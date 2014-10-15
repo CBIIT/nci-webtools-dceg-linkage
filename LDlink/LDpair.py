@@ -20,7 +20,7 @@ else:
 	
 # Find coordinates (GRCh37/hg19) for SNP RS numbers
 # Connect to snp138 database
-conn=sqlite3.connect("/DCEG/Home/machielamj/programs/LDlink/snp138/snp138.db")
+conn=sqlite3.connect("/local/content/ldlink/data/snp138/snp138.db")
 conn.text_factory=str
 cur=conn.cursor()
 
@@ -53,7 +53,7 @@ if snp1_coord[1]!=snp2_coord[1]:
 
 # Select desired ancestral population
 if pop in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-	pop_list=open("/DCEG/Home/machielamj/programs/LDlink/1000G/Phase3/samples/"+pop+".txt").readlines()
+	pop_list=open("/local/content/ldlink/data/1000G/Phase3/samples/"+pop+".txt").readlines()
 	pop_ids=[]
 	for i in range(len(pop_list)):
 		pop_ids.append(pop_list[i].strip())
@@ -68,14 +68,14 @@ else:
 
 # Extract 1000 Genomes phased genotypes
 # SNP1
-vcf_file1="/DCEG/Home/machielamj/programs/LDlink/1000G/Phase3/genotypes/ALL.chr"+snp1_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+vcf_file1="/local/content/ldlink/data/1000G/Phase3/genotypes/ALL.chr"+snp1_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[1], snp1_coord[2], "snp1_"+random+".vcf")
 subprocess.call(tabix_snp1, shell=True)
 grep_remove_dups="grep -v -e END snp1_"+random+".vcf > snp1_no_dups_"+random+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 # SNP2
-vcf_file2="/DCEG/Home/machielamj/programs/LDlink/1000G/Phase3/genotypes/ALL.chr"+snp2_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+vcf_file2="/local/content/ldlink/data/1000G/Phase3/genotypes$$/ALL.chr"+snp2_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[1], snp2_coord[2], "snp2_"+random+".vcf")
 subprocess.call(tabix_snp2, shell=True)
 grep_remove_dups="grep -v -e END snp2_"+random+".vcf > snp2_no_dups_"+random+".vcf"
