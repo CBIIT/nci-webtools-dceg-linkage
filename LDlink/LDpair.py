@@ -343,7 +343,3 @@ print "Run time: "+str(duration)+" seconds\n"
 
 subprocess.call("rm pops_"+random+".txt", shell=True)
 subprocess.call("rm *"+random+".vcf", shell=True)
-# subprocess.call("rm snp1_"+random+".vcf", shell=True)
-# subprocess.call("rm snp1_no_dups_"+random+".vcf", shell=True)
-# subprocess.call("rm snp2_"+random+".vcf", shell=True)
-# subprocess.call("rm snp2_no_dups_"+random+".vcf", shell=True)
