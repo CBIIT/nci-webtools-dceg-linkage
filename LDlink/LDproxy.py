@@ -42,12 +42,12 @@ if snp_coord==None:
 pops=pop.split("+")
 pop_dirs=[]
 for pop_i in pops:
-    if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-        pop_dirs.append(pop_dir+pop_i+".txt")
-    else:
-        output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-        json.dump(output, out)
-        sys.exit()
+	if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
+		pop_dirs.append(pop_dir+pop_i+".txt")
+	else:
+		output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+		json.dump(output, out)
+		sys.exit()
 
 get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+request+".txt"
 subprocess.call(get_pops, shell=True)
@@ -63,7 +63,7 @@ subprocess.call(grep_remove_dups, shell=True)
 window=500000
 coord1=int(snp_coord[2])-window
 if coord1<0:
-    coord1=0
+	coord1=0
 coord2=int(snp_coord[2])+window
 
 
@@ -90,32 +90,63 @@ if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
 		p.wait()
 
 else:
-    output["error"]=snp+" is not a biallelic SNP."
-    json.dump(output, out)
-    sys.exit()
+	output["error"]=snp+" is not a biallelic SNP."
+	json.dump(output, out)
+	sys.exit()
 
 
 # Aggregate output
 get_out="cat "+request+"_*.out > "+request+"_all.out"
 subprocess.call(get_out, shell=True)
 out_raw=open(request+"_all.out").readlines()
-out=[]
+out_prox=[]
 for i in range(len(out_raw)):
-    col=out_raw[i].strip().split("\t")
-    out.append(col)
+	col=out_raw[i].strip().split("\t")
+	col[6]=int(col[6])
+	col[8]=float(col[8])
+	col.append(abs(int(col[6])))
+	out_prox.append(col)
 
 
 # Sort output
-out_dist_sort=sorted(out, key=operator.itemgetter(6))
+out_dist_sort=sorted(out_prox, key=operator.itemgetter(11))
 out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
+for i in range(200):
+	print out_ld_sort[i]
 
 
-# Print output
-print "Query_SNP\tQuery_Alleles\tQuery_Coord\tProxy_SNP\tProxy_Alleles\tProxy_Coord\tProxy_Dist\tDprime\tR2\tCorr_Alleles\tRegulomeDB"
-for i in range(len(out_ld_sort)):
-    if float(out_ld_sort[i][8])>0.1:
-        print "\t".join([str(t) for t in out_ld_sort[i]])
+# Populate JSON output
+query_snp={}
+query_snp["RS"]=out_ld_sort[0][0]
+query_snp["Alleles"]=out_ld_sort[0][1]
+query_snp["Coord"]=out_ld_sort[0][2]
+query_snp["Dist"]=out_ld_sort[0][6]
+query_snp["Dprime"]=out_ld_sort[0][7]
+query_snp["R2"]=out_ld_sort[0][8]
+query_snp["Corr_Alleles"]=out_ld_sort[0][9]
+query_snp["RegulomeDB"]=out_ld_sort[0][10]
 
+output["query_snp"]=query_snp
+
+proxies={}
+for i in range(1,len(out_ld_sort)):
+	if float(out_ld_sort[i][8])>0.1:
+		proxy_info={}
+		proxy_info["RS"]=out_ld_sort[i][3]
+		proxy_info["Alleles"]=out_ld_sort[i][4]
+		proxy_info["Coord"]=out_ld_sort[i][5]
+		proxy_info["Dist"]=out_ld_sort[i][6]
+		proxy_info["Dprime"]=out_ld_sort[i][7]
+		proxy_info["R2"]=out_ld_sort[i][8]
+		proxy_info["Corr_Alleles"]=out_ld_sort[i][9]
+		proxy_info["RegulomeDB"]=out_ld_sort[i][10]
+		
+		proxies["proxy_"+str(i)]=proxy_info
+
+output["proxy_snps"]=proxies
+
+# Save JSON output
+json.dump(output, out, sort_keys=True, indent=2)
 
 
 # Generate plot
@@ -136,7 +167,7 @@ r2=[]
 corr_alleles=[]
 regdb=[]
 for i in range(len(out_ld_sort)):
-	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i=out_ld_sort[i]
+	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,dist_abs=out_ld_sort[i]
 	q_rs.append(q_rs_i)
 	q_allele.append(q_allele_i)
 	q_coord.append(float(q_coord_i.split(":")[1])/1000000)
@@ -153,25 +184,25 @@ x=p_coord
 y=r2
 
 source=ColumnDataSource(
-    data=dict(
-        qrs=q_rs,
-        prs=p_rs,
-        dist=dist,
-        r=r2,
-        d=d_prime,
-        alleles=corr_alleles,
-        regdb=regdb,
-    )
+	data=dict(
+		qrs=q_rs,
+		prs=p_rs,
+		dist=dist,
+		r=r2,
+		d=d_prime,
+		alleles=corr_alleles,
+		regdb=regdb,
+	)
 )
 
 output_file(request+"_scatter.html")
 figure(
-    title="",
-    x_axis_label="Chromosomal Position (Mb)",
-    y_axis_label="R2",
-    plot_width=800,
-    plot_height=400,
-    tools=""
+	title="",
+	x_axis_label="Chromosomal Position (Mb)",
+	y_axis_label="R2",
+	plot_width=800,
+	plot_height=400,
+	tools=""
 )
 
 hold()
@@ -181,17 +212,17 @@ yr=Range1d(start=-0.03, end=1.03)
 
 scatter(x, y, size=12, source=source, color="red", alpha=0.5, x_range=xr, y_range=yr, tools=TOOLS)
 text(x, y, text=regdb, alpha=1, text_font_size="5pt",
-     text_baseline="middle", text_align="center", angle=0)
+	 text_baseline="middle", text_align="center", angle=0)
 
 hover = curplot().select(dict(type=HoverTool))
 hover.tooltips = OrderedDict([
-    ("Query SNP", "@qrs"),
-    ("Proxy SNP", "@prs"),
-    ("Distance", "@dist"),
-    ("R2", "@r"),
-    ("D\'", "@d"),
-    ("Alleles", "@alleles"),
-    ("RegulomeDB", "@regdb"),
+	("Query SNP", "@qrs"),
+	("Proxy SNP", "@prs"),
+	("Distance", "@dist"),
+	("R2", "@r"),
+	("D\'", "@d"),
+	("Alleles", "@alleles"),
+	("RegulomeDB", "@regdb"),
 ])
 
 save()
@@ -201,6 +232,7 @@ save()
 duration=time.time() - start_time
 print "\nRun time: "+str(duration)+" seconds\n"
 
+# Remove temporary files
 subprocess.call("rm pops_"+request+".txt", shell=True)
 subprocess.call("rm *"+request+"*.vcf", shell=True)
 subprocess.call("rm "+request+"*.out", shell=True)
