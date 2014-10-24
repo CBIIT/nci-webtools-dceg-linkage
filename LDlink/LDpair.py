@@ -56,18 +56,27 @@ if snp1_coord[1]!=snp2_coord[1]:
 
 
 
-# Select desired ancestral population
-if pop in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-	pop_list=open(pop_dir+pop+".txt").readlines()
-	pop_ids=[]
-	for i in range(len(pop_list)):
-		pop_ids.append(pop_list[i].strip())
-	print "population: " + pop+" (Individuals="+str(len(pop_ids))+", Haplotypes="+str(2*len(pop_ids))+")\n"
+# Select desired ancestral populations
+pops=pop.split("+")
+pop_dirs=[]
+for pop_i in pops:
+    if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
+        pop_dirs.append(pop_dir+pop_i+".txt")
+    else:
+        output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+        json.dump(output, out)
+        sys.exit()
 
-else:
-	output["error"]=pop+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-	json.dump(output, out)
-	sys.exit()
+get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+random+".txt"
+subprocess.call(get_pops, shell=True)
+
+pop_list=open("pops_"+random+".txt").readlines()
+ids=[]
+for i in range(len(pop_list)):
+    ids.append(pop_list[i].strip())
+
+pop_ids=list(set(ids))
+print "population: "+pop+" (Individuals="+str(len(pop_ids))+", Haplotypes="+str(2*len(pop_ids))+")\n"
 
 
 
@@ -280,15 +289,15 @@ snp_2["allele_2"]=snp_2_allele_2
 output["snp2"]=snp_2
 
 
-table={}
+two_by_two={}
 cells={}
 cells["11"]=str(A)
 cells["12"]=str(B)
 cells["21"]=str(C)
 cells["22"]=str(D)
-table["cells"]=cells
-table["total"]=str(N)
-output["table"]=table
+two_by_two["cells"]=cells
+two_by_two["total"]=str(N)
+output["two_by_two"]=two_by_two
 
 
 haplotypes={}
@@ -332,7 +341,9 @@ json.dump(output, out, sort_keys=True, indent=2)
 duration=time.time()-start
 print "Run time: "+str(duration)+" seconds\n"
 
-subprocess.call("rm snp1_"+random+".vcf", shell=True)
-subprocess.call("rm snp1_no_dups_"+random+".vcf", shell=True)
-subprocess.call("rm snp2_"+random+".vcf", shell=True)
-subprocess.call("rm snp2_no_dups_"+random+".vcf", shell=True)
+subprocess.call("rm pops_"+random+".txt", shell=True)
+subprocess.call("rm *"+random+".vcf", shell=True)
+# subprocess.call("rm snp1_"+random+".vcf", shell=True)
+# subprocess.call("rm snp1_no_dups_"+random+".vcf", shell=True)
+# subprocess.call("rm snp2_"+random+".vcf", shell=True)
+# subprocess.call("rm snp2_no_dups_"+random+".vcf", shell=True)
