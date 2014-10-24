@@ -33,9 +33,7 @@ cur=conn.cursor()
 # SNP1
 cur.execute('SELECT * FROM snps WHERE rsnumber=?', (snp1,))
 snp1_coord=cur.fetchone()
-if snp1_coord!=None:
-	print "      snp1: "+snp1_coord[0]+" chr"+snp1_coord[1]+":"+snp1_coord[2]+"-"+snp1_coord[2]+" (GRCh37/hg19)"
-else:
+if snp1_coord==None:
 	output["error"]=snp1+" is not a valid RS number for SNP1."
 	json.dump(output, out)
 	sys.exit()
@@ -43,9 +41,7 @@ else:
 # SNP2
 cur.execute('SELECT * FROM snps WHERE rsnumber=?', (snp2,))
 snp2_coord=cur.fetchone()
-if snp2_coord!=None:
-	print "      snp2: "+snp2_coord[0]+" chr"+snp2_coord[1]+":"+snp2_coord[2]+"-"+snp2_coord[2]+" (GRCh37/hg19)"
-else:
+if snp2_coord==None:
 	output["error"]=snp2+" is not a valid RS number for SNP2."
 	json.dump(output, out)
 	sys.exit()
@@ -76,8 +72,6 @@ for i in range(len(pop_list)):
     ids.append(pop_list[i].strip())
 
 pop_ids=list(set(ids))
-print "population: "+pop+" (Individuals="+str(len(pop_ids))+", Haplotypes="+str(2*len(pop_ids))+")\n"
-
 
 
 # Extract 1000 Genomes phased genotypes
@@ -165,24 +159,6 @@ C=hap[sorted(hap)[2]]
 D=hap[sorted(hap)[3]]
 N=A+B+C+D
 
-print pop+" Haplotypes:"
-print " "*15+snp2
-print " "*15+sorted(hap)[0][1]+" "*7+sorted(hap)[1][1]
-print " "*13+"-"*17
-print " "*11+sorted(hap)[0][0]+" | "+str(A)+" "*(5-len(str(A)))+" | "+str(B)+" "*(5-len(str(B)))+" | "+str(A+B)+" "*(5-len(str(A+B)))+" ("+str(round(float(A+B)/(A+B+C+D),3))+")"
-print snp1+" "*(10-len(snp1))+" "*3+"-"*17
-print " "*11+sorted(hap)[2][0]+" | "+str(C)+" "*(5-len(str(C)))+" | "+str(D)+" "*(5-len(str(D)))+" | "+str(C+D)+" "*(5-len(str(C+D)))+" ("+str(round(float(C+D)/(A+B+C+D),3))+")"
-print " "*13+"-"*17
-print " "*15+str(A+C)+" "*(5-len(str(A+C)))+" "*3+str(B+D)+" "*(5-len(str(B+D)))+" "*3+str(A+B+C+D)
-print " "*14+"("+str(round(float(A+C)/(A+B+C+D),3))+")"+" "*(5-len(str(round(float(A+C)/(A+B+C+D),3))))+" ("+str(round(float(B+D)/(A+B+C+D),3))+")"+" "*(5-len(str(round(float(B+D)/(A+B+C+D),3))))
-print ""
-
-print "        "+sorted(hap)[0]+": "+str(A)+"\t("+str(round(float(A)/N,3))+")"
-print "        "+sorted(hap)[1]+": "+str(B)+"\t("+str(round(float(B)/N,3))+")"
-print "        "+sorted(hap)[2]+": "+str(C)+"\t("+str(round(float(C)/N,3))+")"
-print "        "+sorted(hap)[3]+": "+str(D)+"\t("+str(round(float(D)/N,3))+")"
-print ""
-
 hap1=sorted(hap, key=hap.get, reverse=True)[0]
 hap2=sorted(hap, key=hap.get, reverse=True)[1]
 hap3=sorted(hap, key=hap.get, reverse=True)[2]
@@ -213,12 +189,6 @@ else:
 	chisq="NA"
 	p=1
 
-print "        D': "+str(round(abs(D_prime),4))
-print "        R2: "+str(round(r2,4))
-print "    Chi-sq: "+str(round(chisq,3))
-print "   p-value: "+str(round(p,4))
-print ""
-
 # Find Correlated Alleles
 if p<0.05 and r2>0.1:
 	# Expected Cell Counts
@@ -235,19 +205,14 @@ if p<0.05 and r2>0.1:
 	dmax=max(dA,dB,dC,dD)
 	
 	if dmax==dA or dmax==dD:
-		print snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
-		print snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele\n"
 		corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
 		corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
 		corr_alleles=[corr1,corr2]
 	else:
-		print snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
-		print snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele\n"
 		corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
 		corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
 		corr_alleles=[corr1,corr2]
 else:
-	print snp1+" and "+snp2+" are in linkage equilibrium.\n"
 	corr_alleles=snp1+" and "+snp2+" are in linkage equilibrium"
 
 
@@ -338,8 +303,6 @@ output["corr_alleles"]=corr_alleles
 json.dump(output, out, sort_keys=True, indent=2)
 
 
-duration=time.time()-start
-print "Run time: "+str(duration)+" seconds\n"
-
+# Remove temporary files
 subprocess.call("rm pops_"+random+".txt", shell=True)
 subprocess.call("rm *"+random+".vcf", shell=True)
