@@ -1,27 +1,27 @@
 #!/usr/bin/env python
-import json,math,sqlite3,subprocess,sys,time
-start=time.time()
-random=str(start)
-
-# Create output dictionary
-out=open(random+".json","w")
-output={}
+import json,math,sqlite3,subprocess,sys
 
 # Import LDLink options
-if len(sys.argv)==4:
+if len(sys.argv)==5:
 	snp1=sys.argv[1]
 	snp2=sys.argv[2]
 	pop =sys.argv[3]
+	request=sys.argv[4]
 else:
-	output["error"]="Correct useage is: LDpair.py snp1 snp2 population"
-	json.dump(output, out)
+	print "Correct useage is: LDpair.py snp1 snp2 populations request"
 	sys.exit()
+
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
 snp_dir=data_dir+"snp138/snp138.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+# Create output JSON file
+out=open(request+".json","w")
+output={}
+
 	
 # Find coordinates (GRCh37/hg19) for SNP RS numbers
 # Connect to snp138 database
@@ -63,10 +63,10 @@ for pop_i in pops:
         json.dump(output, out)
         sys.exit()
 
-get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+random+".txt"
+get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+request+".txt"
 subprocess.call(get_pops, shell=True)
 
-pop_list=open("pops_"+random+".txt").readlines()
+pop_list=open("pops_"+request+".txt").readlines()
 ids=[]
 for i in range(len(pop_list)):
     ids.append(pop_list[i].strip())
@@ -77,20 +77,20 @@ pop_ids=list(set(ids))
 # Extract 1000 Genomes phased genotypes
 # SNP1
 vcf_file1=vcf_dir+snp1_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[1], snp1_coord[2], "snp1_"+random+".vcf")
+tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[1], snp1_coord[2], "snp1_"+request+".vcf")
 subprocess.call(tabix_snp1, shell=True)
-grep_remove_dups="grep -v -e END snp1_"+random+".vcf > snp1_no_dups_"+random+".vcf"
+grep_remove_dups="grep -v -e END snp1_"+request+".vcf > snp1_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 # SNP2
 vcf_file2=vcf_dir+snp2_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[1], snp2_coord[2], "snp2_"+random+".vcf")
+tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[1], snp2_coord[2], "snp2_"+request+".vcf")
 subprocess.call(tabix_snp2, shell=True)
-grep_remove_dups="grep -v -e END snp2_"+random+".vcf > snp2_no_dups_"+random+".vcf"
+grep_remove_dups="grep -v -e END snp2_"+request+".vcf > snp2_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 # Import SNP VCF files
-vcf1=open("snp1_no_dups_"+random+".vcf").readlines()
+vcf1=open("snp1_no_dups_"+request+".vcf").readlines()
 head1=vcf1[len(vcf1)-2].strip().split()
 geno1=vcf1[len(vcf1)-1].strip().split()
 if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
@@ -100,7 +100,7 @@ else:
 	json.dump(output, out)
 	sys.exit()
 
-vcf2=open("snp2_no_dups_"+random+".vcf").readlines()
+vcf2=open("snp2_no_dups_"+request+".vcf").readlines()
 head2=vcf2[len(vcf2)-2].strip().split()
 geno2=vcf2[len(vcf2)-1].strip().split()
 if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
@@ -304,5 +304,5 @@ json.dump(output, out, sort_keys=True, indent=2)
 
 
 # Remove temporary files
-subprocess.call("rm pops_"+random+".txt", shell=True)
-subprocess.call("rm *"+random+".vcf", shell=True)
+subprocess.call("rm pops_"+request+".txt", shell=True)
+subprocess.call("rm *"+request+".vcf", shell=True)
