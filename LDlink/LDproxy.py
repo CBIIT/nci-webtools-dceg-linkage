@@ -198,24 +198,25 @@ source=ColumnDataSource(
 output_file(request+"_scatter.html")
 figure(
 	title="",
-	x_axis_label="Chromosomal Position (Mb)",
-	y_axis_label="R2",
 	plot_width=800,
 	plot_height=400,
 	tools=""
 )
 
 hold()
-TOOLS="hover"
+TOOLS="hover,pan,box_zoom,wheel_zoom,reset,previewsave"
 xr=Range1d(start=coord1/1000000.0, end=coord2/1000000.0)
 yr=Range1d(start=-0.03, end=1.03)
 
 scatter(x, y, size=12, source=source, color="red", alpha=0.5, x_range=xr, y_range=yr, tools=TOOLS)
-text(x, y, text=regdb, alpha=1, text_font_size="5pt",
+text(x, y, text=regdb, alpha=1, text_font_size="6pt",
 	 text_baseline="middle", text_align="center", angle=0)
 
-hover = curplot().select(dict(type=HoverTool))
-hover.tooltips = OrderedDict([
+xaxis().axis_label="Chromosomal Position (Mb)"
+yaxis().axis_label="R2"
+
+hover=curplot().select(dict(type=HoverTool))
+hover.tooltips=OrderedDict([
 	("Query SNP", "@qrs"),
 	("Proxy SNP", "@prs"),
 	("Distance", "@dist"),
