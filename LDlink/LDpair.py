@@ -5,7 +5,7 @@ import json,math,sqlite3,subprocess,sys
 if len(sys.argv)==5:
 	snp1=sys.argv[1]
 	snp2=sys.argv[2]
-	pop =sys.argv[3]
+	pop=sys.argv[3]
 	request=sys.argv[4]
 else:
 	print "Correct useage is: LDpair.py snp1 snp2 populations request"
@@ -190,7 +190,7 @@ else:
 	p=1
 
 # Find Correlated Alleles
-if p<0.05 and r2>0.1:
+if r2>0.1:
 	# Expected Cell Counts
 	eA=(A+B)*(A+C)/N
 	eB=(B+A)*(B+D)/N
