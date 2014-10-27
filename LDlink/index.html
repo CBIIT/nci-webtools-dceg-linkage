@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="">
+<meta name="author" content="">
+
+<title>LD Link Toolset</title>
+<script
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script
+	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script
+	src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+<script src="LDlink.js"></script>
+<link rel="stylesheet"
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet"
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="/common/css/style.css" />
+<link rel="stylesheet" href="./LDlink.css" />
+</head>
+
+<body role="document">
+	<!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+	<div id="logos">
+		<div id="left">
+			<a href="http://www.cancer.gov" target="_blank"><img
+				src="/common/images/nci.jpg" width="286" height="40" border="0"
+				alt="National Cancer Institute" title="National Cancer Institute" /></a>
+		</div>
+		<div id="right">
+			<a href="http://www.cancer.gov" target="_blank"><img
+				src="/common/images/nih.jpg" width="322" height="40" border="0"
+				alt="at the National Institutes of Health"
+				title="at the National Institutes of Health" /></a>
+		</div>
+	</div>
+
+	<div class="container theme-showcase" role="main">
+
+		<div id="banners">
+			<div id="left">
+				<img src="LDlink_logo.png" alt="Logo for the LDlink tool"
+					height="60" />
+			</div>
+			<div id="right">
+				<img src="/common/images/DCEG-LTG_banner.png"
+					alt="Banner for NCI Division of Cancer Epidemiology & Genetics, Laboratory of Translational Genomics"
+					height="60" />
+			</div>
+		</div>
+		<br>
+
+		<ul class="nav nav-tabs responsive">
+			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+			<li><a href="#ldhap" data-toggle="tab">LDhap</a></li>
+			<li><a href="#ldheat" data-toggle="tab">LDheat</a></li>
+			<li><a href="#ldpair" data-toggle="tab">LDpair</a></li>
+			<li><a href="#ldproxy" data-toggle="tab">LDproxy</a></li>
+		</ul>
+
+
+		<div class="tab-content">
+			<div class="tab-pane active" id="home">
+				<h3>Welcome to LDlink!</h3>
+				<p>LDlink is a suite of web-based applications designed to
+					easily and efficiently interrogate linkage disequilibrium in
+					population groups. All population genotype data originates from
+					Phase 3 of the 1000 Genomes Project and SNP rsnumbers are indexed
+					based on dbSNP build 138. Only unambiguously mapping bi-allelic
+					SNPs are permitted as input. LDlink includes the following
+					components:</p>
+				<ul>
+					<li><b>LDhap</b>: Calculate population specific haplotype
+						frequencies of all haplotypes observed for a list of query SNPs.
+						Input is a list of SNP rsnumbers (one per line) and a population
+						group.<br> <br></li>
+					<li><b>LDheat</b>: Create interactive heat maps of pairwise
+						linkage disequilibrium statistics. Input is a list of SNP
+						rsnumbers (one per line) and a population group.<br> <br></li>
+					<li><b>LDpair</b>: Investigate correlated alleles for SNPs in
+						high LD. Input is two rsnumbers and a population group. <br>
+						<br></li>
+					<li><b>LDproxy</b>: Interactively explore proxy and putatively
+						functional SNPs for a query SNP. Input is an rsnumber and a
+						population group.<br> <br></li>
+				</ul>
+				<p>
+					If you find our tool useful, please kindly cite our paper (Machiela
+					et al. Journal 2015). Questions or comments? Contact us via <a
+						href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
+						title="Support">email</a>.
+				</p>
+				<p>LDlink was developed by Mitchell Machiela in collaboration
+					with NCI's Center for Biomedical Informatics and Information
+					Technology (CBIIT). Support comes from the Division of Cancer
+					Epidemiology and Genetics Informatics Tool Challenge.</p>
+			</div>
+			<div class="tab-pane" id="ldhap">
+				<p>LDhap</p>
+			</div>
+			<div class="tab-pane" id="ldheat"></div>
+			<div class="tab-pane" id="ldpair"></div>
+			<div class="tab-pane" id="ldproxy"></div>
+		</div>
+	</div>
+	<div id="portal-footer">
+		<div class="footerLinks">
+			<a href="http://www.cancer.gov/" title="Home">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
+				title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+				href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="http://www.cancer.gov/global/web/policies/accessibility"
+				title="Accessibility">Accessibility</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+				href="http://cancer.gov/global/viewing-files" target="_blank"
+				title="Viewing Files">Viewing Files</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+				href="http://www.cancer.gov/global/web/policies/foia" title="FOIA">FOIA</a><br />
+			<br /> <a href="http://www.dhhs.gov/">Department of Health and
+				Human Services</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+				href="http://www.nih.gov/">National Institutes of Health</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="http://www.cancer.gov/">National Cancer Institute</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a
+				href="http://www.usa.gov/">USA.gov</a>
+		</div>
+		<br /> <br /> NIH...Turning Discovery Into Health<sup>&reg;</sup>
+	</div>
+</body>
+</html>
