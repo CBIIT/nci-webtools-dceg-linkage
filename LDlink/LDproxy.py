@@ -129,6 +129,7 @@ query_snp["RegulomeDB"]=out_ld_sort[0][10]
 output["query_snp"]=query_snp
 
 proxies={}
+digits=len(str(len(out_ld_sort)))
 for i in range(1,len(out_ld_sort)):
 	if float(out_ld_sort[i][8])>0.1:
 		proxy_info={}
@@ -141,7 +142,7 @@ for i in range(1,len(out_ld_sort)):
 		proxy_info["Corr_Alleles"]=out_ld_sort[i][9]
 		proxy_info["RegulomeDB"]=out_ld_sort[i][10]
 		
-		proxies["proxy_"+str(i)]=proxy_info
+		proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
 
 output["proxy_snps"]=proxies
 
