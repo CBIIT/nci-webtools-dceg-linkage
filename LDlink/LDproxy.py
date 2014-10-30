@@ -165,7 +165,9 @@ p_allele=[]
 p_coord=[]
 dist=[]
 d_prime=[]
+d_prime_round=[]
 r2=[]
+r2_round=[]
 corr_alleles=[]
 regdb=[]
 for i in range(len(out_ld_sort)):
@@ -178,7 +180,9 @@ for i in range(len(out_ld_sort)):
 	p_coord.append(float(p_coord_i.split(":")[1])/1000000)
 	dist.append(dist_i)
 	d_prime.append(d_prime_i)
+	d_prime_round.append(round(float(d_prime_i),4))
 	r2.append(float(r2_i))
+	r2_round.append(round(float(r2_i),4))
 	corr_alleles.append(corr_alleles_i)
 	if regdb_i==".":
 		regdb_i=""
@@ -190,10 +194,12 @@ y=r2
 source=ColumnDataSource(
 	data=dict(
 		qrs=q_rs,
+		q_alle=q_allele,
 		prs=p_rs,
+		p_alle=p_allele,
 		dist=dist,
-		r=r2,
-		d=d_prime,
+		r=r2_round,
+		d=d_prime_round,
 		alleles=corr_alleles,
 		regdb=regdb,
 	)
@@ -221,8 +227,8 @@ yaxis().axis_label="R2"
 
 hover=curplot().select(dict(type=HoverTool))
 hover.tooltips=OrderedDict([
-	("Query SNP", "@qrs"),
-	("Proxy SNP", "@prs"),
+	("Query SNP", "@qrs @q_alle"),
+	("Proxy SNP", "@prs @p_alle"),
 	("Distance", "@dist"),
 	("R2", "@r"),
 	("D\'", "@d"),
