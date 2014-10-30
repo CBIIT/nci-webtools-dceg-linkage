@@ -110,7 +110,7 @@ for i in range(len(out_raw)):
 
 
 # Sort output
-out_dist_sort=sorted(out_prox, key=operator.itemgetter(11))
+out_dist_sort=sorted(out_prox, key=operator.itemgetter(13))
 out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
 for i in range(200):
 	print out_ld_sort[i]
@@ -126,6 +126,7 @@ query_snp["Dprime"]=out_ld_sort[0][7]
 query_snp["R2"]=out_ld_sort[0][8]
 query_snp["Corr_Alleles"]=out_ld_sort[0][9]
 query_snp["RegulomeDB"]=out_ld_sort[0][10]
+query_snp["MAF"]=out_ld_sort[0][11]
 
 output["query_snp"]=query_snp
 
@@ -142,6 +143,7 @@ for i in range(1,len(out_ld_sort)):
 		proxy_info["R2"]=out_ld_sort[i][8]
 		proxy_info["Corr_Alleles"]=out_ld_sort[i][9]
 		proxy_info["RegulomeDB"]=out_ld_sort[i][10]
+		proxy_info["MAF"]=out_ld_sort[i][12]
 		
 		proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
 
@@ -160,9 +162,11 @@ from collections import OrderedDict
 q_rs=[]
 q_allele=[]
 q_coord=[]
+q_maf=[]
 p_rs=[]
 p_allele=[]
 p_coord=[]
+p_maf=[]
 dist=[]
 d_prime=[]
 d_prime_round=[]
@@ -171,18 +175,20 @@ r2_round=[]
 corr_alleles=[]
 regdb=[]
 for i in range(len(out_ld_sort)):
-	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,dist_abs=out_ld_sort[i]
+	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,dist_abs=out_ld_sort[i]
 	q_rs.append(q_rs_i)
 	q_allele.append(q_allele_i)
 	q_coord.append(float(q_coord_i.split(":")[1])/1000000)
+	q_maf.append(str(round(float(q_maf_i),4)))
 	p_rs.append(p_rs_i)
 	p_allele.append(p_allele_i)
 	p_coord.append(float(p_coord_i.split(":")[1])/1000000)
-	dist.append(dist_i)
+	p_maf.append(str(round(float(p_maf_i),4)))
+	dist.append(str(round(dist_i/1000000.0,4)))
 	d_prime.append(d_prime_i)
-	d_prime_round.append(round(float(d_prime_i),4))
+	d_prime_round.append(str(round(float(d_prime_i),4)))
 	r2.append(float(r2_i))
-	r2_round.append(round(float(r2_i),4))
+	r2_round.append(str(round(float(r2_i),4)))
 	corr_alleles.append(corr_alleles_i)
 	if regdb_i==".":
 		regdb_i=""
@@ -195,8 +201,10 @@ source=ColumnDataSource(
 	data=dict(
 		qrs=q_rs,
 		q_alle=q_allele,
+		q_maf=q_maf,
 		prs=p_rs,
 		p_alle=p_allele,
+		p_maf=p_maf,
 		dist=dist,
 		r=r2_round,
 		d=d_prime_round,
@@ -207,9 +215,9 @@ source=ColumnDataSource(
 
 output_file(request+"_scatter.html")
 figure(
-	title="",
-	plot_width=800,
-	plot_height=400,
+	title="Proxies for "+snp+" in "+pop,
+	plot_width=900,
+	plot_height=600,
 	tools=""
 )
 
@@ -219,20 +227,21 @@ xr=Range1d(start=coord1/1000000.0, end=coord2/1000000.0)
 yr=Range1d(start=-0.03, end=1.03)
 
 scatter(x, y, size=12, source=source, color="red", alpha=0.5, x_range=xr, y_range=yr, tools=TOOLS)
-text(x, y, text=regdb, alpha=1, text_font_size="6pt",
+text(x, y, text=regdb, alpha=1, text_font_size="7pt",
 	 text_baseline="middle", text_align="center", angle=0)
 
-xaxis().axis_label="Chromosomal Position (Mb)"
-yaxis().axis_label="R2"
+xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
+yaxis().axis_label="Correlation (R2)"
 
 hover=curplot().select(dict(type=HoverTool))
 hover.tooltips=OrderedDict([
 	("Query SNP", "@qrs @q_alle"),
 	("Proxy SNP", "@prs @p_alle"),
-	("Distance", "@dist"),
+	("Distance (Mb)", "@dist"),
+	("MAF (Query,Proxy)", "@q_maf,@p_maf"),
 	("R2", "@r"),
 	("D\'", "@d"),
-	("Alleles", "@alleles"),
+	("Correlated Alleles", "@alleles"),
 	("RegulomeDB", "@regdb"),
 ])
 
