@@ -24,12 +24,12 @@ output={}
 
 	
 # Find coordinates (GRCh37/hg19) for SNP RS numbers
-# Connect to snp138 database
+# Connect to snp141 database
 conn=sqlite3.connect(snp_dir)
 conn.text_factory=str
 cur=conn.cursor()
 
-# Find RS numbers in snp138 database
+# Find RS numbers in snp141 database
 # SNP1
 id1="99"+(13-len(snp1))*"0"+snp1.strip("rs")
 cur.execute('SELECT * FROM snps WHERE id=?', (id1,))
