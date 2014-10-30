@@ -14,7 +14,7 @@ else:
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
-snp_dir=data_dir+"snp138/snp138.db"
+snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 
@@ -24,13 +24,14 @@ output={}
 
 
 # Find coordinates (GRCh37/hg19) for SNP RS number
-# Connect to snp138 database
+# Connect to snp141 database
 conn=sqlite3.connect(snp_dir)
 conn.text_factory=str
 cur=conn.cursor()
 
-# Find RS number in snp138 database
-cur.execute('SELECT * FROM snps WHERE rsnumber=?', (snp,))
+# Find RS number in snp141 database
+id="99"+(13-len(snp))*"0"+snp.strip("rs")
+cur.execute('SELECT * FROM snps WHERE id=?', (id,))
 snp_coord=cur.fetchone()
 if snp_coord==None:
 	output["error"]=snp+" is not a valid RS number for query SNP."
@@ -54,17 +55,17 @@ subprocess.call(get_pops, shell=True)
 
 
 # Extract 1000 Genomes phased genotypes around SNP
-vcf_file=vcf_dir+snp_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file, snp_coord[1], snp_coord[2], "snp_"+request+".vcf")
+vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+tabix_snp="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file, snp_coord[2], snp_coord[3], "snp_"+request+".vcf")
 subprocess.call(tabix_snp, shell=True)
 grep_remove_dups="grep -v -e END snp_"+request+".vcf > snp_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 window=500000
-coord1=int(snp_coord[2])-window
+coord1=int(snp_coord[3])-window
 if coord1<0:
 	coord1=0
-coord2=int(snp_coord[2])+window
+coord2=int(snp_coord[3])+window
 
 
 # Run in parallel
@@ -76,13 +77,13 @@ if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
 	commands=[]
 	for i in range(threads):
 		if i==min(range(threads)) and i==max(range(threads)):
-			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
 		elif i==min(range(threads)):
-			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
 		elif i==max(range(threads)):
-			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
 		else:
-			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
 		commands.append(command)
 
 	processes=[subprocess.Popen(command, shell=True) for command in commands]
