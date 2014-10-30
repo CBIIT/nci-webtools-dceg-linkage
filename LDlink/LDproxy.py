@@ -110,7 +110,7 @@ for i in range(len(out_raw)):
 
 
 # Sort output
-out_dist_sort=sorted(out_prox, key=operator.itemgetter(13))
+out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
 out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
 for i in range(200):
 	print out_ld_sort[i]
@@ -127,6 +127,7 @@ query_snp["R2"]=out_ld_sort[0][8]
 query_snp["Corr_Alleles"]=out_ld_sort[0][9]
 query_snp["RegulomeDB"]=out_ld_sort[0][10]
 query_snp["MAF"]=out_ld_sort[0][11]
+query_snp["Function"]=out_ld_sort[0][13]
 
 output["query_snp"]=query_snp
 
@@ -144,6 +145,7 @@ for i in range(1,len(out_ld_sort)):
 		proxy_info["Corr_Alleles"]=out_ld_sort[i][9]
 		proxy_info["RegulomeDB"]=out_ld_sort[i][10]
 		proxy_info["MAF"]=out_ld_sort[i][12]
+		proxy_info["Function"]=out_ld_sort[i][13]
 		
 		proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
 
@@ -174,12 +176,15 @@ r2=[]
 r2_round=[]
 corr_alleles=[]
 regdb=[]
+funct=[]
 for i in range(len(out_ld_sort)):
-	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,dist_abs=out_ld_sort[i]
+	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs=out_ld_sort[i]
 	q_rs.append(q_rs_i)
 	q_allele.append(q_allele_i)
 	q_coord.append(float(q_coord_i.split(":")[1])/1000000)
 	q_maf.append(str(round(float(q_maf_i),4)))
+	if p_rs_i==".":
+		p_rs_i=("chr"+snp_coord[2]+":"+q_coord_i)
 	p_rs.append(p_rs_i)
 	p_allele.append(p_allele_i)
 	p_coord.append(float(p_coord_i.split(":")[1])/1000000)
@@ -193,6 +198,9 @@ for i in range(len(out_ld_sort)):
 	if regdb_i==".":
 		regdb_i=""
 	regdb.append(regdb_i)
+	if funct_i==".":
+		funct_i=""
+	funct.append(funct_i)
 
 x=p_coord
 y=r2
@@ -210,6 +218,7 @@ source=ColumnDataSource(
 		d=d_prime_round,
 		alleles=corr_alleles,
 		regdb=regdb,
+		funct=funct,
 	)
 )
 
@@ -243,6 +252,7 @@ hover.tooltips=OrderedDict([
 	("D\'", "@d"),
 	("Correlated Alleles", "@alleles"),
 	("RegulomeDB", "@regdb"),
+	("Predicted Function", "@funct"),
 ])
 
 save()
