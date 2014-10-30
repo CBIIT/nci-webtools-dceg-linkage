@@ -19,7 +19,7 @@ pop_ids=list(set(ids))
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
-snp_dir=data_dir+"snp138/snp138.db"
+snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 reg_dir=data_dir+"regulomedb/regulomedb.db"
@@ -98,6 +98,13 @@ con.text_factory=str
 curr=con.cursor()
 
 
+# Open Connection to SNP141
+con2=sqlite3.connect(snp_dir)
+con2.row_factory=sqlite3.Row
+con2.text_factory=str
+curr2=con2.cursor()
+
+
 # Import SNP VCF files
 vcf=open("snp_no_dups_"+request+".vcf").readlines()
 geno=vcf[len(vcf)-1].strip().split()
@@ -151,7 +158,16 @@ for geno_n in vcf:
 			else:
 				score=score[2]
 			
-			temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p]
+			# Get dbSNP function
+			id="99"+(13-len(rs_n))*"0"+rs_n.strip("rs")
+			curr2.execute('SELECT * FROM snps WHERE id=?', (id,))
+			snp_coord=curr2.fetchone()
+			if snp_coord!=None:
+				funct=snp_coord[4]
+			else:
+				funct="."
+			
+			temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p,funct]
 			out.append(temp)
 
 output=open(request+"_"+process+".out","w")
