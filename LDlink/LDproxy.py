@@ -180,6 +180,8 @@ for i in range(len(out_ld_sort)):
 	d_prime.append(d_prime_i)
 	r2.append(float(r2_i))
 	corr_alleles.append(corr_alleles_i)
+	if regdb_i==".":
+		regdb_i=""
 	regdb.append(regdb_i)
 
 x=p_coord
