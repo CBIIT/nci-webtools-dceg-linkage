@@ -175,6 +175,8 @@ r2_round=[]
 corr_alleles=[]
 regdb=[]
 funct=[]
+color=[]
+size=[]
 for i in range(len(out_ld_sort)):
 	q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs=out_ld_sort[i]
 	q_rs.append(q_rs_i)
@@ -193,12 +195,27 @@ for i in range(len(out_ld_sort)):
 	r2.append(float(r2_i))
 	r2_round.append(str(round(float(r2_i),4)))
 	corr_alleles.append(corr_alleles_i)
+	
+	# Correct Missing Annotations
 	if regdb_i==".":
 		regdb_i=""
 	regdb.append(regdb_i)
 	if funct_i==".":
 		funct_i=""
 	funct.append(funct_i)
+	
+	# Set Color
+	if i==0:
+		color_i="blue"
+	elif funct_i!="unknown":
+		color_i="orange"
+	else:
+		color_i="red"
+	color.append(color_i)
+	
+	# Set Size
+	size_i=9+float(p_maf_i)*14.0
+	size.append(size_i)
 
 x=p_coord
 y=r2
@@ -229,11 +246,11 @@ figure(
 )
 
 hold()
-TOOLS="hover,pan,box_zoom,wheel_zoom,reset,previewsave"
+tools="hover,pan,box_zoom,wheel_zoom,reset,previewsave"
 xr=Range1d(start=coord1/1000000.0, end=coord2/1000000.0)
 yr=Range1d(start=-0.03, end=1.03)
 
-scatter(x, y, size=12, source=source, color="red", alpha=0.5, x_range=xr, y_range=yr, tools=TOOLS)
+scatter(x, y, size=size, source=source, color=color, alpha=0.5, x_range=xr, y_range=yr, tools=tools)
 text(x, y, text=regdb, alpha=1, text_font_size="7pt",
 	 text_baseline="middle", text_align="center", angle=0)
 
