@@ -72,15 +72,16 @@ var ldpair =[
 }
 ];
 
+$(document).on('change', '.btn-file :file', function() {
+  var input = $(this),
+  numFiles = input.get(0).files ? input.get(0).files.length : 1,
+  label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+  input.trigger('fileselect', [numFiles, label]);
+});
+
 $( document ).ready(function() {
 
 	console.log( "ready!" );
-    /*
-    $('.calculate').on.('click', function(e){
-        console.log('You clicked calculate');
-
-    });
-*/
     $('.tab-content').on('click',"a[class|='btn btn-primary calculate']", function(e){
         calculate(e);
     });
@@ -103,29 +104,39 @@ $( document ).ready(function() {
                 pane.tab('show');
                 console.log('HREF: '+href);
                 var val = href;
-                console.log(val.substring(1, val.length)+'-population-codes');
-                createPopulationDropdown(val.substring(1, val.length)+'-population-codes');
+                console.log('Creating: '+val.substring(1, val.length));
+                createPopulationDropdown(val.substring(1, val.length));
                 appendJumboTron(val.substring(1, val.length));
+                addPageListeners(val.substring(1, val.length));
                 $('.active a').attr('loaded','true');
             });
         }
     });
 
-// load first tab content
-//$("#home").append("<h1>Hello</h1>");
-//$('.active a').tab('show');
     $('#home').load($('.active a').attr("data-url"), function(result){
         $('.active a').attr('loaded','true');
         $('.active a').tab('show');
     });
-
-/*
-    $('#home').load($('.active a').attr("data-url"), function(result){
-        $('.active a').tab('show');
-    });
-*/
-
 });
+
+function addPageListeners(tabClicked) {
+  if(tabClicked == 'ldhap') {
+    $('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+      console.log("numFiles: " + numFiles);
+      console.log("label: " + label);
+
+      var input = $(this).parents('.input-group').find(':text'),
+          log = numFiles > 1 ? numFiles + ' files selected' : label;
+
+      if( input.length ) {
+          input.val(log);
+      } else {
+          if( log ) alert(log);
+      }
+    });
+  }
+
+}
 
 function calculate(e) {
   var id = e.target.id;
@@ -136,20 +147,25 @@ function calculate(e) {
             bindLDpair();
             //TODO:  Disable button for demo purpose only.
             $('#ldpair-calculate-button').prop("disabled",true);;
-
         });
         break;
       case 'ldproxy-calculate-button':
-          //alert(id);
         $('#ldproxy-results-container').load('ldproxy.results.template.html', function(){
             //TODO:  Disable button for demo purpose only.
             $('#ldproxy-calculate-button').prop("disabled",true);;
-
         });
           break;
       case 'ldheat-calculate-button':
+        $('#ldheat-results-container').load('ldheat.results.template.html', function(){
+            //TODO:  Disable button for demo purpose only.
+            $('#ldheat-calculate-button').prop("disabled",true);;
+        });
           break;
       case 'ldhap-calculate-button':
+        $('#ldhap-results-container').load('ldhap.results.template.html', function(){
+            //TODO:  Disable button for demo purpose only.
+            $('#ldhap-calculate-button').prop("disabled",true);;
+        });
           break;
   }
 
@@ -169,7 +185,7 @@ function appendJumboTron(id) {
 
 function createPopulationDropdown(id) {
 
-    $('#'+id).multiselect({
+    $('#'+id+'-population-codes').multiselect({
         enableClickableOptGroups: true, 
         buttonWidth: '300px',
         maxHeight: 500,
