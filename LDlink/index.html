@@ -14,19 +14,27 @@
 <meta name="author" content="">
 
 <title>LD Link Toolset</title>
-<script
-	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<script
-	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<script
-	src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+<!--
+<script	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+<script	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"></script>
+<script	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+<script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
+
 <script src="LDlink.js"></script>
-<link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
-<link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
-<link rel="stylesheet" href="/common/css/style.css" />
-<link rel="stylesheet" href="./LDlink.css" />
+
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+<link rel="stylesheet" href="../common/css/font-awesome.css" />
+
+<!-- Include the multiselect plugin's CSS and JS: -->
+<script type="text/javascript" src="../common/js/bootstrap-multiselect.js"></script>
+<link rel="stylesheet" href="../common/css/bootstrap-multiselect.css" type="text/css"/>
+<link rel="stylesheet" href="../common/css/style.css" />
+<link rel="stylesheet" href="LDlink.css" />
+
 </head>
 
 <body role="document">
@@ -56,72 +64,38 @@
 					height="60" />
 			</div>
 			<div id="right">
-				<img src="/common/images/DCEG-LTG_banner.png"
+			<!-- ../common/images/DCEG-LTG_banner.png -->
+			<!-- NCI-translational-genomics.png -->
+			<!-- DCEG-BB-HREB.png -->
+				<img src="../common/images/DCEG-LTG_banner.png"
 					alt="Banner for NCI Division of Cancer Epidemiology & Genetics, Laboratory of Translational Genomics"
 					height="60" />
 			</div>
 		</div>
 		<br>
-
-		<ul class="nav nav-tabs responsive">
-			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
-			<li><a href="#ldhap" data-toggle="tab">LDhap</a></li>
-			<li><a href="#ldheat" data-toggle="tab">LDheat</a></li>
-			<li><a href="#ldpair" data-toggle="tab">LDpair</a></li>
-			<li><a href="#ldproxy" data-toggle="tab">LDproxy</a></li>
+		<!-- Main Menu Tabs -->
+		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
+			<li class="active"><a  href="#home" data-url="home.html" loaded="false" data-toggle="tab">Home</a></li>
+			<li><a href="#ldhap" data-url="ldhap.html" loaded="false" data-toggle="tab">LDhap</a></li>
+			<li><a href="#ldheat" data-url="ldheat.html" loaded="false" data-toggle="tab">LDheat</a></li>
+			<li><a href="#ldpair" data-url="ldpair.html" loaded="false" data-toggle="tab">LDpair</a></li>
+			<li><a href="#ldproxy" data-url="ldproxy.html" loaded="false" data-toggle="tab">LDproxy</a></li>
 		</ul>
-
-
+		<!-- Tab Content -->
 		<div class="tab-content">
-			<div class="tab-pane active" id="home">
-				<h3>Welcome to LDlink!</h3>
-				<p>LDlink is a suite of web-based applications designed to
-					easily and efficiently interrogate linkage disequilibrium in
-					population groups. All population genotype data originates from
-					Phase 3 of the 1000 Genomes Project and SNP rsnumbers are indexed
-					based on dbSNP build 138. Only unambiguously mapping bi-allelic
-					SNPs are permitted as input. LDlink includes the following
-					components:</p>
-				<ul>
-					<li><b>LDhap</b>: Calculate population specific haplotype
-						frequencies of all haplotypes observed for a list of query SNPs.
-						Input is a list of SNP rsnumbers (one per line) and a population
-						group.<br> <br></li>
-					<li><b>LDheat</b>: Create interactive heat maps of pairwise
-						linkage disequilibrium statistics. Input is a list of SNP
-						rsnumbers (one per line) and a population group.<br> <br></li>
-					<li><b>LDpair</b>: Investigate correlated alleles for SNPs in
-						high LD. Input is two rsnumbers and a population group. <br>
-						<br></li>
-					<li><b>LDproxy</b>: Interactively explore proxy and putatively
-						functional SNPs for a query SNP. Input is an rsnumber and a
-						population group.<br> <br></li>
-				</ul>
-				<p>
-					If you find our tool useful, please kindly cite our paper (Machiela
-					et al. Journal 2015). Questions or comments? Contact us via <a
-						href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
-						title="Support">email</a>.
-				</p>
-				<p>LDlink was developed by Mitchell Machiela in collaboration
-					with NCI's Center for Biomedical Informatics and Information
-					Technology (CBIIT). Support comes from the Division of Cancer
-					Epidemiology and Genetics Informatics Tool Challenge.</p>
-			</div>
-			<div class="tab-pane" id="ldhap">
-				<p>LDhap</p>
-			</div>
-			<div class="tab-pane" id="ldheat"></div>
-			<div class="tab-pane" id="ldpair"></div>
-			<div class="tab-pane" id="ldproxy"></div>
+			<div class="tab-pane active" id="home"></div>
+			<div class="tab-pane fade" id="ldhap"></div>
+			<div class="tab-pane fade" id="ldheat"></div>
+			<div class="tab-pane fade" id="ldpair"></div>
+			<div class="tab-pane fade" id="ldproxy"></div>
 		</div>
 	</div>
 	<div id="portal-footer">
 		<div class="footerLinks">
 			<a href="http://www.cancer.gov/" title="Home">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
-				title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
-				href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="mailto:someone@example.com?Subject=Hello%20again" target="_top" 
+				title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; 
+			<a href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<a href="http://www.cancer.gov/global/web/policies/accessibility"
 				title="Accessibility">Accessibility</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
 				href="http://cancer.gov/global/viewing-files" target="_blank"

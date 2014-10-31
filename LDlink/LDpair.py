@@ -14,7 +14,7 @@ else:
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
-snp_dir=data_dir+"snp138/snp138.db"
+snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 
@@ -24,14 +24,15 @@ output={}
 
 	
 # Find coordinates (GRCh37/hg19) for SNP RS numbers
-# Connect to snp138 database
+# Connect to snp141 database
 conn=sqlite3.connect(snp_dir)
 conn.text_factory=str
 cur=conn.cursor()
 
-# Find RS numbers in snp138 database
+# Find RS numbers in snp141 database
 # SNP1
-cur.execute('SELECT * FROM snps WHERE rsnumber=?', (snp1,))
+id1="99"+(13-len(snp1))*"0"+snp1.strip("rs")
+cur.execute('SELECT * FROM snps WHERE id=?', (id1,))
 snp1_coord=cur.fetchone()
 if snp1_coord==None:
 	output["error"]=snp1+" is not a valid RS number for SNP1."
@@ -39,7 +40,8 @@ if snp1_coord==None:
 	sys.exit()
 
 # SNP2
-cur.execute('SELECT * FROM snps WHERE rsnumber=?', (snp2,))
+id2="99"+(13-len(snp2))*"0"+snp2.strip("rs")
+cur.execute('SELECT * FROM snps WHERE id=?', (id2,))
 snp2_coord=cur.fetchone()
 if snp2_coord==None:
 	output["error"]=snp2+" is not a valid RS number for SNP2."
@@ -47,7 +49,7 @@ if snp2_coord==None:
 	sys.exit()
 
 # Check if SNPs are on the same chromosome
-if snp1_coord[1]!=snp2_coord[1]:
+if snp1_coord[2]!=snp2_coord[2]:
 	output["warning"]=snp1+" and "+snp2+" are on different chromosomes"
 
 
@@ -76,15 +78,15 @@ pop_ids=list(set(ids))
 
 # Extract 1000 Genomes phased genotypes
 # SNP1
-vcf_file1=vcf_dir+snp1_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[1], snp1_coord[2], "snp1_"+request+".vcf")
+vcf_file1=vcf_dir+snp1_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[2], snp1_coord[3], "snp1_"+request+".vcf")
 subprocess.call(tabix_snp1, shell=True)
 grep_remove_dups="grep -v -e END snp1_"+request+".vcf > snp1_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 # SNP2
-vcf_file2=vcf_dir+snp2_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[1], snp2_coord[2], "snp2_"+request+".vcf")
+vcf_file2=vcf_dir+snp2_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[2], snp2_coord[3], "snp2_"+request+".vcf")
 subprocess.call(tabix_snp2, shell=True)
 grep_remove_dups="grep -v -e END snp2_"+request+".vcf > snp2_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
@@ -111,7 +113,7 @@ else:
 	sys.exit()
 
 
-if geno1[1]!=snp1_coord[2] or geno2[1]!=snp2_coord[2]:
+if geno1[1]!=snp1_coord[3] or geno2[1]!=snp2_coord[3]:
 	output["error"]="VCF File does not match SNP coordinates."
 	json.dump(output, out)
 	sys.exit()
@@ -220,7 +222,7 @@ else:
 # Create JSON output
 snp_1={}
 snp_1["rsnum"]=snp1
-snp_1["coord"]="chr"+snp1_coord[1]+":"+snp1_coord[2]
+snp_1["coord"]="chr"+snp1_coord[2]+":"+snp1_coord[3]
 
 snp_1_allele_1={}
 snp_1_allele_1["allele"]=sorted(hap)[0][0]
@@ -238,7 +240,7 @@ output["snp1"]=snp_1
 
 snp_2={}
 snp_2["rsnum"]=snp2
-snp_2["coord"]="chr"+snp2_coord[1]+":"+snp2_coord[2]
+snp_2["coord"]="chr"+snp2_coord[2]+":"+snp2_coord[3]
 
 snp_2_allele_1={}
 snp_2_allele_1["allele"]=sorted(hap)[0][1]
