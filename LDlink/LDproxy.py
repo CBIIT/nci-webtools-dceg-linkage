@@ -112,8 +112,6 @@ for i in range(len(out_raw)):
 # Sort output
 out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
 out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
-for i in range(200):
-	print out_ld_sort[i]
 
 
 # Populate JSON output
@@ -155,7 +153,7 @@ output["proxy_snps"]=proxies
 json.dump(output, out, sort_keys=True, indent=2)
 
 
-# Generate plot
+# Generate scatter plot
 from bokeh.plotting import *
 from bokeh.objects import Range1d,HoverTool
 from collections import OrderedDict
@@ -184,7 +182,7 @@ for i in range(len(out_ld_sort)):
 	q_coord.append(float(q_coord_i.split(":")[1])/1000000)
 	q_maf.append(str(round(float(q_maf_i),4)))
 	if p_rs_i==".":
-		p_rs_i=("chr"+snp_coord[2]+":"+q_coord_i)
+		p_rs_i=p_coord_i
 	p_rs.append(p_rs_i)
 	p_allele.append(p_allele_i)
 	p_coord.append(float(p_coord_i.split(":")[1])/1000000)
