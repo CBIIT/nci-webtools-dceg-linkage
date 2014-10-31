@@ -128,22 +128,31 @@ $( document ).ready(function() {
 });
 
 function calculate(e) {
-    var id = e.target.id;
-    console.log('CALCULATE '+id);
-    //Put a switch here for all the different types of caclulate buttons.
-    if(id == 'ldpair-calculate-button') {
-        //alert('got it');
+  var id = e.target.id;
+  console.log('CALCULATE: '+id);
+  switch(id) {
+      case 'ldpair-calculate-button':
         $('#ldpair-results-container').load('ldpair.results.template.html', function(){
             bindLDpair();
             //TODO:  Disable button for demo purpose only.
             $('#ldpair-calculate-button').prop("disabled",true);;
 
         });
-        //ko.applyBindings(new PatientViewModel(), document.getElementById('match-patient'));
-        // Activates knockout.js
-        //ko.applyBindings(new AppViewModel(), document.getElementById('names'));      
-        // Activates knockout.js
-    }
+        break;
+      case 'ldproxy-calculate-button':
+          //alert(id);
+        $('#ldproxy-results-container').load('ldproxy.results.template.html', function(){
+            //TODO:  Disable button for demo purpose only.
+            $('#ldproxy-calculate-button').prop("disabled",true);;
+
+        });
+          break;
+      case 'ldheat-calculate-button':
+          break;
+      case 'ldhap-calculate-button':
+          break;
+  }
+
 }
 
 function appendJumboTron(id) {
