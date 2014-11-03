@@ -235,9 +235,27 @@ for i in range(len(all_haps[0])):
 		ld_matrix[i][j]=[snp1,snp2,allele1,allele2,corr,pos1,pos2,D_prime,r2]
 		ld_matrix[j][i]=[snp2,snp1,allele2,allele1,corr_f,pos2,pos1,D_prime,r2]
 
+# Generate D' and R2 output matrices
+d_matrix=open(tmp_dir+"D_prime_"+request+".txt","w")
+r_matrix=open(tmp_dir+"R2_"+request+".txt","w")
+dim=len(ld_matrix)
+print >> d_matrix, "RS_number"+"\t"+"\t".join(rsnum_lst)
+print >> r_matrix, "RS_number"+"\t"+"\t".join(rsnum_lst)
+for i in range(dim):
+	temp_d=[rsnum_lst[i]]
+	temp_r=[rsnum_lst[i]]
+	for j in range(dim):
+		temp_d.append(str(ld_matrix[i][j][7]))
+		temp_r.append(str(ld_matrix[i][j][8]))
+	print >> d_matrix, "\t".join(temp_d)
+	print >> r_matrix, "\t".join(temp_r)
+
+d_matrix.close()
+r_matrix.close()
+
+
 # Generate Plot Variables
 out=[j for i in ld_matrix for j in i]
-
 xnames=[]
 ynames=[]
 xA=[]
