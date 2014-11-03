@@ -1,72 +1,99 @@
 #!/usr/bin/env python
-import math,operator,sqlite3,subprocess,sys,time
+import json,math,operator,sqlite3,subprocess,sys,time
 start_time=time.time()
 
 # Import LDLink options
-if len(sys.argv)==3:
+if len(sys.argv)==4:
 	snplst=sys.argv[1]
-	pop =sys.argv[2]
-	print "\n   command: " + " ".join(sys.argv)
+	pop=sys.argv[2]
+	request=sys.argv[3]
 else:
-	raise ValueError("Correct useage is: LDLink.py snplst population")
+	print "Correct useage is: LDLink.py snplst populations request"
+	sys.exit()
+
+# Set data directories
+data_dir="/local/content/ldlink/data/"
+snp_dir=data_dir+"snp141/snp141.db"
+pop_dir=data_dir+"1000G/Phase3/samples/"
+vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+
+# Create output JSON file
+out=open(request+".json","w")
+output={}
 
 
 # Open SNP list file
 snps=open(snplst).readlines()
 
 
-# Connect to snp138 database
-conn=sqlite3.connect("/DCEG/Home/machielamj/programs/LDlink/snp138/snp138.db")
+# Find coordinates (GRCh37/hg19) for SNP RS number
+# Connect to snp141 database
+conn=sqlite3.connect(snp_dir)
 conn.text_factory=str
 cur=conn.cursor()
-print "  database: snp138"
 
 
-# Select desired ancestral population
-if pop in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-	pop_list=open("/DCEG/Home/machielamj/programs/LDlink/1000G/Phase3/samples/"+pop+".txt").readlines()
-	pop_ids=[]
-	for i in range(len(pop_list)):
-		pop_ids.append(pop_list[i].strip())
-	print "population: " + pop+" (Individuals="+str(len(pop_ids))+", Haplotypes="+str(2*len(pop_ids))+")\n"
+# Select desired ancestral populations
+pops=pop.split("+")
+pop_dirs=[]
+for pop_i in pops:
+	if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
+		pop_dirs.append(pop_dir+pop_i+".txt")
+	else:
+		output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+		json.dump(output, out)
+		sys.exit()
 
-else:
-	raise ValueError("%s is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI." % pop)
+get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+request+".txt"
+subprocess.call(get_pops, shell=True)
+
+pop_list=open("pops_"+request+".txt").readlines()
+ids=[]
+for i in range(len(pop_list)):
+	ids.append(pop_list[i].strip())
+
+pop_ids=list(set(ids))
 
 
-# Find RS numbers in snp138 database
+# Find RS numbers in snp141 database
 rs_nums=[]
+snp_pos=[]
 snp_coords=[]
 tabix_coords=""
 for i in range(len(snps)):
 	snp_i=snps[i].strip().split()
 	if snp_i[0][0:2]=="rs":
-		cur.execute('SELECT * FROM snps WHERE rsnumber=?', (snp_i[0],))
+		id="99"+(13-len(snp_i[0]))*"0"+snp_i[0].strip("rs")
+		cur.execute('SELECT * FROM snps WHERE id=?', (id,))
 		snp_coord=cur.fetchone()
 		if snp_coord!=None:
 			rs_nums.append(snp_i[0])
-			temp=[snp_coord[0],snp_coord[1],snp_coord[2]]
+			snp_pos.append(snp_coord[3])
+			temp=[snp_coord[1],snp_coord[2],snp_coord[3]]
 			snp_coords.append(temp)
-			temp2=snp_coord[1]+":"+snp_coord[2]+"-"+snp_coord[2]
+			temp2=snp_coord[2]+":"+snp_coord[3]+"-"+snp_coord[3]
 			tabix_coords=tabix_coords+" "+temp2
 
 
 # Check SNPs are all on the same chromosome
 for i in range(len(snp_coords)):
 	if snp_coords[0][1]!=snp_coords[i][1]:
-		raise ValueError("Not all input SNPs are on the same chromosome")
+		output["error"]="Not all input SNPs are on the same chromosome"
+		json.dump(output, out)
+		sys.exit()
 
 
 # Extract 1000 Genomes phased genotypes
-vcf_file="/DCEG/Home/machielamj/programs/LDlink/1000G/Phase3/genotypes/ALL.chr"+snp_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, "snps.vcf")
+vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, "snps_"+request+".vcf")
 subprocess.call(tabix_snps, shell=True)
-grep_remove_dups="grep -v -e END snps.vcf > snps_no_dups.vcf"
+grep_remove_dups="grep -v -e END snps_"+request+".vcf > snps_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 
 # Import SNP VCF files
-vcf=open("snps_no_dups.vcf").readlines()
+vcf=open("snps_no_dups_"+request+".vcf").readlines()
 h=0
 while vcf[h][0:2]=="##":
 	h+=1
@@ -79,10 +106,11 @@ for i in range(9,len(head)):
 	if head[i] in pop_ids:
 		index.append(i)
 
-print "SNP Queried\tPosition (GRCh37/hg19)  \tAlleles\tFrequecies"
 hap1=[""]*len(index)
 hap2=[""]*len(index)
-counter=0
+rsnum_lst=[]
+allele_lst=[]
+pos_lst=[]
 for g in range(h+1,len(vcf)):
 	geno=vcf[g].strip().split()
 	count0=0
@@ -113,23 +141,17 @@ for g in range(h+1,len(vcf)):
 			else:
 				hap1[i]=hap1[i]+"?"
 				hap2[i]=hap2[i]+"?"
-	else:
-		for i in range(len(index)):
-			hap1[i]=hap1[i]+"-"
-			hap2[i]=hap2[i]+"-"
-	
-	rsnum=rs_nums[counter]
-	counter+=1
-	position="chr"+geno[0]+":"+geno[1]+"-"+geno[1]
-	alleles=geno[3]+"/"+geno[4]
-	f0=round(float(count0)/(count0+count1),4)
-	f1=round(float(count1)/(count0+count1),4)
-	freq=str(f0)+"/"+str(f1)
-	
-	temp=[rsnum,position,alleles,freq]
-	print "\t".join(temp)
 
-print ""
+		if geno[1] in snp_pos:
+			rsnum=rs_nums[snp_pos.index(geno[1])]
+		else:
+			rsnum=str(g)+"?"
+		rsnum_lst.append(rsnum)
+		
+		position="chr"+geno[0]+":"+geno[1]+"-"+geno[1]
+		pos_lst.append(position)
+		alleles=geno[3]+"/"+geno[4]
+		allele_lst.append(alleles)
 
 
 haps={}
@@ -145,7 +167,7 @@ for i in range(len(index)):
 		haps[hap2[i]]=1
 
 
-# Format and Print Results
+# Sort results
 results=[]
 for hap in haps:
 	temp=[hap,haps[hap]]
@@ -154,14 +176,23 @@ for hap in haps:
 results_sort1=sorted(results, key=operator.itemgetter(0))
 results_sort2=sorted(results_sort1, key=operator.itemgetter(1), reverse=True)
 
-print "Haplotype\tCount\tFrequency"
-for i in results_sort2:
-	print i[0]+"\t"+str(i[1])+"\t"+str(round(float(i[1])/(2*len(pop_ids)),4))
 
-print ""
+# Generate JSON output
+digits=len(str(len(results_sort2)))
+for i in range(len(results_sort2)):
+	hap_info={}
+	hap_info["Haplotype"]=results_sort2[i][0]
+	hap_info["Count"]=results_sort2[i][1]
+	hap_info["Frequency"]=round(float(results_sort2[i][1])/(2*len(pop_ids)),4)
+	output["haplotype_"+(digits-len(str(i)))*"0"+str(i+1)]=hap_info
+
+
+# Save JSON output
+json.dump(output, out, sort_keys=True, indent=2)
+
 
 duration=time.time() - start_time
 print "Run time: "+str(duration)+" seconds\n"
 
-subprocess.call("rm snps.vcf", shell=True)
-subprocess.call("rm snps.vcf", shell=True)
+subprocess.call("rm pops_"+request+".txt", shell=True)
+subprocess.call("rm *_"+request+".vcf", shell=True)
