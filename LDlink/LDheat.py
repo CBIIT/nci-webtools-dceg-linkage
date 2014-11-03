@@ -16,10 +16,11 @@ data_dir="/local/content/ldlink/data/"
 snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+tmp_dir="./tmp/"
 
 
 # Create output JSON file
-out=open(request+".json","w")
+out=open(tmp_dir+request+".json","w")
 output={}
 
 
@@ -50,10 +51,10 @@ for pop_i in pops:
 		json.dump(output, out)
 		sys.exit()
 
-get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+request+".txt"
+get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
 subprocess.call(get_pops, shell=True)
 
-pop_list=open("pops_"+request+".txt").readlines()
+pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
 ids=[]
 for i in range(len(pop_list)):
 	ids.append(pop_list[i].strip())
@@ -92,14 +93,14 @@ for i in range(len(snp_coords)):
 
 # Extract 1000 Genomes phased genotypes
 vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, "snps_"+request+".vcf")
+tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, tmp_dir+"snps_"+request+".vcf")
 subprocess.call(tabix_snps, shell=True)
-grep_remove_dups="grep -v -e END snps_"+request+".vcf > snps_no_dups_"+request+".vcf"
+grep_remove_dups="grep -v -e END "+tmp_dir+"snps_"+request+".vcf > "+tmp_dir+"snps_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 
 # Import SNP VCF files
-vcf=open("snps_no_dups_"+request+".vcf").readlines()
+vcf=open(tmp_dir+"snps_no_dups_"+request+".vcf").readlines()
 h=0
 while vcf[h][0:2]=="##":
 	h+=1
@@ -264,7 +265,7 @@ from bokeh.plotting import *
 from bokeh.objects import HoverTool, ColumnDataSource
 from collections import OrderedDict
 
-output_file("heatmap_"+request+".html")
+output_file(tmp_dir+"heatmap_"+request+".html")
 source = ColumnDataSource(
 	data=dict(
 		xname=xnames,
@@ -309,5 +310,5 @@ save()
 duration=time.time() - start_time
 print "Run time: "+str(duration)+" seconds\n"
 
-subprocess.call("rm pops_"+request+".txt", shell=True)
-subprocess.call("rm *_"+request+".vcf", shell=True)
+subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+subprocess.call("rm "+tmp_dir+"*_"+request+".vcf", shell=True)
