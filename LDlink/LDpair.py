@@ -17,9 +17,11 @@ data_dir="/local/content/ldlink/data/"
 snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+tmp_dir="./tmp/"
+
 
 # Create output JSON file
-out=open(request+".json","w")
+out=open(tmp_dir+request+".json","w")
 output={}
 
 	
@@ -65,10 +67,10 @@ for pop_i in pops:
         json.dump(output, out)
         sys.exit()
 
-get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+request+".txt"
+get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
 subprocess.call(get_pops, shell=True)
 
-pop_list=open("pops_"+request+".txt").readlines()
+pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
 ids=[]
 for i in range(len(pop_list)):
     ids.append(pop_list[i].strip())
@@ -79,20 +81,20 @@ pop_ids=list(set(ids))
 # Extract 1000 Genomes phased genotypes
 # SNP1
 vcf_file1=vcf_dir+snp1_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[2], snp1_coord[3], "snp1_"+request+".vcf")
+tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[2], snp1_coord[3], tmp_dir+"snp1_"+request+".vcf")
 subprocess.call(tabix_snp1, shell=True)
-grep_remove_dups="grep -v -e END snp1_"+request+".vcf > snp1_no_dups_"+request+".vcf"
+grep_remove_dups="grep -v -e END "+tmp_dir+"snp1_"+request+".vcf > "+tmp_dir+"snp1_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 # SNP2
 vcf_file2=vcf_dir+snp2_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[2], snp2_coord[3], "snp2_"+request+".vcf")
+tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[2], snp2_coord[3], tmp_dir+"snp2_"+request+".vcf")
 subprocess.call(tabix_snp2, shell=True)
-grep_remove_dups="grep -v -e END snp2_"+request+".vcf > snp2_no_dups_"+request+".vcf"
+grep_remove_dups="grep -v -e END "+tmp_dir+"snp2_"+request+".vcf > "+tmp_dir+"snp2_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 # Import SNP VCF files
-vcf1=open("snp1_no_dups_"+request+".vcf").readlines()
+vcf1=open(tmp_dir+"snp1_no_dups_"+request+".vcf").readlines()
 head1=vcf1[len(vcf1)-2].strip().split()
 geno1=vcf1[len(vcf1)-1].strip().split()
 if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
@@ -102,7 +104,7 @@ else:
 	json.dump(output, out)
 	sys.exit()
 
-vcf2=open("snp2_no_dups_"+request+".vcf").readlines()
+vcf2=open(tmp_dir+"snp2_no_dups_"+request+".vcf").readlines()
 head2=vcf2[len(vcf2)-2].strip().split()
 geno2=vcf2[len(vcf2)-1].strip().split()
 if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
@@ -306,5 +308,5 @@ json.dump(output, out, sort_keys=True, indent=2)
 
 
 # Remove temporary files
-subprocess.call("rm pops_"+request+".txt", shell=True)
-subprocess.call("rm *"+request+".vcf", shell=True)
+subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
