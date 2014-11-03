@@ -17,9 +17,11 @@ data_dir="/local/content/ldlink/data/"
 snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+tmp_dir="./tmp/"
+
 
 # Create output JSON file
-out=open(request+".json","w")
+out=open(tmp_dir+request+".json","w")
 output={}
 
 
@@ -50,15 +52,15 @@ for pop_i in pops:
 		json.dump(output, out)
 		sys.exit()
 
-get_pops="cat "+ " ".join(pop_dirs) +" > pops_"+request+".txt"
+get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
 subprocess.call(get_pops, shell=True)
 
 
 # Extract 1000 Genomes phased genotypes around SNP
 vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file, snp_coord[2], snp_coord[3], "snp_"+request+".vcf")
+tabix_snp="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file, snp_coord[2], snp_coord[3], tmp_dir+"snp_"+request+".vcf")
 subprocess.call(tabix_snp, shell=True)
-grep_remove_dups="grep -v -e END snp_"+request+".vcf > snp_no_dups_"+request+".vcf"
+grep_remove_dups="grep -v -e END "+tmp_dir+"snp_"+request+".vcf > "+tmp_dir+"snp_no_dups_"+request+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 window=500000
@@ -69,7 +71,7 @@ coord2=int(snp_coord[3])+window
 
 
 # Run in parallel
-vcf=open("snp_no_dups_"+request+".vcf").readlines()
+vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 geno=vcf[len(vcf)-1].strip().split()
 if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
 	threads=4
@@ -97,9 +99,9 @@ else:
 
 
 # Aggregate output
-get_out="cat "+request+"_*.out > "+request+"_all.out"
+get_out="cat "+tmp_dir+request+"_*.out > "+tmp_dir+request+"_all.out"
 subprocess.call(get_out, shell=True)
-out_raw=open(request+"_all.out").readlines()
+out_raw=open(tmp_dir+request+"_all.out").readlines()
 out_prox=[]
 for i in range(len(out_raw)):
 	col=out_raw[i].strip().split("\t")
@@ -237,7 +239,7 @@ source=ColumnDataSource(
 	)
 )
 
-output_file(request+"_scatter.html")
+output_file(tmp_dir+"scatter_"+request+".html")
 figure(
 	title="Proxies for "+snp+" in "+pop,
 	plot_width=900,
@@ -278,6 +280,6 @@ duration=time.time() - start_time
 print "\nRun time: "+str(duration)+" seconds\n"
 
 # Remove temporary files
-subprocess.call("rm pops_"+request+".txt", shell=True)
-subprocess.call("rm *"+request+"*.vcf", shell=True)
-subprocess.call("rm "+request+"*.out", shell=True)
+subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+subprocess.call("rm "+tmp_dir+request+"*.out", shell=True)

@@ -9,13 +9,6 @@ process=sys.argv[6]
 
 print "Process "+str(int(process)+1)+" initialized."
 
-# Get population ids
-pop_list=open("pops_"+request+".txt").readlines()
-ids=[]
-for i in range(len(pop_list)):
-	ids.append(pop_list[i].strip())
-
-pop_ids=list(set(ids))
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
@@ -23,12 +16,24 @@ snp_dir=data_dir+"snp141/snp141.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 reg_dir=data_dir+"regulomedb/regulomedb.db"
+tmp_dir="./tmp/"
+
+
+# Get population ids
+pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
+ids=[]
+for i in range(len(pop_list)):
+	ids.append(pop_list[i].strip())
+
+pop_ids=list(set(ids))
+
+
 
 # Get VCF region
 vcf_file=vcf_dir+chr+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp="tabix -fh {0} {1}:{2}-{3} > {4}".format(vcf_file, chr, start, stop, "snps_"+request+"_"+process+".vcf")
+tabix_snp="tabix -fh {0} {1}:{2}-{3} > {4}".format(vcf_file, chr, start, stop, tmp_dir+"snps_"+request+"_"+process+".vcf")
 subprocess.call(tabix_snp, shell=True)
-grep_remove_dups="grep -v -e END snps_"+request+"_"+process+".vcf > snps_no_dups_"+request+"_"+process+".vcf"
+grep_remove_dups="grep -v -e END "+tmp_dir+"snps_"+request+"_"+process+".vcf > "+tmp_dir+"snps_no_dups_"+request+"_"+process+".vcf"
 subprocess.call(grep_remove_dups, shell=True)
 
 
@@ -106,7 +111,7 @@ curr2=con2.cursor()
 
 
 # Import SNP VCF files
-vcf=open("snp_no_dups_"+request+".vcf").readlines()
+vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 geno=vcf[len(vcf)-1].strip().split()
 allele={"0":geno[3],"1":geno[4]}
 chr=geno[0]
@@ -116,7 +121,7 @@ al="("+geno[3]+"/"+geno[4]+")"
 
 
 # Import Window around SNP
-vcf=csv.reader(open("snps_no_dups_"+request+"_"+process+".vcf"),dialect="excel-tab")
+vcf=csv.reader(open(tmp_dir+"snps_no_dups_"+request+"_"+process+".vcf"),dialect="excel-tab")
 
 # Loop past file information and find header
 head=next(vcf,None)
@@ -170,7 +175,7 @@ for geno_n in vcf:
 			temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p,funct]
 			out.append(temp)
 
-output=open(request+"_"+process+".out","w")
+output=open(tmp_dir+request+"_"+process+".out","w")
 for i in range(len(out)):
 	print >> output, "\t".join(str(j) for j in out[i])
 
