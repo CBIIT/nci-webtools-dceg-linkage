@@ -1,3 +1,11 @@
+var yourObject = {
+          test:'test 1',
+          testData: [ 
+                {testName: 'do',testId:''}
+          ],
+          testRcd:'value'   
+};
+
 var ldpair =[
 {
  "corr_alleles": [
@@ -243,14 +251,30 @@ function PatientViewModel() {
 }
 
 function bindLDpair() {
-    ko.applyBindings(new AppViewModel());  
+    ko.applyBindings(new LDpairViewModel());  
+    //alert(yourObject);
+    console.dir(yourObject);
+    var url = "http://"+location.hostname+":8090/LDlink/ldpair";
+    alert(url);
+    $.getJSON(url, function(data) { 
+    // Now use this data to update your view models, 
+    // and Knockout will update your UI automatically 
+     alert(data);
+
+    });
+    $('#ldpair-results-data').load(url);
 }
 
 // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
-function AppViewModel() {
-    this.firstName = ko.observable("Bert");
-    this.lastName = ko.observable("Bertington");
+function LDpairViewModel() {
+    //this.parameter.snp1 = ko.observable("Bert");
+    //this.parameter.snp2 = ko.observable("Bertington");
+    //this.parameter.populations = ko.observableArray(["Cat", "Dog", "Fish"])
     this.ldpair = ldpair[0];
-    console.log('AppViewModel');
+    console.log('LDpairViewModel');
     console.dir(this);
 }
+
+
+
+/* Ajax calls*/
