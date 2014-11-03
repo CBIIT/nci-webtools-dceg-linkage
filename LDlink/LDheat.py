@@ -309,4 +309,5 @@ save()
 duration=time.time() - start_time
 print "Run time: "+str(duration)+" seconds\n"
 
+subprocess.call("rm pops_"+request+".txt", shell=True)
 subprocess.call("rm *_"+request+".vcf", shell=True)
