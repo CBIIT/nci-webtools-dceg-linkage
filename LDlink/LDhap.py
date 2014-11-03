@@ -149,9 +149,15 @@ for g in range(h+1,len(vcf)):
 			rsnum=str(g)+"?"
 		rsnum_lst.append(rsnum)
 		
-		position="chr"+geno[0]+":"+geno[1]+"-"+geno[1]
+		position="chr"+geno[0]+":"+geno[1]
 		pos_lst.append(position)
-		alleles=geno[3]+"/"+geno[4]
+		
+		f0=round(float(count0)/(count0+count1),4)
+		f1=round(float(count1)/(count0+count1),4)
+		if f0>=f1:
+			alleles=geno[3]+"="+str(round(f0,3))+", "+geno[4]+"="+str(round(f1,3))
+		else:
+			alleles=geno[4]+"="+str(round(f1,3))+", "+geno[3]+"="+str(round(f0,3))
 		allele_lst.append(alleles)
 
 
@@ -180,12 +186,24 @@ results_sort2=sorted(results_sort1, key=operator.itemgetter(1), reverse=True)
 
 # Generate JSON output
 digits=len(str(len(results_sort2)))
+haps_out={}
 for i in range(len(results_sort2)):
 	hap_info={}
 	hap_info["Haplotype"]=results_sort2[i][0]
 	hap_info["Count"]=results_sort2[i][1]
 	hap_info["Frequency"]=round(float(results_sort2[i][1])/(2*len(pop_ids)),4)
-	output["haplotype_"+(digits-len(str(i)))*"0"+str(i+1)]=hap_info
+	haps_out["haplotype_"+(digits-len(str(i)))*"0"+str(i+1)]=hap_info
+output["haplotypes"]=haps_out
+
+digits=len(str(len(rsnum_lst)))
+snps_out={}
+for i in range(len(rsnum_lst)):
+	snp_info={}
+	snp_info["RS"]=rsnum_lst[i]
+	snp_info["Alleles"]=allele_lst[i]
+	snp_info["Coord"]=pos_lst[i]
+	snps_out["snp_"+(digits-len(str(i)))*"0"+str(i+1)]=snp_info
+output["snps"]=snps_out
 
 
 # Save JSON output
