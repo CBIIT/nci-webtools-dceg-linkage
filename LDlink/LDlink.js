@@ -1,10 +1,15 @@
-var yourObject = {
-          test:'test 1',
-          testData: [ 
-                {testName: 'do',testId:''}
-          ],
-          testRcd:'value'   
-};
+var restService = {
+  protocol: 'http',
+  hostname: document.location.hostname,
+  fqn: "nci.nih.gov",
+  port:9090,
+  route: "LDlinkRest"
+}
+
+var restServerUrl = restService.protocol
+                      +"://"+restService.hostname
+                      +"/"+restService.route; 
+
 
 var ldpair =[
 {
@@ -90,6 +95,8 @@ $(document).on('change', '.btn-file :file', function() {
 $( document ).ready(function() {
 
 	console.log( "ready!" );
+  console.log("restServerUrl");
+  console.log(restServerUrl);
     $('.tab-content').on('click',"a[class|='btn btn-primary calculate']", function(e){
         calculate(e);
     });
@@ -219,10 +226,10 @@ function createPopulationDropdown(id) {
                 var selected = '';
                 options.each(function() {
                     //var label =  $(this).attr('label') : $(this).html();
-                    selected += $(this).val() + ', ';
+                    selected += $(this).val() + '+';
                 });
                 
-                return selected.substr(0, selected.length - 2) + ' <b class="caret"></b>';
+                return selected.substr(0, selected.length - 1) + ' <b class="caret"></b>';
             }
         },
         buttonTitle: function(options, select) {
@@ -251,18 +258,72 @@ function PatientViewModel() {
 }
 
 function bindLDpair() {
-    ko.applyBindings(new LDpairViewModel());  
+    var ldpairInputs = {
+        snp1: $('#ldpair-snp1').val(),
+        snp2: $('#ldpair-snp2').val(),
+        populations: $('#ldpair-population-codes').val(),
+        reference: Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000 
+    };
+    /*
+    var myDropDownListValues = $("#ldpair-population-codes").multiselect("getSelected").map(function()
+        {
+            return this.value;    
+        }).get();
+*/
+    //console.log(myDropDownListValues);
+    //alert($('#ldpair-population-codes').multiselect('getSelected'));
+    //alert($('#ldpair-population-codes').val());
+    //alert("about to get inputs");
+    //var ldpairInputs = $('#ldpair-inputs-form').serializeObject();
+    console.log("ldpairInputs");
+    //alert(ldpairInputs);
+    //alert(JSON.stringify(ldpairInputs));
+    //console.log(JSON.stringify(ldpairInputs));
+    console.dir(ldpairInputs);
     //alert(yourObject);
-    console.dir(yourObject);
-    var url = "http://"+location.hostname+":8090/LDlink/ldpair";
-    alert(url);
+    //var url = "http://"+location.hostname+":8090/LDlinkRest/ldpair";
+    //var url = "http://"+location.hostname+"/LDlinkRest/ldpair";
+    var url = restServerUrl+"/ldpair";
+  //var url = "http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldpair";
+    //alert(url);
+
+    /*  
     $.getJSON(url, function(data) { 
     // Now use this data to update your view models, 
     // and Knockout will update your UI automatically 
-     alert(data);
+        console.log("DATA");
+        console.dir(data);
+      //  alert(data);
 
+    }); 
+    */
+
+// Assign handlers immediately after making the request,
+// and remember the jqXHR object for this request
+
+    var jqxhr = $.ajax({
+        type: "GET",
+        url: url,
+        data: ldpairInputs,        
+    }).done(function() {
+        console.log("done");
+    }).fail(function() {
+        console.log("error");
+    }).always(function() {
+        console.log("complete");
     });
-    $('#ldpair-results-data').load(url);
+// Perform other work here ...
+// Set another completion function for the request above
+    jqxhr.always(function() {
+        //Load file
+        $console.log("second complete");
+        alert("complete load file");
+        
+
+    });    
+
+//    $('#ldpair-results-data').load(url);
+    ko.applyBindings(new LDpairViewModel()); 
 }
 
 // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
@@ -276,5 +337,20 @@ function LDpairViewModel() {
 }
 
 
+jQuery.fn.serializeObject = function() {
+    var o = {};
+    var a = this.serializeArray();
+    jQuery.each(a, function() {
+        if (o[this.id] !== undefined) {
+            if (!o[this.id].push) {
+                o[this.id] = [o[this.id]];
+            }
+            o[this.id].push(this.value || '');
+        } else {
+            o[this.id] = this.value || '';
+        }
+    });
+    return o;
+};
 
 /* Ajax calls*/
