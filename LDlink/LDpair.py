@@ -338,6 +338,10 @@ def main():
 	
 	except KeyError:
 		print ""
+		print "Query SNPs:"
+		print json_dict["snp1"]["rsnum"]+" ("+json_dict["snp1"]["coord"]+")"
+		print json_dict["snp2"]["rsnum"]+" ("+json_dict["snp2"]["coord"]+")"
+		print ""
 		print pop+" Haplotypes:"
 		print " "*15+json_dict["snp2"]["rsnum"]
 		print " "*15+json_dict["snp2"]["allele_1"]["allele"]+" "*7+json_dict["snp2"]["allele_2"]["allele"]
@@ -364,10 +368,19 @@ def main():
 			print json_dict["corr_alleles"][1]
 		else:
 			print json_dict["corr_alleles"]
-		print ""
+		
+		try:
+			json_dict["warning"]
+		except KeyError:
+			print ""
+		else:
+			print "WARNING: "+json_dict["warning"]+"!"
+			print ""
 	
 	else:
+		print ""
 		print json_dict["error"]
+		print ""
 	
 
 if __name__ == "__main__":
