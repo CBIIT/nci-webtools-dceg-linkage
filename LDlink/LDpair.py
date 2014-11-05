@@ -16,7 +16,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		os.makedirs(tmp_dir)
 	
 	
-	# Create output JSON string
+	# Create JSON output
 	output={}
 	
 	
