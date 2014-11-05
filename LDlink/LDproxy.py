@@ -33,7 +33,7 @@ def calculate_proxy(snp,pop,request):
 	snp_coord=cur.fetchone()
 	if snp_coord==None:
 		output["error"]=snp+" is not a valid RS number for query SNP."
-		return(json.dumps(output, sort_keys=True, indent=2))
+		return(json.dumps(output, sort_keys=True, indent=2),None,None)
 		raise
 	
 	
@@ -45,7 +45,7 @@ def calculate_proxy(snp,pop,request):
 			pop_dirs.append(pop_dir+pop_i+".txt")
 		else:
 			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			return(json.dumps(output, sort_keys=True, indent=2))
+			return(json.dumps(output, sort_keys=True, indent=2),None,None)
 			raise
 	
 	get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
@@ -91,7 +91,7 @@ def calculate_proxy(snp,pop,request):
 	
 	else:
 		output["error"]=snp+" is not a biallelic SNP."
-		return(json.dumps(output, sort_keys=True, indent=2))
+		return(json.dumps(output, sort_keys=True, indent=2),None,None)
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 		raise
@@ -289,7 +289,7 @@ def calculate_proxy(snp,pop,request):
 
 
 def main():
-	import sys
+	import json,sys
 	
 	# Import LDproxy options
 	if len(sys.argv)==4:
@@ -302,7 +302,26 @@ def main():
 	
 	# Run function
 	out_json,out_script,out_div=calculate_proxy(snp,pop,request)
-	print out_script[0:10]
+	
+	# Print output
+	json_dict=json.loads(out_json)
+	temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
+	print "\t".join(temp)
+	for k in sorted(json_dict["proxy_snps"], key=json_dict["proxy_snps"].get):
+		temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+		print "\t".join(temp)
+	print ""
+	
+	out_script_line=out_script.split("\n")
+	for i in range(len(out_script_line)):
+		if len(out_script_line[i])<80:
+			print out_script_line[i]
+		else:
+			print out_script_line[i][0:80]
+	print ""
+	
+	print out_div
+	print ""
 
 
 if __name__ == "__main__":
