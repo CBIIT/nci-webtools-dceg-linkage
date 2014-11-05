@@ -316,7 +316,7 @@ def calculate_pair(snp1,snp2,pop,request):
 
 
 def main():
-	import sys
+	import json,sys
 	
 	# Import LDpair options
 	if len(sys.argv)==5:
@@ -329,10 +329,46 @@ def main():
 		sys.exit()
 		
 	# Run function
-	json_out=calculate_pair(snp1,snp2,pop,request)
-	print json_out
-
+	out_json=calculate_pair(snp1,snp2,pop,request)
+	
+	# Print output
+	json_dict=json.loads(out_json)
+	try:
+		json_dict["error"]
+	
+	except KeyError:
+		print ""
+		print pop+" Haplotypes:"
+		print " "*15+json_dict["snp2"]["rsnum"]
+		print " "*15+json_dict["snp2"]["allele_1"]["allele"]+" "*7+json_dict["snp2"]["allele_2"]["allele"]
+		print " "*13+"-"*17
+		print " "*11+json_dict["snp1"]["allele_1"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["11"]+" "*(5-len(json_dict["two_by_two"]["cells"]["11"]))+" | "+json_dict["two_by_two"]["cells"]["12"]+" "*(5-len(json_dict["two_by_two"]["cells"]["12"]))+" | "+json_dict["snp1"]["allele_1"]["count"]+" "*(5-len(json_dict["snp1"]["allele_1"]["count"]))+" ("+json_dict["snp1"]["allele_1"]["frequency"]+")"
+		print json_dict["snp1"]["rsnum"]+" "*(10-len(json_dict["snp1"]["rsnum"]))+" "*3+"-"*17
+		print " "*11+json_dict["snp2"]["allele_2"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["21"]+" "*(5-len(json_dict["two_by_two"]["cells"]["21"]))+" | "+json_dict["two_by_two"]["cells"]["22"]+" "*(5-len(json_dict["two_by_two"]["cells"]["22"]))+" | "+json_dict["snp1"]["allele_2"]["count"]+" "*(5-len(json_dict["snp1"]["allele_2"]["count"]))+" ("+json_dict["snp1"]["allele_2"]["frequency"]+")"
+		print " "*13+"-"*17
+		print " "*15+json_dict["snp2"]["allele_1"]["count"]+" "*(5-len(json_dict["snp2"]["allele_1"]["count"]))+" "*3+json_dict["snp2"]["allele_2"]["count"]+" "*(5-len(json_dict["snp2"]["allele_2"]["count"]))+" "*3+json_dict["two_by_two"]["total"]
+		print " "*14+"("+json_dict["snp2"]["allele_1"]["frequency"]+")"+" "*(5-len(json_dict["snp2"]["allele_1"]["frequency"]))+" ("+json_dict["snp2"]["allele_2"]["frequency"]+")"+" "*(5-len(json_dict["snp2"]["allele_2"]["frequency"]))
+		print ""
+		print "          "+json_dict["haplotypes"]["hap1"]["alleles"]+": "+json_dict["haplotypes"]["hap1"]["count"]+" ("+json_dict["haplotypes"]["hap1"]["frequency"]+")"
+		print "          "+json_dict["haplotypes"]["hap2"]["alleles"]+": "+json_dict["haplotypes"]["hap2"]["count"]+" ("+json_dict["haplotypes"]["hap2"]["frequency"]+")"
+		print "          "+json_dict["haplotypes"]["hap3"]["alleles"]+": "+json_dict["haplotypes"]["hap3"]["count"]+" ("+json_dict["haplotypes"]["hap3"]["frequency"]+")"
+		print "          "+json_dict["haplotypes"]["hap4"]["alleles"]+": "+json_dict["haplotypes"]["hap4"]["count"]+" ("+json_dict["haplotypes"]["hap4"]["frequency"]+")"
+		print ""
+		print "          D': "+json_dict["statistics"]["d_prime"]
+		print "          R2: "+json_dict["statistics"]["r2"]
+		print "      Chi-sq: "+json_dict["statistics"]["chisq"]
+		print "     p-value: "+json_dict["statistics"]["p"]
+		print ""
+		if len(json_dict["corr_alleles"])==2:
+			print json_dict["corr_alleles"][0]
+			print json_dict["corr_alleles"][1]
+		else:
+			print json_dict["corr_alleles"]
+		print ""
+	
+	else:
+		print json_dict["error"]
+	
 
 if __name__ == "__main__":
 	main()
-
