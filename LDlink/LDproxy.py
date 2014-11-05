@@ -305,23 +305,33 @@ def main():
 	
 	# Print output
 	json_dict=json.loads(out_json)
-	temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
-	print "\t".join(temp)
-	for k in sorted(json_dict["proxy_snps"], key=json_dict["proxy_snps"].get):
-		temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+	
+	try:
+		json_dict["error"]
+	
+	except KeyError:
+		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 		print "\t".join(temp)
-	print ""
+		for k in sorted(json_dict["proxy_snps"], key=json_dict["proxy_snps"].get):
+			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+			print "\t".join(temp)
+		print ""
+		
+		out_script_line=out_script.split("\n")
+		for i in range(len(out_script_line)):
+			if len(out_script_line[i])<110:
+				print out_script_line[i]
+			else:
+				print out_script_line[i][0:110]
+		print ""
+		
+		print out_div
+		print ""
 	
-	out_script_line=out_script.split("\n")
-	for i in range(len(out_script_line)):
-		if len(out_script_line[i])<80:
-			print out_script_line[i]
-		else:
-			print out_script_line[i][0:80]
-	print ""
-	
-	print out_div
-	print ""
+	else:
+		print ""
+		print json_dict["error"]
+		print ""
 
 
 if __name__ == "__main__":
