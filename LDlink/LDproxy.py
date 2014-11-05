@@ -17,7 +17,7 @@ def calculate_proxy(snp,pop,request):
 		os.makedirs(tmp_dir)
 	
 	
-	# Create output JSON file
+	# Create JSON output
 	output={}
 	
 	
@@ -312,7 +312,7 @@ def main():
 	except KeyError:
 		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 		print "\t".join(temp)
-		for k in sorted(json_dict["proxy_snps"], key=json_dict["proxy_snps"].get):
+		for k in sorted(json_dict["proxy_snps"].keys()):
 			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
 			print "\t".join(temp)
 		print ""
