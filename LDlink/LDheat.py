@@ -70,17 +70,19 @@ snp_coords=[]
 tabix_coords=""
 for i in range(len(snps)):
 	snp_i=snps[i].strip().split()
-	if snp_i[0][0:2]=="rs":
-		id="99"+(13-len(snp_i[0]))*"0"+snp_i[0].strip("rs")
-		cur.execute('SELECT * FROM snps WHERE id=?', (id,))
-		snp_coord=cur.fetchone()
-		if snp_coord!=None:
-			rs_nums.append(snp_i[0])
-			snp_pos.append(snp_coord[3])
-			temp=[snp_coord[1],snp_coord[2],snp_coord[3]]
-			snp_coords.append(temp)
-			temp2=snp_coord[2]+":"+snp_coord[3]+"-"+snp_coord[3]
-			tabix_coords=tabix_coords+" "+temp2
+	if len(snp_i)>0:
+		if len(snp_i[0])>2:
+			if snp_i[0][0:2]=="rs":
+				id="99"+(13-len(snp_i[0]))*"0"+snp_i[0].strip("rs")
+				cur.execute('SELECT * FROM snps WHERE id=?', (id,))
+				snp_coord=cur.fetchone()
+				if snp_coord!=None:
+					rs_nums.append(snp_i[0])
+					snp_pos.append(snp_coord[3])
+					temp=[snp_coord[1],snp_coord[2],snp_coord[3]]
+					snp_coords.append(temp)
+					temp2=snp_coord[2]+":"+snp_coord[3]+"-"+snp_coord[3]
+					tabix_coords=tabix_coords+" "+temp2
 
 
 # Check SNPs are all on the same chromosome
