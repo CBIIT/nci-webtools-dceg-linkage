@@ -13,6 +13,8 @@ import pandas as pd
 import numpy as np
 from pandas import DataFrame
 import urllib
+from LDpair import calculate_pair
+from LDpair import ping
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -55,7 +57,27 @@ def callRFunction():
 
 @app.route('/LDlinkRest/hello', methods = ['GET'])
 def hello():
+    print 'hello'
+    ping('Another hello')
     return 'hello'
+
+@app.route('/LDlinkRest/test', methods = ['GET'])
+def test():
+    # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
+    print 'Execute TEST'
+    print 'Gathering Variables from url'
+    snp1 = request.args.get('snp1', False)
+    snp2 = request.args.get('snp2', False)
+    pop = request.args.get('pop', False)
+    request_reference = request.args.get('request', False) 
+    ping('Running Test')
+    print 'snp1: '+snp1
+    print 'snp2: '+snp2
+    print 'pop: '+pop
+    print 'request: ' + request_reference
+    out_json = calculate_pair(snp1,snp2,pop,request_reference)
+
+    return out_json
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():

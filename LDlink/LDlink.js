@@ -258,13 +258,16 @@ function PatientViewModel() {
 }
 
 function bindLDpair() {
+    var population = $('#ldpair-population-codes').val();
+    console.log('population');
+    console.dir(population);
     var ldpairInputs = {
         snp1: $('#ldpair-snp1').val(),
         snp2: $('#ldpair-snp2').val(),
-        populations: $('#ldpair-population-codes').val(),
-        reference: Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000 
+        pop: population.join("+"),
+        request: Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000 
     };
-    /*
+/*
     var myDropDownListValues = $("#ldpair-population-codes").multiselect("getSelected").map(function()
         {
             return this.value;    
@@ -283,7 +286,7 @@ function bindLDpair() {
     //alert(yourObject);
     //var url = "http://"+location.hostname+":8090/LDlinkRest/ldpair";
     //var url = "http://"+location.hostname+"/LDlinkRest/ldpair";
-    var url = restServerUrl+"/ldpair";
+    var url = restServerUrl+"/test";
   //var url = "http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldpair";
     //alert(url);
 
@@ -316,9 +319,8 @@ function bindLDpair() {
 // Set another completion function for the request above
     jqxhr.always(function() {
         //Load file
-        $console.log("second complete");
+        console.log("second complete");
         alert("complete load file");
-        
 
     });    
 
@@ -335,7 +337,6 @@ function LDpairViewModel() {
     console.log('LDpairViewModel');
     console.dir(this);
 }
-
 
 jQuery.fn.serializeObject = function() {
     var o = {};
