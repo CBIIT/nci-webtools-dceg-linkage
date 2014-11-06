@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Create LDproxy function
+# Create LDhap function
 def calculate_hap(snplst,pop,request):
 	import json,math,operator,os,sqlite3,subprocess,sys,time
 	start_time=time.time()
