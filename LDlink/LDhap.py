@@ -24,6 +24,10 @@ def calculate_hap(snplst,pop,request):
 	
 	# Open SNP list file
 	snps=open(snplst).readlines()
+	if len(snps)>30:
+		output["error"]="Maximum SNP list is 30 SNPs. Your list contains "+str(len(snps))+" entries."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		raise
 	
 	
 	# Find coordinates (GRCh37/hg19) for SNP RS number
@@ -207,8 +211,6 @@ def calculate_hap(snplst,pop,request):
 	
 	
 	duration=time.time() - start_time
-	print ""
-	print "Run time: "+str(duration)+" seconds\n"
 	
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*_"+request+".vcf", shell=True)
@@ -247,27 +249,38 @@ def main():
 		hap_freq=[]
 		for k in sorted(json_dict["haplotypes"].keys()):
 			hap_lst.append(json_dict["haplotypes"][k]["Haplotype"])
-			hap_count.append(str(json_dict["haplotypes"][k]["Count"])+" "*(6-len(str(json_dict["haplotypes"][k]["Count"]))))
+			hap_count.append(" "*(6-len(str(json_dict["haplotypes"][k]["Count"])))+str(json_dict["haplotypes"][k]["Count"]))
 			hap_freq.append(str(json_dict["haplotypes"][k]["Frequency"])+"0"*(6-len(str(json_dict["haplotypes"][k]["Frequency"]))))
+		
+		# Only print haplotypes >1 percent frequency
+		freq_count=0
+		for i in range(len(hap_freq)):
+			if float(hap_freq[i])>=0.01:
+				freq_count+=1
 		
 		hap_snp=[]
 		for i in range(len(hap_lst[0])):
 			temp=[]
-			for j in range(len(hap_lst)):
+			for j in range(freq_count):     ## use "len(hap_lst)" for all haplotypes
 				temp.append(hap_lst[j][i])
 			hap_snp.append(temp)
-				
-		print "RS Number\tCoordinates\tAlleles (Freq)\t\t   Haplotypes"
+		
+		print ""
+		print "RS Number     Coordinates      Allele Frequency      Common Haplotypes (>1%)"
 		print ""
 		counter=0
 		for k in sorted(json_dict["snps"].keys()):
-			temp=[json_dict["snps"][k]["RS"],json_dict["snps"][k]["Coord"],json_dict["snps"][k]["Alleles"],"   "+"      ".join(hap_snp[counter])]
-			print "\t".join(temp)
+			rs_k=json_dict["snps"][k]["RS"]+" "*(11-len(str(json_dict["snps"][k]["RS"])))
+			coord_k=json_dict["snps"][k]["Coord"]+" "*(14-len(str(json_dict["snps"][k]["Coord"])))
+			alleles_k0=json_dict["snps"][k]["Alleles"].strip(" ").split(",")
+			alleles_k1=alleles_k0[0]+"0"*(7-len(str(alleles_k0[0])))+","+alleles_k0[1]+"0"*(8-len(str(alleles_k0[1])))
+			temp_k=[rs_k,coord_k,alleles_k1,"   "+"      ".join(hap_snp[counter])]
+			print "   ".join(temp_k)
 			counter+=1
 		
 		print ""
-		print "\t\t\t\t\t\t    Count: "+" ".join(hap_count)
-		print "\t\t\t\t\t\tFrequency: "+" ".join(hap_freq)
+		print "                                         Count: "+" ".join(hap_count[0:freq_count])
+		print "                                     Frequency: "+" ".join(hap_freq[0:freq_count])
 		print ""
 		
 	else:
