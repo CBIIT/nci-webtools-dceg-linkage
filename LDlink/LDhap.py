@@ -63,6 +63,7 @@ def calculate_hap(snplst,pop,request):
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
+	warn=[]
 	tabix_coords=""
 	for i in range(len(snps)):
 		snp_i=snps[i].strip().split()
@@ -79,6 +80,11 @@ def calculate_hap(snplst,pop,request):
 						snp_coords.append(temp)
 						temp2=snp_coord[2]+":"+snp_coord[3]+"-"+snp_coord[3]
 						tabix_coords=tabix_coords+" "+temp2
+					else:
+						warn.append(snp_i[0])
+	
+	if warn!=[]:
+		output["warning"]="Not all input SNPs were found in dbSNP 141 ("+",".join(warn)+")"
 	
 	
 	# Check SNPs are all on the same chromosome
@@ -281,8 +287,17 @@ def main():
 		print ""
 		print "                                         Count: "+" ".join(hap_count[0:freq_count])
 		print "                                     Frequency: "+" ".join(hap_freq[0:freq_count])
-		print ""
 		
+		try:
+			json_dict["warning"]
+		except KeyError:
+			print ""
+		else:
+			print ""
+			print "WARNING: "+json_dict["warning"]+"!"
+			print ""
+	
+	
 	else:
 		print ""
 		print json_dict["error"]
