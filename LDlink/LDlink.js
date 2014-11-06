@@ -265,7 +265,7 @@ function bindLDpair() {
         snp1: $('#ldpair-snp1').val(),
         snp2: $('#ldpair-snp2').val(),
         pop: population.join("+"),
-        request: Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000 
+        reference: "ref" + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000 
     };
 /*
     var myDropDownListValues = $("#ldpair-population-codes").multiselect("getSelected").map(function()
@@ -286,7 +286,7 @@ function bindLDpair() {
     //alert(yourObject);
     //var url = "http://"+location.hostname+":8090/LDlinkRest/ldpair";
     //var url = "http://"+location.hostname+"/LDlinkRest/ldpair";
-    var url = restServerUrl+"/test";
+    var url = restServerUrl+"/ldpair";
   //var url = "http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldpair";
     //alert(url);
 
@@ -304,38 +304,54 @@ function bindLDpair() {
 // Assign handlers immediately after making the request,
 // and remember the jqXHR object for this request
 
-    var jqxhr = $.ajax({
+    var ajaxRequest = $.ajax({
         type: "GET",
         url: url,
-        data: ldpairInputs,        
-    }).done(function() {
+        data: ldpairInputs,
+        contentType: 'application/json' //JSON        
+    });
+    ajaxRequest.done(function(data) {
         console.log("done");
-    }).fail(function() {
-        console.log("error");
-    }).always(function() {
-        console.log("complete");
+        //alert("File is completed. Check for valid json.  Check for errors.");
+        console.log("second complete");
+        //alert("complete load file");
+        if(data.error){
+            alert("error: "+data.error);
+        } else {
+            //Temporarly change the json two
+            data.two_by_two.cells.c11 = data.two_by_two.cells['11'];
+            data.two_by_two.cells.c12 = data.two_by_two.cells['12'];
+            data.two_by_two.cells.c21 = data.two_by_two.cells['21'];
+            data.two_by_two.cells.c22 = data.two_by_two.cells['22'];
+            ko.applyBindings(new LDpairViewModel(data)); 
+        }
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {     
+        console.log("header: "+jqXHR+"\n"+"Status: "+textStatus+"\n\nMake sure Plask Python server is available.");
+        alert('Communication problem: '+textStatus);
     });
 // Perform other work here ...
 // Set another completion function for the request above
-    jqxhr.always(function() {
-        //Load file
+    ajaxRequest.always(function() {
         console.log("second complete");
-        alert("complete load file");
-
     });    
 
 //    $('#ldpair-results-data').load(url);
-    ko.applyBindings(new LDpairViewModel()); 
 }
 
 // This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
-function LDpairViewModel() {
+function LDpairViewModel(data) {
     //this.parameter.snp1 = ko.observable("Bert");
     //this.parameter.snp2 = ko.observable("Bertington");
     //this.parameter.populations = ko.observableArray(["Cat", "Dog", "Fish"])
-    this.ldpair = ldpair[0];
+    console.log("LDpairViewModel");
+    console.dir(data);
+    this.ldpair = data[0];
     console.log('LDpairViewModel');
     console.dir(this);
+
+    this.ldpair = data;
+
 }
 
 jQuery.fn.serializeObject = function() {
