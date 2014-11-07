@@ -14,7 +14,6 @@ import numpy as np
 from pandas import DataFrame
 import urllib
 from LDpair import calculate_pair
-from LDpair import ping
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -103,10 +102,10 @@ def ldheat():
 import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", dest="port_number", default="9982", help="Sets the Port") 
+    parser.add_argument("-p", dest="port_number", default="9982", help="Sets the Port")
     # Default port is production value; prod,stage,dev = 9982, sandbox=9983
     args = parser.parse_args()
     port_num = int(args.port_number);
-    
+
     hostname = gethostname()
     app.run(host='0.0.0.0', port=port_num, debug = True)

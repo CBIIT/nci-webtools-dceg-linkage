@@ -8,7 +8,7 @@ var restService = {
 
 var restServerUrl = restService.protocol
                       +"://"+restService.hostname
-                      +"/"+restService.route; 
+                      +"/"+restService.route;
 
 
 var ldpair =[
@@ -115,7 +115,7 @@ $( document ).ready(function() {
 
         if(loaded == "false") {
             // ajax load from data-url
-            $(href).load(url,function(result){      
+            $(href).load(url,function(result){
                 pane.tab('show');
                 console.log('HREF: '+href);
                 var val = href;
@@ -201,7 +201,7 @@ function appendJumboTron(id) {
 function createPopulationDropdown(id) {
 
     $('#'+id+'-population-codes').multiselect({
-        enableClickableOptGroups: true, 
+        enableClickableOptGroups: true,
         buttonWidth: '300px',
         maxHeight: 500,
         includeSelectAllOption: true,
@@ -228,7 +228,7 @@ function createPopulationDropdown(id) {
                     //var label =  $(this).attr('label') : $(this).html();
                     selected += $(this).val() + '+';
                 });
-                
+
                 return selected.substr(0, selected.length - 1) + ' <b class="caret"></b>';
             }
         },
@@ -253,7 +253,7 @@ function PatientViewModel() {
     this.firstName = ko.observable("Bert");
     this.lastName = ko.observable("Bertington");
     this.fullName = ko.computed(function() {
-        return this.firstName() + " " + this.lastName();    
+        return this.firstName() + " " + this.lastName();
     }, this);
 }
 
@@ -265,12 +265,12 @@ function bindLDpair() {
         snp1: $('#ldpair-snp1').val(),
         snp2: $('#ldpair-snp2').val(),
         pop: population.join("+"),
-        reference: "ref" + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000 
+        reference: "ref" + Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000
     };
 /*
     var myDropDownListValues = $("#ldpair-population-codes").multiselect("getSelected").map(function()
         {
-            return this.value;    
+            return this.value;
         }).get();
 */
     //console.log(myDropDownListValues);
@@ -290,15 +290,15 @@ function bindLDpair() {
   //var url = "http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldpair";
     //alert(url);
 
-    /*  
-    $.getJSON(url, function(data) { 
-    // Now use this data to update your view models, 
-    // and Knockout will update your UI automatically 
+    /*
+    $.getJSON(url, function(data) {
+    // Now use this data to update your view models,
+    // and Knockout will update your UI automatically
         console.log("DATA");
         console.dir(data);
       //  alert(data);
 
-    }); 
+    });
     */
 
 // Assign handlers immediately after making the request,
@@ -308,7 +308,7 @@ function bindLDpair() {
         type: "GET",
         url: url,
         data: ldpairInputs,
-        contentType: 'application/json' //JSON        
+        contentType: 'application/json' //JSON
     });
     ajaxRequest.done(function(data) {
         console.log("done");
@@ -319,14 +319,16 @@ function bindLDpair() {
             alert("error: "+data.error);
         } else {
             //Temporarly change the json two
+            /*
             data.two_by_two.cells.c11 = data.two_by_two.cells['11'];
             data.two_by_two.cells.c12 = data.two_by_two.cells['12'];
             data.two_by_two.cells.c21 = data.two_by_two.cells['21'];
             data.two_by_two.cells.c22 = data.two_by_two.cells['22'];
-            ko.applyBindings(new LDpairViewModel(data)); 
+            */
+            ko.applyBindings(new LDpairViewModel(data));
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {     
+    ajaxRequest.fail(function(jqXHR, textStatus) {
         console.log("header: "+jqXHR+"\n"+"Status: "+textStatus+"\n\nMake sure Plask Python server is available.");
         alert('Communication problem: '+textStatus);
     });
@@ -334,7 +336,7 @@ function bindLDpair() {
 // Set another completion function for the request above
     ajaxRequest.always(function() {
         console.log("second complete");
-    });    
+    });
 
 //    $('#ldpair-results-data').load(url);
 }
