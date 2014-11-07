@@ -5,12 +5,12 @@
     <p>corr_alleles[0]: <strong data-bind="text: ldpair.haplotypes.hap1.alleles"></strong></p>
 
     <p>First name: <input data-bind="value: firstName" /></p>
-    <p>Last name: <input data-bind="value: lastName" /></p>        
+    <p>Last name: <input data-bind="value: lastName" /></p>
         </div>
 -->
 <div style="text-align:center" data-bind="text: ldpair.snp2.rsnum"></div>
 <div style="text-align:center" data-bind="text: ldpair.snp2.coord"></div>
-<table class="table">
+<table class="table table-condensed ldhap">
 <tbody>
     <!-- Header row -->
     <tr>
@@ -20,25 +20,37 @@
         <td class="cell-center">T</td>
         <td></td>
         <td></td>
-    </tr>    
+    </tr>
     <!-- Row 2 -->
     <tr>
         <td class="cell-right" data-bind="text: ldpair.snp1.rsnum"></td>
         <td class="cell-center">A</td>
-        <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c11"></td>
-        <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c12"></td>
+
+        <td colspan="2" rowspan="2">
+        <!--  -->
+          <table class="table table-condensed table-bordered two-by-two">
+            <tbody>
+            </tbody>
+              <tr>
+                <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c11"></td>
+                <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c12"></td>
+              </tr>
+                <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c21"></td>
+                <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c22"></td>
+              <tr>
+              </tr>
+          </table>
+        </td>
         <td data-bind="text: ldpair.snp1.allele_1.count"></td>
         <td class="cell-left">(<span data-bind="text: ldpair.snp1.allele_1.frequency"></span>)</td>
-    </tr>    
+    </tr>
     <!-- Row 3 -->
     <tr>
-        <td  class="cell-right" data-bind="text: ldpair.snp1.coord"></td>
-        <td  class="cell-center" >G</td>
-        <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c21"></td>
-        <td class="ldpair-results cell-center" data-bind="text: ldpair.two_by_two.cells.c22"></td>
+        <td class="cell-right" data-bind="text: ldpair.snp1.coord"></td>
+        <td class="cell-center" >G</td>
         <td data-bind="text: ldpair.snp1.allele_2.count"></td>
         <td class="cell-left">(<span data-bind="text: ldpair.snp1.allele_2.frequency"></span>)</td>
-    </tr>    
+    </tr>
     <!-- Row 4 -->
     <tr>
         <td></td>
@@ -60,37 +72,42 @@
   <div class="col-lg-4">
   </div>
   <div class="col-lg-2">
-<table class="table">
+<table class="table ldlink">
 <tbody>
     <tr>
         <td colspan="2" class="cell-center"><u>Heplotypes</u></td>
-    </tr>  
+    </tr>
     <tr>
-        <td class="cell-right">AC:<br>AT:<br>GC:<br>GT:</td>
-        <td>
-          <span data-bind="text: ldpair.haplotypes.hap1.count"></span>&nbsp
+        <td class="cell-right">
+          <span data-bind="text: ldpair.haplotypes.hap1.alleles"></span>:<br>
+          <span data-bind="text: ldpair.haplotypes.hap2.alleles"></span>:<br>
+          <span data-bind="text: ldpair.haplotypes.hap3.alleles"></span>:<br>
+          <span data-bind="text: ldpair.haplotypes.hap4.alleles"></span>:<br>
+        </td>
+        <td nowrap>
+          <span data-bind="text: ldpair.haplotypes.hap1.count"></span>&nbsp;
           (<span data-bind="text: ldpair.haplotypes.hap1.frequency"></span>)
           <br>
-          <span data-bind="text: ldpair.haplotypes.hap2.count"></span>&nbsp
+          <span data-bind="text: ldpair.haplotypes.hap2.count"></span>&nbsp;
           (<span data-bind="text: ldpair.haplotypes.hap2.frequency"></span>)
           <br>
-          <span data-bind="text: ldpair.haplotypes.hap3.count"></span>&nbsp
+          <span data-bind="text: ldpair.haplotypes.hap3.count"></span>&nbsp;
           (<span data-bind="text: ldpair.haplotypes.hap3.frequency"></span>)
           <br>
-          <span data-bind="text: ldpair.haplotypes.hap4.count"></span>&nbsp
+          <span data-bind="text: ldpair.haplotypes.hap4.count"></span>&nbsp;
           (<span data-bind="text: ldpair.haplotypes.hap4.frequency"></span>)
           <br>
         </td>
     </tr>
 </tbody>
-</table>  
+</table>
   </div>
   <div class="col-lg-2">
-<table class="table">
+<table class="table ldlink">
 <tbody>
     <tr class="cell-height-small">
         <td colspan="2" class="cell-center"><u>Statistics</u></td>
-    </tr> 
+    </tr>
     <tr>
         <td class="cell-right">D:<br>R2:<br>Chi-sq:<br>p-value:</td>
         <td>
@@ -101,7 +118,7 @@
         </td>
     </tr>
 </tbody>
-</table>  
+</table>
   </div>
 </div>
 <div data-bind="foreach: ldpair.corr_alleles">
@@ -115,7 +132,7 @@
         <td data-bind="text: name"></td>
         <td data-bind="text: meal().mealName"></td>
         <td data-bind="text: meal().price"></td>
-    </tr>    
+    </tr>
 </tbody>
 
 

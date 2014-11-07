@@ -113,6 +113,10 @@ table tr th:last-child {
 }
 
 */
+table.ldpair,table.ldpair tr, table.ldpair th {
+  background-color: white !important;
+}
+
 td.cell-right {
     text-align: right;
 }
@@ -155,6 +159,14 @@ input[readonly] {
   background-color: white !important;
   cursor: text !important;
 }
+/*
 table.ldhap,table.ldhap tr, table.ldhap th {
   background-color: white !important;
+}
+*/
+.container {
+  background-color: white;
+}
+.two-by-two {
+  margin-bottom:0px;
 }
