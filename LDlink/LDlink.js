@@ -214,12 +214,14 @@ $(document)
 					input.trigger('fileselect', [ numFiles, label ]);
 				});
 
+
 $(document).ready(
 		function() {
 
 			console.log("ready!");
 			console.log("restServerUrl");
 			console.log(restServerUrl);
+
 			buildPopulationDropdown("ldhap-population-codes");
 			buildPopulationDropdown("ldmatrix-population-codes");
 			buildPopulationDropdown("ldpair-population-codes");
@@ -229,6 +231,7 @@ $(document).ready(
 			appendJumboTron('ldmatrix');
 			appendJumboTron('ldpair');
 			appendJumboTron('ldproxy');
+			bindLDpair();
 
 			$('.tab-content').on('click',
 					"a[class|='btn btn-primary calculate']", function(e) {
@@ -308,7 +311,7 @@ function addPageListeners(tabClicked) {
 }
 
 function calculate(e) {
-	alert('Calculate');
+	//alert('Calculate');
 	var id = e.target.id;
 	console.log('CALCULATE: ' + id);
 	switch (id) {
