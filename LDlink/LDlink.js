@@ -220,6 +220,10 @@ $(document).ready(
 			console.log("ready!");
 			console.log("restServerUrl");
 			console.log(restServerUrl);
+			buildPopulationDropdown("ldhap-population-codes");
+			buildPopulationDropdown("ldmatrix-population-codes");
+			buildPopulationDropdown("ldpair-population-codes");
+			buildPopulationDropdown("ldproxy-population-codes");
 
 			appendJumboTron('ldhap');
 			appendJumboTron('ldmatrix');
@@ -230,6 +234,7 @@ $(document).ready(
 					"a[class|='btn btn-primary calculate']", function(e) {
 						calculate(e);
 					});
+/*
 			$('#ldlink-tabs a').click(
 					function(e) {
 						e.preventDefault();
@@ -270,6 +275,7 @@ $(document).ready(
 											});
 						}
 					});
+*/
 
 			$('#home').load($('.active a').attr("data-url"), function(result) {
 				$('.active a').attr('loaded', 'true');
@@ -360,6 +366,7 @@ function appendJumboTron(id) {
 													"    Results ...<br><br><br><br><br><br><br><br><br><br><br><br><br><br>")
 											.attr('id',
 													id + '-results-container')));
+	//addResults(id);
 
 }
 
@@ -540,5 +547,3 @@ jQuery.fn.serializeObject = function() {
 	});
 	return o;
 };
-
-/* Ajax calls */

@@ -1,7 +1,16 @@
+<!--
 <div style="text-align:center" data-bind="text: ldpair.snp2.rsnum"></div>
 <div style="text-align:center" data-bind="text: ldpair.snp2.coord"></div>
+-->
 <table class="table table-condensed ldhap">
 <tbody>
+
+    <tr>
+        <td class="cell-center" colspan="6">
+            <span data-bind="text: ldpair.snp2.rsnum"></span><br>
+            <span data-bind="text: ldpair.snp2.coord"></span>
+        </td>
+    </tr>
     <!-- Header row -->
     <tr>
         <td></td>
@@ -13,7 +22,7 @@
     </tr>
     <!-- Row 2 -->
     <tr>
-        <td class="cell-right" data-bind="text: ldpair.snp1.rsnum"></td>
+        <td class="cell-right" width="250" data-bind="text: ldpair.snp1.rsnum"></td>
         <td class="cell-center">A</td>
 
         <td colspan="2" rowspan="2">
@@ -114,4 +123,3 @@
 <div data-bind="foreach: ldpair.corr_alleles">
     <div style="text-align:center" data-bind="text: $data"></div>
 </div>
-<p id="ldpair-results-data"></p>
