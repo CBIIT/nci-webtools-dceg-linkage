@@ -367,6 +367,7 @@ function appendJumboTron(id) {
 											.attr('id',
 													id + '-results-container')));
 	//addResults(id);
+	$('#'+id+'-results-container').load(id+'.results.template.html');
 
 }
 
