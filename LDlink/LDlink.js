@@ -220,6 +220,12 @@ $(document).ready(
 			console.log("ready!");
 			console.log("restServerUrl");
 			console.log(restServerUrl);
+
+			appendJumboTron('ldhap');
+			appendJumboTron('ldmatrix');
+			appendJumboTron('ldpair');
+			appendJumboTron('ldproxy');
+
 			$('.tab-content').on('click',
 					"a[class|='btn btn-primary calculate']", function(e) {
 						calculate(e);
@@ -296,6 +302,7 @@ function addPageListeners(tabClicked) {
 }
 
 function calculate(e) {
+	alert('Calculate');
 	var id = e.target.id;
 	console.log('CALCULATE: ' + id);
 	switch (id) {
@@ -337,6 +344,8 @@ function calculate(e) {
 }
 
 function appendJumboTron(id) {
+
+	$("#"+id).append("<hr>");
 
 	$("#" + id)
 			.append(
@@ -456,7 +465,7 @@ function bindLDpair() {
 	 * $.getJSON(url, function(data) { // Now use this data to update your view
 	 * models, // and Knockout will update your UI automatically
 	 * console.log("DATA"); console.dir(data); // alert(data);
-	 * 
+	 *
 	 * });
 	 */
 

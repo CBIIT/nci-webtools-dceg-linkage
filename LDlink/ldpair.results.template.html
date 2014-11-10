@@ -1,13 +1,3 @@
-<!--
-        <div id="names">
-    <p>First name: <strong data-bind="text: firstName"></strong></p>
-    <p>Last name: <strong data-bind="text: lastName"></strong></p>
-    <p>corr_alleles[0]: <strong data-bind="text: ldpair.haplotypes.hap1.alleles"></strong></p>
-
-    <p>First name: <input data-bind="value: firstName" /></p>
-    <p>Last name: <input data-bind="value: lastName" /></p>
-        </div>
--->
 <div style="text-align:center" data-bind="text: ldpair.snp2.rsnum"></div>
 <div style="text-align:center" data-bind="text: ldpair.snp2.coord"></div>
 <table class="table table-condensed ldhap">
@@ -124,15 +114,4 @@
 <div data-bind="foreach: ldpair.corr_alleles">
     <div style="text-align:center" data-bind="text: $data"></div>
 </div>
-<p id='ldpair-results-data'></p>
-<!-- Append
-<div style="text-align:center" data-bind="text: ldpair.corr_alleles[0]"></div>
-<tbody data-bind="foreach: seats">
-    <tr>
-        <td data-bind="text: name"></td>
-        <td data-bind="text: meal().mealName"></td>
-        <td data-bind="text: meal().price"></td>
-    </tr>
-</tbody>
-
-
+<p id="ldpair-results-data"></p>
