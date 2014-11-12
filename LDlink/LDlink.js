@@ -66,7 +66,7 @@ function buildPopulationDropdown(elementId) {
 					"DETAIL", subDetail);
 		}
 		htmlText += "</optgroup>\n";
-		console.log(htmlText);
+		//console.log(htmlText);
 	}
 	$('#' + elementId).html(htmlText);
 
@@ -214,6 +214,7 @@ $(document)
 					input.trigger('fileselect', [ numFiles, label ]);
 				});
 
+var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
 
 $(document).ready(
 		function() {
@@ -221,17 +222,19 @@ $(document).ready(
 			console.log("ready!");
 			console.log("restServerUrl");
 			console.log(restServerUrl);
-
-			buildPopulationDropdown("ldhap-population-codes");
+			$.each(modules, function(key, value) {
+				buildPopulationDropdown(value+"-population-codes");
+			});
+			/*
 			buildPopulationDropdown("ldmatrix-population-codes");
 			buildPopulationDropdown("ldpair-population-codes");
 			buildPopulationDropdown("ldproxy-population-codes");
-
-			appendJumboTron('ldhap');
-			appendJumboTron('ldmatrix');
+			*/
+			//appendJumboTron('ldhap');
+			//appendJumboTron('ldmatrix');
 			appendJumboTron('ldpair');
-			appendJumboTron('ldproxy');
-			bindLDpair();
+			//appendJumboTron('ldproxy');
+			//bindLDpair();
 
 			$('.tab-content').on('click',
 					"a[class|='btn btn-primary calculate']", function(e) {
