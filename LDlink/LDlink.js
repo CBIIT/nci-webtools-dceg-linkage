@@ -66,7 +66,6 @@ function buildPopulationDropdown(elementId) {
 					"DETAIL", subDetail);
 		}
 		htmlText += "</optgroup>\n";
-		//console.log(htmlText);
 	}
 	$('#' + elementId).html(htmlText);
 
@@ -203,6 +202,26 @@ var ldpair = [ {
 	}
 } ];
 
+function ViewModel() {
+    var self = this;
+
+    self.data = ko.observableArray();
+};
+
+var viewModel = new ViewModel();
+
+/* LDpair View*/
+function ViewLDpairModel() {
+    var self = this;
+    self.ldpair = ko.observableArray();
+    self.ldpair = ldpair[0];
+};
+
+var viewLDpairModel = new ViewLDpairModel();
+
+//ko.applyBindings(viewLDpairModel);
+
+//ko.applyBindings(viewModel);
 $(document)
 		.on(
 				'change',
@@ -216,8 +235,19 @@ $(document)
 
 var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
 
+
 $(document).ready(
 		function() {
+			//ko.applyBindings(viewLDpairModel);
+
+			var viewModel = {
+				myValues: ko.observableArray([]), // Initially empty, so message hidden
+				ldpair: ko.observableArray(ldpair.data)
+    	};
+
+    	//ko.applyBindings(viewModel, document.getElementById('ldpair'));
+
+			//viewModel.myValues.push("some value"); // Now visible
 
 			console.log("ready!");
 			console.log("restServerUrl");
@@ -225,6 +255,7 @@ $(document).ready(
 			$.each(modules, function(key, value) {
 				buildPopulationDropdown(value+"-population-codes");
 			});
+
 			/*
 			buildPopulationDropdown("ldmatrix-population-codes");
 			buildPopulationDropdown("ldpair-population-codes");
@@ -232,13 +263,15 @@ $(document).ready(
 			*/
 			//appendJumboTron('ldhap');
 			//appendJumboTron('ldmatrix');
-			appendJumboTron('ldpair');
+			//appendJumboTron('ldpair');
 			//appendJumboTron('ldproxy');
 			//bindLDpair();
 
 			$('.tab-content').on('click',
 					"a[class|='btn btn-primary calculate']", function(e) {
-						calculate(e);
+						alert("You clicked a calculate button");
+
+						//calculate(e);
 					});
 /*
 			$('#ldlink-tabs a').click(
@@ -283,10 +316,14 @@ $(document).ready(
 					});
 */
 
+/*
 			$('#home').load($('.active a').attr("data-url"), function(result) {
 				$('.active a').attr('loaded', 'true');
 				$('.active a').tab('show');
 			});
+
+*/
+
 		});
 
 function addPageListeners(tabClicked) {
@@ -499,14 +536,7 @@ function bindLDpair() {
 		if (data.error) {
 			alert("error: " + data.error);
 		} else {
-			// Temporarly change the json two
-			/*
-			 * data.two_by_two.cells.c11 = data.two_by_two.cells['11'];
-			 * data.two_by_two.cells.c12 = data.two_by_two.cells['12'];
-			 * data.two_by_two.cells.c21 = data.two_by_two.cells['21'];
-			 * data.two_by_two.cells.c22 = data.two_by_two.cells['22'];
-			 */
-			ko.applyBindings(new LDpairViewModel(data));
+			//ko.applyBindings(new LDpairViewModel(data));
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {

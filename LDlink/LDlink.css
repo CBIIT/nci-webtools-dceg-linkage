@@ -175,4 +175,6 @@ table.ldhap,table.ldhap tr, table.ldhap th {
 .jumbotron {
   background-color:white;
 }
-
+.hidden {
+  display:none;
+}
