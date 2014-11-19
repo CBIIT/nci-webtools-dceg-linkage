@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+  <meta name="generator" content=
+  "HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content=
+  "width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>LD Link Toolset</title><!--
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+-->
+  <!-- need to keep this before jquery -->
+  <!-- Removed until needed..  Too slow to load during development
+<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
+-->
+
+  <script src=
+  "http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
+  type="text/javascript">
+</script>
+  <script src=
+  "http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
+  type="text/javascript">
+</script><!--
+<script src="//cdn.datatables.net/plug-ins/380cb78f450/integration/bootstrap/3/dataTables.bootstrap.js"></script>
+-->
+
+  <script src=
+  "http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
+  type="text/javascript">
+</script>
+  <script src=
+  "http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
+  type="text/javascript">
+</script>
+  <script src=
+  "http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
+  type="text/javascript">
+</script>
+
+  <script src="LDlink.js" type="text/javascript">
+</script>
+  <link rel="stylesheet" href=
+  "http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
+  type="text/css">
+  <link rel="stylesheet" href=
+  "http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"
+  type="text/css">
+  <!-- Loading too slow.  Took it out until we need it.
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh-0.6.1.css">
+-->
+  <!--
+<link rel="stylesheet" href="http://cdn.datatables.net/plug-ins/380cb78f450/integration/bootstrap/3/dataTables.bootstrap.css">
+-->
+  <link rel="stylesheet" href="../common/css/font-awesome.css"
+  type="text/css">
+  <!-- Include the multiselect plugin's CSS and JS: -->
+
+  <script type="text/javascript" src=
+  "../common/js/bootstrap-multiselect.js">
+</script>
+  <link rel="stylesheet" href=
+  "../common/css/bootstrap-multiselect.css" type="text/css">
+  <link rel="stylesheet" href="../common/css/style.css" type=
+  "text/css">
+  <link rel="stylesheet" href="LDlink.css" type="text/css">
+</head>
+
+<body role="document">
+  <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+
+  <div id="logos">
+    <div id="left">
+      <a href="http://www.cancer.gov" target="_blank"><img src=
+      "/common/images/nci.jpg" width="286" height="40" border="0"
+      alt="National Cancer Institute" title=
+      "National Cancer Institute"></a>
+    </div>
+
+    <div id="right">
+      <a href="http://www.cancer.gov" target="_blank"><img src=
+      "/common/images/nih.jpg" width="322" height="40" border="0"
+      alt="at the National Institutes of Health" title=
+      "at the National Institutes of Health"></a>
+    </div>
+  </div>
+
+  <div class="container theme-showcase" role="main">
+    <div id="banners">
+      <div id="left"><img src="LDlink_logo.png" alt=
+      "Logo for the LDlink tool" height="60"></div>
+
+      <div id="right"><!-- ../common/images/DCEG-LTG_banner.png -->
+      <!-- NCI-translational-genomics.png -->
+      <!-- DCEG-BB-HREB.png -->
+      <img src="../common/images/DCEG-LTG_banner.png" alt=
+      "Banner for NCI Division of Cancer Epidemiology &amp; Genetics, Laboratory of Translational Genomics"
+      height="60"></div>
+    </div><br>
+    <!-- Main Menu Tabs -->
+
+    <ul id="ldlink-tabs" class="nav nav-tabs responsive">
+      <li class="active"><a href="#home" data-toggle=
+      "tab">Home</a></li>
+
+      <li><a href="#ldhap-tab" data-toggle="tab">LDhap</a></li>
+
+      <li><a href="#ldmatrix-tab" data-toggle="tab">LDmatrix</a></li>
+
+      <li><a href="#ldpair-tab" data-toggle="tab">LDpair</a></li>
+
+      <li><a href="#ldproxy-tab" data-toggle="tab">LDproxy</a></li>
+    </ul><!-- Tab Content -->
+
+    <div class="tab-content">
+      <div class="tab-pane active" id="home">
+        <h3>Welcome to LDlink!</h3>
+
+        <p>LDlink is a suite of web-based applications designed to
+        easily and efficiently interrogate linkage disequilibrium
+        in population groups. All population genotype data
+        originates from Phase 3 of the 1000 Genomes Project and SNP
+        rsnumbers are indexed based on dbSNP build 138. Only
+        unambiguously mapping bi-allelic SNPs are permitted as
+        input. LDlink includes the following components:</p>
+
+        <ul>
+          <li><b>LDhap</b>: Calculate population specific haplotype
+          frequencies of all haplotypes observed for a list of
+          query SNPs. Input is a list of SNP rsnumbers (one per
+          line) and a population group.<br>
+          <br></li>
+
+          <li><b>LDmatrix</b>: Create interactive heat maps of
+          pairwise linkage disequilibrium statistics. Input is a
+          list of SNP rsnumbers (one per line) and a population
+          group.<br>
+          <br></li>
+
+          <li><b>LDpair</b>: Investigate correlated alleles for
+          SNPs in high LD. Input is two rsnumbers and a population
+          group.<br>
+          <br></li>
+
+          <li><b>LDproxy</b>: Interactively explore proxy and
+          putatively functional SNPs for a query SNP. Input is an
+          rsnumber and a population group.<br>
+          <br></li>
+        </ul>
+
+        <p>If you find our tool useful, please kindly cite our
+        paper (Machiela et al. Journal 2015). Questions or
+        comments? Contact us via <a title="Support">email</a>.</p>
+
+        <p>LDlink was developed by Mitchell Machiela in
+        collaboration with NCI's Center for Biomedical Informatics
+        and Information Technology (CBIIT). Support comes from the
+        Division of Cancer Epidemiology and Genetics Informatics
+        Tool Challenge.</p>
+      </div><!-- LDhap -->
+
+      <div class="tab-pane fade" id="ldhap-tab">
+        <!--
+        <div class="row" style="padding-top: 10px;">
+          <div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
+            <div class="input-group">
+              <span class="input-group-btn"><span class=
+              "btn btn-primary btn-file">Browse<input type="file"
+              multiple></span></span> <input type="text" class=
+              "form-control" readonly>
+            </div>
+          </div>
+        </div>
+
+        <div class="row" style="padding-top: 10px;">
+          <div class="col-md-9 col-md-offset-1">
+            <span>or</span>
+          </div>
+        </div>
+
+        <div class="row" style="padding-top: 10px;">
+          <div class="col-md-9 col-md-offset-1">
+            <div class="form-group">
+              <div class="col-md-3">
+                <textarea placeholder="Text entry" name="Text1"
+                cols="40" rows="5" class="form-control">
+</textarea>
+              </div><select id="ldhap-population-codes" multiple=
+              "multiple">
+                </select> <a id="ldhap-calculate-button" class=
+                "btn btn-primary calculate" href="#"> Calculate</a>
+            </div>
+          </div>
+        </div>
+        -->
+      </div><!-- LDmatrix -->
+
+      <div class="tab-pane fade" id="ldmatrix-tab">
+      </div><!-- LDpair -->
+
+      <div class="tab-pane fade" id="ldpair-tab">
+        <!-- LDpair INPUTS-->
+
+        <div class="row" style="padding-top: 10px;">
+          <div class="col-md-9 col-md-offset-1">
+            <div id="ldpair-inputs-form" class="form-group">
+              <div class="col-md-3">
+                <!--        <input id="ldpair-snp1" name="textinput" placeholder="RS Number for SNP1" class="form-control input-md" type="text" value="rs2720460"> -->
+                <input id="ldpair-snp1" name="textinput" class=
+                "form-control input-md" type="text" value=
+                "rs2720460">
+              </div>
+
+              <div class="col-md-3">
+                <!--
+
+                <input id="ldpair-snp2" name="textinput" placeholder="RS Number for SNP2" class="form-control input-md" type="text" value="rs11733615">
+
+                -->
+                <input id="ldpair-snp2" name="textinput" class=
+                "form-control input-md" type="text" value=
+                "rs11733615">
+              </div>
+              <select id="ldpair-population-codes" multiple="multiple">
+                </select>
+              <a id="ldpair" class=
+                "btn btn-primary calculate" href="#"> Calculate</a>
+            </div>
+          </div>
+        </div><!-- LDpair OUTPUT Results -->
+
+        <div class="jumbotron">
+        <!--
+          <div class="container hidden" id="ldpair-results-container">
+        -->
+          <div class="container hidden" id="ldpair-results-container">
+<!--
+<div>
+    You've clicked <span data-bind="text: numberOfClicks"></span> times
+    <button data-bind="click: incrementClickCounter">Click me</button>
+</div>
+-->
+
+            <div style="text-align:center" data-bind="text: snp2.rsnum"></div>
+            <div style="text-align:center" data-bind="text: snp2.coord"></div>
+            <table class="table table-condensed ldhap">
+            <tbody>
+              <!-- Header row -->
+              <tr>
+                <td></td>
+                <td></td>
+                <td class="cell-center">C</td>
+                <td class="cell-center">T</td>
+                <td></td>
+                <td></td>
+              </tr>
+              <!-- Row 2 -->
+              <tr>
+                <td class="cell-right" data-bind="text: snp1.rsnum"></td>
+                <td class="cell-center">A</td>
+
+                <td colspan="2" rowspan="2">
+                <!--  -->
+                  <table class="table table-condensed table-bordered two-by-two">
+                  <tbody>
+                  </tbody>
+                    <tr>
+                    <td class="ldpair-results cell-center" data-bind="text: two_by_two.cells.c11"></td>
+                    <td class="ldpair-results cell-center" data-bind="text: two_by_two.cells.c12"></td>
+                    </tr>
+                    <td class="ldpair-results cell-center" data-bind="text: two_by_two.cells.c21"></td>
+                    <td class="ldpair-results cell-center" data-bind="text: two_by_two.cells.c22"></td>
+                    <tr>
+                    </tr>
+                  </table>
+                </td>
+                <td data-bind="text: snp1.allele_1.count"></td>
+                <td class="cell-left">(<span data-bind="text: snp1.allele_1.frequency"></span>)</td>
+              </tr>
+              <!-- Row 3 -->
+              <tr>
+                <td class="cell-right" data-bind="text: snp1.coord"></td>
+                <td class="cell-center" >G</td>
+                <td data-bind="text: snp1.allele_2.count"></td>
+                <td class="cell-left">(<span data-bind="text: snp1.allele_2.frequency"></span>)</td>
+              </tr>
+              <!-- Row 4 -->
+              <tr>
+                <td></td>
+                <td></td>
+                <td class="cell-center">
+                  <span data-bind="text: snp2.allele_1.count"></span><br>
+                  (<span data-bind="text: snp2.allele_1.frequency"></span>)
+                </td>
+                <td class="cell-center">
+                  <span data-bind="text: snp2.allele_2.count"></span><br>
+                  (<span data-bind="text: snp2.allele_2.frequency"></span>)
+                </td>
+                <td data-bind="text: two_by_two.total"></td>
+                <td></td>
+              </tr>
+            </tbody>
+            </table>
+            <div class="row">
+              <div class="col-lg-4">
+              </div>
+              <div class="col-lg-2">
+            <table class="table ldlink">
+            <tbody>
+              <tr>
+                <td colspan="2" class="cell-center"><u>Heplotypes</u></td>
+              </tr>
+              <tr>
+                <td class="cell-right">
+                  <span data-bind="text: haplotypes.hap1.alleles"></span>:<br>
+                  <span data-bind="text: haplotypes.hap2.alleles"></span>:<br>
+                  <span data-bind="text: haplotypes.hap3.alleles"></span>:<br>
+                  <span data-bind="text: haplotypes.hap4.alleles"></span>:<br>
+                </td>
+                <td nowrap>
+                  <span data-bind="text: haplotypes.hap1.count"></span>&nbsp;
+                  (<span data-bind="text: haplotypes.hap1.frequency"></span>)
+                  <br>
+                  <span data-bind="text: haplotypes.hap2.count"></span>&nbsp;
+                  (<span data-bind="text: haplotypes.hap2.frequency"></span>)
+                  <br>
+                  <span data-bind="text: haplotypes.hap3.count"></span>&nbsp;
+                  (<span data-bind="text: haplotypes.hap3.frequency"></span>)
+                  <br>
+                  <span data-bind="text: haplotypes.hap4.count"></span>&nbsp;
+                  (<span data-bind="text: haplotypes.hap4.frequency"></span>)
+                  <br>
+                </td>
+              </tr>
+            </tbody>
+            </table>
+              </div>
+              <div class="col-lg-2">
+            <table class="table ldlink">
+            <tbody>
+              <tr class="cell-height-small">
+                <td colspan="2" class="cell-center"><u>Statistics</u></td>
+              </tr>
+              <tr>
+                <td class="cell-right">D:<br>R2:<br>Chi-sq:<br>p-value:</td>
+                <td>
+                  <span data-bind="text: statistics.d_prime"></span><br>
+                  <span data-bind="text: statistics.r2"></span><br>
+                  <span data-bind="text: statistics.chisq"></span><br>
+                  <span data-bind="text: statistics.p"></span><br>
+                </td>
+              </tr>
+            </tbody>
+            </table>
+              </div>
+            </div>
+            <div data-bind="foreach: corr_alleles">
+              <div style="text-align:center" data-bind="text: $data"></div>
+            </div>
+<!--
+            <div style="text-align:center" data-bind="text: test"></div>
+-->
+
+          </div>
+      </div>
+      <!-- LDproxy -->
+      <div class="tab-pane fade" id="ldproxy-tab">
+        <div class="jumbotron">
+          <div class="container" id="ldproxy-results-container">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="portal-footer">
+    <div class="footerLinks">
+      <a href="http://www.cancer.gov/" title=
+      "Home">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a href=
+      "mailto:someone@example.com?Subject=Hello%20again" target=
+      "_top" title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+      <a href="http://www.cancer.gov/global/web/policies" title=
+      "Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a href=
+      "http://www.cancer.gov/global/web/policies/accessibility"
+      title=
+      "Accessibility">Accessibility</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+      <a href="http://cancer.gov/global/viewing-files" target=
+      "_blank" title="Viewing Files">Viewing
+      Files</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a href=
+      "http://www.cancer.gov/global/web/policies/foia" title=
+      "FOIA">FOIA</a><br>
+      <br>
+      <a href="http://www.dhhs.gov/">Department of Health and Human
+      Services</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a href=
+      "http://www.nih.gov/">National Institutes of
+      Health</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a href=
+      "http://www.cancer.gov/">National Cancer
+      Institute</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href=
+      "http://www.usa.gov/">USA.gov</a>
+    </div><br>
+    <br>
+    NIH...Turning Discovery Into Health<sup>&#174;</sup>
+  </div>
+</body>
+</html>

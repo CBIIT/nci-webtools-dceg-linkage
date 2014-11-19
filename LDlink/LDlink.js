@@ -131,95 +131,129 @@ var restService = {
 var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
 		+ restService.route;
 
-var ldpair = [ {
-	"corr_alleles" : [
-			"rs2720460(A) allele is correlated with rs11733615(C) allele",
-			"rs2720460(G) allele is correlated with rs11733615(T) allele" ],
-	"haplotypes" : {
-		"hap1" : {
-			"alleles" : "AC",
-			"count" : "576",
-			"frequency" : "0.573"
-		},
-		"hap2" : {
-			"alleles" : "GT",
-			"count" : "361",
-			"frequency" : "0.359"
-		},
-		"hap3" : {
-			"alleles" : "GC",
-			"count" : "42",
-			"frequency" : "0.042"
-		},
-		"hap4" : {
-			"alleles" : "AT",
-			"count" : "27",
-			"frequency" : "0.027"
-		}
-	},
-	"snp1" : {
-		"allele_1" : {
-			"allele" : "A",
-			"count" : "603",
-			"frequency" : "0.599"
-		},
-		"allele_2" : {
-			"allele" : "G",
-			"count" : "403",
-			"frequency" : "0.401"
-		},
-		"coord" : "chr4:104054686",
-		"rsnum" : "rs2720460"
-	},
-	"snp2" : {
-		"allele_1" : {
-			"allele" : "C",
-			"count" : "618",
-			"frequency" : "0.614"
-		},
-		"allele_2" : {
-			"allele" : "T",
-			"count" : "388",
-			"frequency" : "0.386"
-		},
-		"coord" : "chr4:104157164",
-		"rsnum" : "rs11733615"
-	},
-	"statistics" : {
-		"chisq" : "738.354",
-		"d_prime" : "0.8839",
-		"p" : "0.0",
-		"r2" : "0.734"
-	},
-	"two_by_two" : {
-		"cells" : {
-			"c11" : "576",
-			"c12" : "27",
-			"c21" : "42",
-			"c22" : "361"
-		},
-		"total" : "1006"
-	}
-} ];
+var ldpairNewData =[
+{
+  "corr_alleles": [
+    "rs2720460(A) allele is correlated with rs11733615(C) allele",
+    "rs2720460(G) allele is correlated with rs11733615(T) allele"
+  ],
+  "haplotypes": {
+    "hap1": {
+      "alleles": "AC",
+      "count": "155",
+      "frequency": "0.686"
+    },
+    "hap2": {
+      "alleles": "GC",
+      "count": "40",
+      "frequency": "0.177"
+    },
+    "hap3": {
+      "alleles": "GT",
+      "count": "29",
+      "frequency": "0.128"
+    },
+    "hap4": {
+      "alleles": "AT",
+      "count": "2",
+      "frequency": "0.009"
+    }
+  },
+  "snp1": {
+    "allele_1": {
+      "allele": "A",
+      "count": "157",
+      "frequency": "0.695"
+    },
+    "allele_2": {
+      "allele": "G",
+      "count": "69",
+      "frequency": "0.305"
+    },
+    "coord": "chr4:104054686",
+    "rsnum": "rs2720460"
+  },
+  "snp2": {
+    "allele_1": {
+      "allele": "C",
+      "count": "195",
+      "frequency": "0.863"
+    },
+    "allele_2": {
+      "allele": "T",
+      "count": "31",
+      "frequency": "0.137"
+    },
+    "coord": "chr4:104157164",
+    "rsnum": "rs11733615"
+  },
+  "statistics": {
+    "chisq": "67.271",
+    "d_prime": "0.9071",
+    "p": "0.0",
+    "r2": "0.2977"
+  },
+  "two_by_two": {
+    "cells": {
+      "c11": "155",
+      "c12": "2",
+      "c21": "40",
+      "c22": "29"
+    },
+    "total": "old - 227"
+  }
+}];
 
-function ViewModel() {
-    var self = this;
-
-    self.data = ko.observableArray();
-};
-
-var viewModel = new ViewModel();
+var ldpairModel = ko.mapping.fromJS(ldpairNewData[0]);
 
 /* LDpair View*/
-function ViewLDpairModel() {
+function ViewldpairModel() {
     var self = this;
     self.ldpair = ko.observableArray();
-    self.ldpair = ldpair[0];
+    //self.ldpair = ldpairData[0];
+    self.test = ko.observable("Hello");
+		self.updateData = function(data) {
+         self.test("Calculate");
+         alert(JSON.stringify(data));
+         alert(JSON.stringify(self.ldpair));
+         self.ldpair =  data[0];
+         console.log("UPDATE THE DAMN OBSERVABLE PLEASE");
+         console.dir(self.ldpair);
+         alert(JSON.stringify(self.ldpair));
+         self.test("Calculate");
+    };
+    self.numberOfClicks = ko.observable(0);
+    self.incrementClickCounter = function() {
+            var previousCount = this.numberOfClicks();
+            self.numberOfClicks(previousCount + 1);
+		        self.test("Goodbye");
+    };
+ 		self.seasons = ko.observableArray([
+            { name: 'Spring', months: [ 'March', 'April', 'May' ] },
+            { name: 'Summer', months: [ 'June', 'July', 'August' ] },
+            { name: 'Autumn', months: [ 'September', 'October', 'November' ] },
+            { name: 'Winter', months: [ 'December', 'January', 'February' ] }
+        ]);
+
+		this.pets = ko.observableArray(["Cat", "Dog", "Fish"]);
+
+ 		self.lengthOfLDpair = function() {
+ 				ko.computed(function() {
+    				return this.ldpair().length < 2
+				});
+			}
+
+		this.hasALotOfPets =  function() {
+			ko.computed(function() {
+    		return this.pets().length > 2
+				})
+			;
+			};
+
 };
 
-var viewLDpairModel = new ViewLDpairModel();
+var viewldpairModel = new ViewldpairModel();
 
-//ko.applyBindings(viewLDpairModel);
 
 //ko.applyBindings(viewModel);
 $(document)
@@ -235,96 +269,69 @@ $(document)
 
 var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
 
+var whatisthis = new Object();
+var thisisit = new Object();
 
 $(document).ready(
 		function() {
-			//ko.applyBindings(viewLDpairModel);
+			// Apply Bindings
+			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
 
-			var viewModel = {
-				myValues: ko.observableArray([]), // Initially empty, so message hidden
-				ldpair: ko.observableArray(ldpair.data)
-    	};
-
-    	//ko.applyBindings(viewModel, document.getElementById('ldpair'));
-
-			//viewModel.myValues.push("some value"); // Now visible
-
-			console.log("ready!");
-			console.log("restServerUrl");
-			console.log(restServerUrl);
 			$.each(modules, function(key, value) {
 				buildPopulationDropdown(value+"-population-codes");
 			});
 
-			/*
-			buildPopulationDropdown("ldmatrix-population-codes");
-			buildPopulationDropdown("ldpair-population-codes");
-			buildPopulationDropdown("ldproxy-population-codes");
-			*/
-			//appendJumboTron('ldhap');
-			//appendJumboTron('ldmatrix');
-			//appendJumboTron('ldpair');
-			//appendJumboTron('ldproxy');
-			//bindLDpair();
-
 			$('.tab-content').on('click',
 					"a[class|='btn btn-primary calculate']", function(e) {
-						alert("You clicked a calculate button");
-
-						//calculate(e);
+						calculate(e);
 					});
-/*
-			$('#ldlink-tabs a').click(
-					function(e) {
-						e.preventDefault();
-						// alert($(this).attr("data-url"));
-						var url = $(this).attr("data-url");
-						var href = this.hash;
-						var pane = $(this);
-						var loaded = $(this).attr("loaded");
-						console.log('url: ' + url);
-						console.log('href: ' + href);
-						console.log('pane: ' + pane);
-						console.log('loaded: ' + loaded);
-						console.log('About to load');
-						buildPopulationDropdown("ldhap-population-codes");
-						buildPopulationDropdown("ldmatrix-population-codes");
-						buildPopulationDropdown("ldpair-population-codes");
-						buildPopulationDropdown("ldproxy-population-codes");
-						if (loaded == "false") {
-							// ajax load from data-url
-							$(href)
-									.load(
-											url,
-											function(result) {
-												pane.tab('show');
-												console.log('HREF: ' + href);
-												var val = href;
-												console.log('Creating: '
-														+ val.substring(1,
-																val.length));
-												// createPopulationDropdown(val.substring(1,
-												// val.length));
-												appendJumboTron(val.substring(
-														1, val.length));
-												addPageListeners(val.substring(
-														1, val.length));
-												$('.active a').attr('loaded',
-														'true');
-											});
-						}
-					});
-*/
 
-/*
-			$('#home').load($('.active a').attr("data-url"), function(result) {
-				$('.active a').attr('loaded', 'true');
-				$('.active a').tab('show');
-			});
+  // Add file select listeners
 
-*/
-
+	$('.btn-file :file')
+		.on(
+			'fileselect',
+			function(event, numFiles, label) {
+				console.log("numFiles: " + numFiles);
+				console.log("label: " + label);
+				var input = $(this).parents('.input-group').find(
+								':text'), log = numFiles > 1 ? numFiles
+									+ ' files selected' : label;
+							if (input.length) {
+								input.val(log);
+							} else {
+								if (log)
+									alert(log);
+			}
 		});
+
+});
+
+function calculate(e) {
+	var id = e.target.id;
+	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
+	updateData(id);
+	$('#'+id+'-results-container').removeClass('hidden');
+}
+
+function updateData(id) {
+	//Make this generic...
+	//ie. prepare url and post data.
+	//Get data...
+	var data;
+	switch (id) {
+	case 'ldpair':
+					updateLDpair();
+		break;
+	case 'ldproxy':
+		break;
+	case 'ldheat':
+		break;
+	case 'ldhap':
+		break;
+	}
+
+}
 
 function addPageListeners(tabClicked) {
 	if (tabClicked == 'ldhap') {
@@ -350,7 +357,7 @@ function addPageListeners(tabClicked) {
 
 }
 
-function calculate(e) {
+function calculate_old(e) {
 	//alert('Calculate');
 	var id = e.target.id;
 	console.log('CALCULATE: ' + id);
@@ -392,31 +399,9 @@ function calculate(e) {
 
 }
 
-function appendJumboTron(id) {
-
-	$("#"+id).append("<hr>");
-
-	$("#" + id)
-			.append(
-					$('<div/>', {
-						'class' : 'jumbotron'
-					})
-							.append(
-									$('<div/>', {
-										'class' : 'container'
-									})
-											.append(
-													"    Results ...<br><br><br><br><br><br><br><br><br><br><br><br><br><br>")
-											.attr('id',
-													id + '-results-container')));
-	//addResults(id);
-	$('#'+id+'-results-container').load(id+'.results.template.html');
-
-}
-
 function createPopulationDropdown(id) {
 
-	$('#' + id + '-population-codes')
+  $('#' + id + '-population-codes')
 			.multiselect(
 					{
 						enableClickableOptGroups : true,
@@ -464,22 +449,10 @@ function createPopulationDropdown(id) {
 								return selected;
 							}
 						}
-					});
+	});
 }
 
-function PatientViewModel() {
-	this._id = patient[0]._id;
-	this.patientSequenceNumber = ko
-			.observable(patient[0].patientSequenceNumber);
-	this.registrationDate = patient[0].registrationDate;
-	this.firstName = ko.observable("Bert");
-	this.lastName = ko.observable("Bertington");
-	this.fullName = ko.computed(function() {
-		return this.firstName() + " " + this.lastName();
-	}, this);
-}
-
-function bindLDpair() {
+function updateLDpair() {
 	var population = $('#ldpair-population-codes').val();
 	console.log('population');
 	console.dir(population);
@@ -490,35 +463,9 @@ function bindLDpair() {
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
 	};
-	/*
-	 * var myDropDownListValues =
-	 * $("#ldpair-population-codes").multiselect("getSelected").map(function() {
-	 * return this.value; }).get();
-	 */
-	// console.log(myDropDownListValues);
-	// alert($('#ldpair-population-codes').multiselect('getSelected'));
-	// alert($('#ldpair-population-codes').val());
-	// alert("about to get inputs");
-	// var ldpairInputs = $('#ldpair-inputs-form').serializeObject();
-	console.log("ldpairInputs");
-	// alert(ldpairInputs);
-	// alert(JSON.stringify(ldpairInputs));
-	// console.log(JSON.stringify(ldpairInputs));
-	console.dir(ldpairInputs);
-	// alert(yourObject);
 	// var url = "http://"+location.hostname+":8090/LDlinkRest/ldpair";
 	// var url = "http://"+location.hostname+"/LDlinkRest/ldpair";
 	var url = restServerUrl + "/ldpair";
-	// var url = "http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldpair";
-	// alert(url);
-
-	/*
-	 * $.getJSON(url, function(data) { // Now use this data to update your view
-	 * models, // and Knockout will update your UI automatically
-	 * console.log("DATA"); console.dir(data); // alert(data);
-	 *
-	 * });
-	 */
 
 	// Assign handlers immediately after making the request,
 	// and remember the jqXHR object for this request
@@ -536,7 +483,8 @@ function bindLDpair() {
 		if (data.error) {
 			alert("error: " + data.error);
 		} else {
-			//ko.applyBindings(new LDpairViewModel(data));
+			console.log('viewldpairModel BEFORE');
+			ko.mapping.fromJS(data, ldpairModel);
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -544,29 +492,9 @@ function bindLDpair() {
 				+ "\n\nMake sure Plask Python server is available.");
 		alert('Communication problem: ' + textStatus);
 	});
-	// Perform other work here ...
-	// Set another completion function for the request above
 	ajaxRequest.always(function() {
 		console.log("second complete");
 	});
-
-	// $('#ldpair-results-data').load(url);
-}
-
-// This is a simple *viewmodel* - JavaScript that defines the data and behavior
-// of your UI
-function LDpairViewModel(data) {
-	// this.parameter.snp1 = ko.observable("Bert");
-	// this.parameter.snp2 = ko.observable("Bertington");
-	// this.parameter.populations = ko.observableArray(["Cat", "Dog", "Fish"])
-	console.log("LDpairViewModel");
-	console.dir(data);
-	this.ldpair = data[0];
-	console.log('LDpairViewModel');
-	console.dir(this);
-
-	this.ldpair = data;
-
 }
 
 jQuery.fn.serializeObject = function() {

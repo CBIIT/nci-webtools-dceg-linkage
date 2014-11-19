@@ -218,7 +218,7 @@ def calculate_pair(snp1,snp2,pop,request):
 			corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
 			corr_alleles=[corr1,corr2]
 	else:
-		corr_alleles=snp1+" and "+snp2+" are in linkage equilibrium"
+		corr_alleles=[snp1+" and "+snp2+" are in linkage equilibrium"]
 
 
 
