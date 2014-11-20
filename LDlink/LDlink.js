@@ -352,51 +352,8 @@ function addPageListeners(tabClicked) {
 								if (log)
 									alert(log);
 							}
-						});
+		});
 	}
-
-}
-
-function calculate_old(e) {
-	//alert('Calculate');
-	var id = e.target.id;
-	console.log('CALCULATE: ' + id);
-	switch (id) {
-	case 'ldpair-calculate-button':
-		$('#ldpair-results-container').load('ldpair.results.template.html',
-				function() {
-					bindLDpair();
-					// TODO: Disable button for demo purpose only.
-					$('#ldpair-calculate-button').prop("disabled", true);
-					;
-				});
-		break;
-	case 'ldproxy-calculate-button':
-		$('#ldproxy-results-container').load('ldproxy.results.template.html',
-				function() {
-					// TODO: Disable button for demo purpose only.
-					$('#ldproxy-calculate-button').prop("disabled", true);
-					;
-				});
-		break;
-	case 'ldheat-calculate-button':
-		$('#ldheat-results-container').load('ldheat.results.template.html',
-				function() {
-					// TODO: Disable button for demo purpose only.
-					$('#ldheat-calculate-button').prop("disabled", true);
-					;
-				});
-		break;
-	case 'ldhap-calculate-button':
-		$('#ldhap-results-container').load('ldhap.results.template.html',
-				function() {
-					// TODO: Disable button for demo purpose only.
-					$('#ldhap-calculate-button').prop("disabled", true);
-					;
-				});
-		break;
-	}
-
 }
 
 function createPopulationDropdown(id) {

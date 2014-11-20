@@ -14,6 +14,7 @@ import numpy as np
 from pandas import DataFrame
 import urllib
 from LDpair import calculate_pair
+from LDproxy import calculate_proxy
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -84,15 +85,27 @@ def ldpair():
 
     return current_app.response_class(out_json, mimetype=mimetype)
 
+@app.route('/LDlinkRest/ldproxy', methods = ['GET'])
+def ldproxy():
+    print
+    print 'Execute ldproxy'
+    print 'Gathering Variables from url'
+    snp = request.args.get('snp', False)
+    pop = request.args.get('pop', False)
+    reference = request.args.get('reference', False)
+    print 'snp: ' + snp
+    print 'pop: ' + pop
+    print 'request: ' + reference
+    print
+    out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
+    r1 = 'Hello'
+    return out_json+"\n"+out_div+" "+out_script
+
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():
     r1 = 'Calling ldhap'
     return r1
 
-@app.route('/LDlinkRest/ldproxy', methods = ['GET'])
-def ldproxy():
-    r1 = 'Calling ldproxy'
-    return r1
 
 @app.route('/LDlinkRest/ldheat', methods = ['GET'])
 def ldheat():
