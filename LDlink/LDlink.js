@@ -206,56 +206,6 @@ var ldpairNewData =[
 
 var ldpairModel = ko.mapping.fromJS(ldpairNewData[0]);
 
-/* LDpair View*/
-function ViewldpairModel() {
-    var self = this;
-    self.ldpair = ko.observableArray();
-    //self.ldpair = ldpairData[0];
-    self.test = ko.observable("Hello");
-		self.updateData = function(data) {
-         self.test("Calculate");
-         alert(JSON.stringify(data));
-         alert(JSON.stringify(self.ldpair));
-         self.ldpair =  data[0];
-         console.log("UPDATE THE DAMN OBSERVABLE PLEASE");
-         console.dir(self.ldpair);
-         alert(JSON.stringify(self.ldpair));
-         self.test("Calculate");
-    };
-    self.numberOfClicks = ko.observable(0);
-    self.incrementClickCounter = function() {
-            var previousCount = this.numberOfClicks();
-            self.numberOfClicks(previousCount + 1);
-		        self.test("Goodbye");
-    };
- 		self.seasons = ko.observableArray([
-            { name: 'Spring', months: [ 'March', 'April', 'May' ] },
-            { name: 'Summer', months: [ 'June', 'July', 'August' ] },
-            { name: 'Autumn', months: [ 'September', 'October', 'November' ] },
-            { name: 'Winter', months: [ 'December', 'January', 'February' ] }
-        ]);
-
-		this.pets = ko.observableArray(["Cat", "Dog", "Fish"]);
-
- 		self.lengthOfLDpair = function() {
- 				ko.computed(function() {
-    				return this.ldpair().length < 2
-				});
-			}
-
-		this.hasALotOfPets =  function() {
-			ko.computed(function() {
-    		return this.pets().length > 2
-				})
-			;
-			};
-
-};
-
-var viewldpairModel = new ViewldpairModel();
-
-
-//ko.applyBindings(viewModel);
 $(document)
 		.on(
 				'change',
@@ -269,8 +219,6 @@ $(document)
 
 var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
 
-var whatisthis = new Object();
-var thisisit = new Object();
 
 $(document).ready(
 		function() {
@@ -279,12 +227,13 @@ $(document).ready(
 
 			$.each(modules, function(key, value) {
 				buildPopulationDropdown(value+"-population-codes");
+        $("#"+value+"-results-container").hide();
 			});
 
 			$('.tab-content').on('click',
-					"a[class|='btn btn-primary calculate']", function(e) {
+					"a[class|='btn btn-default calculate']", function(e) {
 						calculate(e);
-					});
+			});
 
   // Add file select listeners
 
@@ -309,9 +258,10 @@ $(document).ready(
 
 function calculate(e) {
 	var id = e.target.id;
-	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
-	updateData(id);
-	$('#'+id+'-results-container').removeClass('hidden');
+//	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
+  $('#'+id+'-results-container').hide();
+  $('#'+id+'-message').hide();
+ 	updateData(id);
 }
 
 function updateData(id) {
@@ -433,15 +383,18 @@ function updateLDpair() {
 		contentType : 'application/json' // JSON
 	});
 	ajaxRequest.done(function(data) {
+    // DONE
 		console.log("done");
-		// alert("File is completed. Check for valid json. Check for errors.");
-		console.log("second complete");
-		// alert("complete load file");
+    var id = 'ldpair';
+
 		if (data.error) {
-			alert("error: " + data.error);
+      // ERROR
+      $('#'+id+'-message').show();
+      $('#'+id+'-message-content').empty().append(data.error);
 		} else {
-			console.log('viewldpairModel BEFORE');
-			ko.mapping.fromJS(data, ldpairModel);
+      // SUCCESS
+      ko.mapping.fromJS(data, ldpairModel);
+      $('#'+id+'-results-container').show();
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {

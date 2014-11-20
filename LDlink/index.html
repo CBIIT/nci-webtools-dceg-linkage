@@ -226,40 +226,37 @@
 					<div class="col-md-9 col-md-offset-1">
 						<div id="ldpair-inputs-form" class="form-group">
 							<div class="col-md-3">
-								<!--        <input id="ldpair-snp1" name="textinput" placeholder="RS Number for SNP1" class="form-control input-md" type="text" value="rs2720460"> -->
 								<input id="ldpair-snp1" name="textinput"
-									class="form-control input-md" type="text" value="rs2720460">
+									class="form-control input-md" type="text" placeholder="RS Number for SNP1">
 							</div>
 
 							<div class="col-md-3">
-								<!--
-
-                <input id="ldpair-snp2" name="textinput" placeholder="RS Number for SNP2" class="form-control input-md" type="text" value="rs11733615">
-
-                -->
 								<input id="ldpair-snp2" name="textinput"
-									class="form-control input-md" type="text" value="rs11733615">
+									class="form-control input-md" type="text" placeholder="RS Number for SNP2">
 							</div>
 							<select id="ldpair-population-codes" multiple="multiple">
-							</select> <a id="ldpair" class="btn btn-primary calculate" href="#">
+							</select> <a id="ldpair" class="btn btn-default calculate" href="#">
 								Calculate</a>
 						</div>
+            <hr>
 					</div>
 				</div>
+        <div >
+          <div class="col-md-7 col-md-offset-2" id="ldpair-message" style="display:none;">
+            <div class="panel panel-warning">
+                <div class="panel-heading">Error Message</div>
+                <div class="panel-body" id="ldpair-message-content">
+                </div>
+            </div>
+          </div>
+        </div>
 				<!-- LDpair OUTPUT Results -->
 
 				<div class="jumbotron">
 					<!--
           <div class="container hidden" id="ldpair-results-container">
         -->
-					<div class="container hidden" id="ldpair-results-container">
-						<!--
-<div>
-    You've clicked <span data-bind="text: numberOfClicks"></span> times
-    <button data-bind="click: incrementClickCounter">Click me</button>
-</div>
--->
-
+					<div class="container-fluid" id="ldpair-results-container">
 						<div style="text-align: center" data-bind="text: snp2.rsnum"></div>
 						<div style="text-align: center" data-bind="text: snp2.coord"></div>
 						<table class="table table-condensed ldhap">
@@ -329,7 +326,7 @@
 						<div class="row">
 							<div class="col-lg-4"></div>
 							<div class="col-lg-2">
-								<table class="table ldlink">
+								<table class="table ldpair-stats">
 									<tbody>
 										<tr>
 											<td colspan="2" class="cell-center"><u>Haplotypes</u></td>
@@ -353,9 +350,9 @@
 										</tr>
 									</tbody>
 								</table>
-							</div>
-							<div class="col-lg-2">
-								<table class="table ldlink">
+              </div>
+              <div class="col-lg-2">
+								<table class="table ldpair-stats">
 									<tbody>
 										<tr class="cell-height-small">
 											<td colspan="2" class="cell-center"><u>Statistics</u></td>
