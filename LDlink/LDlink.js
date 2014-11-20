@@ -4,7 +4,7 @@ var populations = {
 		subPopulations : {
 			YRI : "Yoruba in Ibadan, Nigera",
 			LWK : "	Luhya in Webuye, Kenya",
-			GWD : "	Gambian in Western Divisons in The Gambia",
+			GWD : "	Gambian in Western Gambia",
 			MSL : "	Mende in Sierra Leone",
 			ESN : "	Esan in Nigera",
 			ASW : "	Americans of African Ancestry in SW USA",
@@ -14,7 +14,7 @@ var populations = {
 	AMR : {
 		fullName : "Ad Mixed American",
 		subPopulations : {
-			MXL : "	Mexican Ancestry from Los Angeles USA",
+			MXL : "	Mexican Ancestry from Los Angeles, USA",
 			PUR : "	Puerto Ricans from Puerto Rico",
 			CLM : "	Colombians from Medellin, Colombia",
 			PEL : "	Peruvians from Lima, Peru"
@@ -33,7 +33,7 @@ var populations = {
 	EUR : {
 		fullName : "European",
 		subPopulations : {
-			CEU : "	Utah Residents (CEPH) with Northern and   Western European ancestry",
+			CEU : "	Utah Residents from North and West Europe",
 			TSI : "	Toscani in Italia",
 			FIN : "	Finnish in Finland",
 			GBR : "	British in England and Scotland",
