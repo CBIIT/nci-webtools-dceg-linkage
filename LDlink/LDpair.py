@@ -32,7 +32,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id1,))
 	snp1_coord=cur.fetchone()
 	if snp1_coord==None:
-		output["error"]=snp1+" is not a valid RS number for SNP1."
+		output["error"]=snp1+" is not a valid RS number for SNP1. Ensure the RS number is correct and the SNP is bi-allelic, autosomal, and unambiguously mapping."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
@@ -41,7 +41,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id2,))
 	snp2_coord=cur.fetchone()
 	if snp2_coord==None:
-		output["error"]=snp2+" is not a valid RS number for SNP2."
+		output["error"]=snp2+" is not a valid RS number for SNP2. Ensure the RS number is correct and the SNP is bi-allelic, autosomal, and unambiguously mapping."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
@@ -92,6 +92,14 @@ def calculate_pair(snp1,snp2,pop,request):
 	vcf1=open(tmp_dir+"snp1_no_dups_"+request+".vcf").readlines()
 	head1=vcf1[len(vcf1)-2].strip().split()
 	geno1=vcf1[len(vcf1)-1].strip().split()
+	
+	if geno1[0]=="#CHROM":
+		output["error"]=snp1+" is not in 1000G reference panel."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
+		raise
+	
 	if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
 		allele1={"0|0":geno1[3]+geno1[3],"0|1":geno1[3]+geno1[4],"1|0":geno1[4]+geno1[3],"1|1":geno1[4]+geno1[4],"./.":""}
 	else:
@@ -104,6 +112,14 @@ def calculate_pair(snp1,snp2,pop,request):
 	vcf2=open(tmp_dir+"snp2_no_dups_"+request+".vcf").readlines()
 	head2=vcf2[len(vcf2)-2].strip().split()
 	geno2=vcf2[len(vcf2)-1].strip().split()
+	
+	if geno2[0]=="#CHROM":
+		output["error"]=snp2+" is not in 1000G reference panel."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
+		raise
+	
 	if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
 		allele2={"0|0":geno2[3]+geno2[3],"0|1":geno2[3]+geno2[4],"1|0":geno2[4]+geno2[3],"1|1":geno2[4]+geno2[4],"./.":""}
 	else:
@@ -300,7 +316,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	statistics={}
 	statistics["d_prime"]=str(round(abs(D_prime),4))
 	statistics["r2"]=str(round(r2,4))
-	statistics["chisq"]=str(round(chisq,3))
+	statistics["chisq"]=str(round(chisq,4))
 	statistics["p"]=str(round(p,4))
 	output["statistics"]=statistics
 
@@ -346,9 +362,9 @@ def main():
 		print " "*15+json_dict["snp2"]["rsnum"]
 		print " "*15+json_dict["snp2"]["allele_1"]["allele"]+" "*7+json_dict["snp2"]["allele_2"]["allele"]
 		print " "*13+"-"*17
-		print " "*11+json_dict["snp1"]["allele_1"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["11"]+" "*(5-len(json_dict["two_by_two"]["cells"]["11"]))+" | "+json_dict["two_by_two"]["cells"]["12"]+" "*(5-len(json_dict["two_by_two"]["cells"]["12"]))+" | "+json_dict["snp1"]["allele_1"]["count"]+" "*(5-len(json_dict["snp1"]["allele_1"]["count"]))+" ("+json_dict["snp1"]["allele_1"]["frequency"]+")"
+		print " "*11+json_dict["snp1"]["allele_1"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["c11"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c11"]))+" | "+json_dict["two_by_two"]["cells"]["c12"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c12"]))+" | "+json_dict["snp1"]["allele_1"]["count"]+" "*(5-len(json_dict["snp1"]["allele_1"]["count"]))+" ("+json_dict["snp1"]["allele_1"]["frequency"]+")"
 		print json_dict["snp1"]["rsnum"]+" "*(10-len(json_dict["snp1"]["rsnum"]))+" "*3+"-"*17
-		print " "*11+json_dict["snp2"]["allele_2"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["21"]+" "*(5-len(json_dict["two_by_two"]["cells"]["21"]))+" | "+json_dict["two_by_two"]["cells"]["22"]+" "*(5-len(json_dict["two_by_two"]["cells"]["22"]))+" | "+json_dict["snp1"]["allele_2"]["count"]+" "*(5-len(json_dict["snp1"]["allele_2"]["count"]))+" ("+json_dict["snp1"]["allele_2"]["frequency"]+")"
+		print " "*11+json_dict["snp2"]["allele_2"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["c21"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c21"]))+" | "+json_dict["two_by_two"]["cells"]["c22"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c22"]))+" | "+json_dict["snp1"]["allele_2"]["count"]+" "*(5-len(json_dict["snp1"]["allele_2"]["count"]))+" ("+json_dict["snp1"]["allele_2"]["frequency"]+")"
 		print " "*13+"-"*17
 		print " "*15+json_dict["snp2"]["allele_1"]["count"]+" "*(5-len(json_dict["snp2"]["allele_1"]["count"]))+" "*3+json_dict["snp2"]["allele_2"]["count"]+" "*(5-len(json_dict["snp2"]["allele_2"]["count"]))+" "*3+json_dict["two_by_two"]["total"]
 		print " "*14+"("+json_dict["snp2"]["allele_1"]["frequency"]+")"+" "*(5-len(json_dict["snp2"]["allele_1"]["frequency"]))+" ("+json_dict["snp2"]["allele_2"]["frequency"]+")"+" "*(5-len(json_dict["snp2"]["allele_2"]["frequency"]))
