@@ -388,7 +388,7 @@ def main():
 			print json_dict["corr_alleles"][0]
 			print json_dict["corr_alleles"][1]
 		else:
-			print json_dict["corr_alleles"]
+			print json_dict["corr_alleles"][0]
 
 		try:
 			json_dict["warning"]
