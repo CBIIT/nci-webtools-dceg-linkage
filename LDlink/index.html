@@ -287,8 +287,8 @@
 								<tr>
 									<td></td>
 									<td></td>
-									<td class="cell-center">C</td>
-									<td class="cell-center">T</td>
+									<td class="cell-center" data-bind="text: snp2.allele_1.allele"></td>
+									<td class="cell-center"  data-bind="text: snp2.allele_2.allele"></td>
 									<td></td>
 									<td></td>
 								</tr>
@@ -303,7 +303,7 @@
                   </div>
 
                   </td>
-									<td class="cell-center">A</td>
+									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
 									<td colspan="2" rowspan="2">
 										<!-- two-by-two sub table -->
@@ -338,7 +338,7 @@
                      title="Genome Browser"
                      target="_blank"></a>
                   </td>
-									<td class="cell-center">G</td>
+									<td class="cell-center"  data-bind="text: snp2.allele_2.allele"></td>
 									<td data-bind="text: snp1.allele_2.count"></td>
 									<td class="cell-left">(<span
 										data-bind="text: snp1.allele_2.frequency"></span>)

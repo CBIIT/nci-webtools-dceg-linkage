@@ -92,14 +92,14 @@ def calculate_pair(snp1,snp2,pop,request):
 	vcf1=open(tmp_dir+"snp1_no_dups_"+request+".vcf").readlines()
 	head1=vcf1[len(vcf1)-2].strip().split()
 	geno1=vcf1[len(vcf1)-1].strip().split()
-	
+
 	if geno1[0]=="#CHROM":
 		output["error"]=snp1+" is not in 1000G reference panel."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
-	
+
 	if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
 		allele1={"0|0":geno1[3]+geno1[3],"0|1":geno1[3]+geno1[4],"1|0":geno1[4]+geno1[3],"1|1":geno1[4]+geno1[4],"./.":""}
 	else:
@@ -112,14 +112,14 @@ def calculate_pair(snp1,snp2,pop,request):
 	vcf2=open(tmp_dir+"snp2_no_dups_"+request+".vcf").readlines()
 	head2=vcf2[len(vcf2)-2].strip().split()
 	geno2=vcf2[len(vcf2)-1].strip().split()
-	
+
 	if geno2[0]=="#CHROM":
 		output["error"]=snp2+" is not in 1000G reference panel."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
-	
+
 	if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
 		allele2={"0|0":geno2[3]+geno2[3],"0|1":geno2[3]+geno2[4],"1|0":geno2[4]+geno2[3],"1|1":geno2[4]+geno2[4],"./.":""}
 	else:

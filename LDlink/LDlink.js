@@ -386,7 +386,7 @@ function updateLDpair() {
 		contentType : 'application/json' // JSON
 	});
 
-	ajaxRequest.done(function(data) {
+	ajaxRequest.success(function(data) {
     var id = 'ldpair';
     if(data.warning) {
       $('#'+id+'-message-warning').show();
@@ -414,6 +414,7 @@ function updateLDpair() {
 	});
 	ajaxRequest.always(function() {
 		console.log("second complete");
+
 	});
 }
 
@@ -488,6 +489,7 @@ Use plus and minus 250 bp from the given coordinates.
     };
     url = server+"?"+$.param(params);
     $('#snp2-coord').attr('href', url);
+
 
 }
 
