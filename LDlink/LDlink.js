@@ -225,9 +225,12 @@ $(document).ready(
 			// Apply Bindings
 			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
 
-			$.each(modules, function(key, value) {
-				buildPopulationDropdown(value+"-population-codes");
-        $("#"+value+"-results-container").hide();
+			$.each(modules, function(key, id) {
+				buildPopulationDropdown(id+"-population-codes");
+        $("#"+id+"-results-container").hide();
+        $('#'+id+'-message').hide();
+        $('#'+id+'-message-warning').hide();
+
 			});
 
 			$('.tab-content').on('click',
@@ -261,6 +264,8 @@ function calculate(e) {
 //	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
   $('#'+id+'-results-container').hide();
   $('#'+id+'-message').hide();
+  $('#'+id+'-message-warning').hide();
+
  	updateData(id);
 }
 
@@ -374,18 +379,19 @@ function updateLDpair() {
 	// var url = "http://"+location.hostname+"/LDlinkRest/ldpair";
 	var url = restServerUrl + "/ldpair";
 
-	// Assign handlers immediately after making the request,
-	// and remember the jqXHR object for this request
 	var ajaxRequest = $.ajax({
 		type : "GET",
 		url : url,
 		data : ldpairInputs,
 		contentType : 'application/json' // JSON
 	});
+
 	ajaxRequest.done(function(data) {
-    // DONE
-		console.log("done");
     var id = 'ldpair';
+    if(data.warning) {
+      $('#'+id+'-message-warning').show();
+      $('#'+id+'-message-warning-content').empty().append(data.warning);
+    }
 
 		if (data.error) {
       // ERROR
@@ -395,16 +401,94 @@ function updateLDpair() {
       // SUCCESS
       ko.mapping.fromJS(data, ldpairModel);
       $('#'+id+'-results-container').show();
+      addHyperLinks(data);
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
 				+ "\n\nMake sure Plask Python server is available.");
-		alert('Communication problem: ' + textStatus);
+		//alert('Communication problem: ' + textStatus);
+    // ERROR
+    $('#'+id+'-message').show();
+    $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Plask Python server is available.");
 	});
 	ajaxRequest.always(function() {
 		console.log("second complete");
 	});
+}
+
+function addHyperLinks(data) {
+
+/*
+1.  Add dbSNP link to snp1.rsnum and snp2.rsnum
+
+e.g. for SNP rs2720460, add the following link
+http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2720460
+
+2.  Add UCSC Genome Browser link to snp1.coord and snp2.coord
+
+e.g. for SNP rs2720460, chromosome position chr4:104054686, add the following link
+
+http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:104054436-104054936&snp141=pack&hgFind.matches=rs2720460
+
+Use plus and minus 250 bp from the given coordinates.
+
+3.  Bring up these two links as two separate browser tabs.
+*/
+  // Add snp1-rsum to
+    var server;
+    var params = {};
+    var rs_number;
+    var url;
+    //
+    // Cluster Report:
+    //
+    server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+    // snp1-rsum
+    rs_number = data.snp1.rsnum.substring(2);
+    params = {rs: rs_number};
+    url = server+"?"+$.param(params);
+    $('#snp1-rsnum').attr('href', url)
+    // snp2-rsum
+    rs_number = data.snp2.rsnum.substring(2);
+    params = {rs: rs_number};
+    url = server+"?"+$.param(params);
+    $('#snp2-rsnum').attr('href', url)
+    //
+    // Genome Browser:
+    //
+    server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+    // snp1-coord
+    var positions = data.snp1.coord.split(":");
+    var chr = positions[0];
+    var mid_value = parseInt(positions[1]);
+    var offset =250;
+    var range = (mid_value-offset)+"-"+(mid_value+offset);
+    var position = chr+":"+range;
+    rs_number = data.snp1.rsnum;
+    params = {
+      position: position,
+      snp141: 'pack',
+      'hgFind.matches' : rs_number
+    };
+    url = server+"?"+$.param(params);
+    $('#snp1-coord').attr('href', url)
+    // snp2-coord
+    positions = data.snp2.coord.split(":");
+    chr = positions[0];
+    mid_value = parseInt(positions[1]);
+    offset =250;
+    range = (mid_value-offset)+"-"+(mid_value+offset);
+    position = chr+":"+range;
+    rs_number = data.snp2.rsnum;
+    params = {
+      position: position,
+      snp141: 'pack',
+      'hgFind.matches' : rs_number
+    };
+    url = server+"?"+$.param(params);
+    $('#snp2-coord').attr('href', url);
+
 }
 
 jQuery.fn.serializeObject = function() {
