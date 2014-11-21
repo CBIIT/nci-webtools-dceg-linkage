@@ -320,7 +320,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		statistics["d_prime"]="NA"
 		statistics["r2"]="NA"
 		statistics["chisq"]="NA"
-		statistics["p"]="1"
+		statistics["p"]="NA"
 		output["corr_alleles"]=["Correlated alleles for "+snp1+" and "+snp2+" could not be calculated"]
 		
 	output["statistics"]=statistics
