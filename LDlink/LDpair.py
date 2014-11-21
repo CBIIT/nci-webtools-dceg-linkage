@@ -203,38 +203,33 @@ def calculate_pair(snp1,snp2,pop,request):
 		denom=Ms
 		chisq=num/denom
 		p=2*(1-(0.5*(1+math.erf(chisq**0.5/2**0.5))))
+		
+		
+		# Find Correlated Alleles
+		if r2>0.1:
+			# Expected Cell Counts
+			eA=(A+B)*(A+C)/N
+			eB=(B+A)*(B+D)/N
+			eC=(C+A)*(C+D)/N
+			eD=(D+C)*(D+B)/N
 
-	else:
-		D_prime="NA"
-		r2="NA"
-		chisq="NA"
-		p=1
+			# Calculate Deltas
+			dA=(A-eA)**2
+			dB=(B-eB)**2
+			dC=(C-eC)**2
+			dD=(D-eD)**2
+			dmax=max(dA,dB,dC,dD)
 
-	# Find Correlated Alleles
-	if r2>0.1:
-		# Expected Cell Counts
-		eA=(A+B)*(A+C)/N
-		eB=(B+A)*(B+D)/N
-		eC=(C+A)*(C+D)/N
-		eD=(D+C)*(D+B)/N
-
-		# Calculate Deltas
-		dA=(A-eA)**2
-		dB=(B-eB)**2
-		dC=(C-eC)**2
-		dD=(D-eD)**2
-		dmax=max(dA,dB,dC,dD)
-
-		if dmax==dA or dmax==dD:
-			corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
-			corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
-			corr_alleles=[corr1,corr2]
+			if dmax==dA or dmax==dD:
+				corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
+				corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
+				corr_alleles=[corr1,corr2]
+			else:
+				corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
+				corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
+				corr_alleles=[corr1,corr2]
 		else:
-			corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
-			corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
-			corr_alleles=[corr1,corr2]
-	else:
-		corr_alleles=[snp1+" and "+snp2+" are in linkage equilibrium"]
+			corr_alleles=[snp1+" and "+snp2+" are in linkage equilibrium"]
 
 
 
@@ -314,13 +309,23 @@ def calculate_pair(snp1,snp2,pop,request):
 
 
 	statistics={}
-	statistics["d_prime"]=str(round(abs(D_prime),4))
-	statistics["r2"]=str(round(r2,4))
-	statistics["chisq"]=str(round(chisq,4))
-	statistics["p"]=str(round(p,4))
+	if Ms!=0:
+		statistics["d_prime"]=str(round(abs(D_prime),4))
+		statistics["r2"]=str(round(r2,4))
+		statistics["chisq"]=str(round(chisq,4))
+		statistics["p"]=str(round(p,4))
+		output["corr_alleles"]=corr_alleles
+		
+	else:
+		statistics["d_prime"]="NA"
+		statistics["r2"]="NA"
+		statistics["chisq"]="NA"
+		statistics["p"]="1"
+		output["corr_alleles"]=["Correlated alleles for "+snp1+" and "+snp2+" could not be calculated"]
+		
 	output["statistics"]=statistics
 
-	output["corr_alleles"]=corr_alleles
+	
 
 
 	# Remove temporary files
