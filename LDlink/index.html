@@ -239,47 +239,76 @@
 								Calculate</a>
 						</div>
             <hr>
-					</div>
-				</div>
-        <div >
-          <div class="col-md-7 col-md-offset-2" id="ldpair-message" style="display:none;">
-            <div class="panel panel-warning">
-                <div class="panel-heading">Error Message</div>
-                <div class="panel-body" id="ldpair-message-content">
-                </div>
-            </div>
+        <!-- Message ERROR -->
+        <div class="row">
+        <div class="col-md-7 col-md-offset-2" id="ldpair-message">
+          <div class="panel panel-danger">
+            <div class="panel-heading">Error</div>
+              <div class="panel-body" id="ldpair-message-content">
+              </div>
           </div>
         </div>
+        </div>
+        <!-- Message WARNING -->
+        <div class="row">
+        <div class="col-md-7 col-md-offset-2" id="ldpair-message-warning">
+          <div class="panel panel-warning">
+            <div class="panel-heading">Warning</div>
+              <div class="panel-body" id="ldpair-message-warning-content">
+              </div>
+          </div>
+        </div>
+        </div>
+
+					</div>
+				</div>
 				<!-- LDpair OUTPUT Results -->
 
 				<div class="jumbotron">
-					<!--
-          <div class="container hidden" id="ldpair-results-container">
-        -->
+          <!-- LDPAIR CONTAINER -->
 					<div class="container-fluid" id="ldpair-results-container">
-						<div style="text-align: center" data-bind="text: snp2.rsnum"></div>
-						<div style="text-align: center" data-bind="text: snp2.coord"></div>
+						<div style="text-align: center">
+              <a id="snp2-rsnum"
+               data-bind="text: snp2.rsnum"
+               href="#"
+               title="Cluster Report:"
+               target="_blank"></a>
+            </div>
+						<div style="text-align: center">
+              <a id="snp2-coord"
+               data-bind="text: snp2.coord"
+               href="#"
+               title="Genome Browser"
+               target="_blank"></a>
+            </div>
 						<table class="table table-condensed ldhap">
 							<tbody>
 								<!-- Header row -->
 								<tr>
 									<td></td>
 									<td></td>
-									<td class="cell-center">C</td>
-									<td class="cell-center">T</td>
+									<td class="cell-center" data-bind="text: snp2.allele_1.allele"></td>
+									<td class="cell-center"  data-bind="text: snp2.allele_2.allele"></td>
 									<td></td>
 									<td></td>
 								</tr>
 								<!-- Row 2 -->
 								<tr>
-									<td class="cell-right" data-bind="text: snp1.rsnum"></td>
-									<td class="cell-center">A</td>
+									<td class="cell-right" width="250">
+                    <a id="snp1-rsnum"
+                     data-bind="text: snp1.rsnum"
+                     href="#"
+                     title="Cluster Report:"
+                     target="_blank"></a>
+                  </div>
+
+                  </td>
+									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
 									<td colspan="2" rowspan="2">
-										<!--  -->
+										<!-- two-by-two sub table -->
 										<table class="table table-condensed table-bordered two-by-two">
 											<tbody>
-											</tbody>
 											<tr>
 												<td class="ldpair-results cell-center"
 													data-bind="text: two_by_two.cells.c11"></td>
@@ -292,6 +321,7 @@
 												data-bind="text: two_by_two.cells.c22"></td>
 											<tr>
 											</tr>
+                      </tbody>
 										</table>
 									</td>
 									<td data-bind="text: snp1.allele_1.count"></td>
@@ -301,8 +331,14 @@
 								</tr>
 								<!-- Row 3 -->
 								<tr>
-									<td class="cell-right" data-bind="text: snp1.coord"></td>
-									<td class="cell-center">G</td>
+									<td class="cell-right">
+                    <a id="snp1-coord"
+                     data-bind="text: snp1.coord"
+                     href="#"
+                     title="Genome Browser"
+                     target="_blank"></a>
+                  </td>
+									<td class="cell-center"  data-bind="text: snp1.allele_2.allele"></td>
 									<td data-bind="text: snp1.allele_2.count"></td>
 									<td class="cell-left">(<span
 										data-bind="text: snp1.allele_2.frequency"></span>)
@@ -324,12 +360,12 @@
 							</tbody>
 						</table>
 						<div class="row">
-							<div class="col-lg-4"></div>
-							<div class="col-lg-2">
-								<table class="table ldpair-stats">
+							<div class="col-lg-4 col-lg-offset-4">
+								<table class="table fixed">
 									<tbody>
 										<tr>
-											<td colspan="2" class="cell-center"><u>Haplotypes</u></td>
+											<td colspan="2" class="cell-center" width="200"><u>Haplotypes</u></td>
+                      <td colspan="2" class="cell-center" width="200"><u>Statistics</u></td>
 										</tr>
 										<tr>
 											<td class="cell-right"><span
@@ -346,28 +382,19 @@
 												(<span data-bind="text: haplotypes.hap3.frequency"></span>)
 												<br> <span data-bind="text: haplotypes.hap4.count"></span>&nbsp;
 												(<span data-bind="text: haplotypes.hap4.frequency"></span>)
-												<br></td>
+												<br>
+                      </td>
+                      <td class="cell-right">D:<br>R2:<br>Chi-sq:<br>p-value:
+                      </td>
+                      <td><span data-bind="text: statistics.d_prime"></span><br>
+                        <span data-bind="text: statistics.r2"></span><br> <span
+                        data-bind="text: statistics.chisq"></span><br> <span
+                        data-bind="text: statistics.p"></span><br>
+                       </td>
 										</tr>
 									</tbody>
 								</table>
               </div>
-              <div class="col-lg-2">
-								<table class="table ldpair-stats">
-									<tbody>
-										<tr class="cell-height-small">
-											<td colspan="2" class="cell-center"><u>Statistics</u></td>
-										</tr>
-										<tr>
-											<td class="cell-right">D:<br>R2:<br>Chi-sq:<br>p-value:
-											</td>
-											<td><span data-bind="text: statistics.d_prime"></span><br>
-												<span data-bind="text: statistics.r2"></span><br> <span
-												data-bind="text: statistics.chisq"></span><br> <span
-												data-bind="text: statistics.p"></span><br></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
 						</div>
 						<div data-bind="foreach: corr_alleles">
 							<div style="text-align: center" data-bind="text: $data"></div>

@@ -50,7 +50,7 @@
 .tab-content {
 	padding: 10px;
 	width: 100%;
-	height: 600px;
+	min-height: 600px;
 	-webkit-overflow-scrolling: touch;
 	background: white;
 	border-width: 0 1px 1px 1px;
@@ -175,6 +175,14 @@ table.ldhap,table.ldhap tr, table.ldhap th {
 .jumbotron {
   background-color:white;
 }
-table.ldpair {
+.ldpair-stats {
   float:left;
+}
+table.fixed {
+    table-layout:fixed;
+    width:400px;
+    margin-bottom:15px;
+}
+table.fixed td {
+    overflow: hidden;
 }
