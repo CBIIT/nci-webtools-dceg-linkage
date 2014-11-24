@@ -1,3 +1,5 @@
+width = 0;
+
 var populations = {
 	AFR : {
 		fullName : "African",
@@ -280,14 +282,10 @@ function updateData(id) {
 					updateLDpair();
 		break;
 	case 'ldproxy':
-      //alert("You clicked ldproxy.  What to do now");
-      $('#'+id+'-results-container').show();
+      $('#'+id+'-progress').show();
+      updateLDproxy();
+      updateProgressBar(id, 28);
 
-      var url = 'http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldproxy?snp=rs2720460&pop=EUR&reference=proxy3';
-      $('#'+id+'-results-container').load(url, function() {
-        console.log('ldproxy_json');
-        console.dir(ldproxy_json);
-      });
 
 		break;
 	case 'ldheat':
@@ -297,6 +295,36 @@ function updateData(id) {
 	}
 
 }
+function funcx() {
+   // your code here
+   // break out here if needed
+   setTimeout(funcx, 1000);
+}
+
+function updateProgressBar(id, seconds) {
+  var milliseconds = seconds * 1000;
+  // Divide number of milliseconds to get 100 to get 100 updates
+  var delay = milliseconds / 100;
+
+//  $('#'+id+'-progress').show();
+
+    //var progressBar = $('#'+id+' div:first-child');
+    var progressBar = $('.progress-bar');
+    width = 0;
+
+    progressBar.width(width);
+
+    var interval = setInterval(function() {
+        width += 1;
+        progressBar.css('width', width + '%').attr('aria-valuenow', width.toString()+'%');
+        progressBar.html('<span>'+width.toString()+'% Complete</span>');
+        if (width >= 100) {
+            clearInterval(interval);
+            return;
+        }
+    }, delay);
+}
+
 
 function addPageListeners(tabClicked) {
 	if (tabClicked == 'ldhap') {
@@ -372,6 +400,47 @@ function createPopulationDropdown(id) {
 							}
 						}
 	});
+}
+
+function updateLDproxy() {
+  var id = "ldproxy";
+
+  var $btn = $('#'+id).button('loading');
+
+  var population = $('#ldproxy-population-codes').val();
+  var ldproxyInputs = {
+    snp : $('#ldproxy-snp').val(),
+    pop : population.join("+"),
+    reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
+        + 10000
+  };
+
+  var url = restServerUrl + "/ldproxy";
+  var ajaxRequest = $.ajax({
+    type : "GET",
+    url : url,
+    data : ldproxyInputs
+  });
+
+  ajaxRequest.success(function(data) {
+      // SUCCESS
+      console.log("SUCCESS");
+      $('#'+id+'-results-container').append(data);
+      $('#'+id+'-progress').hide();
+      $('#'+id+'-results-container').show();
+  });
+  ajaxRequest.fail(function(jqXHR, textStatus) {
+    console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
+        + "\n\nMake sure Plask Python server is available.");
+    //alert('Communication problem: ' + textStatus);
+    // ERROR
+    $('#'+id+'-message').show();
+    $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Plask Python server is available.");
+  });
+  ajaxRequest.always(function() {
+    $btn.button('reset');
+  });
+
 }
 
 function updateLDpair() {
