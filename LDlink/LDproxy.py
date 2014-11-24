@@ -28,12 +28,11 @@ def calculate_proxy(snp,pop,request):
 	cur=conn.cursor()
 
 	# Find RS number in snp141 database
-	print snp
 	id="99"+(13-len(snp))*"0"+snp.strip("rs")
 	cur.execute('SELECT * FROM snps WHERE id=?', (id,))
 	snp_coord=cur.fetchone()
 	if snp_coord==None:
-		output["error"]=snp+" is not a valid RS number for query SNP."
+		output["error"]=snp1+" is not a valid RS number for query SNP. Ensure the RS number is correct and the SNP is bi-allelic, autosomal, and unambiguously mapping."
 		return(json.dumps(output, sort_keys=True, indent=2),None,None)
 		raise
 
@@ -152,7 +151,26 @@ def calculate_proxy(snp,pop,request):
 	output["proxy_snps"]=proxies
 
 	out_json=json.dumps(output, sort_keys=True, indent=2)
-
+	
+	
+	
+	# Create output .txt for download
+	outfile=open(tmp_dir+request+".txt","w")
+	
+	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
+	print >> outfile, "\t".join(header)
+	
+	temp=[output["query_snp"]["RS"],output["query_snp"]["Coord"],output["query_snp"]["Alleles"],output["query_snp"]["MAF"],str(output["query_snp"]["Dist"]),str(output["query_snp"]["Dprime"]),str(output["query_snp"]["R2"]),output["query_snp"]["Corr_Alleles"],output["query_snp"]["RegulomeDB"],output["query_snp"]["Function"]]
+	print >> outfile, "\t".join(temp)
+	
+	for k in sorted(output["proxy_snps"].keys()):
+		temp=[output["proxy_snps"][k]["RS"],output["proxy_snps"][k]["Coord"],output["proxy_snps"][k]["Alleles"],output["proxy_snps"][k]["MAF"],str(output["proxy_snps"][k]["Dist"]),str(output["proxy_snps"][k]["Dprime"]),str(output["proxy_snps"][k]["R2"]),output["proxy_snps"][k]["Corr_Alleles"],output["proxy_snps"][k]["RegulomeDB"],output["proxy_snps"][k]["Function"]]
+		print >> outfile, "\t".join(temp)
+	
+	outfile.close()
+	
+	
+	
 	# Organize scatter plot data
 	q_rs=[]
 	q_allele=[]
