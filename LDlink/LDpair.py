@@ -92,14 +92,14 @@ def calculate_pair(snp1,snp2,pop,request):
 	vcf1=open(tmp_dir+"snp1_no_dups_"+request+".vcf").readlines()
 	head1=vcf1[len(vcf1)-2].strip().split()
 	geno1=vcf1[len(vcf1)-1].strip().split()
-	
+
 	if geno1[0]=="#CHROM":
 		output["error"]=snp1+" is not in 1000G reference panel."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
-	
+
 	if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
 		allele1={"0|0":geno1[3]+geno1[3],"0|1":geno1[3]+geno1[4],"1|0":geno1[4]+geno1[3],"1|1":geno1[4]+geno1[4],"./.":""}
 	else:
@@ -112,14 +112,14 @@ def calculate_pair(snp1,snp2,pop,request):
 	vcf2=open(tmp_dir+"snp2_no_dups_"+request+".vcf").readlines()
 	head2=vcf2[len(vcf2)-2].strip().split()
 	geno2=vcf2[len(vcf2)-1].strip().split()
-	
+
 	if geno2[0]=="#CHROM":
 		output["error"]=snp2+" is not in 1000G reference panel."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
-	
+
 	if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
 		allele2={"0|0":geno2[3]+geno2[3],"0|1":geno2[3]+geno2[4],"1|0":geno2[4]+geno2[3],"1|1":geno2[4]+geno2[4],"./.":""}
 	else:
@@ -203,33 +203,38 @@ def calculate_pair(snp1,snp2,pop,request):
 		denom=Ms
 		chisq=num/denom
 		p=2*(1-(0.5*(1+math.erf(chisq**0.5/2**0.5))))
-		
-		
-		# Find Correlated Alleles
-		if r2>0.1:
-			# Expected Cell Counts
-			eA=(A+B)*(A+C)/N
-			eB=(B+A)*(B+D)/N
-			eC=(C+A)*(C+D)/N
-			eD=(D+C)*(D+B)/N
 
-			# Calculate Deltas
-			dA=(A-eA)**2
-			dB=(B-eB)**2
-			dC=(C-eC)**2
-			dD=(D-eD)**2
-			dmax=max(dA,dB,dC,dD)
+	else:
+		D_prime="NA"
+		r2="NA"
+		chisq="NA"
+		p=1
 
-			if dmax==dA or dmax==dD:
-				corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
-				corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
-				corr_alleles=[corr1,corr2]
-			else:
-				corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
-				corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
-				corr_alleles=[corr1,corr2]
+	# Find Correlated Alleles
+	if r2>0.1:
+		# Expected Cell Counts
+		eA=(A+B)*(A+C)/N
+		eB=(B+A)*(B+D)/N
+		eC=(C+A)*(C+D)/N
+		eD=(D+C)*(D+B)/N
+
+		# Calculate Deltas
+		dA=(A-eA)**2
+		dB=(B-eB)**2
+		dC=(C-eC)**2
+		dD=(D-eD)**2
+		dmax=max(dA,dB,dC,dD)
+
+		if dmax==dA or dmax==dD:
+			corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
+			corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
+			corr_alleles=[corr1,corr2]
 		else:
-			corr_alleles=[snp1+" and "+snp2+" are in linkage equilibrium"]
+			corr1=snp1+"("+sorted(hap)[0][0]+") allele is correlated with "+snp2+"("+sorted(hap)[1][1]+") allele"
+			corr2=snp1+"("+sorted(hap)[2][0]+") allele is correlated with "+snp2+"("+sorted(hap)[0][1]+") allele"
+			corr_alleles=[corr1,corr2]
+	else:
+		corr_alleles=[snp1+" and "+snp2+" are in linkage equilibrium"]
 
 
 
@@ -309,23 +314,13 @@ def calculate_pair(snp1,snp2,pop,request):
 
 
 	statistics={}
-	if Ms!=0:
-		statistics["d_prime"]=str(round(abs(D_prime),4))
-		statistics["r2"]=str(round(r2,4))
-		statistics["chisq"]=str(round(chisq,4))
-		statistics["p"]=str(round(p,4))
-		output["corr_alleles"]=corr_alleles
-		
-	else:
-		statistics["d_prime"]="NA"
-		statistics["r2"]="NA"
-		statistics["chisq"]="NA"
-		statistics["p"]="NA"
-		output["corr_alleles"]=["Correlated alleles for "+snp1+" and "+snp2+" could not be calculated"]
-		
+	statistics["d_prime"]=str(round(abs(D_prime),4))
+	statistics["r2"]=str(round(r2,4))
+	statistics["chisq"]=str(round(chisq,4))
+	statistics["p"]=str(round(p,4))
 	output["statistics"]=statistics
 
-	
+	output["corr_alleles"]=corr_alleles
 
 
 	# Remove temporary files
@@ -369,7 +364,7 @@ def main():
 		print " "*13+"-"*17
 		print " "*11+json_dict["snp1"]["allele_1"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["c11"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c11"]))+" | "+json_dict["two_by_two"]["cells"]["c12"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c12"]))+" | "+json_dict["snp1"]["allele_1"]["count"]+" "*(5-len(json_dict["snp1"]["allele_1"]["count"]))+" ("+json_dict["snp1"]["allele_1"]["frequency"]+")"
 		print json_dict["snp1"]["rsnum"]+" "*(10-len(json_dict["snp1"]["rsnum"]))+" "*3+"-"*17
-		print " "*11+json_dict["snp1"]["allele_2"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["c21"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c21"]))+" | "+json_dict["two_by_two"]["cells"]["c22"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c22"]))+" | "+json_dict["snp1"]["allele_2"]["count"]+" "*(5-len(json_dict["snp1"]["allele_2"]["count"]))+" ("+json_dict["snp1"]["allele_2"]["frequency"]+")"
+		print " "*11+json_dict["snp2"]["allele_2"]["allele"]+" | "+json_dict["two_by_two"]["cells"]["c21"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c21"]))+" | "+json_dict["two_by_two"]["cells"]["c22"]+" "*(5-len(json_dict["two_by_two"]["cells"]["c22"]))+" | "+json_dict["snp1"]["allele_2"]["count"]+" "*(5-len(json_dict["snp1"]["allele_2"]["count"]))+" ("+json_dict["snp1"]["allele_2"]["frequency"]+")"
 		print " "*13+"-"*17
 		print " "*15+json_dict["snp2"]["allele_1"]["count"]+" "*(5-len(json_dict["snp2"]["allele_1"]["count"]))+" "*3+json_dict["snp2"]["allele_2"]["count"]+" "*(5-len(json_dict["snp2"]["allele_2"]["count"]))+" "*3+json_dict["two_by_two"]["total"]
 		print " "*14+"("+json_dict["snp2"]["allele_1"]["frequency"]+")"+" "*(5-len(json_dict["snp2"]["allele_1"]["frequency"]))+" ("+json_dict["snp2"]["allele_2"]["frequency"]+")"+" "*(5-len(json_dict["snp2"]["allele_2"]["frequency"]))
@@ -388,7 +383,7 @@ def main():
 			print json_dict["corr_alleles"][0]
 			print json_dict["corr_alleles"][1]
 		else:
-			print json_dict["corr_alleles"][0]
+			print json_dict["corr_alleles"]
 
 		try:
 			json_dict["warning"]

@@ -97,9 +97,20 @@ def ldproxy():
     print 'pop: ' + pop
     print 'request: ' + reference
     print
+
     out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
+
+    links = '<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>'
+    links += '<link rel="stylesheet" href="http://cdn.pydata.org/bokeh-0.6.1.css">'
+    links += '<script>'
+    links += 'var ldproxy_json ='
+    links += out_json
+    links += ';'
+    links += '</script>'
+
     r1 = 'Hello'
-    return out_json+"\n"+out_div+" "+out_script
+
+    return links+"\n"+out_script+"\n "+out_div
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():

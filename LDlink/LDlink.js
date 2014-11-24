@@ -235,6 +235,7 @@ $(document).ready(
 
 			$('.tab-content').on('click',
 					"a[class|='btn btn-default calculate']", function(e) {
+
 						calculate(e);
 			});
 
@@ -279,6 +280,15 @@ function updateData(id) {
 					updateLDpair();
 		break;
 	case 'ldproxy':
+      //alert("You clicked ldproxy.  What to do now");
+      $('#'+id+'-results-container').show();
+
+      var url = 'http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldproxy?snp=rs2720460&pop=EUR&reference=proxy3';
+      $('#'+id+'-results-container').load(url, function() {
+        console.log('ldproxy_json');
+        console.dir(ldproxy_json);
+      });
+
 		break;
 	case 'ldheat':
 		break;
