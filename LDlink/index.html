@@ -401,8 +401,8 @@
         <div class="row" style="padding-top: 10px;">
           <div class="col-md-12">
 
-            <div id="ldpair-inputs-form" class="form-group">
-              <div class="col-md-4">
+            <div class="form-group">
+              <div class="col-md-3">
                 <input id="ldproxy-snp" name="textinput"
                   class="form-control input-md" type="text" placeholder="SNP RS Number">
               </div>
@@ -448,9 +448,48 @@
 
           <!-- LDProxy CONTAINER -->
           <div class="container-fluid" id="ldproxy-results-container">
+            <a id="ldproxy-results-link" target="_blank" class="pull-right" href="#">Results</a>
+            <div id="ldproxy-bokeh-graph"></div>
+            <br>
+            <div id="ldproxy-table-container">
+            <table class="table table-bordered">
+              <thead>
+                <!-- Header row -->
+                <tr>
+                  <td>RS Number</td>
+                  <td>Coord</td>
+                  <td>Alleles</td>
+                  <td>MAF</td>
+                  <td>Distance</td>
+                  <td>Dprime</td>
+                  <td>R2</td>
+                  <td>Correlated Alleles</td>
+                  <td>RegulomeDB</td>
+                  <td>Function</td>
+                </tr>
+              <tbody data-bind="foreach: top10">
+                <tr>
+                    <td style="text-align: center" data-bind="text: RS"></td>
+                    <td style="text-align: center" data-bind="text: Coord"></td>
+                    <td style="text-align: center" data-bind="text: Alleles"></td>
+                    <td style="text-align: center" data-bind="text: MAF"></td>
+                    <td style="text-align: center" data-bind="text: Dist"></td>
+                    <td style="text-align: center" data-bind="text: Dprime"></td>
+                    <td style="text-align: center" data-bind="text: R2"></td>
+                    <td style="text-align: center" data-bind="text: Corr_Alleles"></td>
+                    <td style="text-align: center" data-bind="text: RegulomeDB"></td>
+                    <td style="text-align: center" data-bind="text: Function"></td>
+                </tr>
+
+              </tbody>
+            </table>
+
+          </div>
+
           </div>
 
 				</div>
+      </div>
 			</div>
 		</div>
 	</div>

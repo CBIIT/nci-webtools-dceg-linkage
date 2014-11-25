@@ -99,16 +99,11 @@ def ldproxy():
     print
 
     out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
-
-    links = '<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>'
-    links += '<link rel="stylesheet" href="http://cdn.pydata.org/bokeh-0.6.1.css">'
-    links += '<script>'
+    links = '<script>'
     links += 'var ldproxy_json ='
     links += out_json
     links += ';'
     links += '</script>'
-
-    r1 = 'Hello'
 
     return links+"\n"+out_script+"\n "+out_div
 

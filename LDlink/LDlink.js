@@ -207,6 +207,25 @@ var ldpairNewData =[
 }];
 
 var ldpairModel = ko.mapping.fromJS(ldpairNewData[0]);
+var proxy = [{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
+,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
+,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}];
+
+var newProxy = {
+  proxies: [{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
+,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
+,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}]
+};
+
+var newProxy3 = {
+  top10: [{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(T/C)","Coord":"chr12:126894824","Corr_Alleles":"G-T,A-C","Dist":3844,"Dprime":"1.0","Function":"unknown","MAF":"0.127358490566","R2":0.957785742732,"RS":"rs11058635","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.103773584906","R2":0.828340080972,"RS":"rs7132131","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126903875","Corr_Alleles":"G-G,A-A","Dist":12895,"Dprime":"1.0","Function":"unknown","MAF":"0.103773584906","R2":0.828340080972,"RS":"rs4356291","RegulomeDB":"5"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.0990566037736","R2":0.786548530004,"RS":"rs11058630","RegulomeDB":"6"}]
+};
+/*
+var newProxy = {"proxy":{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","FunctionA":"unknown","MAF":"0.120689655172","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
+},
+"proxy":{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.120689655172","R2":1,"RS":"rs10847146","RegulomeDB":"5"}];
+*/
+var ldproxyModel = ko.mapping.fromJS(newProxy3);
 
 $(document)
 		.on(
@@ -221,11 +240,15 @@ $(document)
 
 var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
 
-
 $(document).ready(
 		function() {
 			// Apply Bindings
 			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
+      ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-table-container'));
+      console.log('ldpairModel');
+      console.dir(ldpairModel);
+      console.log('ldproxyModel');
+      console.dir(ldproxyModel);
 
 			$.each(modules, function(key, id) {
 				buildPopulationDropdown(id+"-population-codes");
@@ -411,9 +434,10 @@ function updateLDproxy() {
   var ldproxyInputs = {
     snp : $('#ldproxy-snp').val(),
     pop : population.join("+"),
-    reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
-        + 10000
+    reference : "proxy_" + Math.floor(Math.random() * (99999 - 10000 + 1))
   };
+
+  $('#ldproxy-results-link').attr('href', 'tmp/'+ldproxyInputs.reference+'.txt');
 
   var url = restServerUrl + "/ldproxy";
   var ajaxRequest = $.ajax({
@@ -425,9 +449,16 @@ function updateLDproxy() {
   ajaxRequest.success(function(data) {
       // SUCCESS
       console.log("SUCCESS");
-      $('#'+id+'-results-container').append(data);
+      $('#ldproxy-bokeh-graph').empty().append(data);
       $('#'+id+'-progress').hide();
       $('#'+id+'-results-container').show();
+      //Remove logo
+      $('.bk-logo').css('dispaly', 'none');
+      console.log('Here is th json');
+      console.dir(ldproxy_json);
+      //Get the top 10...
+      createProxyTop10();
+
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
@@ -436,13 +467,30 @@ function updateLDproxy() {
     // ERROR
     $('#'+id+'-message').show();
     $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Plask Python server is available.");
+    $('#'+id+'-progress').hide();
   });
   ajaxRequest.always(function() {
     $btn.button('reset');
   });
 
 }
+proxy = [];
 
+function createProxyTop10() {
+  proxies = [];
+  var obj;
+  for(i=0;i<10;i++) {
+    obj = {'proxy': ldproxy_json.proxy_snps.proxy_00001};
+    proxies.push(obj);
+    obj = {'proxy': ldproxy_json.proxy_snps.proxy_00002};
+    proxies.push(obj);
+    obj = {'proxy': ldproxy_json.proxy_snps.proxy_00003};
+    proxies.push(obj);
+  }
+  console.log('PROXIES');
+  console.log('proxies');
+  console.dir(proxies);
+}
 function updateLDpair() {
 	var population = $('#ldpair-population-codes').val();
 	console.log('population');
@@ -454,8 +502,7 @@ function updateLDpair() {
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
 	};
-	// var url = "http://"+location.hostname+":8090/LDlinkRest/ldpair";
-	// var url = "http://"+location.hostname+"/LDlinkRest/ldpair";
+
 	var url = restServerUrl + "/ldpair";
 
 	var ajaxRequest = $.ajax({
@@ -498,23 +545,6 @@ function updateLDpair() {
 }
 
 function addHyperLinks(data) {
-
-/*
-1.  Add dbSNP link to snp1.rsnum and snp2.rsnum
-
-e.g. for SNP rs2720460, add the following link
-http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2720460
-
-2.  Add UCSC Genome Browser link to snp1.coord and snp2.coord
-
-e.g. for SNP rs2720460, chromosome position chr4:104054686, add the following link
-
-http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:104054436-104054936&snp141=pack&hgFind.matches=rs2720460
-
-Use plus and minus 250 bp from the given coordinates.
-
-3.  Bring up these two links as two separate browser tabs.
-*/
   // Add snp1-rsum to
     var server;
     var params = {};
