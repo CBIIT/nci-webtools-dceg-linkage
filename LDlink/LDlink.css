@@ -1,10 +1,8 @@
-/*disable bk logo */ 
-.bk-logo-small { 
-   width: 26px; 
-   height: 26px; 
-   display:none; 
-} 
-   
+/*disable bk logo */
+.bk-logo-small {
+   display:none;
+}
+
 .nav-tabs {
 	width: 100%;
 	float: left;
@@ -185,4 +183,21 @@ table.fixed {
 }
 table.fixed td {
     overflow: hidden;
+}
+
+#ldproxy-results-link {
+  height: 50px;
+  display: block;
+}
+#ldproxy-results-link span {
+  /*position: absolute; */
+  /*bottom: 0; */
+}
+.proxy-table-title-row {
+  margin-left:0px;
+  margin-right:0px;
+}
+table thead td {
+  font-weight:bold;
+  text-align: center;
 }

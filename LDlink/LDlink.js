@@ -218,14 +218,23 @@ var newProxy = {
 };
 
 var newProxy3 = {
-  top10: [{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(T/C)","Coord":"chr12:126894824","Corr_Alleles":"G-T,A-C","Dist":3844,"Dprime":"1.0","Function":"unknown","MAF":"0.127358490566","R2":0.957785742732,"RS":"rs11058635","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.103773584906","R2":0.828340080972,"RS":"rs7132131","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126903875","Corr_Alleles":"G-G,A-A","Dist":12895,"Dprime":"1.0","Function":"unknown","MAF":"0.103773584906","R2":0.828340080972,"RS":"rs4356291","RegulomeDB":"5"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.0990566037736","R2":0.786548530004,"RS":"rs11058630","RegulomeDB":"6"}]
+  top10: [{"Alleles":"Hello","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"Is this working","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs10847146","RegulomeDB":"5"}]
 };
+var newProxy4 = {
+  top10: [{"Alleles":"YES YES YES","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"Is this working","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs10847146","RegulomeDB":"5"}]
+};
+
+var newProxy5 ={
+  top10:  [{"Alleles":"newProxy5","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]
+};
+console.log("newProxy3");
+console.dir(newProxy3);
 /*
 var newProxy = {"proxy":{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","FunctionA":"unknown","MAF":"0.120689655172","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
 },
 "proxy":{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.120689655172","R2":1,"RS":"rs10847146","RegulomeDB":"5"}];
 */
-var ldproxyModel = ko.mapping.fromJS(newProxy3);
+var ldproxyModel = ko.mapping.fromJS(newProxy5);
 
 $(document)
 		.on(
@@ -244,7 +253,7 @@ $(document).ready(
 		function() {
 			// Apply Bindings
 			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
-      ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-table-container'));
+      ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
       console.log('ldpairModel');
       console.dir(ldpairModel);
       console.log('ldproxyModel');
@@ -252,6 +261,7 @@ $(document).ready(
 
 			$.each(modules, function(key, id) {
 				buildPopulationDropdown(id+"-population-codes");
+
         $("#"+id+"-results-container").hide();
         $('#'+id+'-message').hide();
         $('#'+id+'-message-warning').hide();
@@ -288,6 +298,7 @@ $(document).ready(
 function calculate(e) {
 	var id = e.target.id;
 //	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
+
   $('#'+id+'-results-container').hide();
   $('#'+id+'-message').hide();
   $('#'+id+'-message-warning').hide();
@@ -305,11 +316,10 @@ function updateData(id) {
 					updateLDpair();
 		break;
 	case 'ldproxy':
-      $('#'+id+'-progress').show();
+      $('#'+id+'-progress-container').show();
+      //ko.mapping.fromJS(newProxy4, ldproxyModel);
       updateLDproxy();
-      updateProgressBar(id, 28);
-
-
+      updateProgressBar(id, 30);
 		break;
 	case 'ldheat':
 		break;
@@ -434,7 +444,7 @@ function updateLDproxy() {
   var ldproxyInputs = {
     snp : $('#ldproxy-snp').val(),
     pop : population.join("+"),
-    reference : "proxy_" + Math.floor(Math.random() * (99999 - 10000 + 1))
+    reference : "proxy" + Math.floor(Math.random() * (99999 - 10000 + 1))
   };
 
   $('#ldproxy-results-link').attr('href', 'tmp/'+ldproxyInputs.reference+'.txt');
@@ -450,14 +460,23 @@ function updateLDproxy() {
       // SUCCESS
       console.log("SUCCESS");
       $('#ldproxy-bokeh-graph').empty().append(data);
-      $('#'+id+'-progress').hide();
+      $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
-      //Remove logo
-      $('.bk-logo').css('dispaly', 'none');
       console.log('Here is th json');
       console.dir(ldproxy_json);
+      var updateTop10 = [];
+      updateTop10.top10 = ldproxy_json.top10;
+      console.log('Where is the new top10');
+      console.dir(updateTop10);
+/*
+    setTimeout(function(){
+      var proxyTop = getProxyTop10();
+      ko.mapping.fromJS(proxyTop, ldproxyModel);
+      //alert("Hello");
+    }, 9000);
+*/
       //Get the top 10...
-      createProxyTop10();
+      //createProxyTop10();
 
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -470,27 +489,42 @@ function updateLDproxy() {
     $('#'+id+'-progress').hide();
   });
   ajaxRequest.always(function() {
+    setTimeout(function(){
+      var proxyTop = getProxyTop10();
+      ko.mapping.fromJS(proxyTop, ldproxyModel);
+      //alert("Hello");
+    }, 10000);
     $btn.button('reset');
   });
 
 }
-proxy = [];
 
-function createProxyTop10() {
-  proxies = [];
-  var obj;
-  for(i=0;i<10;i++) {
-    obj = {'proxy': ldproxy_json.proxy_snps.proxy_00001};
-    proxies.push(obj);
-    obj = {'proxy': ldproxy_json.proxy_snps.proxy_00002};
-    proxies.push(obj);
-    obj = {'proxy': ldproxy_json.proxy_snps.proxy_00003};
-    proxies.push(obj);
-  }
+function getProxyTop10() {
+
+  var top10 = {};
+  var proxies = [];
+
+  proxies.push(ldproxy_json.proxy_snps.proxy_00001);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00002);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00003);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00004);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00005);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00006);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00007);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00008);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00009);
+  proxies.push(ldproxy_json.proxy_snps.proxy_00010);
+
   console.log('PROXIES');
-  console.log('proxies');
   console.dir(proxies);
+
+  top10.top10 = proxies;
+  console.log('TOP 10');
+  console.dir(top10);
+
+  return top10;
 }
+
 function updateLDpair() {
 	var population = $('#ldpair-population-codes').val();
 	console.log('population');

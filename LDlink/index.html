@@ -216,12 +216,12 @@
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-md-9 col-md-offset-1">
 						<div id="ldpair-inputs-form" class="form-group">
-							<div class="col-md-3">
+							<div class="col-md-2">
 								<input id="ldpair-snp1" name="textinput"
 									class="form-control input-md" type="text" placeholder="SNP1 RS Number">
 							</div>
 
-							<div class="col-md-3">
+							<div class="col-md-2">
 								<input id="ldpair-snp2" name="textinput"
 									class="form-control input-md" type="text" placeholder="SNP2 RS Number">
 							</div>
@@ -302,7 +302,7 @@
 										<table class="table table-condensed table-bordered two-by-two">
 											<tbody>
 											<tr>
-												<td class="ldpair-results cell-center"
+												<td class="ldpair-results cell-center" width="50%"
 													data-bind="text: two_by_two.cells.c11"></td>
 												<td class="ldpair-results cell-center"
 													data-bind="text: two_by_two.cells.c12"></td>
@@ -402,7 +402,7 @@
           <div class="col-md-12">
 
             <div class="form-group">
-              <div class="col-md-3">
+              <div class="col-md-2">
                 <input id="ldproxy-snp" name="textinput"
                   class="form-control input-md" type="text" placeholder="SNP RS Number">
               </div>
@@ -439,19 +439,28 @@
 
         <div class="jumbotron">
           <!-- LDPROXY PROGRESS BAR -->
-          <div id="ldproxy-progress" class="progress" style="display:none;">
-            <div class="progress-bar" role="progressbar"
-                aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-              60%
-            </div>
+          <div id="ldproxy-progress-container"style="width:525px;display:none;">
+              <div id="ldproxy-progress" class="progress">
+                      <div class="progress-bar" role="progressbar"
+                        aria-valuenow="0" aria-valuemin="0"
+                        aria-valuemax="100" style="width: 0%;">0%</div>
+              </div>
           </div>
 
           <!-- LDProxy CONTAINER -->
           <div class="container-fluid" id="ldproxy-results-container">
-            <a id="ldproxy-results-link" target="_blank" class="pull-right" href="#">Results</a>
+
             <div id="ldproxy-bokeh-graph"></div>
             <br>
+            <br>
             <div id="ldproxy-table-container">
+
+            <div class="row proxy-table-title-row">
+                <h3 class="pull-left">Top 10 Proxy SNPs</h3>
+                <a id="ldproxy-results-link" target="_blank" class="pull-right" href="#">
+                    <span>Download Proxy file</span>
+                </a>
+            </div>
             <table class="table table-bordered">
               <thead>
                 <!-- Header row -->
