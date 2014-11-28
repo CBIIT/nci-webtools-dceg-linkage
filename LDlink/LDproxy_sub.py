@@ -142,10 +142,11 @@ for geno_n in vcf:
 		hap={"00":0,"01":0,"10":0,"11":0}
 		for i in index:
 			hap0=geno[i][0]+geno_n[i][0]
-			hap1=geno[i][1]+geno_n[i][1]
+			hap1=geno[i][2]+geno_n[i][2]
 			hap[hap0]+=1
-			hap[hap1]=1
-
+			hap[hap1]+=1
+		
+		print hap
 		maf_q,maf_p,D_prime,r2,match=LD_calcs(hap,allele,allele_n)
 		
 		if r2!="--" and r2>0.0:
