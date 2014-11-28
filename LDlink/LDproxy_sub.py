@@ -146,7 +146,6 @@ for geno_n in vcf:
 			hap[hap0]+=1
 			hap[hap1]+=1
 		
-		print hap
 		maf_q,maf_p,D_prime,r2,match=LD_calcs(hap,allele,allele_n)
 		
 		if r2!="--" and r2>0.0:
