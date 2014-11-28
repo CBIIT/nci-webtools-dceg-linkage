@@ -208,10 +208,10 @@ def calculate_pair(snp1,snp2,pop,request):
 		D_prime="NA"
 		r2="NA"
 		chisq="NA"
-		p=1
+		p="NA"
 
 	# Find Correlated Alleles
-	if r2>0.1:
+	if r2>0.1 and r2!="NA":
 		# Expected Cell Counts
 		eA=(A+B)*(A+C)/N
 		eB=(B+A)*(B+D)/N
@@ -314,10 +314,17 @@ def calculate_pair(snp1,snp2,pop,request):
 
 
 	statistics={}
-	statistics["d_prime"]=str(round(abs(D_prime),4))
-	statistics["r2"]=str(round(r2,4))
-	statistics["chisq"]=str(round(chisq,4))
-	statistics["p"]=str(round(p,4))
+	if Ms!=0:
+		statistics["d_prime"]=str(round(abs(D_prime),4))
+		statistics["r2"]=str(round(r2,4))
+		statistics["chisq"]=str(round(chisq,4))
+		statistics["p"]=str(round(p,4))
+	else:
+		statistics["d_prime"]=D_prime
+		statistics["r2"]=r2
+		statistics["chisq"]=chisq
+		statistics["p"]=p
+	
 	output["statistics"]=statistics
 
 	output["corr_alleles"]=corr_alleles
@@ -383,7 +390,7 @@ def main():
 			print json_dict["corr_alleles"][0]
 			print json_dict["corr_alleles"][1]
 		else:
-			print json_dict["corr_alleles"]
+			print json_dict["corr_alleles"][0]
 
 		try:
 			json_dict["warning"]
