@@ -111,14 +111,28 @@ def calculate_proxy(snp,pop,request):
 	get_out="cat "+tmp_dir+request+"_*.out > "+tmp_dir+request+"_all.out"
 	subprocess.call(get_out, shell=True)
 	out_raw=open(tmp_dir+request+"_all.out").readlines()
-		
+	
+	# MAF test
+	col=out_raw[0].strip().split("\t")
+	if col[11]=="0.0":
+		output["error"]=snp+" is monoallelic in the "+pop+" subpopulation."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+		subprocess.call("rm "+tmp_dir+request+"*.out", shell=True)
+		return(None,None)
+		raise
+	
 	out_prox=[]
 	for i in range(len(out_raw)):
 		col=out_raw[i].strip().split("\t")
-		col[6]=int(col[6])
-		col[8]=float(col[8])
-		col.append(abs(int(col[6])))
-		out_prox.append(col)
+		if col[8]!="--":
+			col[6]=int(col[6])
+			col[8]=float(col[8])
+			col.append(abs(int(col[6])))
+			out_prox.append(col)
 
 
 	# Sort output
