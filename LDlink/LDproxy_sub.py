@@ -148,12 +148,14 @@ for geno_n in vcf:
 		
 		maf_q,maf_p,D_prime,r2,match=LD_calcs(hap,allele,allele_n)
 		
-		if r2!="--" and r2>0.0:
-			bp_n=geno_n[1]
-			rs_n=geno_n[2]
-			al_n="("+geno_n[3]+"/"+geno_n[4]+")"
-			dist=str(int(geno_n[1])-int(geno[1]))
-			
+		bp_n=geno_n[1]
+		rs_n=geno_n[2]
+		al_n="("+geno_n[3]+"/"+geno_n[4]+")"
+		dist=str(int(geno_n[1])-int(geno[1]))
+		
+		score="."
+		funct="."
+		if r2!="--":
 			# Get RegulomeDB score
 			t=("chr"+geno_n[0]+":"+geno_n[1],)
 			curr.execute('SELECT * FROM regdb WHERE position=?', t)
@@ -171,9 +173,10 @@ for geno_n in vcf:
 				funct=snp_coord[4]
 			else:
 				funct="."
+		
+		temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p,funct]
+		out.append(temp)
 			
-			temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p,funct]
-			out.append(temp)
 
 output=open(tmp_dir+request+"_"+process+".out","w")
 for i in range(len(out)):
