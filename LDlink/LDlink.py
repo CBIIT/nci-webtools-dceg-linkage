@@ -98,14 +98,10 @@ def ldproxy():
     print 'request: ' + reference
     print
 
-    out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
-    links = '<script>'
-    links += 'var ldproxy_json ='
-    links += out_json
-    links += ';'
-    links += '</script>'
+    #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
+    out_script,out_div = calculate_proxy(snp, pop, reference)
 
-    return links+"\n"+out_script+"\n "+out_div
+    return out_script+"\n "+out_div
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():

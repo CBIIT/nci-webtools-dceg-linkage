@@ -481,7 +481,7 @@ function updateLDproxy() {
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
-        + "\n\nMake sure Plask Python server is available.");
+        + "\n\nMake sure Flask Python server is available.");
     //alert('Communication problem: ' + textStatus);
     // ERROR
     $('#'+id+'-message').show();
