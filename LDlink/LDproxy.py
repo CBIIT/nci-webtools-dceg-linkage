@@ -196,7 +196,7 @@ def calculate_proxy(snp,pop,request):
 			proxy_info["MAF"]=out_ld_sort[i][12]
 			proxy_info["Function"]=out_ld_sort[i][13]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
-			if i<10:
+			if i<=10:
 				top10.append(proxy_info)
 			#proxies["proxy"][i]=proxy_info
 			#proxies(proxy_info);

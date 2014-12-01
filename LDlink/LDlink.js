@@ -515,9 +515,9 @@ function getLDProxyResults(jsonfile) {
   ajaxRequest.always(function() {
     //alert('Always');
     //wait here until proxyTop.top10[9] is defined
-      setTimeout(function(){
+      //setTimeout(function(){
         ko.mapping.fromJS(proxyTop, ldproxyModel);
-      }, 3000);
+      //}, 3000);
   });
 
 
@@ -529,7 +529,6 @@ function getProxyTop10(data) {
   var ldproxy_json = data;
   console.log('ldproxy_json');
   console.dir(ldproxy_json);
-
 
   var top10 = {};
   /*
