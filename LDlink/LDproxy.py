@@ -37,7 +37,7 @@ def calculate_proxy(snp,pop,request):
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
-		return(None,None)
+		return([],[])
 		raise
 	
 	
@@ -52,7 +52,7 @@ def calculate_proxy(snp,pop,request):
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
-			return(None,None)
+			return([],[])
 			raise
 	
 	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
@@ -98,7 +98,7 @@ def calculate_proxy(snp,pop,request):
 		out_json.close()
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-		return(None,None)
+		return([],[])
 		raise
 		
 	
@@ -139,7 +139,7 @@ def calculate_proxy(snp,pop,request):
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
-		return(None,None)
+		return([],[])
 		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 		raise
