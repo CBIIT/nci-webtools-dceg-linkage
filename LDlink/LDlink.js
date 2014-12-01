@@ -1,4 +1,5 @@
-width = 0;
+//width = 0;
+var proxyTop;
 
 var populations = {
 	AFR : {
@@ -444,10 +445,10 @@ function updateLDproxy() {
   var ldproxyInputs = {
     snp : $('#ldproxy-snp').val(),
     pop : population.join("+"),
-    reference : "proxy" + Math.floor(Math.random() * (99999 - 10000 + 1))
+    reference : Math.floor(Math.random() * (99999 - 10000 + 1))
   };
 
-  $('#ldproxy-results-link').attr('href', 'tmp/'+ldproxyInputs.reference+'.txt');
+  $('#ldproxy-results-link').attr('href', 'tmp/proxy'+ldproxyInputs.reference+'.txt');
 
   var url = restServerUrl + "/ldproxy";
   var ajaxRequest = $.ajax({
@@ -462,12 +463,7 @@ function updateLDproxy() {
       $('#ldproxy-bokeh-graph').empty().append(data);
       $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
-      console.log('Here is th json');
-      console.dir(ldproxy_json);
-      var updateTop10 = [];
-      updateTop10.top10 = ldproxy_json.top10;
-      console.log('Where is the new top10');
-      console.dir(updateTop10);
+      getLDProxyResults('proxy'+ldproxyInputs.reference+'.json');
 /*
     setTimeout(function(){
       var proxyTop = getProxyTop10();
@@ -489,19 +485,54 @@ function updateLDproxy() {
     $('#'+id+'-progress').hide();
   });
   ajaxRequest.always(function() {
-    setTimeout(function(){
-      var proxyTop = getProxyTop10();
-      ko.mapping.fromJS(proxyTop, ldproxyModel);
-      //alert("Hello");
-    }, 10000);
     $btn.button('reset');
   });
 
 }
 
-function getProxyTop10() {
+function getLDProxyResults(jsonfile) {
+  /*
+      console.log('Here is th json');
+      console.dir(ldproxy_json);
+      var updateTop10 = [];
+      updateTop10.top10 = ldproxy_json.top10;
+      console.log('Where is the new top10');
+      console.dir(updateTop10);
+  */
+
+  var url = "tmp/"+jsonfile;
+  var ajaxRequest = $.ajax({
+    type : "GET",
+    url : url,
+    format: "json"
+  });
+  ajaxRequest.success(function(data) {
+    proxyTop = getProxyTop10(data);
+  });
+  ajaxRequest.fail(function(jqXHR, textStatus) {
+    alert('Fail');
+  });
+  ajaxRequest.always(function() {
+    //alert('Always');
+    //wait here until proxyTop.top10[9] is defined
+      setTimeout(function(){
+        ko.mapping.fromJS(proxyTop, ldproxyModel);
+      }, 3000);
+  });
+
+
+
+}
+
+function getProxyTop10(data) {
+
+  var ldproxy_json = data;
+  console.log('ldproxy_json');
+  console.dir(ldproxy_json);
+
 
   var top10 = {};
+  /*
   var proxies = [];
 
   proxies.push(ldproxy_json.proxy_snps.proxy_00001);
@@ -517,10 +548,11 @@ function getProxyTop10() {
 
   console.log('PROXIES');
   console.dir(proxies);
-
-  top10.top10 = proxies;
+  */
+  top10.top10 = ldproxy_json.top10;
   console.log('TOP 10');
   console.dir(top10);
+
 
   return top10;
 }
@@ -566,7 +598,7 @@ function updateLDpair() {
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
-				+ "\n\nMake sure Plask Python server is available.");
+				+ "\n\nMake sure Flask Python server is available.");
 		//alert('Communication problem: ' + textStatus);
     // ERROR
     $('#'+id+'-message').show();

@@ -18,7 +18,7 @@ def calculate_proxy(snp,pop,request):
 
 
 	# Create JSON output
-	out_json=open(tmp_dir+request+".json","w")
+	out_json=open(tmp_dir+'proxy'+request+".json","w")
 	output={}
 
 
@@ -39,8 +39,8 @@ def calculate_proxy(snp,pop,request):
 		out_json.close()
 		return("","")
 		raise
-	
-	
+
+
 	# Select desired ancestral populations
 	pops=pop.split("+")
 	pop_dirs=[]
@@ -54,43 +54,43 @@ def calculate_proxy(snp,pop,request):
 			out_json.close()
 			return("","")
 			raise
-	
+
 	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
 	subprocess.call(get_pops, shell=True)
-	
-	
+
+
 	# Get population ids
 	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
 	ids=[]
 	for i in range(len(pop_list)):
 		ids.append(pop_list[i].strip())
-	
+
 	pop_ids=list(set(ids))
-	
-	
+
+
 	# Extract query SNP phased genotypes
 	vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 	tabix_snp="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file, snp_coord[2], snp_coord[3], tmp_dir+"snp_"+request+".vcf")
 	subprocess.call(tabix_snp, shell=True)
 	grep_remove_dups="grep -v -e END "+tmp_dir+"snp_"+request+".vcf > "+tmp_dir+"snp_no_dups_"+request+".vcf"
 	subprocess.call(grep_remove_dups, shell=True)
-	
-	
+
+
 	# Check SNP is not monoallelic in selected 1000G population
 	vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 	geno=vcf[len(vcf)-1].strip().split()
 	head=vcf[len(vcf)-2].strip().split()
-	
+
 	index=[]
 	for i in range(9,len(head)):
 		if head[i] in pop_ids:
 			index.append(i)
-	
+
 	genotypes={"0":0,"1":0}
 	for i in index:
 		genotypes[geno[i][0]]+=1
 		genotypes[geno[i][2]]+=1
-	
+
 	if genotypes["0"]==0 or genotypes["1"]==0:
 		output["error"]=snp+" is monoallelic in the "+pop+" subpopulation."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -100,9 +100,9 @@ def calculate_proxy(snp,pop,request):
 		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 		return("","")
 		raise
-		
-	
-	
+
+
+
 	# Define window of interest around query SNP
 	window=500000
 	coord1=int(snp_coord[3])-window
@@ -149,7 +149,7 @@ def calculate_proxy(snp,pop,request):
 	get_out="cat "+tmp_dir+request+"_*.out > "+tmp_dir+request+"_all.out"
 	subprocess.call(get_out, shell=True)
 	out_raw=open(tmp_dir+request+"_all.out").readlines()
-	
+
 	out_prox=[]
 	for i in range(len(out_raw)):
 		col=out_raw[i].strip().split("\t")
@@ -203,8 +203,8 @@ def calculate_proxy(snp,pop,request):
 
 	output["proxy_snps"]=proxies
 	output["top10"]=top10
-	
-	
+
+
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
@@ -213,7 +213,7 @@ def calculate_proxy(snp,pop,request):
 
 
 	# Create output .txt for download
-	outfile=open(tmp_dir+request+".txt","w")
+	outfile=open(tmp_dir+'proxy'+request+".txt","w")
 
 	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
 	print >> outfile, "\t".join(header)
@@ -347,26 +347,26 @@ def calculate_proxy(snp,pop,request):
 		("RegulomeDB", "@regdb"),
 		("Predicted Function", "@funct"),
 	])
-	
+
 	out_script,out_div=embed.components(curplot(), CDN)
-	
-	
+
+
 	# Print run time statistics
 	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
 	print "\nNumber of Individuals: "+str(len(pop_list))
-	
+
 	print "SNPs in Region: "+str(len(out_raw))
-	
+
 	duration=time.time() - start_time
 	print "Run time: "+str(duration)+" seconds\n"
-	
-	
+
+
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 	subprocess.call("rm "+tmp_dir+request+"*.out", shell=True)
-	
-	
+
+
 	# Return plot output
 	return(out_script,out_div)
 
@@ -374,7 +374,7 @@ def calculate_proxy(snp,pop,request):
 def main():
 	import json,sys
 	tmp_dir="./tmp/"
-	
+
 	# Import LDproxy options
 	if len(sys.argv)==4:
 		snp=sys.argv[1]
@@ -383,17 +383,17 @@ def main():
 	else:
 		print "Correct useage is: LDproxy.py snp populations request"
 		sys.exit()
-	
+
 	# Run function
 	out_script,out_div=calculate_proxy(snp,pop,request)
-	
+
 	# Print output
 	with open(tmp_dir+request+".json") as f:
 		json_dict=json.load(f)
-	
+
 	try:
 		json_dict["error"]
-	
+
 	except KeyError:
 		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 		print "\t".join(temp)
@@ -401,7 +401,7 @@ def main():
 			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
 			print "\t".join(temp)
 		print ""
-	
+
 	else:
 		print ""
 		print json_dict["error"]
