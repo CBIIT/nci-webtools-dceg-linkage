@@ -18,7 +18,8 @@ def calculate_matrix(snplst,pop,request):
 		os.makedirs(tmp_dir)
 	
 	
-	# Create JSON output 
+	# Create JSON output
+	out_json=open(tmp_dir+request+".json","w")
 	output={}
 	
 	
@@ -26,7 +27,10 @@ def calculate_matrix(snplst,pop,request):
 	snps=open(snplst).readlines()
 	if len(snps)>100:
 		output["error"]="Maximum SNP list is 100 SNPs. Your list contains "+str(len(snps))+" entries."
-		return(json.dumps(output, sort_keys=True, indent=2),None,None)
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
 		raise
 	
 	
@@ -45,7 +49,10 @@ def calculate_matrix(snplst,pop,request):
 			pop_dirs.append(pop_dir+pop_i+".txt")
 		else:
 			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			return(json.dumps(output, sort_keys=True, indent=2),None,None)
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
 			raise
 	
 	get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
@@ -85,14 +92,18 @@ def calculate_matrix(snplst,pop,request):
 						warn.append(snp_i[0])
 	
 	if warn!=[]:
-		output["warning"]="Not all input SNPs were found in dbSNP 141 ("+",".join(warn)+")"
+		output["warning"]="The following SNPs were not found in dbSNP 141: "+",".join(warn)
 	
 	
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
 		if snp_coords[0][1]!=snp_coords[i][1]:
 			output["error"]="Not all input SNPs are on the same chromosome"
-			return(json.dumps(output, sort_keys=True, indent=2),None,None)
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			raise
 	
 	
@@ -242,11 +253,11 @@ def calculate_matrix(snplst,pop,request):
 	
 	
 	# Generate D' and R2 output matrices
-	d_matrix=[]
-	r_matrix=[]
+	d_out=open(tmp_dir+"d_prime_"+request+".txt", "w")
+	r_out=open(tmp_dir+"r2_"+request+".txt", "w")
 		
-	d_matrix.append("RS_number"+"\t"+"\t".join(rsnum_lst))
-	r_matrix.append("RS_number"+"\t"+"\t".join(rsnum_lst))
+	print >> d_out, "RS_number"+"\t"+"\t".join(rsnum_lst)
+	print >> r_out, "RS_number"+"\t"+"\t".join(rsnum_lst)
 	
 	dim=len(ld_matrix)
 	for i in range(dim):
@@ -255,13 +266,8 @@ def calculate_matrix(snplst,pop,request):
 		for j in range(dim):
 			temp_d.append(str(ld_matrix[i][j][7]))
 			temp_r.append(str(ld_matrix[i][j][8]))
-		d_matrix.append("\t".join(temp_d))
-		r_matrix.append("\t".join(temp_r))
-	
-	output["d_matrix"]=d_matrix
-	output["r_matrix"]=r_matrix
-	
-	out_json=json.dumps(output, sort_keys=True, indent=2)
+		print >> d_out, "\t".join(temp_d)
+		print >> r_out, "\t".join(temp_r)
 	
 	
 	# Generate Plot Variables
@@ -341,6 +347,7 @@ def calculate_matrix(snplst,pop,request):
 	duration=time.time()-start_time
 	print ""
 	print "Run time: "+str(duration)+" seconds\n"
+
 	
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
@@ -348,11 +355,15 @@ def calculate_matrix(snplst,pop,request):
 	
 	
 	# Return output
-	return(out_json,out_script,out_div)
-
+	json_output=json.dumps(output, sort_keys=True, indent=2)
+	print >> out_json, json_output
+	out_json.close()
+	return(out_script,out_div)
+		
 
 def main():
 	import json,sys
+	tmp_dir="./tmp/"
 	
 	# Import LDmatrix options
 	if len(sys.argv)==4:
@@ -365,41 +376,22 @@ def main():
 	
 	
 	# Run function
-	out_json,out_script,out_div=calculate_matrix(snplst,pop,request)
+	out_script,out_div=calculate_matrix(snplst,pop,request)
 	
 	
 	# Print output
-	json_dict=json.loads(out_json)
+	with open(tmp_dir+request+".json") as f:
+		json_dict=json.load(f)
 	
 	try:
 		json_dict["error"]
 	
 	except KeyError:
-		d_matrix=json_dict["d_matrix"]
-		print "D Prime:"
-		for i in range(len(d_matrix)):
-			print d_matrix[i]
-		print ""
-		
-		r_matrix=json_dict["r_matrix"]
-		print "R2:"
-		for i in range(len(r_matrix)):
-			print r_matrix[i]
-		print ""
-		
-		out_script_line=out_script.split("\n")
-		for i in range(len(out_script_line)):
-			if len(out_script_line[i])<110:
-				print out_script_line[i]
-			else:
-				print out_script_line[i][0:110]
-		print ""
-		
-		print out_div
-
+		print "Output saved as: d_prime_"+request+".txt and r2_"+request+".txt"
 		
 		try:
 			json_dict["warning"]
+			
 		except KeyError:
 			print ""
 		else:
