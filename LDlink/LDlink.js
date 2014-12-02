@@ -1,5 +1,13 @@
-//width = 0;
-var proxyTop;
+var restService = {
+  protocol : 'http',
+  hostname : document.location.hostname,
+  fqn : "nci.nih.gov",
+  port : 9090,
+  route : "LDlinkRest"
+}
+
+var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
+    + restService.route;
 
 var populations = {
 	AFR : {
@@ -54,6 +62,7 @@ var populations = {
 		}
 	}
 }
+
 
 function buildPopulationDropdown(elementId) {
 	var htmlText = "";
@@ -123,18 +132,8 @@ function buildPopulationDropdown(elementId) {
 					});
 }
 
-var restService = {
-	protocol : 'http',
-	hostname : document.location.hostname,
-	fqn : "nci.nih.gov",
-	port : 9090,
-	route : "LDlinkRest"
-}
 
-var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
-		+ restService.route;
-
-var ldpairNewData =[
+var ldPairData =[
 {
   "corr_alleles": [
     "rs2720460(A) allele is correlated with rs11733615(C) allele",
@@ -207,36 +206,16 @@ var ldpairNewData =[
   }
 }];
 
-var ldpairModel = ko.mapping.fromJS(ldpairNewData[0]);
-var proxy = [{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
-,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
-,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}];
 
-var newProxy = {
-  proxies: [{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
-,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
-,{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","fdsa":"unknown","MAF":"0.132743362832","R2":1,"RS":"rs7957025","RegulomeDB":"5"}]
+var ldProxyData ={
+  top10:  [{"Alleles":"newProxy","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]
 };
 
-var newProxy3 = {
-  top10: [{"Alleles":"Hello","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"Is this working","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs10847146","RegulomeDB":"5"}]
-};
-var newProxy4 = {
-  top10: [{"Alleles":"YES YES YES","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"Is this working","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.122641509434","R2":1,"RS":"rs10847146","RegulomeDB":"5"}]
-};
+//Map knockout models to a sample json data
+var ldproxyModel = ko.mapping.fromJS(ldProxyData);
+var ldpairModel = ko.mapping.fromJS(ldPairData[0]);
 
-var newProxy5 ={
-  top10:  [{"Alleles":"newProxy5","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]
-};
-console.log("newProxy3");
-console.dir(newProxy3);
-/*
-var newProxy = {"proxy":{"Alleles":"(G/A)","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","FunctionA":"unknown","MAF":"0.120689655172","R2":1,"RS":"rs7957025","RegulomeDB":"5"}
-},
-"proxy":{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.120689655172","R2":1,"RS":"rs10847146","RegulomeDB":"5"}];
-*/
-var ldproxyModel = ko.mapping.fromJS(newProxy5);
-
+//Set file support trigger
 $(document)
 		.on(
 				'change',
@@ -274,6 +253,11 @@ $(document).ready(
 
 						calculate(e);
 			});
+      $('.tab-content').on('click',
+        "button[class|='btn btn-default calculate']", function(e) {
+            //alert("You clicked a button");
+            calculate(e);
+      });
 
   // Add file select listeners
 
@@ -283,21 +267,60 @@ $(document).ready(
 			function(event, numFiles, label) {
 				console.log("numFiles: " + numFiles);
 				console.log("label: " + label);
-				var input = $(this).parents('.input-group').find(
-								':text'), log = numFiles > 1 ? numFiles
-									+ ' files selected' : label;
+				var input = $(this).parents('.input-group').find(':text'),
+              log = numFiles > 1 ? numFiles + ' files selected' : label;
 							if (input.length) {
 								input.val(log);
-							} else {
+						  } else {
 								if (log)
 									alert(log);
-			}
+			        }
 		});
 
+//
+// HERE IS HOW IT IS DONE
+//  https://developer.mozilla.org/en-US/docs/Web/Guide/Using_FormData_Objects
+//
+    $('input').change(function() {
+
+        //alert('uploading');
+
+        var fileInput = document.querySelector('#ldmatrix-file');
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'LDlinkRest/tmp/');
+
+        xhr.upload.onprogress = function(e) {
+        /*
+        * values that indicate the progression
+        * e.loaded
+        * e.total
+        */
+        };
+
+        xhr.onload = function(){
+            alert('upload complete');
+        };
+
+        // upload success
+        if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) {
+            // if your server sends a message on upload sucess,
+            // get it with xhr.responseText
+            alert(xhr.responseText);
+        }
+
+        var form = new FormData();
+        form.append('title', this.files[0].name);
+        form.append('pict', fileInput.files[0]);
+
+        xhr.send(form);
+    });
 });
+
 
 function calculate(e) {
 	var id = e.target.id;
+  e.preventDefault();
 //	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
 
   $('#'+id+'-results-container').hide();
@@ -322,18 +345,78 @@ function updateData(id) {
       updateLDproxy();
       updateProgressBar(id, 30);
 		break;
-	case 'ldheat':
+	case 'ldmatrix':
+      console.log($('#ldmatrix-form').serialize());
+      updateLDmatrix();
 		break;
 	case 'ldhap':
 		break;
 	}
 
 }
-function funcx() {
-   // your code here
-   // break out here if needed
-   setTimeout(funcx, 1000);
+
+function updateLDmatrix() {
+  var id = "ldmatrix";
+
+  var $btn = $('#'+id).button('loading');
+//    snp : $('#ldmatrix-snp').val(),
+
+  var population = $('#'+id+'-population-codes').val();
+  var ldmatrixInputs = {
+    snp: 'sr3',
+    filename: 'get from input',
+    pop : population.join("+"),
+    reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+  };
+  console.log('ldmatrixInputs');
+  console.dir(ldmatrixInputs);
+
+//    Add
+//  $('#ldproxy-results-link').attr('href', 'tmp/proxy'+ldproxyInputs.reference+'.txt');
+
+  var url = restServerUrl + "/ldmatrix";
+  var ajaxRequest = $.ajax({
+    type : "GET",
+    url : url,
+    data : ldmatrixInputs
+  });
+
+  ajaxRequest.success(function(data) {
+      // SUCCESS
+      console.log("SUCCESS");
+      $('#ldmatrix-bokeh-graph').empty().append(data);
+      $('#'+id+'-progress-container').hide();
+      $('#'+id+'-results-container').show();
+      //getLDProxyResults('proxy'+ldproxyInputs.reference+'.json');
+/*
+    setTimeout(function(){
+      var proxyTop = getProxyTop10();
+      ko.mapping.fromJS(proxyTop, ldproxyModel);
+      //alert("Hello");
+    }, 9000);
+*/
+      //Get the top 10...
+      //createProxyTop10();
+
+  });
+  ajaxRequest.fail(function(jqXHR, textStatus) {
+    console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
+        + "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+    //alert('Communication problem: ' + textStatus);
+    // ERROR
+    message = 'Service Unavailable: ' + textStatus+"<br>";
+    message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+    $('#'+id+'-message').show();
+    $('#'+id+'-message-content').empty().append(message);
+    $('#'+id+'-progress').hide();
+  });
+  ajaxRequest.always(function() {
+    $btn.button('reset');
+  });
+
 }
+
 
 function updateProgressBar(id, seconds) {
   var milliseconds = seconds * 1000;
@@ -477,11 +560,14 @@ function updateLDproxy() {
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
-        + "\n\nMake sure Flask Python server is available.");
+        + "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
     //alert('Communication problem: ' + textStatus);
     // ERROR
+    message = 'Service Unavailable: ' + textStatus+"<br>";
+    message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
     $('#'+id+'-message').show();
-    $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Plask Python server is available.");
+    $('#'+id+'-message-content').empty().append(message);
     $('#'+id+'-progress').hide();
   });
   ajaxRequest.always(function() {
@@ -491,69 +577,34 @@ function updateLDproxy() {
 }
 
 function getLDProxyResults(jsonfile) {
-  /*
-      console.log('Here is th json');
-      console.dir(ldproxy_json);
-      var updateTop10 = [];
-      updateTop10.top10 = ldproxy_json.top10;
-      console.log('Where is the new top10');
-      console.dir(updateTop10);
-  */
 
+  var id = "proxy";
   var url = "tmp/"+jsonfile;
   var ajaxRequest = $.ajax({
     type : "GET",
     url : url,
     format: "json"
   });
+
   ajaxRequest.success(function(data) {
-    proxyTop = getProxyTop10(data);
+    ko.mapping.fromJS(data, ldproxyModel);
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     alert('Fail');
+    console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
+        + "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+    message = 'Service Unavailable: ' + textStatus+"<br>";
+    message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+    $('#'+id+'-message').show();
+    $('#'+id+'-message-content').empty().append(message);
+    $('#'+id+'-progress').hide();
   });
   ajaxRequest.always(function() {
-    //alert('Always');
-    //wait here until proxyTop.top10[9] is defined
-      //setTimeout(function(){
-        ko.mapping.fromJS(proxyTop, ldproxyModel);
-      //}, 3000);
   });
 
 
 
-}
-
-function getProxyTop10(data) {
-
-  var ldproxy_json = data;
-  console.log('ldproxy_json');
-  console.dir(ldproxy_json);
-
-  var top10 = {};
-  /*
-  var proxies = [];
-
-  proxies.push(ldproxy_json.proxy_snps.proxy_00001);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00002);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00003);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00004);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00005);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00006);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00007);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00008);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00009);
-  proxies.push(ldproxy_json.proxy_snps.proxy_00010);
-
-  console.log('PROXIES');
-  console.dir(proxies);
-  */
-  top10.top10 = ldproxy_json.top10;
-  console.log('TOP 10');
-  console.dir(top10);
-
-
-  return top10;
 }
 
 function updateLDpair() {
@@ -663,10 +714,10 @@ function addHyperLinks(data) {
     };
     url = server+"?"+$.param(params);
     $('#snp2-coord').attr('href', url);
-
-
 }
 
+
+/*
 jQuery.fn.serializeObject = function() {
 	var o = {};
 	var a = this.serializeArray();
@@ -682,3 +733,4 @@ jQuery.fn.serializeObject = function() {
 	});
 	return o;
 };
+*/

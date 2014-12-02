@@ -15,6 +15,7 @@ from pandas import DataFrame
 import urllib
 from LDpair import calculate_pair
 from LDproxy import calculate_proxy
+from LDmatrix import calculate_matrix
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
@@ -58,7 +59,6 @@ def callRFunction():
 @app.route('/LDlinkRest/hello', methods = ['GET'])
 def hello():
     print 'hello'
-    ping('Another hello')
     return 'hello'
 
 @app.route('/LDlinkRest/ldpair', methods = ['GET'])
@@ -105,13 +105,35 @@ def ldproxy():
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():
-    r1 = 'Calling ldhap'
+    r1 = 'Calling ldhap [GET]'
     return r1
 
 
-@app.route('/LDlinkRest/ldheat', methods = ['GET'])
-def ldheat():
-    r1 = 'Calling ldheat'
+@app.route('/LDlinkRest/ldmatrix', methods = ['GET'])
+def ldmatrixGet():
+    # python LDmatrix.py snps.txt EUR 5
+    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?pop=EUR&reference=5&snp=sr3
+    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?filename=get+from+input&pop=LWK%2BGWD&reference=76178
+    print
+    print 'Execute ldmatrix'
+    print 'Gathering Variables from url'
+    snp = request.args.get('snp', False)
+    pop = request.args.get('pop', False)
+    reference = request.args.get('reference', False)
+    print 'snp: ' + snp
+    print 'pop: ' + pop
+    print 'request: ' + reference
+    print
+    snplst = 'snps.txt'
+    #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
+    out_script,out_div = calculate_matrix(snplst,pop,reference)
+
+    return out_script+"\n "+out_div
+
+
+@app.route('/LDlinkRest/ldmatrix', methods = ['POST'])
+def ldmatrixPost():
+    r1 = 'Calling ldmatrix [POST]'
     return r1
 
 import argparse
