@@ -197,9 +197,8 @@ def calculate_proxy(snp,pop,request):
 			proxy_info["Function"]=out_ld_sort[i][13]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
 			if i<=10:
+				proxy_info["MAF"]=str(round(float(out_ld_sort[i][12]),3))
 				top10.append(proxy_info)
-			#proxies["proxy"][i]=proxy_info
-			#proxies(proxy_info);
 
 	output["proxy_snps"]=proxies
 	output["top10"]=top10
@@ -213,7 +212,7 @@ def calculate_proxy(snp,pop,request):
 
 
 	# Create output .txt for download
-	outfile=open(tmp_dir+'proxy'+request+".txt","w")
+	outfile=open(tmp_dir+"proxy"+request+".txt","w")
 
 	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
 	print >> outfile, "\t".join(header)
@@ -388,7 +387,7 @@ def main():
 	out_script,out_div=calculate_proxy(snp,pop,request)
 
 	# Print output
-	with open(tmp_dir+request+".json") as f:
+	with open(tmp_dir+"proxy"+request+".json") as f:
 		json_dict=json.load(f)
 
 	try:
