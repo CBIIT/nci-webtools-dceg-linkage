@@ -277,7 +277,7 @@ def calculate_proxy(snp,pop,request):
 		# Set Color
 		if i==0:
 			color_i="blue"
-		elif funct_i!="unknown":
+		elif funct_i!="unknown" and funct_i!="":
 			color_i="orange"
 		else:
 			color_i="red"
