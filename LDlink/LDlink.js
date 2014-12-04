@@ -227,10 +227,11 @@ $(document)
 					input.trigger('fileselect', [ numFiles, label ]);
 				});
 
-var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
 
-$(document).ready(
-		function() {
+$(document).ready(function() {
+
+      var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
+
 			// Apply Bindings
 			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
       ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
@@ -241,21 +242,17 @@ $(document).ready(
 
 			$.each(modules, function(key, id) {
 				buildPopulationDropdown(id+"-population-codes");
-
         $("#"+id+"-results-container").hide();
         $('#'+id+'-message').hide();
         $('#'+id+'-message-warning').hide();
-
 			});
 
 			$('.tab-content').on('click',
 					"a[class|='btn btn-default calculate']", function(e) {
-
 						calculate(e);
 			});
       $('.tab-content').on('click',
         "button[class|='btn btn-default calculate']", function(e) {
-            //alert("You clicked a button");
             calculate(e);
       });
 
@@ -265,6 +262,7 @@ $(document).ready(
 		.on(
 			'fileselect',
 			function(event, numFiles, label) {
+        populateTextArea(event, numFiles, label);
 				console.log("numFiles: " + numFiles);
 				console.log("label: " + label);
 				var input = $(this).parents('.input-group').find(':text'),
@@ -281,42 +279,26 @@ $(document).ready(
 // HERE IS HOW IT IS DONE
 //  https://developer.mozilla.org/en-US/docs/Web/Guide/Using_FormData_Objects
 //
-    $('input').change(function() {
-
-        //alert('uploading');
-
-        var fileInput = document.querySelector('#ldmatrix-file');
-
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'LDlinkRest/tmp/');
-
-        xhr.upload.onprogress = function(e) {
-        /*
-        * values that indicate the progression
-        * e.loaded
-        * e.total
-        */
-        };
-
-        xhr.onload = function(){
-            alert('upload complete');
-        };
-
-        // upload success
-        if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) {
-            // if your server sends a message on upload sucess,
-            // get it with xhr.responseText
-            alert(xhr.responseText);
-        }
-
-        var form = new FormData();
-        form.append('title', this.files[0].name);
-        form.append('pict', fileInput.files[0]);
-
-        xhr.send(form);
-    });
 });
 
+function populateTextArea(event, numFiles, label) {
+  id = event.target.id;
+  if(window.FileReader) {
+
+    var input = event.target;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var text = reader.result;
+      $('#'+id+'-snp-numbers').val(text);
+      console.log("Append to textarea");
+      console.log(reader.result.substring(0, 10000));
+    };
+    reader.readAsText(input.files[0]);
+  } else {
+    alert('FileReader not supported');
+    return;
+  }
+}
 
 function calculate(e) {
 	var id = e.target.id;
@@ -360,23 +342,50 @@ function updateLDmatrix() {
 
   var $btn = $('#'+id).button('loading');
 //    snp : $('#ldmatrix-snp').val(),
-
+  var snps = $('#'+id+'-file-snp-numbers').val();
   var population = $('#'+id+'-population-codes').val();
+  //var snps = snps.replace("\n", ",");
+  //alert(snps);
+  //alert(population);
+  console.log("snps");
+  console.dir(snps);
+  console.log("population");
+  console.dir(population);
+
   var ldmatrixInputs = {
-    snp: 'sr3',
-    filename: 'get from input',
+    snps: snps,
     pop : population.join("+"),
     reference : Math.floor(Math.random() * (99999 - 10000 + 1))
   };
   console.log('ldmatrixInputs');
   console.dir(ldmatrixInputs);
+/*
+  var ajaxType;
+  // The Javascript
+  var fileInput = document.getElementById('ldmatrix-file');
+  var formData = new FormData();
 
-//    Add
-//  $('#ldproxy-results-link').attr('href', 'tmp/proxy'+ldproxyInputs.reference+'.txt');
+  if($("#ldmatrix-file").val() == '') {
+    ajaxType = 'GET';
+  } else {
+    //Append file to post
+    ajaxType = 'POST';
+    var file = fileInput.files[0];
+    formData.append('file', file);
+    formData.append('filename', file.name);
+    formData.append('filetype', file.type);
+  }
+  formData.append('pop', ldmatrixInputs.pop);
+
+
+  console.log("formData");
+  console.dir(formData);
+*/
+
 
   var url = restServerUrl + "/ldmatrix";
   var ajaxRequest = $.ajax({
-    type : "GET",
+    type : 'GET',
     url : url,
     data : ldmatrixInputs
   });
@@ -387,6 +396,9 @@ function updateLDmatrix() {
       $('#ldmatrix-bokeh-graph').empty().append(data);
       $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
+
+      addLDMatrixHyperLinks(ldmatrixInputs.reference);
+
       //getLDProxyResults('proxy'+ldproxyInputs.reference+'.json');
 /*
     setTimeout(function(){
@@ -417,7 +429,10 @@ function updateLDmatrix() {
 
 }
 
-
+function addLDMatrixHyperLinks(request) {
+  $('#ldmatrix-DPrime').attr('href','tmp/d_prime_'+request+'.txt');
+  $('#ldmatrix-R2').attr('href','tmp/r2_'+request+'.txt');
+}
 function updateProgressBar(id, seconds) {
   var milliseconds = seconds * 1000;
   // Divide number of milliseconds to get 100 to get 100 updates

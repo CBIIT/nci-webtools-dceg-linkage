@@ -17,7 +17,9 @@
 <meta name="author" content="">
 
 <title>LD Link Toolset</title>
-
+<!-- Too slow
+<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
+-->
 <script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
 
 
@@ -178,7 +180,7 @@
           <div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
             <div class="input-group">
               <span class="input-group-btn"><span class=
-              "btn btn-primary btn-file">Browse<input type="file"
+              "btn btn-primary btn-file">Browse<input id="ldhap-file" type="file"
               multiple></span></span> <input type="text" class=
               "form-control" readonly>
             </div>
@@ -195,7 +197,7 @@
           <div class="col-md-9 col-md-offset-1">
             <div class="form-group">
               <div class="col-md-3">
-                <textarea placeholder="Text entry" name="Text1"
+                <textarea id="ldhap-file-snp-numbers" placeholder="Text entry" name="Text1"
                 cols="40" rows="5" class="form-control">
 </textarea>
               </div><select id="ldhap-population-codes" multiple=
@@ -213,19 +215,19 @@
 			<div class="tab-pane fade" id="ldmatrix-tab">
 
         <form id="ldmatrix-form" class="form-inline" role="form">
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
-            <div class="input-group">
-              <span class="input-group-btn">
-                <span class="btn btn-primary btn-file">Browse
-                    <input type="file" id="ldmatrix-file">
+          <div class="row" style="padding-top: 10px;">
+            <div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
+              <div class="input-group">
+                <span class="input-group-btn">
+                  <span class="btn btn-primary btn-file">Browse
+                      <input type="file" id="ldmatrix-file">
+                  </span>
                 </span>
-              </span>
-              <input type="text" class="form-control" readonly>
+                <input type="text" class="form-control" readonly>
 
+              </div>
             </div>
           </div>
-        </div>
 
         <div class="row" style="padding-top: 10px;">
           <div class="col-md-9 col-md-offset-1">
@@ -236,12 +238,16 @@
         <div class="row" style="padding-top: 10px;">
           <div class="col-md-9 col-md-offset-1">
             <div class="form-group">
-              <div class="col-md-3">
-                <textarea placeholder="Text entry" name="ldmatrix-text"
-                cols="40" rows="5" class="form-control"></textarea>
+              <div class="col-md-2" style="width:200px;">
+                <textarea id="ldmatrix-file-snp-numbers" placeholder="Text entry"
+                cols="12" rows="6" class="form-control"></textarea>
               </div>
-              <select id="ldmatrix-population-codes" multiple="multiple"></select>
-              <button type="submit" class="btn btn-default calculate" id="ldmatrix">Calculate</button>
+              <div class="col-md-6">
+                  <select id="ldmatrix-population-codes" multiple="multiple"></select>
+              </div>
+              <div class="col-md-2">
+                  <button type="submit" class="btn btn-default calculate" id="ldmatrix">Calculate</button>
+              </div>
             </div>
           </div>
         </div>
@@ -268,15 +274,23 @@
           </div>
         </div>
         </div>
-                  <!-- LDProxy CONTAINER -->
+                  <!-- LDMatrix CONTAINER -->
+        <div class="jumbotron">
           <div class="container-fluid" id="ldmatrix-results-container">
-
-            <div id="ldmatrix-bokeh-graph"></div>
+            <div class="row">
+                <div class="col-md-11 col-md-offset-1">
+                    <div id="ldmatrix-bokeh-graph"></div>
+                </div>
+                <div class="col-md-11 col-md-offset-1">
+                      <span><a id="ldmatrix-DPrime" target="LDMatrix-DPrime">Download D Prime File</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
+                      <span><a id="ldmatrix-R2" target="LDMatrix-R2">Download R2 File</a></span>
+                </div>
+            </div>
           </div>
+        </div>
 
 
-
-			<!-- LDmatrix -->
+			<!-- LDpair -->
 
 			<div class="tab-pane fade" id="ldpair-tab">
 				<!-- LDpair INPUTS-->

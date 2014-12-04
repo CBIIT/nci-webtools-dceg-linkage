@@ -1,5 +1,5 @@
 #!flask/bin/python
-from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify
+from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect
 from functools import wraps
 from flask import current_app
 
@@ -17,7 +17,20 @@ from LDpair import calculate_pair
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 
+'''Hello'''
+
+#import os
+#from flask import Flask, request, redirect, url_for
+from werkzeug import secure_filename
+
+UPLOAD_FOLDER = '/h1/kneislercp/nci-analysis-tools-web-presence/src/LDlink/tmp'
+ALLOWED_EXTENSIONS = set(['txt'])
+
 app = Flask(__name__, static_folder='', static_url_path='/')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.debug = True
+
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 @app.route('/')
@@ -43,7 +56,7 @@ def jsonp(func):
 def setRWorkingDirectory():
     sourceReturn1 = robjects.r("path")
     return ""
-
+'''
 @app.route('/riskStratAdvRest/cal', methods = ['POST'])
 @jsonp
 def callRFunction():
@@ -55,11 +68,8 @@ def callRFunction():
     jsondata = r_getname_getData(thestream)
     print "json string >> "+str(jsondata[0]);
     return jsondata[0]
+'''
 
-@app.route('/LDlinkRest/hello', methods = ['GET'])
-def hello():
-    print 'hello'
-    return 'hello'
 
 @app.route('/LDlinkRest/ldpair', methods = ['GET'])
 def ldpair():
@@ -110,31 +120,93 @@ def ldhap():
 
 
 @app.route('/LDlinkRest/ldmatrix', methods = ['GET'])
-def ldmatrixGet():
+def ldmatrix():
     # python LDmatrix.py snps.txt EUR 5
     #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?pop=EUR&reference=5&snp=sr3
     #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?filename=get+from+input&pop=LWK%2BGWD&reference=76178
     print
     print 'Execute ldmatrix'
     print 'Gathering Variables from url'
-    snp = request.args.get('snp', False)
+
+    snps = request.args.get('snps', False)
+    pop = request.args.get('pop', False)
+    reference = request.args.get('reference', False)
+    print 'snps: ' + snps
+    print 'pop: ' + pop
+    print 'request: ' + reference
+
+    snplst = './tmp/snps'+reference+'.txt'
+    print 'snplst: '+snplst
+
+    f = open(snplst, 'w')
+    f.write(snps)
+    f.close()
+
+    out_script,out_div = calculate_matrix(snplst,pop,reference)
+    return out_script+"\n "+out_div
+    #return request.method
+
+
+@app.route('/LDlinkRest/test', methods=['GET', 'POST'])
+def test():
+    print 'In /LDlinkRest/test'
+    print 'request.headers[Content-Type]'
+    print request.headers['Content-Type']
+    print ''
+    print 'request.data'
+    print request.data
+    print 'request.args'
+    print json.dumps(request.args)
+
+    print 'request.files'
+    print request.files
+
+    print 'request.method'
+    print request.method
+
+    print
+    print 'Execute ldmatrix'
+    print 'Gathering Variables from url'
+    snps = request.args.get('snps', False)
+    #filename = request.args.get('filename', False)
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
     print 'snp: ' + snp
     print 'pop: ' + pop
     print 'request: ' + reference
     print
-    snplst = 'snps.txt'
-    #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
-    out_script,out_div = calculate_matrix(snplst,pop,reference)
+    snplst = 'snps2.txt'
 
-    return out_script+"\n "+out_div
+    if request.headers['Content-Type'] == 'text/plain':
+        return "Text Message: " + request.data
+
+    elif request.headers['Content-Type'] == 'application/json':
+        return "JSON Message: " + json.dumps(request.json)
+
+    elif request.headers['Content-Type'] == 'application/octet-stream':
+        f = open('./binary', 'wb')
+        f.write(request.data)
+        f.close()
+        return "Binary message written!"
+    elif request.headers['Content-Type'] == 'multipart/form-data':
+        return 'multipart/form-data'
+    elif request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
+        return 'application/x-www-form-urlencoded'
+
+    else:
+        return "415 Unsupported Media Type ;)"
 
 
-@app.route('/LDlinkRest/ldmatrix', methods = ['POST'])
-def ldmatrixPost():
-    r1 = 'Calling ldmatrix [POST]'
-    return r1
+@app.route('/LDlinkRest/upload', methods=['GET', 'POST'])
+def upload():
+    if request.method == 'POST' and 'photo' in request.files:
+        filename = photos.save(request.files['photo'])
+        rec = Photo(filename=filename, user=g.user.id)
+        rec.store()
+        flash("Photo saved.")
+        return redirect(url_for('show', id=rec.id))
+    return render_template('upload.html')
+
 
 import argparse
 if __name__ == '__main__':

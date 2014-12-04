@@ -324,7 +324,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		statistics["r2"]=r2
 		statistics["chisq"]=chisq
 		statistics["p"]=p
-	
+
 	output["statistics"]=statistics
 
 	output["corr_alleles"]=corr_alleles
