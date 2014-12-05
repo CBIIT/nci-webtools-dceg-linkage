@@ -26,31 +26,32 @@
 <script
 	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
 	type="text/javascript">
-
+	
 </script>
 <script
 	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
 	type="text/javascript">
+	
 </script>
 
 <script
 	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
 	type="text/javascript">
-
+	
 </script>
 <script
 	src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
 	type="text/javascript">
-
+	
 </script>
 <script
 	src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
 	type="text/javascript">
-
+	
 </script>
 
 <script src="LDlink.js" type="text/javascript">
-
+	
 </script>
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
@@ -69,7 +70,7 @@
 
 <script type="text/javascript"
 	src="../common/js/bootstrap-multiselect.js">
-
+	
 </script>
 <link rel="stylesheet" href="../common/css/bootstrap-multiselect.css"
 	type="text/css">
@@ -175,120 +176,106 @@
 
 			<div class="tab-pane fade" id="ldhap-tab">
 
-        <form role="form">
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
-            <div class="input-group">
-              <span class="input-group-btn"><span class=
-              "btn btn-primary btn-file">Browse<input id="ldhap-file" type="file"
-              multiple></span></span> <input type="text" class=
-              "form-control" readonly>
-            </div>
-          </div>
-        </div>
+				<form role="form">
+					<div class="row" style="padding-top: 10px;">
+						<div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
+							<div class="input-group">
+								<span class="input-group-btn"><span
+									class="btn btn-default btn-file">Browse<input
+										id="ldhap-file" type="file" multiple></span></span> <input
+									type="text" class="form-control" readonly>
+							</div>
+						</div>
+					</div>
 
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-md-9 col-md-offset-1">
-            <span>or</span>
-          </div>
-        </div>
+					<div class="row" style="padding-top: 10px;">
+						<div class="col-md-9 col-md-offset-1">
+							<span>or</span>
+						</div>
+					</div>
 
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-md-9 col-md-offset-1">
-            <div class="form-group">
-              <div class="col-md-3">
-                <textarea id="ldhap-file-snp-numbers" placeholder="Text entry" name="Text1"
-                cols="40" rows="5" class="form-control">
+					<div class="row" style="padding-top: 10px;">
+						<div class="col-md-9 col-md-offset-1">
+							<div class="form-group">
+								<div class="col-md-3">
+									<textarea id="ldhap-file-snp-numbers" placeholder="Text entry"
+										name="Text1" cols="40" rows="8" class="form-control">
 </textarea>
-              </div><select id="ldhap-population-codes" multiple=
-              "multiple">
-                </select> <a id="ldhap-calculate-button" class=
-                "btn btn-primary calculate" href="#"> Calculate</a>
-            </div>
-          </div>
-        </div>
-        </form>
+								</div>
+								<select id="ldhap-population-codes" multiple="multiple">
+								</select> <a id="ldhap-calculate-button"
+									class="btn btn-primary calculate" href="#"> Calculate</a>
+							</div>
+						</div>
+					</div>
+				</form>
 
 			</div>
 			<!-- LDmatrix -->
 
 			<div class="tab-pane fade" id="ldmatrix-tab">
 
-        <form id="ldmatrix-form" class="form-inline" role="form">
-          <div class="row" style="padding-top: 10px;">
-            <div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
-              <div class="input-group">
-                <span class="input-group-btn">
-                  <span class="btn btn-primary btn-file">Browse
-                      <input type="file" id="ldmatrix-file">
-                  </span>
-                </span>
-                <input type="text" class="form-control" readonly>
+				<form id="ldmatrix-form" class="form-inline" role="form">
+					<div class="row" style="padding-top: 10px;">
+						<div class="col-sm-4 col-md-4">
+							<div class="input-group">
+								<span class="input-group-btn"> <span
+									class="btn btn-default btn-file">Browse <input
+										type="file" id="ldmatrix-file">
+								</span>
+								</span> <input type="text" class="form-control" readonly>
+							</div>
+							<br>or <br>
+							<textarea id="ldmatrix-file-snp-numbers" placeholder="RS Numbers"
+								cols="12" rows="8" class="form-control"
+								title="Enter list of RS numbers (one per line)"></textarea>
+						</div>
+						<div class="col-sm-5 col-md-4">
+							<select id="ldmatrix-population-codes" multiple="multiple"></select>
+						</div>
+						<div class="col-sm-3 col-md-4">
+							<button type="submit" class="btn btn-default calculate"
+								id="ldmatrix">Calculate</button>
+						</div>
+					</div>
+				</form>
 
-              </div>
-            </div>
-          </div>
-
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-md-9 col-md-offset-1">
-            <span>or</span>
-          </div>
-        </div>
-
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-md-9 col-md-offset-1">
-            <div class="form-group">
-              <div class="col-md-2" style="width:200px;">
-                <textarea id="ldmatrix-file-snp-numbers" placeholder="Text entry"
-                cols="12" rows="6" class="form-control"></textarea>
-              </div>
-              <div class="col-md-6">
-                  <select id="ldmatrix-population-codes" multiple="multiple"></select>
-              </div>
-              <div class="col-md-2">
-                  <button type="submit" class="btn btn-default calculate" id="ldmatrix">Calculate</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      </form>
-            <hr>
-        <!-- Message ERROR -->
-        <div class="row">
-        <div class="col-md-7 col-md-offset-2" id="ldmatrix-message">
-          <div class="panel panel-danger">
-            <div class="panel-heading">Error</div>
-              <div class="panel-body" id="ldmatrix-message-content">
-              </div>
-          </div>
-        </div>
-        </div>
-        <!-- Message WARNING -->
-        <div class="row">
-        <div class="col-md-7 col-md-offset-2" id="ldmatrix-message-warning">
-          <div class="panel panel-warning">
-            <div class="panel-heading">Warning</div>
-              <div class="panel-body" id="ldmatrix-message-warning-content">
-              </div>
-          </div>
-        </div>
-        </div>
-                  <!-- LDMatrix CONTAINER -->
-        <div class="jumbotron">
-          <div class="container-fluid" id="ldmatrix-results-container">
-            <div class="row">
-                <div class="col-md-11 col-md-offset-1">
-                    <div id="ldmatrix-bokeh-graph"></div>
-                </div>
-                <div class="col-md-11 col-md-offset-1">
-                      <span><a id="ldmatrix-DPrime" target="LDMatrix-DPrime">Download D Prime File</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
-                      <span><a id="ldmatrix-R2" target="LDMatrix-R2">Download R2 File</a></span>
-                </div>
-            </div>
-          </div>
-        </div>
-
+				<hr>
+				<!-- Message ERROR -->
+				<div class="row">
+					<div class="col-md-7 col-md-offset-2" id="ldmatrix-message">
+						<div class="panel panel-danger">
+							<div class="panel-heading">Error</div>
+							<div class="panel-body" id="ldmatrix-message-content"></div>
+						</div>
+					</div>
+				</div>
+				<!-- Message WARNING -->
+				<div class="row">
+					<div class="col-md-7 col-md-offset-2" id="ldmatrix-message-warning">
+						<div class="panel panel-warning">
+							<div class="panel-heading">Warning</div>
+							<div class="panel-body" id="ldmatrix-message-warning-content">
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- LDMatrix CONTAINER -->
+				<div class="jumbotron">
+					<div class="container-fluid" id="ldmatrix-results-container">
+						<div class="row">
+							<div class="col-md-11 col-md-offset-1">
+								<div id="ldmatrix-bokeh-graph"></div>
+							</div>
+							<div class="col-md-11 col-md-offset-1">
+								<span><a id="ldmatrix-DPrime" target="LDMatrix-DPrime">Download
+										D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp; <span><a
+									id="ldmatrix-R2" target="LDMatrix-R2">Download R2 File</a></span>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 
 			<!-- LDpair -->
 
@@ -299,65 +286,61 @@
 					<div class="col-md-9 col-md-offset-1">
 						<div id="ldpair-inputs-form" class="form-group">
 							<div class="col-md-2">
-                <label for="ldpair-snp1" style="display:none;">LD Pair SNP1</label>
-								<input id="ldpair-snp1" name="textinput"
-									class="form-control input-small" type="text" placeholder="SNP1 RS Number">
+								<label for="ldpair-snp1" style="display: none;">LD Pair
+									SNP1</label> <input id="ldpair-snp1" name="textinput"
+									class="form-control input-small" type="text"
+									placeholder="SNP1 RS Number" required
+									title="Enter SNP1 RS number">
 							</div>
 
 							<div class="col-md-2">
-                <label for="ldpair-snp2" style="display:none;">LD Pair SNP2</label>
-								<input id="ldpair-snp2" name="textinput"
-									class="form-control input-small" type="text" placeholder="SNP2 RS Number">
+								<label for="ldpair-snp2" style="display: none;">LD Pair
+									SNP2</label> <input id="ldpair-snp2" name="textinput"
+									class="form-control input-small" type="text"
+									placeholder="SNP2 RS Number" required
+									title="Enter SNP2 RS number">
 							</div>
-              <label for="ldpair-population-codes" style="display:none;">LD Pair Population</label>
-							<select id="ldpair-population-codes" multiple="multiple">
-							</select>
-              <a id="ldpair" class="btn btn-default calculate">
-								Calculate</a>
+							<label for="ldpair-population-codes" style="display: none;">LD
+								Pair Population</label> <select id="ldpair-population-codes"
+								multiple="multiple">
+							</select> <a id="ldpair" class="btn btn-default calculate"> Calculate</a>
 						</div>
-            <hr>
-        <!-- Message ERROR -->
-        <div class="row">
-        <div class="col-md-7 col-md-offset-2" id="ldpair-message">
-          <div class="panel panel-danger">
-            <div class="panel-heading">Error</div>
-              <div class="panel-body" id="ldpair-message-content">
-              </div>
-          </div>
-        </div>
-        </div>
-        <!-- Message WARNING -->
-        <div class="row">
-        <div class="col-md-7 col-md-offset-2" id="ldpair-message-warning">
-          <div class="panel panel-warning">
-            <div class="panel-heading">Warning</div>
-              <div class="panel-body" id="ldpair-message-warning-content">
-              </div>
-          </div>
-        </div>
-        </div>
+						<hr>
+						<!-- Message ERROR -->
+						<div class="row">
+							<div class="col-md-7 col-md-offset-2" id="ldpair-message">
+								<div class="panel panel-danger">
+									<div class="panel-heading">Error</div>
+									<div class="panel-body" id="ldpair-message-content"></div>
+								</div>
+							</div>
+						</div>
+						<!-- Message WARNING -->
+						<div class="row">
+							<div class="col-md-7 col-md-offset-2" id="ldpair-message-warning">
+								<div class="panel panel-warning">
+									<div class="panel-heading">Warning</div>
+									<div class="panel-body" id="ldpair-message-warning-content">
+									</div>
+								</div>
+							</div>
+						</div>
 
 					</div>
 				</div>
 				<!-- LDpair OUTPUT Results -->
 
 				<div class="jumbotron">
-          <!-- LDPAIR CONTAINER -->
+					<!-- LDPAIR CONTAINER -->
 					<div class="container-fluid" id="ldpair-results-container">
 						<div style="text-align: center">
-              <a id="snp2-rsnum"
-               data-bind="text: snp2.rsnum"
-               href="#"
-               title="Cluster Report:"
-               target="LDPair"></a>
-            </div>
+							<a id="snp2-rsnum" data-bind="text: snp2.rsnum" href="#"
+								title="Cluster Report:" target="LDPair"></a>
+						</div>
 						<div style="text-align: center">
-              <a id="snp2-coord"
-               data-bind="text: snp2.coord"
-               href="#"
-               title="Genome Browser"
-               target="LDPair"></a>
-            </div>
+							<a id="snp2-coord" data-bind="text: snp2.coord" href="#"
+								title="Genome Browser" target="LDPair"></a>
+						</div>
 						<table class="table table-condensed ldhap">
 							<tbody>
 								<!-- Header row -->
@@ -365,40 +348,34 @@
 									<td></td>
 									<td></td>
 									<td class="cell-center" data-bind="text: snp2.allele_1.allele"></td>
-									<td class="cell-center"  data-bind="text: snp2.allele_2.allele"></td>
+									<td class="cell-center" data-bind="text: snp2.allele_2.allele"></td>
 									<td></td>
 									<td></td>
 								</tr>
 								<!-- Row 2 -->
 								<tr>
-									<td class="cell-right" width="250">
-                    <a id="snp1-rsnum"
-                     data-bind="text: snp1.rsnum"
-                     href="#"
-                     title="Cluster Report:"
-                     target="_blank"></a>
-                  </div>
-
-                  </td>
+									<td class="cell-right" width="250"><a id="snp1-rsnum"
+										data-bind="text: snp1.rsnum" href="#" title="Cluster Report:"
+										target="_blank"></a></td>
 									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
 									<td colspan="2" rowspan="2">
 										<!-- two-by-two sub table -->
 										<table class="table table-condensed table-bordered two-by-two">
 											<tbody>
-											<tr>
-												<td class="ldpair-results cell-center" width="50%"
-													data-bind="text: two_by_two.cells.c11"></td>
+												<tr>
+													<td class="ldpair-results cell-center" width="50%"
+														data-bind="text: two_by_two.cells.c11"></td>
+													<td class="ldpair-results cell-center"
+														data-bind="text: two_by_two.cells.c12"></td>
+												</tr>
 												<td class="ldpair-results cell-center"
-													data-bind="text: two_by_two.cells.c12"></td>
-											</tr>
-											<td class="ldpair-results cell-center"
-												data-bind="text: two_by_two.cells.c21"></td>
-											<td class="ldpair-results cell-center"
-												data-bind="text: two_by_two.cells.c22"></td>
-											<tr>
-											</tr>
-                      </tbody>
+													data-bind="text: two_by_two.cells.c21"></td>
+												<td class="ldpair-results cell-center"
+													data-bind="text: two_by_two.cells.c22"></td>
+												<tr>
+												</tr>
+											</tbody>
 										</table>
 									</td>
 									<td data-bind="text: snp1.allele_1.count"></td>
@@ -408,14 +385,10 @@
 								</tr>
 								<!-- Row 3 -->
 								<tr>
-									<td class="cell-right">
-                    <a id="snp1-coord"
-                     data-bind="text: snp1.coord"
-                     href="#"
-                     title="Genome Browser"
-                     target="_blank"></a>
-                  </td>
-									<td class="cell-center"  data-bind="text: snp1.allele_2.allele"></td>
+									<td class="cell-right"><a id="snp1-coord"
+										data-bind="text: snp1.coord" href="#" title="Genome Browser"
+										target="_blank"></a></td>
+									<td class="cell-center" data-bind="text: snp1.allele_2.allele"></td>
 									<td data-bind="text: snp1.allele_2.count"></td>
 									<td class="cell-left">(<span
 										data-bind="text: snp1.allele_2.frequency"></span>)
@@ -442,7 +415,7 @@
 									<tbody>
 										<tr>
 											<td colspan="2" class="cell-center" width="200"><u>Haplotypes</u></td>
-                      <td colspan="2" class="cell-center" width="200"><u>Statistics</u></td>
+											<td colspan="2" class="cell-center" width="200"><u>Statistics</u></td>
 										</tr>
 										<tr>
 											<td class="cell-right"><span
@@ -459,19 +432,17 @@
 												(<span data-bind="text: haplotypes.hap3.frequency"></span>)
 												<br> <span data-bind="text: haplotypes.hap4.count"></span>&nbsp;
 												(<span data-bind="text: haplotypes.hap4.frequency"></span>)
-												<br>
-                      </td>
-                      <td class="cell-right">D:<br>R2:<br>Chi-sq:<br>p-value:
-                      </td>
-                      <td><span data-bind="text: statistics.d_prime"></span><br>
-                        <span data-bind="text: statistics.r2"></span><br> <span
-                        data-bind="text: statistics.chisq"></span><br> <span
-                        data-bind="text: statistics.p"></span><br>
-                       </td>
+												<br></td>
+											<td class="cell-right">D':<br>R2:<br>Chi-sq:<br>p-value:
+											</td>
+											<td><span data-bind="text: statistics.d_prime"></span><br>
+												<span data-bind="text: statistics.r2"></span><br> <span
+												data-bind="text: statistics.chisq"></span><br> <span
+												data-bind="text: statistics.p"></span><br></td>
 										</tr>
 									</tbody>
 								</table>
-              </div>
+							</div>
 						</div>
 						<div data-bind="foreach: corr_alleles">
 							<div style="text-align: center" data-bind="text: $data"></div>
@@ -481,120 +452,119 @@
 			</div>
 			<!-- LDproxy -->
 			<div class="tab-pane fade" id="ldproxy-tab">
-        <!-- LDproxy INPUTS-->
+				<!-- LDproxy INPUTS-->
 
-        <div class="row" style="padding-top: 10px;">
-          <div class="col-md-12">
-            <div class="form-group">
-              <div class="col-md-2">
-              <label for="ldproxy-snp" style="display:none;">Proxy SNP</label>
-                <input id="ldproxy-snp" name="textinput"
-                  class="form-control input-small" type="text" placeholder="SNP RS Number">
-              </div>
-              <label for="ldproxy-population-codes" style="display:none;">Proxy Population</label>
-              <select id="ldproxy-population-codes" multiple="multiple">
-              </select>
-              <a id="ldproxy" class="btn btn-default calculate" data-loading-text="Loading...">
-                Calculate</a>
-              <hr>
-            </div>
-        <!-- Message ERROR -->
-            <div class="row">
-              <div class="col-md-7 col-md-offset-2" id="ldproxy-message">
-                  <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        Error
-                    </div>
-                    <div class="panel-body" id="ldproxy-message-content">
-                    </div>
-                  </div>
-              </div>
-            </div>
-        <!-- Message WARNING -->
-            <div class="row">
-            <div class="col-md-7 col-md-offset-2" id="ldproxy-message-warning">
-                  <div class="panel panel-warning">
-                    <div class="panel-heading">Warning</div>
-                    <div class="panel-body" id="ldproxy-message-warning-content">
-                  </div>
-            </div>
+				<div class="row" style="padding-top: 10px;">
+					<div class="col-md-12">
+						<div class="form-group">
+							<div class="col-md-2">
+								<label for="ldproxy-snp" style="display: none;">Proxy
+									SNP</label> <input id="ldproxy-snp" name="textinput"
+									class="form-control input-small" type="text"
+									placeholder="SNP RS Number">
+							</div>
+							<label for="ldproxy-population-codes" style="display: none;">Proxy
+								Population</label> <select id="ldproxy-population-codes"
+								multiple="multiple">
+							</select> <a id="ldproxy" class="btn btn-default calculate"
+								data-loading-text="Loading..."> Calculate</a>
+							<hr>
+						</div>
+						<!-- Message ERROR -->
+						<div class="row">
+							<div class="col-md-7 col-md-offset-2" id="ldproxy-message">
+								<div class="panel panel-danger">
+									<div class="panel-heading">Error</div>
+									<div class="panel-body" id="ldproxy-message-content"></div>
+								</div>
+							</div>
+						</div>
+						<!-- Message WARNING -->
+						<div class="row">
+							<div class="col-md-7 col-md-offset-2"
+								id="ldproxy-message-warning">
+								<div class="panel panel-warning">
+									<div class="panel-heading">Warning</div>
+									<div class="panel-body" id="ldproxy-message-warning-content">
+									</div>
+								</div>
 
-          </div>
-        </div>
-        <!-- LDpair OUTPUT Results -->
+							</div>
+						</div>
+						<!-- LDpair OUTPUT Results -->
 
-        <div class="jumbotron">
-          <!-- LDPROXY PROGRESS BAR -->
-          <div id="ldproxy-progress-container"style="width:525px;display:none;">
-              <div id="ldproxy-progress" class="progress">
-                      <div class="progress-bar" role="progressbar"
-                        aria-valuenow="0" aria-valuemin="0"
-                        aria-valuemax="100" style="width: 0%;">0%</div>
-              </div>
-          </div>
+						<div class="jumbotron">
+							<!-- LDPROXY PROGRESS BAR -->
+							<div id="ldproxy-progress-container"
+								style="width: 525px; display: none;">
+								<div id="ldproxy-progress" class="progress">
+									<div class="progress-bar" role="progressbar" aria-valuenow="0"
+										aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>
+								</div>
+							</div>
 
-          <!-- LDProxy CONTAINER -->
-          <div class="container-fluid" id="ldproxy-results-container">
+							<!-- LDProxy CONTAINER -->
+							<div class="container-fluid" id="ldproxy-results-container">
 
-            <div id="ldproxy-bokeh-graph"></div>
-            <br>
-            <br>
-            <div id="ldproxy-table-container">
+								<div id="ldproxy-bokeh-graph"></div>
+								<br> <br>
+								<div id="ldproxy-table-container">
 
-            <div class="row proxy-table-title-row">
-                <h3 class="pull-left">Top 10 Proxy SNPs</h3>
-            </div>
-            <table class="table table-bordered">
-              <thead>
-                <!-- Header row -->
-                <tr>
-                  <td>RS Number</td>
-                  <td>Coord</td>
-                  <td>Alleles</td>
-                  <td>MAF</td>
-                  <td>Distance</td>
-                  <td>Dprime</td>
-                  <td>R2</td>
-                  <td>Correlated Alleles</td>
-                  <td>RegulomeDB</td>
-                  <td>Function</td>
-                </tr>
-              <tbody data-bind="foreach: top10">
-                <tr>
-                    <td style="text-align: center" data-bind="text: RS"></td>
-                    <td style="text-align: center" data-bind="text: Coord"></td>
-                    <td style="text-align: center" data-bind="text: Alleles"></td>
-                    <td style="text-align: center" data-bind="text: MAF"></td>
-                    <td style="text-align: center" data-bind="text: Dist"></td>
-                    <td style="text-align: center" data-bind="text: Dprime"></td>
-                    <td style="text-align: center" data-bind="text: R2"></td>
-                    <td style="text-align: center" data-bind="text: Corr_Alleles"></td>
-                    <td style="text-align: center" data-bind="text: RegulomeDB"></td>
-                    <td style="text-align: center" data-bind="text: Function"></td>
-                </tr>
+									<div class="row proxy-table-title-row">
+										<h3 class="pull-left">Top 10 Proxy SNPs</h3>
+									</div>
+									<table class="table table-bordered">
+										<thead>
+											<!-- Header row -->
+											<tr>
+												<td>RS Number</td>
+												<td>Coord</td>
+												<td>Alleles</td>
+												<td>MAF</td>
+												<td>Distance</td>
+												<td>Dprime</td>
+												<td>R2</td>
+												<td>Correlated Alleles</td>
+												<td>RegulomeDB</td>
+												<td>Function</td>
+											</tr>
+										<tbody data-bind="foreach: top10">
+											<tr>
+												<td style="text-align: center" data-bind="text: RS"></td>
+												<td style="text-align: center" data-bind="text: Coord"></td>
+												<td style="text-align: center" data-bind="text: Alleles"></td>
+												<td style="text-align: center" data-bind="text: MAF"></td>
+												<td style="text-align: center" data-bind="text: Dist"></td>
+												<td style="text-align: center" data-bind="text: Dprime"></td>
+												<td style="text-align: center" data-bind="text: R2"></td>
+												<td style="text-align: center"
+													data-bind="text: Corr_Alleles"></td>
+												<td style="text-align: center" data-bind="text: RegulomeDB"></td>
+												<td style="text-align: center" data-bind="text: Function"></td>
+											</tr>
 
-              </tbody>
-            </table>
-            <div class="row proxy-table-title-row">
-                    <a id="ldproxy-results-link" target="_blank">
-                        <span>Download Proxy file</span>
-                    </a>
-            </div>
+										</tbody>
+									</table>
+									<div class="row proxy-table-title-row">
+										<a id="ldproxy-results-link" target="_blank"> <span>Download
+												all proxy SNPs</span>
+										</a>
+									</div>
 
-          </div>
+								</div>
 
-          </div>
+							</div>
 
+						</div>
+					</div>
 				</div>
-      </div>
 			</div>
 		</div>
 	</div>
-
 	<div id="portal-footer">
 		<div class="footerLinks">
 			<a href="http://www.cancer.gov/" title="Home">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<a href="mailto:someone@example.com?Subject=Hello%20again"
+			<a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
 				target="_top" title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
 				href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<a href="http://www.cancer.gov/global/web/policies/accessibility"
