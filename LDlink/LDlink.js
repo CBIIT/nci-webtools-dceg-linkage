@@ -85,10 +85,10 @@ function buildPopulationDropdown(elementId) {
 			.multiselect(
 					{
 						enableClickableOptGroups : true,
-						buttonWidth : '300px',
+						buttonWidth : '280px',
 						maxHeight : 500,
 						includeSelectAllOption : true,
-						dropRight : true,
+						dropRight : false,
 						allSelectedText : 'All Populations',
 						nonSelectedText : 'Select Population',
 						numberDisplayed : 6,
@@ -332,9 +332,80 @@ function updateData(id) {
       updateLDmatrix();
 		break;
 	case 'ldhap':
+      $('#'+id+'-results-container').show();
+      updateLDldhap();
 		break;
 	}
 
+}
+
+function updateLDldhap() {
+  var id = "ldhap";
+  alert('Got here');
+
+  var $btn = $('#'+id).button('loading');
+//    snp : $('#ldmatrix-snp').val(),
+  var snps = $('#'+id+'-file-snp-numbers').val();
+  var population = $('#'+id+'-population-codes').val();
+  //var snps = snps.replace("\n", ",");
+  //alert(snps);
+  //alert(population);
+  console.log("snps");
+  console.dir(snps);
+  console.log("population");
+  console.dir(population);
+
+  var ldInputs = {
+    snps: snps,
+    pop : population.join("+"),
+    reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+  };
+  console.log('ldInputs');
+  console.dir(ldInputs);
+
+  var url = restServerUrl + "/ldhap";
+  var ajaxRequest = $.ajax({
+    type : 'GET',
+    url : url,
+    data : ldInputs
+  });
+
+  ajaxRequest.success(function(data) {
+      // SUCCESS
+      console.log("SUCCESS");
+      $('#ldhap-bokeh-graph').empty().append(data);
+      $('#'+id+'-results-container').show();
+
+      pivotLDhapTable(data);
+
+  });
+  ajaxRequest.fail(function(jqXHR, textStatus) {
+    console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
+        + "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+    //alert('Communication problem: ' + textStatus);
+    // ERROR
+    message = 'Service Unavailable: ' + textStatus+"<br>";
+    message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+    $('#'+id+'-message').show();
+    $('#'+id+'-message-content').empty().append(message);
+    $('#'+id+'-progress').hide();
+  });
+  ajaxRequest.always(function() {
+    $btn.button('reset');
+  });
+
+}
+function pivotLDhapTable(data) {
+  console.log('ldhap data');
+  console.dir(data);
+
+  pivotTable = data;
+
+  console.log('pivotTable data');
+  console.dir(pivotTable);
+
+  return pivotTable;
 }
 
 function updateLDmatrix() {
@@ -487,7 +558,7 @@ function createPopulationDropdown(id) {
 			.multiselect(
 					{
 						enableClickableOptGroups : true,
-						buttonWidth : '300px',
+						buttonWidth : '280px',
 						maxHeight : 500,
 						includeSelectAllOption : true,
 						dropRight : true,

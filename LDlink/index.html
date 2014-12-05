@@ -26,32 +26,32 @@
 <script
 	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
 	type="text/javascript">
-	
+
 </script>
 <script
 	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
 	type="text/javascript">
-	
-</script>
 
+</script>
 <script
 	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
 	type="text/javascript">
-	
+
+
 </script>
 <script
 	src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
 	type="text/javascript">
-	
+
 </script>
 <script
 	src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
 	type="text/javascript">
-	
+
 </script>
 
 <script src="LDlink.js" type="text/javascript">
-	
+
 </script>
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
@@ -70,7 +70,7 @@
 
 <script type="text/javascript"
 	src="../common/js/bootstrap-multiselect.js">
-	
+
 </script>
 <link rel="stylesheet" href="../common/css/bootstrap-multiselect.css"
 	type="text/css">
@@ -175,40 +175,94 @@
 			<!-- LDhap -->
 
 			<div class="tab-pane fade" id="ldhap-tab">
+        <form id="ldhap-form" class="form-inline" role="form">
+          <div class="row" style="padding-top: 10px;">
+            <div class="col-md-3 col-md-offset-1">
+              <div class="input-group" >
+                <span class="input-group-btn"> <span
+                  class="btn btn-default btn-file">Browse <input
+                    type="file" id="ldhap-file">
+                </span>
+                </span> <input type="text" class="form-control" readonly style="width:210px;">
+              </div>
+              <br>or <br>
+              <textarea id="ldhap-file-snp-numbers" placeholder="RS Numbers"
+                cols="12" rows="8" class="form-control"
+                title="Enter list of RS numbers (one per line)"></textarea>
+            </div>
+            <div class="col-md-3">
+              <select id="ldhap-population-codes" multiple="multiple"></select>
+            </div>
+            <div class="col-md-4">
+              <button type="submit" class="btn btn-default calculate"
+                id="ldhap">Calculate</button>
+            </div>
+          </div>
+        </form>
 
-				<form role="form">
-					<div class="row" style="padding-top: 10px;">
-						<div class="col-lg-5 col-sm-5 col-12 col-md-offset-1">
-							<div class="input-group">
-								<span class="input-group-btn"><span
-									class="btn btn-default btn-file">Browse<input
-										id="ldhap-file" type="file" multiple></span></span> <input
-									type="text" class="form-control" readonly>
-							</div>
-						</div>
-					</div>
+        <hr>
+        <!-- Message ERROR -->
+        <div class="row">
+          <div class="col-md-7 col-md-offset-2" id="ldhap-message">
+            <div class="panel panel-danger">
+              <div class="panel-heading">Error</div>
+              <div class="panel-body" id="ldhap-message-content"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Message WARNING -->
+        <div class="row">
+          <div class="col-md-7 col-md-offset-2" id="ldhap-message-warning">
+            <div class="panel panel-warning">
+              <div class="panel-heading">Warning</div>
+              <div class="panel-body" id="ldhap-message-warning-content">
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- ldhap CONTAINER -->
+        <div class="jumbotron">
+          <div class="container-fluid" id="ldhap-results-container">
+            <div class="row">
+                <div id="ldhap-bokeh-graph">
+<!--  SNIP ... -->
+<table class="table table-condensed ldhap" data-height="299">
+<thead>
+<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th><th colspan="7">Haplotypes</th></tr>
+</thead>
 
-					<div class="row" style="padding-top: 10px;">
-						<div class="col-md-9 col-md-offset-1">
-							<span>or</span>
-						</div>
-					</div>
+<tfoot>
+<tr class="ldhap-table-footer"><td colspan="2" rowspan="2"></td><td>Haplotype Count</td><td class="cell-right">593</td><td class="cell-right">181</td><td class="cell-right">144</td><td class="cell-right">78</td><td class="cell-right">4</td class="cell-right"><td>4</td ><td class="cell-right">2</td></tr>
+<tr class="ldhap-table-footer"><td>Haplotype Frequency</td><td class="cell-right">0.5895</td><td class="cell-right">0.1799</td><td class="cell-right">0.1431</td><td class="cell-right">0.0775</td><td class="cell-right">0.004</td><td class="cell-right">0.004</td><td class="cell-right">0.002</td></tr>
+</tfoot>
 
-					<div class="row" style="padding-top: 10px;">
-						<div class="col-md-9 col-md-offset-1">
-							<div class="form-group">
-								<div class="col-md-3">
-									<textarea id="ldhap-file-snp-numbers" placeholder="Text entry"
-										name="Text1" cols="40" rows="8" class="form-control">
-</textarea>
-								</div>
-								<select id="ldhap-population-codes" multiple="multiple">
-								</select> <a id="ldhap-calculate-button"
-									class="btn btn-primary calculate" href="#"> Calculate</a>
-							</div>
-						</div>
-					</div>
-				</form>
+<thead style="border: 1px solid #ccc;">
+<tr><td class="cell-left font-weight-normal">rs4872330</td><td class="cell-left">chr4:104053521</td><td class="cell-left">G=0.6852, T=0.7822</td><td>G</td><td>A</td><td>T</td><td>G</td><td>A</td><td>T</td><td>T</td></tr>
+<tr><td>rs6776870</td><td>chr4:104054369</td><td>G=0.327, T=0.5859</td><td>C</td><td>G</td><td>C</td><td>C</td><td>G</td><td>C</td><td>C</td></tr>
+<tr><td>rs3203517</td><td>chr4:104053446</td><td>G=0.5911, T=0.6099</td><td>A</td><td>T</td><td>A</td><td>A</td><td>T</td><td>A</td><td>A</td></tr>
+<tr><td>rs4126978</td><td>chr4:104056097</td><td>G=0.3662, T=0.2649</td><td>T</td><td>T</td><td>A</td><td>T</td><td>T</td><td>A</td><td>A</td></tr>
+<tr><td>rs7079759</td><td>chr4:104051554</td><td>G=0.7904, T=0.7343</td><td>C</td><td>A</td><td>C</td><td>C</td><td>A</td><td>C</td><td>C</td></tr>
+<tr><td>rs5230036</td><td>chr4:104056349</td><td>G=0.678, T=0.734</td><td>G</td><td>T</td><td>T</td><td>G</td><td>T</td><td>T</td><td>T</td></tr>
+<tr><td>rs2864997</td><td>chr4:104055215</td><td>G=0.9744, T=0.315</td><td>A</td><td>T</td><td>G</td><td>A</td><td>T</td><td>G</td><td>G</td></tr>
+<tr><td>rs5581839</td><td>chr4:104054036</td><td>G=0.782, T=0.513</td><td>C</td><td>T</td><td>G</td><td>C</td><td>T</td><td>G</td><td>G</td></tr>
+<tr><td>rs7647042</td><td>chr4:104058363</td><td>G=0.9679, T=0.4413</td><td>G</td><td>T</td><td>A</td><td>G</td><td>T</td><td>A</td><td>A</td></tr>
+<tr><td>rs5832004</td><td>chr4:104056478</td><td>G=0.7286, T=0.4709</td><td>A</td><td>A</td><td>T</td><td>A</td><td>A</td><td>T</td><td>T</td></tr>
+<tr><td>rs6230729</td><td>chr4:104058001</td><td>G=0.4355, T=0.3554</td><td>C</td><td>C</td><td>T</td><td>C</td><td>C</td><td>T</td><td>T</td></tr>
+<tr><td>rs5369378</td><td>chr4:104052150</td><td>G=0.4744, T=0.7056</td><td>T</td><td>T</td><td>A</td><td>T</td><td>T</td><td>A</td><td>A</td></tr>
+<tr><td>rs7356055</td><td>chr4:104056799</td><td>G=0.5548, T=0.6998</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td></tr>
+<tr><td>rs7089053</td><td>chr4:104052316</td><td>G=0.9106, T=0.1404</td><td>C</td><td>A</td><td>A</td><td>C</td><td>A</td><td>A</td><td>A</td></tr>
+</tbody>
+</table>
+
+<!-- SNIP up -->
+
+
+
+
+                </div>
+            </div>
+          </div>
+        </div>
 
 			</div>
 			<!-- LDmatrix -->
@@ -217,23 +271,23 @@
 
 				<form id="ldmatrix-form" class="form-inline" role="form">
 					<div class="row" style="padding-top: 10px;">
-						<div class="col-sm-4 col-md-4">
-							<div class="input-group">
+						<div class="col-md-3 col-md-offset-1">
+							<div class="input-group" >
 								<span class="input-group-btn"> <span
 									class="btn btn-default btn-file">Browse <input
 										type="file" id="ldmatrix-file">
 								</span>
-								</span> <input type="text" class="form-control" readonly>
+								</span> <input type="text" class="form-control" readonly style="width:210px;">
 							</div>
 							<br>or <br>
 							<textarea id="ldmatrix-file-snp-numbers" placeholder="RS Numbers"
 								cols="12" rows="8" class="form-control"
 								title="Enter list of RS numbers (one per line)"></textarea>
 						</div>
-						<div class="col-sm-5 col-md-4">
+						<div class="col-md-3">
 							<select id="ldmatrix-population-codes" multiple="multiple"></select>
 						</div>
-						<div class="col-sm-3 col-md-4">
+						<div class="col-md-4">
 							<button type="submit" class="btn btn-default calculate"
 								id="ldmatrix">Calculate</button>
 						</div>

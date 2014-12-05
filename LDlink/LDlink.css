@@ -201,3 +201,7 @@ table thead td {
   font-weight:bold;
   text-align: center;
 }
+
+.font-weight-normal {
+  font-weight:normal;
+}

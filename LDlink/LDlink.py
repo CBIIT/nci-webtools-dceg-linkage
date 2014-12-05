@@ -16,8 +16,7 @@ import urllib
 from LDpair import calculate_pair
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
-
-'''Hello'''
+from LDhap import calculate_hap
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -113,11 +112,6 @@ def ldproxy():
 
     return out_script+"\n "+out_div
 
-@app.route('/LDlinkRest/ldhap', methods = ['GET'])
-def ldhap():
-    r1 = 'Calling ldhap [GET]'
-    return r1
-
 
 @app.route('/LDlinkRest/ldmatrix', methods = ['GET'])
 def ldmatrix():
@@ -145,6 +139,33 @@ def ldmatrix():
     out_script,out_div = calculate_matrix(snplst,pop,reference)
     return out_script+"\n "+out_div
     #return request.method
+
+
+@app.route('/LDlinkRest/ldhap', methods = ['GET'])
+def ldhap():
+    # python LDmatrix.py snps.txt EUR 5
+    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?pop=EUR&reference=5&snp=sr3
+    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?filename=get+from+input&pop=LWK%2BGWD&reference=76178
+    print
+    print 'Execute ldhap'
+    print 'Gathering Variables from url'
+
+    snps = request.args.get('snps', False)
+    pop = request.args.get('pop', False)
+    reference = request.args.get('reference', False)
+    print 'snps: ' + snps
+    print 'pop: ' + pop
+    print 'request: ' + reference
+
+    snplst = './tmp/snps'+reference+'.txt'
+    print 'snplst: '+snplst
+
+    f = open(snplst, 'w')
+    f.write(snps)
+    f.close()
+
+    out_json = calculate_hap(snplst,pop,reference)
+    return out_json
 
 
 @app.route('/LDlinkRest/test', methods=['GET', 'POST'])
