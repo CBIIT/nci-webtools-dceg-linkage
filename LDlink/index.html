@@ -20,8 +20,6 @@
 <!-- Too slow
 <script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
 -->
-<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
-
 
 <script
 	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
@@ -228,31 +226,52 @@
 <!--  SNIP ... -->
 <table class="table table-condensed ldhap" data-height="299">
 <thead>
-<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th><th colspan="7">Haplotypes</th></tr>
+<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th><th colspan="2" id="ldhap-haplotypes-column">Haplotypes</th></tr>
 </thead>
 
 <tfoot>
-<tr class="ldhap-table-footer"><td colspan="2" rowspan="2"></td><td>Haplotype Count</td><td class="cell-right">593</td><td class="cell-right">181</td><td class="cell-right">144</td><td class="cell-right">78</td><td class="cell-right">4</td class="cell-right"><td>4</td ><td class="cell-right">2</td></tr>
+    <tr class="ldhap-table-footer">
+        <td colspan="2" rowspan="2"></td>
+        <td>Haplotype Count</td>
+        <!-- ko foreach: footer -->
+          <td class="cell-right" data-bind="text: $data.Count"></td>
+        <!-- /ko -->
+    </tr>
+    <tr class="ldhap-table-footer">
+        <td>Haplotype Frequency</td>
+        <!-- ko foreach: footer -->
+          <td class="cell-right" data-bind="text: $data.Frequency"></td>
+        <!-- /ko -->
+    </tr>
+<!--
 <tr class="ldhap-table-footer"><td>Haplotype Frequency</td><td class="cell-right">0.5895</td><td class="cell-right">0.1799</td><td class="cell-right">0.1431</td><td class="cell-right">0.0775</td><td class="cell-right">0.004</td><td class="cell-right">0.004</td><td class="cell-right">0.002</td></tr>
+-->
+
 </tfoot>
 
-<thead style="border: 1px solid #ccc;">
-<tr><td class="cell-left font-weight-normal">rs4872330</td><td class="cell-left">chr4:104053521</td><td class="cell-left">G=0.6852, T=0.7822</td><td>G</td><td>A</td><td>T</td><td>G</td><td>A</td><td>T</td><td>T</td></tr>
-<tr><td>rs6776870</td><td>chr4:104054369</td><td>G=0.327, T=0.5859</td><td>C</td><td>G</td><td>C</td><td>C</td><td>G</td><td>C</td><td>C</td></tr>
-<tr><td>rs3203517</td><td>chr4:104053446</td><td>G=0.5911, T=0.6099</td><td>A</td><td>T</td><td>A</td><td>A</td><td>T</td><td>A</td><td>A</td></tr>
-<tr><td>rs4126978</td><td>chr4:104056097</td><td>G=0.3662, T=0.2649</td><td>T</td><td>T</td><td>A</td><td>T</td><td>T</td><td>A</td><td>A</td></tr>
-<tr><td>rs7079759</td><td>chr4:104051554</td><td>G=0.7904, T=0.7343</td><td>C</td><td>A</td><td>C</td><td>C</td><td>A</td><td>C</td><td>C</td></tr>
-<tr><td>rs5230036</td><td>chr4:104056349</td><td>G=0.678, T=0.734</td><td>G</td><td>T</td><td>T</td><td>G</td><td>T</td><td>T</td><td>T</td></tr>
-<tr><td>rs2864997</td><td>chr4:104055215</td><td>G=0.9744, T=0.315</td><td>A</td><td>T</td><td>G</td><td>A</td><td>T</td><td>G</td><td>G</td></tr>
-<tr><td>rs5581839</td><td>chr4:104054036</td><td>G=0.782, T=0.513</td><td>C</td><td>T</td><td>G</td><td>C</td><td>T</td><td>G</td><td>G</td></tr>
-<tr><td>rs7647042</td><td>chr4:104058363</td><td>G=0.9679, T=0.4413</td><td>G</td><td>T</td><td>A</td><td>G</td><td>T</td><td>A</td><td>A</td></tr>
-<tr><td>rs5832004</td><td>chr4:104056478</td><td>G=0.7286, T=0.4709</td><td>A</td><td>A</td><td>T</td><td>A</td><td>A</td><td>T</td><td>T</td></tr>
-<tr><td>rs6230729</td><td>chr4:104058001</td><td>G=0.4355, T=0.3554</td><td>C</td><td>C</td><td>T</td><td>C</td><td>C</td><td>T</td><td>T</td></tr>
-<tr><td>rs5369378</td><td>chr4:104052150</td><td>G=0.4744, T=0.7056</td><td>T</td><td>T</td><td>A</td><td>T</td><td>T</td><td>A</td><td>A</td></tr>
-<tr><td>rs7356055</td><td>chr4:104056799</td><td>G=0.5548, T=0.6998</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td><td>C</td></tr>
-<tr><td>rs7089053</td><td>chr4:104052316</td><td>G=0.9106, T=0.1404</td><td>C</td><td>A</td><td>A</td><td>C</td><td>A</td><td>A</td><td>A</td></tr>
-</tbody>
+  <tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+    <tr>
+      <td data-bind="text: $data.RS"></td>
+      <td data-bind="text: $data.Coord"></td>
+      <td data-bind="text: $data.Alleles"></td>
+      <!-- ko foreach: $data.Haplotypes -->
+          <td class="cell-right font-weight-bold" data-bind="text: $data"></td>
+      <!-- /ko -->
+      <!--
+      <td data-bind="value: $parent.rows[$index()].haplotypesHTML"></td>
+      <span data-bind="html: haplotypesHTML"></span>
+      -->
+    </tr>
+  </tbody>
 </table>
+<!--
+   <tbody data-bind="foreach: people">
+        <tr>
+            <td data-bind="text: firstName"></td>
+            <td data-bind="text: lastName"></td>
+        </tr>
+    </tbody>
+-->
 
 <!-- SNIP up -->
 

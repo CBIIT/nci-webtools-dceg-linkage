@@ -9,224 +9,16 @@ var restService = {
 var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
     + restService.route;
 
-var populations = {
-	AFR : {
-		fullName : "African",
-		subPopulations : {
-			YRI : "Yoruba in Ibadan, Nigera",
-			LWK : "	Luhya in Webuye, Kenya",
-			GWD : "	Gambian in Western Gambia",
-			MSL : "	Mende in Sierra Leone",
-			ESN : "	Esan in Nigera",
-			ASW : "	Americans of African Ancestry in SW USA",
-			ACB : "	African Carribbeans in Barbados"
-		}
-	},
-	AMR : {
-		fullName : "Ad Mixed American",
-		subPopulations : {
-			MXL : "	Mexican Ancestry from Los Angeles, USA",
-			PUR : "	Puerto Ricans from Puerto Rico",
-			CLM : "	Colombians from Medellin, Colombia",
-			PEL : "	Peruvians from Lima, Peru"
-		}
-	},
-	EAS : {
-		fullName : "East Asian",
-		subPopulations : {
-			CHB : "	Han Chinese in Bejing, China",
-			JPT : "	Japanese in Tokyo, Japan",
-			CHS : "	Southern Han Chinese",
-			CDX : "	Chinese Dai in Xishuangbanna, China",
-			KHV : "	Kinh in Ho Chi Minh City, Vietnam"
-		}
-	},
-	EUR : {
-		fullName : "European",
-		subPopulations : {
-			CEU : "	Utah Residents from North and West Europe",
-			TSI : "	Toscani in Italia",
-			FIN : "	Finnish in Finland",
-			GBR : "	British in England and Scotland",
-			IBS : "	Iberian population in Spain"
-		}
-	},
-	SAS : {
-		fullName : "South Asian",
-		subPopulations : {
-			GIH : "	Gujarati Indian from Houston, Texas",
-			PJL : "	Punjabi from Lahore, Pakistan",
-			BEB : "	Bengali from Bangladesh",
-			STU : "	Sri Lankan Tamil from the UK",
-			ITU : "	Indian Telugu from the UK"
-		}
-	}
-}
+var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
 
-
-function buildPopulationDropdown(elementId) {
-	var htmlText = "";
-	var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
-	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
-	for ( var popAbbrev in populations) {
-		var population = populations[popAbbrev];
-		htmlText += htmlText1.replace(/ABBREV/g, popAbbrev).replace("FULLNAME",
-				population.fullName);
-		for ( var subPopAbbrev in population.subPopulations) {
-			var subDetail = population.subPopulations[subPopAbbrev];
-			htmlText += htmlText2.replace(/ABBREV/g, subPopAbbrev).replace(
-					"DETAIL", subDetail);
-		}
-		htmlText += "</optgroup>\n";
-	}
-	$('#' + elementId).html(htmlText);
-
-	$('#' + elementId)
-			.multiselect(
-					{
-						enableClickableOptGroups : true,
-						buttonWidth : '280px',
-						maxHeight : 500,
-						includeSelectAllOption : true,
-						dropRight : false,
-						allSelectedText : 'All Populations',
-						nonSelectedText : 'Select Population',
-						numberDisplayed : 6,
-						selectAllText : ' (ALL) All Populations',
-
-						// buttonClass: 'btn btn-link',
-						buttonText : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText
-										+ ' <b class="caret"></b>';
-							} else if (options.length == $('option', $(select)).length) {
-								return this.allSelectedText
-										+ ' <b class="caret"></b>';
-							} else if (options.length > this.numberDisplayed) {
-								return '<span class="badge">' + options.length
-										+ '</span> ' + this.nSelectedText
-										+ ' <b class="caret"></b>';
-							} else {
-								var selected = '';
-								options.each(function() {
-									// var label = $(this).attr('label') :
-									// $(this).html();
-									selected += $(this).val() + '+';
-								});
-
-								return selected.substr(0, selected.length - 1)
-										+ ' <b class="caret"></b>';
-							}
-						},
-						buttonTitle : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText;
-							} else {
-								var selected = '';
-								options.each(function() {
-									selected += $(this).text() + '\n';
-								});
-								return selected;
-							}
-						}
-					});
-}
-
-
-var ldPairData =[
-{
-  "corr_alleles": [
-    "rs2720460(A) allele is correlated with rs11733615(C) allele",
-    "rs2720460(G) allele is correlated with rs11733615(T) allele"
-  ],
-  "haplotypes": {
-    "hap1": {
-      "alleles": "AC",
-      "count": "155",
-      "frequency": "0.686"
-    },
-    "hap2": {
-      "alleles": "GC",
-      "count": "40",
-      "frequency": "0.177"
-    },
-    "hap3": {
-      "alleles": "GT",
-      "count": "29",
-      "frequency": "0.128"
-    },
-    "hap4": {
-      "alleles": "AT",
-      "count": "2",
-      "frequency": "0.009"
-    }
-  },
-  "snp1": {
-    "allele_1": {
-      "allele": "A",
-      "count": "157",
-      "frequency": "0.695"
-    },
-    "allele_2": {
-      "allele": "G",
-      "count": "69",
-      "frequency": "0.305"
-    },
-    "coord": "chr4:104054686",
-    "rsnum": "rs2720460"
-  },
-  "snp2": {
-    "allele_1": {
-      "allele": "C",
-      "count": "195",
-      "frequency": "0.863"
-    },
-    "allele_2": {
-      "allele": "T",
-      "count": "31",
-      "frequency": "0.137"
-    },
-    "coord": "chr4:104157164",
-    "rsnum": "rs11733615"
-  },
-  "statistics": {
-    "chisq": "67.271",
-    "d_prime": "0.9071",
-    "p": "0.0",
-    "r2": "0.2977"
-  },
-  "two_by_two": {
-    "cells": {
-      "c11": "155",
-      "c12": "2",
-      "c21": "40",
-      "c22": "29"
-    },
-    "total": "old - 227"
-  }
-}];
-
-
-var ldProxyData ={
-  top10:  [{"Alleles":"newProxy","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]
-};
+var ldPairData=[{corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}}];
+var ldProxyData = {top10:  [{"Alleles":"newProxy","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]};
+var ldhapData = {"footer":[{"Count":127,"Frequency":0.588,"Haplotype":"GCATGGCGTTGGGG"},{"Count":40,"Frequency":0.1852,"Haplotype":"GGGGAGCGTTGGGG"},{"Count":23,"Frequency":0.1065,"Haplotype":"GCGGAGCGTTGGGG"},{"Count":11,"Frequency":0.0509,"Haplotype":"TGGGAGCGTTGGGG"},{"Count":8,"Frequency":0.037,"Haplotype":"GCATAGCGTTGGGG"},{"Count":7,"Frequency":0.0324,"Haplotype":"TGGGGATAGCAAAG"}],"rows":[{"Alleles":"G=0.917, T=0.083","Coord":"chr4:104050980","RS":"rs2720457","Haplotypes":["G","G","G","T","G","T"]},{"Alleles":"C=0.732, G=0.269","Coord":"chr4:104052963","RS":"rs2720458","Haplotypes":["C","G","C","G","C","G"]},{"Alleles":"A=0.625, G=0.375","Coord":"chr4:104055748","RS":"rs2720461","Haplotypes":["A","G","G","G","A","G"]},{"Alleles":"T=0.625, G=0.375","Coord":"chr4:104056210","RS":"rs2720462","Haplotypes":["T","G","G","G","T","G"]},{"Alleles":"G=0.62, A=0.38","Coord":"chr4:104052068","RS":"rs7661201","Haplotypes":["G","A","A","A","A","G"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104055722","RS":"rs2623063","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"C=0.968, T=0.032","Coord":"chr4:104057121","RS":"rs2623062","Haplotypes":["C","C","C","C","C","T"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104057248","RS":"rs2720463","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"T=0.968, G=0.032","Coord":"chr4:104057887","RS":"rs2711901","Haplotypes":["T","T","T","T","T","G"]},{"Alleles":"T=0.968, C=0.032","Coord":"chr4:104051132","RS":"rs2623082","Haplotypes":["T","T","T","T","T","C"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104058596","RS":"rs2711900","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104050510","RS":"rs2720456","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104050326","RS":"rs2720455","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"G=1.0, A=0.0","Coord":"chr4:104059542","RS":"rs2243682","Haplotypes":["G","G","G","G","G","G"]}]};
 
 //Map knockout models to a sample json data
 var ldproxyModel = ko.mapping.fromJS(ldProxyData);
 var ldpairModel = ko.mapping.fromJS(ldPairData[0]);
-
-//Set file support trigger
-$(document)
-		.on(
-				'change',
-				'.btn-file :file',
-				function() {
-					var input = $(this), numFiles = input.get(0).files ? input
-							.get(0).files.length : 1, label = input.val()
-							.replace(/\\/g, '/').replace(/.*\//, '');
-					input.trigger('fileselect', [ numFiles, label ]);
-				});
-
+var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(function() {
 
@@ -235,10 +27,11 @@ $(document).ready(function() {
 			// Apply Bindings
 			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
       ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
-      console.log('ldpairModel');
-      console.dir(ldpairModel);
-      console.log('ldproxyModel');
-      console.dir(ldproxyModel);
+      ko.applyBindings(ldhapModel, document.getElementById('ldhap-results-container'));
+      //console.log('ldpairModel');
+      //console.dir(ldpairModel);
+      //console.log('ldproxyModel');
+      //console.dir(ldproxyModel);
 
 			$.each(modules, function(key, id) {
 				buildPopulationDropdown(id+"-population-codes");
@@ -263,8 +56,6 @@ $(document).ready(function() {
 			'fileselect',
 			function(event, numFiles, label) {
         populateTextArea(event, numFiles, label);
-				console.log("numFiles: " + numFiles);
-				console.log("label: " + label);
 				var input = $(this).parents('.input-group').find(':text'),
               log = numFiles > 1 ? numFiles + ' files selected' : label;
 							if (input.length) {
@@ -281,6 +72,18 @@ $(document).ready(function() {
 //
 });
 
+//Set file support trigger
+$(document)
+    .on(
+        'change',
+        '.btn-file :file',
+        function() {
+          var input = $(this), numFiles = input.get(0).files ? input
+              .get(0).files.length : 1, label = input.val()
+              .replace(/\\/g, '/').replace(/.*\//, '');
+          input.trigger('fileselect', [ numFiles, label ]);
+});
+
 function populateTextArea(event, numFiles, label) {
   id = event.target.id;
   if(window.FileReader) {
@@ -290,8 +93,6 @@ function populateTextArea(event, numFiles, label) {
     reader.onload = function(){
       var text = reader.result;
       $('#'+id+'-snp-numbers').val(text);
-      console.log("Append to textarea");
-      console.log(reader.result.substring(0, 10000));
     };
     reader.readAsText(input.files[0]);
   } else {
@@ -333,27 +134,19 @@ function updateData(id) {
 		break;
 	case 'ldhap':
       $('#'+id+'-results-container').show();
-      updateLDldhap();
+      updateLDhap();
 		break;
 	}
 
 }
 
-function updateLDldhap() {
+function updateLDhap() {
   var id = "ldhap";
-  alert('Got here');
 
   var $btn = $('#'+id).button('loading');
 //    snp : $('#ldmatrix-snp').val(),
   var snps = $('#'+id+'-file-snp-numbers').val();
   var population = $('#'+id+'-population-codes').val();
-  //var snps = snps.replace("\n", ",");
-  //alert(snps);
-  //alert(population);
-  console.log("snps");
-  console.dir(snps);
-  console.log("population");
-  console.dir(population);
 
   var ldInputs = {
     snps: snps,
@@ -373,10 +166,13 @@ function updateLDldhap() {
   ajaxRequest.success(function(data) {
       // SUCCESS
       console.log("SUCCESS");
-      $('#ldhap-bokeh-graph').empty().append(data);
+      //$('#ldhap-bokeh-graph').empty().append(data);
       $('#'+id+'-results-container').show();
 
-      pivotLDhapTable(data);
+      var ldhapTable = formatLDhapData($.parseJSON(data));
+      $('#ldhap-haplotypes-column').attr('colspan', ldhapTable.footer.length);
+      ko.mapping.fromJS(ldhapTable, ldhapModel);
+
 
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -396,16 +192,54 @@ function updateLDldhap() {
   });
 
 }
-function pivotLDhapTable(data) {
+
+function formatLDhapData(data) {
+
   console.log('ldhap data');
   console.dir(data);
 
-  pivotTable = data;
+  var haplotypes = data.haplotypes;
+  var snps = data.snps;
 
-  console.log('pivotTable data');
-  console.dir(pivotTable);
+  var ldhapTable = {footer:[], rows:[]};
 
-  return pivotTable;
+  //Convert haplotypes to footer
+  for (key in haplotypes) {
+    console.log(key);
+    console.dir(haplotypes[key]);
+    var obj = {
+      Count: haplotypes[key].Count,
+      Frequency: haplotypes[key].Frequency,
+      Haplotype: haplotypes[key].Haplotype
+    };
+    ldhapTable.footer.push(obj);
+  }
+  //Convert snps to rows.
+  for (key in snps) {
+    var obj = {
+      Alleles: snps[key].Alleles,
+      Coord: snps[key].Coord,
+      RS: snps[key].RS,
+      Haplotypes: []
+    };
+    ldhapTable.rows.push(obj);
+  }
+  //Add haplotypesHTML
+  $.each(ldhapTable.rows, function(index, value){
+    //Get all the haplotypes in pivot order
+    $.each(ldhapTable.footer, function(index2, value2){
+        value.Haplotypes[index2] = value2.Haplotype.substr(index, 1);
+    });
+  });
+
+  console.log('ldhapTable');
+  console.dir(ldhapTable);
+  var obj = {
+    out_final: ldhapTable
+  }
+  console.dir(obj);
+
+  return ldhapTable;
 }
 
 function updateLDmatrix() {
@@ -430,29 +264,6 @@ function updateLDmatrix() {
   };
   console.log('ldmatrixInputs');
   console.dir(ldmatrixInputs);
-/*
-  var ajaxType;
-  // The Javascript
-  var fileInput = document.getElementById('ldmatrix-file');
-  var formData = new FormData();
-
-  if($("#ldmatrix-file").val() == '') {
-    ajaxType = 'GET';
-  } else {
-    //Append file to post
-    ajaxType = 'POST';
-    var file = fileInput.files[0];
-    formData.append('file', file);
-    formData.append('filename', file.name);
-    formData.append('filetype', file.type);
-  }
-  formData.append('pop', ldmatrixInputs.pop);
-
-
-  console.log("formData");
-  console.dir(formData);
-*/
-
 
   var url = restServerUrl + "/ldmatrix";
   var ajaxRequest = $.ajax({
@@ -469,17 +280,6 @@ function updateLDmatrix() {
       $('#'+id+'-results-container').show();
 
       addLDMatrixHyperLinks(ldmatrixInputs.reference);
-
-      //getLDProxyResults('proxy'+ldproxyInputs.reference+'.json');
-/*
-    setTimeout(function(){
-      var proxyTop = getProxyTop10();
-      ko.mapping.fromJS(proxyTop, ldproxyModel);
-      //alert("Hello");
-    }, 9000);
-*/
-      //Get the top 10...
-      //createProxyTop10();
 
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -526,30 +326,6 @@ function updateProgressBar(id, seconds) {
             return;
         }
     }, delay);
-}
-
-
-function addPageListeners(tabClicked) {
-	if (tabClicked == 'ldhap') {
-		$('.btn-file :file')
-				.on(
-						'fileselect',
-						function(event, numFiles, label) {
-							console.log("numFiles: " + numFiles);
-							console.log("label: " + label);
-
-							var input = $(this).parents('.input-group').find(
-									':text'), log = numFiles > 1 ? numFiles
-									+ ' files selected' : label;
-
-							if (input.length) {
-								input.val(log);
-							} else {
-								if (log)
-									alert(log);
-							}
-		});
-	}
 }
 
 function createPopulationDropdown(id) {
@@ -688,9 +464,6 @@ function getLDProxyResults(jsonfile) {
   });
   ajaxRequest.always(function() {
   });
-
-
-
 }
 
 function updateLDpair() {
@@ -802,21 +575,70 @@ function addHyperLinks(data) {
     $('#snp2-coord').attr('href', url);
 }
 
+function buildPopulationDropdown(elementId) {
+  var htmlText = "";
+  var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
+  var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
+  for ( var popAbbrev in populations) {
+    var population = populations[popAbbrev];
+    htmlText += htmlText1.replace(/ABBREV/g, popAbbrev).replace("FULLNAME",
+        population.fullName);
+    for ( var subPopAbbrev in population.subPopulations) {
+      var subDetail = population.subPopulations[subPopAbbrev];
+      htmlText += htmlText2.replace(/ABBREV/g, subPopAbbrev).replace(
+          "DETAIL", subDetail);
+    }
+    htmlText += "</optgroup>\n";
+  }
+  $('#' + elementId).html(htmlText);
 
-/*
-jQuery.fn.serializeObject = function() {
-	var o = {};
-	var a = this.serializeArray();
-	jQuery.each(a, function() {
-		if (o[this.id] !== undefined) {
-			if (!o[this.id].push) {
-				o[this.id] = [ o[this.id] ];
-			}
-			o[this.id].push(this.value || '');
-		} else {
-			o[this.id] = this.value || '';
-		}
-	});
-	return o;
-};
-*/
+  $('#' + elementId)
+      .multiselect(
+          {
+            enableClickableOptGroups : true,
+            buttonWidth : '280px',
+            maxHeight : 500,
+            includeSelectAllOption : true,
+            dropRight : false,
+            allSelectedText : 'All Populations',
+            nonSelectedText : 'Select Population',
+            numberDisplayed : 6,
+            selectAllText : ' (ALL) All Populations',
+
+            // buttonClass: 'btn btn-link',
+            buttonText : function(options, select) {
+              if (options.length === 0) {
+                return this.nonSelectedText
+                    + ' <b class="caret"></b>';
+              } else if (options.length == $('option', $(select)).length) {
+                return this.allSelectedText
+                    + ' <b class="caret"></b>';
+              } else if (options.length > this.numberDisplayed) {
+                return '<span class="badge">' + options.length
+                    + '</span> ' + this.nSelectedText
+                    + ' <b class="caret"></b>';
+              } else {
+                var selected = '';
+                options.each(function() {
+                  // var label = $(this).attr('label') :
+                  // $(this).html();
+                  selected += $(this).val() + '+';
+                });
+
+                return selected.substr(0, selected.length - 1)
+                    + ' <b class="caret"></b>';
+              }
+            },
+            buttonTitle : function(options, select) {
+              if (options.length === 0) {
+                return this.nonSelectedText;
+              } else {
+                var selected = '';
+                options.each(function() {
+                  selected += $(this).text() + '\n';
+                });
+                return selected;
+              }
+            }
+          });
+}

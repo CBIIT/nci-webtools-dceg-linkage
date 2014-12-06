@@ -143,9 +143,7 @@ def ldmatrix():
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():
-    # python LDmatrix.py snps.txt EUR 5
-    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?pop=EUR&reference=5&snp=sr3
-    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?filename=get+from+input&pop=LWK%2BGWD&reference=76178
+
     print
     print 'Execute ldhap'
     print 'Gathering Variables from url'
