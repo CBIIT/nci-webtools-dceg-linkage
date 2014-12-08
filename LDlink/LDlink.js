@@ -23,6 +23,9 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 $(document).ready(function() {
 
       var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
+      $( "body" ).keypress(function() {
+        console.log( "Handler for .keypress() called." );
+      });
 
 			// Apply Bindings
 			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
@@ -409,16 +412,6 @@ function updateLDproxy() {
       $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
       getLDProxyResults('proxy'+ldproxyInputs.reference+'.json');
-/*
-    setTimeout(function(){
-      var proxyTop = getProxyTop10();
-      ko.mapping.fromJS(proxyTop, ldproxyModel);
-      //alert("Hello");
-    }, 9000);
-*/
-      //Get the top 10...
-      //createProxyTop10();
-
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
@@ -450,6 +443,10 @@ function getLDProxyResults(jsonfile) {
 
   ajaxRequest.success(function(data) {
     ko.mapping.fromJS(data, ldproxyModel);
+    console.log('ldproxy data');
+    console.dir(data);
+//	addLDHyperlinks(data)
+		addLDproxyHyperLinks(data);
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     alert('Fail');
@@ -502,7 +499,7 @@ function updateLDpair() {
       // SUCCESS
       ko.mapping.fromJS(data, ldpairModel);
       $('#'+id+'-results-container').show();
-      addHyperLinks(data);
+      addLDpairHyperLinks(data);
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -519,7 +516,47 @@ function updateLDpair() {
 	});
 }
 
-function addHyperLinks(data) {
+function addLDproxyHyperLinks(data) {
+    var server;
+    var params = {};
+    var rs_number;
+    var url;
+    //Find the coord of the rs number
+    //
+    // Cluster Report:
+    //
+    server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+    //http://genome.ucsc.edu/cgi-bin/hgTracks?
+    //position=chr4:103554686-104554686
+    //&snp141=pack
+    //&hgFind.matches=rs2720460
+    // snp1-coord
+    //
+    // Genome Browser:
+    //
+
+    // snp1-coord
+    var positions = data.query_snp.Coord.split(":");
+    var chr = positions[0];
+    var mid_value = parseInt(positions[1]);
+    var offset =500000;
+    var range = (mid_value-offset)+"-"+(mid_value+offset);
+    var position = chr+":"+range;
+    rs_number = data.query_snp.RS;
+    params = {
+      position: position,
+      snp141: 'pack',
+      'hgFind.matches' : rs_number
+    };
+
+		url = server+"?"+$.param(params);
+
+		//url = "http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460snp1-coord";
+		$('#ldproxy-link').attr('href', url)
+
+}
+
+function addLDpairHyperLinks(data) {
   // Add snp1-rsum to
     var server;
     var params = {};

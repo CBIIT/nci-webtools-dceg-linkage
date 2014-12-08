@@ -205,3 +205,8 @@ table thead td {
 .font-weight-bold {
   font-weight:bold;
 }
+img.proxy-legend {
+  width:800px;
+  padding-left:100px;
+  padding-top:25px;
+}
