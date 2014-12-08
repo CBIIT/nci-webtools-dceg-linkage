@@ -531,11 +531,11 @@ function addLDproxyHyperLinks(data) {
     //&snp141=pack
     //&hgFind.matches=rs2720460
     // snp1-coord
+
     //
     // Genome Browser:
     //
 
-    // snp1-coord
     var positions = data.query_snp.Coord.split(":");
     var chr = positions[0];
     var mid_value = parseInt(positions[1]);
@@ -548,11 +548,68 @@ function addLDproxyHyperLinks(data) {
       snp141: 'pack',
       'hgFind.matches' : rs_number
     };
-
 		url = server+"?"+$.param(params);
-
-		//url = "http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460snp1-coord";
 		$('#ldproxy-link').attr('href', url)
+/*
+
+RS number=rs2720460
+Position=chr4:104054686
+Pos_minus_250bp=104054436
+Pos_plus_250bp=104054936
+
+Add three links to the following columns in the top 10 proxy table:
+
+RS Number Column links: (Cluster Report)
+http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2720460
+
+Coord Column links:
+http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:104054436-104054936&snp141=pack&hgFind.matches=rs2720460
+
+RegulomeDB links:
+http://www.regulomedb.org/snp/chr4/104054685
+
+## Notice the minus one base pair for the RegulomeDB coordinate in the link. They use a 0 based system for coordinates and not a one based system like our coordinates.
+*/
+		//Add links to the top10 table
+	$.each(data.top10, function( index, value ) {
+
+		//Create RSnumber link (Cluster Report)
+		server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+		// snp1-rsum
+		rs_number = value.RS.substring(2);
+		params = {rs: rs_number};
+		url = server+"?"+$.param(params);
+		$('#RSnumber_'+index+' a:first-child').attr('href', url);
+
+		//Create Coord link ()
+		server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+		positions = value.Coord.split(":");
+		chr = positions[0];
+		mid_value = parseInt(positions[1]);
+		offset =250;
+		range = (mid_value-offset)+"-"+(mid_value+offset);
+		position = chr+":"+range;
+		rs_number = value.RS;
+		params = {
+				position: position,
+				snp141: 'pack',
+				'hgFind.matches' : rs_number
+		};
+		url = server+"?"+$.param(params);
+		$('#Coord_'+index+' a:first-child').attr('href', url);
+
+		//Create RegulomeDB links
+		server = 'http://www.regulomedb.org/snp';
+		positions = value.Coord.split(":");
+		chr = positions[0];
+		mid_value = parseInt(positions[1]);
+		zero_base = mid_value-1;
+
+		url = server+"/"+chr+"/"+zero_base;
+		$('#RegulomeDB_'+index+' a:first-child').attr('href', url);
+
+
+	});
 
 }
 
@@ -610,6 +667,7 @@ function addLDpairHyperLinks(data) {
     };
     url = server+"?"+$.param(params);
     $('#snp2-coord').attr('href', url);
+
 }
 
 function buildPopulationDropdown(elementId) {

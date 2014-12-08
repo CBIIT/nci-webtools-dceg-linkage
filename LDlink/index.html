@@ -535,11 +535,11 @@
 								<label for="ldproxy-snp" style="display: none;">Proxy
 									SNP</label> <input id="ldproxy-snp" name="textinput"
 									class="form-control input-small" type="text"
-									placeholder="SNP RS Number">
+									placeholder="SNP RS Number" required pattern="rs.+">
 							</div>
 							<label for="ldproxy-population-codes" style="display: none;">Proxy
 								Population</label> <select id="ldproxy-population-codes"
-								multiple="multiple">
+								multiple="multiple" required>
 							</select> <a id="ldproxy" class="btn btn-default calculate"
 								data-loading-text="Loading..."> Calculate</a>
 							<hr>
@@ -582,10 +582,10 @@
 
 								<div id="ldproxy-bokeh-graph"></div>
                 <div class="row proxy-table-title-row">
-                  <img src="LDproxy_legend.png" alt="LD Proxy Legend" class="proxy-legend">
+                  <img src="LDproxy_legend.png" title="LD Proxy Legend" class="proxy-legend">
                 </div>
                 <div class="row proxy-table-title-row">
-	                <a id="ldproxy-link" href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460" target="_blank" style="padding-left:100px;">View region in UCSC Genome Browser</a>
+	                <a id="ldproxy-link" href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460" target="_blank" style="padding-left:100px;" title="Genome Browser">View region in UCSC Genome Browser</a>
 	              </div>
 								<br>
                 <br>
@@ -611,8 +611,15 @@
 											</tr>
 										<tbody data-bind="foreach: top10">
 											<tr>
-												<td style="text-align: center" data-bind="text: RS"></td>
-												<td style="text-align: center" data-bind="text: Coord"></td>
+												<td data-bind="attr: { id: 'RSnumber_' + $index() }"
+														style="text-align: center">
+														<a data-bind="text: RS" title="Cluster Report" target="_blank"></a>
+												</td>
+												<td data-bind="attr: { id: 'Coord_' + $index() }"
+														style="text-align: center">
+													<a data-bind="text: Coord" title="Genome Browser" target="_blank"></a>
+
+												</td>
 												<td style="text-align: center" data-bind="text: Alleles"></td>
 												<td style="text-align: center" data-bind="text: MAF"></td>
 												<td style="text-align: center" data-bind="text: Dist"></td>
@@ -620,7 +627,10 @@
 												<td style="text-align: center" data-bind="text: R2"></td>
 												<td style="text-align: center"
 													data-bind="text: Corr_Alleles"></td>
-												<td style="text-align: center" data-bind="text: RegulomeDB"></td>
+												<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
+														style="text-align: center">
+													<a data-bind="text: RegulomeDB" title="RegulomeDB" target="_blank"></a>
+												</td>
 												<td style="text-align: center" data-bind="text: Function"></td>
 											</tr>
 
