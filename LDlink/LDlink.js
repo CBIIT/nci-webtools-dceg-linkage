@@ -215,7 +215,10 @@ function formatLDhapData(data) {
       Frequency: haplotypes[key].Frequency,
       Haplotype: haplotypes[key].Haplotype
     };
-    ldhapTable.footer.push(obj);
+    // Add Haplotypes with a frequency of 1% or greater.
+  	if(haplotypes[key].Frequency*100>1) {
+		ldhapTable.footer.push(obj);
+	}
   }
   //Convert snps to rows.
   for (key in snps) {
