@@ -59,6 +59,9 @@
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"
 	type="text/css">
 <link rel="stylesheet" href="http://cdn.pydata.org/bokeh-0.6.1.css">
+<link rel="stylesheet"
+	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css"
+	type="text/css">
 
 <!--
 <link rel="stylesheet" href="http://cdn.datatables.net/plug-ins/380cb78f450/integration/bootstrap/3/dataTables.bootstrap.css">
@@ -68,9 +71,11 @@
 <!-- Include the multiselect plugin's CSS and JS: -->
 
 <script type="text/javascript"
-	src="../common/js/bootstrap-multiselect.js">
+	src="../common/js/bootstrap-multiselect.js"></script>
 
+<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
 </script>
+
 <link rel="stylesheet" href="../common/css/bootstrap-multiselect.css"
 	type="text/css">
 <link rel="stylesheet" href="../common/css/style.css" type="text/css">
@@ -177,22 +182,22 @@
         <form id="ldhap-form" class="form-inline" role="form">
           <div class="row" style="padding-top: 10px;">
             <div class="col-md-3 col-md-offset-1">
-              <div class="input-group" >
+              <div class="input-group">
                 <span class="input-group-btn"> <span
                   class="btn btn-default btn-file">Browse <input
                     type="file" id="ldhap-file">
                 </span>
-                </span> <input type="text" class="form-control" readonly style="width:210px;">
+                </span> <input type="text" class="form-control" readonly style="width:210px;" required>
               </div>
               <br>or <br>
               <textarea id="ldhap-file-snp-numbers" placeholder="RS Numbers"
                 cols="12" rows="8" class="form-control"
-                title="Enter list of RS numbers (one per line)"></textarea>
+                title="Enter list of RS numbers (one per line)" required></textarea>
             </div>
-            <div class="col-md-3">
-              <select id="ldhap-population-codes" multiple="multiple"></select>
+            <div>
+              <select id="ldhap-population-codes" multiple="multiple" required></select>
             </div>
-            <div class="col-md-4">
+            <div>
               <button type="submit" class="btn btn-default calculate"
                 id="ldhap">Calculate</button>
             </div>
@@ -225,60 +230,38 @@
             <div class="row">
                 <div id="ldhap-bokeh-graph">
 <!--  SNIP ... -->
-<table class="table table-condensed ldhap" data-height="150">
-<thead>
-<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th><th colspan="2" id="ldhap-haplotypes-column">Haplotypes</th></tr>
-</thead>
-
-<tfoot>
-    <tr class="ldhap-table-footer">
-        <td colspan="2" rowspan="2"></td>
-        <td>Haplotype Count</td>
-        <!-- ko foreach: footer -->
-          <td class="cell-right" data-bind="text: $data.Count"></td>
-        <!-- /ko -->
-    </tr>
-    <tr class="ldhap-table-footer">
-        <td>Haplotype Frequency</td>
-        <!-- ko foreach: footer -->
-          <td class="cell-right" data-bind="text: $data.Frequency"></td>
-        <!-- /ko -->
-    </tr>
-<!--
-<tr class="ldhap-table-footer"><td>Haplotype Frequency</td><td class="cell-right">0.5895</td><td class="cell-right">0.1799</td><td class="cell-right">0.1431</td><td class="cell-right">0.0775</td><td class="cell-right">0.004</td><td class="cell-right">0.004</td><td class="cell-right">0.002</td></tr>
--->
-
-</tfoot>
-
-  <tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
-    <tr>
-      <td data-bind="text: $data.RS"></td>
-      <td data-bind="text: $data.Coord"></td>
-      <td data-bind="text: $data.Alleles"></td>
-      <!-- ko foreach: $data.Haplotypes -->
-          <td class="cell-right font-weight-bold" data-bind="text: $data"></td>
-      <!-- /ko -->
-      <!--
-      <td data-bind="value: $parent.rows[$index()].haplotypesHTML"></td>
-      <span data-bind="html: haplotypesHTML"></span>
-      -->
-    </tr>
-  </tbody>
-</table>
-<!--
-   <tbody data-bind="foreach: people">
-        <tr>
-            <td data-bind="text: firstName"></td>
-            <td data-bind="text: lastName"></td>
-        </tr>
-    </tbody>
--->
-
-<!-- SNIP up -->
-
-
-
-
+									<table class="table table-condensed ldhap" data-height="150">
+										<thead>
+											<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th>
+											<th colspan="2" id="ldhap-haplotypes-column">Haplotypes</th>
+											</tr>
+										</thead>
+										<tfoot>
+										    <tr class="ldhap-table-footer">
+										        <td colspan="2" rowspan="2"></td>
+										        <td>Haplotype Count</td>
+										        <!-- ko foreach: footer -->
+										          <td class="cell-right" data-bind="text: $data.Count"></td>
+										        <!-- /ko -->
+										    </tr>
+										    <tr class="ldhap-table-footer">
+										        <td>Haplotype Frequency</td>
+										        <!-- ko foreach: footer -->
+										          <td class="cell-right" data-bind="text: $data.Frequency"></td>
+										        <!-- /ko -->
+										    </tr>
+										</tfoot>
+									  <tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+									    <tr>
+									      <td data-bind="text: $data.RS"></td>
+									      <td data-bind="text: $data.Coord"></td>
+									      <td data-bind="text: $data.Alleles"></td>
+									      <!-- ko foreach: $data.Haplotypes -->
+									          <td class="cell-right font-weight-bold" data-bind="text: $data"></td>
+									      <!-- /ko -->
+									    </tr>
+									  </tbody>
+									</table>
                 </div>
             </div>
           </div>
@@ -304,10 +287,10 @@
 								cols="12" rows="8" class="form-control"
 								title="Enter list of RS numbers (one per line)"></textarea>
 						</div>
-						<div class="col-md-3">
+						<div class="col-md-2">
 							<select id="ldmatrix-population-codes" multiple="multiple"></select>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-2">
 							<button type="submit" class="btn btn-default calculate"
 								id="ldmatrix">Calculate</button>
 						</div>
@@ -529,9 +512,9 @@
 				<!-- LDproxy INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
-					<div class="col-md-12">
-						<div class="form-group">
-							<div class="col-md-2">
+					<div class="col-sm-12">
+						<div class="form-group col-sm-10 col-sm-offset-1">
+							<div class="col-sm-2">
 								<label for="ldproxy-snp" style="display: none;">Proxy
 									SNP</label> <input id="ldproxy-snp" name="textinput"
 									class="form-control input-small" type="text"
@@ -546,7 +529,7 @@
 						</div>
 						<!-- Message ERROR -->
 						<div class="row">
-							<div class="col-md-7 col-md-offset-2" id="ldproxy-message">
+							<div class="col-sm-7 col-sm-offset-2" id="ldproxy-message">
 								<div class="panel panel-danger">
 									<div class="panel-heading">Error</div>
 									<div class="panel-body" id="ldproxy-message-content"></div>
@@ -555,7 +538,7 @@
 						</div>
 						<!-- Message WARNING -->
 						<div class="row">
-							<div class="col-md-7 col-md-offset-2"
+							<div class="col-sm-7 col-sm-offset-2"
 								id="ldproxy-message-warning">
 								<div class="panel panel-warning">
 									<div class="panel-heading">Warning</div>
@@ -565,7 +548,7 @@
 
 							</div>
 						</div>
-						<!-- LDpair OUTPUT Results -->
+						<!-- LDproxy OUTPUT Results -->
 
 						<div class="jumbotron">
 							<!-- LDPROXY PROGRESS BAR -->
@@ -654,7 +637,7 @@
 	</div>
 	<div id="portal-footer">
 		<div class="footerLinks">
-			<a href="http://www.cancer.gov/" title="Home">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+			<a href="http://www.cancer.gov/" title="Home" data-toggle="tooltip" data-placement="left">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
 				target="_top" title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
 				href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;

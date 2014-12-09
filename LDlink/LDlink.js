@@ -23,6 +23,54 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 $(document).ready(function() {
 
 	var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
+
+	$('#ldhap-form').bootstrapValidator();
+
+	// Apply Bindings
+	ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
+	ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
+	ko.applyBindings(ldhapModel, document.getElementById('ldhap-results-container'));
+	//console.log('ldpairModel');
+	//console.dir(ldpairModel);
+	//console.log('ldproxyModel');
+	//console.dir(ldproxyModel);
+
+	$.each(modules, function(key, id) {
+		buildPopulationDropdown(id+"-population-codes");
+		$("#"+id+"-results-container").hide();
+		$('#'+id+'-message').hide();
+		$('#'+id+'-message-warning').hide();
+	});
+
+	$('.tab-content').on('click',
+		"a[class|='btn btn-default calculate']", function(e) {
+		calculate(e);
+	});
+
+	$('.tab-content').on('click',
+		"button[class|='btn btn-default calculate']", function(e) {
+		calculate(e);
+	});
+
+  // Add file select listeners
+
+	$('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+		populateTextArea(event, numFiles, label);
+		var input = $(this).parents('.input-group').find(':text'),
+		log = numFiles > 1 ? numFiles + ' files selected' : label;
+		if (input.length) {
+			input.val(log);
+		} else {
+			if (log)
+				alert(log);
+		}
+	});
+
+//
+// HERE IS HOW IT IS DONE
+//  https://developer.mozilla.org/en-US/docs/Web/Guide/Using_FormData_Objects
+//
+
 	$( "body" ).keypress(function(e) {
 		//Look for a return value
 		var code = e.keyCode || e.which;
@@ -36,52 +84,6 @@ $(document).ready(function() {
 		}
 	});
 
-		// Apply Bindings
-		ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
-	    ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
-	    ko.applyBindings(ldhapModel, document.getElementById('ldhap-results-container'));
-      //console.log('ldpairModel');
-      //console.dir(ldpairModel);
-      //console.log('ldproxyModel');
-      //console.dir(ldproxyModel);
-
-			$.each(modules, function(key, id) {
-				buildPopulationDropdown(id+"-population-codes");
-        $("#"+id+"-results-container").hide();
-        $('#'+id+'-message').hide();
-        $('#'+id+'-message-warning').hide();
-			});
-
-			$('.tab-content').on('click',
-					"a[class|='btn btn-default calculate']", function(e) {
-						calculate(e);
-			});
-      $('.tab-content').on('click',
-        "button[class|='btn btn-default calculate']", function(e) {
-            calculate(e);
-      });
-
-  // Add file select listeners
-
-	$('.btn-file :file')
-		.on(
-			'fileselect',
-			function(event, numFiles, label) {
-        populateTextArea(event, numFiles, label);
-				var input = $(this).parents('.input-group').find(':text'),
-              log = numFiles > 1 ? numFiles + ' files selected' : label;
-							if (input.length) {
-								input.val(log);
-						  } else {
-								if (log)
-									alert(log);
-			        }
-		});
-
-//
-// HERE IS HOW IT IS DONE
-//  https://developer.mozilla.org/en-US/docs/Web/Guide/Using_FormData_Objects
-//
 });
 
 //Set file support trigger
@@ -259,17 +261,9 @@ function updateLDmatrix() {
   var id = "ldmatrix";
 
   var $btn = $('#'+id).button('loading');
-//    snp : $('#ldmatrix-snp').val(),
+
   var snps = $('#'+id+'-file-snp-numbers').val();
   var population = $('#'+id+'-population-codes').val();
-  //var snps = snps.replace("\n", ",");
-  //alert(snps);
-  //alert(population);
-  console.log("snps");
-  console.dir(snps);
-  console.log("population");
-  console.dir(population);
-
   var ldmatrixInputs = {
     snps: snps,
     pop : population.join("+"),
