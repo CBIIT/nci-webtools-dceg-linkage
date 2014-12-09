@@ -75,6 +75,18 @@ $(document).ready(function() {
 		//Look for a return value
 		var code = e.keyCode || e.which;
 		if(code == 13) { //User pressed return key
+			//make sure focus is not in a textarea.  If so ignore.
+			var event_id = e.target.id;
+			//Skip if you can't get event_id
+			if(event_id === "") {
+
+			} else {
+				//Skip if user is editing TEXTAREA
+				var tag_name = $("#"+event_id).get(0).tagName;
+				if(tag_name == "TEXTAREA") {
+					return;
+				}
+			}
 			var active_tab = $("div.tab-pane.active").attr('id');
 			var id = active_tab.split("-");
 			if(id.length == 2) { //Check to make sure we are on a calculate tab
