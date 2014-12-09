@@ -29,9 +29,7 @@ $(document).ready(function() {
 		if(code == 13) { //User pressed return key
 			var active_tab = $("div.tab-pane.active").attr('id');
 			var id = active_tab.split("-");
-			alert(id.length);
 			if(id.length == 2) { //Check to make sure we are on a calculate tab
-				alert(active_tab);
 				initCalculate(id[0]);
 				updateData(id[0]);
 			}
