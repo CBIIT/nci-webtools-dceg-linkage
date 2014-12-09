@@ -22,15 +22,26 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(function() {
 
-      var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
-      $( "body" ).keypress(function() {
-        console.log( "Handler for .keypress() called." );
-      });
+	var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
+	$( "body" ).keypress(function(e) {
+		//Look for a return value
+		var code = e.keyCode || e.which;
+		if(code == 13) { //User pressed return key
+			var active_tab = $("div.tab-pane.active").attr('id');
+			var id = active_tab.split("-");
+			alert(id.length);
+			if(id.length == 2) { //Check to make sure we are on a calculate tab
+				alert(active_tab);
+				initCalculate(id[0]);
+				updateData(id[0]);
+			}
+		}
+	});
 
-			// Apply Bindings
-			ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
-      ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
-      ko.applyBindings(ldhapModel, document.getElementById('ldhap-results-container'));
+		// Apply Bindings
+		ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
+	    ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
+	    ko.applyBindings(ldhapModel, document.getElementById('ldhap-results-container'));
       //console.log('ldpairModel');
       //console.dir(ldpairModel);
       //console.log('ldproxyModel');
@@ -106,14 +117,15 @@ function populateTextArea(event, numFiles, label) {
 
 function calculate(e) {
 	var id = e.target.id;
-  e.preventDefault();
+	e.preventDefault();
 //	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
-
-  $('#'+id+'-results-container').hide();
-  $('#'+id+'-message').hide();
-  $('#'+id+'-message-warning').hide();
-
- 	updateData(id);
+	initCalculate(id);
+	updateData(id);
+}
+function initCalculate(id) {
+	$('#'+id+'-results-container').hide();
+	$('#'+id+'-message').hide();
+	$('#'+id+'-message-warning').hide();
 }
 
 function updateData(id) {
@@ -129,7 +141,6 @@ function updateData(id) {
       $('#'+id+'-progress-container').show();
       //ko.mapping.fromJS(newProxy4, ldproxyModel);
       updateLDproxy();
-      updateProgressBar(id, 30);
 		break;
 	case 'ldmatrix':
       console.log($('#ldmatrix-form').serialize());
@@ -167,8 +178,6 @@ function updateLDhap() {
   });
 
   ajaxRequest.success(function(data) {
-      // SUCCESS
-      console.log("SUCCESS");
       //$('#ldhap-bokeh-graph').empty().append(data);
       $('#'+id+'-results-container').show();
 
@@ -279,8 +288,6 @@ function updateLDmatrix() {
   });
 
   ajaxRequest.success(function(data) {
-      // SUCCESS
-      console.log("SUCCESS");
       $('#ldmatrix-bokeh-graph').empty().append(data);
       $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
@@ -310,14 +317,14 @@ function addLDMatrixHyperLinks(request) {
   $('#ldmatrix-DPrime').attr('href','tmp/d_prime_'+request+'.txt');
   $('#ldmatrix-R2').attr('href','tmp/r2_'+request+'.txt');
 }
-function updateProgressBar(id, seconds) {
-  var milliseconds = seconds * 1000;
-  // Divide number of milliseconds to get 100 to get 100 updates
-  var delay = milliseconds / 100;
 
-//  $('#'+id+'-progress').show();
+function updateLDproxyProgressBar(id, seconds) {
 
-    //var progressBar = $('#'+id+' div:first-child');
+  	var milliseconds = seconds * 1000;
+  	// Divide number of milliseconds to get 100 to get 100 updates
+  	var delay = milliseconds / 100;
+
+	$('#'+id+'-progress').show();
     var progressBar = $('.progress-bar');
     width = 0;
 
@@ -340,7 +347,7 @@ function createPopulationDropdown(id) {
 			.multiselect(
 					{
 						enableClickableOptGroups : true,
-						buttonWidth : '280px',
+						buttonWidth : '250px',
 						maxHeight : 500,
 						includeSelectAllOption : true,
 						dropRight : true,
@@ -399,7 +406,62 @@ function updateLDproxy() {
     reference : Math.floor(Math.random() * (99999 - 10000 + 1))
   };
 
+
   $('#ldproxy-results-link').attr('href', 'tmp/proxy'+ldproxyInputs.reference+'.txt');
+  	//
+  	//Determine caclulation time.
+  	//Wait 1.5 seconds for pops file to be created.
+  	//
+	setTimeout(function(){
+			//Determine seconds...
+		var url = 'tmp/pops_'+ldproxyInputs.reference+'.txt';
+		var base_calculation_time = 20; //seconds
+		var bokeh_load_time = 8; //seconds
+		var sample_multiplier = 0.0256; //seconds per sample
+
+		var seconds = 0;
+		var ajaxRequest = $.ajax({
+			type : "GET",
+			url : url
+		});
+
+	  	ajaxRequest.success(function(data) {
+			console.log("Estimate for number of seconds");
+			console.info(seconds);
+		    sample_count = data.split("\n").length;
+		    console.log("sample_count = "+ sample_count);
+		    seconds = (sample_multiplier * sample_count)
+		    		+ base_calculation_time + bokeh_load_time;
+		    console.log("Total Seconds =");
+		    console.log(seconds);
+			updateLDproxyProgressBar(id, seconds);
+		});
+		ajaxRequest.fail(function(jqXHR, textStatus) {
+			//Create a linear guess based on
+			// One (1) population take 30 seconds
+			// All (26) populations take 93 seconds.
+			//Get populations list length...
+			var population = $('#ldproxy-population-codes').val();
+			console.log(population);
+			//Get number of populations selected min 1 thru max 30
+			var pop_selected = population.length;
+			console.log("populations selected");
+			console.log(pop_selected);
+			// Backup estimeate30 + (2.42 * x) = seconds
+			var backup_estimate_multiplier =2.5;
+			seconds = (backup_estimate_multiplier * pop_selected)
+					+ base_calculation_time + bokeh_load_time;
+			console.log("Using Backup Estimate for number of seconds");
+			console.info(seconds);
+			updateLDproxyProgressBar(id, seconds);
+
+	  	});
+
+	  	ajaxRequest.always(function() {
+	  		console.log('AJAX call done for LDProxy estimate');
+	  	});
+
+	}, 1500);
 
   var url = restServerUrl + "/ldproxy";
   var ajaxRequest = $.ajax({
@@ -409,8 +471,6 @@ function updateLDproxy() {
   });
 
   ajaxRequest.success(function(data) {
-      // SUCCESS
-      console.log("SUCCESS");
       $('#ldproxy-bokeh-graph').empty().append(data);
       $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
@@ -446,10 +506,7 @@ function getLDProxyResults(jsonfile) {
 
   ajaxRequest.success(function(data) {
     ko.mapping.fromJS(data, ldproxyModel);
-    console.log('ldproxy data');
-    console.dir(data);
-//	addLDHyperlinks(data)
-		addLDproxyHyperLinks(data);
+	addLDproxyHyperLinks(data);
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     alert('Fail');
@@ -499,7 +556,6 @@ function updateLDpair() {
       $('#'+id+'-message').show();
       $('#'+id+'-message-content').empty().append(data.error);
 		} else {
-      // SUCCESS
       ko.mapping.fromJS(data, ldpairModel);
       $('#'+id+'-results-container').show();
       addLDpairHyperLinks(data);
