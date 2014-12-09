@@ -733,12 +733,10 @@ function buildPopulationDropdown(elementId) {
   var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
   for ( var popAbbrev in populations) {
     var population = populations[popAbbrev];
-    htmlText += htmlText1.replace(/ABBREV/g, popAbbrev).replace("FULLNAME",
-        population.fullName);
+    htmlText += htmlText1.replace(/ABBREV/g, popAbbrev).replace("FULLNAME", population.fullName);
     for ( var subPopAbbrev in population.subPopulations) {
       var subDetail = population.subPopulations[subPopAbbrev];
-      htmlText += htmlText2.replace(/ABBREV/g, subPopAbbrev).replace(
-          "DETAIL", subDetail);
+      htmlText += htmlText2.replace(/ABBREV/g, subPopAbbrev).replace("DETAIL", subDetail);
     }
     htmlText += "</optgroup>\n";
   }
@@ -748,13 +746,14 @@ function buildPopulationDropdown(elementId) {
       .multiselect(
           {
             enableClickableOptGroups : true,
-            buttonWidth : '280px',
+            buttonWidth : '180px',
             maxHeight : 500,
+            buttonClass: 'btn btn-default btn-ldlink-multiselect',
             includeSelectAllOption : true,
             dropRight : false,
             allSelectedText : 'All Populations',
             nonSelectedText : 'Select Population',
-            numberDisplayed : 6,
+            numberDisplayed : 4,
             selectAllText : ' (ALL) All Populations',
 
             // buttonClass: 'btn btn-link',
