@@ -319,7 +319,7 @@ def calculate_proxy(snp,pop,request):
 
 	figure(
 		title="Proxies for "+snp+" in "+pop,
-		plot_width=900,
+		plot_width=800,
 		plot_height=600,
 		tools=""
 	)
