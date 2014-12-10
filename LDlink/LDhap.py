@@ -215,6 +215,29 @@ def calculate_hap(snplst,pop,request):
 		snps_out["snp_"+(digits-len(str(i+1)))*"0"+str(i+1)]=snp_info
 	output["snps"]=snps_out
 	
+	# Create SNP File
+	snp_out=open(tmp_dir+"snps_"+request+".txt", "w")
+	print >> snp_out, "RS_Number\tPosition (hg19)\tAllele Frequency"
+	for k in sorted(output["snps"].keys()):
+		rs_k=output["snps"][k]["RS"]
+		coord_k=output["snps"][k]["Coord"]
+		alleles_k0=output["snps"][k]["Alleles"].strip(" ").split(",")
+		alleles_k1=alleles_k0[0]+"0"*(7-len(str(alleles_k0[0])))+","+alleles_k0[1]+"0"*(8-len(str(alleles_k0[1])))
+		temp_k=[rs_k,coord_k,alleles_k1]
+		print >> snp_out, "\t".join(temp_k)
+	snp_out.close()
+	
+	# Create Haplotype File
+	hap_out=open(tmp_dir+"haplotypes_"+request+".txt", "w")
+	print >> hap_out, "Haplotype\tCount\tFrequency"
+	for k in sorted(output["haplotypes"].keys()):
+		hap_k=output["haplotypes"][k]["Haplotype"]
+		count_k=str(output["haplotypes"][k]["Count"])
+		freq_k=str(output["haplotypes"][k]["Frequency"])
+		temp_k=[hap_k,count_k,freq_k]
+		print >> hap_out, "\t".join(temp_k)
+	hap_out.close()
+	
 	
 	duration=time.time() - start_time
 	
