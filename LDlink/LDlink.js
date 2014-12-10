@@ -11,29 +11,24 @@ var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
 
 var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
 
-var ldPairData=[{corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}}];
+var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
 var ldProxyData = {top10:  [{"Alleles":"newProxy","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]};
 var ldhapData = {"footer":[{"Count":127,"Frequency":0.588,"Haplotype":"GCATGGCGTTGGGG"},{"Count":40,"Frequency":0.1852,"Haplotype":"GGGGAGCGTTGGGG"},{"Count":23,"Frequency":0.1065,"Haplotype":"GCGGAGCGTTGGGG"},{"Count":11,"Frequency":0.0509,"Haplotype":"TGGGAGCGTTGGGG"},{"Count":8,"Frequency":0.037,"Haplotype":"GCATAGCGTTGGGG"},{"Count":7,"Frequency":0.0324,"Haplotype":"TGGGGATAGCAAAG"}],"rows":[{"Alleles":"G=0.917, T=0.083","Coord":"chr4:104050980","RS":"rs2720457","Haplotypes":["G","G","G","T","G","T"]},{"Alleles":"C=0.732, G=0.269","Coord":"chr4:104052963","RS":"rs2720458","Haplotypes":["C","G","C","G","C","G"]},{"Alleles":"A=0.625, G=0.375","Coord":"chr4:104055748","RS":"rs2720461","Haplotypes":["A","G","G","G","A","G"]},{"Alleles":"T=0.625, G=0.375","Coord":"chr4:104056210","RS":"rs2720462","Haplotypes":["T","G","G","G","T","G"]},{"Alleles":"G=0.62, A=0.38","Coord":"chr4:104052068","RS":"rs7661201","Haplotypes":["G","A","A","A","A","G"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104055722","RS":"rs2623063","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"C=0.968, T=0.032","Coord":"chr4:104057121","RS":"rs2623062","Haplotypes":["C","C","C","C","C","T"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104057248","RS":"rs2720463","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"T=0.968, G=0.032","Coord":"chr4:104057887","RS":"rs2711901","Haplotypes":["T","T","T","T","T","G"]},{"Alleles":"T=0.968, C=0.032","Coord":"chr4:104051132","RS":"rs2623082","Haplotypes":["T","T","T","T","T","C"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104058596","RS":"rs2711900","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104050510","RS":"rs2720456","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"G=0.968, A=0.032","Coord":"chr4:104050326","RS":"rs2720455","Haplotypes":["G","G","G","G","G","A"]},{"Alleles":"G=1.0, A=0.0","Coord":"chr4:104059542","RS":"rs2243682","Haplotypes":["G","G","G","G","G","G"]}]};
 
 //Map knockout models to a sample json data
 var ldproxyModel = ko.mapping.fromJS(ldProxyData);
-var ldpairModel = ko.mapping.fromJS(ldPairData[0]);
+var ldpairModel = ko.mapping.fromJS(ldPairData);
 var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(function() {
 
 	var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
-
 	$('#ldhap-form').bootstrapValidator();
 
 	// Apply Bindings
 	ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
 	ko.applyBindings(ldproxyModel, document.getElementById('ldproxy-results-container'));
 	ko.applyBindings(ldhapModel, document.getElementById('ldhap-results-container'));
-	//console.log('ldpairModel');
-	//console.dir(ldpairModel);
-	//console.log('ldproxyModel');
-	//console.dir(ldproxyModel);
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id+"-population-codes");
@@ -52,8 +47,7 @@ $(document).ready(function() {
 		calculate(e);
 	});
 
-  // Add file select listeners
-
+	// Add file select file listener
 	$('.btn-file :file').on('fileselect', function(event, numFiles, label) {
 		populateTextArea(event, numFiles, label);
 		var input = $(this).parents('.input-group').find(':text'),
@@ -87,6 +81,16 @@ $(document).ready(function() {
 					return;
 				}
 			}
+
+			console.log("********");
+			console.log("event_id");
+			console.log(event_id);
+			console.log('typeof event_id');
+			console.log(typeof event_id);
+
+
+			console.log('tag_name');
+			console.log(tag_name);
 			var active_tab = $("div.tab-pane.active").attr('id');
 			var id = active_tab.split("-");
 			if(id.length == 2) { //Check to make sure we are on a calculate tab
@@ -329,7 +333,7 @@ function updateLDproxyProgressBar(id, seconds) {
   	var delay = milliseconds / 100;
 
 	$('#'+id+'-progress').show();
-    var progressBar = $('.progress-bar');
+    var progressBar = $('#ldproxy-progress-bar');
     width = 0;
 
     progressBar.width(width);
@@ -347,54 +351,52 @@ function updateLDproxyProgressBar(id, seconds) {
 
 function createPopulationDropdown(id) {
 
-  $('#' + id + '-population-codes')
-			.multiselect(
-					{
-						enableClickableOptGroups : true,
-						buttonWidth : '250px',
-						maxHeight : 500,
-						includeSelectAllOption : true,
-						dropRight : true,
-						allSelectedText : 'All Populations',
-						nonSelectedText : 'Select Population',
-						numberDisplayed : 6,
-						selectAllText : ' (ALL) All Populations',
+	$('#' + id + '-population-codes').multiselect({
+		enableClickableOptGroups : true,
+		buttonWidth : '250px',
+		maxHeight : 500,
+		includeSelectAllOption : true,
+		dropRight : true,
+		allSelectedText : 'All Populations',
+		nonSelectedText : 'Select Population',
+		numberDisplayed : 6,
+		selectAllText : ' (ALL) All Populations',
 
-						// buttonClass: 'btn btn-link',
-						buttonText : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText
-										+ ' <b class="caret"></b>';
-							} else if (options.length == $('option', $(select)).length) {
-								return this.allSelectedText
-										+ ' <b class="caret"></b>';
-							} else if (options.length > this.numberDisplayed) {
-								return '<span class="badge">' + options.length
-										+ '</span> ' + this.nSelectedText
-										+ ' <b class="caret"></b>';
-							} else {
-								var selected = '';
-								options.each(function() {
-									// var label = $(this).attr('label') :
-									// $(this).html();
-									selected += $(this).val() + '+';
-								});
+		// buttonClass: 'btn btn-link',
+		buttonText : function(options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText
+						+ ' <b class="caret"></b>';
+			} else if (options.length == $('option', $(select)).length) {
+				return this.allSelectedText
+						+ ' <b class="caret"></b>';
+			} else if (options.length > this.numberDisplayed) {
+				return '<span class="badge">' + options.length
+						+ '</span> ' + this.nSelectedText
+						+ ' <b class="caret"></b>';
+			} else {
+				var selected = '';
+				options.each(function() {
+					// var label = $(this).attr('label') :
+					// $(this).html();
+					selected += $(this).val() + '+';
+				});
 
-								return selected.substr(0, selected.length - 1)
-										+ ' <b class="caret"></b>';
-							}
-						},
-						buttonTitle : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText;
-							} else {
-								var selected = '';
-								options.each(function() {
-									selected += $(this).text() + '\n';
-								});
-								return selected;
-							}
-						}
+				return selected.substr(0, selected.length - 1)
+						+ ' <b class="caret"></b>';
+			}
+		},
+		buttonTitle : function(options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText;
+			} else {
+				var selected = '';
+				options.each(function() {
+					selected += $(this).text() + '\n';
+				});
+				return selected;
+			}
+		}
 	});
 }
 
@@ -412,6 +414,8 @@ function updateLDproxy() {
 
 
   $('#ldproxy-results-link').attr('href', 'tmp/proxy'+ldproxyInputs.reference+'.txt');
+  $('#ldproxy-progress-bar').attr('', "0");
+
   	//
   	//Determine caclulation time.
   	//Wait 1.5 seconds for pops file to be created.
@@ -432,12 +436,12 @@ function updateLDproxy() {
 	  	ajaxRequest.success(function(data) {
 			console.log("Estimate for number of seconds");
 			console.info(seconds);
-		    sample_count = data.split("\n").length;
-		    console.log("sample_count = "+ sample_count);
-		    seconds = (sample_multiplier * sample_count)
-		    		+ base_calculation_time + bokeh_load_time;
-		    console.log("Total Seconds =");
-		    console.log(seconds);
+			sample_count = data.split("\n").length;
+			console.log("sample_count = "+ sample_count);
+			seconds = (sample_multiplier * sample_count)
+					+ base_calculation_time + bokeh_load_time;
+			console.log("Total Seconds =");
+			console.log(seconds);
 			updateLDproxyProgressBar(id, seconds);
 		});
 		ajaxRequest.fail(function(jqXHR, textStatus) {

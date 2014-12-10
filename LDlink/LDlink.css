@@ -172,6 +172,7 @@ table.ldhap,table.ldhap tr, table.ldhap th {
 
 .jumbotron {
   background-color:white;
+  padding:10px 15px;
 }
 .ldpair-stats {
   float:left;
