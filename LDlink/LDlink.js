@@ -9,7 +9,11 @@ var restService = {
 var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
     + restService.route;
 
-var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
+var populations={
+	AFR:{
+		fullName:"African",
+		subPopulations:
+		{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
 
 var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
 var ldProxyData = {top10:  [{"Alleles":"newProxy","Coord":"chr12:126891966","Corr_Alleles":"G-G,A-A","Dist":986,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7957025","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126888368","Corr_Alleles":"G-A,A-G","Dist":-2612,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs10847146","RegulomeDB":"5"},{"Alleles":"(T/A)","Coord":"chr12:126894660","Corr_Alleles":"G-T,A-A","Dist":3680,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058634","RegulomeDB":"7"},{"Alleles":"(G/C)","Coord":"chr12:126887133","Corr_Alleles":"G-G,A-C","Dist":-3847,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058630","RegulomeDB":"6"},{"Alleles":"(G/A)","Coord":"chr12:126895215","Corr_Alleles":"G-G,A-A","Dist":4235,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs11058636","RegulomeDB":"7"},{"Alleles":"(G/T)","Coord":"chr12:126895996","Corr_Alleles":"G-G,A-T","Dist":5016,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7972985","RegulomeDB":"6"},{"Alleles":"(C/T)","Coord":"chr12:126885179","Corr_Alleles":"G-C,A-T","Dist":-5801,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs61942997","RegulomeDB":"5"},{"Alleles":"(A/G)","Coord":"chr12:126884784","Corr_Alleles":"G-A,A-G","Dist":-6196,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs12579545","RegulomeDB":"7"},{"Alleles":"(G/A)","Coord":"chr12:126898373","Corr_Alleles":"G-G,A-A","Dist":7393,"Dprime":"1.0","Function":"unknown","MAF":"0.138888888889","R2":1,"RS":"rs7132131","RegulomeDB":"7"}]};
@@ -94,60 +98,7 @@ $(document).ready(function() {
 		}
 	});
 
-	//Add validators
-
-    $('#ldpairForm').bootstrapValidator({
-        feedbackIcons: {
-            valid: 'fa  fa-check',
-            invalid: 'fa  fa-close',
-            validating: 'fa fa-refresh'
-        },
-        fields: {
-            snp: {
-            	selector: '.snp',
-                    validators: {
-                        notEmpty: {
-                            message: 'The RS Number is required and cannot be empty'
-                        },
-                        regexp: {
-                        		regexp: /^rs\d+$/i,
-                        		message: 'Enter a valid rs number'
-                    		}
-            			}
-            },
-            email: {
-                // All the email address field have emailAddress class
-                selector: '.emailAddress',
-                validators: {
-                    callback: {
-                        message: 'You must enter at least one email address',
-               		        callback: function(value, validator, $field) {
-                            var isEmpty = true,
-                                // Get the list of fields
-                                $fields = validator.getFieldElements('email');
-                            for (var i = 0; i < $fields.length; i++) {
-                                if ($fields.eq(i).val() !== '') {
-                                    isEmpty = false;
-                                    break;
-                                }
-                            }
-
-                            if (!isEmpty) {
-                                // Update the status of callback validator for all fields
-                                validator.updateStatus('email', validator.STATUS_VALID, 'callback');
-                                return true;
-                            }
-
-                            return false;
-                        }
-                    },
-                    emailAddress: {
-                        message: 'The value is not a valid email address'
-                    }
-                }
-            }
-        }
-    });
+	addValidators();
 
 });
 
@@ -646,8 +597,6 @@ function displayError(id, data) {
 function addLDHapHyperLinks(request, ldhapTable) {
 		$('#ldhap-snps').attr('href','tmp/snps_'+request+'.txt');
 		$('#ldhap-haplotypes').attr('href','tmp/haplotypes_'+request+'.txt');
-		console.log("ldhapTable");
-		console.dir(ldhapTable);
 
     var server;
     var params = {};
@@ -872,14 +821,14 @@ function buildPopulationDropdown(elementId) {
             buttonText : function(options, select) {
               if (options.length === 0) {
                 return this.nonSelectedText
-                    + ' <b class="caret"></b>';
+                    + '<span class="caret"></span>';
               } else if (options.length == $('option', $(select)).length) {
                 return this.allSelectedText
-                    + ' <b class="caret"></b>';
+                    + '<span class="caret"></span>';
               } else if (options.length > this.numberDisplayed) {
                 return '<span class="badge">' + options.length
                     + '</span> ' + this.nSelectedText
-                    + ' <b class="caret"></b>';
+                    + '<span class="caret"></span>';
               } else {
                 var selected = '';
                 options.each(function() {
@@ -904,4 +853,100 @@ function buildPopulationDropdown(elementId) {
               }
             }
           });
+}
+
+function addValidators() {
+		//Add validators
+
+		// LDPAIR FORM
+    $('#ldpairForm').find('[name="populations"]')
+            .multiselect({
+                onChange: function(element, checked) {
+                	console.log("GOT HERE");
+                    $('#ldpairForm').bootstrapValidator('revalidateField', 'populations');
+                }
+            })
+            .end()
+      .bootstrapValidator({
+				excluded: ':disabled',
+        feedbackIcons: {
+            valid: 'fa  fa-check',
+            invalid: 'fa  fa-close',
+            validating: 'fa fa-refresh'
+        },
+        fields: {
+            snp: {
+            	selector: '.snp',
+                    validators: {
+                        notEmpty: {
+                            message: 'The RS Number is required and cannot be empty'
+                        },
+                        regexp: {
+                        		regexp: /^rs\d+$/i,
+                        		message: 'Enter a valid RS number'
+                    		}
+            			}
+            },
+            populations: {
+                validators: {
+                    callback: {
+                        message: 'Please choose at least one population',
+                        callback: function(value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('populations').val();
+                            console.log('Options');
+                            console.log(console);
+
+                            return (options != null && options.length >= 1);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+		// LDPROX FORM
+    $('#ldproxyForm').find('[name="populations"]')
+            .multiselect({
+                onChange: function(element, checked) {
+                    $('#ldproxyForm').bootstrapValidator('revalidateField', 'populations');
+                }
+            }).end()
+      .bootstrapValidator({
+				excluded: ':disabled',
+        feedbackIcons: {
+            valid: 'fa  fa-check',
+            invalid: 'fa  fa-close',
+            validating: 'fa fa-refresh'
+        },
+        fields: {
+            snp: {
+            	selector: '.snp',
+                    validators: {
+                        notEmpty: {
+                            message: 'The RS Number is required and cannot be empty'
+                        },
+                        regexp: {
+                        		regexp: /^rs\d+$/i,
+                        		message: 'Enter a valid RS number'
+                    		}
+            			}
+            },
+            populations: {
+                validators: {
+                    callback: {
+                        message: 'Please choose at least one population',
+                        callback: function(value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('populations').val();
+                            console.log('Options');
+                            console.log(console);
+                            return (options != null && options.length >= 1);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
 }
