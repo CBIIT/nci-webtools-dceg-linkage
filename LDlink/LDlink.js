@@ -23,7 +23,6 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 $(document).ready(function() {
 
 	var modules = ["ldhap", "ldmatrix", "ldpair", "ldproxy"];
-	$('#ldhap-form').bootstrapValidator();
 
 	// Apply Bindings
 	ko.applyBindings(ldpairModel, document.getElementById('ldpair-results-container'));
@@ -60,11 +59,6 @@ $(document).ready(function() {
 		}
 	});
 
-//
-// HERE IS HOW IT IS DONE
-//  https://developer.mozilla.org/en-US/docs/Web/Guide/Using_FormData_Objects
-//
-
 	$( "body" ).keypress(function(e) {
 		//Look for a return value
 		var code = e.keyCode || e.which;
@@ -100,18 +94,67 @@ $(document).ready(function() {
 		}
 	});
 
+	//Add validators
+
+    $('#ldpairForm').bootstrapValidator({
+        feedbackIcons: {
+            valid: 'fa  fa-check',
+            invalid: 'fa  fa-close',
+            validating: 'fa fa-refresh'
+        },
+        fields: {
+            snp: {
+            	selector: '.snp',
+                    validators: {
+                        notEmpty: {
+                            message: 'The RS Number is required and cannot be empty'
+                        },
+                        regexp: {
+                        		regexp: /^rs\d+$/i,
+                        		message: 'Enter a valid rs number'
+                    		}
+            			}
+            },
+            email: {
+                // All the email address field have emailAddress class
+                selector: '.emailAddress',
+                validators: {
+                    callback: {
+                        message: 'You must enter at least one email address',
+               		        callback: function(value, validator, $field) {
+                            var isEmpty = true,
+                                // Get the list of fields
+                                $fields = validator.getFieldElements('email');
+                            for (var i = 0; i < $fields.length; i++) {
+                                if ($fields.eq(i).val() !== '') {
+                                    isEmpty = false;
+                                    break;
+                                }
+                            }
+
+                            if (!isEmpty) {
+                                // Update the status of callback validator for all fields
+                                validator.updateStatus('email', validator.STATUS_VALID, 'callback');
+                                return true;
+                            }
+
+                            return false;
+                        }
+                    },
+                    emailAddress: {
+                        message: 'The value is not a valid email address'
+                    }
+                }
+            }
+        }
+    });
+
 });
 
 //Set file support trigger
-$(document)
-    .on(
-        'change',
-        '.btn-file :file',
-        function() {
-          var input = $(this), numFiles = input.get(0).files ? input
-              .get(0).files.length : 1, label = input.val()
-              .replace(/\\/g, '/').replace(/.*\//, '');
-          input.trigger('fileselect', [ numFiles, label ]);
+$(document).on('change', '.btn-file :file', function() {
+	var input = $(this), numFiles = input.get(0).files ? input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	input.trigger('fileselect', [ numFiles, label ]);
 });
 
 function populateTextArea(event, numFiles, label) {
@@ -148,7 +191,8 @@ function updateData(id) {
 	//Make this generic...
 	//ie. prepare url and post data.
 	//Get data...
-	var data;
+	console.log("updateData("+id+")");
+
 	switch (id) {
 	case 'ldpair':
 					updateLDpair();
@@ -159,7 +203,7 @@ function updateData(id) {
       updateLDproxy();
 		break;
 	case 'ldmatrix':
-      console.log($('#ldmatrix-form').serialize());
+      //console.log($('#ldmatrix-form').serialize());
       updateLDmatrix();
 		break;
 	case 'ldhap':
@@ -200,6 +244,8 @@ function updateLDhap() {
       var ldhapTable = formatLDhapData($.parseJSON(data));
       $('#ldhap-haplotypes-column').attr('colspan', ldhapTable.footer.length);
       ko.mapping.fromJS(ldhapTable, ldhapModel);
+
+      addLDHapHyperLinks(ldInputs.reference);
 
 
   });
@@ -326,6 +372,11 @@ function addLDMatrixHyperLinks(request) {
   $('#ldmatrix-R2').attr('href','tmp/r2_'+request+'.txt');
 }
 
+function addLDHapHyperLinks(request) {
+		$('#ldhap-snps').attr('href','tmp/snps_'+request+'.txt');
+		$('#ldhap-haplotypes').attr('href','tmp/haplotypes_'+request+'.txt');
+}
+
 function updateLDproxyProgressBar(id, seconds) {
 
   	var milliseconds = seconds * 1000;
@@ -357,7 +408,7 @@ function createPopulationDropdown(id) {
 		maxHeight : 500,
 		includeSelectAllOption : true,
 		dropRight : true,
-		allSelectedText : 'All Populations',
+		allSelectedText : 'All2 Populations',
 		nonSelectedText : 'Select Population',
 		numberDisplayed : 6,
 		selectAllText : ' (ALL) All Populations',
@@ -365,13 +416,17 @@ function createPopulationDropdown(id) {
 		// buttonClass: 'btn btn-link',
 		buttonText : function(options, select) {
 			if (options.length === 0) {
-				return this.nonSelectedText
+				return '<span class="pull-left">'
+							+this.nonSelectedText
+						+'</span>'
 						+ ' <b class="caret"></b>';
 			} else if (options.length == $('option', $(select)).length) {
-				return this.allSelectedText
+				return '<span class="pull-left">'
+							+this.nonSelectedText
+						+'</span>'
 						+ ' <b class="caret"></b>';
 			} else if (options.length > this.numberDisplayed) {
-				return '<span class="badge">' + options.length
+				return '<span class="badge pull-left">' + options.length
 						+ '</span> ' + this.nSelectedText
 						+ ' <b class="caret"></b>';
 			} else {
@@ -412,14 +467,16 @@ function updateLDproxy() {
     reference : Math.floor(Math.random() * (99999 - 10000 + 1))
   };
 
+  console.dir(ldproxyInputs);
 
   $('#ldproxy-results-link').attr('href', 'tmp/proxy'+ldproxyInputs.reference+'.txt');
-  $('#ldproxy-progress-bar').attr('', "0");
+  $('#ldproxy-progress-bar').attr('aria-valuenow', "0");
 
-  	//
-  	//Determine caclulation time.
-  	//Wait 1.5 seconds for pops file to be created.
-  	//
+		//
+		//Determine caclulation time.
+		//Wait 1.5 seconds for pops file to be created.
+		//
+
 	setTimeout(function(){
 			//Determine seconds...
 		var url = 'tmp/pops_'+ldproxyInputs.reference+'.txt';
@@ -431,9 +488,9 @@ function updateLDproxy() {
 		var ajaxRequest = $.ajax({
 			type : "GET",
 			url : url
-		});
+	});
 
-	  	ajaxRequest.success(function(data) {
+	ajaxRequest.success(function(data) {
 			console.log("Estimate for number of seconds");
 			console.info(seconds);
 			sample_count = data.split("\n").length;
@@ -443,7 +500,7 @@ function updateLDproxy() {
 			console.log("Total Seconds =");
 			console.log(seconds);
 			updateLDproxyProgressBar(id, seconds);
-		});
+	});
 		ajaxRequest.fail(function(jqXHR, textStatus) {
 			//Create a linear guess based on
 			// One (1) population take 30 seconds
@@ -463,11 +520,11 @@ function updateLDproxy() {
 			console.info(seconds);
 			updateLDproxyProgressBar(id, seconds);
 
-	  	});
+		});
 
-	  	ajaxRequest.always(function() {
-	  		console.log('AJAX call done for LDProxy estimate');
-	  	});
+		ajaxRequest.always(function() {
+			console.log('AJAX call done for LDProxy estimate');
+		});
 
 	}, 1500);
 
@@ -532,7 +589,10 @@ function getLDProxyResults(jsonfile) {
 }
 
 function updateLDpair() {
+		var id = 'ldpair';
+
 	var population = $('#ldpair-population-codes').val();
+	console.log("LD Pair");
 	console.log('population');
 	console.dir(population);
 	var ldpairInputs = {
@@ -553,17 +613,7 @@ function updateLDpair() {
 	});
 
 	ajaxRequest.success(function(data) {
-    var id = 'ldpair';
-    if(data.warning) {
-      $('#'+id+'-message-warning').show();
-      $('#'+id+'-message-warning-content').empty().append(data.warning);
-    }
-
-		if (data.error) {
-      // ERROR
-      $('#'+id+'-message').show();
-      $('#'+id+'-message-content').empty().append(data.error);
-		} else {
+		if (displayError(id, data) == false) {
       ko.mapping.fromJS(data, ldpairModel);
       $('#'+id+'-results-container').show();
       addLDpairHyperLinks(data);
@@ -581,6 +631,24 @@ function updateLDpair() {
 		console.log("second complete");
 
 	});
+}
+
+function displayError(id, data) {
+	// Display error or warning if available.
+		var error = false;
+		if(data.warning) {
+      $('#'+id+'-message-warning').show();
+      $('#'+id+'-message-warning-content').empty().append(data.warning);
+      error = true;
+    }
+
+		if (data.error) {
+      // ERROR
+      $('#'+id+'-message').show();
+      $('#'+id+'-message-content').empty().append(data.error);
+      error = true;
+		}
+		return error;
 }
 
 function addLDproxyHyperLinks(data) {

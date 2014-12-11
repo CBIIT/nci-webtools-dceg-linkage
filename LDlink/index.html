@@ -138,7 +138,6 @@
 			<div class="tab-pane active" id="home">
 
 				<h3>Welcome to LDlink!</h3>
-
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
 					population groups. All population genotype data originates from
@@ -198,8 +197,9 @@
               <select id="ldhap-population-codes" multiple="multiple" required></select>
             </div>
             <div>
-              <button type="submit" class="btn btn-default calculate"
-                id="ldhap">Calculate</button>
+              <button id="ldhap" type="submit" class="btn btn-default calculate">
+              		Calculate
+              </button>
             </div>
           </div>
         </form>
@@ -264,6 +264,14 @@
 									</table>
                 </div>
             </div>
+						<div class="col-md-12">
+								<span>
+										<a target="LDHap-snps" id="ldhap-snps" href="">Download SNPS File</a>
+										</span>&nbsp;&nbsp;&nbsp;&nbsp; <span>
+										<a target="LDHap-haplotypes" id="ldhap-haplotypes" href="">Download Haplotypes File</a>
+								</span>
+						</div>
+
           </div>
         </div>
 
@@ -341,27 +349,45 @@
 
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-md-9 col-md-offset-1">
-						<div id="ldpair-inputs-form" class="form-group">
-							<div class="col-md-2">
-								<label for="ldpair-snp1" style="display: none;">LD Pair
-									SNP1</label> <input id="ldpair-snp1" name="textinput"
-									class="form-control input-small" type="text"
-									placeholder="SNP1 RS Number" required
-									title="Enter SNP1 RS number">
-							</div>
+					  <!-- FORM 4 LDPair -->
 
-							<div class="col-md-2">
-								<label for="ldpair-snp2" style="display: none;">LD Pair
-									SNP2</label> <input id="ldpair-snp2" name="textinput"
-									class="form-control input-small" type="text"
-									placeholder="SNP2 RS Number" required
-									title="Enter SNP2 RS number">
-							</div>
-							<label for="ldpair-population-codes" style="display: none;">LD
-								Pair Population</label> <select id="ldpair-population-codes"
-								multiple="multiple">
-							</select> <a id="ldpair" class="btn btn-default calculate"> Calculate</a>
+<form id="ldpairForm">
+    <div class="form-group">
+        <div class="col-sm-2">
+            <input id="ldpair-snp1" name="snp1" type="text"
+            			class="form-control snp"
+									placeholder="SNP1 RS Number"
+									title="SNP1 RS number" />
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="col-sm-2">
+            <input id="ldpair-snp2" name="snp2" type="text"
+            			class="form-control snp"
+									placeholder="SNP2 RS Number"
+									title="SNP2 RS number" />
+        </div>
+    </div>
+    <div class="form-group">
+				<div class="col-sm-3">
+					<label for="ldpair-population-codes" style="display: none;">LD Pair Population</label>
+					<select id="ldpair-population-codes" multiple="multiple" required>
+					</select>
+				</div>
+		</div>
+		<div class="form-group">
+				<div class="col-sm-2">
+					<button id="ldpair" type="submit" class="btn btn-default calculate">
+							Calculate
+					</button>
+				</div>
+		</div>
+
+</form>
+
 						</div>
+				</div>
 						<hr>
 						<!-- Message ERROR -->
 						<div class="row">
@@ -382,9 +408,6 @@
 								</div>
 							</div>
 						</div>
-
-					</div>
-				</div>
 				<!-- LDpair OUTPUT Results -->
 
 				<div class="jumbotron">

@@ -212,5 +212,39 @@ img.proxy-legend {
   padding-top:25px;
 }
 .btn-ldlink-multiselect {
-  text-align:right;
+  text-align:left;
+}
+
+.has-feedback .form-control {
+    padding-right: 0px;
+}
+
+.form-control-feedback {
+    top: 0;
+    right: -15px;
+}
+
+
+/* Placeholder Style */
+::-webkit-input-placeholder {
+   color: red;
+   font-size: 70%;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   color: red;
+   font-size: 70%;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   color: red;
+   font-size: 70%;
+}
+
+:-ms-input-placeholder {
+   color: red;
+   font-size: 70%;
+}
+.snp {
+  text-transform: lowercase;
 }
