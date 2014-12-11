@@ -218,7 +218,6 @@ function updateLDhap() {
   var id = "ldhap";
 
   var $btn = $('#'+id).button('loading');
-//    snp : $('#ldmatrix-snp').val(),
   var snps = $('#'+id+'-file-snp-numbers').val();
   var population = $('#'+id+'-population-codes').val();
 
@@ -238,17 +237,14 @@ function updateLDhap() {
   });
 
   ajaxRequest.success(function(data) {
-      //$('#ldhap-bokeh-graph').empty().append(data);
+		if (displayError(id, data) == false) {
       $('#'+id+'-results-container').show();
-
       var ldhapTable = formatLDhapData($.parseJSON(data));
       $('#ldhap-haplotypes-column').attr('colspan', ldhapTable.footer.length);
       ko.mapping.fromJS(ldhapTable, ldhapModel);
-
-      addLDHapHyperLinks(ldInputs.reference);
-
-
-  });
+      addLDHapHyperLinks(ldInputs.reference, ldhapTable);
+		}
+	});
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
         + "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
@@ -342,12 +338,12 @@ function updateLDmatrix() {
   });
 
   ajaxRequest.success(function(data) {
+		if (displayError(id, data) == false) {
       $('#ldmatrix-bokeh-graph').empty().append(data);
       $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
-
       addLDMatrixHyperLinks(ldmatrixInputs.reference);
-
+    }
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
@@ -370,11 +366,6 @@ function updateLDmatrix() {
 function addLDMatrixHyperLinks(request) {
   $('#ldmatrix-DPrime').attr('href','tmp/d_prime_'+request+'.txt');
   $('#ldmatrix-R2').attr('href','tmp/r2_'+request+'.txt');
-}
-
-function addLDHapHyperLinks(request) {
-		$('#ldhap-snps').attr('href','tmp/snps_'+request+'.txt');
-		$('#ldhap-haplotypes').attr('href','tmp/haplotypes_'+request+'.txt');
 }
 
 function updateLDproxyProgressBar(id, seconds) {
@@ -536,10 +527,12 @@ function updateLDproxy() {
   });
 
   ajaxRequest.success(function(data) {
+    $('#'+id+'-progress-container').hide();
+		if (displayError(id, data) == false) {
       $('#ldproxy-bokeh-graph').empty().append(data);
-      $('#'+id+'-progress-container').hide();
       $('#'+id+'-results-container').show();
       getLDProxyResults('proxy'+ldproxyInputs.reference+'.json');
+    }
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
@@ -571,7 +564,7 @@ function getLDProxyResults(jsonfile) {
 
   ajaxRequest.success(function(data) {
     ko.mapping.fromJS(data, ldproxyModel);
-	addLDproxyHyperLinks(data);
+	  addLDproxyHyperLinks(data);
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
     alert('Fail');
@@ -639,7 +632,6 @@ function displayError(id, data) {
 		if(data.warning) {
       $('#'+id+'-message-warning').show();
       $('#'+id+'-message-warning-content').empty().append(data.warning);
-      error = true;
     }
 
 		if (data.error) {
@@ -649,6 +641,48 @@ function displayError(id, data) {
       error = true;
 		}
 		return error;
+}
+
+function addLDHapHyperLinks(request, ldhapTable) {
+		$('#ldhap-snps').attr('href','tmp/snps_'+request+'.txt');
+		$('#ldhap-haplotypes').attr('href','tmp/haplotypes_'+request+'.txt');
+		console.log("ldhapTable");
+		console.dir(ldhapTable);
+
+    var server;
+    var params = {};
+    var rs_number;
+    var url;
+    server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+
+    $.each(ldhapTable.rows, function( index, value ) {
+				console.log( index + ": " + value );
+				//Create RSnumber link (Cluster Report)
+				server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+				// snp1-rsum
+				rs_number = value.RS.substring(2);
+				params = {rs: rs_number};
+				url = server+"?"+$.param(params);
+				$('#RSnumber_hap_'+index+' a:first-child').attr('href', url);
+
+				//Create Coord link ()
+				server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+				positions = value.Coord.split(":");
+				chr = positions[0];
+				mid_value = parseInt(positions[1]);
+				offset =250;
+				range = (mid_value-offset)+"-"+(mid_value+offset);
+				position = chr+":"+range;
+				rs_number = value.RS;
+				params = {
+						position: position,
+						snp141: 'pack',
+						'hgFind.matches' : rs_number
+				};
+				url = server+"?"+$.param(params);
+				$('#Coord_hap_'+index+' a:first-child').attr('href', url);
+		});
+
 }
 
 function addLDproxyHyperLinks(data) {
@@ -684,7 +718,7 @@ function addLDproxyHyperLinks(data) {
       'hgFind.matches' : rs_number
     };
 		url = server+"?"+$.param(params);
-		$('#ldproxy-link').attr('href', url)
+		$('#ldproxy-link').attr('href', url);
 /*
 
 RS number=rs2720460

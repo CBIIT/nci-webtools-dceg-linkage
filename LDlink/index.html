@@ -229,7 +229,6 @@
           <div class="container-fluid" id="ldhap-results-container">
             <div class="row">
                 <div id="ldhap-bokeh-graph">
-<!--  SNIP ... -->
 									<table class="table table-condensed ldhap" data-height="150">
 										<thead>
 											<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th>
@@ -253,8 +252,16 @@
 										</tfoot>
 									  <tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
 									    <tr>
-									      <td data-bind="text: $data.RS"></td>
-									      <td data-bind="text: $data.Coord"></td>
+
+												<td data-bind="attr: { id: 'RSnumber_hap_' + $index() }"
+														style="text-align: center">
+														<a data-bind="text: RS" title="Cluster Report" target="LDHap-cluster-report"></a>
+												</td>
+												<td data-bind="attr: { id: 'Coord_hap_' + $index() }"
+														style="text-align: center">
+													<a data-bind="text: Coord" title="Genome Browser" target="LDHap-coord"></a>
+
+												</td>
 									      <td data-bind="text: $data.Alleles"></td>
 									      <!-- ko foreach: $data.Haplotypes -->
 									          <td class="cell-right font-weight-bold" data-bind="text: $data"></td>
@@ -415,11 +422,11 @@
 					<div class="container-fluid" id="ldpair-results-container">
 						<div style="text-align: center">
 							<a id="snp2-rsnum" data-bind="text: snp2.rsnum" href="#"
-								title="Cluster Report:" target="LDPair"></a>
+								title="Cluster Report:" target="LDPair-snp2-rsnum"></a>
 						</div>
 						<div style="text-align: center">
 							<a id="snp2-coord" data-bind="text: snp2.coord" href="#"
-								title="Genome Browser" target="LDPair"></a>
+								title="Genome Browser" target="LDPair-snp2-coord"></a>
 						</div>
 						<table class="table table-condensed ldhap">
 							<tbody>
@@ -436,7 +443,7 @@
 								<tr>
 									<td class="cell-right" width="250"><a id="snp1-rsnum"
 										data-bind="text: snp1.rsnum" href="#" title="Cluster Report:"
-										target="_blank"></a></td>
+										target="LDPair-snp1-rsnum"></a></td>
 									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
 									<td colspan="2" rowspan="2">
@@ -467,7 +474,7 @@
 								<tr>
 									<td class="cell-right"><a id="snp1-coord"
 										data-bind="text: snp1.coord" href="#" title="Genome Browser"
-										target="_blank"></a></td>
+										target="LDPair-snp1-coord"></a></td>
 									<td class="cell-center" data-bind="text: snp1.allele_2.allele"></td>
 									<td data-bind="text: snp1.allele_2.count"></td>
 									<td class="cell-left">(<span
@@ -591,7 +598,7 @@
                   <img src="LDproxy_legend.png" title="LD Proxy Legend" class="proxy-legend">
                 </div>
                 <div class="row proxy-table-title-row">
-	                <a id="ldproxy-link" href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460" target="_blank" style="padding-left:100px;" title="Genome Browser">View region in UCSC Genome Browser</a>
+	                <a id="ldproxy-link" href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460" target="LDProxy-genome-browser" style="padding-left:100px;" title="Genome Browser">View region in UCSC Genome Browser</a>
 	              </div>
 								<br>
                 <br>
@@ -619,11 +626,11 @@
 											<tr>
 												<td data-bind="attr: { id: 'RSnumber_' + $index() }"
 														style="text-align: center">
-														<a data-bind="text: RS" title="Cluster Report" target="_blank"></a>
+														<a data-bind="text: RS" title="Cluster Report" target="LDProxy-cluster-report"></a>
 												</td>
 												<td data-bind="attr: { id: 'Coord_' + $index() }"
 														style="text-align: center">
-													<a data-bind="text: Coord" title="Genome Browser" target="_blank"></a>
+													<a data-bind="text: Coord" title="Genome Browser" target="LDProxy-coord"></a>
 
 												</td>
 												<td style="text-align: center" data-bind="text: Alleles"></td>
@@ -635,7 +642,7 @@
 													data-bind="text: Corr_Alleles"></td>
 												<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
 														style="text-align: center">
-													<a data-bind="text: RegulomeDB" title="RegulomeDB" target="_blank"></a>
+													<a data-bind="text: RegulomeDB" title="RegulomeDB" target="LDProxy-RegulomeDB"></a>
 												</td>
 												<td style="text-align: center" data-bind="text: Function"></td>
 											</tr>
@@ -643,7 +650,7 @@
 										</tbody>
 									</table>
 									<div class="row proxy-table-title-row">
-										<a id="ldproxy-results-link" target="_blank"> <span>Download
+										<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
 												all proxy SNPs</span>
 										</a>
 									</div>
