@@ -346,14 +346,14 @@ function createPopulationDropdown(id) {
 
 	$('#' + id + '-population-codes').multiselect({
 		enableClickableOptGroups : true,
-		buttonWidth : '250px',
+		buttonWidth : '180px',
 		maxHeight : 500,
 		includeSelectAllOption : true,
 		dropRight : true,
-		allSelectedText : 'All2 Populations',
+		allSelectedText : 'All Populations',
 		nonSelectedText : 'Select Population',
-		numberDisplayed : 6,
-		selectAllText : ' (ALL) All Populations',
+		numberDisplayed : 4,
+		selectAllText : 'All Populations',
 
 		// buttonClass: 'btn btn-link',
 		buttonText : function(options, select) {
@@ -533,7 +533,8 @@ function getLDProxyResults(jsonfile) {
 }
 
 function updateLDpair() {
-		var id = 'ldpair';
+	var id = 'ldpair';
+  var $btn = $('#'+id).button('loading');
 
 	var population = $('#ldpair-population-codes').val();
 	console.log("LD Pair");
@@ -572,8 +573,7 @@ function updateLDpair() {
     $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Plask Python server is available.");
 	});
 	ajaxRequest.always(function() {
-		console.log("second complete");
-
+    $btn.button('reset');
 	});
 }
 
@@ -857,6 +857,95 @@ function buildPopulationDropdown(elementId) {
 
 function addValidators() {
 		//Add validators
+
+		// LDHAP FORM
+    $('#ldhapForm').find('[name="populations"]')
+            .multiselect({
+                onChange: function(element, checked) {
+                    $('#ldhapForm').bootstrapValidator('revalidateField', 'populations');
+                }
+            }).end()
+      .bootstrapValidator({
+				excluded: ':disabled',
+        feedbackIcons: {
+            valid: 'fa  fa-check',
+            invalid: 'fa  fa-close',
+            validating: 'fa fa-refresh'
+        },
+        fields: {
+            snp_textbox: {
+            	selector: '.snp_textbox',
+                    validators: {
+                        notEmpty: {
+                            message: 'The RS Number is required and cannot be empty'
+                        },
+                        regexp: {
+                        		regexp: /^rs\d/i,
+                        		message: 'Enter valid RS numbers'
+                    		}
+            			}
+            },
+            populations: {
+                validators: {
+                    callback: {
+                        message: 'Please choose at least one population',
+                        callback: function(value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('populations').val();
+                            console.log('Options');
+                            console.log(console);
+                            return (options != null && options.length >= 1);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+
+		// LDMATRIX FORM
+    $('#ldmatrixForm').find('[name="populations"]')
+            .multiselect({
+                onChange: function(element, checked) {
+                    $('#ldmatrixForm').bootstrapValidator('revalidateField', 'populations');
+                }
+            }).end()
+      .bootstrapValidator({
+				excluded: ':disabled',
+        feedbackIcons: {
+            valid: 'fa  fa-check',
+            invalid: 'fa  fa-close',
+            validating: 'fa fa-refresh'
+        },
+        fields: {
+            snp_textbox: {
+            	selector: '.snp_textbox',
+                    validators: {
+                        notEmpty: {
+                            message: 'The RS Number is required and cannot be empty'
+                        },
+                        regexp: {
+                        		regexp: /^rs\d/i,
+                        		message: 'Enter valid RS numbers'
+                    		}
+            			}
+            },
+            populations: {
+                validators: {
+                    callback: {
+                        message: 'Please choose at least one population',
+                        callback: function(value, validator, $field) {
+                            // Get the selected options
+                            var options = validator.getFieldElements('populations').val();
+                            console.log('Options');
+                            console.log(console);
+                            return (options != null && options.length >= 1);
+                        }
+                    }
+                }
+            }
+        }
+    });
 
 		// LDPAIR FORM
     $('#ldpairForm').find('[name="populations"]')

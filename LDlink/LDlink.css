@@ -227,22 +227,18 @@ img.proxy-legend {
 
 /* Placeholder Style */
 ::-webkit-input-placeholder {
-   color: red;
    font-size: 70%;
 }
 
 :-moz-placeholder { /* Firefox 18- */
-   color: red;
    font-size: 70%;
 }
 
 ::-moz-placeholder {  /* Firefox 19+ */
-   color: red;
    font-size: 70%;
 }
 
 :-ms-input-placeholder {
-   color: red;
    font-size: 70%;
 }
 .snp {
