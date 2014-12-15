@@ -25,12 +25,12 @@
 <script
 	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
 	type="text/javascript">
-
+	
 </script>
 <script
 	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
 	type="text/javascript">
-
+	
 </script>
 <!-- Modernizr not in use
 
@@ -43,16 +43,22 @@ Temporarily removing to see if it effects anything.
 
 </script>
 <script
-	src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js" type="text/javascript">
+	src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
+	type="text/javascript">
+	
 </script>
 <script
-	src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js" type="text/javascript">
+	src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
+	type="text/javascript">
+	
 </script>
-<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
+<script type="text/javascript"
+	src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
+	
 </script>
 
 <script src="LDlink.js" type="text/javascript">
-
+	
 </script>
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
@@ -126,6 +132,9 @@ Temporarily removing to see if it effects anything.
 			<li><a href="#ldpair-tab" data-toggle="tab">LDpair</a></li>
 
 			<li><a href="#ldproxy-tab" data-toggle="tab">LDproxy</a></li>
+
+			<li><a href="#help-tab" data-toggle="tab">Help</a></li>
+
 		</ul>
 		<!-- Tab Content -->
 
@@ -172,57 +181,61 @@ Temporarily removing to see if it effects anything.
 			</div>
 			<!-- LDhap -->
 
-<!--
+			<!--
 			<div class="tab-pane fade" id="ldhap-tab">
 -->
-			<!-- LDmatrix -->
+			<!-- LDhap -->
 			<div class="tab-pane fade" id="ldhap-tab">
 				<!-- LDmatrix INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
-						<div class="col-sm-11 col-sm-offset-1">
+					<div class="col-sm-11 col-sm-offset-1">
 
-				<!-- LDMATRIX FORM -->
+						<!-- LDHap FORM -->
 
 
-							<form id="ldhapForm">
+						<form id="ldhapForm" class="ldlinkForm">
 
-								<div class="form-group">
-									<div class="col-md-2">
-										<textarea id="ldhap-file-snp-numbers" placeholder="RS Numbers"
-											cols="12" rows="8" class="form-control snp_textbox"
-											title="Enter list of RS numbers (one per line)"></textarea>
-									</div>
+							<div class="form-group">
+								<div class="col-md-2">
+									<textarea id="ldhap-file-snp-numbers" placeholder="RS Numbers"
+										cols="12" rows="3" class="form-control snp_textbox"
+										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
+							</div>
 
-									<div class="col-md-3">
-										<div class="input-group" >
-											<span class="input-group-btn">or<span
-												class="btn btn-default btn-file">Browse<input
-													type="file" id="ldhap-file">
-											</span>
-											</span>
-											<input type="text" readonly style="width:140px;">
-										</div>
-									</div>
-
-								<div class="form-group">
-										<div class="col-sm-3">
-											<label for="populations" style="display: none;">Populations</label>
-											<select id="ldhap-population-codes" multiple="multiple" name="populations">
-											</select>
-										</div>
+							<div class="col-md-3">
+								<div class="input-group">
+									<span class="input-group-btn">or<span
+										class="btn btn-default btn-file">Browse<input
+											type="file" id="ldhap-file">
+									</span>
+									</span> <input type="text" readonly style="width: 140px;">
 								</div>
-								<div class="form-group">
-										<div class="col-sm-2">
-											<button id="ldhap" type="submit" class="btn btn-default calculate" disabled>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-3">
+									<label for="populations" style="display: none;">Populations</label>
+									<select id="ldhap-population-codes" multiple="multiple"
+										name="populations" required>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input type="submit" id="ldhap" value="Calculate"
+										class="btn btn-default calculate" />
+									<!-- 
+											<button id="ldhap" type="submit" class="btn btn-default calculate">
 													Calculate
 											</button>
-										</div>
+										 -->
 								</div>
-							</form>
+							</div>
+						</form>
 
-<!--
+						<!--
         <form id="ldhap-form" class="form-inline" role="form">
           <div class="row" style="padding-top: 10px;">
             <div class="col-md-3 col-md-offset-1">
@@ -249,85 +262,88 @@ Temporarily removing to see if it effects anything.
           </div>
         </form>
 -->
+					</div>
 				</div>
-			</div>
-        <hr>
-        <!-- Message ERROR -->
-        <div class="row">
-          <div class="col-md-7 col-md-offset-2" id="ldhap-message">
-            <div class="panel panel-danger">
-              <div class="panel-heading">Error</div>
-              <div class="panel-body" id="ldhap-message-content"></div>
-            </div>
-          </div>
-        </div>
-        <!-- Message WARNING -->
-        <div class="row">
-          <div class="col-md-7 col-md-offset-2" id="ldhap-message-warning">
-            <div class="panel panel-warning">
-              <div class="panel-heading">Warning</div>
-              <div class="panel-body" id="ldhap-message-warning-content">
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- ldhap CONTAINER -->
-        <div class="jumbotron">
-          <div class="container-fluid" id="ldhap-results-container">
-            <div class="row">
-                <div id="ldhap-bokeh-graph">
-									<table class="table table-condensed ldhap" data-height="150">
-										<thead>
-											<tr><th>SNP</th><th>Position (hg19)</th><th>AlleleFrequencies</th>
+				<hr>
+				<!-- Message ERROR -->
+				<div class="row">
+					<div class="col-md-7 col-md-offset-2" id="ldhap-message">
+						<div class="panel panel-danger">
+							<div class="panel-heading">Error</div>
+							<div class="panel-body" id="ldhap-message-content"></div>
+						</div>
+					</div>
+				</div>
+				<!-- Message WARNING -->
+				<div class="row">
+					<div class="col-md-7 col-md-offset-2" id="ldhap-message-warning">
+						<div class="panel panel-warning">
+							<div class="panel-heading">Warning</div>
+							<div class="panel-body" id="ldhap-message-warning-content">
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ldhap CONTAINER -->
+				<div class="jumbotron">
+					<div class="container-fluid" id="ldhap-results-container">
+						<div class="row">
+							<div id="ldhap-bokeh-graph">
+								<table class="table table-condensed ldhap" data-height="150">
+									<thead>
+										<tr>
+											<th>SNP</th>
+											<th>Position (hg19)</th>
+											<th>AlleleFrequencies</th>
 											<th colspan="2" id="ldhap-haplotypes-column">Haplotypes</th>
-											</tr>
-										</thead>
-										<tfoot>
-										    <tr class="ldhap-table-footer">
-										        <td colspan="2" rowspan="2"></td>
-										        <td>Haplotype Count</td>
-										        <!-- ko foreach: footer -->
-										          <td class="cell-right" data-bind="text: $data.Count"></td>
-										        <!-- /ko -->
-										    </tr>
-										    <tr class="ldhap-table-footer">
-										        <td>Haplotype Frequency</td>
-										        <!-- ko foreach: footer -->
-										          <td class="cell-right" data-bind="text: $data.Frequency"></td>
-										        <!-- /ko -->
-										    </tr>
-										</tfoot>
-									  <tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
-									    <tr>
+										</tr>
+									</thead>
+									<tfoot>
+										<tr class="ldhap-table-footer">
+											<td colspan="2" rowspan="2"></td>
+											<td>Haplotype Count</td>
+											<!-- ko foreach: footer -->
+											<td class="cell-right" data-bind="text: $data.Count"></td>
+											<!-- /ko -->
+										</tr>
+										<tr class="ldhap-table-footer">
+											<td>Haplotype Frequency</td>
+											<!-- ko foreach: footer -->
+											<td class="cell-right" data-bind="text: $data.Frequency"></td>
+											<!-- /ko -->
+										</tr>
+									</tfoot>
+									<tbody data-bind="foreach: rows"
+										style="border: 1px solid #ccc;">
+										<tr>
 
-												<td data-bind="attr: { id: 'RSnumber_hap_' + $index() }"
-														style="text-align: center">
-														<a data-bind="text: RS" title="Cluster Report" target="LDHap-cluster-report"></a>
-												</td>
-												<td data-bind="attr: { id: 'Coord_hap_' + $index() }"
-														style="text-align: center">
-													<a data-bind="text: Coord" title="Genome Browser" target="LDHap-coord"></a>
-
-												</td>
-									      <td data-bind="text: $data.Alleles"></td>
-									      <!-- ko foreach: $data.Haplotypes -->
-									          <td class="cell-right font-weight-bold" data-bind="text: $data"></td>
-									      <!-- /ko -->
-									    </tr>
-									  </tbody>
-									</table>
-                </div>
-            </div>
+											<td data-bind="attr: { id: 'RSnumber_hap_' + $index() }"
+												style="text-align: center"><a data-bind="text: RS"
+												title="Cluster Report" target="LDHap-cluster-report"></a></td>
+											<td data-bind="attr: { id: 'Coord_hap_' + $index() }"
+												style="text-align: center"><a data-bind="text: Coord"
+												title="Genome Browser" target="LDHap-coord"></a></td>
+											<td data-bind="text: $data.Alleles"></td>
+											<!-- ko foreach: $data.Haplotypes -->
+											<td class="cell-right font-weight-bold"
+												data-bind="text: $data"></td>
+											<!-- /ko -->
+										</tr>
+									</tbody>
+								</table>
+							</div>
+						</div>
 						<div class="col-md-12">
-								<span>
-										<a target="LDHap-snps" id="ldhap-snps" href="">Download SNPS File</a>
-										</span>&nbsp;&nbsp;&nbsp;&nbsp; <span>
-										<a target="LDHap-haplotypes" id="ldhap-haplotypes" href="">Download Haplotypes File</a>
-								</span>
+							<span> <a target="LDHap-snps" id="ldhap-snps" href="">Download
+									SNPS File</a>
+							</span>&nbsp;&nbsp;&nbsp;&nbsp; <span> <a
+								target="LDHap-haplotypes" id="ldhap-haplotypes" href="">
+									Haplotypes File</a>
+							</span>
 						</div>
 
-          </div>
-        </div>
+					</div>
+				</div>
 
 			</div>
 			<!-- LDmatrix -->
@@ -335,52 +351,57 @@ Temporarily removing to see if it effects anything.
 				<!-- LDmatrix INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
-						<div class="col-sm-11 col-sm-offset-1">
+					<div class="col-sm-11 col-sm-offset-1">
 
-				<!-- LDMATRIX FORM -->
+						<!-- LDMATRIX FORM -->
 
 
-							<form id="ldmatrixForm">
+						<form id="ldmatrixForm" class="ldlinkForm">
 
-								<div class="form-group">
-									<div class="col-md-2">
-										<textarea id="ldmatrix-file-snp-numbers" placeholder="RS Numbers"
-											cols="12" rows="8" class="form-control snp_textbox"
-											title="Enter list of RS numbers (one per line)"></textarea>
-									</div>
+							<div class="form-group">
+								<div class="col-md-2">
+									<textarea id="ldmatrix-file-snp-numbers"
+										placeholder="RS Numbers" cols="12" rows="3"
+										class="form-control snp_textbox"
+										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
+							</div>
 
-									<div class="col-md-3">
-										<div class="input-group" >
-											<span class="input-group-btn">or<span
-												class="btn btn-default btn-file">Browse<input
-													type="file" id="ldmatrix-file">
-											</span>
-											</span>
-											<input type="text" readonly style="width:140px;">
-										</div>
-									</div>
-
-								<div class="form-group">
-										<div class="col-sm-3">
-											<label for="populations" style="display: none;">Populations</label>
-											<select id="ldmatrix-population-codes" multiple="multiple" name="populations">
-											</select>
-										</div>
+							<div class="col-md-3">
+								<div class="input-group">
+									<span class="input-group-btn">or<span
+										class="btn btn-default btn-file">Browse<input
+											type="file" id="ldmatrix-file">
+									</span>
+									</span> <input type="text" readonly style="width: 140px;">
 								</div>
-								<div class="form-group">
-										<div class="col-sm-2">
-											<button id="ldmatrix" type="submit" class="btn btn-default calculate" disabled>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-3">
+									<label for="populations" style="display: none;">Populations</label>
+									<select id="ldmatrix-population-codes" multiple="multiple"
+										name="populations" required>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input type="submit" id="ldmatrix" value="Calculate"
+										class="btn btn-default calculate" />
+									<!-- 
+											<button id="ldmatrix" type="submit" class="btn btn-default calculate">
 													Calculate
 											</button>
-										</div>
+										-->
 								</div>
+							</div>
 
-							</form>
+						</form>
 
 
-				<!-- LDMATRIX FORM -->
-<!--
+						<!-- LDMATRIX FORM -->
+						<!--
 				<form id="ldmatrix-form" class="form-inline" role="form">
 					<div class="row" style="padding-top: 10px;">
 						<div class="col-md-3 col-md-offset-1">
@@ -406,7 +427,6 @@ Temporarily removing to see if it effects anything.
 					</div>
 				</form>
 -->
-
 
 					</div>
 				</div>
@@ -454,65 +474,68 @@ Temporarily removing to see if it effects anything.
 
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-md-9 col-md-offset-1">
-					  <!-- FORM 4 LDPair -->
+						<!-- FORM 4 LDPair -->
 
-							<form id="ldpairForm">
-							    <div class="form-group">
-							        <div class="col-sm-2">
-							            <input id="ldpair-snp1" name="snp1" type="text"
-							            			class="form-control snp"
-																placeholder="SNP1 RS Number"
-																title="SNP1 RS number" />
-							        </div>
-							    </div>
+						<form id="ldpairForm" class="ldlinkForm">
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input id="ldpair-snp1" name="snp1" type="text"
+										class="form-control snp" placeholder="SNP1 RS Number"
+										title="rs followed by 1 or more digits" required
+										pattern="^rs\d+$" />
+								</div>
+							</div>
 
-							    <div class="form-group">
-							        <div class="col-sm-2">
-							            <input id="ldpair-snp2" name="snp2" type="text"
-							            			class="form-control snp"
-																placeholder="SNP2 RS Number"
-																title="SNP2 RS number" />
-							        </div>
-							    </div>
-							    <div class="form-group">
-											<div class="col-sm-3">
-												<label for="populations" style="display: none;">Populations</label>
-												<select id="ldpair-population-codes" multiple="multiple" name="populations">
-												</select>
-											</div>
-									</div>
-									<div class="form-group">
-											<div class="col-sm-2">
-												<button id="ldpair" type="submit" class="btn btn-default calculate" disabled>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input id="ldpair-snp2" name="snp2" type="text"
+										class="form-control snp" placeholder="SNP2 RS Number"
+										title="rs followed by 1 or more digits" required
+										pattern="^rs\d+$" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-3">
+									<label for="populations" style="display: none;">Populations</label>
+									<select id="ldpair-population-codes" multiple="multiple"
+										name="populations" required>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input type="submit" id="ldpair" value="Calculate"
+										class="btn btn-default calculate" />
+									<!-- 
+												<button id="ldpair" type="submit" class="btn btn-default calculate">
 														Calculate
 												</button>
-											</div>
-									</div>
-
-							</form>
-
-						</div>
+											 -->
+								</div>
+							</div>
+						</form>
+					</div>
 				</div>
-						<hr>
-						<!-- Message ERROR -->
-						<div class="row">
-							<div class="col-md-7 col-md-offset-2" id="ldpair-message">
-								<div class="panel panel-danger">
-									<div class="panel-heading">Error</div>
-									<div class="panel-body" id="ldpair-message-content"></div>
-								</div>
+				<hr>
+				<!-- Message ERROR -->
+				<div class="row">
+					<div class="col-md-7 col-md-offset-2" id="ldpair-message">
+						<div class="panel panel-danger">
+							<div class="panel-heading">Error</div>
+							<div class="panel-body" id="ldpair-message-content"></div>
+						</div>
+					</div>
+				</div>
+				<!-- Message WARNING -->
+				<div class="row">
+					<div class="col-md-7 col-md-offset-2" id="ldpair-message-warning">
+						<div class="panel panel-warning">
+							<div class="panel-heading">Warning</div>
+							<div class="panel-body" id="ldpair-message-warning-content">
 							</div>
 						</div>
-						<!-- Message WARNING -->
-						<div class="row">
-							<div class="col-md-7 col-md-offset-2" id="ldpair-message-warning">
-								<div class="panel panel-warning">
-									<div class="panel-heading">Warning</div>
-									<div class="panel-body" id="ldpair-message-warning-content">
-									</div>
-								</div>
-							</div>
-						</div>
+					</div>
+				</div>
 				<!-- LDpair OUTPUT Results -->
 
 				<div class="jumbotron">
@@ -640,35 +663,39 @@ Temporarily removing to see if it effects anything.
 				<!-- LDproxy INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
-						<div class="col-sm-9 col-sm-offset-1">
-								<!-- LDProxy FORM -->
-							<form id="ldproxyForm">
-							    <div class="form-group">
-							        <div class="col-sm-2">
-							            <input id="ldproxy-snp" name="snp" type="text"
-							            			class="form-control snp"
-																placeholder="SNP1 RS Number"
-																title="SNP1 RS number" />
-							        </div>
-							    </div>
-							    <div class="form-group">
-											<div class="col-sm-3">
-												<label for="populations" style="display: none;">Populations</label>
-												<select id="ldproxy-population-codes" multiple="multiple" name="populations">
-												</select>
-											</div>
-									</div>
-									<div class="form-group">
-											<div class="col-sm-2">
-												<button id="ldproxy" type="submit" class="btn btn-default calculate" disabled>
+					<div class="col-sm-9 col-sm-offset-1">
+						<!-- LDProxy FORM -->
+						<form id="ldproxyForm" class="ldlinkForm">
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input id="ldproxy-snp" name="snp" type="text"
+										class="form-control snp" placeholder="SNP1 RS Number"
+										title="rs followed by 1 or more digits" required
+										pattern="^rs\d+$" />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-3">
+									<label for="populations" style="display: none;">Populations</label>
+									<select id="ldproxy-population-codes" multiple="multiple"
+										name="populations" required>
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input type="submit" id="ldproxy" value="Calculate"
+										class="btn btn-default calculate" />
+									<!-- 
+												<button id="ldproxy" type="submit" class="btn btn-default calculate">
 														Calculate
 												</button>
-											</div>
-									</div>
+												 -->
+								</div>
+							</div>
+						</form>
 
-							</form>
-
-<!--
+						<!--
 							<div class="col-sm-2">
 								<label for="ldproxy-snp" style="display: none;">Proxy
 									SNP</label> <input id="ldproxy-snp" name="textinput"
@@ -682,121 +709,121 @@ Temporarily removing to see if it effects anything.
 								data-loading-text="Loading..."> Calculate</a>
 						-->
 
-						</div>
+					</div>
 				</div>
-						<hr>
-						<!-- Message ERROR -->
-						<div class="row">
-							<div class="col-sm-7 col-sm-offset-2" id="ldproxy-message">
-								<div class="panel panel-danger">
-									<div class="panel-heading">Error</div>
-									<div class="panel-body" id="ldproxy-message-content"></div>
-								</div>
-							</div>
-						</div>
-						<!-- Message WARNING -->
-						<div class="row">
-							<div class="col-sm-7 col-sm-offset-2"
-								id="ldproxy-message-warning">
-								<div class="panel panel-warning">
-									<div class="panel-heading">Warning</div>
-									<div class="panel-body" id="ldproxy-message-warning-content">
-									</div>
-								</div>
-
-							</div>
-						</div>
-						<!-- LDproxy OUTPUT Results -->
-
-						<div class="jumbotron">
-							<!-- LDPROXY PROGRESS BAR -->
-							<div id="ldproxy-progress-container"
-								style="width: 525px; display: none;">
-								<div id="ldproxy-progress" class="progress">
-									<div id="ldproxy-progress-bar" class="progress-bar" role="progressbar" aria-valuenow="0"
-										aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>
-								</div>
-							</div>
-
-							<!-- LDProxy CONTAINER -->
-							<div class="container-fluid" id="ldproxy-results-container">
-
-								<div id="ldproxy-bokeh-graph"></div>
-                <div class="row proxy-table-title-row">
-                  <img src="LDproxy_legend.png" title="LD Proxy Legend" class="proxy-legend">
-                </div>
-                <div class="row proxy-table-title-row">
-	                <a id="ldproxy-link" href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460" target="LDProxy-genome-browser" style="padding-left:100px;" title="Genome Browser">View region in UCSC Genome Browser</a>
-	              </div>
-								<br>
-                <br>
-								<div id="ldproxy-table-container">
-
-									<div class="row proxy-table-title-row">
-										<h3 class="pull-left">Top 10 Proxy SNPs</h3>
-									</div>
-									<table class="table table-bordered">
-										<thead>
-											<!-- Header row -->
-											<tr>
-												<td>RS Number</td>
-												<td>Coord</td>
-												<td>Alleles</td>
-												<td>MAF</td>
-												<td>Distance</td>
-												<td>Dprime</td>
-												<td>R2</td>
-												<td>Correlated Alleles</td>
-												<td>RegulomeDB</td>
-												<td>Function</td>
-											</tr>
-										<tbody data-bind="foreach: top10">
-											<tr>
-												<td data-bind="attr: { id: 'RSnumber_' + $index() }"
-														style="text-align: center">
-														<a data-bind="text: RS" title="Cluster Report" target="LDProxy-cluster-report"></a>
-												</td>
-												<td data-bind="attr: { id: 'Coord_' + $index() }"
-														style="text-align: center">
-													<a data-bind="text: Coord" title="Genome Browser" target="LDProxy-coord"></a>
-
-												</td>
-												<td style="text-align: center" data-bind="text: Alleles"></td>
-												<td style="text-align: center" data-bind="text: MAF"></td>
-												<td style="text-align: center" data-bind="text: Dist"></td>
-												<td style="text-align: center" data-bind="text: Dprime"></td>
-												<td style="text-align: center" data-bind="text: R2"></td>
-												<td style="text-align: center"
-													data-bind="text: Corr_Alleles"></td>
-												<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
-														style="text-align: center">
-													<a data-bind="text: RegulomeDB" title="RegulomeDB" target="LDProxy-RegulomeDB"></a>
-												</td>
-												<td style="text-align: center" data-bind="text: Function"></td>
-											</tr>
-
-										</tbody>
-									</table>
-									<div class="row proxy-table-title-row">
-										<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
-												all proxy SNPs</span>
-										</a>
-									</div>
-
-								</div>
-
-							</div>
-
+				<hr>
+				<!-- Message ERROR -->
+				<div class="row">
+					<div class="col-sm-7 col-sm-offset-2" id="ldproxy-message">
+						<div class="panel panel-danger">
+							<div class="panel-heading">Error</div>
+							<div class="panel-body" id="ldproxy-message-content"></div>
 						</div>
 					</div>
 				</div>
+				<!-- Message WARNING -->
+				<div class="row">
+					<div class="col-sm-7 col-sm-offset-2" id="ldproxy-message-warning">
+						<div class="panel panel-warning">
+							<div class="panel-heading">Warning</div>
+							<div class="panel-body" id="ldproxy-message-warning-content">
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<!-- LDproxy OUTPUT Results -->
+
+				<div class="jumbotron">
+					<!-- LDPROXY PROGRESS BAR -->
+					<div id="ldproxy-progress-container"
+						style="width: 525px; display: none;">
+						<div id="ldproxy-progress" class="progress">
+							<div id="ldproxy-progress-bar" class="progress-bar"
+								role="progressbar" aria-valuenow="0" aria-valuemin="0"
+								aria-valuemax="100" style="width: 0%;">0%</div>
+						</div>
+					</div>
+
+					<!-- LDProxy CONTAINER -->
+					<div class="container-fluid" id="ldproxy-results-container">
+
+						<div id="ldproxy-bokeh-graph"></div>
+						<div class="row proxy-table-title-row">
+							<img src="LDproxy_legend.png" title="LD Proxy Legend"
+								class="proxy-legend">
+						</div>
+						<div class="row proxy-table-title-row">
+							<br /> <a id="ldproxy-link"
+								href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
+								target="LDProxy-genome-browser" style="padding-left: 100px;"
+								title="Genome Browser">View plotted region in UCSC Genome
+								Browser</a>
+						</div>
+						<br> <br>
+						<div id="ldproxy-table-container">
+
+							<div class="row proxy-table-title-row">
+								<h3 class="pull-left">Top 10 Proxy SNPs</h3>
+							</div>
+							<table class="table table-bordered">
+								<thead>
+									<!-- Header row -->
+									<tr>
+										<td>RS Number</td>
+										<td>Coord</td>
+										<td>Alleles</td>
+										<td>MAF</td>
+										<td>Distance</td>
+										<td>Dprime</td>
+										<td>R2</td>
+										<td>Correlated Alleles</td>
+										<td>RegulomeDB</td>
+										<td>Function</td>
+									</tr>
+								<tbody data-bind="foreach: top10">
+									<tr>
+										<td data-bind="attr: { id: 'RSnumber_' + $index() }"
+											style="text-align: center"><a data-bind="text: RS"
+											title="Cluster Report" target="LDProxy-cluster-report"></a></td>
+										<td data-bind="attr: { id: 'Coord_' + $index() }"
+											style="text-align: center"><a data-bind="text: Coord"
+											title="Genome Browser" target="LDProxy-coord"></a></td>
+										<td style="text-align: center" data-bind="text: Alleles"></td>
+										<td style="text-align: center" data-bind="text: MAF"></td>
+										<td style="text-align: center" data-bind="text: Dist"></td>
+										<td style="text-align: center" data-bind="text: Dprime"></td>
+										<td style="text-align: center" data-bind="text: R2"></td>
+										<td style="text-align: center" data-bind="text: Corr_Alleles"></td>
+										<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
+											style="text-align: center"><a
+											data-bind="text: RegulomeDB" title="RegulomeDB"
+											target="LDProxy-RegulomeDB"></a></td>
+										<td style="text-align: center" data-bind="text: Function"></td>
+									</tr>
+
+								</tbody>
+							</table>
+							<div class="row proxy-table-title-row">
+								<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
+										all proxy SNPs</span>
+								</a>
+							</div>
+
+						</div>
+
+					</div>
+				</div>
 			</div>
+			<!-- Help -->
+			<div class="tab-pane fade" id="help-tab">Under Construction</div>
 		</div>
 	</div>
 	<div id="portal-footer">
 		<div class="footerLinks">
-			<a href="http://www.cancer.gov/" title="Home" data-toggle="tooltip" data-placement="left">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
+			<a href="http://www.cancer.gov/" title="Home" data-toggle="tooltip"
+				data-placement="left">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+				href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
 				target="_top" title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
 				href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
 			<a href="http://www.cancer.gov/global/web/policies/accessibility"

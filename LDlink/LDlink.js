@@ -40,6 +40,7 @@ $(document).ready(function() {
 		$('#'+id+'-message-warning').hide();
 	});
 
+	/*
 	$('.tab-content').on('click',
 		"a[class|='btn btn-default calculate']", function(e) {
 		calculate(e);
@@ -47,6 +48,12 @@ $(document).ready(function() {
 
 	$('.tab-content').on('click',
 		"button[class|='btn btn-default calculate']", function(e) {
+		calculate(e);
+	});
+	
+	*/
+	
+	$('.ldlinkForm').on('submit', function (e) {
 		calculate(e);
 	});
 
@@ -98,7 +105,7 @@ $(document).ready(function() {
 		}
 	});
 
-	addValidators();
+	//addValidators();
 
 });
 
@@ -126,9 +133,13 @@ function populateTextArea(event, numFiles, label) {
 }
 
 function calculate(e) {
-	var id = e.target.id;
+	var formId = e.target.id;
 	e.preventDefault();
 //	var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
+
+	//strip out "Form" from id
+	var id=formId.slice(0, formId.length-4);
+
 	initCalculate(id);
 	updateData(id);
 }
@@ -518,7 +529,7 @@ function getLDProxyResults(jsonfile) {
 	  addLDproxyHyperLinks(data);
   });
   ajaxRequest.fail(function(jqXHR, textStatus) {
-    alert('Fail');
+    //alert('Fail');
     console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
         + "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
     message = 'Service Unavailable: ' + textStatus+"<br>";
