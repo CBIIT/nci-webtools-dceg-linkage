@@ -99,8 +99,12 @@ $(document).ready(function() {
 			var active_tab = $("div.tab-pane.active").attr('id');
 			var id = active_tab.split("-");
 			if(id.length == 2) { //Check to make sure we are on a calculate tab
-				initCalculate(id[0]);
-				updateData(id[0]);
+				//check if the form is valid before sending to server
+				var formId=id[0]+"Form";
+				if ($('#'+formId).checkValidity) {
+					initCalculate(id[0]);
+					updateData(id[0]);
+				}
 			}
 		}
 	});
@@ -581,7 +585,7 @@ function updateLDpair() {
 		//alert('Communication problem: ' + textStatus);
     // ERROR
     $('#'+id+'-message').show();
-    $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Plask Python server is available.");
+    $('#'+id+'-message-content').empty().append('Communication problem: ' + textStatus+"<br>Make sure Flask Python server is available.");
 	});
 	ajaxRequest.always(function() {
     $btn.button('reset');
