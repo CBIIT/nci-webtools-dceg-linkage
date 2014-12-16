@@ -86,6 +86,11 @@ def calculate_hap(snplst,pop,request):
 	if warn!=[]:
 		output["warning"]="Not all input SNPs were found in dbSNP 141 ("+",".join(warn)+")"
 	
+	if len(rs_nums)==0:
+		output["error"]="Input SNP list does not contain any vaild RS numbers that are in dbSNP 141."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		raise
+	
 	
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
