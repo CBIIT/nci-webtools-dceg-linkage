@@ -24,10 +24,7 @@ def calculate_matrix(snplst,pop,request):
 
 
 	# Open SNP list file
-	print " input stream " +snplst
 	snps=open(snplst).readlines()
-	print snps
-	print len(snps)
 	if len(snps)>100:
 		output["error"]="Maximum SNP list is 100 SNPs. Your list contains "+str(len(snps))+" entries."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -96,6 +93,14 @@ def calculate_matrix(snplst,pop,request):
 
 	if warn!=[]:
 		output["warning"]="The following SNPs were not found in dbSNP 141: "+",".join(warn)
+	
+	if len(rs_nums)==0:
+		output["error"]="Input SNP list does not contain any vaild RS numbers that are in dbSNP 141."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise		
 
 
 	# Check SNPs are all on the same chromosome
@@ -112,12 +117,9 @@ def calculate_matrix(snplst,pop,request):
 
 	# Extract 1000 Genomes phased genotypes
 	vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	print 'vcf_file = ' +vcf_file
 	tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, tmp_dir+"snps_"+request+".vcf")
-	print 'tabix_snps = '+tabix_snps
 	subprocess.call(tabix_snps, shell=True)
 	grep_remove_dups="grep -v -e END "+tmp_dir+"snps_"+request+".vcf > "+tmp_dir+"snps_no_dups_"+request+".vcf"
-	print 'grep_remove_dups = '+ grep_remove_dups
 	subprocess.call(grep_remove_dups, shell=True)
 
 
