@@ -498,7 +498,6 @@ function updateData(id) {
 		updateLDmatrix();
 		break;
 	case 'ldhap':
-		$('#' + id + '-results-container').show();
 		updateLDhap();
 		break;
 	}
