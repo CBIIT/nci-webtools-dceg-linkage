@@ -224,22 +224,21 @@ img.proxy-legend {
     right: -15px;
 }
 
-
 /* Placeholder Style */
 ::-webkit-input-placeholder {
-   font-size: 70%;
+   font-size: 95%;
 }
 
 :-moz-placeholder { /* Firefox 18- */
-   font-size: 70%;
+   font-size: 95%;
 }
 
 ::-moz-placeholder {  /* Firefox 19+ */
-   font-size: 70%;
+   font-size: 95%;
 }
 
 :-ms-input-placeholder {
-   font-size: 70%;
+   font-size: 95%;
 }
 .snp {
   text-transform: lowercase;
