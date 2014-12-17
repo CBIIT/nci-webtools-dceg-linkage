@@ -179,11 +179,7 @@ Temporarily removing to see if it effects anything.
 					Technology (CBIIT). Support comes from the Division of Cancer
 					Epidemiology and Genetics Informatics Tool Challenge.</p>
 			</div>
-			<!-- LDhap -->
 
-			<!--
-			<div class="tab-pane fade" id="ldhap-tab">
--->
 			<!-- LDhap -->
 			<div class="tab-pane fade" id="ldhap-tab">
 				<!-- LDmatrix INPUTS-->
@@ -266,7 +262,7 @@ Temporarily removing to see if it effects anything.
 				<hr>
 				<!-- Message ERROR -->
 				<div class="row">
-					<div class="col-md-7 col-md-offset-2" id="ldhap-message">
+					<div class="col-sm-7 col-sm-offset-2" id="ldhap-message">
 						<div class="panel panel-danger">
 							<div class="panel-heading">Error</div>
 							<div class="panel-body" id="ldhap-message-content"></div>
@@ -275,7 +271,7 @@ Temporarily removing to see if it effects anything.
 				</div>
 				<!-- Message WARNING -->
 				<div class="row">
-					<div class="col-md-7 col-md-offset-2" id="ldhap-message-warning">
+					<div class="col-sm-7 col-sm-offset-2" id="ldhap-message-warning">
 						<div class="panel panel-warning">
 							<div class="panel-heading">Warning</div>
 							<div class="panel-body" id="ldhap-message-warning-content">
@@ -345,6 +341,7 @@ Temporarily removing to see if it effects anything.
 				</div>
 
 			</div>
+			
 			<!-- LDmatrix -->
 			<div class="tab-pane fade" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
@@ -429,7 +426,7 @@ Temporarily removing to see if it effects anything.
 				<hr>
 				<!-- Message ERROR -->
 				<div class="row">
-					<div class="col-md-7 col-md-offset-2" id="ldmatrix-message">
+					<div class="col-sm-7 col-sm-offset-2" id="ldmatrix-message">
 						<div class="panel panel-danger">
 							<div class="panel-heading">Error</div>
 							<div class="panel-body" id="ldmatrix-message-content"></div>
@@ -438,7 +435,7 @@ Temporarily removing to see if it effects anything.
 				</div>
 				<!-- Message WARNING -->
 				<div class="row">
-					<div class="col-md-7 col-md-offset-2" id="ldmatrix-message-warning">
+					<div class="col-sm-7 col-sm-offset-2" id="ldmatrix-message-warning">
 						<div class="panel panel-warning">
 							<div class="panel-heading">Warning</div>
 							<div class="panel-body" id="ldmatrix-message-warning-content">
@@ -453,7 +450,7 @@ Temporarily removing to see if it effects anything.
 							<div class="col-md-11 col-md-offset-1">
 								<div id="ldmatrix-bokeh-graph"></div>
 							</div>
-							<div class="col-md-11 col-md-offset-1">
+							<div class="col-md-11 col-md-offset-1" id="ldmatrix-download-links"><br/>
 								<span><a id="ldmatrix-DPrime" target="LDMatrix-DPrime">Download
 										D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp; <span><a
 									id="ldmatrix-R2" target="LDMatrix-R2">Download R2 File</a></span>
@@ -464,7 +461,6 @@ Temporarily removing to see if it effects anything.
 			</div>
 
 			<!-- LDpair -->
-
 			<div class="tab-pane fade" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
 
@@ -515,7 +511,7 @@ Temporarily removing to see if it effects anything.
 				<hr>
 				<!-- Message ERROR -->
 				<div class="row">
-					<div class="col-md-7 col-md-offset-2" id="ldpair-message">
+					<div class="col-sm-7 col-sm-offset-2" id="ldpair-message">
 						<div class="panel panel-danger">
 							<div class="panel-heading">Error</div>
 							<div class="panel-body" id="ldpair-message-content"></div>
@@ -524,7 +520,7 @@ Temporarily removing to see if it effects anything.
 				</div>
 				<!-- Message WARNING -->
 				<div class="row">
-					<div class="col-md-7 col-md-offset-2" id="ldpair-message-warning">
+					<div class="col-sm-7 col-sm-offset-2" id="ldpair-message-warning">
 						<div class="panel panel-warning">
 							<div class="panel-heading">Warning</div>
 							<div class="panel-body" id="ldpair-message-warning-content">
@@ -650,7 +646,7 @@ Temporarily removing to see if it effects anything.
 						</table>
 					</div>
 					<div data-bind="foreach: corr_alleles">
-						<div style="text-alig n: center" data-bind="text: $data"></div>
+						<div style="text-align: center" data-bind="text: $data"></div>
 					</div>
 				</div>
 			</div>
@@ -745,18 +741,16 @@ Temporarily removing to see if it effects anything.
 					<div class="container-fluid" id="ldproxy-results-container">
 
 						<div id="ldproxy-bokeh-graph"></div>
-						<div id="ldproxy-graph-legend">
-							<div class="row proxy-table-title-row">
-								<img src="LDproxy_legend.png" title="LD Proxy Legend"
-									class="proxy-legend">
-							</div>
-							<div class="row proxy-table-title-row"">
-								<br /> <a id="ldproxy-link"
-									href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
-									target="LDProxy-genome-browser" style="padding-left: 100px;"
-									title="Genome Browser">View plotted region in UCSC Genome
-									Browser</a>
-							</div>
+						<div class="row proxy-table-title-row">
+							<img src="LDproxy_legend.png" title="LD Proxy Legend"
+								class="proxy-legend">
+						</div>
+						<div class="row proxy-table-title-row"">
+							<br /> <a id="ldproxy-link"
+								href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
+								target="LDProxy-genome-browser" style="padding-left: 100px;"
+								title="Genome Browser">View plotted region in UCSC Genome
+								Browser</a>
 						</div>
 						<br> <br>
 						<div id="ldproxy-table-container">

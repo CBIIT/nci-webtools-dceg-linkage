@@ -524,11 +524,14 @@ function updateLDhap() {
 	var ajaxRequest = $.ajax({
 		type : 'GET',
 		url : url,
-		data : ldInputs
+		data : ldInputs,
+		contentType : 'application/json' // JSON
 	});
 
 	ajaxRequest.success(function(data) {
-		if (displayError(id, data) == false) {
+		//data is returned as a string representation of JSON instead of JSON obj
+		var jsonObj=JSON.parse(data);
+		if (displayError(id, jsonObj) == false) {
 			$('#' + id + '-results-container').show();
 			var ldhapTable = formatLDhapData($.parseJSON(data));
 			$('#ldhap-haplotypes-column').attr('colspan',
@@ -554,6 +557,7 @@ function updateLDhap() {
 				$('#' + id + '-message').show();
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
 			});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -639,12 +643,12 @@ function updateLDmatrix() {
 	});
 
 	ajaxRequest.success(function(data) {
-		if (displayError(id, data) == false) {
 			$('#ldmatrix-bokeh-graph').empty().append(data);
-			$('#' + id + '-progress-container').hide();
-			$('#' + id + '-results-container').show();
-			addLDMatrixHyperLinks(ldmatrixInputs.reference);
-		}
+		$('#' + id + '-progress-container').hide();
+		$('#' + id + '-results-container').show();
+		getLDmatrixResults(ldmatrixInputs.reference + ".json",
+				ldmatrixInputs.reference);
+
 	});
 	ajaxRequest
 			.fail(function(jqXHR, textStatus) {
@@ -663,6 +667,7 @@ function updateLDmatrix() {
 				$('#' + id + '-message').show();
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
 			});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -841,6 +846,7 @@ function updateLDproxy() {
 			$('#ldproxy-bokeh-graph').empty().append(data);
 			$('#' + id + '-results-container').show();
 			getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
+
 	});
 	ajaxRequest
 			.fail(function(jqXHR, textStatus) {
@@ -859,6 +865,7 @@ function updateLDproxy() {
 				$('#' + id + '-message').show();
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
 			});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -880,6 +887,46 @@ function getLDProxyResults(jsonfile) {
 		if (displayError(id, data) == false) {
 			ko.mapping.fromJS(data, ldproxyModel);
 			addLDproxyHyperLinks(data);
+		}
+	});
+
+	ajaxRequest
+			.fail(function(jqXHR, textStatus) {
+				// alert('Fail');
+				console
+						.log("header: "
+								+ jqXHR
+								+ "\n"
+								+ "Status: "
+								+ textStatus
+								+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+				message = 'Service Unavailable: ' + textStatus + "<br>";
+				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+				$('#' + id + '-message').show();
+				$('#' + id + '-message-content').empty().append(message);
+				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
+			});
+	ajaxRequest.always(function() {
+	});
+}
+
+function getLDmatrixResults(jsonfile, request) {
+	var id = "ldmatrix";
+	var url = "tmp/"+jsonfile;
+	
+	var ajaxRequest = $.ajax({
+		type : "GET",
+		url : url
+	});
+
+	ajaxRequest.success(function(data) {
+		//catch error and warning in json
+		if (displayError(id, data) == false) {
+			addLDMatrixHyperLinks(request);
+			//matrix specific
+			$('#'+id+"-download-links").show();
 		}
 	});
 
@@ -945,6 +992,7 @@ function updateLDpair() {
 		$('#' + id + '-message-content').empty().append(
 				'Communication problem: ' + textStatus
 						+ "<br>Make sure Flask Python server is available.");
+		$('#' + id+ '-results-container').hide();
 	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -957,16 +1005,22 @@ function displayError(id, data) {
 	if (data.warning) {
 		$('#' + id + '-message-warning').show();
 		$('#' + id + '-message-warning-content').empty().append(data.warning);
+		//hide error
+		$('#' + id + '-message').hide();
 	}
 
 	if (data.error) {
 		// ERROR
 		$('#' + id + '-message').show();
 		$('#' + id + '-message-content').empty().append(data.error);
+		//hide warning
+		$('#' + id + '-message-warning').hide();
+				
+		//matrix specific
+		$('#'+id+"-download-links").hide();
 		
-		//proxy specific
-		$('#'+id+"-graph-legend").empty();
-		$('#'+id+"-table-container").empty();
+		$('#'+id+"-results-container").hide();
+		
 		error = true;
 	}
 	return error;
