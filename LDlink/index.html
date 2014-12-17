@@ -206,10 +206,10 @@ Temporarily removing to see if it effects anything.
 							<div class="col-sm-1">or</div>
 							<div class="col-sm-3">
 								<div class="input-group">
-									<span
-										class="btn btn-default btn-file">Browse<input
-											type="file" id="ldhap-file">
-									</span><input type="text" readonly placeholder="Upload file with RS numbers">
+									<span class="btn btn-default btn-file">Browse<input
+										type="file" id="ldhap-file">
+									</span><input type="text" readonly
+										placeholder="Upload file with RS numbers">
 								</div>
 							</div>
 
@@ -360,17 +360,16 @@ Temporarily removing to see if it effects anything.
 							<div class="form-group">
 								<div class="col-sm-2">
 									<textarea id="ldmatrix-file-snp-numbers"
-										placeholder="RS Numbers"
-										class="form-control"
+										placeholder="RS Numbers" class="form-control"
 										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
 								<div class="col-sm-1">or</div>
 								<div class="col-sm-3">
 									<div class="input-group">
-										<span
-										class="btn btn-default btn-file">Browse<input
+										<span class="btn btn-default btn-file">Browse<input
 											type="file" id="ldmatrix-file">
-										</span><input type="text" readonly placeholder="Upload file with RS numbers">
+										</span><input type="text" readonly
+											placeholder="Upload file with RS numbers">
 									</div>
 								</div>
 							</div>
@@ -538,16 +537,20 @@ Temporarily removing to see if it effects anything.
 				<div class="jumbotron">
 					<!-- LDPAIR CONTAINER -->
 					<div class="container-fluid" id="ldpair-results-container">
-						<div style="text-align: center">
-							<a id="snp2-rsnum" data-bind="text: snp2.rsnum" href="#"
-								title="Cluster Report:" target="LDPair-snp2-rsnum"></a>
-						</div>
-						<div style="text-align: center">
-							<a id="snp2-coord" data-bind="text: snp2.coord" href="#"
-								title="Genome Browser" target="LDPair-snp2-coord"></a>
-						</div>
-						<table class="table table-condensed ldhap">
+						<table class="table table-responsive">
 							<tbody>
+								<!-- SNP 1 rsnum and coordinates -->
+								<tr>
+									<td></td>
+									<td></td>
+									<td colspan="2" class="cell-center"><a id="snp2-rsnum"
+										data-bind="text: snp2.rsnum" href="#" title="Cluster Report:"
+										target="LDPair-snp2-rsnum"></a><br /> <a id="snp2-coord"
+										data-bind="text: snp2.coord" href="#" title="Genome Browser"
+										target="LDPair-snp2-coord"></a></td>
+									<td></td>
+									<td></td>
+								</tr>
 								<!-- Header row -->
 								<tr>
 									<td></td>
@@ -559,9 +562,11 @@ Temporarily removing to see if it effects anything.
 								</tr>
 								<!-- Row 2 -->
 								<tr>
-									<td class="cell-right" width="250"><a id="snp1-rsnum"
+									<td class="cell-center" rowspan="2" style="vertical-align:middle"><a id="snp1-rsnum"
 										data-bind="text: snp1.rsnum" href="#" title="Cluster Report:"
-										target="LDPair-snp1-rsnum"></a></td>
+										target="LDPair-snp1-rsnum"></a><br /> <a id="snp1-coord"
+										data-bind="text: snp1.coord" href="#" title="Genome Browser"
+										target="LDPair-snp1-coord"></a></td>
 									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
 									<td colspan="2" rowspan="2">
@@ -590,9 +595,7 @@ Temporarily removing to see if it effects anything.
 								</tr>
 								<!-- Row 3 -->
 								<tr>
-									<td class="cell-right"><a id="snp1-coord"
-										data-bind="text: snp1.coord" href="#" title="Genome Browser"
-										target="LDPair-snp1-coord"></a></td>
+
 									<td class="cell-center" data-bind="text: snp1.allele_2.allele"></td>
 									<td data-bind="text: snp1.allele_2.count"></td>
 									<td class="cell-left">(<span
@@ -614,45 +617,40 @@ Temporarily removing to see if it effects anything.
 								</tr>
 							</tbody>
 						</table>
-						<div class="row">
-							<div class="col-lg-4 col-lg-offset-4">
-								<table class="table fixed">
-									<tbody>
-										<tr>
-											<td colspan="2" class="cell-center" width="200"><u>Haplotypes</u></td>
-											<td colspan="2" class="cell-center" width="200"><u>Statistics</u></td>
-										</tr>
-										<tr>
-											<td class="cell-right"><span
-												data-bind="text: haplotypes.hap1.alleles"></span>:<br>
-												<span data-bind="text: haplotypes.hap2.alleles"></span>:<br>
-												<span data-bind="text: haplotypes.hap3.alleles"></span>:<br>
-												<span data-bind="text: haplotypes.hap4.alleles"></span>:<br>
-											</td>
-											<td nowrap><span data-bind="text: haplotypes.hap1.count"></span>&nbsp;
-												(<span data-bind="text: haplotypes.hap1.frequency"></span>)
-												<br> <span data-bind="text: haplotypes.hap2.count"></span>&nbsp;
-												(<span data-bind="text: haplotypes.hap2.frequency"></span>)
-												<br> <span data-bind="text: haplotypes.hap3.count"></span>&nbsp;
-												(<span data-bind="text: haplotypes.hap3.frequency"></span>)
-												<br> <span data-bind="text: haplotypes.hap4.count"></span>&nbsp;
-												(<span data-bind="text: haplotypes.hap4.frequency"></span>)
-												<br></td>
-											<td class="cell-right">D':<br>R2:<br>Chi-sq:<br>p-value:
-											</td>
-											<td><span data-bind="text: statistics.d_prime"></span><br>
-												<span data-bind="text: statistics.r2"></span><br> <span
-												data-bind="text: statistics.chisq"></span><br> <span
-												data-bind="text: statistics.p"></span><br></td>
-										</tr>
-									</tbody>
-								</table>
-							</div>
-						</div>
-						<div data-bind="foreach: corr_alleles">
-							<div style="text-alig
-							n: center" data-bind="text: $data"></div>
-						</div>
+						<table class="table table-responsive">
+							<tbody>
+								<tr>
+									<td></td>
+									<td colspan="2" class="cell-center" width="200"><u>Haplotypes</u></td>
+									<td colspan="2" class="cell-center" width="200"><u>Statistics</u></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td class="cell-right"><span
+										data-bind="text: haplotypes.hap1.alleles"></span>:<br> <span
+										data-bind="text: haplotypes.hap2.alleles"></span>:<br> <span
+										data-bind="text: haplotypes.hap3.alleles"></span>:<br> <span
+										data-bind="text: haplotypes.hap4.alleles"></span>:<br></td>
+									<td nowrap><span data-bind="text: haplotypes.hap1.count"></span>&nbsp;
+										(<span data-bind="text: haplotypes.hap1.frequency"></span>) <br>
+										<span data-bind="text: haplotypes.hap2.count"></span>&nbsp; (<span
+										data-bind="text: haplotypes.hap2.frequency"></span>) <br>
+										<span data-bind="text: haplotypes.hap3.count"></span>&nbsp; (<span
+										data-bind="text: haplotypes.hap3.frequency"></span>) <br>
+										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span
+										data-bind="text: haplotypes.hap4.frequency"></span>) <br></td>
+									<td class="cell-right">D':<br>R2:<br>Chi-sq:<br>p-value:
+									</td>
+									<td><span data-bind="text: statistics.d_prime"></span><br>
+										<span data-bind="text: statistics.r2"></span><br> <span
+										data-bind="text: statistics.chisq"></span><br> <span
+										data-bind="text: statistics.p"></span><br></td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+					<div data-bind="foreach: corr_alleles">
+						<div style="text-alig n: center" data-bind="text: $data"></div>
 					</div>
 				</div>
 			</div>
@@ -809,35 +807,32 @@ Temporarily removing to see if it effects anything.
 										all proxy SNPs</span>
 								</a>
 							</div>
-
 						</div>
-
 					</div>
 				</div>
 			</div>
 			<!-- Help -->
 			<div class="tab-pane fade" id="help-tab">Under Construction</div>
 		</div>
-	</div>
-	<div id="portal-footer">
-		<div class="footerLinks">
-			<a href="http://www.cancer.gov/" title="Home" data-toggle="tooltip"
-				data-placement="left">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
-				href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
-				target="_top" title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
-				href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<a href="http://www.cancer.gov/global/web/policies/accessibility"
-				title="Accessibility">Accessibility</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
-				href="http://cancer.gov/global/viewing-files" target="_blank"
-				title="Viewing Files">Viewing Files</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
-				href="http://www.cancer.gov/global/web/policies/foia" title="FOIA">FOIA</a><br>
-			<br> <a href="http://www.dhhs.gov/">Department of Health and
-				Human Services</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
-				href="http://www.nih.gov/">National Institutes of Health</a>&nbsp;&nbsp;|&nbsp;&nbsp;
-			<a href="http://www.cancer.gov/">National Cancer Institute</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a
-				href="http://www.usa.gov/">USA.gov</a>
+		<div id="portal-footer">
+			<div class="footerLinks">
+				<a href="http://www.cancer.gov/" title="Home" data-toggle="tooltip"
+					data-placement="left">Home</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+					href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
+					target="_top" title="Support">Support</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+				<a href="http://www.cancer.gov/global/web/policies" title="Policies">Policies</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+				<a href="http://www.cancer.gov/global/web/policies/accessibility"
+					title="Accessibility">Accessibility</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+					href="http://cancer.gov/global/viewing-files" target="_blank"
+					title="Viewing Files">Viewing Files</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+					href="http://www.cancer.gov/global/web/policies/foia" title="FOIA">FOIA</a><br>
+				<br> <a href="http://www.dhhs.gov/">Department of Health
+					and Human Services</a>&nbsp;&nbsp;|&nbsp;&nbsp; <a
+					href="http://www.nih.gov/">National Institutes of Health</a>&nbsp;&nbsp;|&nbsp;&nbsp;
+				<a href="http://www.cancer.gov/">National Cancer Institute</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a
+					href="http://www.usa.gov/">USA.gov</a>
+			</div>
+			<br> <br> NIH...Turning Discovery Into Health<sup>&#174;</sup>
 		</div>
-		<br> <br> NIH...Turning Discovery Into Health<sup>&#174;</sup>
-	</div>
 </body>
 </html>
