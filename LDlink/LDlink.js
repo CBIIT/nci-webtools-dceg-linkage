@@ -489,7 +489,7 @@ function updateData(id) {
 		updateLDpair();
 		break;
 	case 'ldproxy':
-		$('#' + id + '-progress-container').show();
+		//$('#' + id + '-progress-container').show();
 		// ko.mapping.fromJS(newProxy4, ldproxyModel);
 		updateLDproxy();
 		break;
@@ -805,7 +805,7 @@ function updateLDproxy() {
 					+ base_calculation_time + bokeh_load_time;
 			console.log("Total Seconds =");
 			console.log(seconds);
-			updateLDproxyProgressBar(id, seconds);
+			//updateLDproxyProgressBar(id, seconds);
 		});
 		ajaxRequest.fail(function(jqXHR, textStatus) {
 			// Create a linear guess based on
