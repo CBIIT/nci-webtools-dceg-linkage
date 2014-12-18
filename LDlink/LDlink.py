@@ -22,17 +22,13 @@ from LDhap import calculate_hap
 #from flask import Flask, request, redirect, url_for
 from werkzeug import secure_filename
 
-UPLOAD_FOLDER = '/h1/kneislercp/nci-analysis-tools-web-presence/src/LDlink/tmp'
-ALLOWED_EXTENSIONS = set(['txt'])
-
 app = Flask(__name__, static_folder='', static_url_path='/')
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.debug = True
+#app.debug = True
 
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 @app.route('/')
+
 def index():
     return render_template('index.html')
 
@@ -50,25 +46,6 @@ def jsonp(func):
         else:
             return func(*args, **kwargs)
     return decorated_function
-
-
-def setRWorkingDirectory():
-    sourceReturn1 = robjects.r("path")
-    return ""
-'''
-@app.route('/riskStratAdvRest/cal', methods = ['POST'])
-@jsonp
-def callRFunction():
-    rSource = robjects.r('source')
-    rSource('./input.R')
-    r_getname_getData = robjects.globalenv['getDataJSON']
-    thestream=request.stream.read();
-    print " input stream "+str(thestream);
-    jsondata = r_getname_getData(thestream)
-    print "json string >> "+str(jsondata[0]);
-    return jsondata[0]
-'''
-
 
 @app.route('/LDlinkRest/ldpair', methods = ['GET'])
 def ldpair():
@@ -129,7 +106,8 @@ def ldmatrix():
     print 'pop: ' + pop
     print 'request: ' + reference
 
-    snplst = './tmp/snps'+reference+'.txt'
+    tmp_dir = "./tmp/"
+    snplst = tmp_dir+'snps'+reference+'.txt'
     print 'snplst: '+snplst
 
     f = open(snplst, 'w')
@@ -155,7 +133,8 @@ def ldhap():
     print 'pop: ' + pop
     print 'request: ' + reference
 
-    snplst = './tmp/snps'+reference+'.txt'
+    tmp_dir = "./tmp/"
+    snplst = tmp_dir+'snps'+reference+'.txt'
     print 'snplst: '+snplst
 
     f = open(snplst, 'w')
@@ -214,18 +193,6 @@ def test():
 
     else:
         return "415 Unsupported Media Type ;)"
-
-
-@app.route('/LDlinkRest/upload', methods=['GET', 'POST'])
-def upload():
-    if request.method == 'POST' and 'photo' in request.files:
-        filename = photos.save(request.files['photo'])
-        rec = Photo(filename=filename, user=g.user.id)
-        rec.store()
-        flash("Photo saved.")
-        return redirect(url_for('show', id=rec.id))
-    return render_template('upload.html')
-
 
 import argparse
 if __name__ == '__main__':
