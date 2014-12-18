@@ -17,52 +17,13 @@
 <meta name="author" content="">
 
 <title>LD Link Toolset</title>
-<!-- Too slow
-<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
--->
-<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
 
-<script
-	src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
-	type="text/javascript">
-	
-</script>
-<script
-	src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
-	type="text/javascript">
-	
-</script>
-<!-- Modernizr not in use
-
-Temporarily removing to see if it effects anything.
-
-<script
-	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
-	type="text/javascript">
--->
-
-</script>
-<script
-	src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
-	type="text/javascript">
-	
-</script>
-<script
-	src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
-	type="text/javascript">
-	
-</script>
-<script type="text/javascript"
-	src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
-	
-</script>
-
-<script src="LDlink.js" type="text/javascript">
-	
-</script>
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
 	type="text/css">
+<!-- 	
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
+ -->
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"
 	type="text/css">
@@ -72,10 +33,6 @@ Temporarily removing to see if it effects anything.
 	type="text/css">
 <link rel="stylesheet" href="../common/css/font-awesome.css"
 	type="text/css">
-
-<script type="text/javascript"
-	src="../common/js/bootstrap-multiselect.js"></script>
-
 
 <link rel="stylesheet" href="../common/css/bootstrap-multiselect.css"
 	type="text/css">
@@ -218,45 +175,20 @@ Temporarily removing to see if it effects anything.
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-1">
-									<input type="submit" id="ldhap" value="Calculate"
+								<div class="col-sm-1"><!-- 
+									<input type="submit" id="ldhap0" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
+									 <!--
 											<button id="ldhap" type="submit" class="btn btn-default calculate">
 													Calculate
 											</button>
 										 -->
+								    <!-- 
+									<button id="ldhap" class="btn btn-default ladda-button" data-style="expand-right">Submit</button>
+								    -->
 								</div>
 							</div>
 						</form>
-
-						<!--
-        <form id="ldhap-form" class="form-inline" role="form">
-          <div class="row" style="padding-top: 10px;">
-            <div class="col-md-3 col-md-offset-1">
-              <div class="input-group">
-                <span class="input-group-btn"> <span
-                  class="btn btn-default btn-file">Browse <input
-                    type="file" id="ldhap-file">
-                </span>
-                </span> <input type="text" class="form-control" readonly style="width:210px;" required>
-              </div>
-              <br>or <br>
-              <textarea id="ldhap-file-snp-numbers" placeholder="RS Numbers"
-                cols="12" rows="8" class="form-control"
-                title="Enter list of RS numbers (one per line)" required></textarea>
-            </div>
-            <div>
-              <select id="ldhap-population-codes" multiple="multiple" required></select>
-            </div>
-            <div>
-              <button id="ldhap" type="submit" class="btn btn-default calculate">
-              		Calculate
-              </button>
-            </div>
-          </div>
-        </form>
--->
 					</div>
 				</div>
 				<hr>
@@ -341,7 +273,7 @@ Temporarily removing to see if it effects anything.
 				</div>
 
 			</div>
-			
+
 			<!-- LDmatrix -->
 			<div class="tab-pane fade" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
@@ -450,10 +382,12 @@ Temporarily removing to see if it effects anything.
 							<div class="col-md-11 col-md-offset-1">
 								<div id="ldmatrix-bokeh-graph"></div>
 							</div>
-							<div class="col-md-11 col-md-offset-1" id="ldmatrix-download-links"><br/>
-								<span><a id="ldmatrix-DPrime" target="LDMatrix-DPrime">Download
-										D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp; <span><a
-									id="ldmatrix-R2" target="LDMatrix-R2">Download R2 File</a></span>
+							<div class="col-md-11 col-md-offset-1"
+								id="ldmatrix-download-links">
+								<br /> <span><a id="ldmatrix-DPrime"
+									target="LDMatrix-DPrime">Download D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
+								<span><a id="ldmatrix-R2" target="LDMatrix-R2">Download
+										R2 File</a></span>
 							</div>
 						</div>
 					</div>
@@ -558,7 +492,8 @@ Temporarily removing to see if it effects anything.
 								</tr>
 								<!-- Row 2 -->
 								<tr>
-									<td class="cell-center" rowspan="2" style="vertical-align:middle"><a id="snp1-rsnum"
+									<td class="cell-center" rowspan="2"
+										style="vertical-align: middle"><a id="snp1-rsnum"
 										data-bind="text: snp1.rsnum" href="#" title="Cluster Report:"
 										target="LDPair-snp1-rsnum"></a><br /> <a id="snp1-coord"
 										data-bind="text: snp1.coord" href="#" title="Genome Browser"
@@ -644,10 +579,11 @@ Temporarily removing to see if it effects anything.
 								</tr>
 							</tbody>
 						</table>
+						<div data-bind="foreach: corr_alleles">
+							<div style="text-align: center" data-bind="text: $data"></div>
+						</div>
 					</div>
-					<div data-bind="foreach: corr_alleles">
-						<div style="text-align: center" data-bind="text: $data"></div>
-					</div>
+					
 				</div>
 			</div>
 			<!-- LDproxy -->
@@ -828,5 +764,55 @@ Temporarily removing to see if it effects anything.
 			</div>
 			<br> <br> NIH...Turning Discovery Into Health<sup>&#174;</sup>
 		</div>
-</body>
+	</div>
+
+	<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
+
+	<script
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
+		type="text/javascript">
+			
+		</script>
+	<script
+		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
+		type="text/javascript">
+			
+		</script>
+	<!-- Modernizr not in use
+
+Temporarily removing to see if it effects anything.
+
+<script
+	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
+	type="text/javascript">
+</script>
+-->
+	<script
+		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
+		type="text/javascript">
+			
+		</script>
+	<script
+		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
+		type="text/javascript">
+			
+		</script>
+	<script type="text/javascript"
+		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
+			
+		</script>
+
+	<script src="LDlink.js" type="text/javascript">
+			
+		</script>
+
+	<script type="text/javascript"
+		src="../common/js/bootstrap-multiselect.js"></script>
+<!-- 		
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.js"></script>
+
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/spin.min.js"></script>
+-->
+	</body>
 </html>
+
