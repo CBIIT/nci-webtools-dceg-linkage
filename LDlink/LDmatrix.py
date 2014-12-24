@@ -19,7 +19,7 @@ def calculate_matrix(snplst,pop,request):
 
 
 	# Create JSON output
-	out_json=open(tmp_dir+request+".json","w")
+	out_json=open(tmp_dir+"matrix"+request+".json","w")
 	output={}
 
 
