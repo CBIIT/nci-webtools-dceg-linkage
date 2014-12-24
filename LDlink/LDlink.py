@@ -22,12 +22,26 @@ from LDhap import calculate_hap
 #from flask import Flask, request, redirect, url_for
 from werkzeug import secure_filename
 
+tmp_dir = "./tmp/"
+
 app = Flask(__name__, static_folder='', static_url_path='/')
 #app.debug = True
 
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 @app.route('/')
+
+# copy output files from tools' tmp directory to apache tmp directory
+def copy_output_files(reference):
+    apache_root = "/analysistools/"
+    # check if URL contains the keyword sandbox
+    if 'sandbox' in request.url_root:
+        apache_root = "/analysistools-sandbox/"
+
+    apache_tmp_dir = apache_root+"public_html/apps/LDlink/tmp/"
+
+    #copy *<reference_no>.* to htodocs
+    os.system("cp "+ tmp_dir+"*"+reference+".* "+apache_tmp_dir);
 
 def index():
     return render_template('index.html')
@@ -72,6 +86,7 @@ def ldpair():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 @app.route('/LDlinkRest/ldproxy', methods = ['GET'])
+
 def ldproxy():
     print
     print 'Execute ldproxy'
@@ -87,8 +102,9 @@ def ldproxy():
     #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
     out_script,out_div = calculate_proxy(snp, pop, reference)
 
-    return out_script+"\n "+out_div
+    copy_output_files(reference)
 
+    return out_script+"\n "+out_div
 
 @app.route('/LDlinkRest/ldmatrix', methods = ['GET'])
 def ldmatrix():
@@ -106,7 +122,6 @@ def ldmatrix():
     print 'pop: ' + pop
     print 'request: ' + reference
 
-    tmp_dir = "./tmp/"
     snplst = tmp_dir+'snps'+reference+'.txt'
     print 'snplst: '+snplst
 
@@ -115,8 +130,9 @@ def ldmatrix():
     f.close()
 
     out_script,out_div = calculate_matrix(snplst,pop,reference)
+
+    copy_output_files(reference)
     return out_script+"\n "+out_div
-    #return request.method
 
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
@@ -133,7 +149,6 @@ def ldhap():
     print 'pop: ' + pop
     print 'request: ' + reference
 
-    tmp_dir = "./tmp/"
     snplst = tmp_dir+'snps'+reference+'.txt'
     print 'snplst: '+snplst
 
@@ -142,6 +157,8 @@ def ldhap():
     f.close()
 
     out_json = calculate_hap(snplst,pop,reference)
+    copy_output_files(reference)
+
     return out_json
 
 
