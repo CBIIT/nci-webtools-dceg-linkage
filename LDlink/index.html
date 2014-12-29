@@ -467,7 +467,7 @@
 				<div class="jumbotron">
 					<!-- LDPAIR CONTAINER -->
 					<div class="container-fluid" id="ldpair-results-container">
-						<table class="table">
+						<table class="table-condensed center-align">
 							<tbody>
 								<!-- SNP 1 rsnum and coordinates -->
 								<tr>
@@ -548,10 +548,12 @@
 								</tr>
 							</tbody>
 						</table>
-						<table class="table">
+						<br/>
+						<table class="table-condensed center-align">
 							<tbody>
 								<tr>
 									<td colspan="2" class="cell-center"><u>Haplotypes</u></td>
+									<td class="spacer"></td>
 									<td colspan="2" class="cell-center"><u>Statistics</u></td>
 								</tr>
 								<tr>
@@ -568,6 +570,7 @@
 										data-bind="text: haplotypes.hap3.frequency"></span>) <br>
 										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span
 										data-bind="text: haplotypes.hap4.frequency"></span>) <br></td>
+									<td class="spacer"></td>
 									<td class="cell-right">D':<br>R2:<br>Chi-sq:<br>p-value:
 									</td>
 									<td><span data-bind="text: statistics.d_prime"></span><br>
@@ -577,6 +580,7 @@
 								</tr>
 							</tbody>
 						</table>
+						<br/>
 						<div data-bind="foreach: corr_alleles">
 							<div style="text-align: center" data-bind="text: $data"></div>
 						</div>
@@ -595,7 +599,7 @@
 							<div class="form-group">
 								<div class="col-sm-4">
 									<input id="ldproxy-snp" name="snp" type="text"
-										class="form-control" placeholder="SNP1 RS Number"
+										class="form-control" placeholder="SNP RS Number"
 										title="rs followed by 1 or more digits" required
 										pattern="^rs\d+$" />
 								</div>
@@ -672,68 +676,73 @@
 					</div>
 
 					<!-- LDProxy CONTAINER -->
+
 					<div class="container-fluid" id="ldproxy-results-container">
+						<div class="row">
+							<div class="col-sm-10 col-sm-offset-1">
+								<div id="ldproxy-bokeh-graph"></div>
 
-						<div id="ldproxy-bokeh-graph"></div>
-						<div class="row proxy-table-title-row">
-							<img src="LDproxy_legend.png" title="LD Proxy Legend"
-								class="proxy-legend">
-						</div>
-						<div class="row proxy-table-title-row"">
-							<br /> <a id="ldproxy-link"
-								href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
-								target="LDProxy-genome-browser" style="padding-left: 100px;"
-								title="Genome Browser">View plotted region in UCSC Genome
-								Browser</a>
-						</div>
-						<br> <br>
-						<div id="ldproxy-table-container">
-
-							<div class="row proxy-table-title-row">
-								<h3 class="pull-left">Top 10 Proxy SNPs</h3>
+								<br />
+								<div>
+									<img src="LDproxy_legend.png" title="LD Proxy Legend"
+										class="proxy-legend">
+								</div>
 							</div>
-							<table class="table table-bordered">
-								<thead>
-									<!-- Header row -->
-									<tr>
-										<td>RS Number</td>
-										<td>Coord</td>
-										<td>Alleles</td>
-										<td>MAF</td>
-										<td>Distance</td>
-										<td>Dprime</td>
-										<td>R2</td>
-										<td>Correlated Alleles</td>
-										<td>RegulomeDB</td>
-										<td>Function</td>
-									</tr>
-								<tbody data-bind="foreach: top10">
-									<tr>
-										<td data-bind="attr: { id: 'RSnumber_' + $index() }"
-											style="text-align: center"><a data-bind="text: RS"
-											title="Cluster Report" target="LDProxy-cluster-report"></a></td>
-										<td data-bind="attr: { id: 'Coord_' + $index() }"
-											style="text-align: center"><a data-bind="text: Coord"
-											title="Genome Browser" target="LDProxy-coord"></a></td>
-										<td style="text-align: center" data-bind="text: Alleles"></td>
-										<td style="text-align: center" data-bind="text: MAF"></td>
-										<td style="text-align: center" data-bind="text: Dist"></td>
-										<td style="text-align: center" data-bind="text: Dprime"></td>
-										<td style="text-align: center" data-bind="text: R2"></td>
-										<td style="text-align: center" data-bind="text: Corr_Alleles"></td>
-										<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
-											style="text-align: center"><a
-											data-bind="text: RegulomeDB" title="RegulomeDB"
-											target="LDProxy-RegulomeDB"></a></td>
-										<td style="text-align: center" data-bind="text: Function"></td>
-									</tr>
+						</div>
+						<br/>
+						<a id="ldproxy-link"
+							href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
+							target="LDProxy-genome-browser" title="Genome Browser">View
+							plotted region in UCSC Genome Browser</a> <br> <br>
+						<div id="ldproxy-table-container center-align">
+							<div class="table-responsive">
+								<div>
+									<h3>Top 10 Proxy SNPs</h3>
+								</div>
+								<table class="table table-bordered">
+									<thead>
+										<!-- Header row -->
+										<tr>
+											<td>RS Number</td>
+											<td>Coord</td>
+											<td>Alleles</td>
+											<td>MAF</td>
+											<td>Distance</td>
+											<td>Dprime</td>
+											<td>R2</td>
+											<td>Correlated Alleles</td>
+											<td>RegulomeDB</td>
+											<td>Function</td>
+										</tr>
+									<tbody data-bind="foreach: top10">
+										<tr>
+											<td data-bind="attr: { id: 'RSnumber_' + $index() }"
+												style="text-align: center"><a data-bind="text: RS"
+												title="Cluster Report" target="LDProxy-cluster-report"></a>
+											</td>
+											<td data-bind="attr: { id: 'Coord_' + $index() }"
+												style="text-align: center"><a data-bind="text: Coord"
+												title="Genome Browser" target="LDProxy-coord"></a></td>
+											<td style="text-align: center" data-bind="text: Alleles"></td>
+											<td style="text-align: center" data-bind="text: MAF"></td>
+											<td style="text-align: center" data-bind="text: Dist"></td>
+											<td style="text-align: center" data-bind="text: Dprime"></td>
+											<td style="text-align: center" data-bind="text: R2"></td>
+											<td style="text-align: center" data-bind="text: Corr_Alleles"></td>
+											<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
+												style="text-align: center"><a
+												data-bind="text: RegulomeDB" title="RegulomeDB"
+												target="LDProxy-RegulomeDB"></a></td>
+											<td style="text-align: center" data-bind="text: Function"></td>
+										</tr>
 
-								</tbody>
-							</table>
-							<div class="row proxy-table-title-row">
-								<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
-										all proxy SNPs</span>
-								</a>
+									</tbody>
+								</table>
+								<div>
+									<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
+											all proxy SNPs</span>
+									</a>
+								</div>
 							</div>
 						</div>
 					</div>
