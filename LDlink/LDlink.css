@@ -203,6 +203,11 @@ table thead td {
 .font-weight-bold {
   font-weight:bold;
 }
+
+img.logo {
+	max-height:50px;
+}
+
 img.proxy-legend {
   max-width:85%;
   display:block;
@@ -213,6 +218,10 @@ img.proxy-legend {
 #ldproxy-link {
   display:block;
   text-align: center;
+}
+
+.readonly-input-text {
+  width:225px;	
 }
 
 .btn-ldlink-multiselect {

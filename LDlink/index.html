@@ -63,8 +63,7 @@
 	<div class="container theme-showcase" role="main">
 		<div id="banners">
 			<div id="left">
-				<img src="LDlink_logo.png" alt="Logo for the LDlink tool"
-					height="60">
+				<img src="LDlink_logo.png" alt="Logo for the LDlink tool" class="logo">
 			</div>
 
 			<div id="right">
@@ -73,10 +72,10 @@
 				<!-- DCEG-BB-HREB.png -->
 				<img src="../common/images/DCEG-LTG_banner.png"
 					alt="Banner for NCI Division of Cancer Epidemiology &amp; Genetics, Laboratory of Translational Genomics"
-					height="60">
+					class="logo">
 			</div>
 		</div>
-		<br>
+		<br><br>
 		<!-- Main Menu Tabs -->
 
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
@@ -139,14 +138,10 @@
 
 			<!-- LDhap -->
 			<div class="tab-pane fade" id="ldhap-tab">
-				<!-- LDmatrix INPUTS-->
-
-				<div class="row" style="padding-top: 10px;">
-					<div class="col-sm-12">
-
+				<!-- LDhap INPUTS-->
+				<div class="container-fluid">
+					<div class="row" style="padding-top: 10px;">
 						<!-- LDHap FORM -->
-
-
 						<form id="ldhapForm" class="ldlinkForm">
 
 							<div class="form-group">
@@ -156,11 +151,12 @@
 										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
 							</div>
-							<div class="col-sm-1">or</div>
-							<div class="col-sm-3">
+							<div class="col-sm-4">
 								<div class="input-group">
 									<input type="text" readonly
-										placeholder="Upload file with RS numbers"><span class="btn btn-default btn-file">Browse<input
+										placeholder="OR upload input file with RS numbers"
+										class="readonly-input-text"><span
+										class="btn btn-default btn-file">Browse<input
 										type="file" id="ldhap-file">
 									</span>
 								</div>
@@ -175,38 +171,39 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-1">
+								<div class="col-sm-2">
 									<input type="submit" id="ldhap" value="Calculate"
 										class="btn btn-default calculate" />
-									 <!--
+									<!--
 											<button id="ldhap" type="submit" class="btn btn-default calculate">
 													Calculate
 											</button>
 										 -->
-								    <!-- 
+									<!-- 
 									<button id="ldhap" class="btn btn-default ladda-button" data-style="expand-right">Submit</button>
 								    -->
 								</div>
 							</div>
 						</form>
+
 					</div>
-				</div>
-				<hr>
-				<!-- Message ERROR -->
-				<div class="row">
-					<div class="col-sm-7 col-sm-offset-2" id="ldhap-message">
-						<div class="panel panel-danger">
-							<div class="panel-heading">Error</div>
-							<div class="panel-body" id="ldhap-message-content"></div>
+					<hr>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldhap-message">
+							<div class="panel panel-danger">
+								<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldhap-message-content"></div>
+							</div>
 						</div>
 					</div>
-				</div>
-				<!-- Message WARNING -->
-				<div class="row">
-					<div class="col-sm-7 col-sm-offset-2" id="ldhap-message-warning">
-						<div class="panel panel-warning">
-							<div class="panel-heading">Warning</div>
-							<div class="panel-body" id="ldhap-message-warning-content">
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldhap-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldhap-message-warning-content">
+								</div>
 							</div>
 						</div>
 					</div>
@@ -277,13 +274,9 @@
 			<!-- LDmatrix -->
 			<div class="tab-pane fade" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
-
-				<div class="row" style="padding-top: 10px;">
-					<div class="col-sm-12">
-
+				<div class="container-fluid">
+					<div class="row" style="padding-top: 10px;">
 						<!-- LDMATRIX FORM -->
-
-
 						<form id="ldmatrixForm" class="ldlinkForm">
 
 							<div class="form-group">
@@ -292,11 +285,11 @@
 										placeholder="RS Numbers" class="form-control"
 										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
-								<div class="col-sm-1">or</div>
-								<div class="col-sm-3">
+								<div class="col-sm-4">
 									<div class="input-group">
 										<input type="text" readonly
-											placeholder="Upload file with RS numbers"><span class="btn btn-default btn-file">Browse<input
+											placeholder="OR upload file with RS numbers" class="readonly-input-text"><span
+											class="btn btn-default btn-file">Browse<input
 											type="file" id="ldmatrix-file">
 										</span>
 									</div>
@@ -311,7 +304,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-1">
+								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
 										class="btn btn-default calculate" />
 									<!-- 
@@ -323,54 +316,25 @@
 							</div>
 
 						</form>
-
-
-						<!-- LDMATRIX FORM -->
-						<!--
-				<form id="ldmatrix-form" class="form-inline" role="form">
-					<div class="row" style="padding-top: 10px;">
-						<div class="col-md-3 col-md-offset-1">
-							<div class="input-group" >
-								<span class="input-group-btn"> <span
-									class="btn btn-default btn-file">Browse <input
-										type="file" id="ldmatrix-file">
-								</span>
-								</span> <input type="text" class="form-control" readonly style="width:210px;">
+					</div>
+					<hr>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldmatrix-message">
+							<div class="panel panel-danger">
+								<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldmatrix-message-content"></div>
 							</div>
-							<br>or <br>
-							<textarea id="ldmatrix-file-snp-numbers" placeholder="RS Numbers"
-								cols="12" rows="8" class="form-control"
-								title="Enter list of RS numbers (one per line)"></textarea>
-						</div>
-						<div class="col-md-2">
-							<select id="ldmatrix-population-codes" multiple="multiple"></select>
-						</div>
-						<div class="col-md-2">
-							<button type="submit" class="btn btn-default calculate"
-								id="ldmatrix">Calculate</button>
 						</div>
 					</div>
-				</form>
--->
-
-					</div>
-				</div>
-				<hr>
-				<!-- Message ERROR -->
-				<div class="row">
-					<div class="col-sm-7 col-sm-offset-2" id="ldmatrix-message">
-						<div class="panel panel-danger">
-							<div class="panel-heading">Error</div>
-							<div class="panel-body" id="ldmatrix-message-content"></div>
-						</div>
-					</div>
-				</div>
-				<!-- Message WARNING -->
-				<div class="row">
-					<div class="col-sm-7 col-sm-offset-2" id="ldmatrix-message-warning">
-						<div class="panel panel-warning">
-							<div class="panel-heading">Warning</div>
-							<div class="panel-body" id="ldmatrix-message-warning-content">
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2"
+							id="ldmatrix-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldmatrix-message-warning-content">
+								</div>
 							</div>
 						</div>
 					</div>
