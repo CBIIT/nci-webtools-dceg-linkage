@@ -357,6 +357,7 @@ $(document).ready(
 				$("#" + id + "-results-container").hide();
 				$('#' + id + '-message').hide();
 				$('#' + id + '-message-warning').hide();
+				$('#'+ id+ "-loading").hide();
 			});
 
 			/*
@@ -484,6 +485,8 @@ function updateData(id) {
 	// Get data...
 	console.log("updateData(" + id + ")");
 
+	//show loading icon
+	$('#'+id+"-loading").show();
 	switch (id) {
 	case 'ldpair':
 		updateLDpair();
@@ -561,7 +564,8 @@ function updateLDhap() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-
+	
+	hideLoadingIcon(ajaxRequest, id);
 }
 
 function formatLDhapData(data) {
@@ -671,7 +675,8 @@ function updateLDmatrix() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-
+	
+	hideLoadingIcon(ajaxRequest, id);
 }
 
 function addLDMatrixHyperLinks(request) {
@@ -772,16 +777,16 @@ function updateLDproxy() {
 	};
 
 	console.dir(ldproxyInputs);
-
+/*
 	$('#ldproxy-results-link').attr('href',
 			'tmp/proxy' + ldproxyInputs.reference + '.txt');
 	$('#ldproxy-progress-bar').attr('aria-valuenow', "0");
-
+*/
 	//
 	// Determine caclulation time.
 	// Wait 1.5 seconds for pops file to be created.
 	//
-
+/*
 	setTimeout(function() {
 		// Determine seconds...
 		var url = 'tmp/pops_' + ldproxyInputs.reference + '.txt';
@@ -832,7 +837,7 @@ function updateLDproxy() {
 		});
 
 	}, 1500);
-
+*/
 	var url = restServerUrl + "/ldproxy";
 	var ajaxRequest = $.ajax({
 		type : "GET",
@@ -870,6 +875,14 @@ function updateLDproxy() {
 		$btn.button('reset');
 	});
 
+	hideLoadingIcon(ajaxRequest, id);
+}
+
+function hideLoadingIcon(ajaxRequest, id) {
+	ajaxRequest.done(function(msg) {
+		//hide loading icon
+		$('#'+id+"-loading").hide();
+	});
 }
 
 function getLDProxyResults(jsonfile) {
@@ -913,7 +926,7 @@ function getLDProxyResults(jsonfile) {
 
 function getLDmatrixResults(jsonfile, request) {
 	var id = "ldmatrix";
-	var url = "tmp/"+jsonfile;
+	var url = "tmp/matrix"+jsonfile;
 	
 	var ajaxRequest = $.ajax({
 		type : "GET",
@@ -996,6 +1009,7 @@ function updateLDpair() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
+	hideLoadingIcon(ajaxRequest, id);
 }
 
 function displayError(id, data) {

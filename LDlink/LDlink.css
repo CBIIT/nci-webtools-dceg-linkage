@@ -208,6 +208,13 @@ img.logo {
 	max-height:50px;
 }
 
+img.loading {
+	max-height:100px;
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+}
+
 img.proxy-legend {
   max-width:85%;
   display:block;
