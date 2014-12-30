@@ -209,7 +209,8 @@ img.logo {
 }
 
 img.loading {
-	max-height:100px;
+	height:50px;
+	max-height:10%;
 	display: block;
 	margin-left: auto;
     margin-right: auto;

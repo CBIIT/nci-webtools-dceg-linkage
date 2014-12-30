@@ -127,7 +127,7 @@
 				<p>
 					If you find our tool useful, please kindly cite our paper (Machiela
 					et al. Journal 2015). Questions or comments? Contact us via <a
-						title="Support">email</a>.
+					href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
 				</p>
 
 				<p>LDlink was developed by Mitchell Machiela in collaboration
@@ -154,7 +154,7 @@
 							<div class="col-sm-4">
 								<div class="input-group">
 									<input type="text" readonly
-										placeholder="OR upload input file with RS numbers"
+										placeholder="Upload input file with RS numbers"
 										class="readonly-input-text"><span
 										class="btn btn-default btn-file">Browse<input
 										type="file" id="ldhap-file">
@@ -266,7 +266,7 @@
 									SNP File</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp; <span> <a
 								target="LDHap-haplotypes" id="ldhap-haplotypes" href="">
-									Haplotype File</a>
+									Download Haplotype File</a>
 							</span>
 						</div>
 
@@ -292,7 +292,7 @@
 								<div class="col-sm-4">
 									<div class="input-group">
 										<input type="text" readonly
-											placeholder="OR upload file with RS numbers" class="readonly-input-text"><span
+											placeholder="Upload input file with RS numbers" class="readonly-input-text"><span
 											class="btn btn-default btn-file">Browse<input
 											type="file" id="ldmatrix-file">
 										</span>
@@ -359,7 +359,7 @@
 								<br /> <span><a id="ldmatrix-DPrime"
 									target="LDMatrix-DPrime">Download D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
 								<span><a id="ldmatrix-R2" target="LDMatrix-R2">Download
-										R2 File</a></span>
+										R<sup>2</sup> File</a></span>
 							</div>
 						</div>
 					</div>
@@ -547,7 +547,7 @@
 										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span
 										data-bind="text: haplotypes.hap4.frequency"></span>) <br></td>
 									<td class="spacer"></td>
-									<td class="cell-right">D':<br>R2:<br>Chi-sq:<br>p-value:
+									<td class="cell-right">D':<br>R<sup>2</sup>:<br>Chi-sq:<br>p-value:
 									</td>
 									<td><span data-bind="text: statistics.d_prime"></span><br>
 										<span data-bind="text: statistics.r2"></span><br> <span
@@ -619,7 +619,8 @@
 				</div>
 				<hr>
 				<div id="ldproxy-loading">
-					<img src="/common/images/loading.gif" alt="loading icon" class="loading">
+					<img src="/common/images/loading.gif" alt="loading icon"
+						class="loading">
 				</div>
 				<!-- Message ERROR -->
 				<div class="row">
@@ -645,6 +646,7 @@
 
 				<div class="jumbotron">
 					<!-- LDPROXY PROGRESS BAR -->
+					<!-- 
 					<div id="ldproxy-progress-container"
 						style="width: 525px; display: none;">
 						<div id="ldproxy-progress" class="progress">
@@ -653,14 +655,13 @@
 								aria-valuemax="100" style="width: 0%;">0%</div>
 						</div>
 					</div>
-
+ -->
 					<!-- LDProxy CONTAINER -->
 
 					<div class="container-fluid" id="ldproxy-results-container">
 						<div class="row">
 							<div class="col-sm-10 col-sm-offset-1">
 								<div id="ldproxy-bokeh-graph"></div>
-
 								<br />
 								<div>
 									<img src="LDproxy_legend.png" title="LD Proxy Legend"
@@ -668,8 +669,7 @@
 								</div>
 							</div>
 						</div>
-						<br/>
-						<a id="ldproxy-link"
+						<br /> <a id="ldproxy-link"
 							href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
 							target="LDProxy-genome-browser" title="Genome Browser">View
 							plotted region in UCSC Genome Browser</a> <br> <br>
@@ -688,7 +688,7 @@
 											<td>MAF</td>
 											<td>Distance</td>
 											<td>Dprime</td>
-											<td>R2</td>
+											<td>R<sup>2</sup></td>
 											<td>Correlated Alleles</td>
 											<td>RegulomeDB</td>
 											<td>Function</td>
@@ -697,8 +697,7 @@
 										<tr>
 											<td data-bind="attr: { id: 'RSnumber_' + $index() }"
 												style="text-align: center"><a data-bind="text: RS"
-												title="Cluster Report" target="LDProxy-cluster-report"></a>
-											</td>
+												title="Cluster Report" target="LDProxy-cluster-report"></a></td>
 											<td data-bind="attr: { id: 'Coord_' + $index() }"
 												style="text-align: center"><a data-bind="text: Coord"
 												title="Genome Browser" target="LDProxy-coord"></a></td>
@@ -728,7 +727,8 @@
 				</div>
 			</div>
 			<!-- Help -->
-			<div class="tab-pane fade" id="help-tab">Under Construction</div>
+			<div class="tab-pane fade" id="help-tab">
+			</div>
 		</div>
 		<div id="portal-footer">
 			<div class="footerLinks">

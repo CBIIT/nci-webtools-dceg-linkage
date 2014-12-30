@@ -341,7 +341,8 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(
 		function() {
-
+			loadHelp();
+			
 			var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy" ];
 
 			// Apply Bindings
@@ -460,6 +461,10 @@ function populateTextArea(event, numFiles, label) {
 		alert('FileReader not supported');
 		return;
 	}
+}
+
+function loadHelp() {
+	$('#help-tab').load('help.html');
 }
 
 function calculate(e) {
@@ -777,11 +782,11 @@ function updateLDproxy() {
 	};
 
 	console.dir(ldproxyInputs);
-/*
+
 	$('#ldproxy-results-link').attr('href',
 			'tmp/proxy' + ldproxyInputs.reference + '.txt');
-	$('#ldproxy-progress-bar').attr('aria-valuenow', "0");
-*/
+	//$('#ldproxy-progress-bar').attr('aria-valuenow', "0");
+
 	//
 	// Determine caclulation time.
 	// Wait 1.5 seconds for pops file to be created.
