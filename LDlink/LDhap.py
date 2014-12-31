@@ -84,7 +84,7 @@ def calculate_hap(snplst,pop,request):
 						warn.append(snp_i[0])
 	
 	if warn!=[]:
-		output["warning"]="Not all input SNPs were found in dbSNP 141 ("+",".join(warn)+")"
+		output["warning"]="The following RS numbers were not found in dbSNP 141: "+",".join(warn)
 	
 	if len(rs_nums)==0:
 		output["error"]="Input SNP list does not contain any vaild RS numbers that are in dbSNP 141."
