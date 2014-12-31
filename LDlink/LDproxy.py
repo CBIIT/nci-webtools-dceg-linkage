@@ -334,7 +334,8 @@ def calculate_proxy(snp,pop,request):
 		 text_baseline="middle", text_align="center", angle=0)
 
 	xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
-	yaxis().axis_label="Correlation (R2)"
+	sup_2=u"\u00B2"
+	yaxis().axis_label="R"+sup_2
 
 	hover=curplot().select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
