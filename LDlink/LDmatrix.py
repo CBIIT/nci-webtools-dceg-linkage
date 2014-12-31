@@ -247,6 +247,10 @@ def calculate_matrix(snplst,pop,request):
 						match=sorted(hap)[0][0]+"-"+sorted(hap)[1][1]+","+sorted(hap)[2][0]+"-"+sorted(hap)[0][1]
 				else:
 					match="  -  ,  -  "
+			else:
+				D_prime="NA"
+				r2="NA"
+				match="  -  ,  -  "
 
 			snp1=rsnum_lst[i]
 			snp2=rsnum_lst[j]
@@ -256,6 +260,8 @@ def calculate_matrix(snplst,pop,request):
 			allele2=allele_lst[j]
 			corr=match.split(",")[0].split("-")[1]+"-"+match.split(",")[0].split("-")[0]+","+match.split(",")[1].split("-")[1]+"-"+match.split(",")[1].split("-")[0]
 			corr_f=match
+
+			
 			ld_matrix[i][j]=[snp1,snp2,allele1,allele2,corr,pos1,pos2,D_prime,r2]
 			ld_matrix[j][i]=[snp2,snp1,allele2,allele1,corr_f,pos2,pos1,D_prime,r2]
 
@@ -289,6 +295,8 @@ def calculate_matrix(snplst,pop,request):
 	ypos=[]
 	D=[]
 	R=[]
+	box_color=[]
+	box_trans=[]
 
 	for i in range(len(out)):
 		snp1,snp2,allele1,allele2,corr,pos1,pos2,D_prime,r2=out[i]
@@ -299,8 +307,16 @@ def calculate_matrix(snplst,pop,request):
 		corA.append(corr)
 		xpos.append(pos1)
 		ypos.append(pos2)
-		D.append(D_prime)
-		R.append(r2)
+		if r2!="NA":
+			D.append(str(round(float(D_prime),4)))
+			R.append(str(round(float(r2),4)))
+			box_color.append("red")
+			box_trans.append(r2)
+		else:
+			D.append("NA")
+			R.append("NA")
+			box_color.append("blue")
+			box_trans.append(0.1)
 
 	# Import plotting modules
 	import bokeh.embed as embed
@@ -320,14 +336,16 @@ def calculate_matrix(snplst,pop,request):
 			R2=R,
 			Dp=D,
 			corA=corA,
+			box_color=box_color,
+			box_trans=box_trans,
 		)
 	)
-
+	
 	figure(outline_line_color="white")
 	rect('xname', 'yname', 0.95, 0.95, source=source,
 		 x_axis_location="above",
 		 x_range=rsnum_lst, y_range=list(reversed(rsnum_lst)),
-		 color="red", alpha="R2", line_color=None,
+		 color="box_color", alpha="box_trans", line_color=None,
 		 tools="hover,previewsave", title=" ",
 		 plot_width=800, plot_height=800)
 
@@ -349,7 +367,6 @@ def calculate_matrix(snplst,pop,request):
 	])
 
 	out_script,out_div=embed.components(curplot(), CDN)
-
 
 	# Print run time
 	duration=time.time()-start_time
