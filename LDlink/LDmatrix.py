@@ -92,7 +92,7 @@ def calculate_matrix(snplst,pop,request):
 						warn.append(snp_i[0])
 
 	if warn!=[]:
-		output["warning"]="The following SNPs were not found in dbSNP 141: "+",".join(warn)
+		output["warning"]="The following RS numbers were not found in dbSNP 141: "+",".join(warn)
 	
 	if len(rs_nums)==0:
 		output["error"]="Input SNP list does not contain any vaild RS numbers that are in dbSNP 141."
@@ -388,7 +388,7 @@ def main():
 
 
 	# Print output
-	with open(tmp_dir+request+".json") as f:
+	with open(tmp_dir+"matrix"+request+".json") as f:
 		json_dict=json.load(f)
 
 	try:
