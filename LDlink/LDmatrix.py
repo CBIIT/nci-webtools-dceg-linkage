@@ -26,7 +26,7 @@ def calculate_matrix(snplst,pop,request):
 	# Open SNP list file
 	snps=open(snplst).readlines()
 	if len(snps)>100:
-		output["error"]="Maximum SNP list is 100 SNPs. Your list contains "+str(len(snps))+" entries."
+		output["error"]="Maximum SNP list is 100 RS numbers. Your list contains "+str(len(snps))+" entries."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -86,8 +86,6 @@ def calculate_matrix(snplst,pop,request):
 						snp_pos.append(snp_coord[3])
 						temp=[snp_coord[1],snp_coord[2],snp_coord[3]]
 						snp_coords.append(temp)
-						temp2=snp_coord[2]+":"+snp_coord[3]+"-"+snp_coord[3]
-						tabix_coords=tabix_coords+" "+temp2
 					else:
 						warn.append(snp_i[0])
 
@@ -113,7 +111,14 @@ def calculate_matrix(snplst,pop,request):
 			return("","")
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			raise
-
+	
+	
+	# Sort coordinates and make tabix formatted coordinates
+	snp_pos_int=[int(i) for i in snp_pos]
+	snp_pos_int.sort()
+	snp_coord_str=[snp_coords[0][1]+":"+str(i)+"-"+str(i) for i in snp_pos_int]
+	tabix_coords=" "+" ".join(snp_coord_str)
+	
 
 	# Extract 1000 Genomes phased genotypes
 	vcf_file=vcf_dir+snp_coords[0][1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
