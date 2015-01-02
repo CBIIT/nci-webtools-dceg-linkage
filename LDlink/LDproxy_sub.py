@@ -7,8 +7,6 @@ stop=sys.argv[4]
 request=sys.argv[5]
 process=sys.argv[6]
 
-print "Process "+str(int(process)+1)+" initialized."
-
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
@@ -31,10 +29,8 @@ pop_ids=list(set(ids))
 
 # Get VCF region
 vcf_file=vcf_dir+chr+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp="tabix -fh {0} {1}:{2}-{3} > {4}".format(vcf_file, chr, start, stop, tmp_dir+"snps_"+request+"_"+process+".vcf")
-subprocess.call(tabix_snp, shell=True)
-grep_remove_dups="grep -v -e END "+tmp_dir+"snps_"+request+"_"+process+".vcf > "+tmp_dir+"snps_no_dups_"+request+"_"+process+".vcf"
-subprocess.call(grep_remove_dups, shell=True)
+tabix_snp="tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(vcf_file, chr, start, stop)
+proc=subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 
 # Define function to calculate LD metrics
@@ -116,7 +112,7 @@ al="("+geno[3]+"/"+geno[4]+")"
 
 
 # Import Window around SNP
-vcf=csv.reader(open(tmp_dir+"snps_no_dups_"+request+"_"+process+".vcf"),dialect="excel-tab")
+vcf=csv.reader(proc.stdout.readlines(), dialect="excel-tab")
 
 # Loop past file information and find header
 head=next(vcf,None)
@@ -173,9 +169,5 @@ for geno_n in vcf:
 			out.append(temp)
 			
 
-output=open(tmp_dir+request+"_"+process+".out","w")
 for i in range(len(out)):
-	print >> output, "\t".join(str(j) for j in out[i])
-
-
-output.close()
+	print "\t".join(str(j) for j in out[i])
