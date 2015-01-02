@@ -41,7 +41,10 @@ def calculate_matrix(snplst,pop,request):
 			pop_dirs.append(pop_dir+pop_i+".txt")
 		else:
 			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			return(json.dumps(output, sort_keys=True, indent=2))
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
 			raise
 	
 	get_pops="cat "+ " ".join(pop_dirs)
