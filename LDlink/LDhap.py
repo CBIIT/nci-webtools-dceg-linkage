@@ -2,8 +2,7 @@
 
 # Create LDhap function
 def calculate_hap(snplst,pop,request):
-	import json,math,operator,os,sqlite3,subprocess,sys,time
-	start_time=time.time()
+	import json,math,operator,os,sqlite3,subprocess,sys
 	
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
@@ -48,14 +47,11 @@ def calculate_hap(snplst,pop,request):
 			return(json.dumps(output, sort_keys=True, indent=2))
 			raise
 	
-	get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
-	subprocess.call(get_pops, shell=True)
+	get_pops="cat "+ " ".join(pop_dirs)
+	proc=subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
+	pop_list=proc.stdout.readlines()
 	
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	ids=[]
-	for i in range(len(pop_list)):
-		ids.append(pop_list[i].strip())
-	
+	ids=[i.strip() for i in pop_list]
 	pop_ids=list(set(ids))
 	
 	
@@ -107,14 +103,12 @@ def calculate_hap(snplst,pop,request):
 	
 	# Extract 1000 Genomes phased genotypes
 	vcf_file=vcf_dir+snp_coords[0][1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, tmp_dir+"snps_"+request+".vcf")
-	subprocess.call(tabix_snps, shell=True)
-	grep_remove_dups="grep -v -e END "+tmp_dir+"snps_"+request+".vcf > "+tmp_dir+"snps_no_dups_"+request+".vcf"
-	subprocess.call(grep_remove_dups, shell=True)
+	tabix_snps="tabix -fh {0}{1} | grep -v -e END".format(vcf_file, tabix_coords)
+	proc=subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 	
 	
 	# Import SNP VCF files
-	vcf=open(tmp_dir+"snps_no_dups_"+request+".vcf").readlines()
+	vcf=proc.stdout.readlines()
 	h=0
 	while vcf[h][0:2]=="##":
 		h+=1
@@ -247,13 +241,7 @@ def calculate_hap(snplst,pop,request):
 		temp_k=[hap_k,count_k,freq_k]
 		print >> hap_out, "\t".join(temp_k)
 	hap_out.close()
-	
-	
-	duration=time.time() - start_time
-	
-	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-	subprocess.call("rm "+tmp_dir+"*_"+request+".vcf", shell=True)
-	
+
 	
 	# Return JSON output
 	return(json.dumps(output, sort_keys=True, indent=2))
