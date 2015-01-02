@@ -2,8 +2,7 @@
 
 # Create LDmatrix function
 def calculate_matrix(snplst,pop,request):
-	import json,math,operator,os,sqlite3,subprocess,sys,time
-	start_time=time.time()
+	import json,math,operator,os,sqlite3,subprocess,sys
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
@@ -34,13 +33,6 @@ def calculate_matrix(snplst,pop,request):
 		raise
 
 
-	# Find coordinates (GRCh37/hg19) for SNP RS number
-	# Connect to snp141 database
-	conn=sqlite3.connect(snp_dir)
-	conn.text_factory=str
-	cur=conn.cursor()
-
-
 	# Select desired ancestral populations
 	pops=pop.split("+")
 	pop_dirs=[]
@@ -49,22 +41,21 @@ def calculate_matrix(snplst,pop,request):
 			pop_dirs.append(pop_dir+pop_i+".txt")
 		else:
 			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return(json.dumps(output, sort_keys=True, indent=2))
 			raise
-
-	get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
-	subprocess.call(get_pops, shell=True)
-
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	ids=[]
-	for i in range(len(pop_list)):
-		ids.append(pop_list[i].strip())
-
+	
+	get_pops="cat "+ " ".join(pop_dirs)
+	proc=subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
+	pop_list=proc.stdout.readlines()
+	
+	ids=[i.strip() for i in pop_list]
 	pop_ids=list(set(ids))
 
+
+	# Connect to snp141 database
+	conn=sqlite3.connect(snp_dir)
+	conn.text_factory=str
+	cur=conn.cursor()
 
 
 	# Find RS numbers in snp141 database
@@ -122,14 +113,12 @@ def calculate_matrix(snplst,pop,request):
 
 	# Extract 1000 Genomes phased genotypes
 	vcf_file=vcf_dir+snp_coords[0][1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snps="tabix -fh {0}{1} > {2}".format(vcf_file, tabix_coords, tmp_dir+"snps_"+request+".vcf")
-	subprocess.call(tabix_snps, shell=True)
-	grep_remove_dups="grep -v -e END "+tmp_dir+"snps_"+request+".vcf > "+tmp_dir+"snps_no_dups_"+request+".vcf"
-	subprocess.call(grep_remove_dups, shell=True)
-
-
+	tabix_snps="tabix -fh {0}{1} | grep -v -e END".format(vcf_file, tabix_coords)
+	proc=subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+	
+	
 	# Import SNP VCF files
-	vcf=open(tmp_dir+"snps_no_dups_"+request+".vcf").readlines()
+	vcf=proc.stdout.readlines()
 	h=0
 	while vcf[h][0:2]=="##":
 		h+=1
@@ -372,18 +361,8 @@ def calculate_matrix(snplst,pop,request):
 	])
 
 	out_script,out_div=embed.components(curplot(), CDN)
-
-	# Print run time
-	duration=time.time()-start_time
-	print ""
-	print "Run time: "+str(duration)+" seconds\n"
-
-
-	# Remove temporary files
-	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-	subprocess.call("rm "+tmp_dir+"*_"+request+".vcf", shell=True)
-
-
+	
+	
 	# Return output
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
@@ -417,7 +396,7 @@ def main():
 		json_dict["error"]
 
 	except KeyError:
-		print "Output saved as: d_prime_"+request+".txt and r2_"+request+".txt"
+		print "\nOutput saved as: d_prime_"+request+".txt and r2_"+request+".txt"
 
 		try:
 			json_dict["warning"]
