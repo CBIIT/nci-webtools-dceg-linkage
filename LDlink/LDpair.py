@@ -31,7 +31,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id1,))
 	snp1_coord=cur.fetchone()
 	if snp1_coord==None:
-		output["error"]=snp1+" is not a valid RS number for SNP1. Ensure the RS number is correct and the SNP is bi-allelic, autosomal, and unambiguously mapping."
+		output["error"]=snp1+" is not a valid RS number for SNP1."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
@@ -40,7 +40,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id2,))
 	snp2_coord=cur.fetchone()
 	if snp2_coord==None:
-		output["error"]=snp2+" is not a valid RS number for SNP2. Ensure the RS number is correct and the SNP is bi-allelic, autosomal, and unambiguously mapping."
+		output["error"]=snp2+" is not a valid RS number for SNP2."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
