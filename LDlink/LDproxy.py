@@ -3,6 +3,7 @@
 # Create LDproxy function
 def calculate_proxy(snp,pop,request):
 	import csv,json,operator,os,sqlite3,subprocess,sys,time
+	from multiprocessing.dummy import Pool
 	start_time=time.time()
 
 	# Set data directories
@@ -70,10 +71,8 @@ def calculate_proxy(snp,pop,request):
 
 	# Extract query SNP phased genotypes
 	vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file, snp_coord[2], snp_coord[3], tmp_dir+"snp_"+request+".vcf")
+	tabix_snp="tabix -fh {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, snp_coord[2], snp_coord[3], tmp_dir+"snp_no_dups_"+request+".vcf")
 	subprocess.call(tabix_snp, shell=True)
-	grep_remove_dups="grep -v -e END "+tmp_dir+"snp_"+request+".vcf > "+tmp_dir+"snp_no_dups_"+request+".vcf"
-	subprocess.call(grep_remove_dups, shell=True)
 
 
 	# Check SNP is not monoallelic in selected 1000G population
@@ -130,10 +129,14 @@ def calculate_proxy(snp,pop,request):
 				command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
 			commands.append(command)
 
-		processes=[subprocess.Popen(command, shell=True) for command in commands]
-		for p in processes:
-			p.wait()
+		processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+		
+		# collect output in parallel
+		def get_output(process):
+			return process.communicate()[0].splitlines()
 
+		out_raw=Pool(len(processes)).map(get_output, processes)
+		
 	else:
 		output["error"]=snp+" is not a biallelic SNP."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -146,17 +149,14 @@ def calculate_proxy(snp,pop,request):
 
 
 	# Aggregate output
-	get_out="cat "+tmp_dir+request+"_*.out > "+tmp_dir+request+"_all.out"
-	subprocess.call(get_out, shell=True)
-	out_raw=open(tmp_dir+request+"_all.out").readlines()
-
 	out_prox=[]
 	for i in range(len(out_raw)):
-		col=out_raw[i].strip().split("\t")
-		col[6]=int(col[6])
-		col[8]=float(col[8])
-		col.append(abs(int(col[6])))
-		out_prox.append(col)
+		for j in range(len(out_raw[i])):
+			col=out_raw[i][j].strip().split("\t")
+			col[6]=int(col[6])
+			col[8]=float(col[8])
+			col.append(abs(int(col[6])))
+			out_prox.append(col)
 
 
 	# Sort output
@@ -357,7 +357,7 @@ def calculate_proxy(snp,pop,request):
 	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
 	print "\nNumber of Individuals: "+str(len(pop_list))
 
-	print "SNPs in Region: "+str(len(out_raw))
+	print "SNPs in Region: "+str(len(out_prox))
 
 	duration=time.time() - start_time
 	print "Run time: "+str(duration)+" seconds\n"
@@ -366,7 +366,6 @@ def calculate_proxy(snp,pop,request):
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	subprocess.call("rm "+tmp_dir+request+"*.out", shell=True)
 
 
 	# Return plot output
