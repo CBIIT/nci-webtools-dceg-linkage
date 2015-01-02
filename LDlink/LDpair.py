@@ -20,7 +20,6 @@ def calculate_pair(snp1,snp2,pop,request):
 	output={}
 
 
-	# Find coordinates (GRCh37/hg19) for SNP RS numbers
 	# Connect to snp141 database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
@@ -62,42 +61,33 @@ def calculate_pair(snp1,snp2,pop,request):
 			return(json.dumps(output, sort_keys=True, indent=2))
 			raise
 
-	get_pops="cat "+ " ".join(pop_dirs) +" > "+tmp_dir+"pops_"+request+".txt"
-	subprocess.call(get_pops, shell=True)
-
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	ids=[]
-	for i in range(len(pop_list)):
-		ids.append(pop_list[i].strip())
-
+	get_pops="cat "+ " ".join(pop_dirs)
+	proc=subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
+	pop_list=proc.stdout.readlines()
+	
+	ids=[i.strip() for i in pop_list]
 	pop_ids=list(set(ids))
 
 
 	# Extract 1000 Genomes phased genotypes
 	# SNP1
 	vcf_file1=vcf_dir+snp1_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp1="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file1, snp1_coord[2], snp1_coord[3], tmp_dir+"snp1_"+request+".vcf")
-	subprocess.call(tabix_snp1, shell=True)
-	grep_remove_dups="grep -v -e END "+tmp_dir+"snp1_"+request+".vcf > "+tmp_dir+"snp1_no_dups_"+request+".vcf"
-	subprocess.call(grep_remove_dups, shell=True)
+	tabix_snp1="tabix -fh {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file1, snp1_coord[2], snp1_coord[3])
+	proc1=subprocess.Popen(tabix_snp1, shell=True, stdout=subprocess.PIPE)
 
 	# SNP2
 	vcf_file2=vcf_dir+snp2_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp2="tabix -fh {0} {1}:{2}-{2} > {3}".format(vcf_file2, snp2_coord[2], snp2_coord[3], tmp_dir+"snp2_"+request+".vcf")
-	subprocess.call(tabix_snp2, shell=True)
-	grep_remove_dups="grep -v -e END "+tmp_dir+"snp2_"+request+".vcf > "+tmp_dir+"snp2_no_dups_"+request+".vcf"
-	subprocess.call(grep_remove_dups, shell=True)
+	tabix_snp2="tabix -fh {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file2, snp2_coord[2], snp2_coord[3])
+	proc2=subprocess.Popen(tabix_snp2, shell=True, stdout=subprocess.PIPE)
 
 	# Import SNP VCF files
-	vcf1=open(tmp_dir+"snp1_no_dups_"+request+".vcf").readlines()
+	vcf1=proc1.stdout.readlines()
 	head1=vcf1[len(vcf1)-2].strip().split()
 	geno1=vcf1[len(vcf1)-1].strip().split()
 
 	if geno1[0]=="#CHROM":
 		output["error"]=snp1+" is not in 1000G reference panel."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
 
 	if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
@@ -105,19 +95,15 @@ def calculate_pair(snp1,snp2,pop,request):
 	else:
 		output["error"]=snp1+" is not a biallelic SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
 
-	vcf2=open(tmp_dir+"snp2_no_dups_"+request+".vcf").readlines()
+	vcf2=proc2.stdout.readlines()
 	head2=vcf2[len(vcf2)-2].strip().split()
 	geno2=vcf2[len(vcf2)-1].strip().split()
 
 	if geno2[0]=="#CHROM":
 		output["error"]=snp2+" is not in 1000G reference panel."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
 
 	if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
@@ -125,16 +111,12 @@ def calculate_pair(snp1,snp2,pop,request):
 	else:
 		output["error"]=snp2+" is not a biallelic SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
 
 
 	if geno1[1]!=snp1_coord[3] or geno2[1]!=snp2_coord[3]:
 		output["error"]="VCF File does not match SNP coordinates."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
 		raise
 
 	# Combine phased genotypes
@@ -328,12 +310,8 @@ def calculate_pair(snp1,snp2,pop,request):
 	output["statistics"]=statistics
 
 	output["corr_alleles"]=corr_alleles
-
-
-	# Remove temporary files
-	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-	subprocess.call("rm "+tmp_dir+"*"+request+".vcf", shell=True)
-
+	
+	
 	# Return output
 	return(json.dumps(output, sort_keys=True, indent=2))
 
