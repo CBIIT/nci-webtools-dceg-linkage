@@ -34,7 +34,7 @@ def calculate_proxy(snp,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id,))
 	snp_coord=cur.fetchone()
 	if snp_coord==None:
-		output["error"]=snp+" is not a valid RS number for query SNP. Ensure the RS number is correct and the SNP is bi-allelic, autosomal, and unambiguously mapping."
+		output["error"]=snp+" is not a valid RS number for query SNP."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
