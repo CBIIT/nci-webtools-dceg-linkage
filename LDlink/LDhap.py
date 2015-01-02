@@ -29,13 +29,6 @@ def calculate_hap(snplst,pop,request):
 		raise
 	
 	
-	# Find coordinates (GRCh37/hg19) for SNP RS number
-	# Connect to snp141 database
-	conn=sqlite3.connect(snp_dir)
-	conn.text_factory=str
-	cur=conn.cursor()
-	
-	
 	# Select desired ancestral populations
 	pops=pop.split("+")
 	pop_dirs=[]
@@ -53,6 +46,12 @@ def calculate_hap(snplst,pop,request):
 	
 	ids=[i.strip() for i in pop_list]
 	pop_ids=list(set(ids))
+	
+	
+	# Connect to snp141 database
+	conn=sqlite3.connect(snp_dir)
+	conn.text_factory=str
+	cur=conn.cursor()
 	
 	
 	# Find RS numbers in snp141 database
