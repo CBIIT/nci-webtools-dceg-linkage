@@ -103,7 +103,6 @@ def calculate_matrix(snplst,pop,request):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			raise
 	
 	
