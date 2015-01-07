@@ -40,6 +40,10 @@ def copy_output_files(reference):
 
     apache_tmp_dir = apache_root+"public_html/apps/LDlink/tmp/"
 
+    # Ensure apache tmp directory exists
+    if not os.path.exists(apache_tmp_dir):
+	os.makedirs(apache_tmp_dir)
+		
     #copy *<reference_no>.* to htodocs
     os.system("cp "+ tmp_dir+"*"+reference+".* "+apache_tmp_dir);
 
