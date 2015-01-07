@@ -1,532 +1,414 @@
-<h2>Welcome to the LDlink Documentation Page!</h2>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+</head><body>
+<h2>Welcome to LDlink Documentation!</h2>
 <p>LDlink is designed to be an intuitive and simple tool for
-	investigating patterns of linkage disequilibrium across a variety of
-	ancestral population groups. This help documentation page gives
-	detailed description of the metrics calculated by LDlink modules and
-	aids users in understanding all aspects of the required input and
-	returned output. The documentation is divided into the following
-	sections:</p>
-<p>
-	<strong>Understanding Linkage Disequilibrium</strong>
+investigating patterns of linkage disequilibrium across a variety of
+ancestral population groups. This help documentation page gives
+detailed description of the metrics calculated by LDlink modules and
+aids users in understanding all aspects of the required input and
+returned output. The documentation is divided into the following
+sections:</p>
+<p style="margin-left: 40px;"><a href="#Understanding_Linkage_Disequilibrium"><strong>Understanding
+Linkage Disequilibrium</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#linkage_equilibrium"><strong> Linkage
+Equilibrium</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#linkage_disequilibrium"><strong> Linkage
+Disequilibrium</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#haplotype"><strong>Haplotype</strong></a></p>
+<p style="margin-left: 40px;"> <a href="#Data_Sources"><strong>Data
+Sources</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#dbSNP"><strong>dbSNP</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#1000_Genomes_Project"><strong>1000 Genomes
+Project</strong></a></p>
+<p style="margin-left: 40px;"> <a href="#Calculations"><strong>Calculations</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#D_prime"><strong>D
+prime</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#R_squared"><strong>R
+squared</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#Goodness_of_Fit"><strong>Goodness
+of
+Fit</strong></a></p>
+<p style="margin-left: 40px;"> <a href="#Modules"><strong>Modules</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#LDhap"><strong>LDhap</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#LDmatrix"><strong>LDmatrix</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#LDpair"><strong>LDpair</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#LDproxy"><strong>LDproxy</strong></a></p>
+<p style="margin-left: 40px;"> <a href="#FAQ"><strong>Frequently
+Asked Questions</strong></a></p>
+<p style="margin-left: 40px;"> <a href="#Citation"><strong>Citation</strong></a></p>
+<p style="margin-left: 40px;"> <a href="#Contact"><strong>Contact</strong></a></p>
+<br>
+<p> <strong><a name="Understanding_Linkage_Disequilibrium"></a>Understanding
+Linkage Disequilibrium</strong></p>
+<p><a name="linkage_equilibrium"></a>What is
+linkage disequilibrium? Perhaps it is best to start
+with linkage equilibrium. Linkage equilibrium exists when alleles from
+two different genetic variants are inherited independently of each
+other. Recombination during gamete formation results in a mixing of
+parental alleles such that&nbsp;inheritance of variants follows
+probabilistic patterns governed by population allele frequencies. The
+vast majority of genetic variants on a chromosome are in linkage
+disequilibrium. Variants in linkage disequilibrium are not considered
+linked.</p>
+<p><a name="linkage_disequilibrium"></a>Linkage
+disequilibrium is present when alleles from two nearby
+genetic variants are inherited in a non-random, linked fashion. This
+linked mode of inheritance results from genetic variants in close
+proximity being less likely to be separated by a recombination event
+and thus alleles of the variants are more commonly inherited together
+than expected. Alleles of variants in linkage disequilibrium are
+correlated; with the degree of correlation generally greater in
+magnitude the closer the variants are in physical distance. Measures of
+linkage disequilibrium include <a href="#D_prime">D prime
+(D')</a> and <a href="#R_squared">R squared (R<sup>2</sup>)</a>.</p>
+<p><a name="haplotype"></a>A haplotype is a
+cluster of genetic variants that are
+inherited together. Humans are diploid; having maternal and paternal
+copies of each autosomal chromosome. Each chromosomal copy is organized
+into segments of high linkage disequilibrium, called haplotype
+"blocks". Due to unique population histories and differences in variant
+allele frequencies, haplotype structure tends to be population
+specific. Although haplotypes are essential for calculating measures of
+linkage disequilibrium, haplotypes are seldom directly observed.
+Advanced chromosome phasing techniques are often necessary to infer
+individual haplotypes.<strong> </strong>
 </p>
-<p>
-	<strong> Linkage Equilibrium</strong>
+<br>
+<p> <strong><a name="Data_Sources"></a>Data
+Sources</strong>
 </p>
-<p>
-	<strong> Linkage Disequilibrium</strong>
-</p>
-<p>
-	<strong> Haplotype</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Data Sources</strong>
-</p>
-<p>
-	<strong> dbSNP</strong>
-</p>
-<p>
-	<strong> 1000 Genomes Project</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Calculations</strong>
-</p>
-<p>
-	<strong> D prime</strong>
-</p>
-<p>
-	<strong> R square</strong>
-</p>
-<p>
-	<strong> Goodness of Fit</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Modules</strong>
-</p>
-<p>
-	<strong> LDhap</strong>
-</p>
-<p>
-	<strong> LDmatrix</strong>
-</p>
-<p>
-	<strong> LDpair</strong>
-</p>
-<p>
-	<strong> LDproxy</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Frequently Asked Questions</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Citation</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Contact</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Understanding Linkage Disequilibrium</strong>
-</p>
-<p>What is linkage disequilibrium? Perhaps it is best to start with
-	linkage equilibrium. Linkage equilibrium exists when alleles from two
-	different genetic variants are inherited independently of each other.
-	Recombination during gamete formation results in a mixing of parental
-	alleles such that the inheritance of variants follows probabilistic
-	patterns governed by population allele frequencies. The vast majority
-	of genetic variants on a chromosome are in linkage disequilibrium.
-	Variants in linkage disequilibrium are not considered linked.</p>
-<p>Linkage disequilibrium is present when alleles from two nearby
-	genetic variants are inherited in a non-random, linked fashion. This
-	linked mode of inheritance results from genetic variants in close
-	proximity being less likely to be separated by a recombination event
-	and thus alleles of the variants are more commonly inherited together
-	than expected. Alleles of variants in linkage disequilibrium are
-	correlated; with the degree of correlation generally greater in
-	magnitude the closer the variants are in physical distance. Measures of
-	linkage disequilibrium include D' and R square.</p>
-<p>
-	A haplotype is a cluster of genetic variants that are inherited
-	together. Humans are diploid; having maternal and paternal copies of
-	each autosomal chromosome. Each chromosomal copy is organized into
-	segments of high linkage disequilibrium, called haplotype "blocks". Due
-	to unique population histories and differences in variant allele
-	frequencies, haplotype structure tends to be population specific.
-	Although haplotypes are essential for calculating measures of linkage
-	disequilibrium, haplotypes are seldom directly observed. Advanced
-	chromosome phasing techniques are often necessary to infer individual
-	haplotypes.<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Data Sources</strong>
-</p>
-<p>To investigate patterns of linkage disequilibrium, LDlink focuses
-	on a specific class of genetic variants called single nucleotide
-	polymorphisms (SNPs). Every module of LDlink requires the entry of at
-	least one SNP as identified by an RefSNP number (RS number). RS numbers
-	have been assigned by dbSNP and are well-curated identifiers that
-	follow the format "rs" followed by 1 to 8 numbers. The current
-	implementation of LDlink references dbSNP build 141 and only accepts
-	input for bi-allelic, autosomal SNPs.</p>
-<p>Publically available reference haplotypes from Phase 3 of the
-	1000 Genomes Project are used by LDlink to calculate
-	population-specific measures of linkage disequilibrium. Haplotypes are
-	available for continental populations (ex: European, African, and
-	Admixed American) and sub-populations (ex: Finnish, Gambian, and
-	Peruvian). All LDlink modules require the selection of at least one
-	1000 Genomes Project sub-population, but several sub-populations can be
-	selected simultaneously. Available haplotypes vary by sub-population
-	based on sample size.</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Calculations</strong>
+<p><a name="dbSNP"></a>To investigate patterns
+of linkage disequilibrium, LDlink
+focuses on a specific class of genetic variants called single
+nucleotide polymorphisms (SNPs). Every module of LDlink requires the
+entry of at least one SNP as identified by a RefSNP number (RS
+number). RS numbers have been assigned by <a href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a> and
+are well-curated
+identifiers that follow the format "rs" followed by 1 to 8 numbers. The
+current implementation of LDlink references dbSNP build 141 and only
+accepts input for bi-allelic, autosomal SNPs.</p>
+<p><a name="1000_Genomes_Project"></a>Publically
+available reference haplotypes from Phase 3 of the
+<a href="http://www.1000genomes.org/">1000 Genomes Project</a>
+are used by LDlink to calculate
+population-specific measures of linkage disequilibrium. Haplotypes are
+available for continental populations (ex: European, African, and
+Admixed American) and sub-populations (ex: Finnish, Gambian, and
+Peruvian). All LDlink modules require the selection of at least one
+1000 Genomes Project sub-population, but several sub-populations can be
+selected simultaneously. Available haplotypes vary by sub-population
+based on sample size.</p>
+<br>
+<p> <strong><a name="Calculations"></a>Calculations</strong>
 </p>
 <p>LDlink modules report the following measures of linkage
-	disequilibrium: D prime, R square, and goodness-of-fit statistics.
-	Below is a brief description of each measure.</p>
-<p>
-	<strong>D prime (D')</strong> - an indicator of allelic segregation for
-	two genetic variants. D' values range from 0 to 1 with higher values
-	indicating tight linkage of alleles. A D' value of 0 indicates no
-	linkage of alleles. A D' value of 1 indicates at least one expected
-	haplotype combination is not observed.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>R square (R<sup>2</sup>)
-	</strong> - a measure of correlation of alleles for two genetic variants. R<sup>2</sup>
-	values range from 0 to 1 with higher values indicating a higher degree
-	of correlation. An R<sup>2</sup> value of 0 indicates alleles are
-	independent, whereas an R<sup>2</sup> value of 1 indicates an allele of
-	one variant perfectly predicts an allele of another variant. R<sup>2</sup>
-	is sensitive to allele frequency.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Goodness of Fit (&#935;<sup>2</sup> and p-value)
-	</strong> - statistical test testing whether observed haplotype counts follow
-	frequencies expected from variant allele frequencies. High chi-square
-	statistics and low p-values are evidence that haplotype counts deviate
-	from expected values and suggest linkage disequilibrium may be present.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Modules</strong>
-</p>
-<p>LDlink consists of four modules: LDhap, LDmatrix, LDpair, and
-	LDproxy. Each module can be accessed by clicking on the desired tab at
-	the top of each LDlink page. Below is a description of each module, the
-	required user input, and an explanation of the returned output.</p>
-<p>
-	<strong><u>LDhap</u></strong> - Calculate population-specific haplotype
-	frequencies of all haplotypes observed for a list of query SNPs.
-</p>
-<p>
-	<strong>Input:</strong>
-</p>
-<p>
-	(1) <u>List of RS numbers</u> - this can either be entered one per line
-	in the text entry box or uploaded as a file that contains a list of RS
-	numbers in the first column. A maximum of 30 SNP RS numbers are
-	permitted. All input SNPs must be on the same chromosome and match a
-	bi-allelic, autosomal SNP.
-</p>
-<p>
-	(2) <u>Reference population(s)</u> - selected from the drop down menu.
-	At least one 1000 Genomes Project sub-population is required, but more
-	than one may be selected.
-</p>
-<p>
-	<strong>Output:</strong>
-</p>
-<p>
-	(1) <u>Table of observed haplotypes</u> - haplotypes are displayed
-	vertically and sorted by observed frequency in the selected query
-	sub-population. SNP genotypes are reported in rows and follow the same
-	order as entered in the query input. Links are available to dbSNP RS
-	numbers and coordinates in the UCSC Genome Browser.
-</p>
-<p>
-	(2) <u>SNPs file download</u> - download a file listing the order of
-	the queried SNPs. SNPs are in the same order as entered in the query
-	and are not ordered by genomic location (unless ordered by position in
-	the query). This file is used as a key for the order of genotypes in
-	the haplotype file. Only bi-allelic SNPs with matching dbSNP RS numbers
-	are included. All others are filtered out.
-</p>
-<p>
-	(3) <u>Haplotype file download</u> - download a file of all observed
-	haplotypes. Haplotype genotypes are in the order of the above SNPs
-	file.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>LDmatrix</strong> - Create interactive heat maps of pairwise
-	linkage disequilibrium statistics.
-</p>
-<p>
-	<strong>Input:</strong>
-</p>
-<p>
-	(1) <u>List of RS numbers</u> - this can either be entered one per line
-	in the text entry box or uploaded as a file that contains a list of RS
-	numbers in the first column. A maximum of 100 SNP RS numbers are
-	permitted. All input SNPs must be on the same chromosome and match a
-	bi-allelic, autosomal SNP.
-</p>
-<p>
-	(2) <u>Reference population(s)</u> - selected from the drop down menu.
-	At least one 1000 Genomes Project sub-population is required, but more
-	than one may be selected.
-</p>
-<p>
-	<strong>Output:</strong>
-</p>
-<p>
-	(1) <u>Interactive heat map</u> - a square plot with dimensions equal
-	to the number of query SNPs that match a dbSNP RS number. Hovering over
-	the plot with the mouse will display pairwise LD metrics for the
-	respective row and column SNPs. SNPs are ordered the same way as the RS
-	numbers in the query and are not ordered by genomic coordinates (unless
-	ordered by position in the query).
-</p>
-<p>
-	(2) <u>D prime download</u> - download a file of all pairwise D'
-	statistics.
-</p>
-<p>
-	(3) <u>R square download</u> - download a file of all pairwise R<sup>2</sup>
-	statistics.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>LDpair</strong> - Investigate correlated alleles for SNPs in
-	high LD.
-</p>
-<p>
-	<strong>Input:</strong>
-</p>
-<p>
-	(1) <u>SNP1 RS number</u> - RS number for query SNP1. RS number must
-	match a bi-allelic, autosomal SNP.
-</p>
-<p>
-	(2) <u>SNP2 RS number</u> - RS number for query SNP2. RS number must
-	match a bi-allelic, autosomal SNP.
-</p>
-<p>
-	(3) <u>Reference population(s)</u> - selected from the drop down menu.
-	At least one 1000 Genomes Project sub-population is required, but more
-	than one may be selected.
-</p>
-<p>
-	<strong>Output:</strong>
-</p>
-<p>
-	(1) <u>Two-by-two table</u> - contingency table displaying haplotype
-	counts and allele frequencies for the two query SNPs. External links
-	are available to dbSNP RS numbers and coordinates in the UCSC Genome
-	Browser.
-</p>
-<p>
-	(2) <u>Haplotypes</u> - haplotype genotypes, counts, and frequencies.
-</p>
-<p>
-	(3) <u>Statistics</u> - calculated metrics of linkage disequilibrium
-	including: D prime (D'), R square (R<sup>2</sup>), and goodness-of-fit
-	(Chi-square and p-value). Goodness-of-fit tests for deviations of
-	expected haplotype frequencies based on allele frequencies.
-</p>
-<p>
-	(4) <u>Correlated Alleles</u> - alleles that are correlated if linkage
-	disequilibrium is present (R<sup>2</sup> &gt; 0.1). If linkage
-	equilibrium, no alleles are reported.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>LDproxy</strong> - Interactively explore proxy and putatively
-	functional SNPs for a query SNP. Based on the selected query
-	populations, this module may take some time to run.
-</p>
-<p>
-	<strong>Input:</strong>
-</p>
-<p>
-	(1) <u>SNP RS number</u> - RS number for query SNP. RS number must
-	match a bi-allelic, autosomal SNP.
-</p>
-<p>
-	(3) <u>Reference population(s)</u> - selected from the drop down menu.
-	At least one 1000 Genomes Project sub-population is required, but more
-	than one may be selected.
-</p>
-<p>
-	<strong>Output:</strong>
-</p>
-<p>
-	(1) <u>Interactive plot</u> - interactive plot of query SNP and all
-	bi-allelic dbSNP SNPs plus or minus 500 kilobases of the query SNP. X
-	axis is the chromosomal coordinates and the Y axis is the pairwise R<sup>2</sup>
-	value with the query SNP. Each point represents a proxy SNP and is
-	colored based on function, sized based on minor allele frequency, and
-	labeled based on regulatory potential. Hovering over the point will
-	display detailed information on the query and proxy SNPs.
-</p>
-<p>
-	(2) <u>UCSC link</u> - external link to the plotted region (query SNP
-	-/+ 500 Kb) in the UCSC Genome Browser. This is useful for exploring
-	nearby genes and regulatory elements in the region.
-</p>
-<p>
-	(3) <u>Table of top 10 proxies</u> - the ten SNPs with the highest R<sup>2</sup>
-	values and closest distance to the query SNP are displayed. External
-	links lead to the SNP RS number in dbSNP, coordinates in the UCSC
-	Genome Browser, and regulatory information (if any) in RegulomeDB.
-</p>
-<p>
-	(4) <u>Download all proxy SNPs</u> - download a file with information
-	on all SNPs -/+ 500 Kb of the query SNP with a pairwise R<sup>2</sup>
-	value greater than 0.1.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Frequently Asked Questions</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Why is my SNP RS number bringing up an error?</strong>
-</p>
-<p>LDlink modules only accept input for SNP RS numbers that are
-	bi-allelic and autosomal. Ensure your query SNP has A/C, A/G, A/T, C/G,
-	C/T, or G/T alleles. RS numbers for insertions or deletions (i.e.
-	"indels") are not currently accepted as input. If a SNP you believe is
-	bi-allelic is not accepted, check dbSNP to ensure there are only two
-	alleles for the SNP. Even if dbSNP only reports one observation of a
-	SNP being tri- or multi-allelic, the SNP is not considered valid input
-	under the current implementation of LDlink.</p>
-<p>
-	<strong>What 1000 Genomes population should I select for my
-		LDlink query?</strong>
-</p>
-<p>Choosing the correct reference 1000 Genomes Project population is
-	essential for comparability of results from LDlink to your population
-	of interest. In general, try to select the sub-population that best
-	matches the ancestry of your study population. While LDlink allows for
-	multiple 1000 Genomes sub-populations to be selected simultaneously, it
-	is recommended to first investigate the patterns of linkage
-	disequilibrium in the query region of each sub-population before
-	considering whether to combine sub-populations in a query.</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>What is the estimated running time for an LDproxy
-		query?</strong>
-</p>
-<p>Running time varies greatly for LDproxy ranging from a few
-	seconds to approximately one minute. For each query, LDproxy actively
-	calculates all LD metrics based on user input. A variety of factors
-	affect overall running time including: (1) the number of haplotypes
-	available for the sub-population, (2) the number of dbSNP variants in
-	the region queried, (3) the current utilization of the LDlink server,
-	and (4) the download speed of your internet connection. In general, the
-	best way to speed up an LDlink query is to only select one
-	sub-population per query. Queries that include multiple sub-populations
-	or ancestral groups take much longer than single sub-population
-	queries.</p>
-<p>
-	<strong>How do I save output files?</strong>
-</p>
-<p>Output from a variety of LDlink modules (LDhap, LDmatrix, and
-	LDproxy) is available for download. To save output either (1) right
-	click or long press on the link and select the "Save Link As&#8230;"
-	option or (2) open the link in a new browser window and paste the
-	contents to a new file.</p>
-<p>
-	<strong>Can I save the plots generated in LDmatrix or LDproxy?</strong>
-</p>
-<p>Yes. Click the Save icon on the top right of the plot. A preview
-	window will appear. Right click or long press on the preview image,
-	select "Save As&#8230;", and choose a filename for the plot image.</p>
-<p>
-	<strong>What is the maximum number of SNPs LDhap and LDmatrix
-		can accept as input?</strong>
-</p>
-<p>LDhap has a limit of 30 SNPs and LDmatirx has a limit of 100
-	SNPs. These limits were selected to optimize query speed and
-	visualization of results.</p>
-<p>
-	<strong>Why are the SNPs in LDhap and LDmatrix output not
-		ordered by chromosomal position?</strong>
-</p>
-<p>SNPs in LDhap and LDmatrix output are ordered based on user
-	input. If the user inputs the SNP RS numbers in chromosomal order the
-	results will be in chromosomal order. However, if the SNPs are entered
-	in a different order, the output will reflect this order. In general,
-	it is best to input the SNP RS numbers in the order they appear on a
-	chromosome, but the option is available for other orderings is the user
-	so chooses.</p>
-<p>
-	<strong>Why does my computer seem bogged down by LDlink?</strong>
-</p>
-<p>The interactive plots produced by LDmatrix and LDproxy require a
-	sizeable amount of data and java script to be loaded into the web
-	browser. On some computers this results in a notable lag in
-	performance. To improve performance, close the web page or simply
-	refresh the LDlink webpage to clear the data from memory. Clearing the
-	data will remove all interactive plots.</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Citation</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	Machiela MJ, Chanock SJ. LDlink: A web-based application for exploring
-	population-specific haplotype structure and linking correlated alleles
-	of potentially functional variants. <em>Bioinformatics</em> 2015.
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	<strong>Contact</strong>
-</p>
-<p>
-	<strong> </strong>
-</p>
-<p>
-	Still have unanswered LDlink questions? Contact us at <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink"
-					target="_top" title="Support">Email</a>.
-</p>
+disequilibrium: <a href="#D_prime">D prime</a>, <a href="#R_squared">R squared</a>, and <a href="#Goodness_of_Fit">goodness-of-fit</a>
+statistics.
+Below is a brief description of each measure.</p>
+<p> <strong><a name="D_prime"></a>D
+prime (D')</strong> - an indicator of
+allelic segregation for two genetic variants. D' values range from 0 to
+1 with higher values indicating tight linkage of alleles. A D' value of
+0 indicates no linkage of alleles. A D' value of 1 indicates at least
+one expected haplotype combination is not observed.
+</p>
+<p> <strong><a name="R_squared"></a>R
+squared (R<sup>2</sup>) </strong>
+- a measure of correlation of alleles for two genetic variants. R<sup>2</sup>
+values range from 0 to 1 with higher values indicating a higher degree
+of correlation. An R<sup>2</sup> value of 0 indicates
+alleles are independent, whereas an R<sup>2</sup> value of
+1 indicates an allele of one variant perfectly predicts an allele of
+another variant. R<sup>2</sup> is sensitive to allele
+frequency.
+</p>
+<p> <strong><a name="Goodness_of_Fit"></a>Goodness
+of Fit (&#935;<sup>2</sup> and
+p-value) </strong> - statistical test testing whether observed
+haplotype counts follow frequencies expected from variant allele
+frequencies. High chi-square statistics and low p-values are evidence
+that haplotype counts deviate from expected values and suggest linkage
+disequilibrium may be present.
+</p>
+<br>
+<p> <strong><a name="Modules"></a>Modules</strong>
+</p>
+<p>LDlink consists of four modules: <a href="#LDhap">LDhap</a>,
+<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>, and
+<a href="#LDproxy">LDproxy</a>. Each module can be
+accessed by clicking on the desired tab at
+the top of all LDlink pages. Below is a description of each module, the
+required user input, and an explanation of the returned output.</p>
+<br>
+<p style="margin-left: 40px;"> <strong><u><a name="LDhap"></a>LDhap</u></strong>
+-
+Calculate population-specific haplotype frequencies of all haplotypes
+observed for a list of query SNPs.
+</p>
+<p style="margin-left: 80px;"> <strong>Input:</strong>
+</p>
+<p style="margin-left: 120px;"><u>List of RS numbers</u>
+- this can either
+be entered one per line in the text entry box or uploaded as a file
+that contains a list of RS numbers in the first column. A maximum of 30
+SNP RS numbers are permitted. All input SNPs must be on the same
+chromosome and match a bi-allelic, autosomal SNP. The text entry field
+is automatically filled with the contents of the uploaded file.
+</p>
+<p style="margin-left: 120px;"><u>Reference
+population(s)</u> - selected
+from the drop down menu. At least one 1000 Genomes Project
+sub-population is required, but more than one may be selected.
+</p>
+<p style="margin-left: 80px;"> <strong>Output:</strong>
+</p>
+<p style="margin-left: 120px;"><u>Table of observed
+haplotypes</u> -
+haplotypes are displayed vertically and ordered by observed frequency in
+the selected query sub-population. SNP genotypes are reported in rows
+and follow the same order as entered in the query input. Links are
+available to <a href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a> RS numbers and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway">UCSC Genome
+Browser</a>.
+</p>
+<p style="margin-left: 120px;"><u>SNPs file download</u>
+- download a file
+listing the order of the queried SNPs. SNPs are&nbsp;ordered by genomic location. This file is used as a key for the
+order of genotypes in the haplotype file. Only bi-allelic SNPs with
+matching dbSNP RS numbers are included. All others are filtered out.
+</p>
+<p style="margin-left: 120px;"><u>Haplotype file
+download</u> - download a
+file of all observed haplotypes. Haplotype genotypes are in the order
+of the above SNPs file.
+</p>
+<br>
+<p style="margin-left: 40px;"> <strong><a name="LDmatrix"></a><span style="text-decoration: underline;">LDmatrix</span></strong>
+- Create interactive
+heat maps of pairwise linkage disequilibrium statistics.
+</p>
+<p style="margin-left: 80px;"> <strong>Input:</strong>
+</p>
+<p style="margin-left: 120px;"><u>List of RS numbers</u>
+- this can either
+be entered one per line in the text entry box or uploaded as a file
+that contains a list of RS numbers in the first column. A maximum of
+100 SNP RS numbers are permitted. All input SNPs must be on the same
+chromosome and match a bi-allelic, autosomal SNP.&nbsp;The text entry field is automatically filled with the contents of the uploaded file.
+</p>
+<p style="margin-left: 120px;"><u>Reference
+population(s)</u> - selected
+from the drop down menu. At least one 1000 Genomes Project
+sub-population is required, but more than one may be selected.
+</p>
+<p style="margin-left: 80px;"> <strong>Output:</strong>
+</p>
+<p style="margin-left: 120px;"><u>Interactive heat
+map</u>
+- a square plot
+with dimensions equal to the number of query SNPs that match a dbSNP RS
+number. Hovering over the plot with the mouse will display pairwise LD
+metrics for the respective row and column SNPs. SNPs are ordered by genomic
+coordinates.
+</p>
+<p style="margin-left: 120px;"><u>D prime download</u>
+- download a file of
+all pairwise D' statistics.
+</p>
+<p style="margin-left: 120px;"><u>R square download</u>
+- download a file
+of all pairwise R<sup>2</sup> statistics.
+</p>
+<br>
+<p style="margin-left: 40px;"> <strong><a name="LDpair"></a><span style="text-decoration: underline;">LDpair</span></strong>
+- Investigate correlated
+alleles for SNPs in high LD.
+</p>
+<p style="margin-left: 80px;"> <strong>Input:</strong>
+</p>
+<p style="margin-left: 120px;"><u>SNP1 RS number</u>
+- RS number for query
+SNP1. RS number must match a bi-allelic, autosomal SNP.
+</p>
+<p style="margin-left: 120px;"><u>SNP2 RS number</u>
+- RS number for query
+SNP2. RS number must match a bi-allelic, autosomal SNP.
+</p>
+<p style="margin-left: 120px;"><u>Reference
+population(s)</u> - selected
+from the drop down menu. At least one 1000 Genomes Project
+sub-population is required, but more than one may be selected.
+</p>
+<p style="margin-left: 80px;"> <strong>Output:</strong>
+</p>
+<p style="margin-left: 120px;"><u>Two-by-two table</u>
+- contingency table
+displaying haplotype counts and allele frequencies for the two query
+SNPs. External links are available to <a href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a> RS numbers and coordinates
+in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway">UCSC Genome Browser</a>.
+</p>
+<p style="margin-left: 120px;"><u>Haplotypes</u>
+- haplotype genotypes,
+counts, and frequencies.
+</p>
+<p style="margin-left: 120px;"><u>Statistics</u>
+- calculated metrics of
+linkage disequilibrium including: D prime (D'), R square (R<sup>2</sup>),
+and goodness-of-fit (Chi-square and p-value). Goodness-of-fit tests for
+deviations of expected haplotype frequencies based on allele
+frequencies.
+</p>
+<p style="margin-left: 120px;"><u>Correlated Alleles</u>
+- alleles that are
+correlated if linkage disequilibrium is present (R<sup>2</sup>
+&gt; 0.1). If linkage equilibrium, no alleles are reported.
+</p>
+<br>
+<p style="margin-left: 40px;"> <strong><a name="LDproxy"></a><span style="text-decoration: underline;">LDproxy</span></strong>
+- Interactively explore
+proxy and putatively functional SNPs for a query SNP. Based on the
+selected query populations, this module may take some time to run.
+</p>
+<p style="margin-left: 80px;"> <strong>Input:</strong>
+</p>
+<p style="margin-left: 120px;"><u>SNP RS number</u>
+- RS number for query
+SNP. RS number must match a bi-allelic, autosomal SNP.
+</p>
+<p style="margin-left: 120px;"><u>Reference
+population(s)</u> - selected
+from the drop down menu. At least one 1000 Genomes Project
+sub-population is required, but more than one may be selected.
+</p>
+<p style="margin-left: 80px;"> <strong>Output:</strong>
+</p>
+<p style="margin-left: 120px;"><u>Interactive plot</u>
+- interactive plot
+of query SNP and all bi-allelic dbSNP SNPs plus or minus 500 kilobases (Kb)
+of the query SNP. X axis is the chromosomal coordinates and the Y axis
+is the pairwise R<sup>2</sup> value with the query SNP.
+Each point represents a proxy SNP and is colored based on function,
+sized based on minor allele frequency, and labeled based on regulatory
+potential. Hovering over the point will display detailed information on
+the query and proxy SNPs.
+</p>
+<p style="margin-left: 120px;"><u>UCSC link</u>
+- external link to the
+plotted region (query SNP -/+ 500 Kb) in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway">UCSC Genome Browser</a>. This
+is useful for exploring nearby genes and regulatory elements in the
+region.
+</p>
+<p style="margin-left: 120px;"><u>Table of top 10
+proxies</u> - the ten
+SNPs with the highest R<sup>2</sup> values and closest
+distance to the query SNP are displayed. External links lead to the SNP
+RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway">UCSC Genome Browser</a>, and
+regulatory information (if any) in <a href="http://www.regulomedb.org/">RegulomeDB</a>.
+</p>
+<p style="margin-left: 120px;"><u>Download all proxy
+SNPs</u> - download a
+file with information on all SNPs -/+ 500 Kb of the query SNP with a
+pairwise R<sup>2</sup> value greater than 0.1.
+</p>
+<br>
+<p> <strong><a name="FAQ"></a>Frequently
+Asked Questions</strong>
+</p>
+<p style="margin-left: 40px;"> <strong>Why is my
+SNP RS number bringing up an error?</strong>
+</p>
+<p style="margin-left: 80px;">LDlink modules only accept
+input for SNP RS numbers that are
+bi-allelic and autosomal. Ensure your query SNP has A/C, A/G, A/T, C/G,
+C/T, or G/T alleles. RS numbers for insertions or deletions (i.e.
+"indels") are not accepted as input. If a SNP you believe is
+bi-allelic is not accepted, check dbSNP to ensure there are only two
+alleles for the SNP. Even if there is only one reports of a
+SNP being tri- or multi-allelic in dbSNP, the SNP is not considered valid input
+under the current implementation of LDlink.</p>
+<p style="margin-left: 40px;"> <strong>What 1000
+Genomes population should I select
+for my LDlink query?</strong>
+</p>
+<p style="margin-left: 80px;">Choosing the correct
+reference 1000 Genomes Project population
+is essential for comparability of results from LDlink to your
+population of interest. In general, try to select the sub-population
+that best matches the ancestry of your study population. While LDlink
+allows for multiple 1000 Genomes sub-populations to be selected
+simultaneously, it is recommended to first investigate the patterns of
+linkage disequilibrium in the query region of each sub-population
+before considering whether to combine sub-populations in a query.</p>
+<p style="margin-left: 40px;"> <strong>What is the
+estimated running time for an
+LDproxy query?</strong>
+</p>
+<p style="margin-left: 80px;">Running time varies greatly
+for LDproxy ranging from a few
+seconds to approximately one minute. For each query, LDproxy actively
+calculates all LD metrics based on user input. A variety of factors
+affect overall running time including: (1) the number of haplotypes
+available for the sub-population(s), (2) the number of dbSNP variants in
+the region queried, (3) the current utilization of the LDlink server,
+and (4) the download speed of your internet connection. In general, the
+best way to speed up an LDlink query is to only select one
+sub-population per query. Queries that include multiple sub-populations
+or ancestral groups take much longer to complete than single sub-population queries.</p>
+<p style="margin-left: 40px;"> <strong>How do I
+save output files?</strong>
+</p>
+<p style="margin-left: 80px;">Output from a variety of
+LDlink modules (LDhap, LDmatrix, and
+LDproxy) is available for download. To save output either (1) right
+click or long press on the link and select the "Save Link As&#8230;" option
+or (2) open the link in a new browser window and copy and paste the contents to
+a new file.</p>
+<p style="margin-left: 40px;"> <strong>Can I save
+the plots generated in LDmatrix or
+LDproxy?</strong>
+</p>
+<p style="margin-left: 80px;">Yes. Click the Save icon on
+the top right of the plot. A
+preview window will appear. Right click or long press on the preview
+image, select "Save As&#8230;", and choose a filename for the plot image.</p>
+<p style="margin-left: 40px;"> <strong>What is the
+maximum number of SNPs LDhap and
+LDmatrix can accept as input?</strong>
+</p>
+<p style="margin-left: 80px;">LDhap has a limit of 30 SNPs
+and LDmatirx has a limit of 100
+SNPs. These limits were selected to optimize query speed and
+visualization of results.</p>
+<p style="margin-left: 40px;"> <strong>Why are the
+SNPs in LDhap and LDmatrix output
+not in the same order as the RS number input?</strong>
+</p>
+<p style="margin-left: 80px;">SNPs in LDhap and LDmatrix
+output are not ordered based on user
+input. Rahter, results are ordered based on chromosomal order.&nbsp;</p>
+<p style="margin-left: 40px;"> <strong>Why does my
+computer seem slow when using
+LDlink?</strong>
+</p>
+<p style="margin-left: 80px;">The interactive plots
+produced by LDmatrix and LDproxy require
+a sizeable amount of data and java script to be loaded into the web
+browser. On some computers this results in a notable lag in
+performance. To improve performance, simply
+refresh the LDlink webpage to clear the temporary data from memory.
+Refreshing the LDlink webpage will remove all interactive plots.</p>
+<br>
+<p> <strong><a name="Citation"></a>Citation</strong>
+</p>
+<p> Machiela MJ, Chanock SJ. LDlink: A web-based application for
+exploring population-specific haplotype structure and linking
+correlated alleles of potentially functional variants. (under review).
+</p>
+<br>
+<p> <strong><a name="Contact"></a>Contact</strong>
+</p>
+<p> Still have unanswered LDlink questions? <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink">Email
+us</a>.
+</p>
+<br>
+</body></html>
