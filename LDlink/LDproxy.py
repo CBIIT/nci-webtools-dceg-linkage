@@ -75,11 +75,21 @@ def calculate_proxy(snp,pop,request):
 	subprocess.call(tabix_snp, shell=True)
 
 
-	# Check SNP is not monoallelic in selected 1000G population
+	# Check SNP is not monoallelic and in the 1000G population
 	vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 	geno=vcf[len(vcf)-1].strip().split()
 	head=vcf[len(vcf)-2].strip().split()
-
+	
+	if geno[0]=="#CHROM":
+		output["error"]=snp+" is not in 1000G reference panel."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+		return("","")
+		raise
+		
 	index=[]
 	for i in range(9,len(head)):
 		if head[i] in pop_ids:
