@@ -565,6 +565,8 @@ function updateLDhap() {
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
 				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
 			});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -676,6 +678,8 @@ function updateLDmatrix() {
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
 				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
 			});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -875,6 +879,8 @@ function updateLDproxy() {
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
 				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
 			});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -924,6 +930,8 @@ function getLDProxyResults(jsonfile) {
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
 				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
 			});
 	ajaxRequest.always(function() {
 	});
@@ -963,6 +971,8 @@ function getLDmatrixResults(jsonfile, request) {
 				$('#' + id + '-message').show();
 				$('#' + id + '-message-content').empty().append(message);
 				$('#' + id + '-progress').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
 			});
 	ajaxRequest.always(function() {
 	});
@@ -1010,6 +1020,8 @@ function updateLDpair() {
 				'Communication problem: ' + textStatus
 						+ "<br>Make sure Flask Python server is available.");
 		$('#' + id+ '-results-container').hide();
+		//hide loading icon
+		$('#'+id+"-loading").hide();
 	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
