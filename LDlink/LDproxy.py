@@ -353,7 +353,7 @@ def calculate_proxy(snp,pop,request):
 		("Proxy SNP", "@prs @p_alle"),
 		("Distance (Mb)", "@dist"),
 		("MAF (Query,Proxy)", "@q_maf,@p_maf"),
-		("R2", "@r"),
+		("R"+sup_2, "@r"),
 		("D\'", "@d"),
 		("Correlated Alleles", "@alleles"),
 		("RegulomeDB", "@regdb"),
