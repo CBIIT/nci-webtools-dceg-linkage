@@ -349,15 +349,15 @@ def calculate_proxy(snp,pop,request):
 
 	hover=curplot().select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
-		("Query SNP", " @qrs @q_alle"),
-		("Proxy SNP", " @prs @p_alle"),
-		("Distance (Mb)", " @dist"),
-		("MAF (Query,Proxy)", " @q_maf,@p_maf"),
-		("R"+sup_2, " @r"),
-		("D\'", " @d"),
-		("Correlated Alleles", " @alleles"),
-		("RegulomeDB", " @regdb"),
-		("Predicted Function", " @funct"),
+		("Query SNP", " "+"@qrs @q_alle"),
+		("Proxy SNP", " "+"@prs @p_alle"),
+		("Distance (Mb)", " "+"@dist"),
+		("MAF (Query,Proxy)", " "+"@q_maf,@p_maf"),
+		("R"+sup_2, " "+"@r"),
+		("D\'", " "+"@d"),
+		("Correlated Alleles", " "+"@alleles"),
+		("RegulomeDB", " "+"@regdb"),
+		("Predicted Function", " "+"@funct"),
 	])
 
 	out_script,out_div=embed.components(curplot(), CDN)
