@@ -357,11 +357,11 @@ def calculate_matrix(snplst,pop,request):
 	
 	hover=curplot().select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
-		("SNP 1", "@yname (@yA)"),
-		("SNP 2", "@xname (@xA)"),
-		("D prime", "@Dp"),
-		("R"+sup_2, "@R2"),
-		("Correlated Alleles", "@corA"),
+		("SNP 1", " @yname (@yA)"),
+		("SNP 2", " @xname (@xA)"),
+		("D prime", " @Dp"),
+		("R"+sup_2, " @R2"),
+		("Correlated Alleles", " @corA"),
 	])
 
 	out_script,out_div=embed.components(curplot(), CDN)
