@@ -87,7 +87,7 @@ def calculate_matrix(snplst,pop,request):
 		output["warning"]="The following RS numbers were not found in dbSNP 141: "+",".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any vaild RS numbers that are in dbSNP 141."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 141."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -98,7 +98,17 @@ def calculate_matrix(snplst,pop,request):
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
 		if snp_coords[0][1]!=snp_coords[i][1]:
-			output["error"]="Not all input SNPs are on the same chromosome"
+			output["error"]="Not all input SNPs are on the same chromosome."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+	
+	chr_lst=[str(i) for i in range(1,22+1)]
+	for i in range(len(snp_coords)):
+		if snp_coords[i][1] not in chr_lst:
+			output["error"]="Not all input SNPs are autosomal."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
