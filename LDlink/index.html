@@ -386,7 +386,7 @@
 								<div class="col-sm-2">
 									<input id="ldpair-snp1" name="snp1" type="text"
 										class="form-control" placeholder="SNP1 RS Number"
-										title="rs followed by 1 or more digits" required
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
 							</div>
@@ -395,7 +395,7 @@
 								<div class="col-sm-2">
 									<input id="ldpair-snp2" name="snp2" type="text"
 										class="form-control" placeholder="SNP2 RS Number"
-										title="rs followed by 1 or more digits" required
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
 							</div>
@@ -583,7 +583,7 @@
 								<div class="col-sm-2">
 									<input id="ldproxy-snp" name="snp" type="text"
 										class="form-control" placeholder="SNP RS Number"
-										title="rs followed by 1 or more digits" required
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
 							</div>
@@ -694,11 +694,11 @@
 											<td>Alleles</td>
 											<td>MAF</td>
 											<td>Distance</td>
-											<td>Dprime</td>
+											<td>D'</td>
 											<td>R<sup>2</sup></td>
 											<td>Correlated Alleles</td>
 											<td>RegulomeDB</td>
-											<td>Function</td>
+											<td>Functional Class</td>
 										</tr>
 									<tbody data-bind="foreach: top10">
 										<tr>

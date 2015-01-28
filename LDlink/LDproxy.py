@@ -34,7 +34,16 @@ def calculate_proxy(snp,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id,))
 	snp_coord=cur.fetchone()
 	if snp_coord==None:
-		output["error"]=snp+" is not a valid RS number for query SNP."
+		output["error"]=snp+" is not in dbSNP build 141."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise
+	
+	chr_lst=[str(i) for i in range(1,22+1)]
+	if snp_coord[2] not in chr_lst:
+		output["error"]=snp+" is not an autosomal SNP."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -357,7 +366,7 @@ def calculate_proxy(snp,pop,request):
 		("D\'", " "+"@d"),
 		("Correlated Alleles", " "+"@alleles"),
 		("RegulomeDB", " "+"@regdb"),
-		("Predicted Function", " "+"@funct"),
+		("Functional Class", " "+"@funct"),
 	])
 
 	out_script,out_div=embed.components(curplot(), CDN)
@@ -406,6 +415,8 @@ def main():
 		json_dict["error"]
 
 	except KeyError:
+		head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Functional_Class"]
+		print "\t".join(head)
 		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 		print "\t".join(temp)
 		for k in sorted(json_dict["proxy_snps"].keys())[0:10]:

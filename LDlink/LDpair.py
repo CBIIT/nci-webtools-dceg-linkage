@@ -30,8 +30,15 @@ def calculate_pair(snp1,snp2,pop,request):
 	id1="99"+(13-len(snp1))*"0"+snp1.strip("rs")
 	cur.execute('SELECT * FROM snps WHERE id=?', (id1,))
 	snp1_coord=cur.fetchone()
+	
 	if snp1_coord==None:
-		output["error"]=snp1+" is not a valid RS number for SNP1."
+		output["error"]=snp1+" is not in dbSNP build 141."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		raise
+	
+	chr_lst=[str(i) for i in range(1,22+1)]
+	if snp1_coord[2] not in chr_lst:
+		output["error"]=snp1+" is not an autosomal SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
@@ -40,9 +47,15 @@ def calculate_pair(snp1,snp2,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id2,))
 	snp2_coord=cur.fetchone()
 	if snp2_coord==None:
-		output["error"]=snp2+" is not a valid RS number for SNP2."
+		output["error"]=snp2+" is not in dbSNP build 141."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
+	
+	if snp2_coord[2] not in chr_lst:
+		output["error"]=snp2+" is not an autosomal SNP."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		raise
+
 
 	# Check if SNPs are on the same chromosome
 	if snp1_coord[2]!=snp2_coord[2]:
