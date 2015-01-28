@@ -366,7 +366,7 @@ def calculate_proxy(snp,pop,request):
 		("D\'", " "+"@d"),
 		("Correlated Alleles", " "+"@alleles"),
 		("RegulomeDB", " "+"@regdb"),
-		("Predicted Function", " "+"@funct"),
+		("Functional Class", " "+"@funct"),
 	])
 
 	out_script,out_div=embed.components(curplot(), CDN)
@@ -415,6 +415,8 @@ def main():
 		json_dict["error"]
 
 	except KeyError:
+		head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Functional_Class"]
+		print "\t".join(head)
 		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 		print "\t".join(temp)
 		for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
