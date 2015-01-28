@@ -34,7 +34,16 @@ def calculate_proxy(snp,pop,request):
 	cur.execute('SELECT * FROM snps WHERE id=?', (id,))
 	snp_coord=cur.fetchone()
 	if snp_coord==None:
-		output["error"]=snp+" is not a valid RS number for query SNP."
+		output["error"]=snp+" is not in dbSNP build 141."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise
+	
+	chr_lst=[str(i) for i in range(1,22+1)]
+	if snp_coord[2] not in chr_lst:
+		output["error"]=snp+" is not an autosomal SNP."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
