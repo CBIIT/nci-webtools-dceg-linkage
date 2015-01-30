@@ -508,10 +508,10 @@ def calculate_proxy(snp,pop,request):
 	
 	
 	
-	output_file("LDproxy.html")
+	#output_file("LDproxy.html")
 	out_plots=[[proxy_plot],[rug],[gene_plot]]
 	GridPlot(children=out_plots)
-	save()
+	#save()
 	
 	out_script,out_div=embed.components(curplot(), CDN)
 
@@ -529,7 +529,7 @@ def calculate_proxy(snp,pop,request):
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	#subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
+	subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
 
 
 	# Return plot output
