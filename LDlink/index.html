@@ -22,7 +22,7 @@
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
 	type="text/css">
-<!-- 	
+<!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
  -->
 <link rel="stylesheet"
@@ -56,7 +56,7 @@
 				title="at the National Institutes of Health"></a>
 		</div>
 	</div>
-	
+
 	<div class="container theme-showcase" role="main">
 		<div id="banners">
 			<div id="left">
@@ -78,7 +78,7 @@
             <div class="alert alert-danger" role="alert">You are using an <strong>outdated</strong> version of IE that is not supported for this tool.  Please upgrade your browser to IE version 10.</div>
     <![endif]-->
 
-	
+
 
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
 			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
@@ -155,18 +155,21 @@
 							</div>
 							<div class="col-sm-4">
 								<div class="input-group">
+								<label for="ldhap-input-file" style="display:none">File Name</label>
 									<input type="text" readonly
 										placeholder="Upload input file with RS numbers"
-										class="readonly-input-text"><span
-										class="btn btn-default btn-file">Browse<input
-										type="file" id="ldhap-file">
+										class="readonly-input-text" id="ldhap-input-file"><span
+										class="btn btn-default btn-file">
+										Browse
+											<label for="ldhap-file" style="display:none">Browse File</label>
+											<input type="file" id="ldhap-file">
 									</span>
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldhap-population-codes" style="display: none;">Populations</label>
 									<select id="ldhap-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -181,7 +184,7 @@
 													Calculate
 											</button>
 										 -->
-									<!-- 
+									<!--
 									<button id="ldhap" class="btn btn-default ladda-button" data-style="expand-right">Submit</button>
 								    -->
 								</div>
@@ -293,17 +296,22 @@
 								</div>
 								<div class="col-sm-4">
 									<div class="input-group">
-										<input type="text" readonly
-											placeholder="Upload input file with RS numbers" class="readonly-input-text"><span
-											class="btn btn-default btn-file">Browse<input
-											type="file" id="ldmatrix-file">
+										<label for="ldmatrix-input-file" style="display:none">File Name</label>
+										<input id="ldmatrix-input-file" type="text" readonly
+											placeholder="Upload input file with RS numbers"
+											class="readonly-input-text"
+											><span
+											class="btn btn-default btn-file">
+											Browse
+											<label for="ldmatrix-file" style="display:none">Browse File</label>
+											<input type="file" id="ldmatrix-file">
 										</span>
 									</div>
 								</div>
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -313,7 +321,7 @@
 								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
+									<!--
 											<button id="ldmatrix" type="submit" class="btn btn-default calculate">
 													Calculate
 											</button>
@@ -401,7 +409,7 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldpair-population-codes" style="display: none;">Populations</label>
 									<select id="ldpair-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -411,7 +419,7 @@
 								<div class="col-sm-1">
 									<input type="submit" id="ldpair" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
+									<!--
 												<button id="ldpair" type="submit" class="btn btn-default calculate">
 														Calculate
 												</button>
@@ -568,7 +576,7 @@
 							<div style="text-align: center" data-bind="text: $data"></div>
 						</div>
 					</div>
-					
+
 				</div>
 			</div>
 			<!-- LDproxy -->
@@ -589,7 +597,7 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-5">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldproxy-population-codes" style="display: none;">Populations</label>
 									<select id="ldproxy-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -599,7 +607,7 @@
 								<div class="col-sm-1">
 									<input type="submit" id="ldproxy" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
+									<!--
 												<button id="ldproxy" type="submit" class="btn btn-default calculate">
 														Calculate
 												</button>
@@ -653,7 +661,7 @@
 
 				<div class="jumbotron">
 					<!-- LDPROXY PROGRESS BAR -->
-					<!-- 
+					<!--
 					<div id="ldproxy-progress-container"
 						style="width: 525px; display: none;">
 						<div id="ldproxy-progress" class="progress">
@@ -764,12 +772,12 @@
 	<script
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script
 		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<!-- Modernizr not in use
 
@@ -783,25 +791,25 @@ Temporarily removing to see if it effects anything.
 	<script
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script type="text/javascript"
 		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
-			
+
 		</script>
 
 	<script src="LDlink.js" type="text/javascript">
-			
+
 		</script>
 
 	<script type="text/javascript"
 		src="../common/js/bootstrap-multiselect.js"></script>
-<!-- 		
+<!--
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.js"></script>
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/spin.min.js"></script>
