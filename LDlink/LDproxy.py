@@ -8,6 +8,7 @@ def calculate_proxy(snp,pop,request):
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
+	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
 	snp_dir=data_dir+"snp141/snp141.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
@@ -308,14 +309,11 @@ def calculate_proxy(snp,pop,request):
 		size_i=9+float(p_maf_i)*14.0
 		size.append(size_i)
 
-	x=p_coord
-	y=r2
-
 
 	# Import plotting modules
 	import bokeh.embed as embed
 	from bokeh.objects import Range1d,HoverTool
-	from bokeh.plotting import ColumnDataSource,curplot,figure,hold,scatter,text,xaxis,yaxis
+	from bokeh.plotting import ColumnDataSource,curplot,figure,GridPlot,hold,output_file,Plot,rect,save,scatter,segment,text,xaxis,yaxis,ygrid
 	from bokeh.resources import CDN
 	from collections import OrderedDict
 
@@ -335,40 +333,186 @@ def calculate_proxy(snp,pop,request):
 			funct=funct,
 		)
 	)
+	
+	
+	# Proxy Plot
+	x=p_coord
+	y=r2
 
 	figure(
 		title="Proxies for "+snp+" in "+pop,
+		min_border=2, h_symmetry=False, v_symmetry=False,
 		plot_width=800,
 		plot_height=600,
-		tools=""
+		tools="hover,pan,select,box_zoom,wheel_zoom,reset,previewsave"
 	)
 
 	hold()
-	tools="hover,pan,box_zoom,wheel_zoom,reset,previewsave"
+	
 	xr=Range1d(start=coord1/1000000.0, end=coord2/1000000.0)
 	yr=Range1d(start=-0.03, end=1.03)
 
-	scatter(x, y, size=size, source=source, color=color, alpha=0.5, x_range=xr, y_range=yr, tools=tools)
+	scatter(x, y, size=size, source=source, color=color, alpha=0.5, x_range=xr, y_range=yr)
 	text(x, y, text=regdb, alpha=1, text_font_size="7pt",
 		 text_baseline="middle", text_align="center", angle=0)
 
-	xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
 	sup_2=u"\u00B2"
 	yaxis().axis_label="R"+sup_2
 
 	hover=curplot().select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
-		("Query SNP", " "+"@qrs @q_alle"),
-		("Proxy SNP", " "+"@prs @p_alle"),
-		("Distance (Mb)", " "+"@dist"),
-		("MAF (Query,Proxy)", " "+"@q_maf,@p_maf"),
-		("R"+sup_2, " "+"@r"),
-		("D\'", " "+"@d"),
-		("Correlated Alleles", " "+"@alleles"),
-		("RegulomeDB", " "+"@regdb"),
-		("Functional Class", " "+"@funct"),
+		("Query SNP", "@qrs @q_alle"),
+		("Proxy SNP", "@prs @p_alle"),
+		("Distance (Mb)", "@dist"),
+		("MAF (Query,Proxy)", "@q_maf,@p_maf"),
+		("R"+sup_2, "@r"),
+		("D\'", "@d"),
+		("Correlated Alleles", "@alleles"),
+		("RegulomeDB", "@regdb"),
+		("Functional Class", "@funct"),
 	])
+	
+	proxy_plot=curplot()
+	
+	
+	
+	# Rug Plot
+	y2_ll=[-0.03]*len(x)
+	y2_ul=[1.03]*len(x)
+	
+	figure(
+	x_range=xr, y_range=yr, border_fill='white',
+        title="", min_border=2, h_symmetry=False, v_symmetry=False,
+        plot_width=800, plot_height=77, tools="")
+	hold()
+	segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=0.5, line_width=1)
+	yaxis().axis_line_color="black"
+	yaxis().major_tick_line_color=None
+	yaxis().major_label_text_color=None
+	yaxis().minor_tick_line_alpha=0  ## Option does not work
+	yaxis().axis_label="SNPs"
+	ygrid().axis_line_color="white"
+	
+	rug=curplot()
+	rug.toolbar_location=None
+	
+	
+	# Gene Plot
+	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[2], coord1, coord2, tmp_dir+"genes_"+request+".txt")
+	subprocess.call(tabix_gene, shell=True)
+	filename=tmp_dir+"genes_"+request+".txt"
+	genes_raw=open(filename).readlines()
+	
+	genes_plot_start=[]
+	genes_plot_end=[]
+	genes_plot_y=[]
+	genes_plot_name=[]
+	exons_plot_x=[]
+	exons_plot_y=[]
+	exons_plot_w=[]
+	exons_plot_h=[]
+	exons_plot_name=[]
+	exons_plot_id=[]
+	exons_plot_exon=[]
+	lines=[0]
+	gap=20000
+	tall=0.75
+	if genes_raw!=None:
+		for i in range(len(genes_raw)):
+			bin,name_id,chrom,strand,txStart,txEnd,cdsStart,cdsEnd,exonCount,exonStarts,exonEnds,score,name2,cdsStartStat,cdsEndStat,exonFrames=genes_raw[i].strip().split()
+			name=name2
+			id=name_id
+			e_start=exonStarts.split(",")
+			e_end=exonEnds.split(",")
+			
+			# Determine Y Coordinate
+			i=0
+			y_coord=None
+			while y_coord==None:
+				if i>len(lines)-1:
+					y_coord=i+1
+					lines.append(int(txEnd))
+				elif int(txStart)>(gap+lines[i]):
+					y_coord=i+1
+					lines[i]=int(txEnd)
+				else:
+					i+=1
+			
+			genes_plot_start.append(int(txStart)/1000000.0)
+			genes_plot_end.append(int(txEnd)/1000000.0)
+			genes_plot_y.append(y_coord)
+			genes_plot_name.append(name)
+			
+			for i in range(len(e_start)-1):
+				if strand=="+":
+					exon=i+1
+				else:
+					exon=len(e_start)-1-i
+				
+				width=(int(e_end[i])-int(e_start[i]))/1000000.0
+				x_coord=(int(e_start[i])+(width/2))/1000000.0
+				
+				exons_plot_x.append(x_coord)
+				exons_plot_y.append(y_coord)
+				exons_plot_w.append(width)
+				exons_plot_h.append(tall)
+				exons_plot_name.append(name)
+				exons_plot_id.append(id)
+				exons_plot_exon.append(exon)
 
+
+	n_rows=len(lines)
+	genes_plot_yn=[n_rows-x+0.5 for x in genes_plot_y]
+	exons_plot_yn=[n_rows-x+0.5 for x in exons_plot_y]
+	yr2=Range1d(start=0, end=n_rows)
+	
+	source2=ColumnDataSource(
+		data=dict(
+			exons_plot_name=exons_plot_name,
+			exons_plot_id=exons_plot_id,
+			exons_plot_exon=exons_plot_exon,
+		)
+	)
+	
+	if len(lines)<3:
+	    plot_h_pix=150
+	else:
+	    plot_h_pix=150+(len(lines)-2)*50
+	
+	figure(
+        x_range=xr, y_range=yr2, border_fill='white',
+        title="", min_border=2, h_symmetry=False, v_symmetry=False,
+        plot_width=800, plot_height=plot_h_pix, tools="hover,pan,select,box_zoom,wheel_zoom,reset,previewsave")
+	hold()
+	segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
+	rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
+	xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
+	yaxis().axis_label="Genes"
+	yaxis().major_tick_line_color=None
+	yaxis().major_label_text_color=None
+	
+	hover=curplot().select(dict(type=HoverTool))
+	hover.tooltips=OrderedDict([
+		("Gene", "@exons_plot_name"),
+		("ID", "@exons_plot_id"),
+		("Exon", "@exons_plot_exon"),
+	])
+	
+	from math import pi
+	genes_plot_start_n=[x-0.000500 for x in genes_plot_start]
+	text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+		 text_font_style="bold", text_baseline="bottom", text_align="center", angle=pi/2)
+	
+	gene_plot=curplot()
+	gene_plot.toolbar_location="below"
+	
+	
+	
+	output_file("LDproxy.html")
+	out_plots=[[proxy_plot],[rug],[gene_plot]]
+	GridPlot(children=out_plots)
+	save()
+	
 	out_script,out_div=embed.components(curplot(), CDN)
 
 
@@ -385,6 +529,7 @@ def calculate_proxy(snp,pop,request):
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+	#subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
 
 
 	# Return plot output
