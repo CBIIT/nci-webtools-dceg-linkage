@@ -510,12 +510,12 @@ def calculate_proxy(snp,pop,request):
 	
 	#output_file("LDproxy.html")
 	out_plots=[[proxy_plot],[rug],[gene_plot]]
-	GridPlot(children=out_plots)
+	plots=GridPlot(children=out_plots) ## Remove plots is you want to save HTML file
 	#save()
 	
-	out_script,out_div=embed.components(curplot(), CDN)
-
-
+	out_script,out_div=embed.components(plots, CDN)
+	
+	
 	# Print run time statistics
 	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
 	print "\nNumber of Individuals: "+str(len(pop_list))
@@ -551,7 +551,16 @@ def main():
 
 	# Run function
 	out_script,out_div=calculate_proxy(snp,pop,request)
-
+	
+	# out_script_line=out_script.split("\n")
+	# for i in range(len(out_script_line)):
+		# print out_script_line[i]
+	# print ""
+	
+	# print out_div
+	# print ""
+	
+	
 	# Print output
 	with open(tmp_dir+"proxy"+request+".json") as f:
 		json_dict=json.load(f)
