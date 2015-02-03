@@ -313,11 +313,10 @@ def calculate_proxy(snp,pop,request):
 	# Import plotting modules
 	import bokeh.embed as embed
 	from bokeh.objects import Range1d,HoverTool
-	from bokeh.plotting import ColumnDataSource,clear,curdoc,curplot,figure,GridPlot,hold,output_file,Plot,rect,save,scatter,segment,text,xaxis,yaxis,ygrid
+	from bokeh.plotting import ColumnDataSource,curdoc,curplot,figure,GridPlot,hold,output_file,Plot,rect,reset_output,save,scatter,segment,text,xaxis,yaxis,ygrid
 	from bokeh.resources import CDN
 	from collections import OrderedDict
 	
-	clear()
 	
 	source=ColumnDataSource(
 		data=dict(
@@ -516,7 +515,7 @@ def calculate_proxy(snp,pop,request):
 	#save()
 	
 	out_script,out_div=embed.components(curdoc(), CDN)
-	clear()
+	reset_output()
 	
 	
 	# Print run time statistics
