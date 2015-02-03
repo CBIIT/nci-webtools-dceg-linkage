@@ -317,6 +317,7 @@ def calculate_proxy(snp,pop,request):
 	from bokeh.resources import CDN
 	from collections import OrderedDict
 	
+	reset_output()
 	
 	source=ColumnDataSource(
 		data=dict(
