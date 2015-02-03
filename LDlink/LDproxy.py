@@ -313,7 +313,7 @@ def calculate_proxy(snp,pop,request):
 	# Import plotting modules
 	import bokeh.embed as embed
 	from bokeh.objects import Range1d,HoverTool
-	from bokeh.plotting import ColumnDataSource,curplot,figure,GridPlot,hold,output_file,Plot,rect,save,scatter,segment,text,xaxis,yaxis,ygrid
+	from bokeh.plotting import ColumnDataSource,curdoc,curplot,figure,GridPlot,hold,output_file,Plot,rect,save,scatter,segment,text,xaxis,yaxis,ygrid
 	from bokeh.resources import CDN
 	from collections import OrderedDict
 
@@ -510,10 +510,10 @@ def calculate_proxy(snp,pop,request):
 	
 	#output_file("LDproxy.html")
 	out_plots=[[proxy_plot],[rug],[gene_plot]]
-	plots=GridPlot(children=out_plots) ## Remove plots is you want to save HTML file
+	GridPlot(children=out_plots)
 	#save()
 	
-	out_script,out_div=embed.components(plots, CDN)
+	out_script,out_div=embed.components(curdoc(), CDN)
 	
 	
 	# Print run time statistics
