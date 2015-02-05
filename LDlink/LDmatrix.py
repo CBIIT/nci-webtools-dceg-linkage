@@ -490,9 +490,9 @@ def calculate_matrix(snplst,pop,request):
 	
 	# Rug Plot
 	figure(
-	x_range=xr, y_range=yr, border_fill='white',
+	x_range=xr, y_range=yr, border_fill='white', y_axis_type=None,
         title="", min_border_top=0, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
-        plot_width=800, plot_height=80, tools="hover,pan")
+        plot_width=800, plot_height=50, tools="hover,pan")
 	hold()
 	rect(x, y, w, h, source=source2, fill_color="red", dilate=True, line_color=None, fill_alpha=0.6)
 	yaxis().axis_line_color="black"
@@ -531,7 +531,7 @@ def calculate_matrix(snplst,pop,request):
 	exons_plot_id=[]
 	exons_plot_exon=[]
 	lines=[0]
-	gap=20000
+	gap=80000
 	tall=0.75
 	if genes_raw!=None:
 		for i in range(len(genes_raw)):
@@ -596,7 +596,7 @@ def calculate_matrix(snplst,pop,request):
 	    plot_h_pix=150+(len(lines)-2)*50
 	
 	figure(min_border_top=0, min_border_bottom=0, min_border_left=100, min_border_right=5,
-        x_range=xr, y_range=yr2, border_fill='white',
+        x_range=xr, y_range=yr2, border_fill='white', y_axis_type=None,
         title="", h_symmetry=False, v_symmetry=False,
         plot_width=800, plot_height=plot_h_pix, tools="hover,pan,box_zoom,wheel_zoom,reset,previewsave")
 	hold()
@@ -614,9 +614,9 @@ def calculate_matrix(snplst,pop,request):
 		("Exon", "@exons_plot_exon"),
 	])
 	
-	genes_plot_start_n=[x-0.000500 for x in genes_plot_start]
+	genes_plot_start_n=[x-0.001000 for x in genes_plot_start]
 	text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-		 text_font_style="bold", text_baseline="bottom", text_align="center", angle=pi/2)
+		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 	
 	gene_plot=curplot()
 	gene_plot.toolbar_location="below"
