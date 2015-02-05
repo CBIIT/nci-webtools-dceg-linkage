@@ -22,11 +22,18 @@ def calculate_hap(snplst,pop,request):
 	
 	
 	# Open SNP list file
-	snps=open(snplst).readlines()
-	if len(snps)>30:
-		output["error"]="Maximum SNP list is 30 RS numbers. Your list contains "+str(len(snps))+" entries."
+	snps_raw=open(snplst).readlines()
+	if len(snps_raw)>30:
+		output["error"]="Maximum SNP list is 30 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
+	
+	# Remove duplicate RS numbers
+	snps=[]
+	for snp_raw in snps_raw:
+		snp=snp_raw.strip().split()
+		if snp not in snps:
+			snps.append(snp)
 	
 	
 	# Select desired ancestral populations
@@ -60,8 +67,7 @@ def calculate_hap(snplst,pop,request):
 	snp_coords=[]
 	warn=[]
 	tabix_coords=""
-	for i in range(len(snps)):
-		snp_i=snps[i].strip().split()
+	for snp_i in snps:
 		if len(snp_i)>0:
 			if len(snp_i[0])>2:
 				if snp_i[0][0:2]=="rs":
