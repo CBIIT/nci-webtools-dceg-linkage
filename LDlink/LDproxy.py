@@ -343,7 +343,7 @@ def calculate_proxy(snp,pop,request):
 
 	figure(
 		title="Proxies for "+snp+" in "+pop,
-		min_border=2, h_symmetry=False, v_symmetry=False,
+		min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=2, h_symmetry=False, v_symmetry=False,
 		plot_width=800,
 		plot_height=600,
 		tools="hover,pan,select,box_zoom,wheel_zoom,reset,previewsave"
@@ -383,9 +383,9 @@ def calculate_proxy(snp,pop,request):
 	y2_ul=[1.03]*len(x)
 	
 	figure(
-	x_range=xr, y_range=yr, border_fill='white',
-        title="", min_border=2, h_symmetry=False, v_symmetry=False,
-        plot_width=800, plot_height=77, tools="")
+	x_range=xr, y_range=yr, border_fill='white', y_axis_type=None,
+        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=2, h_symmetry=False, v_symmetry=False,
+        plot_width=800, plot_height=50, tools="")
 	hold()
 	segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=0.5, line_width=1)
 	yaxis().axis_line_color="black"
@@ -417,7 +417,7 @@ def calculate_proxy(snp,pop,request):
 	exons_plot_id=[]
 	exons_plot_exon=[]
 	lines=[0]
-	gap=20000
+	gap=80000
 	tall=0.75
 	if genes_raw!=None:
 		for i in range(len(genes_raw)):
@@ -482,8 +482,8 @@ def calculate_proxy(snp,pop,request):
 	    plot_h_pix=150+(len(lines)-2)*50
 	
 	figure(
-        x_range=xr, y_range=yr2, border_fill='white',
-        title="", min_border=2, h_symmetry=False, v_symmetry=False,
+        x_range=xr, y_range=yr2, border_fill='white', y_axis_type=None,
+        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=2, h_symmetry=False, v_symmetry=False,
         plot_width=800, plot_height=plot_h_pix, tools="hover,pan,select,box_zoom,wheel_zoom,reset,previewsave")
 	hold()
 	segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
@@ -501,9 +501,9 @@ def calculate_proxy(snp,pop,request):
 	])
 	
 	from math import pi
-	genes_plot_start_n=[x-0.000500 for x in genes_plot_start]
+	genes_plot_start_n=[x-0.003000 for x in genes_plot_start]
 	text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-		 text_font_style="bold", text_baseline="bottom", text_align="center", angle=pi/2)
+		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 	
 	gene_plot=curplot()
 	gene_plot.toolbar_location="below"
