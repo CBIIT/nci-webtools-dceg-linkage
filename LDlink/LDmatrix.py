@@ -6,6 +6,7 @@ def calculate_matrix(snplst,pop,request):
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
+	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
 	snp_dir=data_dir+"snp141/snp141.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
@@ -24,7 +25,7 @@ def calculate_matrix(snplst,pop,request):
 
 	# Open SNP list file
 	snps=open(snplst).readlines()
-	if len(snps)>100:
+	if len(snps)>301:
 		output["error"]="Maximum SNP list is 100 RS numbers. Your list contains "+str(len(snps))+" entries."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
@@ -323,17 +324,82 @@ def calculate_matrix(snplst,pop,request):
 			R.append("NA")
 			box_color.append("blue")
 			box_trans.append(0.1)
-
+	
 	# Import plotting modules
 	import bokeh.embed as embed
-	from bokeh.objects import HoverTool
-	from bokeh.plotting import axis,ColumnDataSource,curplot,figure,grid,rect,xaxis
+	from bokeh.objects import HoverTool, Range1d
+	from bokeh.plotting import axis,ColumnDataSource,curdoc,curplot,figure,grid,GridPlot,hold,output_file,rect,reset_output,save,segment,text,xaxis,yaxis,ygrid
 	from bokeh.resources import CDN
 	from collections import OrderedDict
-
+	from math import pi
+	
+	reset_output()
+		
+	# Aggregate Plotting Data
+	x=[]
+	y=[]
+	w=[]
+	h=[]
+	coord_snps_plot=[]
+	snp_id_plot=[]
+	alleles_snp_plot=[]
+	for i in range(0,len(xpos),int(len(xpos)**0.5)):
+		x.append(int(xpos[i].split(":")[1])/1000000.0)
+		y.append(0.5)
+		w.append(0.0001)
+		h.append(1.06)
+		coord_snps_plot.append(xpos[i])
+		snp_id_plot.append(xnames[i])
+		alleles_snp_plot.append(xA[i])
+	
+	source2=ColumnDataSource(
+		data=dict(
+			x=x,
+			y=y,
+			w=w,
+			h=h,
+			coord_snps_plot=coord_snps_plot,
+			snp_id_plot=snp_id_plot,
+			alleles_snp_plot=alleles_snp_plot,
+		)
+	)
+	
+	buffer=(x[-1]-x[0])*0.025
+	xr=Range1d(start=x[0]-buffer, end=x[-1]+buffer)
+	yr=Range1d(start=-0.03, end=1.03)
+	y2_ll=[-0.03]*len(x)
+	y2_ul=[1.03]*len(x)
+	
+	
+	yr0=Range1d(start=0, end=1)
+	yr2=Range1d(start=0, end=3.8)
+	yr3=Range1d(start=0, end=1)
+	
+	spacing=(x[-1]-x[0]+buffer+buffer)/(len(x)*1.0)
+	x2=[]
+	y0=[]
+	y1=[]
+	y2=[]
+	y3=[]
+	y4=[]
+	for i in range(len(x)):
+		x2.append(x[0]-buffer+spacing*(i+0.5))
+		y0.append(0)
+		y1.append(0.20)
+		y2.append(0.80)
+		y3.append(1)
+		y4.append(1.15)
+	
+	xname_pos=[]
+	for i in x2:
+		for j in range(len(x2)):
+			xname_pos.append(i)
+	
+	# R2 Matrix
 	source = ColumnDataSource(
 		data=dict(
 			xname=xnames,
+			xname_pos=xname_pos,
 			yname=ynames,
 			xA=xA,
 			yA=yA,
@@ -347,21 +413,31 @@ def calculate_matrix(snplst,pop,request):
 		)
 	)
 	
-	figure(outline_line_color="white")
-	rect('xname', 'yname', 0.95, 0.95, source=source,
+	threshold=70
+	if len(snps)<threshold:
+		figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
+	       h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None)
+	else:
+		figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
+	       h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None, y_axis_type=None)
+
+	rect('xname_pos', 'yname', spacing*0.95, 0.95, source=source,
 		 x_axis_location="above",
-		 x_range=rsnum_lst, y_range=list(reversed(rsnum_lst)),
+		 x_range=xr, y_range=list(reversed(rsnum_lst)),
 		 color="box_color", alpha="box_trans", line_color=None,
-		 tools="hover,previewsave", title=" ",
+		 tools="hover,reset,previewsave", title=" ",
 		 plot_width=800, plot_height=800)
 
 	grid().grid_line_color=None
 	axis().axis_line_color=None
 	axis().major_tick_line_color=None
-	axis().major_label_text_font_size=str(15-len(rsnum_lst)/10)+"pt"
+	if len(snps)<threshold:
+		axis().major_label_text_font_size="8pt"
+		xaxis().major_label_orientation="vertical"
+
 	axis().major_label_text_font_style="normal"
-	axis().major_label_standoff=0
-	xaxis().major_label_orientation="vertical"
+	xaxis().major_label_standoff=0
+	
 	
 	sup_2=u"\u00B2"
 	
@@ -369,12 +445,192 @@ def calculate_matrix(snplst,pop,request):
 	hover.tooltips=OrderedDict([
 		("SNP 1", " "+"@yname (@yA)"),
 		("SNP 2", " "+"@xname (@xA)"),
-		("D prime", " "+"@Dp"),
+		("D\'", " "+"@Dp"),
 		("R"+sup_2, " "+"@R2"),
 		("Correlated Alleles", " "+"@corA"),
 	])
+	R2_plot=curplot()
+	
+	
+	
+	# Connecting and Rug Plots
+	# Connector Plot
+	if len(snps)<threshold:
+		figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+			x_range=xr, y_range=yr2, border_fill='white',
+			title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
+			plot_width=800, plot_height=90, tools="")
+		hold()
+		segment(x, y0, x, y1, color="black")
+		segment(x, y1, x2, y2, color="black")
+		segment(x2, y2, x2, y3, color="black")
+		text(x2,y4,text=snp_id_plot,alpha=1, angle=pi/2, text_font_size="8pt",text_baseline="middle", text_align="left")
+	else:
+		figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+			x_range=xr, y_range=yr3, border_fill='white',
+			title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
+			plot_width=800, plot_height=30, tools="")
+		hold()
+		segment(x, y0, x, y1, color="black")
+		segment(x, y1, x2, y2, color="black")
+		segment(x2, y2, x2, y3, color="black")
 
-	out_script,out_div=embed.components(curplot(), CDN)
+	
+	
+	yaxis().major_label_text_color=None
+	yaxis().minor_tick_line_alpha=0  ## Option does not work
+	yaxis().axis_label=" "
+	grid().grid_line_color=None
+	axis().axis_line_color=None
+	axis().major_tick_line_color=None
+	axis().minor_tick_line_color=None
+	
+	connector=curplot()
+	connector.toolbar_location=None
+	
+	# Rug Plot
+	figure(
+	x_range=xr, y_range=yr, border_fill='white',
+        title="", min_border_top=0, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
+        plot_width=800, plot_height=80, tools="hover,pan")
+	hold()
+	rect(x, y, w, h, source=source2, fill_color="red", dilate=True, line_color=None, fill_alpha=0.6)
+	yaxis().axis_line_color="black"
+	yaxis().major_tick_line_color=None
+	yaxis().major_label_text_color=None
+	yaxis().minor_tick_line_alpha=0  ## Option does not work
+	yaxis().axis_label="SNPs"
+	ygrid().axis_line_color="white"
+	
+	hover=curplot().select(dict(type=HoverTool))
+	hover.tooltips=OrderedDict([
+		("SNP", "@snp_id_plot (@alleles_snp_plot)"),
+		("Coord", "@coord_snps_plot"),
+	])
+	
+	rug=curplot()
+	rug.toolbar_location=None
+	
+	
+		
+	# Gene Plot
+	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[2], (x[0]-buffer)*1000000, (x[0]+buffer)*1000000, tmp_dir+"genes_"+request+".txt")
+	subprocess.call(tabix_gene, shell=True)
+	filename=tmp_dir+"genes_"+request+".txt"
+	genes_raw=open(filename).readlines()
+	
+	genes_plot_start=[]
+	genes_plot_end=[]
+	genes_plot_y=[]
+	genes_plot_name=[]
+	exons_plot_x=[]
+	exons_plot_y=[]
+	exons_plot_w=[]
+	exons_plot_h=[]
+	exons_plot_name=[]
+	exons_plot_id=[]
+	exons_plot_exon=[]
+	lines=[0]
+	gap=20000
+	tall=0.75
+	if genes_raw!=None:
+		for i in range(len(genes_raw)):
+			bin,name_id,chrom,strand,txStart,txEnd,cdsStart,cdsEnd,exonCount,exonStarts,exonEnds,score,name2,cdsStartStat,cdsEndStat,exonFrames=genes_raw[i].strip().split()
+			name=name2
+			id=name_id
+			e_start=exonStarts.split(",")
+			e_end=exonEnds.split(",")
+			
+			# Determine Y Coordinate
+			i=0
+			y_coord=None
+			while y_coord==None:
+				if i>len(lines)-1:
+					y_coord=i+1
+					lines.append(int(txEnd))
+				elif int(txStart)>(gap+lines[i]):
+					y_coord=i+1
+					lines[i]=int(txEnd)
+				else:
+					i+=1
+			
+			genes_plot_start.append(int(txStart)/1000000.0)
+			genes_plot_end.append(int(txEnd)/1000000.0)
+			genes_plot_y.append(y_coord)
+			genes_plot_name.append(name)
+			
+			for i in range(len(e_start)-1):
+				if strand=="+":
+					exon=i+1
+				else:
+					exon=len(e_start)-1-i
+				
+				width=(int(e_end[i])-int(e_start[i]))/1000000.0
+				x_coord=(int(e_start[i])+(width/2))/1000000.0
+				
+				exons_plot_x.append(x_coord)
+				exons_plot_y.append(y_coord)
+				exons_plot_w.append(width)
+				exons_plot_h.append(tall)
+				exons_plot_name.append(name)
+				exons_plot_id.append(id)
+				exons_plot_exon.append(exon)
+
+
+	n_rows=len(lines)
+	genes_plot_yn=[n_rows-x+0.5 for x in genes_plot_y]
+	exons_plot_yn=[n_rows-x+0.5 for x in exons_plot_y]
+	yr2=Range1d(start=0, end=n_rows)
+	
+	source2=ColumnDataSource(
+		data=dict(
+			exons_plot_name=exons_plot_name,
+			exons_plot_id=exons_plot_id,
+			exons_plot_exon=exons_plot_exon,
+		)
+	)
+	
+	if len(lines)<3:
+	    plot_h_pix=150
+	else:
+	    plot_h_pix=150+(len(lines)-2)*50
+	
+	figure(min_border_top=0, min_border_bottom=0, min_border_left=100, min_border_right=5,
+        x_range=xr, y_range=yr2, border_fill='white',
+        title="", h_symmetry=False, v_symmetry=False,
+        plot_width=800, plot_height=plot_h_pix, tools="hover,pan,box_zoom,wheel_zoom,reset,previewsave")
+	hold()
+	segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
+	rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
+	xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
+	yaxis().axis_label="Genes"
+	yaxis().major_tick_line_color=None
+	yaxis().major_label_text_color=None
+	
+	hover=curplot().select(dict(type=HoverTool))
+	hover.tooltips=OrderedDict([
+		("Gene", "@exons_plot_name"),
+		("ID", "@exons_plot_id"),
+		("Exon", "@exons_plot_exon"),
+	])
+	
+	genes_plot_start_n=[x-0.000500 for x in genes_plot_start]
+	text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+		 text_font_style="bold", text_baseline="bottom", text_align="center", angle=pi/2)
+	
+	gene_plot=curplot()
+	gene_plot.toolbar_location="below"
+	
+	
+	
+	#output_file("LDmatrix.html")
+	out_plots=[[R2_plot],[connector],[rug],[gene_plot]]
+	GridPlot(children=out_plots)
+	#save()
+	
+	out_script,out_div=embed.components(curdoc(), CDN)
+	reset_output()
+	
 	
 	
 	# Return output
