@@ -352,6 +352,16 @@ def calculate_matrix(snplst,pop,request):
 		snp_id_plot.append(xnames[i])
 		alleles_snp_plot.append(xA[i])
 	
+	
+	# Generate error if less than two SNPs
+	if len(x)<2:
+		output["error"]="Less than two SNPs to plot."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise
+	
 	source2=ColumnDataSource(
 		data=dict(
 			x=x,
