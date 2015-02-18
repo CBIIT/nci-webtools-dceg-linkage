@@ -93,6 +93,15 @@ con.row_factory=sqlite3.Row
 con.text_factory=str
 curr=con.cursor()
 
+def get_regDB(chr,pos):
+	t=(pos,)
+	curr.execute("SELECT * FROM "+chr+" WHERE position=?", t)
+	a=curr.fetchone()
+	if a==None:
+		return "."
+	else:
+		return a[1]
+
 
 # Open Connection to SNP141
 con2=sqlite3.connect(snp_dir)
@@ -148,13 +157,7 @@ for geno_n in vcf:
 			
 			
 			# Get RegulomeDB score
-			t=("chr"+geno_n[0]+":"+geno_n[1],)
-			curr.execute('SELECT * FROM regdb WHERE position=?', t)
-			score=curr.fetchone()
-			if score==None:
-				score="."
-			else:
-				score=score[2]
+			score=get_regDB("chr"+geno_n[0],geno_n[1])
 			
 			# Get dbSNP function
 			id="99"+(13-len(rs_n))*"0"+rs_n.strip("rs")
