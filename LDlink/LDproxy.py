@@ -299,12 +299,14 @@ def calculate_proxy(snp,pop,request):
 		regdb.append(regdb_i)
 		if funct_i==".":
 			funct_i=""
+		if funct_i=="NA":
+			funct_i="none"
 		funct.append(funct_i)
 
 		# Set Color
 		if i==0:
 			color_i="blue"
-		elif funct_i!="unknown" and funct_i!="":
+		elif funct_i!="none" and funct_i!="":
 			color_i="orange"
 		else:
 			color_i="red"
