@@ -109,6 +109,12 @@ con2.row_factory=sqlite3.Row
 con2.text_factory=str
 curr2=con2.cursor()
 
+def get_coords(rs):
+	id=rs.strip("rs")
+	t=(id,)
+	curr2.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+	return curr2.fetchone()
+
 
 # Import SNP VCF files
 vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
@@ -160,15 +166,13 @@ for geno_n in vcf:
 			score=get_regDB("chr"+geno_n[0],geno_n[1])
 			
 			# Get dbSNP function
-			def get_coords(rs):
-				id=rs.strip("rs")
-				t=(id,)
-				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-				return cur.fetchone()
-			
-			snp_coord=get_coords(rs_n)
-			if snp_coord!=None:
-				funct=snp_coord[3]
+			if rs_n[0:2]=="rs":
+				snp_coord=get_coords(rs_n)
+				
+				if snp_coord!=None:
+					funct=snp_coord[3]
+				else:
+					funct="."
 			else:
 				funct="."
 			
