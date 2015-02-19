@@ -6,7 +6,7 @@ def calculate_pair(snp1,snp2,pop,request):
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp141/snp141.db"
+	snp_dir=data_dir+"snp142/snp142_annot.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
@@ -24,12 +24,16 @@ def calculate_pair(snp1,snp2,pop,request):
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
+	
+	def get_coords(rs):
+		id=rs.strip("rs")
+		t=(id,)
+		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+		return cur.fetchone()
 
 	# Find RS numbers in snp141 database
 	# SNP1
-	id1="99"+(13-len(snp1))*"0"+snp1.strip("rs")
-	cur.execute('SELECT * FROM snps WHERE id=?', (id1,))
-	snp1_coord=cur.fetchone()
+	snp1_coord=get_coords(snp1)
 	
 	if snp1_coord==None:
 		output["error"]=snp1+" is not in dbSNP build 141."
@@ -37,28 +41,26 @@ def calculate_pair(snp1,snp2,pop,request):
 		raise
 	
 	chr_lst=[str(i) for i in range(1,22+1)]
-	if snp1_coord[2] not in chr_lst:
+	if snp1_coord[1] not in chr_lst:
 		output["error"]=snp1+" is not an autosomal SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
 	# SNP2
-	id2="99"+(13-len(snp2))*"0"+snp2.strip("rs")
-	cur.execute('SELECT * FROM snps WHERE id=?', (id2,))
-	snp2_coord=cur.fetchone()
+	snp2_coord=get_coords(snp2)
 	if snp2_coord==None:
 		output["error"]=snp2+" is not in dbSNP build 141."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
-	if snp2_coord[2] not in chr_lst:
+	if snp2_coord[1] not in chr_lst:
 		output["error"]=snp2+" is not an autosomal SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
 
 	# Check if SNPs are on the same chromosome
-	if snp1_coord[2]!=snp2_coord[2]:
+	if snp1_coord[1]!=snp2_coord[1]:
 		output["warning"]=snp1+" and "+snp2+" are on different chromosomes"
 
 
@@ -84,13 +86,13 @@ def calculate_pair(snp1,snp2,pop,request):
 
 	# Extract 1000 Genomes phased genotypes
 	# SNP1
-	vcf_file1=vcf_dir+snp1_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp1="tabix -fh {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file1, snp1_coord[2], snp1_coord[3])
+	vcf_file1=vcf_dir+snp1_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	tabix_snp1="tabix -fh {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file1, snp1_coord[1], snp1_coord[2])
 	proc1=subprocess.Popen(tabix_snp1, shell=True, stdout=subprocess.PIPE)
 
 	# SNP2
-	vcf_file2=vcf_dir+snp2_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp2="tabix -fh {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file2, snp2_coord[2], snp2_coord[3])
+	vcf_file2=vcf_dir+snp2_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	tabix_snp2="tabix -fh {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file2, snp2_coord[1], snp2_coord[2])
 	proc2=subprocess.Popen(tabix_snp2, shell=True, stdout=subprocess.PIPE)
 
 	# Import SNP VCF files
@@ -127,7 +129,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		raise
 
 
-	if geno1[1]!=snp1_coord[3] or geno2[1]!=snp2_coord[3]:
+	if geno1[1]!=snp1_coord[2] or geno2[1]!=snp2_coord[2]:
 		output["error"]="VCF File does not match SNP coordinates."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
@@ -236,7 +238,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	# Create JSON output
 	snp_1={}
 	snp_1["rsnum"]=snp1
-	snp_1["coord"]="chr"+snp1_coord[2]+":"+snp1_coord[3]
+	snp_1["coord"]="chr"+snp1_coord[1]+":"+snp1_coord[2]
 
 	snp_1_allele_1={}
 	snp_1_allele_1["allele"]=sorted(hap)[0][0]
@@ -254,7 +256,7 @@ def calculate_pair(snp1,snp2,pop,request):
 
 	snp_2={}
 	snp_2["rsnum"]=snp2
-	snp_2["coord"]="chr"+snp2_coord[2]+":"+snp2_coord[3]
+	snp_2["coord"]="chr"+snp2_coord[1]+":"+snp2_coord[2]
 
 	snp_2_allele_1={}
 	snp_2_allele_1["allele"]=sorted(hap)[0][1]
