@@ -10,7 +10,7 @@ process=sys.argv[6]
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
-snp_dir=data_dir+"snp141/snp141.db"
+snp_dir=data_dir+"snp142/snp142_annot.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 reg_dir=data_dir+"regulomedb/regulomedb.db"
@@ -160,11 +160,15 @@ for geno_n in vcf:
 			score=get_regDB("chr"+geno_n[0],geno_n[1])
 			
 			# Get dbSNP function
-			id="99"+(13-len(rs_n))*"0"+rs_n.strip("rs")
-			curr2.execute('SELECT * FROM snps WHERE id=?', (id,))
-			snp_coord=curr2.fetchone()
+			def get_coords(rs):
+				id=rs.strip("rs")
+				t=(id,)
+				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+				return cur.fetchone()
+			
+			snp_coord=get_coords(rs_n)
 			if snp_coord!=None:
-				funct=snp_coord[4]
+				funct=snp_coord[3]
 			else:
 				funct="."
 			

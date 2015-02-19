@@ -9,7 +9,7 @@ def calculate_proxy(snp,pop,request):
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
-	snp_dir=data_dir+"snp141/snp141.db"
+	snp_dir=data_dir+"snp142/snp142_annot.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
@@ -29,11 +29,16 @@ def calculate_proxy(snp,pop,request):
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
+	
+	def get_coords(rs):
+		id=rs.strip("rs")
+		t=(id,)
+		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+		return cur.fetchone()
 
 	# Find RS number in snp141 database
-	id="99"+(13-len(snp))*"0"+snp.strip("rs")
-	cur.execute('SELECT * FROM snps WHERE id=?', (id,))
-	snp_coord=cur.fetchone()
+	snp_coord=get_coords(snp)
+	
 	if snp_coord==None:
 		output["error"]=snp+" is not in dbSNP build 141."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -43,7 +48,7 @@ def calculate_proxy(snp,pop,request):
 		raise
 	
 	chr_lst=[str(i) for i in range(1,22+1)]
-	if snp_coord[2] not in chr_lst:
+	if snp_coord[1] not in chr_lst:
 		output["error"]=snp+" is not an autosomal SNP."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
@@ -80,8 +85,8 @@ def calculate_proxy(snp,pop,request):
 
 
 	# Extract query SNP phased genotypes
-	vcf_file=vcf_dir+snp_coord[2]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp="tabix -fh {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, snp_coord[2], snp_coord[3], tmp_dir+"snp_no_dups_"+request+".vcf")
+	vcf_file=vcf_dir+snp_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	tabix_snp="tabix -fh {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, snp_coord[1], snp_coord[2], tmp_dir+"snp_no_dups_"+request+".vcf")
 	subprocess.call(tabix_snp, shell=True)
 
 
@@ -124,10 +129,10 @@ def calculate_proxy(snp,pop,request):
 
 	# Define window of interest around query SNP
 	window=500000
-	coord1=int(snp_coord[3])-window
+	coord1=int(snp_coord[2])-window
 	if coord1<0:
 		coord1=0
-	coord2=int(snp_coord[3])+window
+	coord2=int(snp_coord[2])+window
 	print ""
 
 
@@ -140,13 +145,13 @@ def calculate_proxy(snp,pop,request):
 		commands=[]
 		for i in range(threads):
 			if i==min(range(threads)) and i==max(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
+				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
 			elif i==min(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
+				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
 			elif i==max(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
+				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
 			else:
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[2]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
+				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
 			commands.append(command)
 
 		processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
@@ -294,12 +299,14 @@ def calculate_proxy(snp,pop,request):
 		regdb.append(regdb_i)
 		if funct_i==".":
 			funct_i=""
+		if funct_i=="NA":
+			funct_i="none"
 		funct.append(funct_i)
 
 		# Set Color
 		if i==0:
 			color_i="blue"
-		elif funct_i!="unknown" and funct_i!="":
+		elif funct_i!="none" and funct_i!="":
 			color_i="orange"
 		else:
 			color_i="red"
@@ -400,7 +407,7 @@ def calculate_proxy(snp,pop,request):
 	
 	
 	# Gene Plot
-	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[2], coord1, coord2, tmp_dir+"genes_"+request+".txt")
+	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[1], coord1, coord2, tmp_dir+"genes_"+request+".txt")
 	subprocess.call(tabix_gene, shell=True)
 	filename=tmp_dir+"genes_"+request+".txt"
 	genes_raw=open(filename).readlines()
@@ -488,7 +495,7 @@ def calculate_proxy(snp,pop,request):
 	hold()
 	segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
+	xaxis().axis_label="Chromosome "+snp_coord[1]+" Coordinate (Mb)"
 	yaxis().axis_label="Genes"
 	yaxis().major_tick_line_color=None
 	yaxis().major_label_text_color=None
