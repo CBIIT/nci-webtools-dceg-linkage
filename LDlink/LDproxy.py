@@ -9,6 +9,7 @@ def calculate_proxy(snp,pop,request):
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
+	recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
 	snp_dir=data_dir+"snp142/snp142_annot.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
@@ -292,7 +293,7 @@ def calculate_proxy(snp,pop,request):
 		r2.append(float(r2_i))
 		r2_round.append(str(round(float(r2_i),4)))
 		corr_alleles.append(corr_alleles_i)
-
+		
 		# Correct Missing Annotations
 		if regdb_i==".":
 			regdb_i=""
@@ -302,28 +303,28 @@ def calculate_proxy(snp,pop,request):
 		if funct_i=="NA":
 			funct_i="none"
 		funct.append(funct_i)
-
+		
 		# Set Color
 		if i==0:
 			color_i="blue"
 		elif funct_i!="none" and funct_i!="":
-			color_i="orange"
-		else:
 			color_i="red"
+		else:
+			color_i="orange"
 		color.append(color_i)
-
+		
 		# Set Size
 		size_i=9+float(p_maf_i)*14.0
 		size.append(size_i)
-
-
-	# Import plotting modules
-	import bokeh.embed as embed
-	from bokeh.objects import Range1d,HoverTool
-	from bokeh.plotting import ColumnDataSource,curdoc,curplot,figure,GridPlot,hold,output_file,Plot,rect,reset_output,save,scatter,segment,text,xaxis,yaxis,ygrid
-	from bokeh.resources import CDN
-	from collections import OrderedDict
 	
+	
+	# Begin Bokeh Plotting
+	from collections import OrderedDict
+	from bokeh.embed import components,file_html
+	from bokeh.models import HoverTool,LinearAxis,Range1d
+	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
+	from bokeh.resources import CDN	
+		
 	reset_output()
 	
 	source=ColumnDataSource(
@@ -347,28 +348,36 @@ def calculate_proxy(snp,pop,request):
 	# Proxy Plot
 	x=p_coord
 	y=r2
-
-	figure(
-		title="Proxies for "+snp+" in "+pop,
-		min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=2, h_symmetry=False, v_symmetry=False,
-		plot_width=800,
-		plot_height=600,
-		tools="hover,pan,select,box_zoom,wheel_zoom,reset,previewsave"
-	)
-
-	hold()
-	
-	xr=Range1d(start=coord1/1000000.0, end=coord2/1000000.0)
+	whitespace=0.01
+	xr=Range1d(start=coord1/1000000.0-whitespace, end=coord2/1000000.0+whitespace)
 	yr=Range1d(start=-0.03, end=1.03)
-
-	scatter(x, y, size=size, source=source, color=color, alpha=0.5, x_range=xr, y_range=yr)
-	text(x, y, text=regdb, alpha=1, text_font_size="7pt",
-		 text_baseline="middle", text_align="center", angle=0)
-
 	sup_2=u"\u00B2"
-	yaxis().axis_label="R"+sup_2
 
-	hover=curplot().select(dict(type=HoverTool))
+	proxy_plot=figure(
+				title="Proxies for "+snp+" in "+pop,
+				min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+				plot_width=900,
+				plot_height=600,
+				x_range=xr, y_range=yr,
+				tools="hover,tap,pan,box_zoom,box_select,reset,previewsave", logo=None,
+				toolbar_location="above")
+	
+	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord[1], coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
+	subprocess.call(tabix_recomb, shell=True)
+	filename=tmp_dir+"recomb_"+request+".txt"
+	recomb_raw=open(filename).readlines()
+	recomb_x=[]
+	recomb_y=[]
+	for i in range(len(recomb_raw)):
+		chr,pos,rate=recomb_raw[i].strip().split()
+		recomb_x.append(int(pos)/1000000.0)
+		recomb_y.append(float(rate)/100.0)
+	
+	proxy_plot.line(recomb_x, recomb_y, size=12, color="black", alpha=0.5)
+	
+	proxy_plot.circle(x, y, size=size, source=source, color=color, alpha=0.5)
+	
+	hover=proxy_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
 		("Query SNP", "@qrs @q_alle"),
 		("Proxy SNP", "@prs @p_alle"),
@@ -381,28 +390,26 @@ def calculate_proxy(snp,pop,request):
 		("Functional Class", "@funct"),
 	])
 	
-	proxy_plot=curplot()
+	proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
+					text_baseline="middle", text_align="center", angle=0)
 	
+	proxy_plot.yaxis.axis_label="R"+sup_2
+	
+	proxy_plot.extra_y_ranges = {"y2_axis": Range1d(start=-3, end=103)}
+	proxy_plot.add_layout(LinearAxis(y_range_name="y2_axis", axis_label="Combined Recombination Rate (cM/Mb)"), "right")
 	
 	
 	# Rug Plot
 	y2_ll=[-0.03]*len(x)
 	y2_ul=[1.03]*len(x)
+	yr_rug=Range1d(start=-0.03, end=1.03)
 	
-	figure(
-	x_range=xr, y_range=yr, border_fill='white', y_axis_type=None,
-        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=2, h_symmetry=False, v_symmetry=False,
-        plot_width=800, plot_height=50, tools="")
-	hold()
-	segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=0.5, line_width=1)
-	yaxis().axis_line_color="black"
-	yaxis().major_tick_line_color=None
-	yaxis().major_label_text_color=None
-	yaxis().minor_tick_line_alpha=0  ## Option does not work
-	yaxis().axis_label="SNPs"
-	ygrid().axis_line_color="white"
-	
-	rug=curplot()
+	rug=figure(
+			x_range=xr, y_range=yr_rug, border_fill='white', y_axis_type=None,
+			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+			plot_width=900, plot_height=50, tools="xpan,tap")
+
+	rug.segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=0.5, line_width=1)
 	rug.toolbar_location=None
 	
 	
@@ -488,42 +495,54 @@ def calculate_proxy(snp,pop,request):
 	else:
 	    plot_h_pix=150+(len(lines)-2)*50
 	
-	figure(
-        x_range=xr, y_range=yr2, border_fill='white', y_axis_type=None,
-        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=2, h_symmetry=False, v_symmetry=False,
-        plot_width=800, plot_height=plot_h_pix, tools="hover,pan,select,box_zoom,wheel_zoom,reset,previewsave")
-	hold()
-	segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
-	rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	xaxis().axis_label="Chromosome "+snp_coord[1]+" Coordinate (Mb)"
-	yaxis().axis_label="Genes"
-	yaxis().major_tick_line_color=None
-	yaxis().major_label_text_color=None
+	from math import pi
+	genes_plot_start_n=[x-0.003000 for x in genes_plot_start]
 	
-	hover=curplot().select(dict(type=HoverTool))
+	
+	gene_plot=figure(
+					x_range=xr, y_range=yr2, border_fill='white', 
+					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,reset,previewsave", logo=None)
+					
+	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
+	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
+	gene_plot.xaxis.axis_label="Chromosome "+snp_coord[1]+" Coordinate (Mb)"
+	gene_plot.yaxis.axis_label="Genes"
+	gene_plot.ygrid.grid_line_color=None
+	gene_plot.yaxis.axis_line_color=None
+	gene_plot.yaxis.minor_tick_line_color=None
+	gene_plot.yaxis.major_tick_line_color=None
+	gene_plot.yaxis.major_label_text_color=None
+	
+	hover=gene_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
 		("Gene", "@exons_plot_name"),
 		("ID", "@exons_plot_id"),
 		("Exon", "@exons_plot_exon"),
 	])
 	
-	from math import pi
-	genes_plot_start_n=[x-0.003000 for x in genes_plot_start]
-	text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+	gene_plot.text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
 		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 	
-	gene_plot=curplot()
+
 	gene_plot.toolbar_location="below"
+
 	
+	#out_plots=[[proxy_plot],[rug],[gene_plot]]
+	#plots=GridPlot(children=out_plots)
 	
+	html=file_html(curdoc(), CDN, "Test Plot")
+	out_html=open("LDproxy.html","w")
+	print >> out_html, html
+	out_html.close()
 	
-	#output_file("LDproxy.html")
-	out_plots=[[proxy_plot],[rug],[gene_plot]]
-	GridPlot(children=out_plots)
-	#save()
-	
-	out_script,out_div=embed.components(curdoc(), CDN)
+	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
+	
+	
+	
+	
+	
 	
 	
 	# Print run time statistics
@@ -540,6 +559,7 @@ def calculate_proxy(snp,pop,request):
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 	subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
+	subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
 
 
 	# Return plot output
