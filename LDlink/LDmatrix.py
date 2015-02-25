@@ -332,11 +332,11 @@ def calculate_matrix(snplst,pop,request):
 			box_trans.append(0.1)
 	
 	# Import plotting modules
-	import bokeh.embed as embed
-	from bokeh.objects import HoverTool, Range1d
-	from bokeh.plotting import axis,ColumnDataSource,curdoc,curplot,figure,grid,GridPlot,hold,output_file,rect,reset_output,save,segment,text,xaxis,yaxis,ygrid
-	from bokeh.resources import CDN
 	from collections import OrderedDict
+	from bokeh.embed import components,file_html
+	from bokeh.models import HoverTool,LinearAxis,Range1d
+	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
+	from bokeh.resources import CDN	
 	from math import pi
 	
 	reset_output()
@@ -352,7 +352,7 @@ def calculate_matrix(snplst,pop,request):
 	for i in range(0,len(xpos),int(len(xpos)**0.5)):
 		x.append(int(xpos[i].split(":")[1])/1000000.0)
 		y.append(0.5)
-		w.append(0.0001)
+		w.append(0.00003)
 		h.append(1.06)
 		coord_snps_plot.append(xpos[i])
 		snp_id_plot.append(xnames[i])
@@ -386,7 +386,7 @@ def calculate_matrix(snplst,pop,request):
 	y2_ll=[-0.03]*len(x)
 	y2_ul=[1.03]*len(x)
 	
-	
+	yr_pos=Range1d(start=(x[-1]+buffer)*-1, end=(x[0]-buffer)*-1)
 	yr0=Range1d(start=0, end=1)
 	yr2=Range1d(start=0, end=3.8)
 	yr3=Range1d(start=0, end=1)
@@ -411,7 +411,7 @@ def calculate_matrix(snplst,pop,request):
 		for j in range(len(x2)):
 			xname_pos.append(i)
 	
-	# R2 Matrix
+	# Matrix Plot
 	source = ColumnDataSource(
 		data=dict(
 			xname=xnames,
@@ -431,33 +431,34 @@ def calculate_matrix(snplst,pop,request):
 	
 	threshold=70
 	if len(snps)<threshold:
-		figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
-	       h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None)
+		matrix_plot=figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
+	       x_range=xr, y_range=list(reversed(rsnum_lst)),
+	       h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None, logo=None,
+		   tools="hover,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+	
 	else:
-		figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
-	       h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None, y_axis_type=None)
-
-	rect('xname_pos', 'yname', spacing*0.95, 0.95, source=source,
-		 x_axis_location="above",
-		 x_range=xr, y_range=list(reversed(rsnum_lst)),
-		 color="box_color", alpha="box_trans", line_color=None,
-		 tools="hover,reset,previewsave", title=" ",
-		 plot_width=800, plot_height=800)
-
-	grid().grid_line_color=None
-	axis().axis_line_color=None
-	axis().major_tick_line_color=None
+		matrix_plot=figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
+	       x_range=xr, y_range=list(reversed(rsnum_lst)),
+		   h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None, y_axis_type=None, logo=None,
+		   tools="hover,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+	
+	matrix_plot.rect('xname_pos', 'yname', 0.95*spacing, 0.95, source=source,
+		 color="box_color", alpha="box_trans", line_color=None)
+	
+	matrix_plot.grid.grid_line_color=None
+	matrix_plot.axis.axis_line_color=None
+	matrix_plot.axis.major_tick_line_color=None
 	if len(snps)<threshold:
-		axis().major_label_text_font_size="8pt"
-		xaxis().major_label_orientation="vertical"
-
-	axis().major_label_text_font_style="normal"
-	xaxis().major_label_standoff=0
+		matrix_plot.axis.major_label_text_font_size="8pt"
+		matrix_plot.xaxis.major_label_orientation="vertical"
+	
+	matrix_plot.axis.major_label_text_font_style="normal"
+	matrix_plot.xaxis.major_label_standoff=0
 	
 	
 	sup_2=u"\u00B2"
 	
-	hover=curplot().select(dict(type=HoverTool))
+	hover=matrix_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
 		("SNP 1", " "+"@yname (@yA)"),
 		("SNP 2", " "+"@xname (@xA)"),
@@ -465,66 +466,53 @@ def calculate_matrix(snplst,pop,request):
 		("R"+sup_2, " "+"@R2"),
 		("Correlated Alleles", " "+"@corA"),
 	])
-	R2_plot=curplot()
 	
 	
 	
 	# Connecting and Rug Plots
 	# Connector Plot
 	if len(snps)<threshold:
-		figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+		connector=figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
 			x_range=xr, y_range=yr2, border_fill='white',
 			title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-			plot_width=800, plot_height=90, tools="")
-		hold()
-		segment(x, y0, x, y1, color="black")
-		segment(x, y1, x2, y2, color="black")
-		segment(x2, y2, x2, y3, color="black")
-		text(x2,y4,text=snp_id_plot,alpha=1, angle=pi/2, text_font_size="8pt",text_baseline="middle", text_align="left")
+			plot_width=800, plot_height=90, tools="xpan,tap")
+		connector.segment(x, y0, x, y1, color="black")
+		connector.segment(x, y1, x2, y2, color="black")
+		connector.segment(x2, y2, x2, y3, color="black")
+		connector.text(x2,y4,text=snp_id_plot,alpha=1, angle=pi/2, text_font_size="8pt",text_baseline="middle", text_align="left")
 	else:
-		figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+		connector=figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
 			x_range=xr, y_range=yr3, border_fill='white',
 			title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-			plot_width=800, plot_height=30, tools="")
-		hold()
-		segment(x, y0, x, y1, color="black")
-		segment(x, y1, x2, y2, color="black")
-		segment(x2, y2, x2, y3, color="black")
+			plot_width=800, plot_height=30, tools="xpan,tap")
+		connector.segment(x, y0, x, y1, color="black")
+		connector.segment(x, y1, x2, y2, color="black")
+		connector.segment(x2, y2, x2, y3, color="black")
 
 	
 	
-	yaxis().major_label_text_color=None
-	yaxis().minor_tick_line_alpha=0  ## Option does not work
-	yaxis().axis_label=" "
-	grid().grid_line_color=None
-	axis().axis_line_color=None
-	axis().major_tick_line_color=None
-	axis().minor_tick_line_color=None
-	
-	connector=curplot()
+	connector.yaxis.major_label_text_color=None
+	connector.yaxis.minor_tick_line_alpha=0  ## Option does not work
+	connector.yaxis.axis_label=" "
+	connector.grid.grid_line_color=None
+	connector.axis.axis_line_color=None
+	connector.axis.major_tick_line_color=None
+	connector.axis.minor_tick_line_color=None
+
 	connector.toolbar_location=None
 	
 	# Rug Plot
-	figure(
-	x_range=xr, y_range=yr, border_fill='white', y_axis_type=None,
-        title="", min_border_top=0, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
-        plot_width=800, plot_height=50, tools="hover,pan")
-	hold()
-	rect(x, y, w, h, source=source2, fill_color="red", dilate=True, line_color=None, fill_alpha=0.6)
-	yaxis().axis_line_color="black"
-	yaxis().major_tick_line_color=None
-	yaxis().major_label_text_color=None
-	yaxis().minor_tick_line_alpha=0  ## Option does not work
-	yaxis().axis_label="SNPs"
-	ygrid().axis_line_color="white"
+	rug=figure(x_range=xr, y_range=yr, y_axis_type=None,
+        title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
+        plot_width=800, plot_height=50, tools="hover,xpan,tap")
+	rug.rect(x, y, w, h, source=source2, fill_color="red", dilate=True, line_color=None, fill_alpha=0.6)
 	
-	hover=curplot().select(dict(type=HoverTool))
+	hover=rug.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
 		("SNP", "@snp_id_plot (@alleles_snp_plot)"),
 		("Coord", "@coord_snps_plot"),
 	])
-	
-	rug=curplot()
+
 	rug.toolbar_location=None
 	
 	
@@ -611,19 +599,18 @@ def calculate_matrix(snplst,pop,request):
 	else:
 	    plot_h_pix=150+(len(lines)-2)*50
 	
-	figure(min_border_top=0, min_border_bottom=0, min_border_left=100, min_border_right=5,
-        x_range=xr, y_range=yr2, border_fill='white', y_axis_type=None,
-        title="", h_symmetry=False, v_symmetry=False,
-        plot_width=800, plot_height=plot_h_pix, tools="hover,pan,box_zoom,wheel_zoom,reset,previewsave")
-	hold()
-	segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
-	rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	xaxis().axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
-	yaxis().axis_label="Genes"
-	yaxis().major_tick_line_color=None
-	yaxis().major_label_text_color=None
+	gene_plot=figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+        x_range=xr, y_range=yr2, y_axis_type=None,
+        title="", h_symmetry=False, v_symmetry=False, logo=None,
+        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,reset,previewsave")
+	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
+	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
+	gene_plot.xaxis.axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
+	gene_plot.yaxis.axis_label="Genes"
+	gene_plot.yaxis.major_tick_line_color=None
+	gene_plot.yaxis.major_label_text_color=None
 	
-	hover=curplot().select(dict(type=HoverTool))
+	hover=gene_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
 		("Gene", "@exons_plot_name"),
 		("ID", "@exons_plot_id"),
@@ -631,20 +618,19 @@ def calculate_matrix(snplst,pop,request):
 	])
 	
 	genes_plot_start_n=[x-0.001000 for x in genes_plot_start]
-	text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+	gene_plot.text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
 		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 	
-	gene_plot=curplot()
 	gene_plot.toolbar_location="below"
 	
 	
 	
-	#output_file("LDmatrix.html")
-	out_plots=[[R2_plot],[connector],[rug],[gene_plot]]
-	GridPlot(children=out_plots)
-	#save()
+	html=file_html(curdoc(), CDN, "Test Plot")
+	out_html=open("LDmatrix.html","w")
+	print >> out_html, html
+	out_html.close()
 	
-	out_script,out_div=embed.components(curdoc(), CDN)
+	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
 	
 	
