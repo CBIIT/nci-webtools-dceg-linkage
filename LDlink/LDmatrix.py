@@ -7,7 +7,7 @@ def calculate_matrix(snplst,pop,request):
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
-	snp_dir=data_dir+"snp141/snp141.db"
+	snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
@@ -63,13 +63,19 @@ def calculate_matrix(snplst,pop,request):
 	pop_ids=list(set(ids))
 
 
-	# Connect to snp141 database
+	# Connect to snp142 database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
+	
+	def get_coords(rs):
+		id=rs.strip("rs")
+		t=(id,)
+		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+		return cur.fetchone()
 
 
-	# Find RS numbers in snp141 database
+	# Find RS numbers in snp142 database
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
@@ -79,22 +85,20 @@ def calculate_matrix(snplst,pop,request):
 		if len(snp_i)>0:
 			if len(snp_i[0])>2:
 				if snp_i[0][0:2]=="rs":
-					id="99"+(13-len(snp_i[0]))*"0"+snp_i[0].strip("rs")
-					cur.execute('SELECT * FROM snps WHERE id=?', (id,))
-					snp_coord=cur.fetchone()
+					snp_coord=get_coords(snp_i[0])
 					if snp_coord!=None:
 						rs_nums.append(snp_i[0])
-						snp_pos.append(snp_coord[3])
-						temp=[snp_coord[1],snp_coord[2],snp_coord[3]]
+						snp_pos.append(snp_coord[2])
+						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
 
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 141: "+",".join(warn)
+		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 141."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -112,15 +116,6 @@ def calculate_matrix(snplst,pop,request):
 			return("","")
 			raise
 	
-	chr_lst=[str(i) for i in range(1,22+1)]
-	for i in range(len(snp_coords)):
-		if snp_coords[i][1] not in chr_lst:
-			output["error"]="Not all input SNPs are autosomal."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
 	
 	
 	# Sort coordinates and make tabix formatted coordinates
@@ -157,34 +152,29 @@ def calculate_matrix(snplst,pop,request):
 	pos_lst=[]
 	for g in range(h+1,len(vcf)):
 		geno=vcf[g].strip().split()
-		count0=0
-		count1=0
 		if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
 			for i in range(len(index)):
 				if geno[index[i]]=="0|0":
 					hap1[i]=hap1[i]+geno[3]
 					hap2[i]=hap2[i]+geno[3]
-					count0+=2
 				elif geno[index[i]]=="0|1":
 					hap1[i]=hap1[i]+geno[3]
 					hap2[i]=hap2[i]+geno[4]
-					count0+=1
-					count1+=1
 				elif geno[index[i]]=="1|0":
 					hap1[i]=hap1[i]+geno[4]
 					hap2[i]=hap2[i]+geno[3]
-					count0+=1
-					count1+=1
 				elif geno[index[i]]=="1|1":
 					hap1[i]=hap1[i]+geno[4]
 					hap2[i]=hap2[i]+geno[4]
-					count1+=2
-				elif geno[index[i]]=="./.":
-					hap1[i]=hap1[i]+"."
+				elif geno[index[i]]=="0":
+					hap1[i]=hap1[i]+geno[3]
+					hap2[i]=hap2[i]+"."
+				elif geno[index[i]]=="1":
+					hap1[i]=hap1[i]+geno[4]
 					hap2[i]=hap2[i]+"."
 				else:
-					hap1[i]=hap1[i]+"?"
-					hap2[i]=hap2[i]+"?"
+					hap1[i]=hap1[i]+"."
+					hap2[i]=hap2[i]+"."
 
 			if geno[1] in snp_pos:
 				rsnum=rs_nums[snp_pos.index(geno[1])]
@@ -211,6 +201,12 @@ def calculate_matrix(snplst,pop,request):
 					hap[hap_k]+=1
 				else:
 					hap[hap_k]=1
+			
+			# Remove Missing Haplotypes
+			keys=hap.keys()
+			for key in keys:
+				if "." in key:
+					hap.pop(key, None)
 
 			# Check all haplotypes are present
 			if len(hap)!=4:
@@ -625,10 +621,10 @@ def calculate_matrix(snplst,pop,request):
 	
 	
 	
-	html=file_html(curdoc(), CDN, "Test Plot")
-	out_html=open("LDmatrix.html","w")
-	print >> out_html, html
-	out_html.close()
+	#html=file_html(curdoc(), CDN, "Test Plot")
+	#out_html=open("LDmatrix.html","w")
+	#print >> out_html, html
+	#out_html.close()
 	
 	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
