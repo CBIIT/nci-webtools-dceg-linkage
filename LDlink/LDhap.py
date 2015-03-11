@@ -6,7 +6,7 @@ def calculate_hap(snplst,pop,request):
 	
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp141/snp141.db"
+	snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
@@ -55,13 +55,20 @@ def calculate_hap(snplst,pop,request):
 	pop_ids=list(set(ids))
 	
 	
-	# Connect to snp141 database
+	
+	# Connect to snp142 database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
 	
+	def get_coords(rs):
+		id=rs.strip("rs")
+		t=(id,)
+		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+		return cur.fetchone()
 	
-	# Find RS numbers in snp141 database
+	
+	# Find RS numbers in snp142 database
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
@@ -71,13 +78,11 @@ def calculate_hap(snplst,pop,request):
 		if len(snp_i)>0:
 			if len(snp_i[0])>2:
 				if snp_i[0][0:2]=="rs":
-					id="99"+(13-len(snp_i[0]))*"0"+snp_i[0].strip("rs")
-					cur.execute('SELECT * FROM snps WHERE id=?', (id,))
-					snp_coord=cur.fetchone()
+					snp_coord=get_coords(snp_i[0])
 					if snp_coord!=None:
 						rs_nums.append(snp_i[0])
-						snp_pos.append(snp_coord[3])
-						temp=[snp_coord[1],snp_coord[2],snp_coord[3]]
+						snp_pos.append(snp_coord[2])
+						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
@@ -95,13 +100,6 @@ def calculate_hap(snplst,pop,request):
 	for i in range(len(snp_coords)):
 		if snp_coords[0][1]!=snp_coords[i][1]:
 			output["error"]="Not all input SNPs are on the same chromosome."
-			return(json.dumps(output, sort_keys=True, indent=2))
-			raise
-	
-	chr_lst=[str(i) for i in range(1,22+1)]
-	for i in range(len(snp_coords)):
-		if snp_coords[i][1] not in chr_lst:
-			output["error"]="Not all input SNPs are autosomal."
 			return(json.dumps(output, sort_keys=True, indent=2))
 			raise
 	
@@ -162,12 +160,17 @@ def calculate_hap(snplst,pop,request):
 					hap1[i]=hap1[i]+geno[4]
 					hap2[i]=hap2[i]+geno[4]
 					count1+=2
-				elif geno[index[i]]=="./.":
+				elif geno[index[i]]=="0":
+					hap1[i]=hap1[i]+geno[3]
+					hap2[i]=hap2[i]+"."
+					count0+=1
+				elif geno[index[i]]=="1":
+					hap1[i]=hap1[i]+geno[4]
+					hap2[i]=hap2[i]+"."
+					count1+=1
+				else:
 					hap1[i]=hap1[i]+"."
 					hap2[i]=hap2[i]+"."
-				else:
-					hap1[i]=hap1[i]+"?"
-					hap2[i]=hap2[i]+"?"
 			
 			if geno[1] in snp_pos:
 				rsnum=rs_nums[snp_pos.index(geno[1])]
@@ -200,11 +203,20 @@ def calculate_hap(snplst,pop,request):
 			haps[hap2[i]]=1
 	
 	
+	# Remove Missing Haplotypes
+	keys=haps.keys()
+	for key in keys:
+		if "." in key:
+			haps.pop(key, None)
+	
+	
 	# Sort results
 	results=[]
 	for hap in haps:
 		temp=[hap,haps[hap]]
 		results.append(temp)
+	
+	total_haps=sum(haps.values())
 	
 	results_sort1=sorted(results, key=operator.itemgetter(0))
 	results_sort2=sorted(results_sort1, key=operator.itemgetter(1), reverse=True)
@@ -217,7 +229,7 @@ def calculate_hap(snplst,pop,request):
 		hap_info={}
 		hap_info["Haplotype"]=results_sort2[i][0]
 		hap_info["Count"]=results_sort2[i][1]
-		hap_info["Frequency"]=round(float(results_sort2[i][1])/(2*len(pop_ids)),4)
+		hap_info["Frequency"]=round(float(results_sort2[i][1])/total_haps,4)
 		haps_out["haplotype_"+(digits-len(str(i+1)))*"0"+str(i+1)]=hap_info
 	output["haplotypes"]=haps_out
 	
