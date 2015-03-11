@@ -10,7 +10,7 @@ def calculate_proxy(snp,pop,request):
 	data_dir="/local/content/ldlink/data/"
 	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
 	recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
-	snp_dir=data_dir+"snp142/snp142_annot.db"
+	snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
@@ -37,27 +37,19 @@ def calculate_proxy(snp,pop,request):
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 
-	# Find RS number in snp141 database
+	# Find RS number in snp142 database
 	snp_coord=get_coords(snp)
 	
 	if snp_coord==None:
-		output["error"]=snp+" is not in dbSNP build 141."
+		output["error"]=snp+" is not in dbSNP build 142."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
 		return("","")
 		raise
 	
-	chr_lst=[str(i) for i in range(1,22+1)]
-	if snp_coord[1] not in chr_lst:
-		output["error"]=snp+" is not an autosomal SNP."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
-		raise
-
-
+	
+	
 	# Select desired ancestral populations
 	pops=pop.split("+")
 	pop_dirs=[]
@@ -113,11 +105,16 @@ def calculate_proxy(snp,pop,request):
 
 	genotypes={"0":0,"1":0}
 	for i in index:
-		genotypes[geno[i][0]]+=1
-		genotypes[geno[i][2]]+=1
+		sub_geno=geno[i]
+		for j in sub_geno:
+			if j in genotypes:
+				genotypes[j]+=1
+			else:
+				genotypes[j]=1
+		
 
 	if genotypes["0"]==0 or genotypes["1"]==0:
-		output["error"]=snp+" is monoallelic in the "+pop+" subpopulation."
+		output["error"]=snp+" is monoallelic in the "+pop+" population."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -146,13 +143,13 @@ def calculate_proxy(snp,pop,request):
 		commands=[]
 		for i in range(threads):
 			if i==min(range(threads)) and i==max(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
+				command="python LDproxy_sex_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
 			elif i==min(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
+				command="python LDproxy_sex_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
 			elif i==max(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
+				command="python LDproxy_sex_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
 			else:
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
+				command="python LDproxy_sex_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
 			commands.append(command)
 
 		processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
@@ -526,15 +523,12 @@ def calculate_proxy(snp,pop,request):
 	
 
 	gene_plot.toolbar_location="below"
-
 	
-	#out_plots=[[proxy_plot],[rug],[gene_plot]]
-	#plots=GridPlot(children=out_plots)
 	
-	html=file_html(curdoc(), CDN, "Test Plot")
-	out_html=open("LDproxy.html","w")
-	print >> out_html, html
-	out_html.close()
+	#html=file_html(curdoc(), CDN, "Test Plot")
+	#out_html=open("LDproxy.html","w")
+	#print >> out_html, html
+	#out_html.close()
 	
 	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
@@ -582,13 +576,14 @@ def main():
 	# Run function
 	out_script,out_div=calculate_proxy(snp,pop,request)
 	
-	# out_script_line=out_script.split("\n")
-	# for i in range(len(out_script_line)):
-		# print out_script_line[i]
-	# print ""
-	
-	# print out_div
-	# print ""
+	# Print script and div output
+	#out_script_line=out_script.split("\n")
+	#for i in range(len(out_script_line)):
+		#print out_script_line[i]
+	#print ""
+	#
+	#print out_div
+	#print ""
 	
 	
 	# Print output
