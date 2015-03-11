@@ -10,7 +10,7 @@ process=sys.argv[6]
 
 # Set data directories
 data_dir="/local/content/ldlink/data/"
-snp_dir=data_dir+"snp142/snp142_annot.db"
+snp_dir=data_dir+"snp142/snp142_annot_2.db"
 pop_dir=data_dir+"1000G/Phase3/samples/"
 vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 reg_dir=data_dir+"regulomedb/regulomedb.db"
@@ -103,7 +103,7 @@ def get_regDB(chr,pos):
 		return a[1]
 
 
-# Open Connection to SNP141
+# Open Connection to SNP142
 con2=sqlite3.connect(snp_dir)
 con2.row_factory=sqlite3.Row
 con2.text_factory=str
@@ -148,9 +148,13 @@ for geno_n in vcf:
 		hap={"00":0,"01":0,"10":0,"11":0}
 		for i in index:
 			hap0=geno[i][0]+geno_n[i][0]
-			hap1=geno[i][2]+geno_n[i][2]
-			hap[hap0]+=1
-			hap[hap1]+=1
+			if hap0 in hap:
+				hap[hap0]+=1
+			
+			if len(geno[i])==3 and len(geno_n[i])==3:
+				hap1=geno[i][2]+geno_n[i][2]
+				if hap1 in hap:	
+					hap[hap1]+=1
 		
 		out_stats=LD_calcs(hap,allele,allele_n)
 		if out_stats!=None:
