@@ -6,7 +6,7 @@ def calculate_pair(snp1,snp2,pop,request):
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp142/snp142_annot.db"
+	snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
@@ -20,7 +20,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	output={}
 
 
-	# Connect to snp141 database
+	# Connect to snp142 database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
@@ -36,16 +36,10 @@ def calculate_pair(snp1,snp2,pop,request):
 	snp1_coord=get_coords(snp1)
 	
 	if snp1_coord==None:
-		output["error"]=snp1+" is not in dbSNP build 141."
+		output["error"]=snp1+" is not in dbSNP build 142."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
-	chr_lst=[str(i) for i in range(1,22+1)]
-	if snp1_coord[1] not in chr_lst:
-		output["error"]=snp1+" is not an autosomal SNP."
-		return(json.dumps(output, sort_keys=True, indent=2))
-		raise
-
 	# SNP2
 	snp2_coord=get_coords(snp2)
 	if snp2_coord==None:
@@ -53,18 +47,13 @@ def calculate_pair(snp1,snp2,pop,request):
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
-	if snp2_coord[1] not in chr_lst:
-		output["error"]=snp2+" is not an autosomal SNP."
-		return(json.dumps(output, sort_keys=True, indent=2))
-		raise
-
-
+	
 	# Check if SNPs are on the same chromosome
 	if snp1_coord[1]!=snp2_coord[1]:
 		output["warning"]=snp1+" and "+snp2+" are on different chromosomes"
-
-
-
+	
+	
+	
 	# Select desired ancestral populations
 	pops=pop.split("+")
 	pop_dirs=[]
@@ -82,8 +71,9 @@ def calculate_pair(snp1,snp2,pop,request):
 	
 	ids=[i.strip() for i in pop_list]
 	pop_ids=list(set(ids))
-
-
+	
+	
+	
 	# Extract 1000 Genomes phased genotypes
 	# SNP1
 	vcf_file1=vcf_dir+snp1_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
@@ -106,7 +96,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		raise
 
 	if geno1[3] in ["A","C","G","T"] and geno1[4] in ["A","C","G","T"]:
-		allele1={"0|0":geno1[3]+geno1[3],"0|1":geno1[3]+geno1[4],"1|0":geno1[4]+geno1[3],"1|1":geno1[4]+geno1[4],"./.":""}
+		allele1={"0|0":geno1[3]+geno1[3],"0|1":geno1[3]+geno1[4],"1|0":geno1[4]+geno1[3],"1|1":geno1[4]+geno1[4],"0":geno1[3]+".","1":geno1[4]+".","./.":"..",".":".."}
 	else:
 		output["error"]=snp1+" is not a biallelic SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
@@ -122,7 +112,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		raise
 
 	if geno2[3] in ["A","C","G","T"] and geno2[4] in ["A","C","G","T"]:
-		allele2={"0|0":geno2[3]+geno2[3],"0|1":geno2[3]+geno2[4],"1|0":geno2[4]+geno2[3],"1|1":geno2[4]+geno2[4],"./.":""}
+		allele2={"0|0":geno2[3]+geno2[3],"0|1":geno2[3]+geno2[4],"1|0":geno2[4]+geno2[3],"1|1":geno2[4]+geno2[4],"0":geno2[3]+".","1":geno2[4]+".","./.":"..",".":".."}
 	else:
 		output["error"]=snp2+" is not a biallelic SNP."
 		return(json.dumps(output, sort_keys=True, indent=2))
@@ -137,7 +127,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	# Combine phased genotypes
 	geno={}
 	for i in range(9,len(head1)):
-		geno[head1[i]]=[allele1[geno1[i]],""]
+		geno[head1[i]]=[allele1[geno1[i]],".."]
 
 	for i in range(9,len(head2)):
 		if head2[i] in geno:
@@ -160,7 +150,12 @@ def calculate_pair(snp1,snp2,pop,request):
 			else:
 				hap[hap2]=1
 
-
+	# Remove Missing Haplotypes
+	keys=hap.keys()
+	for key in keys:
+		if "." in key:
+			hap.pop(key, None)
+	
 	# Check all haplotypes are present
 	if len(hap)!=4:
 		snp1_a=[geno1[3],geno1[4]]
