@@ -496,7 +496,7 @@ def calculate_proxy(snp,pop,request):
 	gene_plot=figure(
 					x_range=xr, y_range=yr2, border_fill='white', 
 					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,reset,previewsave", logo=None)
+					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,wheel_zoom,reset,previewsave", logo=None)
 					
 	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
