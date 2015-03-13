@@ -557,7 +557,7 @@ def calculate_matrix(snplst,pop,request):
 			genes_plot_start.append(int(txStart)/1000000.0)
 			genes_plot_end.append(int(txEnd)/1000000.0)
 			genes_plot_y.append(y_coord)
-			genes_plot_name.append(name)
+			genes_plot_name.append(name+"  ")
 			
 			for i in range(len(e_start)-1):
 				if strand=="+":
@@ -566,7 +566,7 @@ def calculate_matrix(snplst,pop,request):
 					exon=len(e_start)-1-i
 				
 				width=(int(e_end[i])-int(e_start[i]))/1000000.0
-				x_coord=(int(e_start[i])+(width/2))/1000000.0
+				x_coord=int(e_start[i])/1000000.0+(width/2)
 				
 				exons_plot_x.append(x_coord)
 				exons_plot_y.append(y_coord)
@@ -596,13 +596,17 @@ def calculate_matrix(snplst,pop,request):
 	    plot_h_pix=150+(len(lines)-2)*50
 	
 	gene_plot=figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
-        x_range=xr, y_range=yr2, y_axis_type=None,
+        x_range=xr, y_range=yr2, border_fill='white',
         title="", h_symmetry=False, v_symmetry=False, logo=None,
         plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,reset,previewsave")
+	
 	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	gene_plot.xaxis.axis_label="Chromosome "+snp_coord[2]+" Coordinate (Mb)"
+	gene_plot.xaxis.axis_label="Chromosome "+snp_coord[1]+" Coordinate (Mb)"
 	gene_plot.yaxis.axis_label="Genes"
+	gene_plot.ygrid.grid_line_color=None
+	gene_plot.yaxis.axis_line_color=None
+	gene_plot.yaxis.minor_tick_line_color=None
 	gene_plot.yaxis.major_tick_line_color=None
 	gene_plot.yaxis.major_label_text_color=None
 	
@@ -613,18 +617,17 @@ def calculate_matrix(snplst,pop,request):
 		("Exon", "@exons_plot_exon"),
 	])
 	
-	genes_plot_start_n=[x-0.001000 for x in genes_plot_start]
-	gene_plot.text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+	gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
 		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 	
 	gene_plot.toolbar_location="below"
 	
 	
 	
-	#html=file_html(curdoc(), CDN, "Test Plot")
-	#out_html=open("LDmatrix.html","w")
-	#print >> out_html, html
-	#out_html.close()
+	html=file_html(curdoc(), CDN, "Test Plot")
+	out_html=open("LDmatrix.html","w")
+	print >> out_html, html
+	out_html.close()
 	
 	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
