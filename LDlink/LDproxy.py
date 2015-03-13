@@ -522,10 +522,10 @@ def calculate_proxy(snp,pop,request):
 	gene_plot.toolbar_location="below"
 	
 	
-	html=file_html(curdoc(), CDN, "Test Plot")
-	out_html=open("LDproxy.html","w")
-	print >> out_html, html
-	out_html.close()
+	#html=file_html(curdoc(), CDN, "Test Plot")
+	#out_html=open("LDproxy.html","w")
+	#print >> out_html, html
+	#out_html.close()
 	
 	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
