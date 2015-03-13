@@ -454,7 +454,7 @@ def calculate_proxy(snp,pop,request):
 			genes_plot_start.append(int(txStart)/1000000.0)
 			genes_plot_end.append(int(txEnd)/1000000.0)
 			genes_plot_y.append(y_coord)
-			genes_plot_name.append(name)
+			genes_plot_name.append(name+"  ")
 			
 			for i in range(len(e_start)-1):
 				if strand=="+":
@@ -463,7 +463,7 @@ def calculate_proxy(snp,pop,request):
 					exon=len(e_start)-1-i
 				
 				width=(int(e_end[i])-int(e_start[i]))/1000000.0
-				x_coord=(int(e_start[i])+(width/2))/1000000.0
+				x_coord=int(e_start[i])/1000000.0+(width/2)
 				
 				exons_plot_x.append(x_coord)
 				exons_plot_y.append(y_coord)
@@ -491,10 +491,7 @@ def calculate_proxy(snp,pop,request):
 	    plot_h_pix=150
 	else:
 	    plot_h_pix=150+(len(lines)-2)*50
-	
-	from math import pi
-	genes_plot_start_n=[x-0.003000 for x in genes_plot_start]
-	
+		
 	
 	gene_plot=figure(
 					x_range=xr, y_range=yr2, border_fill='white', 
@@ -518,17 +515,17 @@ def calculate_proxy(snp,pop,request):
 		("Exon", "@exons_plot_exon"),
 	])
 	
-	gene_plot.text(genes_plot_start_n, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+	gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
 		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 	
 
 	gene_plot.toolbar_location="below"
 	
 	
-	#html=file_html(curdoc(), CDN, "Test Plot")
-	#out_html=open("LDproxy.html","w")
-	#print >> out_html, html
-	#out_html.close()
+	html=file_html(curdoc(), CDN, "Test Plot")
+	out_html=open("LDproxy.html","w")
+	print >> out_html, html
+	out_html.close()
 	
 	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
