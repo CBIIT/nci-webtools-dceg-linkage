@@ -514,7 +514,7 @@ def calculate_matrix(snplst,pop,request):
 	
 		
 	# Gene Plot
-	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[2], (x[0]-buffer)*1000000, (x[0]+buffer)*1000000, tmp_dir+"genes_"+request+".txt")
+	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[1], (x[0]-buffer)*1000000, (x[0]+buffer)*1000000, tmp_dir+"genes_"+request+".txt")
 	subprocess.call(tabix_gene, shell=True)
 	filename=tmp_dir+"genes_"+request+".txt"
 	genes_raw=open(filename).readlines()
