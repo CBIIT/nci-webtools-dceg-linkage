@@ -624,10 +624,10 @@ def calculate_matrix(snplst,pop,request):
 	
 	
 	
-	html=file_html(curdoc(), CDN, "Test Plot")
-	out_html=open("LDmatrix.html","w")
-	print >> out_html, html
-	out_html.close()
+	#html=file_html(curdoc(), CDN, "Test Plot")
+	#out_html=open("LDmatrix.html","w")
+	#print >> out_html, html
+	#out_html.close()
 	
 	out_script,out_div=components(curdoc(), CDN)
 	reset_output()
