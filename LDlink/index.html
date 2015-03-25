@@ -22,13 +22,15 @@
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
 	type="text/css">
-<!-- 	
+<!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
  -->
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"
 	type="text/css">
+
 <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.css">
+
 <link rel="stylesheet"
 	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css"
 	type="text/css">
@@ -56,7 +58,7 @@
 				title="at the National Institutes of Health"></a>
 		</div>
 	</div>
-	
+
 	<div class="container theme-showcase" role="main">
 		<div id="banners">
 			<div id="left">
@@ -78,7 +80,7 @@
             <div class="alert alert-danger" role="alert">You are using an <strong>outdated</strong> version of IE that is not supported for this tool.  Please upgrade your browser to IE version 10.</div>
     <![endif]-->
 
-	
+
 
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
 			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
@@ -98,7 +100,6 @@
 
 		<div class="tab-content">
 			<div class="tab-pane active" id="home">
-
 				<h3>Welcome to LDlink!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -165,6 +166,13 @@
 
 							<div class="form-group">
 								<div class="col-sm-4">
+									<a id="ldhap-population-codes-popover"
+											style="position:relative;"
+											href="#"
+											data-toggle="popover"
+											trigger="manual"
+											data-placement="left"
+											data-content="Warning: Selecting more than 7 sub-populations at a time significantly slows down query time and ties up limited system resources"></a>
 									<label for="populations" style="display: none;">Populations</label>
 									<select id="ldhap-population-codes" multiple="multiple"
 										name="populations" required>
@@ -175,14 +183,6 @@
 								<div class="col-sm-2">
 									<input type="submit" id="ldhap" value="Calculate"
 										class="btn btn-default calculate" />
-									<!--
-											<button id="ldhap" type="submit" class="btn btn-default calculate">
-													Calculate
-											</button>
-										 -->
-									<!-- 
-									<button id="ldhap" class="btn btn-default ladda-button" data-style="expand-right">Submit</button>
-								    -->
 								</div>
 							</div>
 						</form>
@@ -302,6 +302,13 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
+									<a id="ldmatrix-population-codes-popover"
+											style="position:relative;"
+											href="#"
+											data-toggle="popover"
+											trigger="manual"
+											data-placement="left"
+											data-content="Warning: Selecting more than 7 sub-populations at a time significantly slows down query time and ties up limited system resources"></a>
 									<label for="populations" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations" required>
@@ -312,11 +319,6 @@
 								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
-											<button id="ldmatrix" type="submit" class="btn btn-default calculate">
-													Calculate
-											</button>
-										-->
 								</div>
 							</div>
 
@@ -400,6 +402,13 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
+									<a id="ldpair-population-codes-popover"
+											style="position:relative;"
+											href="#"
+											data-toggle="popover"
+											trigger="manual"
+											data-placement="left"
+											data-content="Warning: Selecting more than 7 sub-populations at a time significantly slows down query time and ties up limited system resources"></a>
 									<label for="populations" style="display: none;">Populations</label>
 									<select id="ldpair-population-codes" multiple="multiple"
 										name="populations" required>
@@ -410,11 +419,6 @@
 								<div class="col-sm-1">
 									<input type="submit" id="ldpair" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
-												<button id="ldpair" type="submit" class="btn btn-default calculate">
-														Calculate
-												</button>
-											 -->
 								</div>
 							</div>
 						</form>
@@ -567,7 +571,7 @@
 							<div style="text-align: center" data-bind="text: $data"></div>
 						</div>
 					</div>
-					
+
 				</div>
 			</div>
 			<!-- LDproxy -->
@@ -588,7 +592,14 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-5">
-									<label for="populations" style="display: none;">Populations</label>
+									<a id="ldproxy-population-codes-popover"
+											style="position:relative;left:180px;"
+											href="#"
+											data-toggle="popover"
+											trigger="manual"
+											data-placement="right"
+											data-content="Warning: Selecting more than 7 sub-populations at a time significantly slows down query time and ties up limited system resources"></a>
+											<label for="populations" style="display: none;">Populations</label>
 									<select id="ldproxy-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -598,29 +609,9 @@
 								<div class="col-sm-1">
 									<input type="submit" id="ldproxy" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
-												<button id="ldproxy" type="submit" class="btn btn-default calculate">
-														Calculate
-												</button>
-												 -->
 								</div>
 							</div>
 						</form>
-
-						<!--
-							<div class="col-sm-2">
-								<label for="ldproxy-snp" style="display: none;">Proxy
-									SNP</label> <input id="ldproxy-snp" name="textinput"
-									class="form-control input-small" type="text"
-									placeholder="SNP RS Number" required pattern="rs.+">
-							</div>
-							<label for="ldproxy-population-codes" style="display: none;">Proxy
-								Population</label> <select id="ldproxy-population-codes"
-								multiple="multiple" required>
-							</select> <a id="ldproxy" class="btn btn-default calculate"
-								data-loading-text="Loading..."> Calculate</a>
-						-->
-
 					</div>
 				</div>
 				<hr>
@@ -652,7 +643,7 @@
 
 				<div class="jumbotron">
 					<!-- LDPROXY PROGRESS BAR -->
-					<!-- 
+					<!--
 					<div id="ldproxy-progress-container"
 						style="width: 525px; display: none;">
 						<div id="ldproxy-progress" class="progress">
@@ -761,46 +752,37 @@
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script
-		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script
 		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
 		type="text/javascript">
-			
+
 		</script>
-	<!-- Modernizr not in use
-
-Temporarily removing to see if it effects anything.
-
-<script
-	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
-	type="text/javascript">
-</script>
--->
 	<script
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script type="text/javascript"
 		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
-			
+
 		</script>
 
 	<script src="LDlink.js" type="text/javascript">
-			
+
 		</script>
 
 	<script type="text/javascript"
 		src="../common/js/bootstrap-multiselect.js"></script>
-<!-- 		
+<!--
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.js"></script>
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/spin.min.js"></script>

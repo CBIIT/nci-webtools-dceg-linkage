@@ -341,8 +341,27 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(
 		function() {
+			//alert("Hello");
+			$('[data-toggle="popover"]').popover();
+			//$('[data-toggle="popover"]').popover();
+/*
+			$("#dialog" ).dialog({
+				autoOpen: false,
+				show: {
+					effect: "blind",
+					duration: 1000
+				},
+					hide: {
+					effect: "explode",
+						duration: 1000
+						}
+			});
+			$( "#opener" ).click(function() {
+				$( "#dialog" ).dialog( "open" );
+			});
+*/
 			loadHelp();
-			
+
 			var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy" ];
 
 			// Apply Bindings
@@ -364,10 +383,10 @@ $(document).ready(
 			/*
 			 * $('.tab-content').on('click', "a[class|='btn btn-default
 			 * calculate']", function(e) { calculate(e); });
-			 * 
+			 *
 			 * $('.tab-content').on('click', "button[class|='btn btn-default
 			 * calculate']", function(e) { calculate(e); });
-			 * 
+			 *
 			 */
 
 			$('.ldlinkForm').on('submit', function(e) {
@@ -571,7 +590,7 @@ function updateLDhap() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-	
+
 	hideLoadingIcon(ajaxRequest, id);
 }
 
@@ -684,7 +703,7 @@ function updateLDmatrix() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-	
+
 	hideLoadingIcon(ajaxRequest, id);
 }
 
@@ -899,7 +918,7 @@ function hideLoadingIcon(ajaxRequest, id) {
 function getLDProxyResults(jsonfile) {
 	var id = "ldproxy";
 	var url = "tmp/"+jsonfile;
-	
+
 	var ajaxRequest = $.ajax({
 		type : "GET",
 		url : url
@@ -940,7 +959,7 @@ function getLDProxyResults(jsonfile) {
 function getLDmatrixResults(jsonfile, request) {
 	var id = "ldmatrix";
 	var url = "tmp/matrix"+jsonfile;
-	
+
 	var ajaxRequest = $.ajax({
 		type : "GET",
 		url : url
@@ -1045,12 +1064,12 @@ function displayError(id, data) {
 		$('#' + id + '-message-content').empty().append(data.error);
 		//hide warning
 		$('#' + id + '-message-warning').hide();
-				
+
 		//matrix specific
 		$('#'+id+"-download-links").hide();
-		
+
 		$('#'+id+"-results-container").hide();
-		
+
 		error = true;
 	}
 	return error;
@@ -1133,18 +1152,18 @@ function addLDproxyHyperLinks(data) {
 	url = server + "?" + $.param(params);
 	$('#ldproxy-link').attr('href', url);
 	/*
-	 * 
+	 *
 	 * RS number=rs2720460 Position=chr4:104054686 Pos_minus_250bp=104054436
 	 * Pos_plus_250bp=104054936
-	 * 
+	 *
 	 * Add three links to the following columns in the top 10 proxy table:
-	 * 
+	 *
 	 * RS Number Column links: (Cluster Report)
 	 * http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2720460
-	 * 
+	 *
 	 * Coord Column links:
 	 * http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:104054436-104054936&snp141=pack&hgFind.matches=rs2720460
-	 * 
+	 *
 	 * RegulomeDB links: http://www.regulomedb.org/snp/chr4/104054685 ## Notice
 	 * the minus one base pair for the RegulomeDB coordinate in the link. They
 	 * use a 0 based system for coordinates and not a one based system like our
@@ -1285,9 +1304,39 @@ function buildPopulationDropdown(elementId) {
 						nonSelectedText : 'Select Population',
 						numberDisplayed : 4,
 						selectAllText : ' (ALL) All Populations',
+						previousOptionLength: 0,
+						maxPopulationWarn: 7,
+						maxPopulationWarnTimeout: 5000,
+						maxPopulationWarnOnDisplay: false,
 
 						// buttonClass: 'btn btn-link',
 						buttonText : function(options, select) {
+							//console.log("previousOptionLength = "+this.previousOptionLength);
+							//console.log("currentOptionLength = "+options.length);
+							//console.log('options');
+							//console.dir(this);
+
+							if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+								//console.warn("maxPopulationWarn");
+								//console.log(elementId);
+								//console.dir($('#'+elementId+'-popover'));
+								$('#'+elementId+'-popover').popover('show')
+								$('#'+elementId+'-popover').popover('show');
+								this.maxPopulatinWarnOnDisplay=true;
+								setTimeout(function(){
+									$('#'+elementId+'-popover').popover('destroy');
+									this.maxPopulatinWarnOnDisplay=false;
+								}, this.maxPopulationWarnTimeout);
+							} else {
+								//Destory popover if it is currently being displayed.
+								if(this.maxPopulatinWarnOnDisplay) {
+										$('#'+elementId+'-popover').popover('destroy');
+								}
+							}
+
+							this.previousOptionLength = options.length;
+
+							//console.log("buttonText(): length= "+options.length);
 							if (options.length === 0) {
 								return this.nonSelectedText
 										+ '<span class="caret"></span>';
@@ -1310,6 +1359,20 @@ function buildPopulationDropdown(elementId) {
 										+ ' <b class="caret"></b>';
 							}
 						},
+						onChange : function(option, checked) {
+							console.log("Something changed");
+							//console.log("option");
+							//console.dir(option);
+							console.log("checked ...");
+							console.log(checked);
+							//console.log("options:");
+							//console.dir(options);
+							//console.log("select:");
+							//console.dir(select);
+							//console.log("this:");
+							//console.dir(this);
+
+            },
 						buttonTitle : function(options, select) {
 							if (options.length === 0) {
 								return this.nonSelectedText;
@@ -1326,7 +1389,6 @@ function buildPopulationDropdown(elementId) {
 
 function addValidators() {
 	// Add validators
-
 	// LDHAP FORM
 	$('#ldhapForm')
 			.find('[name="populations"]')
