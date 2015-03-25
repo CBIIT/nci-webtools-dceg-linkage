@@ -1307,36 +1307,24 @@ function buildPopulationDropdown(elementId) {
 						previousOptionLength: 0,
 						maxPopulationWarn: 7,
 						maxPopulationWarnTimeout: 5000,
-						maxPopulationWarnOnDisplay: false,
+						maxPopulationWarnVisible: false,
 
 						// buttonClass: 'btn btn-link',
 						buttonText : function(options, select) {
-							//console.log("previousOptionLength = "+this.previousOptionLength);
-							//console.log("currentOptionLength = "+options.length);
-							//console.log('options');
-							//console.dir(this);
-
 							if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
-								//console.warn("maxPopulationWarn");
-								//console.log(elementId);
-								//console.dir($('#'+elementId+'-popover'));
-								$('#'+elementId+'-popover').popover('show')
 								$('#'+elementId+'-popover').popover('show');
-								this.maxPopulatinWarnOnDisplay=true;
+								this.maxPopulatinWarnVisible=true;
 								setTimeout(function(){
 									$('#'+elementId+'-popover').popover('destroy');
-									this.maxPopulatinWarnOnDisplay=false;
+									this.maxPopulatinWarnVisible=false;
 								}, this.maxPopulationWarnTimeout);
 							} else {
 								//Destory popover if it is currently being displayed.
-								if(this.maxPopulatinWarnOnDisplay) {
+								if(this.maxPopulatinWarnVisible) {
 										$('#'+elementId+'-popover').popover('destroy');
 								}
 							}
-
 							this.previousOptionLength = options.length;
-
-							//console.log("buttonText(): length= "+options.length);
 							if (options.length === 0) {
 								return this.nonSelectedText
 										+ '<span class="caret"></span>';
@@ -1359,20 +1347,6 @@ function buildPopulationDropdown(elementId) {
 										+ ' <b class="caret"></b>';
 							}
 						},
-						onChange : function(option, checked) {
-							console.log("Something changed");
-							//console.log("option");
-							//console.dir(option);
-							console.log("checked ...");
-							console.log(checked);
-							//console.log("options:");
-							//console.dir(options);
-							//console.log("select:");
-							//console.dir(select);
-							//console.log("this:");
-							//console.dir(this);
-
-            },
 						buttonTitle : function(options, select) {
 							if (options.length === 0) {
 								return this.nonSelectedText;
