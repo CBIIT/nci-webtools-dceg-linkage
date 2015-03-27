@@ -148,11 +148,13 @@
 							</div>
 							<div class="col-sm-4">
 								<div class="input-group">
-									<input type="text" readonly
+									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
+									<input type="text" id="ldhap-file-label" readonly
 										placeholder="Upload input file with RS numbers"
-										class="readonly-input-text"><span
-										class="btn btn-default btn-file">Browse<input
-										type="file" id="ldhap-file">
+										class="readonly-input-text">
+									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
+									<span	class="btn btn-default btn-file">Browse
+										<input type="file" id="ldhap-file">
 									</span>
 								</div>
 							</div>
@@ -166,7 +168,7 @@
 											trigger="manual"
 											data-placement="left"
 											data-content="Warning: Selecting 7 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldhap-population-codes" style="display: none;">Populations</label>
 									<select id="ldhap-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -285,10 +287,12 @@
 								</div>
 								<div class="col-sm-4">
 									<div class="input-group">
-										<input type="text" readonly
-											placeholder="Upload input file with RS numbers" class="readonly-input-text"><span
-											class="btn btn-default btn-file">Browse<input
-											type="file" id="ldmatrix-file">
+										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
+										<input type="text" id="ldmatrix-file-label" readonly
+											placeholder="Upload input file with RS numbers" class="readonly-input-text">
+										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
+										<span	class="btn btn-default btn-file">Browse
+											<input type="file" id="ldmatrix-file">
 										</span>
 									</div>
 								</div>
@@ -302,7 +306,7 @@
 											trigger="manual"
 											data-placement="left"
 											data-content="Warning: Selecting 7 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -402,7 +406,7 @@
 											trigger="manual"
 											data-placement="left"
 											data-content="Warning: Selecting 7 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldpair-population-codes" style="display: none;">Populations</label>
 									<select id="ldpair-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -592,7 +596,7 @@
 											trigger="manual"
 											data-placement="right"
 											data-content="Warning: Selecting 7 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
-											<label for="populations" style="display: none;">Populations</label>
+											<label for="ldproxy-population-codes" style="display: none;">Populations</label>
 									<select id="ldproxy-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
