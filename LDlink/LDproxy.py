@@ -506,7 +506,6 @@ def calculate_proxy(snp,pop,request):
 	gene_plot.yaxis.axis_line_color=None
 	gene_plot.yaxis.minor_tick_line_color=None
 	gene_plot.yaxis.major_tick_line_color=None
-	gene_plot.yaxis.major_label_text_color=None
 	
 	hover=gene_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
