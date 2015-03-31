@@ -1305,7 +1305,7 @@ function buildPopulationDropdown(elementId) {
 						numberDisplayed : 4,
 						selectAllText : ' (ALL) All Populations',
 						previousOptionLength: 0,
-						maxPopulationWarn: 7,
+						maxPopulationWarn: 2,
 						maxPopulationWarnTimeout: 5000,
 						maxPopulationWarnVisible: false,
 
