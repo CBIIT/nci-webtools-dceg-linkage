@@ -334,6 +334,21 @@ var ldhapData = {
 	} ]
 };
 
+function showFFWarning() {
+	// Is this a version of Mozilla?
+	if ($.browser.mozilla) {
+		var userAgent = navigator.userAgent.toLowerCase();
+		// Is it Firefox?
+		if (userAgent.indexOf('firefox') != -1) {
+			userAgent = userAgent.substring(userAgent.indexOf('firefox/') + 8);
+			var version = userAgent.substring(0, userAgent.indexOf('.'));
+			if (version < 36) {
+				$('.ffWarning').show();
+			}
+		}
+	}
+}
+
 // Map knockout models to a sample json data
 var ldproxyModel = ko.mapping.fromJS(ldProxyData);
 var ldpairModel = ko.mapping.fromJS(ldPairData);
@@ -341,7 +356,7 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(
 		function() {
-			//alert("Hello");
+			showFFWarning();
 			$('[data-toggle="popover"]').popover();
 			//$('[data-toggle="popover"]').popover();
 /*

@@ -264,3 +264,8 @@ img.graph-legend {
 .snp {
   text-transform: lowercase;
 }
+
+.ffWarning {
+	display: none;
+}
+
