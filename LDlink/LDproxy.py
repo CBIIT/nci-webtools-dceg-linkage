@@ -275,7 +275,7 @@ def calculate_proxy(snp,pop,request):
 	for i in range(len(out_ld_sort)):
 		q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs=out_ld_sort[i]
 		
-		if float(r2_i)>0.05:
+		if float(r2_i)>0.01:
 			q_rs.append(q_rs_i)
 			q_allele.append(q_allele_i)
 			q_coord.append(float(q_coord_i.split(":")[1])/1000000)
