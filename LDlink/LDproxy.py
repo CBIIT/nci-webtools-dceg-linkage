@@ -274,45 +274,47 @@ def calculate_proxy(snp,pop,request):
 	size=[]
 	for i in range(len(out_ld_sort)):
 		q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs=out_ld_sort[i]
-		q_rs.append(q_rs_i)
-		q_allele.append(q_allele_i)
-		q_coord.append(float(q_coord_i.split(":")[1])/1000000)
-		q_maf.append(str(round(float(q_maf_i),4)))
-		if p_rs_i==".":
-			p_rs_i=p_coord_i
-		p_rs.append(p_rs_i)
-		p_allele.append(p_allele_i)
-		p_coord.append(float(p_coord_i.split(":")[1])/1000000)
-		p_maf.append(str(round(float(p_maf_i),4)))
-		dist.append(str(round(dist_i/1000000.0,4)))
-		d_prime.append(d_prime_i)
-		d_prime_round.append(str(round(float(d_prime_i),4)))
-		r2.append(float(r2_i))
-		r2_round.append(str(round(float(r2_i),4)))
-		corr_alleles.append(corr_alleles_i)
 		
-		# Correct Missing Annotations
-		if regdb_i==".":
-			regdb_i=""
-		regdb.append(regdb_i)
-		if funct_i==".":
-			funct_i=""
-		if funct_i=="NA":
-			funct_i="none"
-		funct.append(funct_i)
-		
-		# Set Color
-		if i==0:
-			color_i="blue"
-		elif funct_i!="none" and funct_i!="":
-			color_i="red"
-		else:
-			color_i="orange"
-		color.append(color_i)
-		
-		# Set Size
-		size_i=9+float(p_maf_i)*14.0
-		size.append(size_i)
+		if float(r2_i)>0.05:
+			q_rs.append(q_rs_i)
+			q_allele.append(q_allele_i)
+			q_coord.append(float(q_coord_i.split(":")[1])/1000000)
+			q_maf.append(str(round(float(q_maf_i),4)))
+			if p_rs_i==".":
+				p_rs_i=p_coord_i
+			p_rs.append(p_rs_i)
+			p_allele.append(p_allele_i)
+			p_coord.append(float(p_coord_i.split(":")[1])/1000000)
+			p_maf.append(str(round(float(p_maf_i),4)))
+			dist.append(str(round(dist_i/1000000.0,4)))
+			d_prime.append(d_prime_i)
+			d_prime_round.append(str(round(float(d_prime_i),4)))
+			r2.append(float(r2_i))
+			r2_round.append(str(round(float(r2_i),4)))
+			corr_alleles.append(corr_alleles_i)
+			
+			# Correct Missing Annotations
+			if regdb_i==".":
+				regdb_i=""
+			regdb.append(regdb_i)
+			if funct_i==".":
+				funct_i=""
+			if funct_i=="NA":
+				funct_i="none"
+			funct.append(funct_i)
+			
+			# Set Color
+			if i==0:
+				color_i="blue"
+			elif funct_i!="none" and funct_i!="":
+				color_i="red"
+			else:
+				color_i="orange"
+			color.append(color_i)
+			
+			# Set Size
+			size_i=9+float(p_maf_i)*14.0
+			size.append(size_i)
 	
 	
 	# Begin Bokeh Plotting
