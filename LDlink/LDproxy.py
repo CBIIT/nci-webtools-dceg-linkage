@@ -206,7 +206,7 @@ def calculate_proxy(snp,pop,request):
 	top10=[]
 	digits=len(str(len(out_ld_sort)))
 	for i in range(1,len(out_ld_sort)):
-		if float(out_ld_sort[i][8])>0.1:
+		if float(out_ld_sort[i][8])>0.01:
 			proxy_info={}
 			proxy_info["RS"]=out_ld_sort[i][3]
 			proxy_info["Alleles"]=out_ld_sort[i][4]
