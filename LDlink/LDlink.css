@@ -1,0 +1,271 @@
+/*disable bk logo */
+.bk-logo-small {
+   display:none;
+}
+
+.nav-tabs {
+	width: 100%;
+	float: left;
+	border-bottom-color: #d9d9d9;
+}
+
+.nav-tabs>li a {
+	text-align: center;
+	border-width: 1px 1px 0 1px;
+	border-style: solid;
+	border-color: #e0e0e0;
+	background: #f2f2f2;
+	color: #444444;
+}
+
+.nav-tabs>li a:hover {
+	background: #F9F9F9;
+	border-color: #d9d9d9;
+}
+
+.nav-tabs>li.active a, .nav-tabs>li.active:hover a {
+	background: white;
+	border-color: #d9d9d9;
+	border-bottom-color: transparent;
+	font-weight: bold;
+	color: #444444;
+}
+
+.instructions {
+	text-align: center;
+	padding: 10px 0;
+}
+
+.tabs-dropdown .dropdown-toggle {
+	border-width: 1px 1px 0 1px;
+	border-style: solid;
+	border-color: #e0e0e0;
+	border-radius: 4px 4px 0 0;
+	color: #444444;
+	background: #f2f2f2;
+}
+
+.tab-content {
+	padding: 10px;
+	width: 100%;
+	min-height: 600px;
+	-webkit-overflow-scrolling: touch;
+	background: white;
+	border-width: 0 1px 1px 1px;
+	border-style: solid;
+	border-color: #d9d9d9;
+	border-radius: 0 0 4px 4px;
+	overflow: hidden;
+}
+
+.tab-content .tab-pane {
+	color: #566473;
+}
+
+@media ( max-width : 480px) {
+	.nav-tabs>li {
+		float: none;
+		border: 1px solid #dddddd;
+	}
+	.nav-tabs>li.active>a {
+		border: none;
+	}
+	.nav>li>a:hover, .nav>li>a:focus, .nav-tabs>li.active>a, .nav-tabs>li.active>a:hover,
+		.nav-tabs>li.active>a:focus {
+		background: none;
+		border: none;
+	}
+}
+
+/* Reset bootstrap table*/
+.table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+	border-top: 0px;
+}
+
+.left td {
+	text-align:left;
+}
+.ldpair-results {
+	text-align:center;
+	border: 1px solid #ddd;
+}
+
+.center-align {
+	margin: 0 auto !important;
+	float: none !important;
+}
+
+.spacer {
+	width:10%;
+}
+/*
+table {
+  border-collapse: collapse;
+}
+table td, table th {
+  border: 1px solid black;
+}
+table tr:first-child th {
+  border-top: 0;
+}
+table tr:last-child td {
+  border-bottom: 0;
+}
+table tr td:first-child,
+table tr th:first-child {
+  border-left: 0;
+}
+table tr td:last-child,
+table tr th:last-child {
+  border-right: 0;
+}
+
+*/
+table.ldpair,table.ldpair tr, table.ldpair th {
+  background-color: white !important;
+}
+
+td.cell-right {
+    text-align: right;
+}
+td.cell-left {
+    text-align: left;
+}
+
+td.cell-center {
+    text-align: center;
+}
+
+.cell-height-small {
+	height: 10px;
+	padding:0px;
+}
+
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  background: red;
+  cursor: inherit;
+  display: block;
+}
+tfoot tr.ldhap-table-footer {
+	font-weight:bold;
+}
+input[readonly] {
+  background-color: white !important;
+  cursor: text !important;
+}
+/*
+table.ldhap,table.ldhap tr, table.ldhap th {
+  background-color: white !important;
+}
+*/
+.container {
+  background-color: white;
+}
+.two-by-two {
+  margin-bottom:0px;
+}
+
+.jumbotron {
+  background-color:white;
+  padding:10px 15px;
+}
+.ldpair-stats {
+  float:left;
+}
+table.fixed {
+    table-layout:fixed;
+    width:400px;
+    margin-bottom:15px;
+}
+table.fixed td {
+    overflow: hidden;
+}
+
+table thead td {
+  font-weight:bold;
+  text-align: center;
+}
+
+.font-weight-bold {
+  font-weight:bold;
+}
+
+img.logo {
+	max-height:50px;
+}
+
+img.loading {
+	height:107px;
+	max-height:10%;
+	display: block;
+	margin-left: auto;
+    margin-right: auto;
+}
+
+img.graph-legend {
+  max-width:85%;
+  display:block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#ldproxy-link {
+  display:block;
+  text-align: center;
+}
+
+.readonly-input-text {
+  width:225px;	
+}
+
+.btn-ldlink-multiselect {
+  text-align:left;
+}
+
+.has-feedback .form-control {
+    padding-right: 0px;
+}
+
+.form-control-feedback {
+    top: 0;
+    right: -15px;
+}
+
+/* Placeholder Style */
+::-webkit-input-placeholder {
+   font-size: 95%;
+}
+
+:-moz-placeholder { /* Firefox 18- */
+   font-size: 95%;
+}
+
+::-moz-placeholder {  /* Firefox 19+ */
+   font-size: 95%;
+}
+
+:-ms-input-placeholder {
+   font-size: 95%;
+}
+.snp {
+  text-transform: lowercase;
+}
+
+.ffWarning {
+	display: none;
+}
+
