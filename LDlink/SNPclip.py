@@ -43,7 +43,7 @@ def calculate_clip(snplst,pop,request):
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
-		return("")
+		return("","","")
 		raise
 	
 	# Remove duplicate RS numbers
@@ -65,7 +65,7 @@ def calculate_clip(snplst,pop,request):
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
-			return("","")
+			return("","","")
 			raise
 	
 	get_pops="cat "+ " ".join(pop_dirs)
@@ -127,7 +127,7 @@ def calculate_clip(snplst,pop,request):
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
-		return("")
+		return("","","")
 		raise		
 	
 	# Check SNPs are all on the same chromosome
@@ -137,7 +137,7 @@ def calculate_clip(snplst,pop,request):
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
-			return("","")
+			return("","","")
 			raise		
 	
 	# Make tabix formatted coordinates
