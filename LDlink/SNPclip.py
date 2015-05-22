@@ -98,7 +98,7 @@ def calculate_clip(snplst,pop,request):
 	for snp_i in snps:
 		if len(snp_i)>0:
 			if len(snp_i[0])>2:
-				if snp_i[0][0:2]=="rs":
+				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit():
 					snp_coord=get_coords(snp_i[0])
 					if snp_coord!=None:
 						rs_nums.append(snp_i[0])
