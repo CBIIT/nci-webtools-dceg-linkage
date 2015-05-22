@@ -62,7 +62,7 @@ def calculate_tip(snplst,request):
 	for snp_i in snps:
 		if len(snp_i)>0:
 			if len(snp_i[0])>2:
-				if snp_i[0][0:2]=="rs":
+				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit():
 					snp_coord=get_coords(snp_i[0])
 					if snp_coord!=None:
 						chr=snp_coord[1]
@@ -74,6 +74,10 @@ def calculate_tip(snplst,request):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
+				else:
+					warn.append(snp_i[0])
+			else:
+				warn.append(snp_i[0])
 
 	if warn!=[]:
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
