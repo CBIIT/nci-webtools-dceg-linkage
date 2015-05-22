@@ -31,7 +31,7 @@ def calculate_pair(snp1,snp2,pop,request):
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 
-	# Find RS numbers in snp141 database
+	# Find RS numbers in snp142 database
 	# SNP1
 	snp1_coord=get_coords(snp1)
 	
@@ -43,7 +43,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	# SNP2
 	snp2_coord=get_coords(snp2)
 	if snp2_coord==None:
-		output["error"]=snp2+" is not in dbSNP build 141."
+		output["error"]=snp2+" is not in dbSNP build 142."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
