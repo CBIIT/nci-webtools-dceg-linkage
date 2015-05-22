@@ -104,6 +104,17 @@ def calculate_hap(snplst,pop,request):
 			raise
 	
 	
+	# Check max distance between SNPs
+	distance_bp=[]
+	for i in range(len(snp_coords)):
+		distance_bp.append(int(snp_coords[i][2]))
+	distance_max=max(distance_bp)-min(distance_bp)
+	if distance_max>1000000:
+		if "warning" in output:
+			output["warning"]=output["warning"]+" Switch errors become more common as distance between query variants increases (Query range="+str(distance_max)+"bp)."
+		else:
+			output["warning"]="Switch errors become more common as distance between query variants increases (Query range="+str(distance_max)+"bp)."
+	
 	# Sort coordinates and make tabix formatted coordinates
 	snp_pos_int=[int(i) for i in snp_pos]
 	snp_pos_int.sort()
