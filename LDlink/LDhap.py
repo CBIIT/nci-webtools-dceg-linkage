@@ -88,10 +88,10 @@ def calculate_hap(snplst,pop,request):
 						warn.append(snp_i[0])
 	
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 141: "+",".join(warn)
+		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 141."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
