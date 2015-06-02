@@ -1,0 +1,2 @@
+RS_Number	Position (hg19)	Allele Frequency
+rs123	chr7:24966446	A=0.806, C=0.194

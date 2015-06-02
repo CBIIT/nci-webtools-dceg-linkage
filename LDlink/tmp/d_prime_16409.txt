@@ -1,0 +1,2 @@
+RS_number	rs123
+rs123	1.0

@@ -1,0 +1,3 @@
+Haplotype	Count	Frequency
+C	158	0.7315
+T	58	0.2685
