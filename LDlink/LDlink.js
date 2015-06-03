@@ -475,25 +475,6 @@ function calculate(e) {
 
 	// strip out "Form" from id
 	var id = formId.slice(0, formId.length - 4);
-	var errormsg = "Please write the RS Numbers beginning with a 'rs' followed by a number (ex: rs12345)";
-	var regexp = '^rs\\d+$';
-	var invalidInput = false;
-
-	switch(id) {
-
-	case 'ldhap':
-
-	    invalidInput = validateTextArea(regexp,"#" + id + "-file-snp-numbers",errormsg);
-	    break;
-
-	case 'ldmatrix':
-
-	    invalidInput = validateTextArea(regexp,"#" + id + "-file-snp-numbers",errormsg);
-
-	}
-
-	if(invalidInput)   
-	    return;
 
 	initCalculate(id);
 	updateData(id);
