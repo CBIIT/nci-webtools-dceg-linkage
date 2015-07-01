@@ -1,2 +1,0 @@
-RS_Number	Position (hg19)	Allele Frequency
-rs213	chr7:27931860	C=0.732, T=0.269

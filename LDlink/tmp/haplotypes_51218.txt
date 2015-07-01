@@ -1,3 +1,0 @@
-Haplotype	Count	Frequency
-A	174	0.8056
-C	42	0.1944
