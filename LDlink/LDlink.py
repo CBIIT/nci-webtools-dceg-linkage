@@ -23,7 +23,10 @@ from LDhap import calculate_hap
 from werkzeug import secure_filename
 
 tmp_dir = "./tmp/"
-
+# Ensure tmp directory exists
+if not os.path.exists(tmp_dir):
+        os.makedirs(tmp_dir)
+		
 app = Flask(__name__, static_folder='', static_url_path='/')
 #app.debug = True
 
