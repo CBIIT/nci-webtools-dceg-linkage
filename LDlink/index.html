@@ -13,32 +13,34 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="">
+<meta name="description"
+	content="LDlink is a suite of web-based applications designed to
+					easily and efficiently interrogate linkage disequilibrium in
+					population groups.">
+<meta name="keywords" content="linkage, disequilibrium, LD, equilibrium, haplotype, genotype, SNP, LDpair, LDproxy, LDhap, LDmatrix, dbSNP, Haploview">
 <meta name="author" content="">
 
-<title>LDlink Toolset</title>
+<title>LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups</title>
 <link rel="/LDlink/shortcut icon" href="LD.ico" >
 
 <link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css"
-	type="text/css">
-<!-- 	
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
  -->
 <link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css"
-	type="text/css">
-<link rel="stylesheet" href="http://cdn.pydata.org/bokeh-0.6.1.css">
-<link rel="stylesheet"
-	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css"
-	type="text/css">
-<link rel="stylesheet" href="../common/css/font-awesome.css"
-	type="text/css">
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
 
-<link rel="stylesheet" href="../common/css/bootstrap-multiselect.css"
-	type="text/css">
-<link rel="stylesheet" href="../common/css/style.css" type="text/css">
-<link rel="stylesheet" href="LDlink.css" type="text/css">
+<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.css">
+
+<link rel="stylesheet"
+	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css">
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="../common/css/bootstrap-multiselect.css">
+<link rel="stylesheet" href="../common/css/style.css">
+<link rel="stylesheet" href="../common/css/social.css">
+<link rel="stylesheet" href="LDlink.css">
+
 </head>
 
 <body role="document">
@@ -56,7 +58,7 @@
 				title="at the National Institutes of Health"></a>
 		</div>
 	</div>
-	
+
 	<div class="container theme-showcase" role="main">
 		<div id="banners">
 			<div id="left">
@@ -72,14 +74,11 @@
 					class="logo"></a>
 			</div>
 		</div>
-		<br><br>
+		<br>
 		<!-- Main Menu Tabs -->
 	<!--[if lt IE 9]>
             <div class="alert alert-danger" role="alert">You are using an <strong>outdated</strong> version of IE that is not supported for this tool.  Please upgrade your browser to IE version 10.</div>
     <![endif]-->
-
-	
-
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
 			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
 
@@ -98,19 +97,18 @@
 
 		<div class="tab-content">
 			<div class="tab-pane active" id="home">
-
 				<h3>Welcome to LDlink!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
 					population groups. All population genotype data originates from
 					Phase 3 of the 1000 Genomes Project and SNP RS numbers are indexed
-					based on dbSNP build 141. Only bi-allelic
+					based on dbSNP build 142. Only bi-allelic
 					SNPs are permitted as input. LDlink includes the following
 					components:<br><br></p>
 
 				<p style="margin-left: 40px;">
 					<b>LDhap</b>: Calculate population specific haplotype
-						frequencies of all haplotypes observed for a list of query SNPs.
+				frequencies of all haplotypes observed for a list of query SNPs.
 						Input is a list of SNP RS numbers (one per line) and a population
 						group.<br> <br>
 
@@ -127,8 +125,7 @@
 				</p>
 
 				<p>
-					If you find our tool useful, please cite our paper (Machiela
-					et al. Journal 2015). Questions or comments? Contact us via <a
+					Questions or comments? Contact us via <a
 					href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
 				</p>
 
@@ -155,18 +152,20 @@
 							</div>
 							<div class="col-sm-4">
 								<div class="input-group">
-									<input type="text" readonly
+									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
+									<input type="text" id="ldhap-file-label" readonly
 										placeholder="Upload input file with RS numbers"
-										class="readonly-input-text"><span
-										class="btn btn-default btn-file">Browse<input
-										type="file" id="ldhap-file">
+										class="readonly-input-text">
+									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
+									<span	class="btn btn-default btn-file">Browse
+										<input type="file" id="ldhap-file">
 									</span>
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldhap-population-codes" style="display: none;">Populations</label>
 									<select id="ldhap-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -176,14 +175,6 @@
 								<div class="col-sm-2">
 									<input type="submit" id="ldhap" value="Calculate"
 										class="btn btn-default calculate" />
-									<!--
-											<button id="ldhap" type="submit" class="btn btn-default calculate">
-													Calculate
-											</button>
-										 -->
-									<!-- 
-									<button id="ldhap" class="btn btn-default ladda-button" data-style="expand-right">Submit</button>
-								    -->
 								</div>
 							</div>
 						</form>
@@ -282,6 +273,10 @@
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
+						<div class="alert alert-danger ffWarning">You are using
+							a version of Firefox that does not render tool tips properly in the
+							output interactive plot</div>
+
 						<!-- LDMATRIX FORM -->
 						<form id="ldmatrixForm" class="ldlinkForm">
 
@@ -293,17 +288,19 @@
 								</div>
 								<div class="col-sm-4">
 									<div class="input-group">
-										<input type="text" readonly
-											placeholder="Upload input file with RS numbers" class="readonly-input-text"><span
-											class="btn btn-default btn-file">Browse<input
-											type="file" id="ldmatrix-file">
+										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
+										<input type="text" id="ldmatrix-file-label" readonly
+											placeholder="Upload input file with RS numbers" class="readonly-input-text">
+										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
+										<span	class="btn btn-default btn-file">Browse
+											<input type="file" id="ldmatrix-file">
 										</span>
 									</div>
 								</div>
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -313,11 +310,6 @@
 								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
-											<button id="ldmatrix" type="submit" class="btn btn-default calculate">
-													Calculate
-											</button>
-										-->
 								</div>
 							</div>
 
@@ -357,7 +349,7 @@
 								<div id="ldmatrix-bokeh-graph"></div>
 													<br />
 								<div>
-									<img src="LDmatrix_legend.png" title="LDmatrix Legend"
+									<img src="LDmatrix_legend.png" title="LDmatrix Legend" alt="LDmatrix legend"
 										class="graph-legend">
 								</div>
 							</div>
@@ -386,7 +378,7 @@
 								<div class="col-sm-2">
 									<input id="ldpair-snp1" name="snp1" type="text"
 										class="form-control" placeholder="SNP1 RS Number"
-										title="rs followed by 1 or more digits" required
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
 							</div>
@@ -395,13 +387,13 @@
 								<div class="col-sm-2">
 									<input id="ldpair-snp2" name="snp2" type="text"
 										class="form-control" placeholder="SNP2 RS Number"
-										title="rs followed by 1 or more digits" required
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="populations" style="display: none;">Populations</label>
+									<label for="ldpair-population-codes" style="display: none;">Populations</label>
 									<select id="ldpair-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -411,11 +403,6 @@
 								<div class="col-sm-1">
 									<input type="submit" id="ldpair" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
-												<button id="ldpair" type="submit" class="btn btn-default calculate">
-														Calculate
-												</button>
-											 -->
 								</div>
 							</div>
 						</form>
@@ -493,11 +480,11 @@
 													<td class="ldpair-results cell-center"
 														data-bind="text: two_by_two.cells.c12"></td>
 												</tr>
+												<tr>
 												<td class="ldpair-results cell-center"
 													data-bind="text: two_by_two.cells.c21"></td>
 												<td class="ldpair-results cell-center"
 													data-bind="text: two_by_two.cells.c22"></td>
-												<tr>
 												</tr>
 											</tbody>
 										</table>
@@ -568,7 +555,7 @@
 							<div style="text-align: center" data-bind="text: $data"></div>
 						</div>
 					</div>
-					
+
 				</div>
 			</div>
 			<!-- LDproxy -->
@@ -576,6 +563,10 @@
 				<!-- LDproxy INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
+					<div class="alert alert-danger ffWarning">You are using a
+						version of Firefox that does not render tool tips properly in the
+						output interactive plot</div>
+
 					<div class="col-sm-10">
 						<!-- LDProxy FORM -->
 						<form id="ldproxyForm" class="ldlinkForm">
@@ -583,13 +574,20 @@
 								<div class="col-sm-2">
 									<input id="ldproxy-snp" name="snp" type="text"
 										class="form-control" placeholder="SNP RS Number"
-										title="rs followed by 1 or more digits" required
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
 							</div>
 							<div class="form-group">
 								<div class="col-sm-5">
-									<label for="populations" style="display: none;">Populations</label>
+									<a id="ldproxy-population-codes-popover"
+											style="position:relative;left:180px;"
+											href="#"
+											data-toggle="popover"
+											trigger="manual"
+											data-placement="right"
+											data-content="Warning: Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
+											<label for="ldproxy-population-codes" style="display: none;">Populations</label>
 									<select id="ldproxy-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
@@ -599,29 +597,9 @@
 								<div class="col-sm-1">
 									<input type="submit" id="ldproxy" value="Calculate"
 										class="btn btn-default calculate" />
-									<!-- 
-												<button id="ldproxy" type="submit" class="btn btn-default calculate">
-														Calculate
-												</button>
-												 -->
 								</div>
 							</div>
 						</form>
-
-						<!--
-							<div class="col-sm-2">
-								<label for="ldproxy-snp" style="display: none;">Proxy
-									SNP</label> <input id="ldproxy-snp" name="textinput"
-									class="form-control input-small" type="text"
-									placeholder="SNP RS Number" required pattern="rs.+">
-							</div>
-							<label for="ldproxy-population-codes" style="display: none;">Proxy
-								Population</label> <select id="ldproxy-population-codes"
-								multiple="multiple" required>
-							</select> <a id="ldproxy" class="btn btn-default calculate"
-								data-loading-text="Loading..."> Calculate</a>
-						-->
-
 					</div>
 				</div>
 				<hr>
@@ -653,7 +631,7 @@
 
 				<div class="jumbotron">
 					<!-- LDPROXY PROGRESS BAR -->
-					<!-- 
+					<!--
 					<div id="ldproxy-progress-container"
 						style="width: 525px; display: none;">
 						<div id="ldproxy-progress" class="progress">
@@ -672,14 +650,18 @@
 								<br />
 								<div>
 									<img src="LDproxy_legend.png" title="LDproxy Legend"
-										class="graph-legend">
+										class="graph-legend" alt="LDproxy legend">
 								</div>
 							</div>
 						</div>
 						<br /> <a id="ldproxy-link"
 							href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
 							target="LDProxy-genome-browser" title="Genome Browser">View
-							plotted region in UCSC Genome Browser</a> <br> <br>
+							plotted region in UCSC Genome Browser</a> 
+						<a id="ldproxy-link"
+							href="http://www.regulomedb.org/help#score"
+							target="LDProxy-genome-browser" title="RegulomeDB scores">View
+							scoring scheme for RegulomeDB scores</a> <br> <br>
 						<div id="ldproxy-table-container center-align">
 							<div class="table-responsive">
 								<div>
@@ -694,11 +676,11 @@
 											<td>Alleles</td>
 											<td>MAF</td>
 											<td>Distance</td>
-											<td>Dprime</td>
+											<td>D'</td>
 											<td>R<sup>2</sup></td>
 											<td>Correlated Alleles</td>
 											<td>RegulomeDB</td>
-											<td>Function</td>
+											<td>Functional Class</td>
 										</tr>
 									<tbody data-bind="foreach: top10">
 										<tr>
@@ -756,63 +738,71 @@
 					href="http://www.usa.gov/">USA.gov</a>
 			</div>
 			<br> <br> NIH...Turning Discovery Into Health<sup>&#174;</sup>
+			<div class="navbar-text social" style="float:right;">SHARE
+				<a href="http://www.facebook.com/sharer.php?u=http://analysistools.nci.nih.gov/LDlink&t=LDlink: an interactive suite of web-based applications designed to easily and efficiently explore linkage disequilibrium in population groups" target="facebook"><i class="fa fa-lg fa-facebook"></i></a>
+				<a href="http://twitter.com/share?url=http://analysistools.nci.nih.gov/LDlink&text=#LDlink: an interactive web tool to easily and efficiently explore linkage disequilibrium in population groups" target="twitter"><i class="fa fa-lg fa-twitter"></i></a>
+				<a href="https://plus.google.com/share?url=http://analysistools.nci.nih.gov/LDlink" target="googlePlus"><i class="fa fa-lg fa-google-plus"></i></a>
+				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i class="fa fa-lg fa-linkedin"></i></a>
+			</div>
 		</div>
 	</div>
 
-	<script src="http://cdn.pydata.org/bokeh-0.6.1.min.js"></script>
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script
-		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.js"
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script
 		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
 		type="text/javascript">
-			
+
 		</script>
-	<!-- Modernizr not in use
-
-Temporarily removing to see if it effects anything.
-
-<script
-	src="http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"
-	type="text/javascript">
-</script>
--->
 	<script
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
 		type="text/javascript">
-			
+
 		</script>
 	<script type="text/javascript"
 		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
-			
+
 		</script>
 
-	<script src="/common/js/purify.js" type="text/javascript">
-	        </script>
-
-	<script src="/common/js/validateTextArea.js" type="text/javascript">
-
-	        </script>
-
 	<script src="LDlink.js" type="text/javascript">
-			
+
 		</script>
 
 	<script type="text/javascript"
+		src="../common/js/purify.js"></script>
+
+	<script type="text/javascript"
 		src="../common/js/bootstrap-multiselect.js"></script>
-<!-- 		
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js">
+	</script>
+	
+<!--
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.js"></script>
 
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/spin.min.js"></script>
 -->
-	</body>
+
+	<!-- Google Analytics -->
+	<script async src='//www.google-analytics.com/analytics.js'></script>
+	<script>
+		window.ga = window.ga || function() {
+			(ga.q = ga.q || []).push(arguments)
+		};
+		ga.l = +new Date;
+		ga('create', 'UA-62346354-1', 'auto');
+		ga('send', 'pageview');
+	</script>
+	<!-- End Google Analytics -->
+</body>
 </html>
 

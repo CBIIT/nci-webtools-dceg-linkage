@@ -334,6 +334,21 @@ var ldhapData = {
 	} ]
 };
 
+function showFFWarning() {
+	// Is this a version of Mozilla?
+	if ($.browser.mozilla) {
+		var userAgent = navigator.userAgent.toLowerCase();
+		// Is it Firefox?
+		if (userAgent.indexOf('firefox') != -1) {
+			userAgent = userAgent.substring(userAgent.indexOf('firefox/') + 8);
+			var version = userAgent.substring(0, userAgent.indexOf('.'));
+			if (version < 36) {
+				$('.ffWarning').show();
+			}
+		}
+	}
+}
+
 // Map knockout models to a sample json data
 var ldproxyModel = ko.mapping.fromJS(ldProxyData);
 var ldpairModel = ko.mapping.fromJS(ldPairData);
@@ -341,8 +356,27 @@ var ldhapModel = ko.mapping.fromJS(ldhapData);
 
 $(document).ready(
 		function() {
+			showFFWarning();
+			$('[data-toggle="popover"]').popover();
+			//$('[data-toggle="popover"]').popover();
+/*
+			$("#dialog" ).dialog({
+				autoOpen: false,
+				show: {
+					effect: "blind",
+					duration: 1000
+				},
+					hide: {
+					effect: "explode",
+						duration: 1000
+						}
+			});
+			$( "#opener" ).click(function() {
+				$( "#dialog" ).dialog( "open" );
+			});
+*/
 			loadHelp();
-			
+
 			var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy" ];
 
 			// Apply Bindings
@@ -364,14 +398,13 @@ $(document).ready(
 			/*
 			 * $('.tab-content').on('click', "a[class|='btn btn-default
 			 * calculate']", function(e) { calculate(e); });
-			 * 
+			 *
 			 * $('.tab-content').on('click', "button[class|='btn btn-default
 			 * calculate']", function(e) { calculate(e); });
-			 * 
+			 *
 			 */
 
 			$('.ldlinkForm').on('submit', function(e) {
-				
 				calculate(e);
 			});
 
@@ -572,7 +605,7 @@ function updateLDhap() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-	
+
 	hideLoadingIcon(ajaxRequest, id);
 }
 
@@ -685,7 +718,7 @@ function updateLDmatrix() {
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-	
+
 	hideLoadingIcon(ajaxRequest, id);
 }
 
@@ -900,7 +933,7 @@ function hideLoadingIcon(ajaxRequest, id) {
 function getLDProxyResults(jsonfile) {
 	var id = "ldproxy";
 	var url = "tmp/"+jsonfile;
-	
+
 	var ajaxRequest = $.ajax({
 		type : "GET",
 		url : url
@@ -941,7 +974,7 @@ function getLDProxyResults(jsonfile) {
 function getLDmatrixResults(jsonfile, request) {
 	var id = "ldmatrix";
 	var url = "tmp/matrix"+jsonfile;
-	
+
 	var ajaxRequest = $.ajax({
 		type : "GET",
 		url : url
@@ -1046,12 +1079,12 @@ function displayError(id, data) {
 		$('#' + id + '-message-content').empty().append(data.error);
 		//hide warning
 		$('#' + id + '-message-warning').hide();
-				
+
 		//matrix specific
 		$('#'+id+"-download-links").hide();
-		
+
 		$('#'+id+"-results-container").hide();
-		
+
 		error = true;
 	}
 	return error;
@@ -1134,18 +1167,18 @@ function addLDproxyHyperLinks(data) {
 	url = server + "?" + $.param(params);
 	$('#ldproxy-link').attr('href', url);
 	/*
-	 * 
+	 *
 	 * RS number=rs2720460 Position=chr4:104054686 Pos_minus_250bp=104054436
 	 * Pos_plus_250bp=104054936
-	 * 
+	 *
 	 * Add three links to the following columns in the top 10 proxy table:
-	 * 
+	 *
 	 * RS Number Column links: (Cluster Report)
 	 * http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2720460
-	 * 
+	 *
 	 * Coord Column links:
 	 * http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:104054436-104054936&snp141=pack&hgFind.matches=rs2720460
-	 * 
+	 *
 	 * RegulomeDB links: http://www.regulomedb.org/snp/chr4/104054685 ## Notice
 	 * the minus one base pair for the RegulomeDB coordinate in the link. They
 	 * use a 0 based system for coordinates and not a one based system like our
@@ -1286,9 +1319,27 @@ function buildPopulationDropdown(elementId) {
 						nonSelectedText : 'Select Population',
 						numberDisplayed : 4,
 						selectAllText : ' (ALL) All Populations',
+						previousOptionLength: 0,
+						maxPopulationWarn: 2,
+						maxPopulationWarnTimeout: 5000,
+						maxPopulationWarnVisible: false,
 
 						// buttonClass: 'btn btn-link',
 						buttonText : function(options, select) {
+							if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+								$('#'+elementId+'-popover').popover('show');
+								this.maxPopulatinWarnVisible=true;
+								setTimeout(function(){
+									$('#'+elementId+'-popover').popover('destroy');
+									this.maxPopulatinWarnVisible=false;
+								}, this.maxPopulationWarnTimeout);
+							} else {
+								//Destory popover if it is currently being displayed.
+								if(this.maxPopulatinWarnVisible) {
+										$('#'+elementId+'-popover').popover('destroy');
+								}
+							}
+							this.previousOptionLength = options.length;
 							if (options.length === 0) {
 								return this.nonSelectedText
 										+ '<span class="caret"></span>';
@@ -1327,7 +1378,6 @@ function buildPopulationDropdown(elementId) {
 
 function addValidators() {
 	// Add validators
-
 	// LDHAP FORM
 	$('#ldhapForm')
 			.find('[name="populations"]')
