@@ -235,6 +235,15 @@ img.graph-legend {
 .btn-ldlink-multiselect {
   text-align:left;
 }
+.multiselect-container > li {
+    padding-left: 30px;
+}
+.multiselect-item.multiselect-all {
+	padding-left: 0px;
+}
+.multiselect-item.multiselect-group {
+	padding-left: 15px;
+}
 
 .has-feedback .form-control {
     padding-right: 0px;
@@ -268,4 +277,5 @@ img.graph-legend {
 .ffWarning {
 	display: none;
 }
+
 
