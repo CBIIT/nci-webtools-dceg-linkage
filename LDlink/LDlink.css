@@ -80,6 +80,8 @@
 /* Reset bootstrap table*/
 .table > thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
 	border-top: 0px;
+   	border-bottom: 1px solid #ddd;
+}
 }
 
 .left td {
@@ -268,14 +270,37 @@ img.graph-legend {
 }
 
 :-ms-input-placeholder {
-   font-size: 95%;
+	font-size: 95%;
 }
 .snp {
-  text-transform: lowercase;
+	text-transform: lowercase;
 }
 
 .ffWarning {
 	display: none;
+}
+/*
+.bk-plot-canvas-wrapper {
+	max-width:900px;
+	overflow-x: scroll;
+}
+*/
+
+.haplotype {
+	color: black;
+	/* color: white; */
+}
+.haplotype_a {
+	background: #0880C4; 	/* Blue */
+}
+.haplotype_t {
+	background: #9389BD; 	/* Purple */
+}
+.haplotype_c {
+	background: #F5AC1A; /* Orange */
+}
+.haplotype_g {
+	background: #ED7F23; /* Dark Orange */
 }
 
 

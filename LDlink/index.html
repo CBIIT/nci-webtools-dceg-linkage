@@ -215,7 +215,11 @@
 					<div class="container-fluid" id="ldhap-results-container">
 						<div class="row">
 							<div id="ldhap-bokeh-graph">
+<!--
 								<table class="table table-condensed ldhap" data-height="150">
+-->
+
+								<table class="table ldhap" data-height="150">
 									<thead>
 										<tr>
 											<th>SNP</th>
@@ -245,14 +249,19 @@
 
 											<td data-bind="attr: { id: 'RSnumber_hap_' + $index() }"
 												style="text-align: center"><a data-bind="text: RS"
-												title="Cluster Report" target="LDHap-cluster-report"></a></td>
+												title="Cluster Report" target="_blank"></a></td>
 											<td data-bind="attr: { id: 'Coord_hap_' + $index() }"
 												style="text-align: center"><a data-bind="text: Coord"
-												title="Genome Browser" target="LDHap-coord"></a></td>
+												title="Genome Browser" target="_blank"></a></td>
 											<td data-bind="text: $data.Alleles"></td>
 											<!-- ko foreach: $data.Haplotypes -->
-											<td class="cell-right font-weight-bold"
-												data-bind="text: $data"></td>
+												<td class="cell-center haplotype" 
+
+													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G'}"
+												>
+
+													<span data-bind="text: $data"></span>
+												</td>
 											<!-- /ko -->
 										</tr>
 									</tbody>
