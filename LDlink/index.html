@@ -256,10 +256,8 @@
 											<td data-bind="text: $data.Alleles"></td>
 											<!-- ko foreach: $data.Haplotypes -->
 												<td class="cell-center haplotype" 
-
 													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G'}"
 												>
-
 													<span data-bind="text: $data"></span>
 												</td>
 											<!-- /ko -->
@@ -269,10 +267,10 @@
 							</div>
 						</div>
 						<div class="col-md-12">
-							<span> <a target="LDHap-snps" id="ldhap-snps" href="">Download
+							<span> <a target="_blank" id="ldhap-snps" href="">Download
 									SNP File</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp; <span> <a
-								target="LDHap-haplotypes" id="ldhap-haplotypes" href="">
+								target="_blank" id="ldhap-haplotypes" href="">
 									Download Haplotype File</a>
 							</span>
 						</div>

@@ -302,5 +302,10 @@ img.graph-legend {
 .haplotype_g {
 	background: #ED7F23; /* Dark Orange */
 }
+#ldhap-bokeh-graph {
+	max-height: 700px;
+	max-width: 900px;
+	overflow:auto;
+}
 
 
