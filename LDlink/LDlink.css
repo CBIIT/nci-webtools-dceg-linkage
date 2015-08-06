@@ -290,6 +290,7 @@ img.graph-legend {
 	color: black;
 	/* color: white; */
 }
+/* LDhap Heat Map - Version 1 */
 .haplotype_a {
 	background: #0880C4; 	/* Blue */
 }
@@ -302,10 +303,74 @@ img.graph-legend {
 .haplotype_g {
 	background: #ED7F23; /* Dark Orange */
 }
+
+/* LDhap Heat Map - Version 2 */
+.haplotype_a {
+	background: #0880C4; 	/* Blue */
+	background: linear-gradient(45deg, #218DCA , #0880C4); /* Standard syntax (must be last) */
+}
+.haplotype_t {
+	background: #9389BD; 	/* Purple */
+	background: linear-gradient(45deg, #9E95C4 , #9389BD); /* Standard syntax (must be last) */
+}
+.haplotype_c {
+	background: #F5AC1A; /* Orange */
+	background: linear-gradient(45deg, ##F6B431 , #F5AC1A); /* Standard syntax (must be last) */
+}
+.haplotype_g {
+	background: #ED7F23; /* Dark Orange */
+	background: linear-gradient(45deg, #EF8C39 , #ED7F23); /* Standard syntax (must be last) */
+}
+
+/* LDhap Heat Map - Version 3 */
+/* Pastel Colors light blue, light greenish, light orange, and light purple */
+/* Color Contrast Cheker with http://webaim.org/resources/contrastchecker/ */
+.haplotype_a {
+	background: #abc8ec; 	/* Light Blue; Contrast Ratio: 8:1 */
+	background: linear-gradient(145deg, #c6daf2 , #abc8ec); /* Standard syntax (must be last) */
+}
+.haplotype_t {
+	background: #f2b46c; 	/* Light Orange; Contrast Ratio: 7.56:1 */
+	background: linear-gradient(145deg, #f3c38d , #f2b46c); /* Standard syntax (must be last) */
+}
+.haplotype_c {
+	background: #ccee9c; /* Light Green; Contrast Ratio: 10.67:1 */
+	background: linear-gradient(145deg, #d8f3b6 , #ccee9c); /* Standard syntax (must be last) */
+}
+.haplotype_g {
+	background: #c2b2da; /* Light Purple; c2b2da; Contrast Ratio: 7.17:1 */
+	background: linear-gradient(145deg, #d4c9e5 , #c2b2da); /* Standard syntax (must be last) */
+}
+
 #ldhap-bokeh-graph {
 	max-height: 700px;
 	max-width: 900px;
 	overflow:auto;
 }
 
-
+table.jerry {
+  table-layout: fixed; 
+  width: 100%;
+  *margin-left: -100px;/*ie7*/
+}
+td.jerry, th.jerry {
+  vertical-align: top;
+  border-top: 1px solid #ccc;
+  padding:10px;
+  width:100px;
+}
+th.jerry {
+  position:absolute;
+  *position: relative; /*ie7*/
+  left:0; 
+  width:100px;
+}
+.outer.jerry {
+  position:relative
+}
+.inner.jerry {
+  overflow-x:scroll;
+  overflow-y:visible;
+  width:300px; 
+  margin-left:100px;
+}

@@ -23,8 +23,10 @@
 <title>LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups</title>
 <link rel="/LDlink/shortcut icon" href="LD.ico" >
 
+
 <link rel="stylesheet"
 	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
 <!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
  -->
@@ -214,12 +216,13 @@
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldhap-results-container">
 						<div class="row">
-							<div id="ldhap-bokeh-graph">
+							<div class="outer">
+								<div class="inner">
 <!--
 								<table class="table table-condensed ldhap" data-height="150">
 -->
 
-								<table class="table ldhap" data-height="150">
+								<table class="table">
 									<thead>
 										<tr>
 											<th>SNP</th>
@@ -264,7 +267,41 @@
 										</tr>
 									</tbody>
 								</table>
+								</div>
 							</div>
+<!--
+							Testing
+<div class="outer jerry">
+  <div class="inner jerry">
+    <table class="jerry">
+        <tr>
+          <th>Header A</th>
+          <td>col 1 - A</td>
+          <td>col 2 - A (WITH LONGER CONTENT)</td>
+          <td>col 3 - A</td>
+          <td>col 4 - A</td>
+          <td>col 5 - A</td>
+        </tr>
+        <tr>
+          <th>Header B</th>
+          <td>col 1 - B</td>
+          <td>col 2 - B</td>
+          <td>col 3 - B</td>
+          <td>col 4 - B</td>
+          <td>col 5 - B</td>
+        </tr>
+        <tr>
+          <th>Header C</th>
+          <td>col 1 - C</td>
+          <td>col 2 - C</td>
+          <td>col 3 - C</td>
+          <td>col 4 - C</td>
+          <td>col 5 - C</td>
+        </tr>
+    </table>
+  </div>
+</div>
+-->
 						</div>
 						<div class="col-md-12">
 							<span> <a target="_blank" id="ldhap-snps" href="">Download
