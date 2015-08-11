@@ -222,7 +222,7 @@
 								<table class="table table-condensed ldhap" data-height="150">
 -->
 
-								<table class="table">
+								<table class="table table-condensed">
 									<thead>
 										<tr>
 											<th>SNP</th>
@@ -415,7 +415,10 @@
 			</div>
 
 			<!-- LDpair -->
+			<!--
 			<div class="tab-pane fade" id="ldpair-tab">
+			-->
+			<div class="tab-pane" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
@@ -721,7 +724,9 @@
 										<!-- Header row -->
 										<tr>
 											<td>RS Number</td>
-											<td>Coord</td>
+											<!-- <td>Coord</td> -->
+											<td>Chromosome</td>
+											<td>Position on Chromosome</td>
 											<td>Alleles</td>
 											<td>MAF</td>
 											<td>Distance</td>
@@ -736,6 +741,9 @@
 											<td data-bind="attr: { id: 'RSnumber_' + $index() }"
 												style="text-align: center"><a data-bind="text: RS"
 												title="Cluster Report" target="LDProxy-cluster-report"></a></td>
+											<td data-bind="attr: { id: 'Coord_' + $index() }"
+												style="text-align: center"><a data-bind="text: Coord"
+												title="Genome Browser" target="LDProxy-coord"></a></td>
 											<td data-bind="attr: { id: 'Coord_' + $index() }"
 												style="text-align: center"><a data-bind="text: Coord"
 												title="Genome Browser" target="LDProxy-coord"></a></td>
@@ -795,9 +803,10 @@
 			</div>
 		</div>
 	</div>
-
+<!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
-
+-->
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 	<script
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"
 		type="text/javascript">

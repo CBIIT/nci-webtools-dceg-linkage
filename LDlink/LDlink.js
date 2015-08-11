@@ -334,6 +334,14 @@ var ldhapData = {
 	} ]
 };
 
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
 function showFFWarning() {
 	// Is this a version of Mozilla?
 	if ($.browser.mozilla) {
@@ -522,7 +530,7 @@ function updateData(id) {
 	// Make this generic...
 	// ie. prepare url and post data.
 	// Get data...
-	console.log("updateData(" + id + ")");
+	//console.log("updateData(" + id + ")");
 
 	//show loading icon
 	$('#'+id+"-loading").show();
@@ -551,7 +559,8 @@ function updateLDhap() {
 
 	var $btn = $('#' + id).button('loading');
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-	var population = $('#' + id + '-population-codes').val();
+
+	var population = getPopulationCodes(id+'-population-codes');
 
 	var ldInputs = {
 		snps : snps,
@@ -670,7 +679,8 @@ function updateLDmatrix() {
 	var $btn = $('#' + id).button('loading');
 
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-	var population = $('#' + id + '-population-codes').val();
+	var population = getPopulationCodes(id+'-population-codes');
+
 	var ldmatrixInputs = {
 		snps : snps,
 		pop : population.join("+"),
@@ -809,10 +819,9 @@ function createPopulationDropdown(id) {
 
 function updateLDproxy() {
 	var id = "ldproxy";
-
 	var $btn = $('#' + id).button('loading');
+	var population = getPopulationCodes(id+'-population-codes');
 
-	var population = $('#ldproxy-population-codes').val();
 	var ldproxyInputs = {
 		snp : $('#ldproxy-snp').val(),
 		pop : population.join("+"),
@@ -820,67 +829,8 @@ function updateLDproxy() {
 	};
 
 	console.dir(ldproxyInputs);
-
 	$('#ldproxy-results-link').attr('href',
 			'tmp/proxy' + ldproxyInputs.reference + '.txt');
-	//$('#ldproxy-progress-bar').attr('aria-valuenow', "0");
-
-	//
-	// Determine caclulation time.
-	// Wait 1.5 seconds for pops file to be created.
-	//
-/*
-	setTimeout(function() {
-		// Determine seconds...
-		var url = 'tmp/pops_' + ldproxyInputs.reference + '.txt';
-		var base_calculation_time = 20; // seconds
-		var bokeh_load_time = 8; // seconds
-		var sample_multiplier = 0.0256; // seconds per sample
-
-		var seconds = 0;
-		var ajaxRequest = $.ajax({
-			type : "GET",
-			url : url
-		});
-
-		ajaxRequest.success(function(data) {
-			console.log("Estimate for number of seconds");
-			console.info(seconds);
-			sample_count = data.split("\n").length;
-			console.log("sample_count = " + sample_count);
-			seconds = (sample_multiplier * sample_count)
-					+ base_calculation_time + bokeh_load_time;
-			console.log("Total Seconds =");
-			console.log(seconds);
-			//updateLDproxyProgressBar(id, seconds);
-		});
-		ajaxRequest.fail(function(jqXHR, textStatus) {
-			// Create a linear guess based on
-			// One (1) population take 30 seconds
-			// All (26) populations take 93 seconds.
-			// Get populations list length...
-			var population = $('#ldproxy-population-codes').val();
-			console.log(population);
-			// Get number of populations selected min 1 thru max 30
-			var pop_selected = population.length;
-			console.log("populations selected");
-			console.log(pop_selected);
-			// Backup estimeate30 + (2.42 * x) = seconds
-			var backup_estimate_multiplier = 2.5;
-			seconds = (backup_estimate_multiplier * pop_selected)
-					+ base_calculation_time + bokeh_load_time;
-			console.log("Using Backup Estimate for number of seconds");
-			console.info(seconds);
-			updateLDproxyProgressBar(id, seconds);
-
-		});
-
-		ajaxRequest.always(function() {
-			console.log('AJAX call done for LDProxy estimate');
-		});
-
-	}, 1500);
-*/
 	var url = restServerUrl + "/ldproxy";
 	var ajaxRequest = $.ajax({
 		type : "GET",
@@ -1016,10 +966,11 @@ function updateLDpair() {
 	var id = 'ldpair';
 	var $btn = $('#' + id).button('loading');
 
-	var population = $('#ldpair-population-codes').val();
+	var population = getPopulationCodes(id+'-population-codes');
+
 	console.log("LD Pair");
-	console.log('population');
-	console.dir(population);
+	//console.log('population');
+	//console.dir(population);
 	var ldpairInputs = {
 		snp1 : $('#ldpair-snp1').val(),
 		snp2 : $('#ldpair-snp2').val(),
@@ -1541,55 +1492,135 @@ function addValidators() {
 
 	// LDPROX FORM
 	$('#ldproxyForm')
-			.find('[name="populations"]')
-			.multiselect(
-					{
-						onChange : function(element, checked) {
-							$('#ldproxyForm').bootstrapValidator(
-									'revalidateField', 'populations');
-						}
-					})
-			.end()
-			.bootstrapValidator(
-					{
-						excluded : ':disabled',
-						feedbackIcons : {
-							valid : 'fa  fa-check',
-							invalid : 'fa  fa-close',
-							validating : 'fa fa-refresh'
-						},
-						fields : {
-							snp : {
-								selector : '.snp',
-								validators : {
-									notEmpty : {
-										message : 'The RS Number is required and cannot be empty'
-									},
-									regexp : {
-										regexp : /^rs\d+$/i,
-										message : 'Enter a valid RS number'
-									}
-								}
+		.find('[name="populations"]')
+		.multiselect(
+				{
+					onChange : function(element, checked) {
+						$('#ldproxyForm').bootstrapValidator(
+								'revalidateField', 'populations');
+					}
+				})
+		.end()
+		.bootstrapValidator({
+				excluded : ':disabled',
+				feedbackIcons : {
+					valid : 'fa  fa-check',
+					invalid : 'fa  fa-close',
+					validating : 'fa fa-refresh'
+				},
+				fields : {
+					snp : {
+						selector : '.snp',
+						validators : {
+							notEmpty : {
+								message : 'The RS Number is required and cannot be empty'
 							},
-							populations : {
-								validators : {
-									callback : {
-										message : 'Please choose at least one population',
-										callback : function(value, validator,
-												$field) {
-											// Get the selected options
-											var options = validator
-													.getFieldElements(
-															'populations')
-													.val();
-											console.log('Options');
-											console.log(console);
-											return (options != null && options.length >= 1);
-										}
-									}
+							regexp : {
+								regexp : /^rs\d+$/i,
+								message : 'Enter a valid RS number'
+							}
+						}
+					},
+					populations : {
+						validators : {
+							callback : {
+								message : 'Please choose at least one population',
+								callback : function(value, validator,
+										$field) {
+									// Get the selected options
+									var options = validator
+											.getFieldElements(
+													'populations')
+											.val();
+									console.log('Options');
+									console.log(console);
+									return (options != null && options.length >= 1);
 								}
 							}
 						}
-					});
+					}
+			}
+		});
+}
 
+function getPopulationCodes(id) {
+	var population;
+	var totalPopulations;
+	population =  $('#'+id).val();
+	totalPopulations = countSubPopulations(populations);
+
+	//console.log("Populations (static)");
+	//console.log("Populations length: "+totalPopulations);
+
+	//console.dir(populations);
+	//console.log("Population selected");
+	//console.log("Population length: "+population.length);
+	//Check for selection of All
+	// If total subPopulations equals number of population then popluation = array("All");
+	if(totalPopulations == population.length) {
+		//console.log("YOU SELECTED ALL.  CONGRATS!!!");
+		population = ["ALL"];
+		return population;
+	}
+
+	population = replaceSubGroups(population);
+
+	return population;
+}
+
+function countSubPopulations(populations) {
+
+	var totalPopulations = 0;
+	var subPopulations;
+
+	$.each(populations, function(i, val) {
+		totalPopulations += Number(Object.size(val.subPopulations));
+	});
+
+	return totalPopulations;
+}
+
+function replaceSubGroups(population) {
+	var totalGroupPopulations = 0;
+	var subPopulationsFound = 0;
+	var currentSubPopulations = [];
+	//Determine if a group has all subPopulations selected.
+	//console.dir(populations);
+	$.each(populations, function(currentGroup, val) {
+		totalGroupPopulations = Number(Object.size(val.subPopulations));
+		subPopulationsFound = 0;
+		currentSubPopulations = [];
+		//console.info("currentGroup: "+currentGroup+ " ("+val.fullName+")");
+		//console.log("Check all subPopulations in the currentGroup of "+currentGroup);
+		//if there is one miss then abbondon effort
+		$.each(val.subPopulations, function(pop, desc) {
+			if($.inArray(pop, population) !== -1) {
+				subPopulationsFound++;
+				currentSubPopulations.push(pop);
+				//console.log("pop found: "+pop);
+			} else {
+				missingPop = true;
+				//console.log("pop missing: "+pop);
+			}
+		});
+		if(currentSubPopulations.length == totalGroupPopulations) {
+			//Remove populations of Group then add Group acronymn
+			//console.warn("ADD This GROUP: "+currentGroup+"  ... all sub population were found for this group.");
+			//console.log("BEFORE: "+population);
+			//console.log("REMOVE THESE Populations:");
+			//console.dir(currentSubPopulations);
+			$.each(currentSubPopulations, function(key, value) {
+				//Find position in array
+				population.splice( $.inArray(value, population), 1 );
+				//console.log("REMOVE: "+key+": "+value);
+			});
+			population.push(currentGroup);
+			//console.dir(population);
+
+		}
+		//If all are found then 
+		//totalPopulations += Number(Object.size(val.subPopulations));
+	});
+
+	return population;
 }
