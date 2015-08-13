@@ -251,11 +251,20 @@
 										<tr>
 
 											<td data-bind="attr: { id: 'RSnumber_hap_' + $index() }"
-												style="text-align: center"><a data-bind="text: RS"
-												title="Cluster Report" target="_blank"></a></td>
+												style="text-align: center">
+												<a 	title="Cluster Report" 
+												data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
+													<span data-bind="text: RS"></span>
+
+												</a>
+											</td>
 											<td data-bind="attr: { id: 'Coord_hap_' + $index() }"
-												style="text-align: center"><a data-bind="text: Coord"
-												title="Genome Browser" target="_blank"></a></td>
+												style="text-align: center">
+												<a title="Genome Browser"
+												data-bind="attr: { target: 'Coord_hap_' + $index() }">
+													<span data-bind="text: Coord"></span>
+												</a>
+											</td>
 											<td data-bind="text: $data.Alleles"></td>
 											<!-- ko foreach: $data.Haplotypes -->
 												<td class="cell-center haplotype" 
@@ -499,7 +508,8 @@
 										data-bind="text: snp2.rsnum" href="#" title="Cluster Report:"
 										target="LDPair-snp2-rsnum"></a><br /> <a id="snp2-coord"
 										data-bind="text: snp2.coord" href="#" title="Genome Browser"
-										target="LDPair-snp2-coord"></a></td>
+										target="LDPair-snp2-coord">
+									</a></td>
 									<td></td>
 									<td></td>
 								</tr>
@@ -515,11 +525,14 @@
 								<!-- Row 2 -->
 								<tr>
 									<td class="cell-center" rowspan="2"
-										style="vertical-align: middle"><a id="snp1-rsnum"
+										style="vertical-align: middle">
+										<a id="snp1-rsnum"
 										data-bind="text: snp1.rsnum" href="#" title="Cluster Report:"
-										target="LDPair-snp1-rsnum"></a><br /> <a id="snp1-coord"
+										target="LDPair-snp1-rsnum"></a><br />
+										<a id="snp1-coord"
 										data-bind="text: snp1.coord" href="#" title="Genome Browser"
-										target="LDPair-snp1-coord"></a></td>
+										target="LDPair-snp1-coord"></a>
+									</td>
 									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
 									<td colspan="2" rowspan="2">
@@ -739,14 +752,22 @@
 									<tbody data-bind="foreach: top10">
 										<tr>
 											<td data-bind="attr: { id: 'RSnumber_' + $index() }"
-												style="text-align: center"><a data-bind="text: RS"
-												title="Cluster Report" target="LDProxy-cluster-report"></a></td>
+												style="text-align: center">
+												<a title="Cluster Report" 
+												data-bind="attr: { target: 'RSnumber_' + $index() }">
+													<span data-bind="text: RS"></span>
+												</a>
+											</td>
+											<td style="text-align: center" class="chromosome" data-bind="text: Coord">
+											</td>
 											<td data-bind="attr: { id: 'Coord_' + $index() }"
-												style="text-align: center"><a data-bind="text: Coord"
-												title="Genome Browser" target="LDProxy-coord"></a></td>
-											<td data-bind="attr: { id: 'Coord_' + $index() }"
-												style="text-align: center"><a data-bind="text: Coord"
-												title="Genome Browser" target="LDProxy-coord"></a></td>
+												style="text-align: center">
+												<a data-bind="attr: { target: 'Coord_' + $index() }"
+													title="Genome Browser" 
+													>
+													<span data-bind="text: Coord"></span>
+												</a>
+											</td>
 											<td style="text-align: center" data-bind="text: Alleles"></td>
 											<td style="text-align: center" data-bind="text: MAF"></td>
 											<td style="text-align: center" data-bind="text: Dist"></td>
