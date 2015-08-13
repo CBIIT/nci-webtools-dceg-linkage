@@ -892,6 +892,8 @@ function getLDProxyResults(jsonfile) {
 	ajaxRequest.success(function(data) {
 		//catch error and warning in json
 		if (displayError(id, data) == false) {
+			console.info("Data from Proxy");
+			console.dir(data);
 			ko.mapping.fromJS(data, ldproxyModel);
 			addLDproxyHyperLinks(data);
 		}
@@ -1050,7 +1052,12 @@ function addLDHapHyperLinks(request, ldhapTable) {
 	var rs_number;
 	var url;
 	server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+	console.log("ldhapData");
+	
 
+	var timerHyperLinks;
+	console.dir(ldhapTable);
+	console.time(timerHyperLinks);
 	$.each(ldhapTable.rows, function(index, value) {
 		console.log(index + ": " + value);
 		// Create RSnumber link (Cluster Report)
@@ -1080,6 +1087,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
 		url = server + "?" + $.param(params);
 		$('#Coord_hap_' + index + ' a:first-child').attr('href', url);
 	});
+	console.timeEnd(timerHyperLinks);
 
 }
 
@@ -1136,6 +1144,7 @@ function addLDproxyHyperLinks(data) {
 	 * coordinates.
 	 */
 	// Add links to the top10 table
+	console.dir(data);
 	$.each(data.top10, function(index, value) {
 
 		// Create RSnumber link (Cluster Report)
