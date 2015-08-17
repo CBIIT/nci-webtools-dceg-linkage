@@ -181,8 +181,14 @@ for geno_n in vcf:
 				funct="."
 			
 			temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p,funct]
-			out.append(temp)
-			
+			out.append(temp)			
 
 for i in range(len(out)):
 	print "\t".join(str(j) for j in out[i])
+
+
+# Close SQLite connections
+curr.close()
+con.close()
+curr2.close()
+con2.close()
