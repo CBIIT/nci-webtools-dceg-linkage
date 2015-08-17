@@ -14,7 +14,8 @@
 def calculate_clip(snplst,pop,request):
 	import json,math,operator,os,sqlite3,subprocess,sys
 	maf_threshold=0.05
-	r2_threshold=0.1
+	r2_threshold=0.05
+	max_list=6000
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
@@ -37,7 +38,6 @@ def calculate_clip(snplst,pop,request):
 
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
-	max_list=5000
 	if len(snps_raw)>max_list:
 		output["error"]="Maximum SNP list is "+str(max_list)+" RS numbers. Your list contains "+str(len(snps_raw))+" entries."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -117,7 +117,11 @@ def calculate_clip(snplst,pop,request):
 		else:
 			warn.append(snp_i[0])
 			details[snp_i[0]]="Not an RS number, query removed."
-
+	
+	# Close snp142 connection
+	cur.close()
+	conn.close()
+	
 	if warn!=[]:
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 			
@@ -286,7 +290,7 @@ def main():
 		json_dict["error"]
 
 	except KeyError:
-		print ""
+		#print ""
 		print "LD Thinned SNP list ("+pop+"):"
 		for snp in snp_list:
 			print snp
