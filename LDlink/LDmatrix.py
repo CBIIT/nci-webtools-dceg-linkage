@@ -97,7 +97,11 @@ def calculate_matrix(snplst,pop,request):
 					warn.append(snp_i[0])
 			else:
 				warn.append(snp_i[0])
-
+	
+	# Close snp142 connection
+	cur.close()
+	conn.close()
+	
 	if warn!=[]:
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
