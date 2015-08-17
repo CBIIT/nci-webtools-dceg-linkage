@@ -46,6 +46,10 @@ def calculate_pair(snp1,snp2,pop,request):
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
+	# Close snp142 connection
+	cur.close()
+	conn.close()
+	
 	
 	# Check if SNPs are on the same chromosome
 	if snp1_coord[1]!=snp2_coord[1]:
