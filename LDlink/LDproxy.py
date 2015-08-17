@@ -40,6 +40,10 @@ def calculate_proxy(snp,pop,request):
 	# Find RS number in snp142 database
 	snp_coord=get_coords(snp)
 	
+	# Close snp142 connection
+	cur.close()
+	conn.close()
+	
 	if snp_coord==None:
 		output["error"]=snp+" is not in dbSNP build 142."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
