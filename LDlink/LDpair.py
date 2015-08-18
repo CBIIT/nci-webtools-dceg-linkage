@@ -110,6 +110,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	
 	if geno1[2]!=snp1:
 		output["warning"]="Genomic position for query snp ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
+		snp1=geno1[2]
 		
 	if "," in geno1[3] or "," in geno1[4]:
 		output["error"]=snp1+" is not a biallelic SNP."
@@ -150,6 +151,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	
 	if geno2[2]!=snp2:
 		output["warning"]="Genomic position for query snp ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
+		snp2=geno2[2]
 		
 	if "," in geno2[3] or "," in geno2[4]:
 		output["error"]=snp2+" is not a biallelic SNP."
