@@ -83,16 +83,19 @@ def calculate_proxy(snp,pop,request):
 
 	# Extract query SNP phased genotypes
 	vcf_file=vcf_dir+snp_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snp="tabix -fh {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, snp_coord[1], snp_coord[2], tmp_dir+"snp_no_dups_"+request+".vcf")
+	
+	tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
+	proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
+	head=proc_h.stdout.readlines()[0].strip().split()
+	
+	tabix_snp="tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, snp_coord[1], snp_coord[2], tmp_dir+"snp_no_dups_"+request+".vcf")
 	subprocess.call(tabix_snp, shell=True)
 
 
-	# Check SNP is not monoallelic and in the 1000G population
+	# Check SNP is in the 1000G population, has the correct RS number, and not monoallelic 
 	vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-	geno=vcf[len(vcf)-1].strip().split()
-	head=vcf[len(vcf)-2].strip().split()
 	
-	if geno[0]=="#CHROM":
+	if len(vcf)==0:
 		output["error"]=snp+" is not in 1000G reference panel."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
@@ -101,13 +104,44 @@ def calculate_proxy(snp,pop,request):
 		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 		return("","")
 		raise
+	elif len(vcf)>1:
+		geno=[]
+		for i in range(len(vcf)):
+			if vcf[i].strip().split()[2]==snp:
+				geno=vcf[i].strip().split()
+		if geno==[]:
+			output["error"]=snp+" is not in 1000G reference panel."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+			return("","")
+			raise
+	else:
+		geno=vcf[0].strip().split()
+	
+	if geno[2]!=snp:
+		output["warning"]="Genomic position for query snp ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+		snp=geno[2]
 		
+	if "," in geno[3] or "," in geno[4]:
+		output["error"]=snp+" is not a biallelic SNP."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+		return("","")
+		raise
+	
+	
 	index=[]
 	for i in range(9,len(head)):
 		if head[i] in pop_ids:
 			index.append(i)
 
-	genotypes={"0":0,"1":0}
+	genotypes={}
 	for i in index:
 		sub_geno=geno[i]
 		for j in sub_geno:
@@ -126,9 +160,8 @@ def calculate_proxy(snp,pop,request):
 		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 		return("","")
 		raise
-
-
-
+	
+	
 	# Define window of interest around query SNP
 	window=500000
 	coord1=int(snp_coord[2])-window
@@ -139,40 +172,28 @@ def calculate_proxy(snp,pop,request):
 
 
 	# Calculate proxy LD statistics in parallel
-	vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-	geno=vcf[len(vcf)-1].strip().split()
-	if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
-		threads=4
-		block=(2*window)/4
-		commands=[]
-		for i in range(threads):
-			if i==min(range(threads)) and i==max(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
-			elif i==min(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
-			elif i==max(range(threads)):
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
-			else:
-				command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
-			commands.append(command)
+	threads=4
+	block=(2*window)/4
+	commands=[]
+	for i in range(threads):
+		if i==min(range(threads)) and i==max(range(threads)):
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord2)+" "+request+" "+str(i)
+		elif i==min(range(threads)):
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1)+" "+str(coord1+block)+" "+request+" "+str(i)
+		elif i==max(range(threads)):
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord2)+" "+request+" "+str(i)
+		else:
+			command="python LDproxy_sub.py "+snp+" "+snp_coord[1]+" "+str(coord1+(block*i)+1)+" "+str(coord1+(block*(i+1)))+" "+request+" "+str(i)
+		commands.append(command)
 
-		processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
-		
-		# collect output in parallel
-		def get_output(process):
-			return process.communicate()[0].splitlines()
+	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+	
+	# collect output in parallel
+	def get_output(process):
+		return process.communicate()[0].splitlines()
 
-		out_raw=Pool(len(processes)).map(get_output, processes)
-		
-	else:
-		output["error"]=snp+" is not a biallelic SNP."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-		raise
+	out_raw=Pool(len(processes)).map(get_output, processes)
+
 
 
 	# Aggregate output
@@ -191,72 +212,78 @@ def calculate_proxy(snp,pop,request):
 	out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
 
 
-	# Populate JSON output
+	# Populate JSON and text output
+	outfile=open(tmp_dir+"proxy"+request+".txt","w")
+	
+	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
+	print >> outfile, "\t".join(header)
+	
 	query_snp={}
-	query_snp["RS"]=out_ld_sort[0][0]
+	query_snp["RS"]=out_ld_sort[0][3]
 	query_snp["Alleles"]=out_ld_sort[0][1]
 	query_snp["Coord"]=out_ld_sort[0][2]
 	query_snp["Dist"]=out_ld_sort[0][6]
-	query_snp["Dprime"]=out_ld_sort[0][7]
-	query_snp["R2"]=out_ld_sort[0][8]
+	query_snp["Dprime"]=str(round(float(out_ld_sort[0][7]),4))
+	query_snp["R2"]=str(round(float(out_ld_sort[0][8]),4))
 	query_snp["Corr_Alleles"]=out_ld_sort[0][9]
 	query_snp["RegulomeDB"]=out_ld_sort[0][10]
-	query_snp["MAF"]=out_ld_sort[0][11]
+	query_snp["MAF"]=str(round(float(out_ld_sort[0][11]),4))
 	query_snp["Function"]=out_ld_sort[0][13]
 
 	output["query_snp"]=query_snp
+	
+	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],query_snp["RegulomeDB"],query_snp["Function"]]
+	print >> outfile, "\t".join(temp)
 
 	proxies={}
-	top10=[]
 	digits=len(str(len(out_ld_sort)))
-	for i in range(1,len(out_ld_sort)):
+	
+	if float(out_ld_sort[1][8])>0.01 and out_ld_sort[1][3]!=snp:
+		proxy_info={}
+		proxy_info["RS"]=out_ld_sort[1][3]
+		proxy_info["Alleles"]=out_ld_sort[1][4]
+		proxy_info["Coord"]=out_ld_sort[1][5]
+		proxy_info["Dist"]=out_ld_sort[1][6]
+		proxy_info["Dprime"]=str(round(float(out_ld_sort[1][7]),4))
+		proxy_info["R2"]=str(round(float(out_ld_sort[1][8]),4))
+		proxy_info["Corr_Alleles"]=out_ld_sort[1][9]
+		proxy_info["RegulomeDB"]=out_ld_sort[1][10]
+		proxy_info["MAF"]=str(round(float(out_ld_sort[1][12]),4))
+		proxy_info["Function"]=out_ld_sort[1][13]
+		proxies["proxy_"+(digits-len(str(1)))*"0"+str(1)]=proxy_info
+		
+		temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
+		print >> outfile, "\t".join(temp)
+	
+	
+	for i in range(2,len(out_ld_sort)):
 		if float(out_ld_sort[i][8])>0.01:
 			proxy_info={}
 			proxy_info["RS"]=out_ld_sort[i][3]
 			proxy_info["Alleles"]=out_ld_sort[i][4]
 			proxy_info["Coord"]=out_ld_sort[i][5]
 			proxy_info["Dist"]=out_ld_sort[i][6]
-			proxy_info["Dprime"]=out_ld_sort[i][7]
-			proxy_info["R2"]=out_ld_sort[i][8]
+			proxy_info["Dprime"]=str(round(float(out_ld_sort[i][7]),4))
+			proxy_info["R2"]=str(round(float(out_ld_sort[i][8]),4))
 			proxy_info["Corr_Alleles"]=out_ld_sort[i][9]
 			proxy_info["RegulomeDB"]=out_ld_sort[i][10]
-			proxy_info["MAF"]=out_ld_sort[i][12]
+			proxy_info["MAF"]=str(round(float(out_ld_sort[i][12]),4))
 			proxy_info["Function"]=out_ld_sort[i][13]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
-			if i<=10:
-				proxy_info["MAF"]=str(round(float(out_ld_sort[i][12]),4))
-				proxy_info["Dprime"]=str(round(float(out_ld_sort[i][7]),4))
-				proxy_info["R2"]=str(round(float(out_ld_sort[i][8]),4))
-				top10.append(proxy_info)
-
+			
+			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
+			print >> outfile, "\t".join(temp)
+	
 	output["proxy_snps"]=proxies
-	output["top10"]=top10
-
-
-	# Output JSON file
+	
+	# Output JSON and text file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
 	out_json.close()
-
-
-
-	# Create output .txt for download
-	outfile=open(tmp_dir+"proxy"+request+".txt","w")
-
-	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
-	print >> outfile, "\t".join(header)
-
-	temp=[output["query_snp"]["RS"],output["query_snp"]["Coord"],output["query_snp"]["Alleles"],output["query_snp"]["MAF"],str(output["query_snp"]["Dist"]),str(output["query_snp"]["Dprime"]),str(output["query_snp"]["R2"]),output["query_snp"]["Corr_Alleles"],output["query_snp"]["RegulomeDB"],output["query_snp"]["Function"]]
-	print >> outfile, "\t".join(temp)
-
-	for k in sorted(output["proxy_snps"].keys()):
-		temp=[output["proxy_snps"][k]["RS"],output["proxy_snps"][k]["Coord"],output["proxy_snps"][k]["Alleles"],output["proxy_snps"][k]["MAF"],str(output["proxy_snps"][k]["Dist"]),str(output["proxy_snps"][k]["Dprime"]),str(output["proxy_snps"][k]["R2"]),output["proxy_snps"][k]["Corr_Alleles"],output["proxy_snps"][k]["RegulomeDB"],output["proxy_snps"][k]["Function"]]
-		print >> outfile, "\t".join(temp)
-
+	
 	outfile.close()
-
-
-
+	
+	
 	# Organize scatter plot data
 	q_rs=[]
 	q_allele=[]
@@ -609,6 +636,14 @@ def main():
 	else:
 		print ""
 		print json_dict["error"]
+		print ""
+	
+	try:
+		json_dict["warning"]
+	except KeyError:
+		print ""
+	else:
+		print "WARNING: "+json_dict["warning"]+"!"
 		print ""
 
 
