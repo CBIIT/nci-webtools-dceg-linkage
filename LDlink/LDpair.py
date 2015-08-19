@@ -109,7 +109,10 @@ def calculate_pair(snp1,snp2,pop,request):
 		geno1=vcf1[0].strip().split()
 	
 	if geno1[2]!=snp1:
-		output["warning"]="Genomic position for query snp ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
+		if "warning" in output:
+			output["warning"]=output["warning"]+". Genomic position for query SNP1 ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
+		else:
+			output["warning"]="Genomic position for query SNP1 ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
 		snp1=geno1[2]
 		
 	if "," in geno1[3] or "," in geno1[4]:
@@ -150,7 +153,10 @@ def calculate_pair(snp1,snp2,pop,request):
 		geno2=vcf2[0].strip().split()
 	
 	if geno2[2]!=snp2:
-		output["warning"]="Genomic position for query snp ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
+		if "warning" in output:
+			output["warning"]=output["warning"]+". Genomic position for query SNP2 ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
+		else:
+			output["warning"]="Genomic position for query SNP2 ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
 		snp2=geno2[2]
 		
 	if "," in geno2[3] or "," in geno2[4]:
