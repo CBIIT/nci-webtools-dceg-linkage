@@ -236,6 +236,7 @@ def calculate_proxy(snp,pop,request):
 	print >> outfile, "\t".join(temp)
 
 	proxies={}
+	top10=[]
 	digits=len(str(len(out_ld_sort)))
 	
 	if float(out_ld_sort[1][8])>0.01 and out_ld_sort[1][3]!=snp:
@@ -251,6 +252,7 @@ def calculate_proxy(snp,pop,request):
 		proxy_info["MAF"]=str(round(float(out_ld_sort[1][12]),4))
 		proxy_info["Function"]=out_ld_sort[1][13]
 		proxies["proxy_"+(digits-len(str(1)))*"0"+str(1)]=proxy_info
+		top10.append(proxy_info)
 		
 		temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
 		print >> outfile, "\t".join(temp)
@@ -270,11 +272,14 @@ def calculate_proxy(snp,pop,request):
 			proxy_info["MAF"]=str(round(float(out_ld_sort[i][12]),4))
 			proxy_info["Function"]=out_ld_sort[i][13]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
+			if i<=10:
+				top10.append(proxy_info)
 			
 			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
 			print >> outfile, "\t".join(temp)
 	
 	output["proxy_snps"]=proxies
+	output["top10"]=top10
 	
 	# Output JSON and text file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
