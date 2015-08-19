@@ -34,6 +34,21 @@ proc=subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 
 # Define function to calculate LD metrics
+def set_alleles(a1,a2):
+	if len(a1)==1 and len(a2)==1:
+		a1_n=a1
+		a2_n=a2
+	elif len(a1)==1 and len(a2)>1:
+		a1_n="-"
+		a2_n=a2[1:]
+	elif len(a1)>1 and len(a2)==1:
+		a1_n=a1[1:]
+		a2_n="-"
+	elif len(a1)>1 and len(a2)>1:
+		a1_n=a1[1:]
+		a2_n=a2[1:]
+	return(a1_n,a2_n)
+
 def LD_calcs(hap,allele,allele_n):
 	# Extract haplotypes
 	A=hap["00"]
@@ -61,6 +76,7 @@ def LD_calcs(hap,allele,allele_n):
 		r2=(delta**2)/Ms
 		
 		# Find Correlated Alleles
+		equiv="="
 		if r2>0.1:
 			
 			# Expected Cell Counts
@@ -77,12 +93,12 @@ def LD_calcs(hap,allele,allele_n):
 			dmax=max(dA,dB,dC,dD)
 			
 			if dmax==dA or dmax==dD:
-				match=allele["0"]+"-"+allele_n["0"]+","+allele["1"]+"-"+allele_n["1"]
+				match=allele["0"]+equiv+allele_n["0"]+","+allele["1"]+equiv+allele_n["1"]
 			else:
-				match=allele["0"]+"-"+allele_n["1"]+","+allele["1"]+"-"+allele_n["0"]
+				match=allele["0"]+equiv+allele_n["1"]+","+allele["1"]+equiv+allele_n["0"]
 			
 		else:
-			match=" - , - "
+			match=" "+equiv+" , "+equiv+" "
 	
 		return [maf_q,maf_p,D_prime,r2,match]
 
@@ -118,12 +134,20 @@ def get_coords(rs):
 
 # Import SNP VCF files
 vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-geno=vcf[len(vcf)-1].strip().split()
-allele={"0":geno[3],"1":geno[4]}
+
+if len(vcf)>1:
+	for i in range(len(vcf)):
+		if vcf[i].strip().split()[2]==snp:
+			geno=vcf[i].strip().split()
+else:
+	geno=vcf[0].strip().split()
+
+new_alleles=set_alleles(geno[3],geno[4])
+allele={"0":new_alleles[0],"1":new_alleles[1]}
 chr=geno[0]
 bp=geno[1]
 rs=snp
-al="("+geno[3]+"/"+geno[4]+")"
+al="("+new_alleles[0]+"/"+new_alleles[1]+")"
 
 
 # Import Window around SNP
@@ -143,8 +167,9 @@ for i in range(9,len(head)):
 # Loop through SNPs
 out=[]
 for geno_n in vcf:
-	if geno_n[3] in ["A","C","G","T"] and geno_n[4] in ["A","C","G","T"]:
-		allele_n={"0":geno_n[3],"1":geno_n[4]}
+	if "," not in geno_n[3] and "," not in geno_n[4]:
+		new_alleles_n=set_alleles(geno_n[3],geno_n[4])
+		allele_n={"0":new_alleles_n[0],"1":new_alleles_n[1]}
 		hap={"00":0,"01":0,"10":0,"11":0}
 		for i in index:
 			hap0=geno[i][0]+geno_n[i][0]
@@ -162,7 +187,7 @@ for geno_n in vcf:
 		
 			bp_n=geno_n[1]
 			rs_n=geno_n[2]
-			al_n="("+geno_n[3]+"/"+geno_n[4]+")"
+			al_n="("+new_alleles_n[0]+"/"+new_alleles_n[1]+")"
 			dist=str(int(geno_n[1])-int(geno[1]))
 			
 			
@@ -181,7 +206,8 @@ for geno_n in vcf:
 				funct="."
 			
 			temp=[rs,al,"chr"+chr+":"+bp,rs_n,al_n,"chr"+chr+":"+bp_n,dist,D_prime,r2,match,score,maf_q,maf_p,funct]
-			out.append(temp)			
+			out.append(temp)
+
 
 for i in range(len(out)):
 	print "\t".join(str(j) for j in out[i])
