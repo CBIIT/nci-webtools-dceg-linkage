@@ -26,7 +26,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
 	if len(snps_raw)>300:
-		output["error"]="Maximum SNP list is 300 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
+		output["error"]="Maximum variant list is 300 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -107,7 +107,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP 142."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -118,7 +118,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
 		if snp_coords[0][1]!=snp_coords[i][1]:
-			output["error"]="Not all input SNPs are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
+			output["error"]="Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
@@ -161,7 +161,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	
 	# Make sure there are genotype data in VCF file
 	if vcf[-1][0:6]=="#CHROM":
-		output["error"]="No query SNPs were found in 1000G VCF file"
+		output["error"]="No query variants were found in 1000G VCF file"
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -425,7 +425,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	
 	# Generate error if less than two SNPs
 	if len(x)<2:
-		output["error"]="Less than two SNPs to plot."
+		output["error"]="Less than two variants to plot."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
