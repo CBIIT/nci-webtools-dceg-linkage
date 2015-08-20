@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Create LDmatrix function
-def calculate_matrix(snplst,pop,request):
+def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	import json,math,operator,os,sqlite3,subprocess,sys
 
 	# Set data directories
@@ -225,16 +225,16 @@ def calculate_matrix(snplst,pop,request):
 				else:
 					rsnum=rs_1000g
 					if "warning" in output:
-						output["warning"]=output["warning"]+". Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+						output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
 					else:
-						output["warning"]="Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+						output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
 					
 			else:
 				rsnum=geno[2]
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
 				else:
-					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
 			
 			rsnum_lst.append(rsnum)
 
@@ -362,6 +362,13 @@ def calculate_matrix(snplst,pop,request):
 	R=[]
 	box_color=[]
 	box_trans=[]
+	
+	if r2_d not in ["r2","d"]:
+		if "warning" in output:
+			output["warning"]=output["warning"]+". "+r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+		else:
+			output["warning"]=r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+		r2_d="r2"
 
 	for i in range(len(out)):
 		snp1,snp2,allele1,allele2,corr,pos1,pos2,D_prime,r2=out[i]
@@ -372,11 +379,16 @@ def calculate_matrix(snplst,pop,request):
 		corA.append(corr)
 		xpos.append(pos1)
 		ypos.append(pos2)
-		if r2!="NA":
+		if r2_d=="r2" and r2!="NA":
 			D.append(str(round(float(D_prime),4)))
 			R.append(str(round(float(r2),4)))
 			box_color.append("red")
 			box_trans.append(r2)
+		elif r2_d=="d" and D_prime!="NA":
+			D.append(str(round(float(D_prime),4)))
+			R.append(str(round(float(r2),4)))
+			box_color.append("red")
+			box_trans.append(abs(D_prime))
 		else:
 			D.append("NA")
 			R.append("NA")
@@ -706,13 +718,19 @@ def main():
 		snplst=sys.argv[1]
 		pop=sys.argv[2]
 		request=sys.argv[3]
+		r2_d="r2"
+	elif len(sys.argv)==5:
+		snplst=sys.argv[1]
+		pop=sys.argv[2]
+		request=sys.argv[3]
+		r2_d=sys.argv[4]
 	else:
-		print "Correct useage is: LDmatrix.py snplst populations request"
+		print "Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)"
 		sys.exit()
 
 
 	# Run function
-	out_script,out_div=calculate_matrix(snplst,pop,request)
+	out_script,out_div=calculate_matrix(snplst,pop,request,r2_d)
 
 
 	# Print output
