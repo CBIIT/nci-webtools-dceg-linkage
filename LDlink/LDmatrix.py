@@ -102,6 +102,7 @@ def calculate_matrix(snplst,pop,request):
 	cur.close()
 	conn.close()
 	
+	# Check RS numbers were found
 	if warn!=[]:
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
@@ -135,12 +136,38 @@ def calculate_matrix(snplst,pop,request):
 
 	# Extract 1000 Genomes phased genotypes
 	vcf_file=vcf_dir+snp_coords[0][1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	tabix_snps="tabix -fh {0}{1} | grep -v -e END".format(vcf_file, tabix_coords)
+	tabix_snps="tabix -h {0}{1} | grep -v -e END".format(vcf_file, tabix_coords)
 	proc=subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+	
+	# Define function to correct indel alleles
+	def set_alleles(a1,a2):
+		if len(a1)==1 and len(a2)==1:
+			a1_n=a1
+			a2_n=a2
+		elif len(a1)==1 and len(a2)>1:
+			a1_n="-"
+			a2_n=a2[1:]
+		elif len(a1)>1 and len(a2)==1:
+			a1_n=a1[1:]
+			a2_n="-"
+		elif len(a1)>1 and len(a2)>1:
+			a1_n=a1[1:]
+			a2_n=a2[1:]
+		return(a1_n,a2_n)
 	
 	
 	# Import SNP VCF files
 	vcf=proc.stdout.readlines()
+	
+	# Make sure there are genotype data in VCF file
+	if vcf[-1][0:6]=="#CHROM":
+		output["error"]="No query SNPs were found in 1000G VCF file"
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise
+	
 	h=0
 	while vcf[h][0:2]=="##":
 		h+=1
@@ -153,48 +180,69 @@ def calculate_matrix(snplst,pop,request):
 		if head[i] in pop_ids:
 			index.append(i)
 
-	hap1=[""]*len(index)
-	hap2=[""]*len(index)
+	hap1=[[]]
+	for i in range(len(index)-1):
+		hap1.append([])
+	hap2=[[]]
+	for i in range(len(index)-1):
+		hap2.append([])
+	
 	rsnum_lst=[]
 	allele_lst=[]
 	pos_lst=[]
 	for g in range(h+1,len(vcf)):
 		geno=vcf[g].strip().split()
-		if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
+		if "," not in geno[3] and "," not in geno[4]:
+			a1,a2=set_alleles(geno[3],geno[4])
 			for i in range(len(index)):
 				if geno[index[i]]=="0|0":
-					hap1[i]=hap1[i]+geno[3]
-					hap2[i]=hap2[i]+geno[3]
+					hap1[i].append(a1)
+					hap2[i].append(a1)
 				elif geno[index[i]]=="0|1":
-					hap1[i]=hap1[i]+geno[3]
-					hap2[i]=hap2[i]+geno[4]
+					hap1[i].append(a1)
+					hap2[i].append(a2)
 				elif geno[index[i]]=="1|0":
-					hap1[i]=hap1[i]+geno[4]
-					hap2[i]=hap2[i]+geno[3]
+					hap1[i].append(a2)
+					hap2[i].append(a1)
 				elif geno[index[i]]=="1|1":
-					hap1[i]=hap1[i]+geno[4]
-					hap2[i]=hap2[i]+geno[4]
+					hap1[i].append(a2)
+					hap2[i].append(a2)
 				elif geno[index[i]]=="0":
-					hap1[i]=hap1[i]+geno[3]
-					hap2[i]=hap2[i]+"."
+					hap1[i].append(a1)
+					hap2[i].append(".")
 				elif geno[index[i]]=="1":
-					hap1[i]=hap1[i]+geno[4]
-					hap2[i]=hap2[i]+"."
+					hap1[i].append(a2)
+					hap2[i].append(".")
 				else:
-					hap1[i]=hap1[i]+"."
-					hap2[i]=hap2[i]+"."
+					hap1[i].append(".")
+					hap2[i].append(".")
 
 			if geno[1] in snp_pos:
-				rsnum=rs_nums[snp_pos.index(geno[1])]
+				rs_query=rs_nums[snp_pos.index(geno[1])]
+				rs_1000g=geno[2]
+				if rs_query==rs_1000g:
+					rsnum=rs_1000g
+				else:
+					rsnum=rs_1000g
+					if "warning" in output:
+						output["warning"]=output["warning"]+". Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+					else:
+						output["warning"]="Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+					
 			else:
-				rsnum=str(g)+"?"
+				rsnum=geno[2]
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+				else:
+					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+			
 			rsnum_lst.append(rsnum)
 
 			position="chr"+geno[0]+":"+geno[1]+"-"+geno[1]
 			pos_lst.append(position)
-			alleles=geno[3]+"/"+geno[4]
+			alleles=a1+"/"+a2
 			allele_lst.append(alleles)
-
+	
 	# Calculate Pairwise LD Statistics
 	all_haps=hap1+hap2
 	ld_matrix=[[[None for v in range(2)] for i in range(len(all_haps[0]))] for j in range(len(all_haps[0]))]
@@ -224,7 +272,7 @@ def calculate_matrix(snplst,pop,request):
 				for h in haps:
 					if h not in hap:
 						hap[h]=0
-
+			
 			# Perform LD calculations
 			A=hap[sorted(hap)[0]]
 			B=hap[sorted(hap)[1]]
@@ -259,15 +307,15 @@ def calculate_matrix(snplst,pop,request):
 					dmax=max(dA,dB,dC,dD)
 
 					if dmax==dA or dmax==dD:
-						match=sorted(hap)[0][0]+"-"+sorted(hap)[0][1]+","+sorted(hap)[2][0]+"-"+sorted(hap)[1][1]
+						match=sorted(hap)[0][0]+"="+sorted(hap)[0][1]+","+sorted(hap)[2][0]+"="+sorted(hap)[1][1]
 					else:
-						match=sorted(hap)[0][0]+"-"+sorted(hap)[1][1]+","+sorted(hap)[2][0]+"-"+sorted(hap)[0][1]
+						match=sorted(hap)[0][0]+"="+sorted(hap)[1][1]+","+sorted(hap)[2][0]+"="+sorted(hap)[0][1]
 				else:
-					match="  -  ,  -  "
+					match="  =  ,  =  "
 			else:
 				D_prime="NA"
 				r2="NA"
-				match="  -  ,  -  "
+				match="  =  ,  =  "
 
 			snp1=rsnum_lst[i]
 			snp2=rsnum_lst[j]
@@ -275,7 +323,7 @@ def calculate_matrix(snplst,pop,request):
 			pos2=pos_lst[j].split("-")[0]
 			allele1=allele_lst[i]
 			allele2=allele_lst[j]
-			corr=match.split(",")[0].split("-")[1]+"-"+match.split(",")[0].split("-")[0]+","+match.split(",")[1].split("-")[1]+"-"+match.split(",")[1].split("-")[0]
+			corr=match.split(",")[0].split("=")[1]+"="+match.split(",")[0].split("=")[0]+","+match.split(",")[1].split("=")[1]+"="+match.split(",")[1].split("=")[0]
 			corr_f=match
 
 			
@@ -523,7 +571,6 @@ def calculate_matrix(snplst,pop,request):
 		
 	# Gene Plot
 	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coords[1][1], int((x[0]-buffer)*1000000), int((x[-1]+buffer)*1000000), tmp_dir+"genes_"+request+".txt")
-	print tabix_gene
 	subprocess.call(tabix_gene, shell=True)
 	filename=tmp_dir+"genes_"+request+".txt"
 	genes_raw=open(filename).readlines()
