@@ -134,10 +134,36 @@ def calculate_hap(snplst,pop,request):
 	vcf_file=vcf_dir+snp_coords[0][1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 	tabix_snps="tabix -fh {0}{1} | grep -v -e END".format(vcf_file, tabix_coords)
 	proc=subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+		
+	# Define function to correct indel alleles
+	def set_alleles(a1,a2):
+		if len(a1)==1 and len(a2)==1:
+			a1_n=a1
+			a2_n=a2
+		elif len(a1)==1 and len(a2)>1:
+			a1_n="-"
+			a2_n=a2[1:]
+		elif len(a1)>1 and len(a2)==1:
+			a1_n=a1[1:]
+			a2_n="-"
+		elif len(a1)>1 and len(a2)>1:
+			a1_n=a1[1:]
+			a2_n=a2[1:]
+		return(a1_n,a2_n)
 	
 	
 	# Import SNP VCF files
 	vcf=proc.stdout.readlines()
+	
+	# Make sure there are genotype data in VCF file
+	if vcf[-1][0:6]=="#CHROM":
+		output["error"]="No query SNPs were found in 1000G VCF file"
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise
+	
 	h=0
 	while vcf[h][0:2]=="##":
 		h+=1
@@ -150,76 +176,98 @@ def calculate_hap(snplst,pop,request):
 		if head[i] in pop_ids:
 			index.append(i)
 	
-	hap1=[""]*len(index)
-	hap2=[""]*len(index)
+	hap1=[[]]
+	for i in range(len(index)-1):
+		hap1.append([])
+	hap2=[[]]
+	for i in range(len(index)-1):
+		hap2.append([])
+	
 	rsnum_lst=[]
 	allele_lst=[]
 	pos_lst=[]
 	for g in range(h+1,len(vcf)):
 		geno=vcf[g].strip().split()
-		count0=0
-		count1=0
-		if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
+		if "," not in geno[3] and "," not in geno[4]:
+			a1,a2=set_alleles(geno[3],geno[4])
+			count0=0
+			count1=0
 			for i in range(len(index)):
 				if geno[index[i]]=="0|0":
-					hap1[i]=hap1[i]+geno[3]
-					hap2[i]=hap2[i]+geno[3]
+					hap1[i].append(a1)
+					hap2[i].append(a1)
 					count0+=2
 				elif geno[index[i]]=="0|1":
-					hap1[i]=hap1[i]+geno[3]
-					hap2[i]=hap2[i]+geno[4]
+					hap1[i].append(a1)
+					hap2[i].append(a2)
 					count0+=1
 					count1+=1
 				elif geno[index[i]]=="1|0":
-					hap1[i]=hap1[i]+geno[4]
-					hap2[i]=hap2[i]+geno[3]
+					hap1[i].append(a2)
+					hap2[i].append(a1)
 					count0+=1
 					count1+=1
 				elif geno[index[i]]=="1|1":
-					hap1[i]=hap1[i]+geno[4]
-					hap2[i]=hap2[i]+geno[4]
+					hap1[i].append(a2)
+					hap2[i].append(a2)
 					count1+=2
 				elif geno[index[i]]=="0":
-					hap1[i]=hap1[i]+geno[3]
-					hap2[i]=hap2[i]+"."
+					hap1[i].append(a1)
+					hap2[i].append(".")
 					count0+=1
 				elif geno[index[i]]=="1":
-					hap1[i]=hap1[i]+geno[4]
-					hap2[i]=hap2[i]+"."
+					hap1[i].append(a2)
+					hap2[i].append(".")
 					count1+=1
 				else:
-					hap1[i]=hap1[i]+"."
-					hap2[i]=hap2[i]+"."
-			
+					hap1[i].append(".")
+					hap2[i].append(".")
+
 			if geno[1] in snp_pos:
-				rsnum=rs_nums[snp_pos.index(geno[1])]
+				rs_query=rs_nums[snp_pos.index(geno[1])]
+				rs_1000g=geno[2]
+				if rs_query==rs_1000g:
+					rsnum=rs_1000g
+				else:
+					rsnum=rs_1000g
+					if "warning" in output:
+						output["warning"]=output["warning"]+". Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+					else:
+						output["warning"]="Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+					
 			else:
-				rsnum=str(g)+"?"
-			rsnum_lst.append(rsnum)
+				rsnum=geno[2]
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+				else:
+					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
 			
+			rsnum_lst.append(rsnum)
+
 			position="chr"+geno[0]+":"+geno[1]
 			pos_lst.append(position)
 			
 			f0=round(float(count0)/(count0+count1),4)
 			f1=round(float(count1)/(count0+count1),4)
 			if f0>=f1:
-				alleles=geno[3]+"="+str(round(f0,3))+", "+geno[4]+"="+str(round(f1,3))
+				alleles=a1+"="+str(round(f0,3))+", "+a2+"="+str(round(f1,3))
 			else:
-				alleles=geno[4]+"="+str(round(f1,3))+", "+geno[3]+"="+str(round(f0,3))
+				alleles=a2+"="+str(round(f1,3))+", "+a1+"="+str(round(f0,3))
 			allele_lst.append(alleles)
-	
 	
 	haps={}
 	for i in range(len(index)):
-		if hap1[i] in haps:
-			haps[hap1[i]]+=1
+		h1="_".join(hap1[i])
+		h2="_".join(hap2[i])
+		if h1 in haps:
+			haps[h1]+=1
 		else:
-			haps[hap1[i]]=1
+			haps[h1]=1
 		
-		if hap2[i] in haps:
-			haps[hap2[i]]+=1
+		if h2 in haps:
+			haps[h2]+=1
 		else:
-			haps[hap2[i]]=1
+			haps[h2]=1
 	
 	
 	# Remove Missing Haplotypes
@@ -239,7 +287,6 @@ def calculate_hap(snplst,pop,request):
 	
 	results_sort1=sorted(results, key=operator.itemgetter(0))
 	results_sort2=sorted(results_sort1, key=operator.itemgetter(1), reverse=True)
-	
 	
 	# Generate JSON output
 	digits=len(str(len(results_sort2)))
@@ -329,11 +376,12 @@ def main():
 				freq_count+=1
 		
 		hap_snp=[]
-		for i in range(len(hap_lst[0])):
+		for i in range(len(hap_lst[0].split("_"))):
 			temp=[]
 			for j in range(freq_count):     ## use "len(hap_lst)" for all haplotypes
-				temp.append(hap_lst[j][i])
+				temp.append(hap_lst[j].split("_")[i])
 			hap_snp.append(temp)
+		print hap_snp
 		
 		print ""
 		print "RS Number     Coordinates      Allele Frequency      Common Haplotypes (>1%)"
