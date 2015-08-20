@@ -110,13 +110,13 @@ def calculate_pair(snp1,snp2,pop,request):
 	
 	if geno1[2]!=snp1:
 		if "warning" in output:
-			output["warning"]=output["warning"]+". Genomic position for query SNP1 ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
+			output["warning"]=output["warning"]+". Genomic position for query variant1 ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
 		else:
-			output["warning"]="Genomic position for query SNP1 ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
+			output["warning"]="Genomic position for query variant1 ("+snp1+") does not match RS number at 1000G position ("+geno1[2]+")"
 		snp1=geno1[2]
 		
 	if "," in geno1[3] or "," in geno1[4]:
-		output["error"]=snp1+" is not a biallelic SNP."
+		output["error"]=snp1+" is not a biallelic variant."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
@@ -154,13 +154,13 @@ def calculate_pair(snp1,snp2,pop,request):
 	
 	if geno2[2]!=snp2:
 		if "warning" in output:
-			output["warning"]=output["warning"]+". Genomic position for query SNP2 ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
+			output["warning"]=output["warning"]+". Genomic position for query variant2 ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
 		else:
-			output["warning"]="Genomic position for query SNP2 ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
+			output["warning"]="Genomic position for query variant2 ("+snp2+") does not match RS number at 1000G position ("+geno2[2]+")"
 		snp2=geno2[2]
 		
 	if "," in geno2[3] or "," in geno2[4]:
-		output["error"]=snp2+" is not a biallelic SNP."
+		output["error"]=snp2+" is not a biallelic variant."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
@@ -181,11 +181,11 @@ def calculate_pair(snp1,snp2,pop,request):
 	
 	
 	if geno1[1]!=snp1_coord[2]:
-		output["error"]="VCF File does not match SNP coordinates for SNP1."
+		output["error"]="VCF File does not match variant coordinates for SNP1."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	if geno2[1]!=snp2_coord[2]:
-		output["error"]="VCF File does not match SNP coordinates for SNP2."
+		output["error"]="VCF File does not match variant coordinates for SNP2."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 
