@@ -211,8 +211,8 @@ def calculate_pair(snp1,snp2,pop,request):
 	hap={}
 	for ind in pop_ids:
 		if ind in geno:
-			hap1=geno[ind][0][0]+","+geno[ind][1][0]
-			hap2=geno[ind][0][1]+","+geno[ind][1][1]
+			hap1=geno[ind][0][0]+"_"+geno[ind][1][0]
+			hap2=geno[ind][0][1]+"_"+geno[ind][1][1]
 
 			if hap1 in hap:
 				hap[hap1]+=1
@@ -234,7 +234,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	if len(hap)!=4:
 		snp1_a=[snp1_a1,snp1_a2]
 		snp2_a=[snp2_a1,snp2_a2]
-		haps=[snp1_a[0]+","+snp2_a[0],snp1_a[0]+","+snp2_a[1],snp1_a[1]+","+snp2_a[0],snp1_a[1]+","+snp2_a[1]]
+		haps=[snp1_a[0]+"_"+snp2_a[0],snp1_a[0]+"_"+snp2_a[1],snp1_a[1]+"_"+snp2_a[0],snp1_a[1]+"_"+snp2_a[1]]
 		for i in haps:
 			if i not in hap:
 				hap[i]=0
@@ -292,12 +292,12 @@ def calculate_pair(snp1,snp2,pop,request):
 		dmax=max(dA,dB,dC,dD)
 
 		if dmax==dA or dmax==dD:
-			corr1=snp1+"("+sorted(hap)[0].split(",")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split(",")[1]+") allele"
-			corr2=snp1+"("+sorted(hap)[2].split(",")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split(",")[1]+") allele"
+			corr1=snp1+"("+sorted(hap)[0].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split("_")[1]+") allele"
+			corr2=snp1+"("+sorted(hap)[2].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split("_")[1]+") allele"
 			corr_alleles=[corr1,corr2]
 		else:
-			corr1=snp1+"("+sorted(hap)[0].split(",")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split(",")[1]+") allele"
-			corr2=snp1+"("+sorted(hap)[2].split(",")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split(",")[1]+") allele"
+			corr1=snp1+"("+sorted(hap)[0].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split("_")[1]+") allele"
+			corr2=snp1+"("+sorted(hap)[2].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split("_")[1]+") allele"
 			corr_alleles=[corr1,corr2]
 	else:
 		corr_alleles=[snp1+" and "+snp2+" are in linkage equilibrium"]
@@ -308,13 +308,13 @@ def calculate_pair(snp1,snp2,pop,request):
 	snp_1["coord"]="chr"+snp1_coord[1]+":"+snp1_coord[2]
 
 	snp_1_allele_1={}
-	snp_1_allele_1["allele"]=sorted(hap)[0].split(",")[0]
+	snp_1_allele_1["allele"]=sorted(hap)[0].split("_")[0]
 	snp_1_allele_1["count"]=str(A+B)
 	snp_1_allele_1["frequency"]=str(round(float(A+B)/N,3))
 	snp_1["allele_1"]=snp_1_allele_1
 
 	snp_1_allele_2={}
-	snp_1_allele_2["allele"]=sorted(hap)[2].split(",")[0]
+	snp_1_allele_2["allele"]=sorted(hap)[2].split("_")[0]
 	snp_1_allele_2["count"]=str(C+D)
 	snp_1_allele_2["frequency"]=str(round(float(C+D)/N,3))
 	snp_1["allele_2"]=snp_1_allele_2
@@ -326,13 +326,13 @@ def calculate_pair(snp1,snp2,pop,request):
 	snp_2["coord"]="chr"+snp2_coord[1]+":"+snp2_coord[2]
 
 	snp_2_allele_1={}
-	snp_2_allele_1["allele"]=sorted(hap)[0].split(",")[1]
+	snp_2_allele_1["allele"]=sorted(hap)[0].split("_")[1]
 	snp_2_allele_1["count"]=str(A+C)
 	snp_2_allele_1["frequency"]=str(round(float(A+C)/N,3))
 	snp_2["allele_1"]=snp_2_allele_1
 
 	snp_2_allele_2={}
-	snp_2_allele_2["allele"]=sorted(hap)[1].split(",")[1]
+	snp_2_allele_2["allele"]=sorted(hap)[1].split("_")[1]
 	snp_2_allele_2["count"]=str(B+D)
 	snp_2_allele_2["frequency"]=str(round(float(B+D)/N,3))
 	snp_2["allele_2"]=snp_2_allele_2
