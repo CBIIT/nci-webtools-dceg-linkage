@@ -122,11 +122,11 @@ def calculate_proxy(snp,pop,request):
 		geno=vcf[0].strip().split()
 	
 	if geno[2]!=snp:
-		output["warning"]="Genomic position for query SNP ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+		output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
 		snp=geno[2]
 		
 	if "," in geno[3] or "," in geno[4]:
-		output["error"]=snp+" is not a biallelic SNP."
+		output["error"]=snp+" is not a biallelic variant."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
