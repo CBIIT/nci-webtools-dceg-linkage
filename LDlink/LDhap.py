@@ -381,7 +381,6 @@ def main():
 			for j in range(freq_count):     ## use "len(hap_lst)" for all haplotypes
 				temp.append(hap_lst[j].split("_")[i])
 			hap_snp.append(temp)
-		print hap_snp
 		
 		print ""
 		print "RS Number     Coordinates      Allele Frequency      Common Haplotypes (>1%)"
