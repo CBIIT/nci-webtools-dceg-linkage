@@ -24,7 +24,7 @@ def calculate_hap(snplst,pop,request):
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
 	if len(snps_raw)>30:
-		output["error"]="Maximum SNP list is 30 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
+		output["error"]="Maximum variant list is 30 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
@@ -99,7 +99,7 @@ def calculate_hap(snplst,pop,request):
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP 142."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
@@ -107,7 +107,7 @@ def calculate_hap(snplst,pop,request):
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
 		if snp_coords[0][1]!=snp_coords[i][1]:
-			output["error"]="Not all input SNPs are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
+			output["error"]="Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
 			return(json.dumps(output, sort_keys=True, indent=2))
 			raise
 	
@@ -157,7 +157,7 @@ def calculate_hap(snplst,pop,request):
 	
 	# Make sure there are genotype data in VCF file
 	if vcf[-1][0:6]=="#CHROM":
-		output["error"]="No query SNPs were found in 1000G VCF file"
+		output["error"]="No query variants were found in 1000G VCF file"
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -231,16 +231,16 @@ def calculate_hap(snplst,pop,request):
 				else:
 					rsnum=rs_1000g
 					if "warning" in output:
-						output["warning"]=output["warning"]+". Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+						output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
 					else:
-						output["warning"]="Genomic position for query SNP ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+						output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
 					
 			else:
 				rsnum=geno[2]
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
 				else:
-					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query SNPs"
+					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
 			
 			rsnum_lst.append(rsnum)
 
