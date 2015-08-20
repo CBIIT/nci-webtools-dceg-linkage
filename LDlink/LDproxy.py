@@ -237,10 +237,12 @@ def calculate_proxy(snp,pop,request):
 
 	proxies={}
 	top10=[]
+	rows=[]
 	digits=len(str(len(out_ld_sort)))
 	
 	if float(out_ld_sort[1][8])>0.01 and out_ld_sort[1][3]!=snp:
 		proxy_info={}
+		row=[]
 		proxy_info["RS"]=out_ld_sort[1][3]
 		proxy_info["Alleles"]=out_ld_sort[1][4]
 		proxy_info["Coord"]=out_ld_sort[1][5]
@@ -272,12 +274,28 @@ def calculate_proxy(snp,pop,request):
 			proxy_info["MAF"]=str(round(float(out_ld_sort[i][12]),4))
 			proxy_info["Function"]=out_ld_sort[i][13]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
+			chromosome, chromosome_position = proxy_info["Coord"].split(':')
+			# Adding a row for the Data Table
+			row.append(proxy_info["RS"])
+			row.append(chromosome)
+			row.append(chromosome_position)
+			row.append(proxy_info["Alleles"])
+			row.append(str(round(float(proxy_info["MAF"]),4)))
+			row.append(proxy_info["Dist"])
+			row.append(str(round(float(proxy_info["Dprime"]),4)))
+			row.append(str(round(float(proxy_info["R2"]),4)))
+			row.append(proxy_info["Corr_Alleles"])
+			row.append(proxy_info["RegulomeDB"])
+			row.append(proxy_info["Function"])
+			rows.append(row)
+
 			if i<=10:
 				top10.append(proxy_info)
 			
 			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
 			print >> outfile, "\t".join(temp)
-	
+
+	output["aaData"]=rows
 	output["proxy_snps"]=proxies
 	output["top10"]=top10
 	

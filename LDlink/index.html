@@ -38,6 +38,8 @@
 <link rel="stylesheet"
 	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css">
 <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
+
 <link rel="stylesheet" href="../common/css/bootstrap-multiselect.css">
 <link rel="stylesheet" href="../common/css/style.css">
 <link rel="stylesheet" href="../common/css/social.css">
@@ -707,7 +709,6 @@
 					</div>
  -->
 					<!-- LDProxy CONTAINER -->
-
 					<div class="container-fluid" id="ldproxy-results-container">
 						<div class="row">
 							<div class="col-sm-10 col-sm-offset-1">
@@ -726,62 +727,44 @@
 						<a id="ldproxy-link"
 							href="http://www.regulomedb.org/help#score"
 							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scores">View
-							scoring scheme for RegulomeDB scores</a> <br> <br>
+							scoring scheme for RegulomeDB scores</a> <br>
+
 						<div id="ldproxy-table-container center-align">
 							<div class="table-responsive">
 								<div>
-									<h3>Top 10 Proxy SNPs</h3>
+									<h3>Proxy SNPs</h3>
 								</div>
-								<table class="table table-bordered">
+								<table id="new-ldproxy" class="display compact">
 									<thead>
-										<!-- Header row -->
 										<tr>
-											<td>RS Number</td>
-											<!-- <td>Coord</td> -->
-											<td>Chromosome</td>
-											<td>Position on Chromosome</td>
-											<td>Alleles</td>
-											<td>MAF</td>
-											<td>Distance</td>
-											<td>D'</td>
-											<td>R<sup>2</sup></td>
-											<td>Correlated Alleles</td>
-											<td>RegulomeDB</td>
-											<td>Functional Class</td>
+											<th>RS Results</th>
+											<th class="dt-body-center">Chromosome</th>
+											<th>Position on Chromosome</th>
+											<th>Alleles</th>
+											<th>MAF</th>
+											<th>Distance</th>
+											<th>D'</th>
+											<th>R<sup>2</sup></th>
+											<th>Correlated Alleles</th>
+											<th>RegulomeDB</th>
+											<th>Functional Class</th>
 										</tr>
-									<tbody data-bind="foreach: top10">
+									</thead>
+									<tfoot>
 										<tr>
-											<td data-bind="attr: { id: 'RSnumber_' + $index() }"
-												style="text-align: center">
-												<a title="Cluster Report" 
-												data-bind="attr: { target: 'RSnumber_' + $index() }">
-													<span data-bind="text: RS"></span>
-												</a>
-											</td>
-											<td style="text-align: center" class="chromosome" data-bind="text: Coord">
-											</td>
-											<td data-bind="attr: { id: 'Coord_' + $index() }"
-												style="text-align: center">
-												<a data-bind="attr: { target: 'Coord_' + $index() }"
-													title="Genome Browser" 
-													>
-													<span data-bind="text: Coord"></span>
-												</a>
-											</td>
-											<td style="text-align: center" data-bind="text: Alleles"></td>
-											<td style="text-align: center" data-bind="text: MAF"></td>
-											<td style="text-align: center" data-bind="text: Dist"></td>
-											<td style="text-align: center" data-bind="text: Dprime"></td>
-											<td style="text-align: center" data-bind="text: R2"></td>
-											<td style="text-align: center" data-bind="text: Corr_Alleles"></td>
-											<td data-bind="attr: { id: 'RegulomeDB_' + $index() }"
-												style="text-align: center"><a
-												data-bind="text: RegulomeDB" title="RegulomeDB"
-												target="LDProxy-RegulomeDB"></a></td>
-											<td style="text-align: center" data-bind="text: Function"></td>
+											<th>RS Results</th>
+											<th>Chromosome</th>
+											<th>Position on Chromosome</th>
+											<th>Alleles</th>
+											<th>MAF</th>
+											<th>Distance</th>
+											<th>D'</th>
+											<th>R<sup>2</sup></th>
+											<th>Correlated Alleles</th>
+											<th>RegulomeDB</th>
+											<th>Functional Class</th>
 										</tr>
-
-									</tbody>
+									</tfoot>
 								</table>
 								<div>
 									<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
@@ -864,12 +847,9 @@
 		src="../common/js/bootstrap-multiselect.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js">
 	</script>
-	
-<!--
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda.min.js"></script>
 
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/spin.min.js"></script>
--->
+	<script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.js">
+	</script>
 
 	<!-- Google Analytics -->
 	<script async src='//www.google-analytics.com/analytics.js'></script>
