@@ -141,15 +141,14 @@ def calculate_proxy(snp,pop,request):
 		if head[i] in pop_ids:
 			index.append(i)
 
-	genotypes={}
+	genotypes={"0":0, "1":0}
 	for i in index:
-		sub_geno=geno[i]
+		sub_geno=geno[i].split("|")
 		for j in sub_geno:
 			if j in genotypes:
 				genotypes[j]+=1
 			else:
 				genotypes[j]=1
-		
 
 	if genotypes["0"]==0 or genotypes["1"]==0:
 		output["error"]=snp+" is monoallelic in the "+pop+" population."
@@ -214,9 +213,13 @@ def calculate_proxy(snp,pop,request):
 
 	# Populate JSON and text output
 	outfile=open(tmp_dir+"proxy"+request+".txt","w")
-	
 	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
 	print >> outfile, "\t".join(header)
+	
+	track=open(tmp_dir+"track"+request+".txt","w")
+	print >> track, "browser position chr"+str(snp_coord[1])+":"+str(coord1)+"-"+str(coord2)
+	print >> track, ""
+	print >> track, "track name=\""+snp+"\" description=\"Query Variant: "+snp+"\" color=108,108,255"
 	
 	query_snp={}
 	query_snp["RS"]=out_ld_sort[0][3]
@@ -234,34 +237,24 @@ def calculate_proxy(snp,pop,request):
 	
 	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],query_snp["RegulomeDB"],query_snp["Function"]]
 	print >> outfile, "\t".join(temp)
-
+	
+	chr,pos=query_snp["Coord"].split(':')
+	temp2=[chr,pos,pos,query_snp["RS"]]
+	print >> track, "\t".join(temp2)
+	print >> track, ""
+	print >> track, "track name=\"0.8<R2<1.0\" description=\"Proxy Variants with 0.8<R2<1.0\" color=198,129,0"
+	
+	
+	
 	proxies={}
-	top10=[]
 	rows=[]
 	digits=len(str(len(out_ld_sort)))
+	r2_prior=1
+	counter=0
+	cutoff=[0.8,0.6,0.4,0.2,0.0]
 	
-	if float(out_ld_sort[1][8])>0.01 and out_ld_sort[1][3]!=snp:
-		proxy_info={}
-		row=[]
-		proxy_info["RS"]=out_ld_sort[1][3]
-		proxy_info["Alleles"]=out_ld_sort[1][4]
-		proxy_info["Coord"]=out_ld_sort[1][5]
-		proxy_info["Dist"]=out_ld_sort[1][6]
-		proxy_info["Dprime"]=str(round(float(out_ld_sort[1][7]),4))
-		proxy_info["R2"]=str(round(float(out_ld_sort[1][8]),4))
-		proxy_info["Corr_Alleles"]=out_ld_sort[1][9]
-		proxy_info["RegulomeDB"]=out_ld_sort[1][10]
-		proxy_info["MAF"]=str(round(float(out_ld_sort[1][12]),4))
-		proxy_info["Function"]=out_ld_sort[1][13]
-		proxies["proxy_"+(digits-len(str(1)))*"0"+str(1)]=proxy_info
-		#top10.append(proxy_info)
-		
-		temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
-		print >> outfile, "\t".join(temp)
-	
-	
-	for i in range(2,len(out_ld_sort)):
-		if float(out_ld_sort[i][8])>0.01:
+	for i in range(1,len(out_ld_sort)):
+		if float(out_ld_sort[i][8])>0.01 and out_ld_sort[i][3]!=snp:
 			proxy_info={}
 			row=[]
 			proxy_info["RS"]=out_ld_sort[i][3]
@@ -275,11 +268,12 @@ def calculate_proxy(snp,pop,request):
 			proxy_info["MAF"]=str(round(float(out_ld_sort[i][12]),4))
 			proxy_info["Function"]=out_ld_sort[i][13]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
-			chromosome, chromosome_position = proxy_info["Coord"].split(':')
+			chr,pos=proxy_info["Coord"].split(':')
+			
 			# Adding a row for the Data Table
 			row.append(proxy_info["RS"])
-			row.append(chromosome)
-			row.append(chromosome_position)
+			row.append(chr)
+			row.append(pos)
 			row.append(proxy_info["Alleles"])
 			row.append(str(round(float(proxy_info["MAF"]),4)))
 			row.append(proxy_info["Dist"])
@@ -289,16 +283,23 @@ def calculate_proxy(snp,pop,request):
 			row.append(proxy_info["RegulomeDB"])
 			row.append(proxy_info["Function"])
 			rows.append(row)
-
-			#if i<=10:
-			#	top10.append(proxy_info)
 			
 			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
 			print >> outfile, "\t".join(temp)
+			
+			temp2=[chr,pos,pos,proxy_info["RS"]]
+			print >> track, "\t".join(temp2)
+			
+			if cutoff[counter]<r2_prior and float(proxy_info["R2"])<=cutoff[counter]:
+				print >> track, ""
+				print >> track, "track name=\""+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" description=\"Proxy Variants with "+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" color=198,129,0"
+				counter+=1
+			
+			r2_prior=proxy_info["R2"]
 
 	output["aaData"]=rows
-	#output["proxy_snps"]=proxies
-	#output["top10"]=top10
+	output["proxy_snps"]=proxies
+	
 	
 	# Output JSON and text file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -306,6 +307,7 @@ def calculate_proxy(snp,pop,request):
 	out_json.close()
 	
 	outfile.close()
+	track.close()
 	
 	
 	# Organize scatter plot data
