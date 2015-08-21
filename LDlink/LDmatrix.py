@@ -283,9 +283,9 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 			if Ms!=0:
 				# D prime
 				if delta<0:
-					D_prime=round(delta/min((A+C)*(A+B),(B+D)*(C+D)),3)
+					D_prime=round(abs(delta/min((A+C)*(A+B),(B+D)*(C+D))),3)
 				else:
-					D_prime=round(delta/min((A+C)*(C+D),(A+B)*(B+D)),3)
+					D_prime=round(abs(delta/min((A+C)*(C+D),(A+B)*(B+D))),3)
 
 				# R2
 				r2=round((delta**2)/Ms,3)
