@@ -257,9 +257,9 @@ def calculate_pair(snp1,snp2,pop,request):
 
 		# D prime
 		if delta<0:
-			D_prime=delta/min((A+C)*(A+B),(B+D)*(C+D))
+			D_prime=abs(delta/min((A+C)*(A+B),(B+D)*(C+D)))
 		else:
-			D_prime=delta/min((A+C)*(C+D),(A+B)*(B+D))
+			D_prime=abs(delta/min((A+C)*(C+D),(A+B)*(B+D)))
 
 		# R2
 		r2=(delta**2)/Ms
@@ -379,7 +379,7 @@ def calculate_pair(snp1,snp2,pop,request):
 
 	statistics={}
 	if Ms!=0:
-		statistics["d_prime"]=str(round(abs(D_prime),4))
+		statistics["d_prime"]=str(round(D_prime,4))
 		statistics["r2"]=str(round(r2,4))
 		statistics["chisq"]=str(round(chisq,4))
 		statistics["p"]=str(round(p,4))
