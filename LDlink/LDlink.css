@@ -290,6 +290,7 @@ img.graph-legend {
 	color: black;
 	/* color: white; */
 }
+
 /* LDhap Heat Map - Version 1 */
 .haplotype_a {
 	background: #0880C4; 	/* Blue */
@@ -350,6 +351,24 @@ img.graph-legend {
 	*/
 }
 
+/* LDhap Heat Map - Version 4 */
+/* Pastel Colors light red, light orage, light blue, and light green */
+/* Color Code: http://paletton.com/palette.php?uid=7000u0klLMWnHN3kBNFgZMYgZMY */
+.haplotype_a {
+	background: #FF7878; 	/* Light red; */
+}
+.haplotype_t {
+	background: #FFB578; 	/* Light Orange */
+}
+.haplotype_c {
+	background: #63D2D2; /* Light Blue */
+}
+.haplotype_g {
+	background: #6DE96D; /* Light Purple; c2b2da; Contrast Ratio: 7.17:1 */
+	/*
+	background: linear-gradient(145deg, #d4c9e5 , #c2b2da); 
+	*/
+}
 #ldhap-bokeh-graph {
 	max-height: 700px;
 	max-width: 900px;
