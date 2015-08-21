@@ -68,9 +68,9 @@ def LD_calcs(hap,allele,allele_n):
 		
 		# D prime
 		if delta<0:
-			D_prime=delta/min((A+C)*(A+B),(B+D)*(C+D))
+			D_prime=abs(delta/min((A+C)*(A+B),(B+D)*(C+D)))
 		else:
-			D_prime=delta/min((A+C)*(C+D),(A+B)*(B+D))
+			D_prime=abs(delta/min((A+C)*(C+D),(A+B)*(B+D)))
 		
 		# R2
 		r2=(delta**2)/Ms
