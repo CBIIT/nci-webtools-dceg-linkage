@@ -907,8 +907,10 @@ function updateLDproxy() {
 	};
 	//Update href on
 
+	console.log(location.hostname);
+
 	$('#ldproxy-genome').attr('href',
-		'http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track' 
+		'http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
 		+ ldproxyInputs.reference + '.txt');
 	//console.dir(ldproxyInputs);
 	$('#ldproxy-results-link').attr('href',
