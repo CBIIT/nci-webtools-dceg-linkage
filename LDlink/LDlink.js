@@ -355,6 +355,26 @@ function ldproxy_regulome_link(data, type, row ) {
 	return link;
 }
 
+function ldproxy_haploreg_link(data, type, row) {
+
+	// Create RegulomeDB links
+
+	var server = 'http://www.broadinstitute.org/mammals/haploreg/detail_v2.php';
+
+	var rs_number = row[0];
+	var params = {
+		query : "",
+		id : rs_number
+	};
+	var href = server + "?" + $.param(params);
+	var target = 'haploreg_' + Math.floor(Math.random() * (99999 - 10000 + 1));
+	var img = '<img src="LDproxy_external_link.png" alt="HaploReg Details" title="HaploReg Details" class="haploreg_external_link" style="width:16px;height:16px;">'; 
+	var link = '<a href="'+href+'" target="'+target+'">'+img+'</a>';
+
+	return link;
+
+}
+
 
 $(document).ready(function() {
 	showFFWarning();
@@ -395,14 +415,23 @@ $(document).ready(function() {
 				},
 				"targets": 9
 			},
-			{ className: "dt-body-center", "targets": [ 1, 9 ] }
+			{
+				"render": function ( data, type, row ) {
+					return ldproxy_haploreg_link(data, type, row);
+				},
+				"targets": 10
+			},
+			{ className: "dt-body-center", "targets": [ 1, 9, 10 ] }
         ]
 	});
 
 	//console.dir(ldproxyTable);
 	//	alert("hello");
 
-	var new_stuff = {"aaData": [["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","NA"],["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","NA"],[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","NA"]]};
+	var new_stuff = {"aaData": [
+	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
+	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
+	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
 	RefreshTable('#new-ldproxy', new_stuff);
 
 	/*
@@ -876,8 +905,12 @@ function updateLDproxy() {
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
+	//Update href on
 
-	console.dir(ldproxyInputs);
+	$('#ldproxy-genome').attr('href',
+		'http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track' 
+		+ ldproxyInputs.reference + '.txt');
+	//console.dir(ldproxyInputs);
 	$('#ldproxy-results-link').attr('href',
 			'tmp/proxy' + ldproxyInputs.reference + '.txt');
 	var url = restServerUrl + "/ldproxy";

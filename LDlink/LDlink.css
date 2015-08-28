@@ -225,7 +225,7 @@ img.graph-legend {
   margin-right: auto;
 }
 
-#ldproxy-link {
+.ldproxy-link {
   display:block;
   text-align: center;
 }
@@ -238,17 +238,20 @@ img.graph-legend {
   text-align:left;
 }
 .multiselect-container > li {
-    padding-left: 30px;
+    padding-left: 50px;
 }
 .multiselect-item.multiselect-all {
 	padding-left: 0px;
+	text-decoration: underline;
 }
 .multiselect-item.multiselect-group {
-	padding-left: 15px;
+	padding-left: 30px;
 }
-
 .has-feedback .form-control {
     padding-right: 0px;
+}
+.multiselect-container > li.multiselect-group-clickable label {
+	text-decoration: underline;
 }
 
 .form-control-feedback {
@@ -375,32 +378,6 @@ img.graph-legend {
 	overflow:auto;
 }
 
-table.jerry {
-  table-layout: fixed; 
-  width: 100%;
-  *margin-left: -100px;/*ie7*/
-}
-td.jerry, th.jerry {
-  vertical-align: top;
-  border-top: 1px solid #ccc;
-  padding:10px;
-  width:100px;
-}
-th.jerry {
-  position:absolute;
-  *position: relative; /*ie7*/
-  left:0; 
-  width:100px;
-}
-.outer.jerry {
-  position:relative
-}
-.inner.jerry {
-  overflow-x:scroll;
-  overflow-y:visible;
-  width:300px; 
-  margin-left:100px;
-}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,

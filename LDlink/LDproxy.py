@@ -281,6 +281,7 @@ def calculate_proxy(snp,pop,request):
 			row.append(str(round(float(proxy_info["R2"]),4)))
 			row.append(proxy_info["Corr_Alleles"])
 			row.append(proxy_info["RegulomeDB"])
+			row.append("HaploReg link")
 			row.append(proxy_info["Function"])
 			rows.append(row)
 			

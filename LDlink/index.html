@@ -720,13 +720,14 @@
 								</div>
 							</div>
 						</div>
-						<br /> <a id="ldproxy-link"
-							href="http://genome.ucsc.edu/cgi-bin/hgTracks?position=chr4:103554686-104554686&snp141=pack&hgFind.matches=rs2720460"
-							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View
-							plotted region in UCSC Genome Browser</a> 
-						<a id="ldproxy-link"
+						<br />
+						<a id="ldproxy-genome" class="ldproxy-link"
+							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track78816.txt"
+
+							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R2 data in UCSC Genome Browser</a> 
+						<a class="ldproxy-link"
 							href="http://www.regulomedb.org/help#score"
-							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scores">View
+							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scoring scheme">View
 							scoring scheme for RegulomeDB scores</a> <br>
 
 						<div id="ldproxy-table-container center-align">
@@ -734,12 +735,12 @@
 								<div>
 									<h3>Proxy SNPs</h3>
 								</div>
-								<table id="new-ldproxy" class="display compact">
+								<table id="new-ldproxy" class="table display compact">
 									<thead>
 										<tr>
 											<th>RS Results</th>
-											<th class="dt-body-center">Chromosome</th>
-											<th>Position on Chromosome</th>
+											<th class="dt-body-center">Chr</th>
+											<th>Pos on Chr</th>
 											<th>Alleles</th>
 											<th>MAF</th>
 											<th>Distance</th>
@@ -747,14 +748,15 @@
 											<th>R<sup>2</sup></th>
 											<th>Correlated Alleles</th>
 											<th>RegulomeDB</th>
+											<th>HaploReg</th>
 											<th>Functional Class</th>
 										</tr>
 									</thead>
 									<tfoot>
 										<tr>
 											<th>RS Results</th>
-											<th>Chromosome</th>
-											<th>Position on Chromosome</th>
+											<th>Chr</th>
+											<th>Pos on Chr</th>
 											<th>Alleles</th>
 											<th>MAF</th>
 											<th>Distance</th>
@@ -762,6 +764,7 @@
 											<th>R<sup>2</sup></th>
 											<th>Correlated Alleles</th>
 											<th>RegulomeDB</th>
+											<th>HaploReg</th>
 											<th>Functional Class</th>
 										</tr>
 									</tfoot>
