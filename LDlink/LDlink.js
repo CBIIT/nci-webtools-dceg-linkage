@@ -758,11 +758,20 @@ function updateLDmatrix() {
 
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
 	var population = getPopulationCodes(id+'-population-codes');
+	var r2_d
+	if($('#matrix_color_r2').hasClass('active')) {
+		r2_d='r2'; // i.e. R2
+		$("#ldmatrix_legend").attr('src', 'LDmatrix_legend_R2.png');
+	} else {
+		r2_d='d';  // i.e.  Dprime
+		$("#ldmatrix_legend").attr('src', 'LDmatrix_legend_Dprime.png');
+	}
 
 	var ldmatrixInputs = {
 		snps : snps,
 		pop : population.join("+"),
-		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+		r2_d : r2_d
 	};
 	console.log('ldmatrixInputs');
 	console.dir(ldmatrixInputs);

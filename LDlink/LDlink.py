@@ -125,9 +125,11 @@ def ldmatrix():
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
+    r2_d = request.args.get('r2_d', False)
     print 'snps: ' + snps
     print 'pop: ' + pop
     print 'request: ' + reference
+    print 'r2_d: ' + r2_d
 
     snplst = tmp_dir+'snps'+reference+'.txt'
     print 'snplst: '+snplst
@@ -136,7 +138,7 @@ def ldmatrix():
     f.write(snps)
     f.close()
 
-    out_script,out_div = calculate_matrix(snplst,pop,reference)
+    out_script,out_div = calculate_matrix(snplst,pop,reference,r2_d)
 
     copy_output_files(reference)
     return out_script+"\n "+out_div

@@ -339,18 +339,17 @@
 
 						<!-- LDMATRIX FORM -->
 						<form id="ldmatrixForm" class="ldlinkForm">
-
 							<div class="form-group">
 								<div class="col-sm-2">
 									<textarea id="ldmatrix-file-snp-numbers"
 										placeholder="RS Numbers" class="form-control"
 										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
-								<div class="col-sm-4">
+								<div class="col-sm-3">
 									<div class="input-group">
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
-										<input type="text" id="ldmatrix-file-label" readonly
-											placeholder="Upload input file with RS numbers" class="readonly-input-text">
+										<input type="text" name="ldmatrix-file-label" readonly
+											placeholder="Upload input file with RS numbers" class="readonly-input-text2">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
 										<span	class="btn btn-default btn-file">Browse
 											<input type="file" id="ldmatrix-file">
@@ -359,13 +358,27 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-4">
+								<div class="col-sm-3">
 									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations" required>
 									</select>
 								</div>
 							</div>
+<!-- New toggle -->
+							<div class="form-group">
+								<div class="col-sm-2">
+									<div class="btn-group" data-toggle="buttons" title="Select matrix plotting variable">
+										<label id="matrix_color_r2" class="btn btn-default active">
+									 		<input type="radio" name="options" autocomplete="off" checked> R<sub>2</sub>
+										</label>
+										<label class="btn btn-default">
+											<input type="radio" name="options" autocomplete="off"> D'
+										</label>
+									</div>
+								</div>
+							</div>
+
 							<div class="form-group">
 								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
@@ -409,7 +422,7 @@
 								<div id="ldmatrix-bokeh-graph"></div>
 													<br />
 								<div>
-									<img src="LDmatrix_legend.png" title="LDmatrix Legend" alt="LDmatrix legend"
+									<img id="ldmatrix_legend" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend"
 										class="graph-legend">
 								</div>
 							</div>
@@ -418,7 +431,7 @@
 								<br /> <span><a id="ldmatrix-DPrime"
 									target="LDMatrix-DPrime">Download D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
 								<span><a id="ldmatrix-R2" target="LDMatrix-R2">Download
-										R<sup>2</sup> File</a></span>
+										R<sub>2</sub> File</a></span>
 							</div>
 						</div>
 					</div>
@@ -608,7 +621,7 @@
 										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span
 										data-bind="text: haplotypes.hap4.frequency"></span>) <br></td>
 									<td class="spacer"></td>
-									<td class="cell-right">D':<br>R<sup>2</sup>:<br>Chi-sq:<br>p-value:
+									<td class="cell-right">D':<br>R<sub>2</sub>:<br>Chi-sq:<br>p-value:
 									</td>
 									<td><span data-bind="text: statistics.d_prime"></span><br>
 										<span data-bind="text: statistics.r2"></span><br> <span
@@ -724,7 +737,7 @@
 						<a id="ldproxy-genome" class="ldproxy-link"
 							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track78816.txt"
 
-							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R2 data in UCSC Genome Browser</a> 
+							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sub>2</sub> data in UCSC Genome Browser</a> 
 						<a class="ldproxy-link"
 							href="http://www.regulomedb.org/help#score"
 							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scoring scheme">View
@@ -740,12 +753,12 @@
 										<tr>
 											<th>RS Results</th>
 											<th class="dt-body-center">Chr</th>
-											<th>Pos on Chr</th>
+											<th>Position on Chr</th>
 											<th>Alleles</th>
 											<th>MAF</th>
 											<th>Distance</th>
 											<th>D'</th>
-											<th>R<sup>2</sup></th>
+											<th>R<sub>2</sub></th>
 											<th>Correlated Alleles</th>
 											<th>RegulomeDB</th>
 											<th>HaploReg</th>
@@ -756,12 +769,12 @@
 										<tr>
 											<th>RS Results</th>
 											<th>Chr</th>
-											<th>Pos on Chr</th>
+											<th>Position on Chr</th>
 											<th>Alleles</th>
 											<th>MAF</th>
 											<th>Distance</th>
 											<th>D'</th>
-											<th>R<sup>2</sup></th>
+											<th>R<sub>2</sub></th>
 											<th>Correlated Alleles</th>
 											<th>RegulomeDB</th>
 											<th>HaploReg</th>
@@ -814,6 +827,7 @@
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
+
 	<script
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"
 		type="text/javascript">
