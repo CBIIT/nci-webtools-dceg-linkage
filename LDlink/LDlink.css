@@ -291,69 +291,13 @@ img.graph-legend {
 
 .haplotype {
 	color: black;
+	background:#C0C0C0; /* if a multiple grouped */ 
 	/* color: white; */
 }
 
-/* LDhap Heat Map - Version 1 */
-.haplotype_a {
-	background: #0880C4; 	/* Blue */
+.haplotype_dash {
+	background:white;
 }
-.haplotype_t {
-	background: #9389BD; 	/* Purple */
-}
-.haplotype_c {
-	background: #F5AC1A; /* Orange */
-}
-.haplotype_g {
-	background: #ED7F23; /* Dark Orange */
-}
-
-/* LDhap Heat Map - Version 2 */
-.haplotype_a {
-	background: #0880C4; 	/* Blue */
-	/* background: linear-gradient(45deg, #218DCA , #0880C4);  */
-}
-.haplotype_t {
-	background: #9389BD; 	/* Purple */
-	/* background: linear-gradient(45deg, #9E95C4 , #9389BD); */
-}
-.haplotype_c {
-	background: #F5AC1A; /* Orange */
-	/* background: linear-gradient(45deg, ##F6B431 , #F5AC1A);  */
-}
-.haplotype_g {
-	background: #ED7F23; /* Dark Orange */
-	/* background: linear-gradient(45deg, #EF8C39 , #ED7F23); */
-}
-
-/* LDhap Heat Map - Version 3 */
-/* Pastel Colors light blue, light greenish, light orange, and light purple */
-/* Color Contrast Cheker with http://webaim.org/resources/contrastchecker/ */
-.haplotype_a {
-	background: #abc8ec; 	/* Light Blue; Contrast Ratio: 8:1 */
-	/*
-	background: linear-gradient(145deg, #c6daf2 , #abc8ec);
-	*/
-}
-.haplotype_t {
-	background: #f2b46c; 	/* Light Orange; Contrast Ratio: 7.56:1 */
-	/*
-	background: linear-gradient(145deg, #f3c38d , #f2b46c); 
-	 */
-}
-.haplotype_c {
-	background: #ccee9c; /* Light Green; Contrast Ratio: 10.67:1 */
-	/*
-	background: linear-gradient(145deg, #d8f3b6 , #ccee9c); 
-	*/
-}
-.haplotype_g {
-	background: #c2b2da; /* Light Purple; c2b2da; Contrast Ratio: 7.17:1 */
-	/*
-	background: linear-gradient(145deg, #d4c9e5 , #c2b2da); 
-	*/
-}
-
 /* LDhap Heat Map - Version 4 */
 /* Pastel Colors light red, light orage, light blue, and light green */
 /* Color Code: http://paletton.com/palette.php?uid=7000u0klLMWnHN3kBNFgZMYgZMY */

@@ -187,7 +187,6 @@
 								</div>
 							</div>
 						</form>
-
 					</div>
 					<hr>
 					<div id="ldhap-loading">
@@ -270,7 +269,7 @@
 											<td data-bind="text: $data.Alleles"></td>
 											<!-- ko foreach: $data.Haplotypes -->
 												<td class="cell-center haplotype" 
-													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G'}"
+													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}"
 												>
 													<span data-bind="text: $data"></span>
 												</td>
@@ -368,7 +367,7 @@
 <!-- New toggle -->
 							<div class="form-group">
 								<div class="col-sm-2">
-									<div class="btn-group" data-toggle="buttons" title="Select matrix plotting variable">
+									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
 										<label id="matrix_color_r2" class="btn btn-default active">
 									 		<input type="radio" name="options" autocomplete="off" checked> R<sub>2</sub>
 										</label>

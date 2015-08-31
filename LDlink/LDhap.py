@@ -10,16 +10,13 @@ def calculate_hap(snplst,pop,request):
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
-	
-	
+
 	# Ensure tmp directory exists
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
 	
-	
 	# Create JSON output
 	output={}
-	
 	
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
@@ -27,14 +24,12 @@ def calculate_hap(snplst,pop,request):
 		output["error"]="Maximum variant list is 30 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
-	
 	# Remove duplicate RS numbers
 	snps=[]
 	for snp_raw in snps_raw:
 		snp=snp_raw.strip().split()
 		if snp not in snps:
 			snps.append(snp)
-	
 	
 	# Select desired ancestral populations
 	pops=pop.split("+")

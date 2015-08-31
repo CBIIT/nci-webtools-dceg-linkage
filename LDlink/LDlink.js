@@ -698,16 +698,29 @@ function updateLDhap() {
 
 function formatLDhapData(data) {
 
-	console.log('ldhap data');
+	console.info("LDhap Starts here:");
+	console.log('original data structure for ldhap:');
 	console.dir(data);
 
+	console.log("get the two main parts of the data as hplotypes and snps");
+	//var indels = [];
 	var haplotypes = data.haplotypes;
+
+	console.dir(haplotypes);
+
 	var snps = data.snps;
 
 	var ldhapTable = {
 		footer : [],
 		rows : []
 	};
+	//Get the indels from the haplotypes
+	$.each( haplotypes, function( key, value ) {
+		haplotypes[key].indels = value.Haplotype.split("_");
+//		console.log( key + ": " + value );
+	});
+
+	console.dir(haplotypes);
 
 	// Convert haplotypes to footer
 	for (key in haplotypes) {
@@ -716,7 +729,8 @@ function formatLDhapData(data) {
 		var obj = {
 			Count : haplotypes[key].Count,
 			Frequency : haplotypes[key].Frequency,
-			Haplotype : haplotypes[key].Haplotype
+			Haplotype : haplotypes[key].indels 
+			/* Haplotype : ["A", "GGA", "-", 'G'] */
 		};
 		// Add Haplotypes with a frequency of 1% or greater.
 		if (haplotypes[key].Frequency * 100 > 1) {
@@ -733,11 +747,15 @@ function formatLDhapData(data) {
 		};
 		ldhapTable.rows.push(obj);
 	}
+	console.log("First ldhapTable: ");
+	console.dir(ldhapTable);
 	// Add haplotypesHTML
 	$.each(ldhapTable.rows, function(index, value) {
 		// Get all the haplotypes in pivot order
 		$.each(ldhapTable.footer, function(index2, value2) {
-			value.Haplotypes[index2] = value2.Haplotype.substr(index, 1);
+
+			value.Haplotypes[index2] = value2.Haplotype[index];
+
 		});
 	});
 
@@ -747,6 +765,7 @@ function formatLDhapData(data) {
 		out_final : ldhapTable
 	}
 	console.dir(obj);
+	console.info("LDhap ENDS here:");
 
 	return ldhapTable;
 }
@@ -759,6 +778,7 @@ function updateLDmatrix() {
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
 	var population = getPopulationCodes(id+'-population-codes');
 	var r2_d
+
 	if($('#matrix_color_r2').hasClass('active')) {
 		r2_d='r2'; // i.e. R2
 		$("#ldmatrix_legend").attr('src', 'LDmatrix_legend_R2.png');
@@ -773,8 +793,8 @@ function updateLDmatrix() {
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
 		r2_d : r2_d
 	};
-	console.log('ldmatrixInputs');
-	console.dir(ldmatrixInputs);
+	//console.log('ldmatrixInputs');
+	//console.dir(ldmatrixInputs);
 
 	var url = restServerUrl + "/ldmatrix";
 	var ajaxRequest = $.ajax({
