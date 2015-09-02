@@ -216,9 +216,11 @@
 				<!-- ldhap CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldhap-results-container">
-						<div class="row">
+						<div class="row" style="overflow-y:auto;">
+							<!--
 							<div class="outer">
 								<div class="inner">
+							-->
 <!--
 								<table class="table table-condensed ldhap" data-height="150">
 -->
@@ -269,16 +271,17 @@
 											<td data-bind="text: $data.Alleles"></td>
 											<!-- ko foreach: $data.Haplotypes -->
 												<td class="cell-center haplotype" 
-													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}"
-												>
+													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
 													<span data-bind="text: $data"></span>
 												</td>
 											<!-- /ko -->
 										</tr>
 									</tbody>
 								</table>
+							<!--
 								</div>
 							</div>
+							-->
 <!--
 							Testing
 <div class="outer jerry">
@@ -364,7 +367,6 @@
 									</select>
 								</div>
 							</div>
-<!-- New toggle -->
 							<div class="form-group">
 								<div class="col-sm-2">
 									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
@@ -377,14 +379,12 @@
 									</div>
 								</div>
 							</div>
-
 							<div class="form-group">
 								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
 										class="btn btn-default calculate" />
 								</div>
 							</div>
-
 						</form>
 					</div>
 					<hr>
@@ -438,9 +438,6 @@
 			</div>
 
 			<!-- LDpair -->
-			<!--
-			<div class="tab-pane fade" id="ldpair-tab">
-			-->
 			<div class="tab-pane" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
 
@@ -722,8 +719,8 @@
  -->
 					<!-- LDProxy CONTAINER -->
 					<div class="container-fluid" id="ldproxy-results-container">
-						<div class="row">
-							<div class="col-sm-10 col-sm-offset-1">
+						<div class="row overflowy">
+							<div class="col-sm-11 col-sm-offset-1">
 								<div id="ldproxy-bokeh-graph"></div>
 								<br />
 								<div>
@@ -742,7 +739,7 @@
 							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scoring scheme">View
 							scoring scheme for RegulomeDB scores</a> <br>
 
-						<div id="ldproxy-table-container center-align">
+						<div id="ldproxy-table-container" class="row overflowy">
 							<div class="table-responsive">
 								<div>
 									<h3>Proxy SNPs</h3>

@@ -321,6 +321,9 @@ img.graph-legend {
 	max-width: 900px;
 	overflow:auto;
 }
+.overflowy {
+	overflow-y:auto;
+}
 
 /* Testing */
 @media screen and (max-width: 767px) {

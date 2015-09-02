@@ -424,7 +424,6 @@ $(document).ready(function() {
 			{ className: "dt-body-center", "targets": [ 1, 9, 10 ] }
         ]
 	});
-
 	//console.dir(ldproxyTable);
 	//	alert("hello");
 
@@ -729,8 +728,8 @@ function formatLDhapData(data) {
 		var obj = {
 			Count : haplotypes[key].Count,
 			Frequency : haplotypes[key].Frequency,
-			Haplotype : haplotypes[key].indels 
-			/* Haplotype : ["A", "GGA", "-", 'G'] */
+			Haplotype : haplotypes[key].indels  
+			/* Haplotype : ["A", "GGA", "-", 'G'] */ 
 		};
 		// Add Haplotypes with a frequency of 1% or greater.
 		if (haplotypes[key].Frequency * 100 > 1) {
