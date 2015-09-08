@@ -73,7 +73,8 @@
 				<!-- ../common/images/DCEG-LTG_banner.png -->
 				<!-- NCI-translational-genomics.png -->
 				<!-- DCEG-BB-HREB.png -->
-				<a href="http://dceg.cancer.gov" target="_blank"><img src="../common/images/DCEG-LTG_banner.png"
+				<a href="http://dceg.cancer.gov" target="_blank">
+					<img src="../common/images/DCEG-LTG_banner.png"
 					alt="Banner for NCI Division of Cancer Epidemiology &amp; Genetics, Laboratory of Translational Genomics"
 					class="logo"></a>
 			</div>
@@ -128,6 +129,21 @@
 						population group.<br> <br>
 				</p>
 
+				<!-- Add new notes here.  Surround paragrahs with <p></p> -->
+
+				<div class="row">
+					<div class="col-sm-10 col-sm-offset-1 whats_new" >
+<p>Hello,  Here is what is new with LDlink.</p>
+<p>Vim ei labitur numquam, te sit minimum partiendo. Est ei alii rationibus, est ut gloriatur efficiantur. His delectus concludaturque et, eu denique splendide nam, accumsan necessitatibus quo id. Aeque dignissim sadipscing et sit, ei autem gloriatur nam, nobis facete detracto vel ne. Docendi detracto hendrerit his et, mnesarchum instructior consectetuer ius at. Duo cu postea ancillae convenire.</p>
+
+<p>Ex vim dolorem consulatu, eos ei ferri adipiscing dissentiunt. Ex tibique invenire sea, no quas scaevola petentium sea. Ea mea dicat accusamus efficiantur, vis solet temporibus an, no vidisse debitis mei. Mei impedit albucius percipitur te, mea ex aeque dolores scaevola. Autem efficiendi ut vim, eu appareat ponderum sed. Id duo posse vivendum.
+</p>
+<p>Ex vim dolorem consulatu, eos ei ferri adipiscing dissentiunt. Ex tibique invenire sea, no quas scaevola petentium sea. Ea mea dicat accusamus efficiantur, vis solet temporibus an, no vidisse debitis mei. Mei impedit albucius percipitur te, mea ex aeque dolores scaevola. Autem efficiendi ut vim, eu appareat ponderum sed. Id duo posse vivendum.
+</p>
+<p>Ex vim dolorem consulatu, eos ei ferri adipiscing dissentiunt. Ex tibique invenire sea, no quas scaevola petentium sea. Ea mea dicat accusamus efficiantur, vis solet temporibus an, no vidisse debitis mei. Mei impedit albucius percipitur te, mea ex aeque dolores scaevola. Autem efficiendi ut vim, eu appareat ponderum sed. Id duo posse vivendum.
+</p>
+					</div>
+				</div>
 				<p> LDlink was developed by Mitchell Machiela in collaboration
 					with NCI's Center for Biomedical Informatics and Information
 					Technology (CBIIT). Support comes from the Division of Cancer
@@ -140,7 +156,7 @@
 				<p> Citation: Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific 
 				    haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed">26139635</a>.
 				</p>
-				
+				<p id="ldlink_version"></p>
 				
 			</div>
 
@@ -197,7 +213,7 @@
 					<div class="row">
 						<div class="col-sm-7 col-sm-offset-2" id="ldhap-message">
 							<div class="panel panel-danger">
-								<div class="panel-heading">Error</div>
+									<div class="panel-heading">Error</div>
 								<div class="panel-body" id="ldhap-message-content"></div>
 							</div>
 						</div>
@@ -215,22 +231,148 @@
 				</div>
 				<!-- ldhap CONTAINER -->
 				<div class="jumbotron">
-					<div class="container-fluid" id="ldhap-results-container">
-						<div class="row" style="overflow-y:auto;">
-							<!--
-							<div class="outer">
-								<div class="inner">
-							-->
 <!--
-								<table class="table table-condensed ldhap" data-height="150">
+<div class="row ldhap-table-container">
+<div id="left-c">
+<table class="table table-condensed"> 
+	<thead>
+		<tr>
+			<th>SNP</th>
+			<th>Position (hg19)</th>
+			<th nowrap>Allele Frequencies</th>
+		</tr>
+	</thead>
+	<tfoot>
+		<tr>
+			<td colspan="2" rowspan="2"></td>
+			<td>Haplotype Count</td>
+		</tr>
+		<tr>
+			<td nowrap>Haplotype Frequency</td>
+		</tr>
+	</tfoot>
+	<tbody>
+		<tr>
+			<td nowrap>rs123</td>
+			<td nowrap>
+				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
+			</td>
+			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
+		</tr>
+		<tr>
+			<td nowrap>rs123</td>
+			<td nowrap>
+				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
+			</td>
+			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
+		</tr>
+		<tr>
+			<td nowrap>rs123</td>
+			<td nowrap>
+				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
+			</td>
+			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
+		</tr>
+		<tr>
+			<td nowrap>rs123</td>
+			<td nowrap>
+				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
+			</td>
+			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
+		</tr>
+	</tbody>
+	
+	<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+		<tr>
+			<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
+				<a 	title="Cluster Report" 
+				data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
+					<span data-bind="text: RS"></span>
+				</a>
+			</td>
+			<td nowrap data-bind="attr: { id: 'Coord_hap_' + $index() }"
+				style="text-align: center">
+				<a title="Genome Browser"
+				data-bind="attr: { target: 'Coord_hap_' + $index() }">
+					<span data-bind="text: Coord"></span>
+				</a>
+			</td>
+			<td nowrap data-bind="text: $data.Alleles"></td>
+		</tr>
+	</tbody>
+
+</table>
+</div>
+<div id="right-c">
+<table id="ldhap-table-right" class="table table-condensed">
+	<thead>
+		<tr>
+			<th style="text-align:left;" colspan="5">Haplotypes</th>
+		</tr>
+	</thead>
+	<tfoot>
+		<tr>
+			<th style="text-align:left;">125</th>
+			<th style="text-align:left;">9474</th>
+			<th style="text-align:left;">1357</th>
+			<th style="text-align:left;">934</th>
+			<th style="text-align:left;">564</th>
+		</tr>
+		<tr>
+			<th style="text-align:left;">786</th>
+			<th style="text-align:left;">0546</th>
+			<th style="text-align:left;">14</th>
+			<th style="text-align:left;">645</th>
+			<th style="text-align:left;">543</th>
+		</tr>
+	</tfoot>
+	<tbody>
+		<tr>
+			<td>A</td>
+			<td>G</td>
+			<td>TG</td>
+			<td>TTT</td>
+			<td>G</td>
+		</tr>
+		<tr>
+			<td>G</td>
+			<td>T</td>
+			<td>A</td>
+			<td>G</td>
+			<td>G</td>
+		</tr>
+		<tr>
+			<td>G</td>
+			<td>GA</td>
+			<td>GGGG</td>
+			<td>-</td>
+			<td>G</td>
+		</tr>
+		<tr>
+			<td>G</td>
+			<td>G</td>
+			<td>G</td>
+			<td>G</td>
+			<td>G</td>
+		</tr>
+	</tbody>
+</table>
+</div>
+</div>
+</div>
+
 -->
 
-								<table class="table table-condensed">
+
+
+					<div class="container-fluid" id="ldhap-results-container">
+						<div class="row">
+								<table class="table table-condensed overflowy">
 									<thead>
 										<tr>
 											<th>SNP</th>
 											<th>Position (hg19)</th>
-											<th>AlleleFrequencies</th>
+											<th nowrap>Allele Frequencies</th>
 											<th colspan="2" id="ldhap-haplotypes-column">Haplotypes</th>
 										</tr>
 									</thead>
@@ -249,26 +391,22 @@
 											<!-- /ko -->
 										</tr>
 									</tfoot>
-									<tbody data-bind="foreach: rows"
-										style="border: 1px solid #ccc;">
+									<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
 										<tr>
-
-											<td data-bind="attr: { id: 'RSnumber_hap_' + $index() }"
-												style="text-align: center">
+											<td nowrap data-bind="attr: { id: 'OLD_RSnumber_hap_' + $index() }">
 												<a 	title="Cluster Report" 
-												data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
+												data-bind="attr: { target: 'OLD_RSnumber_hap_' + $index() }">
 													<span data-bind="text: RS"></span>
-
 												</a>
 											</td>
-											<td data-bind="attr: { id: 'Coord_hap_' + $index() }"
+											<td nowrap data-bind="attr: { id: 'OLD_Coord_hap_' + $index() }"
 												style="text-align: center">
 												<a title="Genome Browser"
-												data-bind="attr: { target: 'Coord_hap_' + $index() }">
+												data-bind="attr: { target: 'OLD_Coord_hap_' + $index() }">
 													<span data-bind="text: Coord"></span>
 												</a>
 											</td>
-											<td data-bind="text: $data.Alleles"></td>
+											<td nowrap data-bind="text: $data.Alleles"></td>
 											<!-- ko foreach: $data.Haplotypes -->
 												<td class="cell-center haplotype" 
 													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
@@ -278,43 +416,6 @@
 										</tr>
 									</tbody>
 								</table>
-							<!--
-								</div>
-							</div>
-							-->
-<!--
-							Testing
-<div class="outer jerry">
-  <div class="inner jerry">
-    <table class="jerry">
-        <tr>
-          <th>Header A</th>
-          <td>col 1 - A</td>
-          <td>col 2 - A (WITH LONGER CONTENT)</td>
-          <td>col 3 - A</td>
-          <td>col 4 - A</td>
-          <td>col 5 - A</td>
-        </tr>
-        <tr>
-          <th>Header B</th>
-          <td>col 1 - B</td>
-          <td>col 2 - B</td>
-          <td>col 3 - B</td>
-          <td>col 4 - B</td>
-          <td>col 5 - B</td>
-        </tr>
-        <tr>
-          <th>Header C</th>
-          <td>col 1 - C</td>
-          <td>col 2 - C</td>
-          <td>col 3 - C</td>
-          <td>col 4 - C</td>
-          <td>col 5 - C</td>
-        </tr>
-    </table>
-  </div>
-</div>
--->
 						</div>
 						<div class="col-md-12">
 							<span> <a target="_blank" id="ldhap-snps" href="">Download
@@ -351,7 +452,7 @@
 									<div class="input-group">
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
 										<input type="text" name="ldmatrix-file-label" readonly
-											placeholder="Upload input file with RS numbers" class="readonly-input-text2">
+											placeholder="Upload input file with RS numbers" class="readonly-input-text-small">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
 										<span	class="btn btn-default btn-file">Browse
 											<input type="file" id="ldmatrix-file">
@@ -508,7 +609,7 @@
 
 				<div class="jumbotron">
 					<!-- LDPAIR CONTAINER -->
-					<div class="container-fluid" id="ldpair-results-container">
+					<div class="container-fluid overflowy" id="ldpair-results-container">
 						<table class="table-condensed center-align">
 							<tbody>
 								<!-- SNP 1 rsnum and coordinates -->
@@ -647,7 +748,7 @@
 						<!-- LDProxy FORM -->
 						<form id="ldproxyForm" class="ldlinkForm">
 							<div class="form-group">
-								<div class="col-sm-2">
+								<div class="col-sm-3">
 									<input id="ldproxy-snp" name="snp" type="text"
 										class="form-control" placeholder="SNP RS Number"
 										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
@@ -655,7 +756,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-5">
+								<div class="col-sm-4">
 									<a id="ldproxy-population-codes-popover"
 											style="position:relative;left:180px;"
 											href="#"
