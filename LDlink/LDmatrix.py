@@ -124,7 +124,18 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 			out_json.close()
 			return("","")
 			raise
-	
+
+	# Check max distance between SNPs
+	distance_bp=[]
+	for i in range(len(snp_coords)):
+		distance_bp.append(int(snp_coords[i][2]))
+	distance_max=max(distance_bp)-min(distance_bp)
+	if distance_max>1000000:
+		if "warning" in output:
+			output["warning"]=output["warning"]+". Switch rate errors become more common as distance between query variants increases (Query range = "+str(distance_max)+" bp)"
+		else:
+			output["warning"]="Switch rate errors become more common as distance between query variants increases (Query range = "+str(distance_max)+" bp)"
+				
 	
 	
 	# Sort coordinates and make tabix formatted coordinates
@@ -646,8 +657,8 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 
 
 	n_rows=len(lines)
-	genes_plot_yn=[n_rows-x+0.5 for x in genes_plot_y]
-	exons_plot_yn=[n_rows-x+0.5 for x in exons_plot_y]
+	genes_plot_yn=[n_rows-w+0.5 for w in genes_plot_y]
+	exons_plot_yn=[n_rows-w+0.5 for w in exons_plot_y]
 	yr2=Range1d(start=0, end=n_rows)
 	
 	source2=ColumnDataSource(
@@ -658,7 +669,8 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 		)
 	)
 	
-	if len(lines)<3:
+	max_genes=30
+	if len(lines)<3 or len(genes_raw)>max_genes:
 	    plot_h_pix=150
 	else:
 	    plot_h_pix=150+(len(lines)-2)*50
@@ -668,9 +680,22 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
         title="", h_symmetry=False, v_symmetry=False, logo=None,
         plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,reset,previewsave")
 	
-	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
-	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	gene_plot.xaxis.axis_label="Chromosome "+snp_coords[1][1]+" Coordinate (Mb)"
+	if len(genes_raw)<=max_genes:
+		gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
+		gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
+		gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt", text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+		hover=gene_plot.select(dict(type=HoverTool))
+		hover.tooltips=OrderedDict([
+		("Gene", "@exons_plot_name"),
+		("ID", "@exons_plot_id"),
+		("Exon", "@exons_plot_exon"),
+		])
+	
+	else:
+		x_coord_text=x[0]+(x[-1]-x[0])/2.0
+		gene_plot.text(x_coord_text, n_rows/2.0, text="Too many genes to plot.", alpha=1, text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+	
+	gene_plot.xaxis.axis_label="Chromosome "+snp_coords[1][1]+" Coordinate (Mb)(GRCh37)"
 	gene_plot.yaxis.axis_label="Genes"
 	gene_plot.ygrid.grid_line_color=None
 	gene_plot.yaxis.axis_line_color=None
@@ -685,8 +710,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 		("Exon", "@exons_plot_exon"),
 	])
 	
-	gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+
 	
 	gene_plot.toolbar_location="below"
 	
