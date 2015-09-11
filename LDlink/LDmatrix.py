@@ -669,7 +669,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 		)
 	)
 	
-	max_genes=30
+	max_genes=40
 	if len(lines)<3 or len(genes_raw)>max_genes:
 	    plot_h_pix=150
 	else:
