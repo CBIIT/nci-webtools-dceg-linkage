@@ -162,9 +162,7 @@ td.cell-center {
   cursor: inherit;
   display: block;
 }
-tfoot tr.ldhap-table-footer {
-	font-weight:bold;
-}
+
 input[readonly] {
   background-color: white !important;
   cursor: text !important;
@@ -310,15 +308,14 @@ img.graph-legend {
 .haplotype {
 	color: black;
 	background:#C0C0C0; /* if a multiple grouped */ 
-	/* color: white; */
 }
 
-.haplotype_dash {
-	background:white;
-}
 /* LDhap Heat Map - Version 4 */
 /* Pastel Colors light red, light orage, light blue, and light green */
 /* Color Code: http://paletton.com/palette.php?uid=7000u0klLMWnHN3kBNFgZMYgZMY */
+.haplotype_dash {
+	background:white;
+}
 .haplotype_a {
 	background: #FF7878; 	/* Light red; */
 }
@@ -352,6 +349,7 @@ img.graph-legend {
 	overflow-y:auto;
 	margin-bottom:25px;
 }
+
 .table {
     width: auto;
     min-width: 0;
@@ -374,10 +372,23 @@ img.graph-legend {
 
 }
 #ldhap-table-right {
-	display:inline-block;
-	overflow-y:scroll;
-	width:200px;"
+    display: inline-block;
+    overflow-y: auto;
 }
+
+#left-c > table > tfoot > tr > td,
+#right-c > table > tfoot > tr > td {
+	font-weight:bold;
+}
+
+#ldhap-container {
+	overflow-x: scroll;
+}
+
+#ldhap-results-container {
+	overflow-y: auto;
+}
+
 /*
     width: auto;
     min-width: 0;

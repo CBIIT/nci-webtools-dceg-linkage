@@ -132,8 +132,18 @@
 				<!-- Add new notes here.  Surround paragrahs with <p></p> -->
 
 				<div class="row">
-					<div class="col-sm-10 col-sm-offset-1 whats_new" >
-<p>Hello,  Here is what is new with LDlink.</p>
+					<h3 class="col-sm-offset-1" >What's New</h3>
+					<div class="well col-sm-10 col-sm-offset-1 whats_new" >
+
+<p>New features in LDlink 1.1.</p>
+<h4>Improvements:</h4>
+ <ul>
+  <li>LDhap - Indels are shown in heat map.
+  <li>LDhap heat map is color coded by haplotype.</p></li>
+  <li>LDmatrix - The D' or R<sup>2</sup> variable is selectable for the heat map.</li>
+  <li>LDProxy -  Output table returns all data, has sortable columns, and is searchable.</li>
+</ul> 
+
 <p>Vim ei labitur numquam, te sit minimum partiendo. Est ei alii rationibus, est ut gloriatur efficiantur. His delectus concludaturque et, eu denique splendide nam, accumsan necessitatibus quo id. Aeque dignissim sadipscing et sit, ei autem gloriatur nam, nobis facete detracto vel ne. Docendi detracto hendrerit his et, mnesarchum instructior consectetuer ius at. Duo cu postea ancillae convenire.</p>
 
 <p>Ex vim dolorem consulatu, eos ei ferri adipiscing dissentiunt. Ex tibique invenire sea, no quas scaevola petentium sea. Ea mea dicat accusamus efficiantur, vis solet temporibus an, no vidisse debitis mei. Mei impedit albucius percipitur te, mea ex aeque dolores scaevola. Autem efficiendi ut vim, eu appareat ponderum sed. Id duo posse vivendum.
@@ -144,6 +154,7 @@
 </p>
 					</div>
 				</div>
+
 				<p> LDlink was developed by Mitchell Machiela in collaboration
 					with NCI's Center for Biomedical Informatics and Information
 					Technology (CBIIT). Support comes from the Division of Cancer
@@ -159,6 +170,7 @@
 				<p id="ldlink_version"></p>
 				
 			</div>
+
 
 			<!-- LDhap -->
 			<div class="tab-pane fade" id="ldhap-tab">
@@ -231,193 +243,80 @@
 				</div>
 				<!-- ldhap CONTAINER -->
 				<div class="jumbotron">
-<!--
-<div class="row ldhap-table-container">
-<div id="left-c">
-<table class="table table-condensed"> 
-	<thead>
-		<tr>
-			<th>SNP</th>
-			<th>Position (hg19)</th>
-			<th nowrap>Allele Frequencies</th>
-		</tr>
-	</thead>
-	<tfoot>
-		<tr>
-			<td colspan="2" rowspan="2"></td>
-			<td>Haplotype Count</td>
-		</tr>
-		<tr>
-			<td nowrap>Haplotype Frequency</td>
-		</tr>
-	</tfoot>
-	<tbody>
-		<tr>
-			<td nowrap>rs123</td>
-			<td nowrap>
-				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
-			</td>
-			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
-		</tr>
-		<tr>
-			<td nowrap>rs123</td>
-			<td nowrap>
-				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
-			</td>
-			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
-		</tr>
-		<tr>
-			<td nowrap>rs123</td>
-			<td nowrap>
-				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
-			</td>
-			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
-		</tr>
-		<tr>
-			<td nowrap>rs123</td>
-			<td nowrap>
-				<a href="http://genome.ucsc.edu/">chr13:32193627</a>
-			</td>
-			<td nowrap="" data-bind="text: $data.Alleles">-=0.505, T=0.495</td>
-		</tr>
-	</tbody>
-	
-	<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
-		<tr>
-			<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
-				<a 	title="Cluster Report" 
-				data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
-					<span data-bind="text: RS"></span>
-				</a>
-			</td>
-			<td nowrap data-bind="attr: { id: 'Coord_hap_' + $index() }"
-				style="text-align: center">
-				<a title="Genome Browser"
-				data-bind="attr: { target: 'Coord_hap_' + $index() }">
-					<span data-bind="text: Coord"></span>
-				</a>
-			</td>
-			<td nowrap data-bind="text: $data.Alleles"></td>
-		</tr>
-	</tbody>
-
-</table>
+<div class="container-fluid" id="ldhap-results-container">
+	<div class="row ldhap-table-container">
+		<div id="left-c">
+			<table class="table table-condensed"> 
+				<thead>
+					<tr>
+						<th>SNP</th>
+						<th>Position (hg19)</th>
+						<th nowrap>Allele Frequencies</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<td colspan="2" rowspan="2"></td>
+						<td>Haplotype Count</td>
+					</tr>
+					<tr>
+						<td nowrap>Haplotype Frequency</td>
+					</tr>
+				</tfoot>
+				<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+					<tr>
+						<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
+							<a 	title="Cluster Report" 
+							data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
+								<span data-bind="text: RS"></span>
+							</a>
+						</td>
+						<td nowrap data-bind="attr: { id: 'Coord_hap_' + $index() }"
+							style="text-align: center">
+							<a title="Genome Browser"
+							data-bind="attr: { target: 'Coord_hap_' + $index() }">
+								<span data-bind="text: Coord"></span>
+							</a>
+						</td>
+						<td nowrap data-bind="text: $data.Alleles"></td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+		<div id="right-c">
+			<table id="ldhap-table-right" class="table table-condensed">
+				<thead>
+					<tr>
+						<th style="text-align:left;" colspan="5" id="ldhap-haplotypes-column">Haplotypes</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr class="ldhap-table-footer">
+						<!-- ko foreach: footer -->
+						<td class="cell-right" data-bind="text: $data.Count"></td>
+						<!-- /ko -->
+					</tr>
+					<tr class="ldhap-table-footer">
+						<!-- ko foreach: footer -->
+						<td class="cell-right" data-bind="text: $data.Frequency"></td>
+						<!-- /ko -->
+					</tr>
+				</tfoot>
+				<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+					<tr>
+						<!-- ko foreach: $data.Haplotypes -->
+							<td class="cell-center haplotype" 
+								data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
+								<span data-bind="text: $data"></span>
+							</td>
+						<!-- /ko -->
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
 </div>
-<div id="right-c">
-<table id="ldhap-table-right" class="table table-condensed">
-	<thead>
-		<tr>
-			<th style="text-align:left;" colspan="5">Haplotypes</th>
-		</tr>
-	</thead>
-	<tfoot>
-		<tr>
-			<th style="text-align:left;">125</th>
-			<th style="text-align:left;">9474</th>
-			<th style="text-align:left;">1357</th>
-			<th style="text-align:left;">934</th>
-			<th style="text-align:left;">564</th>
-		</tr>
-		<tr>
-			<th style="text-align:left;">786</th>
-			<th style="text-align:left;">0546</th>
-			<th style="text-align:left;">14</th>
-			<th style="text-align:left;">645</th>
-			<th style="text-align:left;">543</th>
-		</tr>
-	</tfoot>
-	<tbody>
-		<tr>
-			<td>A</td>
-			<td>G</td>
-			<td>TG</td>
-			<td>TTT</td>
-			<td>G</td>
-		</tr>
-		<tr>
-			<td>G</td>
-			<td>T</td>
-			<td>A</td>
-			<td>G</td>
-			<td>G</td>
-		</tr>
-		<tr>
-			<td>G</td>
-			<td>GA</td>
-			<td>GGGG</td>
-			<td>-</td>
-			<td>G</td>
-		</tr>
-		<tr>
-			<td>G</td>
-			<td>G</td>
-			<td>G</td>
-			<td>G</td>
-			<td>G</td>
-		</tr>
-	</tbody>
-</table>
-</div>
-</div>
-</div>
-
--->
-
-
-
-					<div class="container-fluid" id="ldhap-results-container">
-						<div class="row">
-								<table class="table table-condensed overflowy">
-									<thead>
-										<tr>
-											<th>SNP</th>
-											<th>Position (hg19)</th>
-											<th nowrap>Allele Frequencies</th>
-											<th colspan="2" id="ldhap-haplotypes-column">Haplotypes</th>
-										</tr>
-									</thead>
-									<tfoot>
-										<tr class="ldhap-table-footer">
-											<td colspan="2" rowspan="2"></td>
-											<td>Haplotype Count</td>
-											<!-- ko foreach: footer -->
-											<td class="cell-right" data-bind="text: $data.Count"></td>
-											<!-- /ko -->
-										</tr>
-										<tr class="ldhap-table-footer">
-											<td>Haplotype Frequency</td>
-											<!-- ko foreach: footer -->
-											<td class="cell-right" data-bind="text: $data.Frequency"></td>
-											<!-- /ko -->
-										</tr>
-									</tfoot>
-									<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
-										<tr>
-											<td nowrap data-bind="attr: { id: 'OLD_RSnumber_hap_' + $index() }">
-												<a 	title="Cluster Report" 
-												data-bind="attr: { target: 'OLD_RSnumber_hap_' + $index() }">
-													<span data-bind="text: RS"></span>
-												</a>
-											</td>
-											<td nowrap data-bind="attr: { id: 'OLD_Coord_hap_' + $index() }"
-												style="text-align: center">
-												<a title="Genome Browser"
-												data-bind="attr: { target: 'OLD_Coord_hap_' + $index() }">
-													<span data-bind="text: Coord"></span>
-												</a>
-											</td>
-											<td nowrap data-bind="text: $data.Alleles"></td>
-											<!-- ko foreach: $data.Haplotypes -->
-												<td class="cell-center haplotype" 
-													data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
-													<span data-bind="text: $data"></span>
-												</td>
-											<!-- /ko -->
-										</tr>
-									</tbody>
-								</table>
-						</div>
-						<div class="col-md-12">
+						<div id="ldhap-links-container" class="col-md-12" style="display:none;">
 							<span> <a target="_blank" id="ldhap-snps" href="">Download
 									SNP File</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp; <span> <a
@@ -426,7 +325,7 @@
 							</span>
 						</div>
 
-					</div>
+
 				</div>
 
 			</div>
@@ -472,7 +371,7 @@
 								<div class="col-sm-2">
 									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
 										<label id="matrix_color_r2" class="btn btn-default active">
-									 		<input type="radio" name="options" autocomplete="off" checked> R<sub>2</sub>
+									 		<input type="radio" name="options" autocomplete="off" checked> R<sup>2</sup>
 										</label>
 										<label class="btn btn-default">
 											<input type="radio" name="options" autocomplete="off"> D'
@@ -531,7 +430,7 @@
 								<br /> <span><a id="ldmatrix-DPrime"
 									target="LDMatrix-DPrime">Download D' File</a></span>&nbsp;&nbsp;&nbsp;&nbsp;
 								<span><a id="ldmatrix-R2" target="LDMatrix-R2">Download
-										R<sub>2</sub> File</a></span>
+										R<sup>2</sup> File</a></span>
 							</div>
 						</div>
 					</div>
@@ -718,7 +617,7 @@
 										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span
 										data-bind="text: haplotypes.hap4.frequency"></span>) <br></td>
 									<td class="spacer"></td>
-									<td class="cell-right">D':<br>R<sub>2</sub>:<br>Chi-sq:<br>p-value:
+									<td class="cell-right">D':<br>R<sup>2</sup>:<br>Chi-sq:<br>p-value:
 									</td>
 									<td><span data-bind="text: statistics.d_prime"></span><br>
 										<span data-bind="text: statistics.r2"></span><br> <span
@@ -834,7 +733,7 @@
 						<a id="ldproxy-genome" class="ldproxy-link"
 							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track78816.txt"
 
-							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sub>2</sub> data in UCSC Genome Browser</a> 
+							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a> 
 						<a class="ldproxy-link"
 							href="http://www.regulomedb.org/help#score"
 							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scoring scheme">View
@@ -855,7 +754,7 @@
 											<th>MAF</th>
 											<th>Distance</th>
 											<th>D'</th>
-											<th>R<sub>2</sub></th>
+											<th>R<sup>2</sup></th>
 											<th>Correlated Alleles</th>
 											<th>RegulomeDB</th>
 											<th>HaploReg</th>
@@ -871,7 +770,7 @@
 											<th>MAF</th>
 											<th>Distance</th>
 											<th>D'</th>
-											<th>R<sub>2</sub></th>
+											<th>R<sup>2</sup></th>
 											<th>Correlated Alleles</th>
 											<th>RegulomeDB</th>
 											<th>HaploReg</th>
