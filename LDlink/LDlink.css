@@ -229,7 +229,7 @@ img.graph-legend {
 }
 
 .readonly-input-text {
-  width:225px;	
+  width:172px;	
 }
 
 .btn-ldlink-multiselect {
@@ -259,36 +259,19 @@ img.graph-legend {
 
 /* Placeholder Style */
 ::-webkit-input-placeholder {
-   font-size: 95%;
+   font-size: 90%;
 }
 
 :-moz-placeholder { /* Firefox 18- */
-   font-size: 95%;
+   font-size: 90%;
 }
 
 ::-moz-placeholder {  /* Firefox 19+ */
-   font-size: 95%;
+   font-size: 90%;
 }
 
 :-ms-input-placeholder {
-		font-size: 95%;
-}
-
-/* Placeholder Style */
-.readonly-input-text-small::-webkit-input-placeholder {
-   font-size: 70%;
-}
-
-.readonly-input-text-small:-moz-placeholder { /* Firefox 18- */
-   font-size: 70%;
-}
-
-.readonly-input-text-small::-moz-placeholder {  /* Firefox 19+ */
-   font-size: 70%;
-}
-
-.readonly-input-text-small:-ms-input-placeholder {
-		font-size: 70%;
+	font-size: 90%;
 }
 
 .snp {

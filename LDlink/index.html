@@ -191,7 +191,7 @@
 								<div class="input-group">
 									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
 									<input type="text" id="ldhap-file-label" readonly
-										placeholder="Upload input file with RS numbers"
+										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
 									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
 									<span	class="btn btn-default btn-file">Browse
@@ -243,79 +243,79 @@
 				</div>
 				<!-- ldhap CONTAINER -->
 				<div class="jumbotron">
-<div class="container-fluid" id="ldhap-results-container">
-	<div class="row ldhap-table-container">
-		<div id="left-c">
-			<table class="table table-condensed"> 
-				<thead>
-					<tr>
-						<th>SNP</th>
-						<th>Position (hg19)</th>
-						<th nowrap>Allele Frequencies</th>
-					</tr>
-				</thead>
-				<tfoot>
-					<tr>
-						<td colspan="2" rowspan="2"></td>
-						<td>Haplotype Count</td>
-					</tr>
-					<tr>
-						<td nowrap>Haplotype Frequency</td>
-					</tr>
-				</tfoot>
-				<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
-					<tr>
-						<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
-							<a 	title="Cluster Report" 
-							data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
-								<span data-bind="text: RS"></span>
-							</a>
-						</td>
-						<td nowrap data-bind="attr: { id: 'Coord_hap_' + $index() }"
-							style="text-align: center">
-							<a title="Genome Browser"
-							data-bind="attr: { target: 'Coord_hap_' + $index() }">
-								<span data-bind="text: Coord"></span>
-							</a>
-						</td>
-						<td nowrap data-bind="text: $data.Alleles"></td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-		<div id="right-c">
-			<table id="ldhap-table-right" class="table table-condensed">
-				<thead>
-					<tr>
-						<th style="text-align:left;" colspan="5" id="ldhap-haplotypes-column">Haplotypes</th>
-					</tr>
-				</thead>
-				<tfoot>
-					<tr class="ldhap-table-footer">
-						<!-- ko foreach: footer -->
-						<td class="cell-right" data-bind="text: $data.Count"></td>
-						<!-- /ko -->
-					</tr>
-					<tr class="ldhap-table-footer">
-						<!-- ko foreach: footer -->
-						<td class="cell-right" data-bind="text: $data.Frequency"></td>
-						<!-- /ko -->
-					</tr>
-				</tfoot>
-				<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
-					<tr>
-						<!-- ko foreach: $data.Haplotypes -->
-							<td class="cell-center haplotype" 
-								data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
-								<span data-bind="text: $data"></span>
-							</td>
-						<!-- /ko -->
-					</tr>
-				</tbody>
-			</table>
-		</div>
-	</div>
-</div>
+						<div class="container-fluid" id="ldhap-results-container">
+							<div class="row ldhap-table-container">
+								<div id="left-c">
+									<table class="table table-condensed"> 
+										<thead>
+											<tr>
+												<th>SNP</th>
+												<th>Position (hg19)</th>
+												<th nowrap>Allele Frequencies</th>
+											</tr>
+										</thead>
+										<tfoot>
+											<tr>
+												<td colspan="2" rowspan="2"></td>
+												<td>Haplotype Count</td>
+											</tr>
+											<tr>
+												<td nowrap>Haplotype Frequency</td>
+											</tr>
+										</tfoot>
+										<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+											<tr>
+												<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
+													<a 	title="Cluster Report" 
+													data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
+														<span data-bind="text: RS"></span>
+													</a>
+												</td>
+												<td nowrap data-bind="attr: { id: 'Coord_hap_' + $index() }"
+													style="text-align: center">
+													<a title="Genome Browser"
+													data-bind="attr: { target: 'Coord_hap_' + $index() }">
+														<span data-bind="text: Coord"></span>
+													</a>
+												</td>
+												<td nowrap data-bind="text: $data.Alleles"></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+								<div id="right-c">
+									<table id="ldhap-table-right" class="table table-condensed">
+										<thead>
+											<tr>
+												<th style="text-align:left;" colspan="5" id="ldhap-haplotypes-column">Haplotypes</th>
+											</tr>
+										</thead>
+										<tfoot>
+											<tr class="ldhap-table-footer">
+												<!-- ko foreach: footer -->
+												<td class="cell-right" data-bind="text: $data.Count"></td>
+												<!-- /ko -->
+											</tr>
+											<tr class="ldhap-table-footer">
+												<!-- ko foreach: footer -->
+												<td class="cell-right" data-bind="text: $data.Frequency"></td>
+												<!-- /ko -->
+											</tr>
+										</tfoot>
+										<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
+											<tr>
+												<!-- ko foreach: $data.Haplotypes -->
+													<td class="cell-center haplotype" 
+														data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
+														<span data-bind="text: $data"></span>
+													</td>
+												<!-- /ko -->
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
 						<div id="ldhap-links-container" class="col-md-12" style="display:none;">
 							<span> <a target="_blank" id="ldhap-snps" href="">Download
 									SNP File</a>
@@ -324,14 +324,11 @@
 									Download Haplotype File</a>
 							</span>
 						</div>
-
-
 				</div>
-
 			</div>
 
 			<!-- LDmatrix -->
-			<div class="tab-pane fade" id="ldmatrix-tab">
+			<div  id="ldmatrix-tab" class="tab-pane fade">
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -342,16 +339,20 @@
 						<!-- LDMATRIX FORM -->
 						<form id="ldmatrixForm" class="ldlinkForm">
 							<div class="form-group">
+								<!-- COLUMN 1 - sm-2 -->
 								<div class="col-sm-2">
 									<textarea id="ldmatrix-file-snp-numbers"
 										placeholder="RS Numbers" class="form-control"
-										title="Enter list of RS numbers (one per line)"></textarea>
+										title="Enter list of RS numbers (one per line)">
+									</textarea>
 								</div>
+								<!-- COLUMN2 - sm-3 -->
 								<div class="col-sm-3">
 									<div class="input-group">
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
+										
 										<input type="text" name="ldmatrix-file-label" readonly
-											placeholder="Upload input file with RS numbers" class="readonly-input-text-small">
+											placeholder="Upload file with RS numbers" class="readonly-input-text">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
 										<span	class="btn btn-default btn-file">Browse
 											<input type="file" id="ldmatrix-file">
@@ -360,7 +361,8 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-3">
+								<!-- COLUMN3 - sm-2 -->
+								<div class="col-sm-2">
 									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations" required>
@@ -368,7 +370,8 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-2">
+								<!-- COLUMN4 - sm-2 -->
+								<div class="col-sm-2 col-sm-offset-1">
 									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
 										<label id="matrix_color_r2" class="btn btn-default active">
 									 		<input type="radio" name="options" autocomplete="off" checked> R<sup>2</sup>
@@ -380,6 +383,7 @@
 								</div>
 							</div>
 							<div class="form-group">
+								<!-- COLUMN5 - sm-2 -->
 								<div class="col-sm-2">
 									<input type="submit" id="ldmatrix" value="Calculate"
 										class="btn btn-default calculate" />
