@@ -325,6 +325,7 @@ img.graph-legend {
 #ldlink_version {
 	float:right;width:150px;
 	font-style: italic;
+	text-align:right;
 }
 .whats_new {
 	height:200px;
