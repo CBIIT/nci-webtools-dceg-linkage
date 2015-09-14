@@ -217,7 +217,6 @@ img.loading {
 }
 
 img.graph-legend {
-  max-width:85%;
   display:block;
   margin-left: auto;
   margin-right: auto;
@@ -318,6 +317,9 @@ img.graph-legend {
 	max-height: 700px;
 	max-width: 900px;
 	overflow:auto;
+}
+.overflowx {
+	overflow-x:auto;
 }
 .overflowy {
 	overflow-y:auto;
