@@ -221,10 +221,10 @@ img.graph-legend {
   margin-left: auto;
   margin-right: auto;
 }
-.ldproxy-legend {
+#ldproxy-legend {
 	width: 700px;
 }
-.ldmatrix-legend {
+#ldmatrix-legend {
 	width: 390px;
 }
 .ldproxy-link {
