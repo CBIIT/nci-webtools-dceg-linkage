@@ -380,6 +380,30 @@ img.graph-legend {
 #ldhap-results-container {
 	overflow-y: auto;
 }
+/* Header and Footer */
+.header img {
+    width: 60%;
+}
+.header h4 {
+    color: #fff;
+    line-height: 0.5em;
+}
+.row-blue {
+    background-color: #2a71a5;
+    height: 2em;
+}
+.footer {
+    bottom: 0;
+    color: #444;
+    padding: 25px 0;
+}
+.footer ul {
+    text-align: center;
+}
+.footer ul li a {
+    color: #444;
+}
+
 
 /*
     width: auto;
