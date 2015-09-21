@@ -403,13 +403,11 @@ img.graph-legend {
 .footer ul li a {
     color: #444;
 }
+hr.header {
+    border-top: 0.5em solid #bb0e3d;
+    margin: 0;
+}
 
-
-/*
-    width: auto;
-    min-width: 0;
-    display: table;
-*/
 
 /* Testing */
 @media screen and (max-width: 767px) {
