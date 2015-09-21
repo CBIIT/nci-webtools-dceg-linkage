@@ -191,8 +191,10 @@ def calculate_proxy(snp,pop,request):
 	def get_output(process):
 		return process.communicate()[0].splitlines()
 
-	out_raw=Pool(len(processes)).map(get_output, processes)
-
+	pool = Pool(len(processes))
+	out_raw=pool.map(get_output, processes)
+	pool.close()
+	pool.join()
 
 
 	# Aggregate output
