@@ -394,7 +394,7 @@ $(document).ready(function() {
 		"bAutoWidth": true,
 		"bProcessing": false,
 		"deferRender": false,
-		"order": [[ 6, "desc" ]], //Order desc on DPrime
+		"order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
 		"columnDefs": [
 			{
 				"render": function ( data, type, row ) {
@@ -431,7 +431,6 @@ $(document).ready(function() {
         ]
 	});
 	//console.dir(ldproxyTable);
-	//	alert("hello");
 
 	var new_stuff = {"aaData": [
 	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
@@ -551,6 +550,11 @@ $(document).ready(function() {
 					initCalculate(id[0]);
 					updateData(id[0]);
 				}
+				/*
+				 else {
+					alert("need value");
+				}
+				*/
 			}
 		}
 	});
@@ -593,6 +597,14 @@ function loadHelp() {
 function calculate(e) {
 	var formId = e.target.id;
 	e.preventDefault();
+/*
+	var f = document.getElementsByTagName('form')[0];
+	if(f.checkValidity()) {
+		f.submit();
+	} else {
+		alert(document.getElementById('example').validationMessage);
+	}
+*/
 	// var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
 
 	// strip out "Form" from id
@@ -879,57 +891,57 @@ function updateLDproxyProgressBar(id, seconds) {
 function createPopulationDropdown(id) {
 
 	$('#' + id + '-population-codes')
-			.multiselect(
-					{
-						enableClickableOptGroups : true,
-						buttonWidth : '180px',
-						maxHeight : 500,
-						includeSelectAllOption : true,
-						dropRight : true,
-						allSelectedText : 'All Populations',
-						nonSelectedText : 'Select Population',
-						numberDisplayed : 4,
-						selectAllText : 'All Populations',
+		.multiselect(
+		{
+			enableClickableOptGroups : true,
+			buttonWidth : '180px',
+			maxHeight : 500,
+			includeSelectAllOption : true,
+			dropRight : true,
+			allSelectedText : 'All Populations',
+			nonSelectedText : 'Select Population',
+			numberDisplayed : 4,
+			selectAllText : 'All Populations',
 
-						// buttonClass: 'btn btn-link',
-						buttonText : function(options, select) {
-							if (options.length === 0) {
-								return '<span class="pull-left">'
-										+ this.nonSelectedText + '</span>'
-										+ ' <b class="caret"></b>';
-							} else if (options.length == $('option', $(select)).length) {
-								return '<span class="pull-left">'
-										+ this.nonSelectedText + '</span>'
-										+ ' <b class="caret"></b>';
-							} else if (options.length > this.numberDisplayed) {
-								return '<span class="badge pull-left">'
-										+ options.length + '</span> '
-										+ this.nSelectedText
-										+ ' <b class="caret"></b>';
-							} else {
-								var selected = '';
-								options.each(function() {
-									// var label = $(this).attr('label') :
-									// $(this).html();
-									selected += $(this).val() + '+';
-								});
-
-								return selected.substr(0, selected.length - 1)
-										+ ' <b class="caret"></b>';
-							}
-						},
-						buttonTitle : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText;
-							} else {
-								var selected = '';
-								options.each(function() {
-									selected += $(this).text() + '\n';
-								});
-								return selected;
-							}
-						}
+			// buttonClass: 'btn btn-link',
+			buttonText : function(options, select) {
+				if (options.length === 0) {
+					return '<span class="pull-left">'
+							+ this.nonSelectedText + '</span>'
+							+ ' <b class="caret"></b>';
+				} else if (options.length == $('option', $(select)).length) {
+					return '<span class="pull-left">'
+							+ this.nonSelectedText + '</span>'
+							+ ' <b class="caret"></b>';
+				} else if (options.length > this.numberDisplayed) {
+					return '<span class="badge pull-left">'
+							+ options.length + '</span> '
+							+ this.nSelectedText
+							+ ' <b class="caret"></b>';
+				} else {
+					var selected = '';
+					options.each(function() {
+						// var label = $(this).attr('label') :
+						// $(this).html();
+						selected += $(this).val() + '+';
 					});
+
+					return selected.substr(0, selected.length - 1)
+							+ ' <b class="caret"></b>';
+				}
+			},
+			buttonTitle : function(options, select) {
+				if (options.length === 0) {
+					return this.nonSelectedText;
+				} else {
+					var selected = '';
+					options.each(function() {
+						selected += $(this).text() + '\n';
+					});
+					return selected;
+				}
+			}
+		});
 }
 
 function updateLDproxy() {
