@@ -17,6 +17,7 @@ from LDpair import calculate_pair
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
+from SNPclip import calculate_clip
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -170,6 +171,31 @@ def ldhap():
 
     return out_json
 
+@app.route('/LDlinkRest/ldclip', methods = ['GET'])
+def ldclip():
+
+    print
+    print 'Execute ldclip'
+    print 'Gathering Variables from url'
+
+    snps = request.args.get('snps', False)
+    pop = request.args.get('pop', False)
+    reference = request.args.get('reference', False)
+    print 'snps: ' + snps
+    print 'pop: ' + pop
+    print 'request: ' + reference
+
+    snplst = tmp_dir+'snps'+reference+'.txt'
+    print 'snplst: '+snplst
+
+    f = open(snplst, 'w')
+    f.write(snps)
+    f.close()
+
+    out_json = calculate_clip(snplst,pop,reference)
+    copy_output_files(reference)
+
+    return out_json
 
 @app.route('/LDlinkRest/test', methods=['GET', 'POST'])
 def test():

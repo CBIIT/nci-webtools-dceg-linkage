@@ -467,7 +467,7 @@ $(document).ready(function() {
 */
 	loadHelp();
 
-	var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy" ];
+	var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "ldclip" ];
 
 	// Apply Bindings
 	ko.applyBindings(ldpairModel, document
@@ -597,6 +597,7 @@ function loadHelp() {
 function calculate(e) {
 	var formId = e.target.id;
 	e.preventDefault();
+
 /*
 	var f = document.getElementsByTagName('form')[0];
 	if(f.checkValidity()) {
@@ -627,6 +628,7 @@ function updateData(id) {
 
 	//show loading icon
 	$('#'+id+"-loading").show();
+
 	switch (id) {
 	case 'ldpair':
 		updateLDpair();
@@ -642,6 +644,9 @@ function updateData(id) {
 		break;
 	case 'ldhap':
 		updateLDhap();
+		break;
+	case 'ldclip':
+		updateLDclip();
 		break;
 	}
 
@@ -660,8 +665,8 @@ function updateLDhap() {
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-	console.log('ldInputs');
-	console.dir(ldInputs);
+	//console.log('ldInputs');
+	//console.dir(ldInputs);
 
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
@@ -675,8 +680,8 @@ function updateLDhap() {
 		//data is returned as a string representation of JSON instead of JSON obj
 		var jsonObj=JSON.parse(data);
 		if (displayError(id, jsonObj) == false) {
-			console.info("LDhap is here");
-			console.dir($.parseJSON(data));
+			//console.info("LDhap is here");
+			//console.dir($.parseJSON(data));
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
 			var ldhapTable = formatLDhapData($.parseJSON(data));
@@ -690,8 +695,7 @@ function updateLDhap() {
 	});
 	ajaxRequest
 			.fail(function(jqXHR, textStatus) {
-				console
-						.log("header: "
+				console.log("header: "
 								+ jqXHR
 								+ "\n"
 								+ "Status: "
@@ -716,17 +720,84 @@ function updateLDhap() {
 	hideLoadingIcon(ajaxRequest, id);
 }
 
+function updateLDclip() {
+	var id = "ldclip";
+
+	var $btn = $('#' + id).button('loading');
+	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+
+	var population = getPopulationCodes(id+'-population-codes');
+
+	var ldInputs = {
+		snps : snps,
+		pop : population.join("+"),
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+	};
+	console.log('LDclip Inputs');
+	console.dir(ldInputs);
+
+	var url = restServerUrl + "/ldclip";
+	var ajaxRequest = $.ajax({
+		type : 'GET',
+		url : url,
+		data : ldInputs,
+		contentType : 'application/json' // JSON
+	});
+
+	console.dir(ajaxRequest);
+
+	ajaxRequest.success(function(data) {
+		//data is returned as a string representation of JSON instead of JSON obj
+		var jsonObj=JSON.parse(data);
+		if (displayError(id, jsonObj) == false) {
+			console.info("LDclip is here");
+			console.dir($.parseJSON(data));
+			$('#' + id + '-results-container').show();
+			$('#' + id + '-links-container').show();
+			//var ldhapTable = formatLDhapData($.parseJSON(data));
+			//$('#ldhap-haplotypes-column').attr('colspan',
+			//		ldhapTable.footer.length);
+
+			//ko.mapping.fromJS(ldhapTable, ldhapModel);
+
+			//addLDHapHyperLinks(ldInputs.reference, ldhapTable);
+		}
+	});
+	ajaxRequest
+			.fail(function(jqXHR, textStatus) {
+				console.log("header: "
+					+ jqXHR
+					+ "\n"
+					+ "Status: "
+					+ textStatus
+					+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+				message = 'Service Unavailable: ' + textStatus + "<br>";
+				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+				$('#' + id + '-message').show();
+				$('#' + id + '-message-content').empty().append(message);
+				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
+			});
+	ajaxRequest.always(function() {
+		$btn.button('reset');
+	});
+
+	hideLoadingIcon(ajaxRequest, id);
+}
 function formatLDhapData(data) {
 
-	console.info("LDhap Starts here:");
-	console.log('original data structure for ldhap:');
-	console.dir(data);
+	//console.info("LDhap Starts here:");
+	//console.log('original data structure for ldhap:');
+	//console.dir(data);
 
-	console.log("get the two main parts of the data as hplotypes and snps");
+	//console.log("get the two main parts of the data as hplotypes and snps");
 	//var indels = [];
 	var haplotypes = data.haplotypes;
 
-	console.dir(haplotypes);
+	//console.dir(haplotypes);
 
 	var snps = data.snps;
 
@@ -740,12 +811,12 @@ function formatLDhapData(data) {
 //		console.log( key + ": " + value );
 	});
 
-	console.dir(haplotypes);
+	//console.dir(haplotypes);
 
 	// Convert haplotypes to footer
 	for (key in haplotypes) {
-		console.log(key);
-		console.dir(haplotypes[key]);
+		//console.log(key);
+		//console.dir(haplotypes[key]);
 		var obj = {
 			Count : haplotypes[key].Count,
 			Frequency : haplotypes[key].Frequency,
@@ -767,8 +838,8 @@ function formatLDhapData(data) {
 		};
 		ldhapTable.rows.push(obj);
 	}
-	console.log("First ldhapTable: ");
-	console.dir(ldhapTable);
+	//console.log("First ldhapTable: ");
+	//console.dir(ldhapTable);
 	// Add haplotypesHTML
 	$.each(ldhapTable.rows, function(index, value) {
 		// Get all the haplotypes in pivot order
@@ -779,13 +850,13 @@ function formatLDhapData(data) {
 		});
 	});
 
-	console.log('ldhapTable');
-	console.dir(ldhapTable);
+	//console.log('ldhapTable');
+	//console.dir(ldhapTable);
 	var obj = {
 		out_final : ldhapTable
 	}
-	console.dir(obj);
-	console.info("LDhap ENDS here:");
+	//console.dir(obj);
+	//console.info("LDhap ENDS here:");
 
 	return ldhapTable;
 }
@@ -1029,8 +1100,8 @@ function getLDProxyResults(jsonfile) {
 	ajaxRequest.success(function(data) {
 		//catch error and warning in json
 		if (displayError(id, data) == false) {
-			console.info("Data from Proxy");
-			console.dir(data);
+			//console.info("Data from Proxy");
+			//console.dir(data);
 			RefreshTable('#new-ldproxy', data);
 			//ko.mapping.fromJS(data, ldproxyModel);
 			//addLDproxyHyperLinks(data);
@@ -1379,6 +1450,7 @@ function buildPopulationDropdown(elementId) {
 }
 
 function getPopulationCodes(id) {
+	alert(id);
 	var population;
 	var totalPopulations;
 	population =  $('#'+id).val();
