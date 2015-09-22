@@ -206,8 +206,9 @@ table thead td {
 }
 
 img.logo {
-	max-height:50px;
+	max-height:150px;
 }
+
 
 img.loading {
 	height:107px;
