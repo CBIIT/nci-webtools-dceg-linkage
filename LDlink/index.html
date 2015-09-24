@@ -51,11 +51,17 @@
 <body role="document">
 	<div class="header">
 		<div class="container">
-			<a href="http://dceg.cancer.gov/">
-				<img alt="National Cancer Institute, Division of Cancer Epidemiology & Genetics"
-					src="/common/images/DCEG-logo.svg"
-					class="img-responsive">
-			</a>
+			<div class="pull-left" style="max-width:70%;width:70%;">
+				<a href="http://dceg.cancer.gov/" target="dceg">
+					<img alt="National Cancer Institute, Division of Cancer Epidemiology & Genetics"
+						src="/common/images/DCEG-logo.svg"
+						class="img-responsive">
+				</a>
+			</div>
+			<div class="pull-right" style="width:29%;">
+				<img src="LDlink_logo.png" alt="Logo for the LDlink tool" class="logo pull-right" style="width:50%;">
+			</div>
+
 		</div>
 		<div class="container">
 			<hr class="header">
@@ -160,14 +166,16 @@
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDHap FORM -->
 						<form id="ldhapForm" class="ldlinkForm">
-
+							<!-- RS numbers -->
 							<div class="form-group">
 								<div class="col-sm-2">
-									<textarea id="ldhap-file-snp-numbers" placeholder="RS Numbers"
+									<textarea id="ldhap-file-snp-numbers" 
+										placeholder="RS Numbers"
 										class="form-control"
 										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
 							</div>
+							<!-- Broswe RS numbers -->
 							<div class="col-sm-4">
 								<div class="input-group">
 									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
