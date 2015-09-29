@@ -960,7 +960,7 @@ function updateLDproxy() {
 	console.log(location.hostname);
 
 	$('#ldproxy-genome').attr('href',
-		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&org=human&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
+		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
 		+ ldproxyInputs.reference + '.txt');
 	//console.dir(ldproxyInputs);
 	$('#ldproxy-results-link').attr('href',
