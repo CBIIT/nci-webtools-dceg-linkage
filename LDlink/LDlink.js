@@ -328,6 +328,7 @@ function ldproxy_position_link(data, type, row ) {
 	var position = chr + ":" + range;
 	var rs_number = row[0];
 	var params = {
+		db:'hg19',
 		position : position,
 		snp141 : 'pack',
 		'hgFind.matches' : rs_number
@@ -959,7 +960,7 @@ function updateLDproxy() {
 	console.log(location.hostname);
 
 	$('#ldproxy-genome').attr('href',
-		'http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
+		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&org=human&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
 		+ ldproxyInputs.reference + '.txt');
 	//console.dir(ldproxyInputs);
 	$('#ldproxy-results-link').attr('href',
@@ -1190,8 +1191,8 @@ function addLDHapHyperLinks(request, ldhapTable) {
 	var params = {};
 	var rs_number;
 	var url;
-	server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
-	console.log("ldhapData");
+	//server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
+	//console.log("ldhapData");
 	
 
 	var timerHyperLinks;
@@ -1219,6 +1220,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
 		position = chr + ":" + range;
 		rs_number = value.RS;
 		params = {
+			db:'hg19',
 			position : position,
 			snp141 : 'pack',
 			'hgFind.matches' : rs_number
@@ -1267,6 +1269,7 @@ function addLDpairHyperLinks(data) {
 	var position = chr + ":" + range;
 	rs_number = data.snp1.rsnum;
 	params = {
+		db:'hg19',
 		position : position,
 		snp141 : 'pack',
 		'hgFind.matches' : rs_number
@@ -1282,6 +1285,7 @@ function addLDpairHyperLinks(data) {
 	position = chr + ":" + range;
 	rs_number = data.snp2.rsnum;
 	params = {
+		db:'hg19',
 		position : position,
 		snp141 : 'pack',
 		'hgFind.matches' : rs_number
