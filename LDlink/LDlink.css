@@ -383,15 +383,13 @@ img.graph-legend {
 }
 /* Header and Footer */
 .header img {
+	/*
     width: 60%;
+    */
 }
 .header h4 {
     color: #fff;
     line-height: 0.5em;
-}
-.row-blue {
-    background-color: #2a71a5;
-    height: 2em;
 }
 .footer {
     bottom: 0;
