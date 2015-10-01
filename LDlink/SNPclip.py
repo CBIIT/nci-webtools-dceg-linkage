@@ -1,14 +1,8 @@
 #!/usr/bin/env python
 
 ###########
-# SNPclip #  LDthin a list of prioritized SNPs
+# SNPclip #
 ###########
-
-# To Do:
-# Add functionality for indels
-# Add functionality for sex chromosomes
-# Add functionality for combining multiple input chromosomes
-# Add sorting priority (ie: Regulome DB, exonic)
 
 # Create SNPtip function
 def calculate_clip(snplst,pop,request):
@@ -19,7 +13,6 @@ def calculate_clip(snplst,pop,request):
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
-	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
 	snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
@@ -32,7 +25,7 @@ def calculate_clip(snplst,pop,request):
 
 
 	# Create JSON output
-	out_json=open(tmp_dir+"matrix"+request+".json","w")
+	out_json=open(tmp_dir+"clip"+request+".json","w")
 	output={}
 
 
@@ -107,16 +100,20 @@ def calculate_clip(snplst,pop,request):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-						details[snp_i[0]]="SNP not found in dbSNP142, SNP removed."
+						details[snp_i[0]]=["NA","SNP not found in dbSNP142, SNP removed."]
 				else:
 					warn.append(snp_i[0])
-					details[snp_i[0]]="Not an RS number, query removed."
+					details[snp_i[0]]=["NA","Not an RS number, query removed."]
 			else:
 				warn.append(snp_i[0])
-				details[snp_i[0]]="Not an RS number, query removed."
+				details[snp_i[0]]=["NA","Not an RS number, query removed."]
 		else:
-			warn.append(snp_i[0])
-			details[snp_i[0]]="Not an RS number, query removed."
+			output["error"]="Input list of RS numbers is empty"
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","","")
+			raise
 	
 	# Close snp142 connection
 	cur.close()
@@ -137,7 +134,7 @@ def calculate_clip(snplst,pop,request):
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
 		if snp_coords[0][1]!=snp_coords[i][1]:
-			output["error"]="Not all input SNPs are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
+			output["error"]="Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
@@ -157,21 +154,37 @@ def calculate_clip(snplst,pop,request):
 	
 	# Make MAF function
 	def calc_maf(genos):
-		vals={"0|0":0, "0|1":0, "1|0":0, "1|1":0}
+		vals={"0|0":0, "0|1":0, "1|0":0, "1|1":0, "0":0, "1":0}
 		for i in range(len(genos)):
 			if genos[i] in vals:
 				vals[genos[i]]+=1
 		
-		zeros=vals["0|0"]*2+vals["0|1"]+vals["1|0"]
-		ones =vals["1|1"]*2+vals["0|1"]+vals["1|0"]
+		zeros=vals["0|0"]*2+vals["0|1"]+vals["1|0"]+vals["0"]
+		ones =vals["1|1"]*2+vals["0|1"]+vals["1|0"]+vals["1"]
 		total=zeros+ones
 		
-		if zeros<ones:
-			maf=zeros*1.0/total
-		else:
-			maf=ones*1.0/total
+		f0=zeros*1.0/total
+		f1=ones*1.0/total
+		maf=min(f0,f1)
 		
-		return maf
+		return f0,f1,maf
+	
+	
+	# Define function to correct indel alleles
+	def set_alleles(a1,a2):
+		if len(a1)==1 and len(a2)==1:
+			a1_n=a1
+			a2_n=a2
+		elif len(a1)==1 and len(a2)>1:
+			a1_n="-"
+			a2_n=a2[1:]
+		elif len(a1)>1 and len(a2)==1:
+			a1_n=a1[1:]
+			a2_n="-"
+		elif len(a1)>1 and len(a2)>1:
+			a1_n=a1[1:]
+			a2_n=a2[1:]
+		return(a1_n,a2_n)
 	
 	
 	# Make R2 function
@@ -218,42 +231,49 @@ def calculate_clip(snplst,pop,request):
 		geno=vcf[g].strip().split()
 		if geno[1] in snp_pos:
 			rsnum=rs_nums[snp_pos.index(geno[1])]
-			if geno[3] in ["A","C","G","T"] and geno[4] in ["A","C","G","T"]:
+			if rsnum!=geno[2]:
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
+				else:
+					output["warning"]="Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
+				snps[snps.index([rsnum])]=[geno[2]]
+				rsnum=geno[2]
+
+			
+			if "," not in geno[3] and "," not in geno[4]:
 				temp_genos=[]
 				for i in range(len(pop_index)):
 					temp_genos.append(geno[pop_index[i]])
-				r2=calc_maf(temp_genos)
-				if maf_threshold<=r2:
+				f0,f1,maf=calc_maf(temp_genos)
+				a0,a1=set_alleles(geno[3],geno[4])
+				details[rsnum]=[a0+"="+str(round(f0,3))+", "+a1+"="+str(round(f1,3))]
+				if maf_threshold<=maf:
 					hap_dict[rsnum]=[temp_genos]
 					snp_list.append(rsnum)
 				else:
-					details[rsnum]="SNP MAF is "+str(r2)+", SNP removed"
+					details[rsnum].append("Variant MAF is "+str(maf)+", variant removed")
 			else:
-				details[rsnum]="SNP has alleles "+geno[3]+" and "+geno[4]+", SNP removed"
+				details[rsnum]=[geno[3]+"=NA, "+geno[4]+"=NA","Variant is not biallelic, variant removed"]
 	
 	for i in rs_nums:
 		if i not in snp_list:
 			if i not in details:
-				details[i]="SNP not in 1000G VCF file, SNP removed"
+				details[i]=["NA","Variant not in 1000G VCF file, variant removed"]
 	
 	# Thin the SNPs
 	i=0
 	while i<len(snp_list):
-		#if snp_list[i] in hap_dict:
-			details[snp_list[i]]="SNP kept"
-			remove_list=[]
-			for j in range(i+1,len(snp_list)):
-				r2=calc_r2(hap_dict[snp_list[i]][0],hap_dict[snp_list[j]][0])
-				if r2_threshold<=r2:
-					snp=snp_list[j]
-					details[snp]="SNP in LD with "+snp_list[i]+" (R2="+str(r2)+"), SNP removed"
-					remove_list.append(snp)
-			for snp in remove_list:
-				snp_list.remove(snp)
-			i+=1
-		#else:
-		#	details[snp_list[i]]="SNP not in 1000G VCF file, SNP removed"
-		#	snp_list.remove(snp_list[i])
+		details[snp_list[i]].append("SNP kept")
+		remove_list=[]
+		for j in range(i+1,len(snp_list)):
+			r2=calc_r2(hap_dict[snp_list[i]][0],hap_dict[snp_list[j]][0])
+			if r2_threshold<=r2:
+				snp=snp_list[j]
+				details[snp].append("SNP in LD with "+snp_list[i]+" (R2="+str(round(r2,4))+"), SNP removed")
+				remove_list.append(snp)
+		for snp in remove_list:
+			snp_list.remove(snp)
+		i+=1
 	
 	
 	
@@ -283,7 +303,7 @@ def main():
 
 
 	# Print output
-	with open(tmp_dir+"matrix"+request+".json") as f:
+	with open(tmp_dir+"clip"+request+".json") as f:
 		json_dict=json.load(f)
 
 	try:
@@ -296,9 +316,9 @@ def main():
 			print snp
 		
 		print ""
-		print "Details:"
+		print "RS Number\tAlleles\tDetails"
 		for snp in snps:
-			print snp[0]+"\t"+details[snp[0]]
+			print snp[0]+"\t"+"\t".join(details[snp[0]])
 
 		try:
 			json_dict["warning"]
@@ -317,7 +337,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-	
-	
-	
-
