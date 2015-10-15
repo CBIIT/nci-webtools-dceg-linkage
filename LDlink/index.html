@@ -65,7 +65,7 @@
 		</div>
  		-->
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
-			<li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+			<li><a href="#home" data-toggle="tab">Home</a></li>
 
 			<li><a href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a></li>
 
@@ -76,7 +76,7 @@
 			<li><a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a></li>
 
 
-			<li><a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a></li>
+			<li class="active"><a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a></li>
 <!--
 			<li><a href="#ldsnip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
 -->
@@ -85,7 +85,10 @@
 		</ul>
 		<!-- Tab Content -->
 		<div class="tab-content">
+			<!--
 			<div class="tab-pane active" id="home">
+			-->
+			<div class="tab-pane" id="home">
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -293,7 +296,7 @@
 						<div id="ldhap-links-container" class="col-md-12" style="display:none;">
 							<span> <a target="_blank" id="ldhap-snps" href="">Download
 									SNP File</a>
-							</span>&nbsp;&nbsp;&nbsp;&nbsp; <span> <a
+							</span>&nbsp;&nbsp;&nbsp;&nbsp;<span> <a
 								target="_blank" id="ldhap-haplotypes" href="">
 									Download Haplotype File</a>
 							</span>
@@ -756,7 +759,7 @@
 			</div>
 
 			<!-- LDclip -->
-			<div class="tab-pane fade" id="ldclip-tab">
+			<div class="tab-pane active" id="ldclip-tab">
 				<!-- LDclip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -828,20 +831,21 @@
 				<div class="jumbotron">
 						<div class="container-fluid" id="ldclip-results-container">
 							<div class="row ldclip-table-container">
-								<div style="width:400px;float:left;">
+								<div>Hello</div>
+								<div id="ldclip-snp-list" style="width:400px;float:left;border:1px solid;padding:10px;">
 									The left side
 								</div>
-								<div style="width:400px;">
+								<div id="ldclip-detail" style="width:575px;border:1px solid;float:right;padding:10px;">
 									The right side
 								</div>
 							</div>
 						</div>
 						<div id="ldclip-links-container" class="col-md-12" style="display:none;">
-							<span> <a target="_blank" id="ldhap-snps" href="">Download
-									SNP File</a>
-							</span>&nbsp;&nbsp;&nbsp;&nbsp;<span> <a
-								target="_blank" id="ldclip-haplotypes" href="">
-									Download Haplotype File</a>
+							<span>
+								<a target="_blank" id="ldhap-snps" href=""></a>
+							</span>&nbsp;&nbsp;&nbsp;&nbsp;
+							<span>
+								<a target="_blank" id="ldclip-haplotypes" href=""></a>
 							</span>
 						</div>
 				</div>

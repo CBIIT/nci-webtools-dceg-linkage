@@ -174,6 +174,9 @@ def ldhap():
 @app.route('/LDlinkRest/ldclip', methods = ['GET'])
 def ldclip():
 
+    #Command line example
+    #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
+
     print
     print 'Execute ldclip'
     print 'Gathering Variables from url'
@@ -191,11 +194,26 @@ def ldclip():
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
+    (snps,snp_list,details) = calculate_clip(snplst,pop,reference)
 
-    out_json = calculate_clip(snplst,pop,reference)
-    copy_output_files(reference)
+    clip={}
+    clip["snp_list"] = snp_list
+    clip["details"] = details
 
-    return out_json
+    print "snps"
+    dir(snps)
+    print snps
+    print "snp_list"
+    dir(snp_list)
+    print snp_list
+    print "details"
+    dir(snps)
+    print details
+
+    out_json = json.dumps(clip, sort_keys=True, indent=2)
+    mimetype = 'application/json'
+
+    return current_app.response_class(out_json, mimetype=mimetype)
 
 @app.route('/LDlinkRest/test', methods=['GET', 'POST'])
 def test():

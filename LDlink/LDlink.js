@@ -382,6 +382,13 @@ function updateVersion(version) {
 }
 
 $(document).ready(function() {
+
+	$('#ldclip').attr('disabled', false); // Remove this. (only need for testing)
+	$('div#ldclip-snp-list').on('click', "a", function(e) {
+		console.log("clicking on link");
+		console.dir(e);
+	});
+
 	updateVersion(ldlink_version);
 	showFFWarning();
 	var ldproxyTable = $('#new-ldproxy').DataTable( {
@@ -518,6 +525,7 @@ $(document).ready(function() {
 		// Look for a return value
 		var code = e.keyCode || e.which;
 		if (code == 13) { // User pressed return key
+			alert("You pressed return");
 			// make sure focus is not in a textarea. If so ignore.
 			var event_id = e.target.id;
 			// Skip if you can't get event_id
@@ -748,12 +756,15 @@ function updateLDclip() {
 
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
-		var jsonObj=JSON.parse(data);
+		var jsonObj=data;
 		if (displayError(id, jsonObj) == false) {
 			console.info("LDclip is here");
-			console.dir($.parseJSON(data));
+			console.dir(data);
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
+			$('#'+id+"-loading").hide();
+			initClip(data);
+
 			//var ldhapTable = formatLDhapData($.parseJSON(data));
 			//$('#ldhap-haplotypes-column').attr('colspan',
 			//		ldhapTable.footer.length);
@@ -787,6 +798,20 @@ function updateLDclip() {
 
 	hideLoadingIcon(ajaxRequest, id);
 }
+function initClip(data) {
+	//clear out the list
+		$("#ldclip-snp-list").empty();
+	//Add the clipped list
+	$.each(data.snp_list, function( index, value ){
+		$("#ldclip-snp-list").append(
+			$("<a>").append(
+				$("<span>").append(value)
+			)).append("<br>");
+
+	});
+	$("#ldclip-detail").empty().append(data.details[data.snp_list[0]]);
+}
+
 function formatLDhapData(data) {
 
 	//console.info("LDhap Starts here:");
@@ -961,6 +986,7 @@ function updateLDproxyProgressBar(id, seconds) {
 
 function createPopulationDropdown(id) {
 
+	alert("createPop");
 	$('#' + id + '-population-codes')
 		.multiselect(
 		{
@@ -969,10 +995,10 @@ function createPopulationDropdown(id) {
 			maxHeight : 500,
 			includeSelectAllOption : true,
 			dropRight : true,
-			allSelectedText : 'All Populations',
-			nonSelectedText : 'Select Population',
+			allSelectedText : 'Hello All Populations',
+			nonSelectedText : 'Hello to you Select Population',
 			numberDisplayed : 4,
-			selectAllText : 'All Populations',
+			selectAllText : 'Hello All Populations',
 
 			// buttonClass: 'btn btn-link',
 			buttonText : function(options, select) {
@@ -1011,7 +1037,10 @@ function createPopulationDropdown(id) {
 					});
 					return selected;
 				}
-			}
+			},
+			onChange : function(option, checked) {
+				alert("You changed something");
+            }
 		});
 }
 
@@ -1368,100 +1397,112 @@ function buildPopulationDropdown(elementId) {
 	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
 	for ( var popAbbrev in populations) {
 		var population = populations[popAbbrev];
-		htmlText += htmlText1.replace(/ABBREV/g, popAbbrev).replace("FULLNAME",
-				population.fullName);
+		htmlText += htmlText1
+			.replace(/ABBREV/g, popAbbrev)
+			.replace("FULLNAME", population.fullName);
 		for ( var subPopAbbrev in population.subPopulations) {
 			var subDetail = population.subPopulations[subPopAbbrev];
-			htmlText += htmlText2.replace(/ABBREV/g, subPopAbbrev).replace(
-					"DETAIL", subDetail);
+			htmlText += htmlText2
+				.replace(/ABBREV/g, subPopAbbrev).replace("DETAIL", subDetail);
 		}
 		htmlText += "</optgroup>\n";
 	}
+
 	$('#' + elementId).html(htmlText);
 
 	$('#' + elementId)
-			.multiselect(
-					{
-						enableClickableOptGroups : true,
-						buttonWidth : '180px',
-						maxHeight : 500,
-						buttonClass : 'btn btn-default btn-ldlink-multiselect',
-						includeSelectAllOption : true,
-						dropRight : false,
-						allSelectedText : 'All Populations',
-						nonSelectedText : 'Select Population',
-						numberDisplayed : 4,
-						selectAllText : ' (ALL) All Populations',
-						previousOptionLength: 0,
-						maxPopulationWarn: 2,
-						maxPopulationWarnTimeout: 5000,
-						maxPopulationWarnVisible: false,
+		.multiselect(			{
+			enableClickableOptGroups : true,
+			buttonWidth : '180px',
+			maxHeight : 500,
+			buttonClass : 'btn btn-default btn-ldlink-multiselect',
+			includeSelectAllOption : true,
+			dropRight : false,
+			allSelectedText : 'All Populations',
+			nonSelectedText : 'Select Population',
+			numberDisplayed : 4,
+			selectAllText : ' (ALL) All Populations',
+			previousOptionLength: 0,
+			maxPopulationWarn: 2,
+			maxPopulationWarnTimeout: 5000,
+			maxPopulationWarnVisible: false,
 
-						// buttonClass: 'btn btn-link',
-						buttonText : function(options, select) {
-							if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
-								$('#'+elementId+'-popover').popover('show');
-								this.maxPopulatinWarnVisible=true;
-								setTimeout(function(){
-									$('#'+elementId+'-popover').popover('destroy');
-									this.maxPopulatinWarnVisible=false;
-								}, this.maxPopulationWarnTimeout);
-							} else {
-								//Destory popover if it is currently being displayed.
-								if(this.maxPopulatinWarnVisible) {
-										$('#'+elementId+'-popover').popover('destroy');
-								}
-							}
-							this.previousOptionLength = options.length;
-							if (options.length === 0) {
-								return this.nonSelectedText
-										+ '<span class="caret"></span>';
-							} else if (options.length == $('option', $(select)).length) {
-								return this.allSelectedText
-										+ '<span class="caret"></span>';
-							} else if (options.length > this.numberDisplayed) {
-								return '<span class="badge">' + options.length
-										+ '</span> ' + this.nSelectedText
-										+ '<span class="caret"></span>';
-							} else {
-								var selected = '';
-								options.each(function() {
-									// var label = $(this).attr('label') :
-									// $(this).html();
-									selected += $(this).val() + '+';
-								});
-
-								return selected.substr(0, selected.length - 1)
-										+ ' <b class="caret"></b>';
-							}
-						},
-						buttonTitle : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText;
-							} else {
-								var selected = '';
-								options.each(function() {
-									selected += $(this).text() + '\n';
-								});
-								return selected;
-							}
-						}
+			// buttonClass: 'btn btn-link',
+			buttonText : function(options, select) {
+				if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+					$('#'+elementId+'-popover').popover('show');
+					this.maxPopulatinWarnVisible=true;
+					setTimeout(function(){
+						$('#'+elementId+'-popover').popover('destroy');
+						this.maxPopulatinWarnVisible=false;
+					}, this.maxPopulationWarnTimeout);
+				} else {
+					//Destory popover if it is currently being displayed.
+					if(this.maxPopulatinWarnVisible) {
+							$('#'+elementId+'-popover').popover('destroy');
+					}
+				}
+				this.previousOptionLength = options.length;
+				if (options.length === 0) {
+					return this.nonSelectedText
+							+ '<span class="caret"></span>';
+				} else if (options.length == $('option', $(select)).length) {
+					return this.allSelectedText
+							+ '<span class="caret"></span>';
+				} else if (options.length > this.numberDisplayed) {
+					return '<span class="badge">' + options.length
+							+ '</span> ' + this.nSelectedText
+							+ '<span class="caret"></span>';
+				} else {
+					var selected = '';
+					options.each(function() {
+						// var label = $(this).attr('label') :
+						// $(this).html();
+						selected += $(this).val() + '+';
 					});
+
+					return selected.substr(0, selected.length - 1)
+							+ ' <b class="caret"></b>';
+				}
+			},
+			buttonTitle : function(options, select) {
+				if (options.length === 0) {
+					return this.nonSelectedText;
+				} else {
+					var selected = '';
+					options.each(function() {
+						selected += $(this).text() + '\n';
+					});
+					return selected;
+				}
+			},
+			onChange : function(option, checked) {
+				/*
+				var active_tab = $("#ldlink-tabs li:[class]='active']");
+				console.dir(active_tab);
+				*/
+				//alert("You changed the population selection.");
+				//console.log("Option: ")
+				//console.dir(option[0]);
+				//console.log("checked: ")
+				//console.dir(checked);
+			}
+		});
 }
 
 function getPopulationCodes(id) {
-	alert(id);
+	//alert(id);
 	var population;
 	var totalPopulations;
 	population =  $('#'+id).val();
 	totalPopulations = countSubPopulations(populations);
 
-	//console.log("Populations (static)");
-	//console.log("Populations length: "+totalPopulations);
+	console.log("Populations (static)");
+	console.log("Populations length: "+totalPopulations);
 
-	//console.dir(populations);
-	//console.log("Population selected");
-	//console.log("Population length: "+population.length);
+	console.dir(populations);
+	console.log("Population selected");
+	console.log("Population length: "+population.length);
 	//Check for selection of All
 	// If total subPopulations equals number of population then popluation = array("All");
 	if(totalPopulations == population.length) {
