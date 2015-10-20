@@ -5,10 +5,8 @@
 ###########
 
 # Create SNPtip function
-def calculate_clip(snplst,pop,request):
+def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	import json,math,operator,os,sqlite3,subprocess,sys
-	maf_threshold=0.05
-	r2_threshold=0.05
 	max_list=6000
 
 	# Set data directories
@@ -100,13 +98,13 @@ def calculate_clip(snplst,pop,request):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-						details[snp_i[0]]=["NA","SNP not found in dbSNP142, SNP removed."]
+						details[snp_i[0]]=["NA","NA","SNP not found in dbSNP142, SNP removed."]
 				else:
 					warn.append(snp_i[0])
-					details[snp_i[0]]=["NA","Not an RS number, query removed."]
+					details[snp_i[0]]=["NA","NA","Not an RS number, query removed."]
 			else:
 				warn.append(snp_i[0])
-				details[snp_i[0]]=["NA","Not an RS number, query removed."]
+				details[snp_i[0]]=["NA","NA","Not an RS number, query removed."]
 		else:
 			output["error"]="Input list of RS numbers is empty"
 			json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -238,6 +236,8 @@ def calculate_clip(snplst,pop,request):
 					output["warning"]="Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
 				snps[snps.index([rsnum])]=[geno[2]]
 				rsnum=geno[2]
+			
+			details[rsnum]=["chr"+geno[0]+":"+geno[1]]
 
 			
 			if "," not in geno[3] and "," not in geno[4]:
@@ -246,19 +246,19 @@ def calculate_clip(snplst,pop,request):
 					temp_genos.append(geno[pop_index[i]])
 				f0,f1,maf=calc_maf(temp_genos)
 				a0,a1=set_alleles(geno[3],geno[4])
-				details[rsnum]=[a0+"="+str(round(f0,3))+", "+a1+"="+str(round(f1,3))]
+				details[rsnum].append(a0+"="+str(round(f0,3))+", "+a1+"="+str(round(f1,3)))
 				if maf_threshold<=maf:
 					hap_dict[rsnum]=[temp_genos]
 					snp_list.append(rsnum)
 				else:
 					details[rsnum].append("Variant MAF is "+str(maf)+", variant removed")
 			else:
-				details[rsnum]=[geno[3]+"=NA, "+geno[4]+"=NA","Variant is not biallelic, variant removed"]
+				details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA","Variant is not biallelic, variant removed")
 	
 	for i in rs_nums:
 		if i not in snp_list:
 			if i not in details:
-				details[i]=["NA","Variant not in 1000G VCF file, variant removed"]
+				details[i]=["NA","NA","Variant not in 1000G VCF file, variant removed"]
 	
 	# Thin the SNPs
 	i=0
@@ -293,13 +293,27 @@ def main():
 		snplst=sys.argv[1]
 		pop=sys.argv[2]
 		request=sys.argv[3]
+		r2_threshold=0.10
+		maf_threshold=0.01
+	elif len(sys.argv)==5:
+		snplst=sys.argv[1]
+		pop=sys.argv[2]
+		request=sys.argv[3]
+		r2_threshold=sys.argv[4]
+		maf_threshold=0.01
+	elif len(sys.argv)==6:
+		snplst=sys.argv[1]
+		pop=sys.argv[2]
+		request=sys.argv[3]
+		r2_threshold=sys.argv[4]
+		maf_threshold=sys.argv[5]
 	else:
-		print "Correct useage is: SNPclip.py snplst populations request"
+		print "Correct useage is: SNPclip.py snplst populations request (optional: r2_threshold maf_threshold)"
 		sys.exit()
 
 
 	# Run function
-	snps,snp_list,details=calculate_clip(snplst,pop,request)
+	snps,thin_list,details=calculate_clip(snplst,pop,request,r2_threshold,maf_threshold)
 
 
 	# Print output
@@ -312,11 +326,11 @@ def main():
 	except KeyError:
 		#print ""
 		print "LD Thinned SNP list ("+pop+"):"
-		for snp in snp_list:
+		for snp in thin_list:
 			print snp
 		
 		print ""
-		print "RS Number\tAlleles\tDetails"
+		print "RS Number\tPosition\tAlleles\tDetails"
 		for snp in snps:
 			print snp[0]+"\t"+"\t".join(details[snp[0]])
 
