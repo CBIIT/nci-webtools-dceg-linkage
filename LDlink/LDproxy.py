@@ -14,7 +14,8 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	pop_dir=data_dir+"1000G/Phase3/samples/"
 	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 	tmp_dir="./tmp/"
-
+	
+	
 	# Ensure tmp directory exists
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
@@ -203,14 +204,26 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 		for j in range(len(out_raw[i])):
 			col=out_raw[i][j].strip().split("\t")
 			col[6]=int(col[6])
+			col[7]=float(col[7])
 			col[8]=float(col[8])
 			col.append(abs(int(col[6])))
 			out_prox.append(col)
-
-
+	
+		
 	# Sort output
+	if r2_d not in ["r2","d"]:
+		if "warning" in output:
+			output["warning"]=output["warning"]+". "+r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+		else:
+			output["warning"]=r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+		r2_d="r2"
+	
+	
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
-	out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
+	if r2_d=="r2":
+		out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(8), reverse=True)
+	else:
+		out_ld_sort=sorted(out_dist_sort, key=operator.itemgetter(7), reverse=True)
 
 
 	# Populate JSON and text output
@@ -244,14 +257,17 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	temp2=[chr,pos,pos,query_snp["RS"]]
 	print >> track, "\t".join(temp2)
 	print >> track, ""
-	print >> track, "track name=\"0.8<R2<1.0\" description=\"Proxy Variants with 0.8<R2<1.0\" color=198,129,0"
+	if r2_d=="r2":
+		print >> track, "track name=\"0.8<R2<1.0\" description=\"Proxy Variants with 0.8<R2<1.0\" color=198,129,0"
+	else:
+		print >> track, "track name=\"0.8<D'<1.0\" description=\"Proxy Variants with 0.8<D'<1.0\" color=198,129,0"
 	
 	
 	
 	proxies={}
 	rows=[]
 	digits=len(str(len(out_ld_sort)))
-	r2_prior=1
+	r2_d_prior=1
 	counter=0
 	cutoff=[0.8,0.6,0.4,0.2,0.0]
 	
@@ -293,22 +309,22 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 			temp2=[chr,pos,pos,proxy_info["RS"]]
 			print >> track, "\t".join(temp2)
 			
-			if cutoff[counter]<r2_prior and float(proxy_info["R2"])<=cutoff[counter]:
+			if r2_d=="r2" and cutoff[counter]<r2_d_prior and float(proxy_info["R2"])<=cutoff[counter]:
 				print >> track, ""
 				print >> track, "track name=\""+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" description=\"Proxy Variants with "+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" color=198,129,0"
 				counter+=1
+			elif r2_d=="d" and cutoff[counter]<r2_d_prior and float(proxy_info["Dprime"])<=cutoff[counter]:
+				print >> track, ""
+				print >> track, "track name=\""+str(cutoff[counter+1])+"<D'<"+str(cutoff[counter])+"\" description=\"Proxy Variants with "+str(cutoff[counter+1])+"<D'<"+str(cutoff[counter])+"\" color=198,129,0"
+				counter+=1
 			
-			r2_prior=proxy_info["R2"]
+			if r2_d=="r2":
+				r2_d_prior=proxy_info["R2"]
+			else:
+				r2_d_prior=proxy_info["Dprime"]
 
 	output["aaData"]=rows
 	output["proxy_snps"]=proxies
-	
-	if r2_d not in ["r2","d"]:
-		if "warning" in output:
-			output["warning"]=output["warning"]+". "+r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-		else:
-			output["warning"]=r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-		r2_d="r2"	
 	
 	
 	# Output JSON and text file
