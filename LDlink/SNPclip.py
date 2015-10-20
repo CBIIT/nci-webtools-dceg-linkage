@@ -253,7 +253,8 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 				else:
 					details[rsnum].append("Variant MAF is "+str(maf)+", variant removed")
 			else:
-				details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA","Variant is not biallelic, variant removed")
+				details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
+				details[rsnum].append("Variant is not biallelic, variant removed")
 	
 	for i in rs_nums:
 		if i not in snp_list:
