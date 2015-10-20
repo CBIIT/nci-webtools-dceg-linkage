@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_proxy(snp,pop,request):
+def calculate_proxy(snp,pop,request,r2_d="r2"):
 	import csv,json,operator,os,sqlite3,subprocess,sys,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
@@ -303,6 +303,13 @@ def calculate_proxy(snp,pop,request):
 	output["aaData"]=rows
 	output["proxy_snps"]=proxies
 	
+	if r2_d not in ["r2","d"]:
+		if "warning" in output:
+			output["warning"]=output["warning"]+". "+r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+		else:
+			output["warning"]=r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+		r2_d="r2"	
+	
 	
 	# Output JSON and text file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -347,7 +354,7 @@ def calculate_proxy(snp,pop,request):
 			p_coord.append(float(p_coord_i.split(":")[1])/1000000)
 			p_maf.append(str(round(float(p_maf_i),4)))
 			dist.append(str(round(dist_i/1000000.0,4)))
-			d_prime.append(d_prime_i)
+			d_prime.append(float(d_prime_i))
 			d_prime_round.append(str(round(float(d_prime_i),4)))
 			r2.append(float(r2_i))
 			r2_round.append(str(round(float(r2_i),4)))
@@ -382,8 +389,8 @@ def calculate_proxy(snp,pop,request):
 	from bokeh.embed import components,file_html
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
-	from bokeh.resources import CDN	
-		
+	from bokeh.resources import CDN
+	
 	reset_output()
 	
 	source=ColumnDataSource(
@@ -406,7 +413,10 @@ def calculate_proxy(snp,pop,request):
 	
 	# Proxy Plot
 	x=p_coord
-	y=r2
+	if r2_d=="r2":
+		y=r2
+	else:
+		y=d_prime
 	whitespace=0.01
 	xr=Range1d(start=coord1/1000000.0-whitespace, end=coord2/1000000.0+whitespace)
 	yr=Range1d(start=-0.03, end=1.03)
@@ -452,7 +462,10 @@ def calculate_proxy(snp,pop,request):
 	proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
 					text_baseline="middle", text_align="center", angle=0)
 	
-	proxy_plot.yaxis.axis_label="R"+sup_2
+	if r2_d=="r2":
+		proxy_plot.yaxis.axis_label="R"+sup_2
+	else:
+		proxy_plot.yaxis.axis_label="D\'"
 	
 	proxy_plot.extra_y_ranges = {"y2_axis": Range1d(start=-3, end=103)}
 	proxy_plot.add_layout(LinearAxis(y_range_name="y2_axis", axis_label="Combined Recombination Rate (cM/Mb)"), "right")
@@ -558,7 +571,7 @@ def calculate_proxy(snp,pop,request):
 	gene_plot=figure(
 					x_range=xr, y_range=yr2, border_fill='white', 
 					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,wheel_zoom,reset,previewsave", logo=None)
+					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,reset,previewsave", logo=None)
 					
 	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
@@ -628,12 +641,18 @@ def main():
 		snp=sys.argv[1]
 		pop=sys.argv[2]
 		request=sys.argv[3]
+		r2_d="r2"
+	elif len(sys.argv)==5:
+		snp=sys.argv[1]
+		pop=sys.argv[2]
+		request=sys.argv[3]
+		r2_d=sys.argv[4]
 	else:
-		print "Correct useage is: LDproxy.py snp populations request"
+		print "Correct useage is: LDproxy.py snp populations request (optional: r2_d)"
 		sys.exit()
 
 	# Run function
-	out_script,out_div=calculate_proxy(snp,pop,request)
+	out_script,out_div=calculate_proxy(snp,pop,request,r2_d)
 	
 	# Print script and div output
 	#out_script_line=out_script.split("\n")
