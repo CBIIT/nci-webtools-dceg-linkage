@@ -1,4 +1,6 @@
-var ldlink_version = "Version 1.1";
+
+var ldlink_version = "Version 2.0";
+
 
 var restService = {
 	protocol : 'http',
@@ -8,232 +10,11 @@ var restService = {
 	route : "LDlinkRest"
 }
 
-var restServerUrl = restService.protocol + "://" + restService.hostname + "/"
-		+ restService.route;
-
-var populations = {
-	AFR : {
-		fullName : "African",
-		subPopulations : {
-			YRI : "Yoruba in Ibadan, Nigera",
-			LWK : " Luhya in Webuye, Kenya",
-			GWD : " Gambian in Western Gambia",
-			MSL : "  Mende in Sierra Leone",
-			ESN : "  Esan in Nigera",
-			ASW : " Americans of African Ancestry in SW USA",
-			ACB : "  African Carribbeans in Barbados"
-		}
-	},
-	AMR : {
-		fullName : "Ad Mixed American",
-		subPopulations : {
-			MXL : "  Mexican Ancestry from Los Angeles, USA",
-			PUR : " Puerto Ricans from Puerto Rico",
-			CLM : " Colombians from Medellin, Colombia",
-			PEL : " Peruvians from Lima, Peru"
-		}
-	},
-	EAS : {
-		fullName : "East Asian",
-		subPopulations : {
-			CHB : " Han Chinese in Bejing, China",
-			JPT : " Japanese in Tokyo, Japan",
-			CHS : " Southern Han Chinese",
-			CDX : " Chinese Dai in Xishuangbanna, China",
-			KHV : "  Kinh in Ho Chi Minh City, Vietnam"
-		}
-	},
-	EUR : {
-		fullName : "European",
-		subPopulations : {
-			CEU : " Utah Residents from North and West Europe",
-			TSI : "  Toscani in Italia",
-			FIN : "  Finnish in Finland",
-			GBR : " British in England and Scotland",
-			IBS : "  Iberian population in Spain"
-		}
-	},
-	SAS : {
-		fullName : "South Asian",
-		subPopulations : {
-			GIH : "  Gujarati Indian from Houston, Texas",
-			PJL : "  Punjabi from Lahore, Pakistan",
-			BEB : "  Bengali from Bangladesh",
-			STU : "  Sri Lankan Tamil from the UK",
-			ITU : " Indian Telugu from the UK"
-		}
-	}
-};
-
-var ldPairData = {
-	corr_alleles : [
-			"rs2720460(A) allele is correlated with rs11733615(C) allele",
-			"rs2720460(G) allele is correlated with rs11733615(T) allele" ],
-	haplotypes : {
-		hap1 : {
-			alleles : "AC",
-			count : "155",
-			frequency : "0.686"
-		},
-		hap2 : {
-			alleles : "GC",
-			count : "40",
-			frequency : "0.177"
-		},
-		hap3 : {
-			alleles : "GT",
-			count : "29",
-			frequency : "0.128"
-		},
-		hap4 : {
-			alleles : "AT",
-			count : "2",
-			frequency : "0.009"
-		}
-	},
-	snp1 : {
-		allele_1 : {
-			allele : "A",
-			count : "157",
-			frequency : "0.695"
-		},
-		allele_2 : {
-			allele : "G",
-			count : "69",
-			frequency : "0.305"
-		},
-		coord : "chr4:104054686",
-		rsnum : "rs2720460"
-	},
-	snp2 : {
-		allele_1 : {
-			allele : "C",
-			count : "195",
-			frequency : "0.863"
-		},
-		allele_2 : {
-			allele : "T",
-			count : "31",
-			frequency : "0.137"
-		},
-		coord : "chr4:104157164",
-		rsnum : "rs11733615"
-	},
-	statistics : {
-		chisq : "67.271",
-		d_prime : "0.9071",
-		p : "0.0",
-		r2 : "0.2977"
-	},
-	two_by_two : {
-		cells : {
-			c11 : "155",
-			c12 : "2",
-			c21 : "40",
-			c22 : "29"
-		},
-		total : "old - 227"
-	}
-};
-
-var ldhapData = {
-	"footer" : [ {
-		"Count" : 127,
-		"Frequency" : 0.588,
-		"Haplotype" : "GCATGGCGTTGGGG"
-	}, {
-		"Count" : 40,
-		"Frequency" : 0.1852,
-		"Haplotype" : "GGGGAGCGTTGGGG"
-	}, {
-		"Count" : 23,
-		"Frequency" : 0.1065,
-		"Haplotype" : "GCGGAGCGTTGGGG"
-	}, {
-		"Count" : 11,
-		"Frequency" : 0.0509,
-		"Haplotype" : "TGGGAGCGTTGGGG"
-	}, {
-		"Count" : 8,
-		"Frequency" : 0.037,
-		"Haplotype" : "GCATAGCGTTGGGG"
-	}, {
-		"Count" : 7,
-		"Frequency" : 0.0324,
-		"Haplotype" : "TGGGGATAGCAAAG"
-	} ],
-	"rows" : [ {
-		"Alleles" : "G=0.917, T=0.083",
-		"Coord" : "chr4:104050980",
-		"RS" : "rs2720457",
-		"Haplotypes" : [ "G", "G", "G", "T", "G", "T" ]
-	}, {
-		"Alleles" : "C=0.732, G=0.269",
-		"Coord" : "chr4:104052963",
-		"RS" : "rs2720458",
-		"Haplotypes" : [ "C", "G", "C", "G", "C", "G" ]
-	}, {
-		"Alleles" : "A=0.625, G=0.375",
-		"Coord" : "chr4:104055748",
-		"RS" : "rs2720461",
-		"Haplotypes" : [ "A", "G", "G", "G", "A", "G" ]
-	}, {
-		"Alleles" : "T=0.625, G=0.375",
-		"Coord" : "chr4:104056210",
-		"RS" : "rs2720462",
-		"Haplotypes" : [ "T", "G", "G", "G", "T", "G" ]
-	}, {
-		"Alleles" : "G=0.62, A=0.38",
-		"Coord" : "chr4:104052068",
-		"RS" : "rs7661201",
-		"Haplotypes" : [ "G", "A", "A", "A", "A", "G" ]
-	}, {
-		"Alleles" : "G=0.968, A=0.032",
-		"Coord" : "chr4:104055722",
-		"RS" : "rs2623063",
-		"Haplotypes" : [ "G", "G", "G", "G", "G", "A" ]
-	}, {
-		"Alleles" : "C=0.968, T=0.032",
-		"Coord" : "chr4:104057121",
-		"RS" : "rs2623062",
-		"Haplotypes" : [ "C", "C", "C", "C", "C", "T" ]
-	}, {
-		"Alleles" : "G=0.968, A=0.032",
-		"Coord" : "chr4:104057248",
-		"RS" : "rs2720463",
-		"Haplotypes" : [ "G", "G", "G", "G", "G", "A" ]
-	}, {
-		"Alleles" : "T=0.968, G=0.032",
-		"Coord" : "chr4:104057887",
-		"RS" : "rs2711901",
-		"Haplotypes" : [ "T", "T", "T", "T", "T", "G" ]
-	}, {
-		"Alleles" : "T=0.968, C=0.032",
-		"Coord" : "chr4:104051132",
-		"RS" : "rs2623082",
-		"Haplotypes" : [ "T", "T", "T", "T", "T", "C" ]
-	}, {
-		"Alleles" : "G=0.968, A=0.032",
-		"Coord" : "chr4:104058596",
-		"RS" : "rs2711900",
-		"Haplotypes" : [ "G", "G", "G", "G", "G", "A" ]
-	}, {
-		"Alleles" : "G=0.968, A=0.032",
-		"Coord" : "chr4:104050510",
-		"RS" : "rs2720456",
-		"Haplotypes" : [ "G", "G", "G", "G", "G", "A" ]
-	}, {
-		"Alleles" : "G=0.968, A=0.032",
-		"Coord" : "chr4:104050326",
-		"RS" : "rs2720455",
-		"Haplotypes" : [ "G", "G", "G", "G", "G", "A" ]
-	}, {
-		"Alleles" : "G=1.0, A=0.0",
-		"Coord" : "chr4:104059542",
-		"RS" : "rs2243682",
-		"Haplotypes" : [ "G", "G", "G", "G", "G", "G" ]
-	} ]
-};
+var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
+var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
+var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
+var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Count:40,Frequency:.1852,Haplotype:"GGGGAGCGTTGGGG"},{Count:23,Frequency:.1065,Haplotype:"GCGGAGCGTTGGGG"},{Count:11,Frequency:.0509,Haplotype:"TGGGAGCGTTGGGG"},{Count:8,Frequency:.037,Haplotype:"GCATAGCGTTGGGG"},{Count:7,Frequency:.0324,Haplotype:"TGGGGATAGCAAAG"}],rows:[{Alleles:"G=0.917, T=0.083",Coord:"chr4:104050980",RS:"rs2720457",Haplotypes:["G","G","G","T","G","T"]},{Alleles:"C=0.732, G=0.269",Coord:"chr4:104052963",RS:"rs2720458",Haplotypes:["C","G","C","G","C","G"]},{Alleles:"A=0.625, G=0.375",Coord:"chr4:104055748",RS:"rs2720461",Haplotypes:["A","G","G","G","A","G"]},{Alleles:"T=0.625, G=0.375",Coord:"chr4:104056210",RS:"rs2720462",Haplotypes:["T","G","G","G","T","G"]},{Alleles:"G=0.62, A=0.38",Coord:"chr4:104052068",RS:"rs7661201",Haplotypes:["G","A","A","A","A","G"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104055722",RS:"rs2623063",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"C=0.968, T=0.032",Coord:"chr4:104057121",RS:"rs2623062",Haplotypes:["C","C","C","C","C","T"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104057248",RS:"rs2720463",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"T=0.968, G=0.032",Coord:"chr4:104057887",RS:"rs2711901",Haplotypes:["T","T","T","T","T","G"]},{Alleles:"T=0.968, C=0.032",Coord:"chr4:104051132",RS:"rs2623082",Haplotypes:["T","T","T","T","T","C"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104058596",RS:"rs2711900",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050510",RS:"rs2720456",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050326",RS:"rs2720455",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=1.0, A=0.0",Coord:"chr4:104059542",RS:"rs2243682",Haplotypes:["G","G","G","G","G","G"]}]};
+var ldClipData;
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -242,6 +23,155 @@ Object.size = function(obj) {
     }
     return size;
 };
+
+$(document).ready(function() {
+
+	$('#ldclip').attr('disabled', false); // Remove this. (only need for testing)
+	$('div#ldclip-snp-list').on('click', "a", function(e) {
+		//console.log("clicking on link");
+		console.log(e.target.id);
+		$('#ldclip-detail').empty().append(ldClipData.details[e.target.id]);
+		console.log(ldClipData);
+	});
+
+	updateVersion(ldlink_version);
+	showFFWarning();
+	var ldproxyTable = $('#new-ldproxy').DataTable( {
+		"bPaginate": true,
+		"bJQueryUI": false,  // ThemeRoller
+		"bLengthChange": true,
+		"bFilter": true,
+		"bSort": true,
+		"bInfo": true,
+		"bAutoWidth": true,
+		"bProcessing": false,
+		"deferRender": false,
+		"order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
+		"columnDefs": [
+			{
+				"render": function ( data, type, row ) {
+					return ldproxy_rs_results_link(data, type, row);
+				},
+				"targets": 0
+			},
+			{
+				"render": function ( data, type, row ) {
+					//Remove 'chr' from the chromosome
+					return data.substring(3);
+				},
+				"targets": 1
+			},
+			{
+				"render": function ( data, type, row ) {
+					return ldproxy_position_link(data, type, row);
+				},
+				"targets": 2
+			},
+			{
+				"render": function ( data, type, row ) {
+					return ldproxy_regulome_link(data, type, row);
+				},
+				"targets": 9
+			},
+			{
+				"render": function ( data, type, row ) {
+					return ldproxy_haploreg_link(data, type, row);
+				},
+				"targets": 10
+			},
+			{ className: "dt-body-center", "targets": [ 1, 9, 10 ] }
+        ]
+	});
+
+	var new_stuff = {"aaData": [
+	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
+	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
+	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
+	RefreshTable('#new-ldproxy', new_stuff);
+
+	$('[data-toggle="popover"]').popover();
+	loadHelp();
+
+	var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "ldclip" ];
+
+	// Apply Bindings
+	ko.applyBindings(ldpairModel, document
+			.getElementById('ldpair-results-container'));
+	//ko.applyBindings(ldproxyModel, document
+	//		.getElementById('ldproxy-results-container'));
+	ko.applyBindings(ldhapModel, document
+			.getElementById('ldhap-results-container'));
+
+	$.each(modules, function(key, id) {
+		buildPopulationDropdown(id + "-population-codes");
+		$("#" + id + "-results-container").hide();
+		$('#' + id + '-message').hide();
+		$('#' + id + '-message-warning').hide();
+		$('#'+ id + "-loading").hide();
+	});
+
+	$('.ldlinkForm').on('submit', function(e) {
+		calculate(e);
+	});
+
+	// Add file select file listener
+	$('.btn-file :file').on(
+		'fileselect',
+		function(event, numFiles, label) {
+			populateTextArea(event, numFiles, label);
+			var input = $(this).parents('.input-group').find(
+					':text'), log = numFiles > 1 ? numFiles
+					+ ' files selected' : label;
+		if (input.length) {
+			input.val(log);
+		} else {
+			if (log)
+				alert(log);
+		}
+	});
+
+	$("body").keypress(function(e) {
+		// Look for a return value
+		var code = e.keyCode || e.which;
+		if (code == 13) { // User pressed return key
+			alert("You pressed return");
+			// make sure focus is not in a textarea. If so ignore.
+			var event_id = e.target.id;
+			// Skip if you can't get event_id
+			if (event_id === "") {
+
+			} else {
+				// Skip if user is editing TEXTAREA
+				var tag_name = $("#" + event_id).get(0).tagName;
+				if (tag_name == "TEXTAREA") {
+					return;
+				}
+			}
+
+			console.log("********");
+			console.log("event_id");
+			console.log(event_id);
+			console.log('typeof event_id');
+			console.log(typeof event_id);
+
+			console.log('tag_name');
+			console.log(tag_name);
+			var active_tab = $("div.tab-pane.active").attr('id');
+			var id = active_tab.split("-");
+			if (id.length == 2) { // Check to make sure we are on a
+				// calculate
+				// tab
+				// check if the form is valid before sending to server
+				var formId = id[0] + "Form";
+				if ($('#' + formId).checkValidity) {
+					initCalculate(id[0]);
+					updateData(id[0]);
+				}
+			}
+		}
+	});
+
+});
 
 function showFFWarning() {
 	// Is this a version of Mozilla?
@@ -381,185 +311,6 @@ function updateVersion(version) {
 	$("#ldlink_version").text(version);
 }
 
-$(document).ready(function() {
-	updateVersion(ldlink_version);
-	showFFWarning();
-	var ldproxyTable = $('#new-ldproxy').DataTable( {
-		"bPaginate": true,
-		"bJQueryUI": false,  // ThemeRoller
-		"bLengthChange": true,
-		"bFilter": true,
-		"bSort": true,
-		"bInfo": true,
-		"bAutoWidth": true,
-		"bProcessing": false,
-		"deferRender": false,
-		"order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
-		"columnDefs": [
-			{
-				"render": function ( data, type, row ) {
-					return ldproxy_rs_results_link(data, type, row);
-				},
-				"targets": 0
-			},
-			{
-				"render": function ( data, type, row ) {
-					//Remove 'chr' from the chromosome
-					return data.substring(3);
-				},
-				"targets": 1
-			},
-			{
-				"render": function ( data, type, row ) {
-					return ldproxy_position_link(data, type, row);
-				},
-				"targets": 2
-			},
-			{
-				"render": function ( data, type, row ) {
-					return ldproxy_regulome_link(data, type, row);
-				},
-				"targets": 9
-			},
-			{
-				"render": function ( data, type, row ) {
-					return ldproxy_haploreg_link(data, type, row);
-				},
-				"targets": 10
-			},
-			{ className: "dt-body-center", "targets": [ 1, 9, 10 ] }
-        ]
-	});
-	//console.dir(ldproxyTable);
-
-	var new_stuff = {"aaData": [
-	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
-	RefreshTable('#new-ldproxy', new_stuff);
-
-	/*
-	ldproxyTable.ajax.reload(null, false);
-
-	ldproxyTable.on( 'xhr', function () {
-	    var json = table.ajax.json();
-	    alert( json.data.length +' row(s) were loaded' );
-	} );
-	*/
-
-	$('[data-toggle="popover"]').popover();
-	//$('[data-toggle="popover"]').popover();
-/*
-	$("#dialog" ).dialog({
-		autoOpen: false,
-		show: {
-			effect: "blind",
-			duration: 1000
-		},
-			hide: {
-			effect: "explode",
-				duration: 1000
-				}
-	});
-	$( "#opener" ).click(function() {
-		$( "#dialog" ).dialog( "open" );
-	});
-*/
-	loadHelp();
-
-	var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy" ];
-
-	// Apply Bindings
-	ko.applyBindings(ldpairModel, document
-			.getElementById('ldpair-results-container'));
-	//ko.applyBindings(ldproxyModel, document
-	//		.getElementById('ldproxy-results-container'));
-	ko.applyBindings(ldhapModel, document
-			.getElementById('ldhap-results-container'));
-
-	$.each(modules, function(key, id) {
-		buildPopulationDropdown(id + "-population-codes");
-		$("#" + id + "-results-container").hide();
-		$('#' + id + '-message').hide();
-		$('#' + id + '-message-warning').hide();
-		$('#'+ id+ "-loading").hide();
-	});
-
-	/*
-	 * $('.tab-content').on('click', "a[class|='btn btn-default
-	 * calculate']", function(e) { calculate(e); });
-	 *
-	 * $('.tab-content').on('click', "button[class|='btn btn-default
-	 * calculate']", function(e) { calculate(e); });
-	 *
-	 */
-
-	$('.ldlinkForm').on('submit', function(e) {
-		calculate(e);
-	});
-
-	// Add file select file listener
-	$('.btn-file :file').on(
-			'fileselect',
-			function(event, numFiles, label) {
-				populateTextArea(event, numFiles, label);
-				var input = $(this).parents('.input-group').find(
-						':text'), log = numFiles > 1 ? numFiles
-						+ ' files selected' : label;
-				if (input.length) {
-					input.val(log);
-				} else {
-					if (log)
-						alert(log);
-				}
-			});
-
-	$("body").keypress(function(e) {
-		// Look for a return value
-		var code = e.keyCode || e.which;
-		if (code == 13) { // User pressed return key
-			// make sure focus is not in a textarea. If so ignore.
-			var event_id = e.target.id;
-			// Skip if you can't get event_id
-			if (event_id === "") {
-
-			} else {
-				// Skip if user is editing TEXTAREA
-				var tag_name = $("#" + event_id).get(0).tagName;
-				if (tag_name == "TEXTAREA") {
-					return;
-				}
-			}
-/*
-			console.log("********");
-			console.log("event_id");
-			console.log(event_id);
-			console.log('typeof event_id');
-			console.log(typeof event_id);
-			console.log('tag_name');
-			console.log(tag_name);
-*/
-			var active_tab = $("div.tab-pane.active").attr('id');
-			var id = active_tab.split("-");
-			if (id.length == 2) { // Check to make sure we are on a
-									// calculate
-				// tab
-				// check if the form is valid before sending to server
-				var formId = id[0] + "Form";
-				if ($('#' + formId).checkValidity) {
-					initCalculate(id[0]);
-					updateData(id[0]);
-				}
-				/*
-				 else {
-					alert("need value");
-				}
-				*/
-			}
-		}
-	});
-
-});
 
 // Set file support trigger
 $(document)
@@ -597,6 +348,7 @@ function loadHelp() {
 function calculate(e) {
 	var formId = e.target.id;
 	e.preventDefault();
+
 /*
 	var f = document.getElementsByTagName('form')[0];
 	if(f.checkValidity()) {
@@ -622,6 +374,7 @@ function initCalculate(id) {
 function updateData(id) {
 
 	$('#'+id+"-loading").show();
+
 	switch (id) {
 	case 'ldpair':
 		updateLDpair();
@@ -634,6 +387,9 @@ function updateData(id) {
 		break;
 	case 'ldhap':
 		updateLDhap();
+		break;
+	case 'ldclip':
+		updateLDclip();
 		break;
 	}
 
@@ -652,8 +408,6 @@ function updateLDhap() {
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-	//console.log('ldInputs');
-	//Fconsole.dir(ldInputs);
 
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
@@ -682,8 +436,7 @@ function updateLDhap() {
 	});
 	ajaxRequest
 			.fail(function(jqXHR, textStatus) {
-				console
-						.log("header: "
+				console.log("header: "
 								+ jqXHR
 								+ "\n"
 								+ "Status: "
@@ -708,9 +461,91 @@ function updateLDhap() {
 	hideLoadingIcon(ajaxRequest, id);
 }
 
+function updateLDclip() {
+	var id = "ldclip";
+
+	var $btn = $('#' + id).button('loading');
+	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+
+	var population = getPopulationCodes(id+'-population-codes');
+
+	var ldInputs = {
+		snps : snps,
+		pop : population.join("+"),
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+	};
+
+	var url = restServerUrl + "/ldclip";
+	var ajaxRequest = $.ajax({
+		type : 'GET',
+		url : url,
+		data : ldInputs,
+		contentType : 'application/json' // JSON
+	});
+
+	ajaxRequest.success(function(data) {
+		//data is returned as a string representation of JSON instead of JSON obj
+		var jsonObj=data;
+		if (displayError(id, jsonObj) == false) {
+			$('#' + id + '-results-container').show();
+			$('#' + id + '-links-container').show();
+			$('#'+id+"-loading").hide();
+			ldClipData = data;
+			initClip(ldClipData);
+		}
+	});
+	ajaxRequest
+			.fail(function(jqXHR, textStatus) {
+				console.log("header: "
+					+ jqXHR
+					+ "\n"
+					+ "Status: "
+					+ textStatus
+					+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+				message = 'Service Unavailable: ' + textStatus + "<br>";
+				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+				$('#' + id + '-message').show();
+				$('#' + id + '-message-content').empty().append(message);
+				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
+			});
+	ajaxRequest.always(function() {
+		$btn.button('reset');
+	});
+
+	hideLoadingIcon(ajaxRequest, id);
+}
+
+function initClip(data) {
+
+	//clear out the list
+	$("#ldclip-snp-list").empty();
+	//Add the clipped list
+	$.each(data.snp_list, function( index, value ){
+		$("#ldclip-snp-list").append(
+			$("<a>").attr('id', value)
+				.append(value)
+			).append("<br>");
+	});
+	$("#ldclip-detail").empty().append(data.details[data.snp_list[0]]);
+
+}
+
 function formatLDhapData(data) {
 
+	//console.info("LDhap Starts here:");
+	//console.log('original data structure for ldhap:');
+	//console.dir(data);
+
+	//console.log("get the two main parts of the data as hplotypes and snps");
+	//var indels = [];
 	var haplotypes = data.haplotypes;
+
+	//console.dir(haplotypes);
+
 	var snps = data.snps;
 	var ldhapTable = {
 		footer : [],
@@ -723,6 +558,8 @@ function formatLDhapData(data) {
 
 	// Convert haplotypes to footer
 	for (key in haplotypes) {
+		//console.log(key);
+		//console.dir(haplotypes[key]);
 		var obj = {
 			Count : haplotypes[key].Count,
 			Frequency : haplotypes[key].Frequency,
@@ -865,6 +702,7 @@ function updateLDproxyProgressBar(id, seconds) {
 
 function createPopulationDropdown(id) {
 
+	alert("createPop");
 	$('#' + id + '-population-codes')
 		.multiselect(
 		{
@@ -873,10 +711,10 @@ function createPopulationDropdown(id) {
 			maxHeight : 500,
 			includeSelectAllOption : true,
 			dropRight : true,
-			allSelectedText : 'All Populations',
-			nonSelectedText : 'Select Population',
+			allSelectedText : 'Hello All Populations',
+			nonSelectedText : 'Hello to you Select Population',
 			numberDisplayed : 4,
-			selectAllText : 'All Populations',
+			selectAllText : 'Hello All Populations',
 
 			// buttonClass: 'btn btn-link',
 			buttonText : function(options, select) {
@@ -915,7 +753,10 @@ function createPopulationDropdown(id) {
 					});
 					return selected;
 				}
-			}
+			},
+			onChange : function(option, checked) {
+				alert("You changed something");
+            }
 		});
 }
 
@@ -1271,99 +1112,113 @@ function buildPopulationDropdown(elementId) {
 	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
 	for ( var popAbbrev in populations) {
 		var population = populations[popAbbrev];
-		htmlText += htmlText1.replace(/ABBREV/g, popAbbrev).replace("FULLNAME",
-				population.fullName);
+		htmlText += htmlText1
+			.replace(/ABBREV/g, popAbbrev)
+			.replace("FULLNAME", population.fullName);
 		for ( var subPopAbbrev in population.subPopulations) {
 			var subDetail = population.subPopulations[subPopAbbrev];
-			htmlText += htmlText2.replace(/ABBREV/g, subPopAbbrev).replace(
-					"DETAIL", subDetail);
+			htmlText += htmlText2
+				.replace(/ABBREV/g, subPopAbbrev).replace("DETAIL", subDetail);
 		}
 		htmlText += "</optgroup>\n";
 	}
+
 	$('#' + elementId).html(htmlText);
 
 	$('#' + elementId)
-			.multiselect(
-					{
-						enableClickableOptGroups : true,
-						buttonWidth : '180px',
-						maxHeight : 500,
-						buttonClass : 'btn btn-default btn-ldlink-multiselect',
-						includeSelectAllOption : true,
-						dropRight : false,
-						allSelectedText : 'All Populations',
-						nonSelectedText : 'Select Population',
-						numberDisplayed : 4,
-						selectAllText : ' (ALL) All Populations',
-						previousOptionLength: 0,
-						maxPopulationWarn: 2,
-						maxPopulationWarnTimeout: 5000,
-						maxPopulationWarnVisible: false,
+		.multiselect(			{
+			enableClickableOptGroups : true,
+			buttonWidth : '180px',
+			maxHeight : 500,
+			buttonClass : 'btn btn-default btn-ldlink-multiselect',
+			includeSelectAllOption : true,
+			dropRight : false,
+			allSelectedText : 'All Populations',
+			nonSelectedText : 'Select Population',
+			numberDisplayed : 4,
+			selectAllText : ' (ALL) All Populations',
+			previousOptionLength: 0,
+			maxPopulationWarn: 2,
+			maxPopulationWarnTimeout: 5000,
+			maxPopulationWarnVisible: false,
 
-						// buttonClass: 'btn btn-link',
-						buttonText : function(options, select) {
-							if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
-								$('#'+elementId+'-popover').popover('show');
-								this.maxPopulatinWarnVisible=true;
-								setTimeout(function(){
-									$('#'+elementId+'-popover').popover('destroy');
-									this.maxPopulatinWarnVisible=false;
-								}, this.maxPopulationWarnTimeout);
-							} else {
-								//Destory popover if it is currently being displayed.
-								if(this.maxPopulatinWarnVisible) {
-										$('#'+elementId+'-popover').popover('destroy');
-								}
-							}
-							this.previousOptionLength = options.length;
-							if (options.length === 0) {
-								return this.nonSelectedText
-										+ '<span class="caret"></span>';
-							} else if (options.length == $('option', $(select)).length) {
-								return this.allSelectedText
-										+ '<span class="caret"></span>';
-							} else if (options.length > this.numberDisplayed) {
-								return '<span class="badge">' + options.length
-										+ '</span> ' + this.nSelectedText
-										+ '<span class="caret"></span>';
-							} else {
-								var selected = '';
-								options.each(function() {
-									// var label = $(this).attr('label') :
-									// $(this).html();
-									selected += $(this).val() + '+';
-								});
-
-								return selected.substr(0, selected.length - 1)
-										+ ' <b class="caret"></b>';
-							}
-						},
-						buttonTitle : function(options, select) {
-							if (options.length === 0) {
-								return this.nonSelectedText;
-							} else {
-								var selected = '';
-								options.each(function() {
-									selected += $(this).text() + '\n';
-								});
-								return selected;
-							}
-						}
+			// buttonClass: 'btn btn-link',
+			buttonText : function(options, select) {
+				if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+					$('#'+elementId+'-popover').popover('show');
+					this.maxPopulatinWarnVisible=true;
+					setTimeout(function(){
+						$('#'+elementId+'-popover').popover('destroy');
+						this.maxPopulatinWarnVisible=false;
+					}, this.maxPopulationWarnTimeout);
+				} else {
+					//Destory popover if it is currently being displayed.
+					if(this.maxPopulatinWarnVisible) {
+							$('#'+elementId+'-popover').popover('destroy');
+					}
+				}
+				this.previousOptionLength = options.length;
+				if (options.length === 0) {
+					return this.nonSelectedText
+							+ '<span class="caret"></span>';
+				} else if (options.length == $('option', $(select)).length) {
+					return this.allSelectedText
+							+ '<span class="caret"></span>';
+				} else if (options.length > this.numberDisplayed) {
+					return '<span class="badge">' + options.length
+							+ '</span> ' + this.nSelectedText
+							+ '<span class="caret"></span>';
+				} else {
+					var selected = '';
+					options.each(function() {
+						// var label = $(this).attr('label') :
+						// $(this).html();
+						selected += $(this).val() + '+';
 					});
+
+					return selected.substr(0, selected.length - 1)
+							+ ' <b class="caret"></b>';
+				}
+			},
+			buttonTitle : function(options, select) {
+				if (options.length === 0) {
+					return this.nonSelectedText;
+				} else {
+					var selected = '';
+					options.each(function() {
+						selected += $(this).text() + '\n';
+					});
+					return selected;
+				}
+			},
+			onChange : function(option, checked) {
+				/*
+				var active_tab = $("#ldlink-tabs li:[class]='active']");
+				console.dir(active_tab);
+				*/
+				//alert("You changed the population selection.");
+				//console.log("Option: ")
+				//console.dir(option[0]);
+				//console.log("checked: ")
+				//console.dir(checked);
+			}
+		});
 }
 
 function getPopulationCodes(id) {
+	//alert(id);
 	var population;
 	var totalPopulations;
 	population =  $('#'+id).val();
 	totalPopulations = countSubPopulations(populations);
+/*
+	console.log("Populations (static)");
+	console.log("Populations length: "+totalPopulations);
 
-	//console.log("Populations (static)");
-	//console.log("Populations length: "+totalPopulations);
-
-	//console.dir(populations);
-	//console.log("Population selected");
-	//console.log("Population length: "+population.length);
+	console.dir(populations);
+	console.log("Population selected");
+	console.log("Population length: "+population.length);
+*/
 	//Check for selection of All
 	// If total subPopulations equals number of population then popluation = array("All");
 	if(totalPopulations == population.length) {
