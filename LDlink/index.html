@@ -65,19 +65,34 @@
 		</div>
  		-->
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
-			<li><a href="#home" data-toggle="tab">Home</a></li>
-
-			<li><a href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a></li>
-
-			<li><a href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a></li>
-
-			<li><a href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of SNPs">LDpair</a></li>
-
-			<li><a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a></li>
-
-
-			<li class="active"><a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a></li>
-			<li><a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
+			<!-- HOME -->
+			<li class="active">
+				<a href="#home" data-toggle="tab">Home</a>
+			</li>
+			<!-- HAP -->
+			<li>
+				<a href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
+			</li>
+			<!-- MATRIX -->
+			<li>
+				<a href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a>
+			</li>
+			<!-- PAIR -->
+			<li>
+				<a href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of SNPs">LDpair</a>
+			</li>
+			<!-- PROXY -->
+			<li>
+				<a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a>
+			</li>
+			<!-- CLIP -->
+			<li>
+				<a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a>
+			</li>
+			<!-- CHIP -->
+			<li>
+				<a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a>
+			</li>
 <!--
 			<li><a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
 -->
@@ -86,10 +101,7 @@
 		</ul>
 		<!-- Tab Content -->
 		<div class="tab-content">
-			<!--
 			<div class="tab-pane active" id="home">
-			-->
-			<div class="tab-pane" id="home">
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -772,7 +784,7 @@
 			</div>
 
 			<!-- LDclip -->
-			<div class="tab-pane active" id="ldclip-tab">
+			<div class="tab-pane" id="ldclip-tab">
 				<!-- LDclip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
