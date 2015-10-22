@@ -18,6 +18,7 @@ from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from SNPclip import calculate_clip
+from SNPchip import calculate_chip
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -102,13 +103,16 @@ def ldproxy():
     snp = request.args.get('snp', False)
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
+    r2_d = request.args.get('r2_d', False)
+
     print 'snp: ' + snp
     print 'pop: ' + pop
     print 'request: ' + reference
+    print 'r2_d: ' + r2_d
     print
 
     #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
-    out_script,out_div = calculate_proxy(snp, pop, reference)
+    out_script,out_div = calculate_proxy(snp, pop, reference, r2_d)
 
     copy_output_files(reference)
 
@@ -195,6 +199,51 @@ def ldclip():
     f.write(snps)
     f.close()
     (snps,snp_list,details) = calculate_clip(snplst,pop,reference)
+
+    clip={}
+    clip["snp_list"] = snp_list
+    clip["details"] = details
+
+    print "snps"
+    dir(snps)
+    print snps
+    print "snp_list"
+    dir(snp_list)
+    print snp_list
+    print "details"
+    dir(snps)
+    print details
+
+    out_json = json.dumps(clip, sort_keys=True, indent=2)
+    mimetype = 'application/json'
+
+    return current_app.response_class(out_json, mimetype=mimetype)
+
+
+@app.route('/LDlinkRest/ldchip', methods = ['GET'])
+def ldchip():
+
+    #Command line example
+    #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
+
+    print
+    print 'Execute ldchip'
+    print 'Gathering Variables from url'
+
+    snps = request.args.get('snps', False)
+    pop = request.args.get('pop', False)
+    reference = request.args.get('reference', False)
+    print 'snps: ' + snps
+    print 'pop: ' + pop
+    print 'request: ' + reference
+
+    snplst = tmp_dir+'snps'+reference+'.txt'
+    print 'snplst: '+snplst
+
+    f = open(snplst, 'w')
+    f.write(snps)
+    f.close()
+    (snps,snp_list,details) = calculate_chip(snplst,pop,reference)
 
     clip={}
     clip["snp_list"] = snp_list

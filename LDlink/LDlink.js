@@ -1,6 +1,4 @@
-
 var ldlink_version = "Version 2.0";
-
 
 var restService = {
 	protocol : 'http',
@@ -88,11 +86,11 @@ $(document).ready(function() {
 	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
 	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
 	RefreshTable('#new-ldproxy', new_stuff);
-
+	
 	$('[data-toggle="popover"]').popover();
 	loadHelp();
 
-	var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "ldclip" ];
+	var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "ldclip", "ldchip" ];
 
 	// Apply Bindings
 	ko.applyBindings(ldpairModel, document
@@ -172,6 +170,18 @@ $(document).ready(function() {
 	});
 
 });
+
+// Set file support trigger
+$(document).on(
+	'change',
+	'.btn-file :file',
+	function() {
+		var input = $(this), numFiles = input.get(0).files ? input
+			.get(0).files.length : 1, label = input.val()
+			.replace(/\\/g, '/').replace(/.*\//, '');
+		input.trigger('fileselect', [ numFiles, label ]);
+	}
+);
 
 function showFFWarning() {
 	// Is this a version of Mozilla?
@@ -311,19 +321,6 @@ function updateVersion(version) {
 	$("#ldlink_version").text(version);
 }
 
-
-// Set file support trigger
-$(document)
-		.on(
-				'change',
-				'.btn-file :file',
-				function() {
-					var input = $(this), numFiles = input.get(0).files ? input
-							.get(0).files.length : 1, label = input.val()
-							.replace(/\\/g, '/').replace(/.*\//, '');
-					input.trigger('fileselect', [ numFiles, label ]);
-				});
-
 function populateTextArea(event, numFiles, label) {
 	id = event.target.id;
 	if (window.FileReader) {
@@ -390,6 +387,9 @@ function updateData(id) {
 		break;
 	case 'ldclip':
 		updateLDclip();
+		break;
+	case 'ldclip':
+		updateLDchip();
 		break;
 	}
 
@@ -476,6 +476,63 @@ function updateLDclip() {
 	};
 
 	var url = restServerUrl + "/ldclip";
+	var ajaxRequest = $.ajax({
+		type : 'GET',
+		url : url,
+		data : ldInputs,
+		contentType : 'application/json' // JSON
+	});
+
+	ajaxRequest.success(function(data) {
+		//data is returned as a string representation of JSON instead of JSON obj
+		var jsonObj=data;
+		if (displayError(id, jsonObj) == false) {
+			$('#' + id + '-results-container').show();
+			$('#' + id + '-links-container').show();
+			$('#'+id+"-loading").hide();
+			ldClipData = data;
+			initClip(ldClipData);
+		}
+	});
+	ajaxRequest
+			.fail(function(jqXHR, textStatus) {
+				console.log("header: "
+					+ jqXHR
+					+ "\n"
+					+ "Status: "
+					+ textStatus
+					+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+				message = 'Service Unavailable: ' + textStatus + "<br>";
+				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+
+				$('#' + id + '-message').show();
+				$('#' + id + '-message-content').empty().append(message);
+				$('#' + id + '-progress').hide();
+				$('#' + id+ '-results-container').hide();
+				//hide loading icon
+				$('#'+id+"-loading").hide();
+			});
+	ajaxRequest.always(function() {
+		$btn.button('reset');
+	});
+
+	hideLoadingIcon(ajaxRequest, id);
+}
+
+function updateLDchip() {
+	var id = "ldchip";
+
+	var $btn = $('#' + id).button('loading');
+	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+
+	//var population = getPopulationCodes(id+'-population-codes');
+
+	var ldInputs = {
+		snps : snps,
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+	};
+
+	var url = restServerUrl + "/ldchip";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
 		url : url,
@@ -609,7 +666,7 @@ function updateLDmatrix() {
 
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
 	var population = getPopulationCodes(id+'-population-codes');
-	var r2_d
+	var r2_d;
 
 	if($('#matrix_color_r2').hasClass('active')) {
 		r2_d='r2'; // i.e. R2
@@ -764,11 +821,21 @@ function updateLDproxy() {
 	var id = "ldproxy";
 	var $btn = $('#' + id).button('loading');
 	var population = getPopulationCodes(id+'-population-codes');
+	var r2_d;
+
+	if($('#proxy_color_r2').hasClass('active')) {
+		r2_d='r2'; // i.e. R2
+		//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
+	} else {
+		r2_d='d';  // i.e.  Dprime
+		//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
+	}
 
 	var ldproxyInputs = {
 		snp : $('#ldproxy-snp').val(),
 		pop : population.join("+"),
-		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+		r2_d : r2_d
 	};
 	//Update href on
 

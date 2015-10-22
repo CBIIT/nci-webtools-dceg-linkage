@@ -77,8 +77,9 @@
 
 
 			<li class="active"><a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a></li>
+			<li><a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
 <!--
-			<li><a href="#ldsnip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
+			<li><a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
 -->
 			<li><a href="#help-tab" data-toggle="tab">Help</a></li>
 
@@ -617,7 +618,6 @@
 			<!-- LDproxy -->
 			<div class="tab-pane fade" id="ldproxy-tab">
 				<!-- LDproxy INPUTS-->
-
 				<div class="row" style="padding-top: 10px;">
 					<div class="alert alert-danger ffWarning">You are using a
 						version of Firefox that does not render tool tips properly in the
@@ -649,6 +649,19 @@
 									</select>
 								</div>
 							</div>
+							<div class="form-group">
+								<div class="col-sm-2 col-sm-offset-1">
+								<div title="Select heat map variable" data-toggle="buttons" class="btn-group">
+										<label class="btn btn-default active" id="proxy_color_r2">
+									 		<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
+										</label>
+										<label class="btn btn-default">
+											<input type="radio" autocomplete="off" name="options"> D'
+										</label>
+									</div>
+									</div>
+							</div>
+
 							<div class="form-group">
 								<div class="col-sm-1">
 									<input type="submit" id="ldproxy" value="Calculate"
@@ -849,8 +862,101 @@
 						</div>
 				</div>
 			</div>
-<!--  END OF ldsnip -->
+<!--  END OF ldchip -->
 
+			<!-- LDchip -->
+			<div class="tab-pane" id="ldchip-tab">
+				<!-- LDchip INPUTS-->
+				<div class="container-fluid">
+					<div class="row" style="padding-top: 10px;">
+						<!-- LDchip FORM -->
+						<form id="ldchipForm" class="ldlinkForm">
+
+							<div class="form-group">
+								<div class="col-sm-2">
+									<textarea id="ldchip-file-snp-numbers" placeholder="RS Numbers"
+										class="form-control"
+										title="Enter list of RS numbers (one per line)"></textarea>
+								</div>
+							</div>
+							<div class="col-sm-4">
+								<div class="input-group">
+									<label for="ldchip-file-label" style="display:none;">Uplaod RS File</label>
+									<input type="text" id="ldhap-file-label" readonly
+										placeholder="Upload file with RS numbers"
+										class="readonly-input-text">
+									<label for="ldchip-file" style="display:none;">Browse for RS File</label>
+									<span	class="btn btn-default btn-file">Browse
+										<input type="file" id="ldchip-file">
+									</span>
+								</div>
+							</div>
+							<!--
+							<div class="form-group">
+								<div class="col-sm-4">
+									<label for="ldchip-population-codes" style="display: none;">Populations</label>
+									<select id="ldchip-population-codes" multiple="multiple"
+										name="populations" required>
+									</select>
+								</div>
+							</div>
+							-->
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input type="submit" id="ldchip" value="Calculate"
+										class="btn btn-default calculate" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<hr>
+					<div id="ldchip-loading">
+						<img src="/LDlink/calculating_LD.gif" alt="loading icon"
+							class="loading">
+					</div>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldchip-message">
+							<div class="panel panel-danger">
+									<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldchip-message-content"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldchip-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldchip-message-warning-content">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ldchip CONTAINER -->
+				<div class="jumbotron">
+						<div class="container-fluid" id="ldchip-results-container">
+							<div class="row ldchip-table-container">
+								<div id="ldchip-snp-list" style="width:300px;float:left;border:1px solid;padding:10px;">
+									The left side
+								</div>
+								<div id="ldchip-detail" style="width:675px;border:1px solid;float:right;padding:10px;">
+									The right side
+								</div>
+							</div>
+						</div>
+						<div id="ldchip-links-container" class="col-md-12" style="display:none;">
+							<span>
+								<a target="_blank" id="ldhap-snps" href=""></a>
+							</span>&nbsp;&nbsp;&nbsp;&nbsp;
+							<span>
+								<a target="_blank" id="ldchip-haplotypes" href=""></a>
+							</span>
+						</div>
+				</div>
+			</div>
+<!--  END OF ldchip -->
 
 
 
@@ -903,6 +1009,7 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"
