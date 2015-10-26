@@ -66,7 +66,7 @@
  		-->
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
 			<!-- HOME -->
-			<li class="active">
+			<li>
 				<a href="#home" data-toggle="tab">Home</a>
 			</li>
 			<!-- HAP -->
@@ -86,7 +86,7 @@
 				<a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a>
 			</li>
 			<!-- CLIP -->
-			<li>
+			<li class="active">
 				<a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a>
 			</li>
 			<!-- CHIP -->
@@ -101,7 +101,7 @@
 		</ul>
 		<!-- Tab Content -->
 		<div class="tab-content">
-			<div class="tab-pane active" id="home">
+			<div class="tab-pane" id="home">
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -663,7 +663,7 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2 col-sm-offset-1">
-								<div title="Select heat map variable" data-toggle="buttons" class="btn-group">
+								<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
 										<label class="btn btn-default active" id="proxy_color_r2">
 									 		<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
 										</label>
@@ -784,21 +784,18 @@
 			</div>
 
 			<!-- LDclip -->
-			<div class="tab-pane" id="ldclip-tab">
+			<div class="tab-pane active" id=" sntab">
 				<!-- LDclip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDclip FORM -->
 						<form id="ldclipForm" class="ldlinkForm">
-
-							<div class="form-group">
-								<div class="col-sm-2">
+							<div class="form-group col-sm-2">
 									<textarea id="ldclip-file-snp-numbers" placeholder="RS Numbers"
 										class="form-control"
 										title="Enter list of RS numbers (one per line)"></textarea>
-								</div>
 							</div>
-							<div class="col-sm-4">
+							<div class="col-sm-3">
 								<div class="input-group">
 									<label for="ldclip-file-label" style="display:none;">Uplaod RS File</label>
 									<input type="text" id="ldhap-file-label" readonly
@@ -810,13 +807,25 @@
 									</span>
 								</div>
 							</div>
-
-							<div class="form-group">
-								<div class="col-sm-4">
-									<label for="ldclip-population-codes" style="display: none;">Populations</label>
-									<select id="ldclip-population-codes" multiple="multiple"
-										name="populations" required>
-									</select>
+							<div class="form-group col-sm-3">
+								<label for="ldclip-population-codes" style="display: none;">Populations</label>
+								<select id="ldclip-population-codes" multiple="multiple"
+									name="populations" required>
+								</select>
+							</div>
+							<div class="form-group col-sm-2">
+								<div id="ldclip-thresholds">
+									<div>Thresholds</div>
+									<div>
+										<label for="ldclip_r2_threshold">R<sup>2</sup>:</label>
+										<input id="ldclip_r2_threshold" type="number" value="0.1" step="0.01" min="0" max="1.0">
+									</div>
+									<div style="clear:both:"></div>
+									<div>
+										<label for="ldclip_maf_threshold">MAF:</label>
+										<input id="ldclip_maf_threshold" type="number" value="0.01" step="0.001" min="0" max="1.0">
+									</div>
+									<div style="clear:both;"></div>
 								</div>
 							</div>
 							<div class="form-group">
@@ -856,20 +865,61 @@
 				<div class="jumbotron">
 						<div class="container-fluid" id="ldclip-results-container">
 							<div class="row ldclip-table-container">
-								<div id="ldclip-snp-list" style="width:300px;float:left;border:1px solid;padding:10px;">
-									The left side
+								<div>LD Thinned SNP List (CEU)</div>
+								<div id="ldclip-snp-list"></div>
+								<div id="ldclip-detail">
+								<table class="table table-striped">
+									<thead>
+										<tr>
+											<td>RS Number</td>
+											<td>Position</td>
+											<td>Allelse</td>
+											<td>Details</td>
+										</tr>
+									</thead>
+									<tbody>
+										<tr>
+											<td>rs7551466</td>
+											<td>chr196892427</td>
+											<td>G=NA,A,T=NA</td>
+											<td>Variant is not biallelic, variant removed</td>
+										</tr>
+									</tbody>
+								</table>
 								</div>
-								<div id="ldclip-detail" style="width:675px;border:1px solid;float:right;padding:10px;">
-									The right side
+							</div>
+							<br>
+							<div class="row">
+								<div>SNPs With Warnings (CEU)</div>
+								<div style="border:1px solid">
+									<table class="table table-striped">
+										<thead>
+											<tr>
+												<td>RS Number</td>
+												<td>Position</td>
+												<td>Allelse</td>
+												<td>Details</td>
+											</tr>
+										</thead>
+										<tbody>
+											<tr>
+												<td>rs7551466</td>
+												<td>chr196892427</td>
+												<td>G=NA,A,T=NA</td>
+												<td>Variant is not biallelic, variant removed</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
 							</div>
 						</div>
+
 						<div id="ldclip-links-container" class="col-md-12" style="display:none;">
 							<span>
-								<a target="_blank" id="ldhap-snps" href=""></a>
+								<a target="_blank" id="ldhap-snps" href="yahoo.com">Download Thinned SNP List</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp;
 							<span>
-								<a target="_blank" id="ldclip-haplotypes" href=""></a>
+								<a target="_blank" id="ldclip-haplotypes" href="yahoo.com">Download Thinned SNP List with Details</a>
 							</span>
 						</div>
 				</div>

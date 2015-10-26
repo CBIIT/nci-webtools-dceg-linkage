@@ -102,7 +102,7 @@ $(document).ready(function() {
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		$("#" + id + "-results-container").hide();
+//		$("#" + id + "-results-container").hide();
 		$('#' + id + '-message').hide();
 		$('#' + id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
@@ -472,8 +472,12 @@ function updateLDclip() {
 	var ldInputs = {
 		snps : snps,
 		pop : population.join("+"),
+		r2_threshold: $("#"+id+"_r2_threshold").val(),
+		maf_threshold: $("#"+id+"_maf_threshold").val(),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
+	console.log('ldInputs');
+	console.dir(ldInputs);
 
 	var url = restServerUrl + "/ldclip";
 	var ajaxRequest = $.ajax({
@@ -825,9 +829,11 @@ function updateLDproxy() {
 
 	if($('#proxy_color_r2').hasClass('active')) {
 		r2_d='r2'; // i.e. R2
+		$('#ldproxy-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
 		//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
 	} else {
 		r2_d='d';  // i.e.  Dprime
+		$('#ldproxy-genome').html("View D' data in UCSC Genome Browser");
 		//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
 	}
 
@@ -844,6 +850,7 @@ function updateLDproxy() {
 	$('#ldproxy-genome').attr('href',
 		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
 		+ ldproxyInputs.reference + '.txt');
+
 	//console.dir(ldproxyInputs);
 	$('#ldproxy-results-link').attr('href',
 			'tmp/proxy' + ldproxyInputs.reference + '.txt');

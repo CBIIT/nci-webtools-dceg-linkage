@@ -407,7 +407,40 @@ hr.header {
     margin: 0;
 }
 
+#ldclip-thresholds {
+	width:130px; 
+	margin-left:10px;
+}
+#ldclip-thresholds > div > label {
+	float:left;
+	width:45px;
+	margin-top:5px;
+}
+#ldclip-thresholds > div > input {
+	width:65px;
+}
 
+#ldclip-thresholds > div:first-child {
+	width:100px;
+	position:relative;
+	top:-8px;
+}
+#ldclip-thresholds > div:not(:first-child) {
+	padding-bottom:3px;
+}
+#ldclip-snp-list {
+	width:200px;
+	float:left;
+	border:1px solid;
+	padding:10px;
+}
+
+#ldclip-detail {
+	border:1px solid;
+	float:left;
+	padding:10px;
+	margin-left:35px;
+}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,

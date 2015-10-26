@@ -7,6 +7,7 @@
 # Create SNPtip function
 def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	import json,math,operator,os,sqlite3,subprocess,sys
+
 	max_list=6000
 
 	# Set data directories
@@ -22,10 +23,16 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		os.makedirs(tmp_dir)
 
 
+	print "Hello let's look at what we got here:"
+	print type(r2_threshold)
+	print "r2_threshold"
+	print r2_threshold
+	print "maf_threshold"
+	print maf_threshold
+	
 	# Create JSON output
 	out_json=open(tmp_dir+"clip"+request+".json","w")
 	output={}
-
 
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()

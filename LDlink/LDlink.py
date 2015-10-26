@@ -187,10 +187,19 @@ def ldclip():
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
+    r2_threshold = request.args.get('r2_threshold', False)
+    maf_threshold = request.args.get('maf_threshold', False)
+
     reference = request.args.get('reference', False)
     print 'snps: ' + snps
     print 'pop: ' + pop
     print 'request: ' + reference
+    print 'r2_threshold: ' + r2_threshold
+    print type (r2_threshold)
+    print 'maf_threshold: ' + maf_threshold
+    float_r2_threshold = float(r2_threshold)
+    print "new type"
+    print type(float_r2_threshold)
 
     snplst = tmp_dir+'snps'+reference+'.txt'
     print 'snplst: '+snplst
@@ -198,7 +207,8 @@ def ldclip():
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
-    (snps,snp_list,details) = calculate_clip(snplst,pop,reference)
+    (snps,snp_list,details) = calculate_clip(snplst,pop,reference,float(r2_threshold),float(maf_threshold))
+    #(snps,snp_list,details) = calculate_clip(snplst,pop,reference)
 
     clip={}
     clip["snp_list"] = snp_list
