@@ -66,7 +66,7 @@
  		-->
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
 			<!-- HOME -->
-			<li>
+			<li class="active">
 				<a href="#home" data-toggle="tab">Home</a>
 			</li>
 			<!-- HAP -->
@@ -86,17 +86,21 @@
 				<a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a>
 			</li>
 			<!-- CLIP -->
+			<!--
 			<li class="active">
 				<a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a>
 			</li>
+			-->
 			<!-- CHIP -->
+			<!--
 			<li>
 				<a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a>
 			</li>
-<!--
-			<li><a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a></li>
--->
-			<li><a href="#help-tab" data-toggle="tab">Help</a></li>
+			-->
+			<!-- HELP -->
+			<li>
+				<a href="#help-tab" data-toggle="tab">Help</a>
+			</li>
 
 		</ul>
 		<!-- Tab Content -->
@@ -784,7 +788,7 @@
 			</div>
 
 			<!-- LDclip -->
-			<div class="tab-pane active" id=" sntab">
+			<div class="tab-pane" id="sntab">
 				<!-- LDclip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -877,9 +881,9 @@
 											<td>Details</td>
 										</tr>
 									</thead>
-									<tbody>
+									<tbody data-bind="foreach: snp_list" style="border: 1px solid #ccc;">
 										<tr>
-											<td>rs7551466</td>
+											<td data-bind="text: $data"></td>
 											<td>chr196892427</td>
 											<td>G=NA,A,T=NA</td>
 											<td>Variant is not biallelic, variant removed</td>
@@ -916,10 +920,10 @@
 
 						<div id="ldclip-links-container" class="col-md-12" style="display:none;">
 							<span>
-								<a target="_blank" id="ldhap-snps" href="yahoo.com">Download Thinned SNP List</a>
+								<a target="_blank" id="ldclip-snps" href="yahoo.com">Download Thinned SNP List</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp;
 							<span>
-								<a target="_blank" id="ldclip-haplotypes" href="yahoo.com">Download Thinned SNP List with Details</a>
+								<a target="_blank" id="ldclip-details" href="yahoo.com">Download Thinned SNP List with Details</a>
 							</span>
 						</div>
 				</div>
@@ -1010,10 +1014,10 @@
 						</div>
 						<div id="ldchip-links-container" class="col-md-12" style="display:none;">
 							<span>
-								<a target="_blank" id="ldhap-snps" href=""></a>
+								<a target="_blank" id="ldchip-snps" href=""></a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp;
 							<span>
-								<a target="_blank" id="ldchip-haplotypes" href=""></a>
+								<a target="_blank" id="ldchip-details" href=""></a>
 							</span>
 						</div>
 				</div>
@@ -1071,6 +1075,7 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
+
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script

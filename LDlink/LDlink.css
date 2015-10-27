@@ -429,12 +429,17 @@ hr.header {
 	padding-bottom:3px;
 }
 #ldclip-snp-list {
-	width:200px;
+	width:175px;
 	float:left;
 	border:1px solid;
 	padding:10px;
+	max-height: 100px;
+	overflow-y: auto;
 }
-
+#ldclip-snp-list > a {
+	text-decoration: underline;
+	color: #428bca;
+}
 #ldclip-detail {
 	border:1px solid;
 	float:left;

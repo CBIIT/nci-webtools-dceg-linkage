@@ -195,14 +195,10 @@ def ldclip():
     print 'pop: ' + pop
     print 'request: ' + reference
     print 'r2_threshold: ' + r2_threshold
-    print type (r2_threshold)
     print 'maf_threshold: ' + maf_threshold
-    float_r2_threshold = float(r2_threshold)
-    print "new type"
-    print type(float_r2_threshold)
 
     snplst = tmp_dir+'snps'+reference+'.txt'
-    print 'snplst: '+snplst
+    print 'snplst" '+snplst
 
     f = open(snplst, 'w')
     f.write(snps)
