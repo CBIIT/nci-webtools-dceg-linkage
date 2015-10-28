@@ -14,7 +14,9 @@ var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615
 var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Count:40,Frequency:.1852,Haplotype:"GGGGAGCGTTGGGG"},{Count:23,Frequency:.1065,Haplotype:"GCGGAGCGTTGGGG"},{Count:11,Frequency:.0509,Haplotype:"TGGGAGCGTTGGGG"},{Count:8,Frequency:.037,Haplotype:"GCATAGCGTTGGGG"},{Count:7,Frequency:.0324,Haplotype:"TGGGGATAGCAAAG"}],rows:[{Alleles:"G=0.917, T=0.083",Coord:"chr4:104050980",RS:"rs2720457",Haplotypes:["G","G","G","T","G","T"]},{Alleles:"C=0.732, G=0.269",Coord:"chr4:104052963",RS:"rs2720458",Haplotypes:["C","G","C","G","C","G"]},{Alleles:"A=0.625, G=0.375",Coord:"chr4:104055748",RS:"rs2720461",Haplotypes:["A","G","G","G","A","G"]},{Alleles:"T=0.625, G=0.375",Coord:"chr4:104056210",RS:"rs2720462",Haplotypes:["T","G","G","G","T","G"]},{Alleles:"G=0.62, A=0.38",Coord:"chr4:104052068",RS:"rs7661201",Haplotypes:["G","A","A","A","A","G"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104055722",RS:"rs2623063",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"C=0.968, T=0.032",Coord:"chr4:104057121",RS:"rs2623062",Haplotypes:["C","C","C","C","C","T"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104057248",RS:"rs2720463",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"T=0.968, G=0.032",Coord:"chr4:104057887",RS:"rs2711901",Haplotypes:["T","T","T","T","T","G"]},{Alleles:"T=0.968, C=0.032",Coord:"chr4:104051132",RS:"rs2623082",Haplotypes:["T","T","T","T","T","C"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104058596",RS:"rs2711900",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050510",RS:"rs2720456",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050326",RS:"rs2720455",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=1.0, A=0.0",Coord:"chr4:104059542",RS:"rs2243682",Haplotypes:["G","G","G","G","G","G"]}]};
 var ldClipData1={details:{rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]},snp_list:["rs11322783","rs8099917","rs955155","rs8101517","rs12980602","rs78605718"]};
 var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
-var ldClipData;
+//var ldClipData = {warnings:[],details:[]};
+var ldclipData = {"warnings":[],"details":[{"rs_number":"rs11322783","position":"chr19:39739153","alleles":"T=0.288, -=0.712","comment":"SNP kept"},{"rs_number":"rs11881222","position":"chr19:39734923","alleles":"A=0.718, G=0.282","comment":"SNP kept"}]};
+var ldClipRaw;
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -26,14 +28,15 @@ Object.size = function(obj) {
 
 $(document).ready(function() {
 
-	$('#home').addClass('active');
+	$('#ldclip-tab').addClass("in").addClass('active');
 
 	$('#ldclip').attr('disabled', false); // Remove this. (only need for testing)
 	$('div#ldclip-snp-list').on('click', "a", function(e) {
 		//console.log("clicking on link");
+		var rs_number = e.target.id;
 		console.log(e.target.id);
-		$('#ldclip-detail').empty().append(ldClipData.details[e.target.id]);
-		console.log(ldClipData);
+		loadSNPdetails(ldClipRaw, rs_number);
+		$('#ldclip-detail-title').html("Detail for <strong>"+rs_number+"</strong>"); 
 	});
 
 	updateVersion(ldlink_version);
@@ -107,14 +110,14 @@ $(document).ready(function() {
 	console.dir(ldhapModel)
 	ko.applyBindings(ldhapModel, document
 			.getElementById('ldhap-results-container'));
-	console.log("ldClipData1");
-	console.dir(ldClipData1)
-	ko.applyBindings(ldClipData1, document
-			.getElementById('ldclip-results-container'));
+	console.log("ldclipData");
+	console.dir(ldclipModel)
+	ko.applyBindings(ldclipModel, document
+			.getElementById('ldclip-detail'));
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		$("#" + id + "-results-container").hide();
+		//$("#" + id + "-results-container").hide();
 		$('#' + id + '-message').hide();
 		$('#' + id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
@@ -214,6 +217,7 @@ function showFFWarning() {
 //var ldproxyModel = ko.mapping.fromJS(ldProxyData);
 var ldpairModel = ko.mapping.fromJS(ldPairData);
 var ldhapModel = ko.mapping.fromJS(ldhapData);
+var ldclipModel = ko.mapping.fromJS(ldclipData);
 
 function RefreshTable(tableId, json) {
     table = $(tableId).dataTable();
@@ -353,6 +357,7 @@ function populateTextArea(event, numFiles, label) {
 function loadHelp() {
 	$('#help-tab').load('help.html');
 }
+
 
 function calculate(e) {
 	var formId = e.target.id;
@@ -510,8 +515,7 @@ function updateLDclip() {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
 			$('#'+id+"-loading").hide();
-			ldClipData = data;
-			initClip(ldClipData);
+			initClip(data);
 		}
 	});
 	ajaxRequest
@@ -540,6 +544,7 @@ function updateLDclip() {
 }
 
 function updateLDchip() {
+
 	var id = "ldchip";
 
 	var $btn = $('#' + id).button('loading');
@@ -567,8 +572,7 @@ function updateLDchip() {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
 			$('#'+id+"-loading").hide();
-			ldClipData = data;
-			initClip(ldClipData);
+			initClip(data);
 		}
 	});
 	ajaxRequest
@@ -595,14 +599,9 @@ function updateLDchip() {
 
 	hideLoadingIcon(ajaxRequest, id);
 }
+function populateSNPlist(data) {
 
-function initClip(data) {
-
-	console.log("initClip()");
-	console.log(data.details);
-	console.log(data.details);
 	//clear out the list
-
 	$("#ldclip-snp-list").empty();
 	//Add the clipped list
 	$.each(data.snp_list, function( index, value ){
@@ -610,6 +609,81 @@ function initClip(data) {
 			$("<a>").attr('id', value)
 				.append(value)
 			).append("<br>");
+	});
+
+}
+
+function loadSNPdetails(data, rs_number) {
+
+	console.log("Here is the rs_number to populate");
+	console.log("rs_number: "+rs_number);
+	//console.dir(data.details);
+	console.log("find key for the rs_number");
+
+	//console.log("Found one::::");
+	//console.dir(data.details[rs_number]);
+	ldclipData = {warnings:[],details:[]};
+
+	var found = false;
+
+	$.each(data.details, function( index, value ){
+		var detail = {
+			rs_number: index,
+			position: value[0],
+			alleles: value[1],
+			comment: value[2]
+		};
+		console.log(index+" - "+value);
+		if(detail.rs_number == rs_number) {
+			found = true;
+		}
+		//if(found == true && detail.rs_number == rs_number) {
+		if(found) {
+			ldclipData.details.push(detail);
+			if(detail.comment == 'SNP kept' && detail.rs_number != rs_number){
+				// List is complete, exit loop
+				return false;
+			}
+		}
+
+	});
+	console.dir(ldclipData);
+	console.log(JSON.stringify(ldclipData));
+	ko.mapping.fromJS(ldclipData, ldclipModel);
+
+	//populate a global variable that represents the table 
+
+	//Populate the table using knockout.
+
+}
+/*
+function organizeSNPdata(data) {
+	//populate a global with organized data.
+	$.each(data.snp_list, function( index, value ){
+		console.log(index+" - "+value);
+	});
+}
+*/
+function initClip(data) {
+
+	ldClipRaw = data;
+
+	populateSNPlist(data);
+	//organizeSNPdata(data);
+	//
+	// Get first element
+	//
+
+	var rs_number = "rs11322783";
+	//console.dir(data);
+	loadSNPdetails(data, rs_number);
+	//console.dir(data.snp_list);
+
+	console.log("initClip()");
+	//console.log(data.details);
+
+	$.each(data.details, function( index, value ){
+	//	console.log(index+" - "+value);
 	});
 
 	//$("#ldclip-detail").empty().append(data.details[data.snp_list[0]]);
@@ -1219,84 +1293,83 @@ function buildPopulationDropdown(elementId) {
 
 	$('#' + elementId).html(htmlText);
 
-	$('#' + elementId)
-		.multiselect(			{
-			enableClickableOptGroups : true,
-			buttonWidth : '180px',
-			maxHeight : 500,
-			buttonClass : 'btn btn-default btn-ldlink-multiselect',
-			includeSelectAllOption : true,
-			dropRight : false,
-			allSelectedText : 'All Populations',
-			nonSelectedText : 'Select Population',
-			numberDisplayed : 4,
-			selectAllText : ' (ALL) All Populations',
-			previousOptionLength: 0,
-			maxPopulationWarn: 2,
-			maxPopulationWarnTimeout: 5000,
-			maxPopulationWarnVisible: false,
+	$('#' + elementId).multiselect({
+		enableClickableOptGroups : true,
+		buttonWidth : '180px',
+		maxHeight : 500,
+		buttonClass : 'btn btn-default btn-ldlink-multiselect',
+		includeSelectAllOption : true,
+		dropRight : false,
+		allSelectedText : 'All Populations',
+		nonSelectedText : 'Select Population',
+		numberDisplayed : 4,
+		selectAllText : ' (ALL) All Populations',
+		previousOptionLength: 0,
+		maxPopulationWarn: 2,
+		maxPopulationWarnTimeout: 5000,
+		maxPopulationWarnVisible: false,
 
-			// buttonClass: 'btn btn-link',
-			buttonText : function(options, select) {
-				if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
-					$('#'+elementId+'-popover').popover('show');
-					this.maxPopulatinWarnVisible=true;
-					setTimeout(function(){
+		// buttonClass: 'btn btn-link',
+		buttonText : function(options, select) {
+			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+				$('#'+elementId+'-popover').popover('show');
+				this.maxPopulatinWarnVisible=true;
+				setTimeout(function(){
+					$('#'+elementId+'-popover').popover('destroy');
+					this.maxPopulatinWarnVisible=false;
+				}, this.maxPopulationWarnTimeout);
+			} else {
+				//Destory popover if it is currently being displayed.
+				if(this.maxPopulatinWarnVisible) {
 						$('#'+elementId+'-popover').popover('destroy');
-						this.maxPopulatinWarnVisible=false;
-					}, this.maxPopulationWarnTimeout);
-				} else {
-					//Destory popover if it is currently being displayed.
-					if(this.maxPopulatinWarnVisible) {
-							$('#'+elementId+'-popover').popover('destroy');
-					}
 				}
-				this.previousOptionLength = options.length;
-				if (options.length === 0) {
-					return this.nonSelectedText
-							+ '<span class="caret"></span>';
-				} else if (options.length == $('option', $(select)).length) {
-					return this.allSelectedText
-							+ '<span class="caret"></span>';
-				} else if (options.length > this.numberDisplayed) {
-					return '<span class="badge">' + options.length
-							+ '</span> ' + this.nSelectedText
-							+ '<span class="caret"></span>';
-				} else {
-					var selected = '';
-					options.each(function() {
-						// var label = $(this).attr('label') :
-						// $(this).html();
-						selected += $(this).val() + '+';
-					});
-
-					return selected.substr(0, selected.length - 1)
-							+ ' <b class="caret"></b>';
-				}
-			},
-			buttonTitle : function(options, select) {
-				if (options.length === 0) {
-					return this.nonSelectedText;
-				} else {
-					var selected = '';
-					options.each(function() {
-						selected += $(this).text() + '\n';
-					});
-					return selected;
-				}
-			},
-			onChange : function(option, checked) {
-				/*
-				var active_tab = $("#ldlink-tabs li:[class]='active']");
-				console.dir(active_tab);
-				*/
-				//alert("You changed the population selection.");
-				//console.log("Option: ")
-				//console.dir(option[0]);
-				//console.log("checked: ")
-				//console.dir(checked);
 			}
-		});
+			this.previousOptionLength = options.length;
+			if (options.length === 0) {
+				return this.nonSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length == $('option', $(select)).length) {
+				return this.allSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length > this.numberDisplayed) {
+				return '<span class="badge">' + options.length
+						+ '</span> ' + this.nSelectedText
+						+ '<span class="caret"></span>';
+			} else {
+				var selected = '';
+				options.each(function() {
+					// var label = $(this).attr('label') :
+					// $(this).html();
+					selected += $(this).val() + '+';
+				});
+
+				return selected.substr(0, selected.length - 1)
+						+ ' <b class="caret"></b>';
+			}
+		},
+		buttonTitle : function(options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText;
+			} else {
+				var selected = '';
+				options.each(function() {
+					selected += $(this).text() + '\n';
+				});
+				return selected;
+			}
+		},
+		onChange : function(option, checked) {
+			/*
+			var active_tab = $("#ldlink-tabs li:[class]='active']");
+			console.dir(active_tab);
+			*/
+			//alert("You changed the population selection.");
+			//console.log("Option: ")
+			//console.dir(option[0]);
+			//console.log("checked: ")
+			//console.dir(checked);
+		}
+	});
 }
 
 function getPopulationCodes(id) {

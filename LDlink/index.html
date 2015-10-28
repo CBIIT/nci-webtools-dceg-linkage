@@ -86,11 +86,9 @@
 				<a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a>
 			</li>
 			<!-- CLIP -->
-			<!--
 			<li class="active">
 				<a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a>
 			</li>
-			-->
 			<!-- CHIP -->
 			<!--
 			<li>
@@ -105,7 +103,7 @@
 		</ul>
 		<!-- Tab Content -->
 		<div class="tab-content">
-			<div class="tab-pane" id="home">
+			<div class="tab-pane fade" id="home">
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -322,7 +320,7 @@
 			</div>
 
 			<!-- LDmatrix -->
-			<div  id="ldmatrix-tab" class="tab-pane fade">
+			<div class="tab-pane fade" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -435,7 +433,7 @@
 			</div>
 
 			<!-- LDpair -->
-			<div class="tab-pane" id="ldpair-tab">
+			<div class="tab-pane fade" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
@@ -788,7 +786,7 @@
 			</div>
 
 			<!-- LDclip -->
-			<div class="tab-pane" id="sntab">
+			<div class="tab-pane fade" id="ldclip-tab">
 				<!-- LDclip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -872,6 +870,7 @@
 								<div>LD Thinned SNP List (CEU)</div>
 								<div id="ldclip-snp-list"></div>
 								<div id="ldclip-detail">
+								<div id="ldclip-detail-title">Details for rs1234</div>
 								<table class="table table-striped">
 									<thead>
 										<tr>
@@ -881,12 +880,12 @@
 											<td>Details</td>
 										</tr>
 									</thead>
-									<tbody data-bind="foreach: snp_list" style="border: 1px solid #ccc;">
+									<tbody data-bind="foreach: details" style="border: 1px solid #ccc;">
 										<tr>
-											<td data-bind="text: $data"></td>
-											<td>chr196892427</td>
-											<td>G=NA,A,T=NA</td>
-											<td>Variant is not biallelic, variant removed</td>
+											<td data-bind="text: rs_number"></td>
+											<td data-bind="text: position"></td>
+											<td data-bind="text: alleles"></td>
+											<td data-bind="text: comment"></td>
 										</tr>
 									</tbody>
 								</table>
@@ -931,7 +930,7 @@
 <!--  END OF ldchip -->
 
 			<!-- LDchip -->
-			<div class="tab-pane" id="ldchip-tab">
+			<div class="tab-pane fade" id="ldchip-tab">
 				<!-- LDchip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -1075,8 +1074,6 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
-
-	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"

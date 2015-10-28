@@ -433,7 +433,7 @@ hr.header {
 	float:left;
 	border:1px solid;
 	padding:10px;
-	max-height: 100px;
+	max-height: 400px;
 	overflow-y: auto;
 }
 #ldclip-snp-list > a {
