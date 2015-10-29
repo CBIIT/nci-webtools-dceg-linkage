@@ -86,8 +86,8 @@
 				<a href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a>
 			</li>
 			<!-- CLIP -->
-			<li class="active">
-				<a href="#ldclip-tab" data-toggle="tab" title="A new way to clip the genome">SNPclip</a>
+			<li>
+				<a href="#ldclip-tab" data-toggle="tab" title="Clip snp list">SNPclip</a>
 			</li>
 			<!-- CHIP -->
 			<!--
@@ -818,14 +818,24 @@
 							<div class="form-group col-sm-2">
 								<div id="ldclip-thresholds">
 									<div>Thresholds</div>
-									<div>
+									<div class="input-group">
 										<label for="ldclip_r2_threshold">R<sup>2</sup>:</label>
-										<input id="ldclip_r2_threshold" type="number" value="0.1" step="0.01" min="0" max="1.0">
+										<input class="form-control" id="ldclip_r2_threshold" 
+											type="text" 
+											pattern="[0-9.]+" 
+											value="0.1"
+											title="R2 Threshold must be a number between 0 and 1"
+											required>
 									</div>
 									<div style="clear:both:"></div>
 									<div>
 										<label for="ldclip_maf_threshold">MAF:</label>
-										<input id="ldclip_maf_threshold" type="number" value="0.01" step="0.001" min="0" max="1.0">
+										<input id="ldclip_maf_threshold" 
+											type="text" 
+											pattern="[0-9.]+" 
+											value="0.01" 
+											title="MAF Threshold must be a number between 0 and 1"
+											required>
 									</div>
 									<div style="clear:both;"></div>
 								</div>
@@ -867,35 +877,13 @@
 				<div class="jumbotron">
 						<div class="container-fluid" id="ldclip-results-container">
 							<div class="row ldclip-table-container">
-								<div>LD Thinned SNP List (CEU)</div>
-								<div id="ldclip-snp-list"></div>
-								<div id="ldclip-detail">
-								<div id="ldclip-detail-title">Details for rs1234</div>
-								<table class="table table-striped">
-									<thead>
-										<tr>
-											<td>RS Number</td>
-											<td>Position</td>
-											<td>Allelse</td>
-											<td>Details</td>
-										</tr>
-									</thead>
-									<tbody data-bind="foreach: details" style="border: 1px solid #ccc;">
-										<tr>
-											<td data-bind="text: rs_number"></td>
-											<td data-bind="text: position"></td>
-											<td data-bind="text: alleles"></td>
-											<td data-bind="text: comment"></td>
-										</tr>
-									</tbody>
-								</table>
+								<div class="col-sm-3 col-md-3">
+									<div>LD Thinned SNP List (CEU)</div>
+									<div id="ldclip-snp-list"></div>
 								</div>
-							</div>
-							<br>
-							<div class="row">
-								<div>SNPs With Warnings (CEU)</div>
-								<div style="border:1px solid">
+								<div class="col-sm-9 col-md-9" id="ldclip-detail">
 									<table class="table table-striped">
+									<caption id="ldclip-detail-title">Details for rs1234</caption>
 										<thead>
 											<tr>
 												<td>RS Number</td>
@@ -904,15 +892,40 @@
 												<td>Details</td>
 											</tr>
 										</thead>
-										<tbody>
+										<tbody data-bind="foreach: details" style="border: 1px solid #ccc;">
 											<tr>
-												<td>rs7551466</td>
-												<td>chr196892427</td>
-												<td>G=NA,A,T=NA</td>
-												<td>Variant is not biallelic, variant removed</td>
+												<td data-bind="text: rs_number"></td>
+												<td data-bind="text: position"></td>
+												<td data-bind="text: alleles"></td>
+												<td data-bind="text: comment"></td>
 											</tr>
 										</tbody>
 									</table>
+								</div>
+							</div>
+							<div id="ldclip-warning">
+								<div class="row ldclip-table-container" id="ldclip-warning">
+									<div class="col-sm-10 col-sm-offset-2">
+										<table class="table table-striped">
+										<caption>SNPs With Warnings (CEU)</caption>
+											<thead>
+												<tr>
+													<td>RS Number</td>
+													<td>Position</td>
+													<td>Allelse</td>
+													<td>Details</td>
+												</tr>
+											</thead>
+											<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
+												<tr>
+													<td data-bind="text: rs_number"></td>
+													<td data-bind="text: position"></td>
+													<td data-bind="text: alleles"></td>
+													<td data-bind="text: comment"></td>
+												</tr>
+											</tbody>
+										</table>
+									</div>
 								</div>
 							</div>
 						</div>
@@ -1075,46 +1088,43 @@
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
 
-	<script
-		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js"
-		type="text/javascript">
-
-		</script>
-	<script
-		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"
-		type="text/javascript">
-
-		</script>
-	<script
-		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"
-		type="text/javascript">
-
-		</script>
-	<script
-		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"
-		type="text/javascript">
-
-		</script>
+	<script type="text/javascript"
+		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
+	</script>
+	<script type="text/javascript"
+		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js">
+	</script>
+	<script type="text/javascript"
+		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js">
+	</script>
+	<script type="text/javascript"
+		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js">
+	</script>
+	<!--
+	<script type="text/javascript"
+		src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.8/jquery.form-validator.min.js">
+	</script>
+	-->
 <!--
 	<script type="text/javascript"
 		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
 	</script>
 -->
-	<script src="LDlink.js" type="text/javascript">
-
-		</script>
-
 	<script type="text/javascript"
-		src="../common/js/purify.js"></script>
-
+		src="LDlink.js"> 
+	</script>
 	<script type="text/javascript"
-		src="../common/js/bootstrap-multiselect.js"></script>
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js">
+		src="../common/js/purify.js">
 	</script>
-
-	<script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.js">
+	<script type="text/javascript"
+		src="../common/js/bootstrap-multiselect.js">
 	</script>
-
+	<script type="text/javascript" 
+		src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js">
+	</script>
+	<script type="text/javascript"
+		src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.js">
+	</script>
 	<!-- Google Analytics -->
 	<script async src='//www.google-analytics.com/analytics.js'></script>
 	<script>

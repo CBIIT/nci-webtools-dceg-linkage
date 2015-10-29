@@ -417,7 +417,7 @@ hr.header {
 	margin-top:5px;
 }
 #ldclip-thresholds > div > input {
-	width:65px;
+	width:50px;
 }
 
 #ldclip-thresholds > div:first-child {
@@ -429,23 +429,28 @@ hr.header {
 	padding-bottom:3px;
 }
 #ldclip-snp-list {
-	width:175px;
+	/*width:175px; */
 	float:left;
-	border:1px solid;
+	border:1px solid #333;
 	padding:10px;
 	max-height: 400px;
 	overflow-y: auto;
+	margin-top: 20px;
 }
 #ldclip-snp-list > a {
 	text-decoration: underline;
 	color: #428bca;
 }
 #ldclip-detail {
-	border:1px solid;
+/*	border:1px solid #333; */
 	float:left;
 	padding:10px;
-	margin-left:35px;
 }
+#ldclip-warning {
+	float:left;
+	padding:10px;
+}
+
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,

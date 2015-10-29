@@ -15,7 +15,7 @@ var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Co
 var ldClipData1={details:{rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]},snp_list:["rs11322783","rs8099917","rs955155","rs8101517","rs12980602","rs78605718"]};
 var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
 //var ldClipData = {warnings:[],details:[]};
-var ldclipData = {"warnings":[],"details":[{"rs_number":"rs11322783","position":"chr19:39739153","alleles":"T=0.288, -=0.712","comment":"SNP kept"},{"rs_number":"rs11881222","position":"chr19:39734923","alleles":"A=0.718, G=0.282","comment":"SNP kept"}]};
+var ldclipData = {"warnings":[{"rs_number":"rs1","position":"NA","alleles":"NA","comment":"SNP not found in dbSNP142, SNP removed."},{"rs_number":"rs2","position":"NA","alleles":"NA","comment":"SNP not found in dbSNP142, SNP removed."},{"rs_number":"rs368234815","position":"NA","alleles":"NA","comment":"Variant not in 1000G VCF file, variant removed"}],"details":[{"rs_number":"rs11322783","position":"chr19:39739153","alleles":"T=0.288, -=0.712","comment":"SNP kept"},{"rs_number":"rs11881222","position":"chr19:39734923","alleles":"A=0.718, G=0.282","comment":"SNP kept"}]};
 var ldClipRaw;
 
 Object.size = function(obj) {
@@ -28,7 +28,9 @@ Object.size = function(obj) {
 
 $(document).ready(function() {
 
-	$('#ldclip-tab').addClass("in").addClass('active');
+	//$('#ldclip-tab').addClass("in").addClass('active');
+	$('#home').addClass("in").addClass('active');
+	//addValidators();
 
 	$('#ldclip').attr('disabled', false); // Remove this. (only need for testing)
 	$('div#ldclip-snp-list').on('click', "a", function(e) {
@@ -36,7 +38,6 @@ $(document).ready(function() {
 		var rs_number = e.target.id;
 		console.log(e.target.id);
 		loadSNPdetails(ldClipRaw, rs_number);
-		$('#ldclip-detail-title').html("Detail for <strong>"+rs_number+"</strong>"); 
 	});
 
 	updateVersion(ldlink_version);
@@ -88,11 +89,11 @@ $(document).ready(function() {
         ]
 	});
 
-	var new_stuff = {"aaData": [
+	var new_proxy_data = {"aaData": [
 	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
 	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
 	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
-	RefreshTable('#new-ldproxy', new_stuff);
+	RefreshTable('#new-ldproxy', new_proxy_data);
 	
 	$('[data-toggle="popover"]').popover();
 	loadHelp();
@@ -113,11 +114,11 @@ $(document).ready(function() {
 	console.log("ldclipData");
 	console.dir(ldclipModel)
 	ko.applyBindings(ldclipModel, document
-			.getElementById('ldclip-detail'));
+			.getElementById('ldclip-results-container'));
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		//$("#" + id + "-results-container").hide();
+		$("#" + id + "-results-container").hide();
 		$('#' + id + '-message').hide();
 		$('#' + id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
@@ -606,14 +607,46 @@ function populateSNPlist(data) {
 	//Add the clipped list
 	$.each(data.snp_list, function( index, value ){
 		$("#ldclip-snp-list").append(
-			$("<a>").attr('id', value)
+			$("<a>")
+				.attr('id', value)
+				.attr('title', 'Click to view details')
 				.append(value)
 			).append("<br>");
 	});
 
 }
 
+function populateSNPwarnings(data) {
+	
+	ldclipData.warnings = [];
+
+	$.each(data.details, function( index, value ){
+		var detail = {
+			rs_number: index,
+			position: value[0],
+			alleles: value[1],
+			comment: value[2]
+		};
+		console.log(index+" - "+value);
+		if(detail.comment != 'SNP kept' && detail.comment.substring(0, 9) != 'SNP in LD') {
+			// Place message on the warning table.
+			ldclipData.warnings.push(detail);
+		}
+	});
+	console.dir(ldclipData);
+	console.log(JSON.stringify(ldclipData));
+
+	if(ldclipData.warnings.length == 0) {
+		$('#ldclip-warning').hide();
+	} else {
+		$('#ldclip-warning').show();
+	}
+
+}
+
 function loadSNPdetails(data, rs_number) {
+
+	ldclipData.details =[];
 
 	console.log("Here is the rs_number to populate");
 	console.log("rs_number: "+rs_number);
@@ -622,7 +655,7 @@ function loadSNPdetails(data, rs_number) {
 
 	//console.log("Found one::::");
 	//console.dir(data.details[rs_number]);
-	ldclipData = {warnings:[],details:[]};
+
 
 	var found = false;
 
@@ -639,55 +672,34 @@ function loadSNPdetails(data, rs_number) {
 		}
 		//if(found == true && detail.rs_number == rs_number) {
 		if(found) {
-			ldclipData.details.push(detail);
 			if(detail.comment == 'SNP kept' && detail.rs_number != rs_number){
 				// List is complete, exit loop
 				return false;
 			}
+			if(detail.comment == 'SNP kept' || detail.comment.substring(0, 9) =='SNP in LD') {
+				ldclipData.details.push(detail);
+			}
 		}
-
 	});
 	console.dir(ldclipData);
 	console.log(JSON.stringify(ldclipData));
 	ko.mapping.fromJS(ldclipData, ldclipModel);
-
-	//populate a global variable that represents the table 
-
-	//Populate the table using knockout.
-
+	$('#ldclip-detail-title').text("Detail for "+rs_number); 
 }
-/*
-function organizeSNPdata(data) {
-	//populate a global with organized data.
-	$.each(data.snp_list, function( index, value ){
-		console.log(index+" - "+value);
-	});
-}
-*/
+
 function initClip(data) {
 
 	ldClipRaw = data;
-
 	populateSNPlist(data);
-	//organizeSNPdata(data);
 	//
 	// Get first element
 	//
+	console.dir(data);
+	//alert(data.);
 
-	var rs_number = "rs11322783";
-	//console.dir(data);
+	var rs_number = data.snp_list[0];
+	populateSNPwarnings(data);
 	loadSNPdetails(data, rs_number);
-	//console.dir(data.snp_list);
-
-	console.log("initClip()");
-	//console.log(data.details);
-
-	$.each(data.details, function( index, value ){
-	//	console.log(index+" - "+value);
-	});
-
-	//$("#ldclip-detail").empty().append(data.details[data.snp_list[0]]);
-
 }
 
 function formatLDhapData(data) {
@@ -1454,4 +1466,52 @@ function replaceSubGroups(population) {
 	});
 
 	return population;
+}
+
+function addValidators() {
+	 $('#ldclipForm').formValidation({
+        framework: 'bootstrap',
+        icon: {
+            valid: 'glyphicon glyphicon-ok',
+            invalid: 'glyphicon glyphicon-remove',
+            validating: 'glyphicon glyphicon-refresh'
+        },
+        fields: {
+            price: {
+                validators: {
+                    notEmpty: {
+                        message: 'The price is required'
+                    },
+                    numeric: {
+                        message: 'The price must be a number'
+                    }
+                }
+            },
+            amount: {
+                validators: {
+                    notEmpty: {
+                        message: 'The amount is required'
+                    },
+                    numeric: {
+                        message: 'The amount must be a number'
+                    }
+                }
+            },
+            color: {
+                validators: {
+                    notEmpty: {
+                        message: 'The color is required'
+                    }
+                }
+            },
+            size: {
+                validators: {
+                    notEmpty: {
+                        message: 'The size is required'
+                    }
+                }
+            }
+        }
+    });
+
 }
