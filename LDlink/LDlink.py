@@ -209,6 +209,19 @@ def ldclip():
     clip={}
     clip["snp_list"] = snp_list
     clip["details"] = details
+    #write the snp_list file
+
+    f = open('tmp/snp_list'+reference+'.txt', 'w')
+    for rs_number in snp_list:
+        f.write(rs_number + '\n')
+
+    f.close()
+
+    f = open('tmp/details'+reference+'.json', 'w')
+    f.write(json.dumps(details, sort_keys=True, indent=2))
+    f.close()
+
+    #Turn these into files, refrence them on page
 
     print "snps"
     dir(snps)

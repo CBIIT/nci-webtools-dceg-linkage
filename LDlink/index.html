@@ -793,9 +793,10 @@
 						<!-- LDclip FORM -->
 						<form id="ldclipForm" class="ldlinkForm">
 							<div class="form-group col-sm-2">
-									<textarea id="ldclip-file-snp-numbers" placeholder="RS Numbers"
-										class="form-control"
-										title="Enter list of RS numbers (one per line)"></textarea>
+								<textarea id="ldclip-file-snp-numbers" 
+									placeholder="RS Numbers"
+									class="form-control"
+									title="Enter list of RS numbers (one per line)"></textarea>
 							</div>
 							<div class="col-sm-3">
 								<div class="input-group">
@@ -815,12 +816,12 @@
 									name="populations" required>
 								</select>
 							</div>
-							<div class="form-group col-sm-2">
+							<div class="col-sm-2">
 								<div id="ldclip-thresholds">
 									<div>Thresholds</div>
 									<div class="input-group">
 										<label for="ldclip_r2_threshold">R<sup>2</sup>:</label>
-										<input class="form-control" id="ldclip_r2_threshold" 
+										<input id="ldclip_r2_threshold" 
 											type="text" 
 											pattern="[0-9.]+" 
 											value="0.1"
@@ -878,7 +879,7 @@
 						<div class="container-fluid" id="ldclip-results-container">
 							<div class="row ldclip-table-container">
 								<div class="col-sm-3 col-md-3">
-									<div>LD Thinned SNP List (CEU)</div>
+									<div style="font-weight:bold;">LD Thinned SNP List (CEU)</div>
 									<div id="ldclip-snp-list"></div>
 								</div>
 								<div class="col-sm-9 col-md-9" id="ldclip-detail">
@@ -888,7 +889,7 @@
 											<tr>
 												<td>RS Number</td>
 												<td>Position</td>
-												<td>Allelse</td>
+												<td>Alleles</td>
 												<td>Details</td>
 											</tr>
 										</thead>
@@ -905,14 +906,14 @@
 							</div>
 							<div id="ldclip-warning">
 								<div class="row ldclip-table-container" id="ldclip-warning">
-									<div class="col-sm-10 col-sm-offset-2">
+									<div class="col-sm-12">
 										<table class="table table-striped">
 										<caption>SNPs With Warnings (CEU)</caption>
 											<thead>
 												<tr>
 													<td>RS Number</td>
 													<td>Position</td>
-													<td>Allelse</td>
+													<td>Alleles</td>
 													<td>Details</td>
 												</tr>
 											</thead>
@@ -932,10 +933,10 @@
 
 						<div id="ldclip-links-container" class="col-md-12" style="display:none;">
 							<span>
-								<a target="_blank" id="ldclip-snps" href="yahoo.com">Download Thinned SNP List</a>
+								<a target="snp_thin_list" id="ldclip-snps" href="yahoo.com">Download Thinned SNP List</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp;
 							<span>
-								<a target="_blank" id="ldclip-details" href="yahoo.com">Download Thinned SNP List with Details</a>
+								<a target="snp_details" id="ldclip-details" href="yahoo.com">Download Thinned SNP List with Details</a>
 							</span>
 						</div>
 				</div>

@@ -498,8 +498,8 @@ function updateLDclip() {
 	console.dir(ldInputs);
 	//Update href on
 	//Set file links
-	$("#ldclip-snps").attr('href', 'tmp/snps'+ldInputs.reference+'.txt');
-	$("#ldclip-details").attr('href', 'tmp/clip'+ldInputs.reference+'.json');
+	$("#ldclip-snps").attr('href', 'tmp/snp_list'+ldInputs.reference+'.txt');
+	$("#ldclip-details").attr('href', 'tmp/details'+ldInputs.reference+'.json');
 
 	var url = restServerUrl + "/ldclip";
 	var ajaxRequest = $.ajax({

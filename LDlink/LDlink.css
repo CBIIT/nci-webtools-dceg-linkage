@@ -450,7 +450,9 @@ hr.header {
 	float:left;
 	padding:10px;
 }
-
+caption {
+	font-weight:bold;
+}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,
