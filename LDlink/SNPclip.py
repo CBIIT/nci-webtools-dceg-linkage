@@ -266,7 +266,8 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	for i in rs_nums:
 		if i not in snp_list:
 			if i not in details:
-				details[i]=["NA","NA","Variant not in 1000G VCF file, variant removed"]
+				index_i=rs_nums.index(i)
+				details[i]=["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-"+snp_coords[index_i][2],"NA","Variant not in 1000G VCF file, variant removed"]
 	
 	# Thin the SNPs
 	i=0
