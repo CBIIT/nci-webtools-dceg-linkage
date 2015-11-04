@@ -4,6 +4,11 @@
 # SNPchip #
 ###########
 
+from pymongo import MongoClient
+import os
+import bson.regex
+import json
+
 # Create SNPchip function
 def calculate_chip(snplst,request):
 	import json,operator,sqlite3,os
@@ -99,21 +104,23 @@ def calculate_chip(snplst,request):
 			snp_coords_sort[i][1]=str(snp_coords_sort[i][1])
 	
 	
-	conn2=sqlite3.connect(array_dir)
-	cur2=conn2.cursor()
-	cur2.execute("SELECT sql FROM sqlite_master where type='table';")
-	colnam=cur2.fetchall()[0][0].split('(')[1].split(')')[0].split(',')
-	chipname=[]
-	for j in range(2,len(colnam)):
-		chipname.append(colnam[j].strip(' ').split(' ')[0])
-		
+	client = MongoClient()
+	client = MongoClient('localhost', 27017)
+	client.admin.authenticate("LDLink_user", "1234", mechanism='SCRAM-SHA-1')
+	db = client.LDLink_sandbox
+
+	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
-		tbl_nam='chr_'+str(snp_coords_sort[k][1])
-		cur2.execute("SELECT * FROM "+tbl_nam+" WHERE pos= ?",(str(snp_coords_sort[k][2]),))
-		line=cur2.fetchone()[2::]
-		indx=[i for i, j in enumerate(line) if j==1]
-		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(chipname[z] for z in indx)]
-	
+		position=str(snp_coords_sort[k][2])
+		Chr=str(snp_coords_sort[k][1])
+		cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]} ) #Json object that stores all the results
+		platforms=[]
+		#Parsing each docuemnt to retrieve platforms 
+		for document in cursor:	
+			for z in range(0,len(document["data"])):
+				if(document["data"][z]["chr"]==Chr):
+					platforms.append(document["data"][z]["platform"]+" ")
+		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','+s.join(platforms)]
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
