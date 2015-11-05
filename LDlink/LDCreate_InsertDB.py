@@ -32,6 +32,7 @@ def main(argv):
 	client.admin.authenticate(user, password, mechanism='SCRAM-SHA-1')
 	db = client.LDLink_sandbox
 
+
 	if(multiple==True):
 		Multi(input,db)              
 	else:
@@ -49,17 +50,18 @@ def Multi(folder,db):
 		manifest_file[k]=folder+manifest_file[k]
 
 	for i in range(len(manifest)):
-		Insert(manifest_file[i],manifest[i],db)			
+		Insert(manifest_file[i],db)			
 		
 #If inserting a single file
 def Single(file,db):
-	file_name=os.path.splitext(file)[0]
-	Insert(file,file_name,db)
+	Insert(file,db)
 
 #Insert function: Inserts position and chromsome/platform pairs for each position
-def Insert(file,platform,db):
+def Insert(file,db):
 	db.snp_col.create_index("pos")
-	snp_data=csv.reader(open(file))			
+	snp_data=csv.reader(open(file))
+	platform=(os.path.splitext(os.path.basename(file))[0])
+	print platform			
 	for coord in snp_data:
 		Chr=coord[0].split(":")[0].strip("chr")
 		position=coord[0].split("-")[1]
@@ -68,5 +70,6 @@ def Insert(file,platform,db):
     		{ "$addToSet" : { "data" : { "$each" :[ { "chr" : Chr, "platform" :platform} ] } } },
     		upsert=True,
 		)
+	print "finished "+platform
 
 main(sys.argv[1:])
