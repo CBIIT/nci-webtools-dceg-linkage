@@ -876,70 +876,92 @@
 				</div>
 				<!-- snpclip CONTAINER -->
 				<div class="jumbotron">
-						<div class="container-fluid" id="snpclip-results-container">
-							<div class="row snpclip-table-container">
-								<div class="col-sm-3 col-md-3">
-									<div style="font-weight:bold;">LD Thinned SNP List (CEU)</div>
-									<div id="snpclip-snp-list"></div>
-								</div>
-								<div class="col-sm-9 col-md-9" id="snpclip-detail">
-									<table class="table table-striped">
-									<caption id="snpclip-detail-title">Details for rs1234</caption>
-										<thead>
-											<tr>
-												<td>RS Number</td>
-												<td>Position</td>
-												<td>Alleles</td>
-												<td>Details</td>
-											</tr>
-										</thead>
-										<tbody data-bind="foreach: details" style="border: 1px solid #ccc;">
-											<tr>
-												<td data-bind="text: rs_number"></td>
-												<td data-bind="text: position"></td>
-												<td data-bind="text: alleles"></td>
-												<td data-bind="text: comment"></td>
-											</tr>
-										</tbody>
-									</table>
-								</div>
-							</div>
-							<div id="snpclip-warning">
-								<div class="row snpclip-table-container" id="snpclip-warning">
-									<div class="col-sm-12">
-										<table class="table table-striped">
-										<caption>SNPs With Warnings (CEU)</caption>
-											<thead>
-												<tr>
-													<td>RS Number</td>
-													<td>Position</td>
-													<td>Alleles</td>
-													<td>Details</td>
-												</tr>
-											</thead>
-											<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
-												<tr>
-													<td data-bind="text: rs_number"></td>
-													<td data-bind="text: position"></td>
-													<td data-bind="text: alleles"></td>
-													<td data-bind="text: comment"></td>
-												</tr>
-											</tbody>
-										</table>
-									</div>
-								</div>
+					<div class="container-fluid" id="snpclip-results-container">
+						<div class="row">
+							<div style="font-weight:bold;">LD Thinned SNP List (<span class="snpclip-populations"></span>)
 							</div>
 						</div>
+						<div class="row snpclip-table-container">
+							<div class="col-sm-3 col-md-3">
+								<table class="table table-striped">
+									<tbody id="snpclip-snp-list"></tbody>
+								</table>
+							</div>
 
-						<div id="snpclip-links-container" class="col-md-12" style="display:none;">
-							<span>
-								<a target="snp_thin_list" id="snpclip-snps" href="yahoo.com">Download Thinned SNP List</a>
-							</span>&nbsp;&nbsp;&nbsp;&nbsp;
-							<span>
-								<a target="snp_details" id="snpclip-details" href="yahoo.com">Download Thinned SNP List with Details</a>
-							</span>
+							<div class="col-sm-9 col-md-9" id="snpclip-detail">
+
+								<!-- Detail message -->
+								<table id="snpclip-details" class="table table-striped">
+								<caption id="snpclip-detail-title">Details for rs1234</caption>
+									<thead>
+										<tr>
+											<td>RS Number</td>
+											<td>Position</td>
+											<td>Alleles</td>
+											<td>Details</td>
+										</tr>
+									</thead>
+									<tbody data-bind="foreach: details" style="border: 1px solid #ccc;">
+										<tr>
+											<td data-bind="text: rs_number"></td>
+											<td data-bind="text: position"></td>
+											<td data-bind="text: alleles"></td>
+											<td data-bind="text: comment"></td>
+										</tr>
+									</tbody>
+								</table>
+
+								<!-- SNPs with warnings -->
+								<table id="snpclip-warnings" class="table table-striped">
+									<caption>SNPs With Warnings (<span class="snpclip-populations"></span>)</caption>
+									<thead>
+										<tr>
+											<td>RS Number</td>
+											<td>Position</td>
+											<td>Alleles</td>
+											<td>Details</td>
+										</tr>
+									</thead>
+									<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
+										<tr>
+											<td data-bind="text: rs_number"></td>
+											<td data-bind="text: position"></td>
+											<td data-bind="text: alleles"></td>
+											<td data-bind="text: comment"></td>
+										</tr>
+									</tbody>
+								</table>
+
+								<!-- Initial Message -->
+								<div id="snpclip-initial-message" >Click SNP on the left to view detail.</div>
+
+							</div>
 						</div>
-				</div>
+						<!--
+						<div id="snpclip-warning">
+							<div class="row snpclip-table-container" id="snpclip-warning">
+								<div class="col-sm-12">
+								</div>
+							</div>
+						</div>
+						-->
+						<div class="row">
+							<a id="snpclip-warnings-button">SNPs with Warnings (<span class="snpclip-populations"></span>)</a>
+						</div>
+						<br>
+						<div class="row">
+							<div id="snpclip-links-container">
+								<span>
+									<a target="snp_thin_list" id="snpclip-snps" href="yahoo.com">Download Thinned SNP List</a>
+								</span>&nbsp;&nbsp;&nbsp;&nbsp;
+								<span>
+									<a target="snp_details" id="snpclip-details" href="yahoo.com">Download Thinned SNP List with Details</a>
+								</span>
+							</div>
+						</div>
+					</div>
+				</div> <!-- jumbotron -->
+
 			</div>
 <!--  END OF ldchip -->
 

@@ -452,6 +452,11 @@ hr.header {
 caption {
 	font-weight:bold;
 }
+#snpclip-initial-message {
+	font-weight:bold;
+	font-size:110%;
+	margin-top:50px;
+}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,

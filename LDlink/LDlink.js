@@ -12,7 +12,7 @@ var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ r
 var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
 var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
 var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Count:40,Frequency:.1852,Haplotype:"GGGGAGCGTTGGGG"},{Count:23,Frequency:.1065,Haplotype:"GCGGAGCGTTGGGG"},{Count:11,Frequency:.0509,Haplotype:"TGGGAGCGTTGGGG"},{Count:8,Frequency:.037,Haplotype:"GCATAGCGTTGGGG"},{Count:7,Frequency:.0324,Haplotype:"TGGGGATAGCAAAG"}],rows:[{Alleles:"G=0.917, T=0.083",Coord:"chr4:104050980",RS:"rs2720457",Haplotypes:["G","G","G","T","G","T"]},{Alleles:"C=0.732, G=0.269",Coord:"chr4:104052963",RS:"rs2720458",Haplotypes:["C","G","C","G","C","G"]},{Alleles:"A=0.625, G=0.375",Coord:"chr4:104055748",RS:"rs2720461",Haplotypes:["A","G","G","G","A","G"]},{Alleles:"T=0.625, G=0.375",Coord:"chr4:104056210",RS:"rs2720462",Haplotypes:["T","G","G","G","T","G"]},{Alleles:"G=0.62, A=0.38",Coord:"chr4:104052068",RS:"rs7661201",Haplotypes:["G","A","A","A","A","G"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104055722",RS:"rs2623063",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"C=0.968, T=0.032",Coord:"chr4:104057121",RS:"rs2623062",Haplotypes:["C","C","C","C","C","T"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104057248",RS:"rs2720463",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"T=0.968, G=0.032",Coord:"chr4:104057887",RS:"rs2711901",Haplotypes:["T","T","T","T","T","G"]},{Alleles:"T=0.968, C=0.032",Coord:"chr4:104051132",RS:"rs2623082",Haplotypes:["T","T","T","T","T","C"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104058596",RS:"rs2711900",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050510",RS:"rs2720456",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050326",RS:"rs2720455",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=1.0, A=0.0",Coord:"chr4:104059542",RS:"rs2243682",Haplotypes:["G","G","G","G","G","G"]}]};
-var ldClipData1={details:{rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]},snp_list:["rs11322783","rs8099917","rs955155","rs8101517","rs12980602","rs78605718"]};
+//var ldClipData1={details:{rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]},snp_list:["rs11322783","rs8099917","rs955155","rs8101517","rs12980602","rs78605718"]};
 var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
 //var ldClipData = {warnings:[],details:[]};
 var snpclipData = {"warnings":[{"rs_number":"rs1","position":"NA","alleles":"NA","comment":"SNP not found in dbSNP142, SNP removed."},{"rs_number":"rs2","position":"NA","alleles":"NA","comment":"SNP not found in dbSNP142, SNP removed."},{"rs_number":"rs368234815","position":"NA","alleles":"NA","comment":"Variant not in 1000G VCF file, variant removed"}],"details":[{"rs_number":"rs11322783","position":"chr19:39739153","alleles":"T=0.288, -=0.712","comment":"SNP kept"},{"rs_number":"rs11881222","position":"chr19:39734923","alleles":"A=0.718, G=0.282","comment":"SNP kept"}]};
@@ -29,70 +29,6 @@ Object.size = function(obj) {
 };
 
 $(document).ready(function() {
-
-	//Clear the active tab on a reload
-	$.each(modules, function(key, id) {
-		$("#"+id+"-tab-anchor").removeClass('active');
-	});
-	$("#home-tab-anchor").removeClass('active');
-	$("#help-tab-anchor").removeClass('active');
-	//Look for a tab variable on the url
-	var search = location.search.substring(1);
-	var inputs = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
-	var currentTab;
-	if(typeof inputs.tab !="undefined") {
-		currentTab = inputs.tab.toLowerCase();
-	} else {
-		currentTab = 'home';
-	}
-	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
-	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
-	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
-	if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
-	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
-	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
-
-	window.history.pushState({},'', "?tab="+currentTab);
-
-	switch (currentTab) { 
-		case 'home': 
-			$('#home-tab').addClass("in").addClass('active');
-			$('#home-tab-anchor').parent().addClass('active');
-//			$("a[href='#home-tab']").parent().addClass(active);
-			break;
-		case 'ldhap': 
-			$('#ldhap-tab').addClass("in").addClass('active');
-			$('#ldhap-tab-anchor').parent().addClass('active');
-			break;
-		case 'ldmatrix': 
-			$('#ldmatrix-tab').addClass("in").addClass('active');
-			$('#ldmatrix-tab-anchor').parent().addClass('active');
-			break;
-		case 'ldpair': 
-			$('#ldpair-tab').addClass("in").addClass('active');
-			$('#ldpair-tab-anchor').parent().addClass('active');
-			break;
-		case 'ldproxy': 
-			$('#ldproxy-tab').addClass("in").addClass('active');
-			$('#ldproxy-tab-anchor').parent().addClass('active');
-			break;
-		case 'snpclip': 
-			$('#snpclip-tab').addClass("in").addClass('active');
-			$('#snpclip-tab-anchor').parent().addClass('active');
-			break;
-		case 'snpchip': 
-			$('#ldchip-tab').addClass("in").addClass('active');
-			$('#ldchip-tab-anchor').parent().addClass('active');
-			break;
-		case 'help': 
-			$('#help-tab').addClass("in").addClass('active');
-			$('#help-tab-anchor').parent().addClass('active');
-			break;
-		default:
-			$('#home-tab').addClass("in").addClass('active');
-			$('#home-tab-anchor').parent().addClass('active');
-	}
-
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {
 		var currentTab = e.target.id.substr(0, e.target.id.search('-'));
@@ -100,11 +36,20 @@ $(document).ready(function() {
 	});
 
 	//('#snpclip').attr('disabled', false); // Remove this. (only need for testing)
-	$('div#snpclip-snp-list').on('click', "a", function(e) {
+	$('#snpclip-snp-list').on('click', "a", function(e) {
 		//console.log("clicking on link");
 		var rs_number = e.target.id;
-		console.log(e.target.id);
+		$('#snpclip-snp-list').show();
+		$('#snpclip-initial-message').hide();
 		loadSNPdetails(ldClipRaw, rs_number);
+		$('#snpclip-details').show();
+		$('#snpclip-warnings').hide();
+		$('#snpclip-initial-message').hide();
+	});
+	$('#snpclip-warnings-button').click( function() {
+		$('#snpclip-details').hide();
+		$('#snpclip-warnings').show();
+		$('#snpclip-initial-message').hide();
 	});
 
 	updateVersion(ldlink_version);
@@ -164,20 +109,13 @@ $(document).ready(function() {
 	
 	$('[data-toggle="popover"]').popover();
 	loadHelp();
-
 	// Apply Bindings
-	console.log("ldpairModel");
-	console.dir(ldpairModel)
 	ko.applyBindings(ldpairModel, document
 			.getElementById('ldpair-results-container'));
 	//ko.applyBindings(ldproxyModel, document
 	//		.getElementById('ldproxy-results-container'));
-	console.log("ldhapModel");
-	console.dir(ldhapModel)
 	ko.applyBindings(ldhapModel, document
 			.getElementById('ldhap-results-container'));
-	console.log("snpclipData");
-	console.dir(snpclipModel)
 	ko.applyBindings(snpclipModel, document
 			.getElementById('snpclip-results-container'));
 
@@ -199,8 +137,8 @@ $(document).ready(function() {
 		function(event, numFiles, label) {
 			populateTextArea(event, numFiles, label);
 			var input = $(this).parents('.input-group').find(
-					':text'), log = numFiles > 1 ? numFiles
-					+ ' files selected' : label;
+				':text'), log = numFiles > 1 ? numFiles
+				+ ' files selected' : label;
 		if (input.length) {
 			input.val(log);
 		} else {
@@ -232,9 +170,9 @@ $(document).ready(function() {
 			console.log(event_id);
 			console.log('typeof event_id');
 			console.log(typeof event_id);
-
 			console.log('tag_name');
 			console.log(tag_name);
+
 			var active_tab = $("div.tab-pane.active").attr('id');
 			var id = active_tab.split("-");
 			if (id.length == 2) { // Check to make sure we are on a
@@ -250,6 +188,8 @@ $(document).ready(function() {
 		}
 	});
 
+	setupTabs();
+
 });
 
 // Set file support trigger
@@ -263,6 +203,55 @@ $(document).on(
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
 );
+
+function setupTabs() {
+	//Clear the active tab on a reload
+	$.each(modules, function(key, id) {
+		$("#"+id+"-tab-anchor").removeClass('active');
+	});
+	$("#home-tab-anchor").removeClass('active');
+	$("#help-tab-anchor").removeClass('active');
+	//Look for a tab variable on the url
+	var url = "{tab:''}";
+	var search = location.search.substring(1);
+	console.log(location.search);
+	console.log(search);
+	if(search.length >0 ) {
+		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
+	}
+
+	console.log(url);
+	console.dir(url);
+	var currentTab;
+	if(typeof url.tab !="undefined") {
+		currentTab = url.tab.toLowerCase();
+	} else {
+		currentTab = 'home';
+	}
+
+	console.log("Tab: "+currentTab);
+
+	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
+	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
+	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
+	if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
+	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
+	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
+
+	//window.history.pushState({},'', "?tab="+currentTab);
+
+	$('#'+currentTab+'-tab').addClass("in").addClass('active');
+	$('#'+currentTab+'-tab-anchor').parent().addClass('active');
+
+	if(typeof url.inputs !="undefined") {
+		console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
+		updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
+	}
+
+}
+function pushInputs(currentTab, inputs) {
+	window.history.pushState({},'', "?tab="+currentTab+"&inputs="+JSON.stringify(inputs));
+}
 
 function showFFWarning() {
 	// Is this a version of Mozilla?
@@ -451,47 +440,63 @@ function initCalculate(id) {
 	$('#' + id + '-message-warning').hide();
 }
 
-function updateData(id) {
+function updateData(id, inputs) {
+	console.log('updateData');
+	console.log('inputs:');
+	console.log(inputs);
 
 	$('#'+id+"-loading").show();
 
 	switch (id) {
-	case 'ldpair':
-		updateLDpair();
-		break;
-	case 'ldproxy':
-		updateLDproxy();
-		break;
-	case 'ldmatrix':
-		updateLDmatrix();
-		break;
-	case 'ldhap':
-		updateLDhap();
-		break;
-	case 'snpclip':
-		updateSNPclip();
-		break;
-	case 'snpclip':
-		updateLDchip();
-		break;
+		case 'ldhap':
+			updateLDhap(inputs);
+			break;
+		case 'ldmatrix':
+			updateLDmatrix();
+			break;
+		case 'ldpair':
+			updateLDpair();
+			break;
+		case 'ldproxy':
+			updateLDproxy();
+			break;
+		case 'snpclip':
+			updateSNPclip();
+			break;
+		case 'snpchip':
+			updateLDchip();
+			break;
 	}
-
 }
 
-function updateLDhap() {
+function updateLDhap(inputs) {
+
 	var id = "ldhap";
 
 	var $btn = $('#' + id).button('loading');
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-
 	var population = getPopulationCodes(id+'-population-codes');
-
 	var ldInputs = {
 		snps : snps,
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-
+/*
+	if(typeof inputs === 'undefined') {
+		var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+		var population = getPopulationCodes(id+'-population-codes');
+		ldInputs = {
+			snps : snps,
+			pop : population.join("+"),
+			reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+		};
+		var newInputs = ldInputs;
+		newInputs.snps = ldInputs.snps.replace(/\t/g, '').replace(/\n/g, '+');
+		pushInputs(id, newInputs);
+	} else {
+		ldInputs = JSON.parse(inputs.replace('+', '\n'));
+	}
+*/
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -543,13 +548,35 @@ function updateLDhap() {
 
 	hideLoadingIcon(ajaxRequest, id);
 }
+function explodeLegalArray(entities) {
+	//Turn an arry into a legal statement to use in a scentense
+	//Example: array("Maryland", "New York", "Virginia")
+	// = "Maryland, New York, and Virgina"
+
+	var delimiter = ",";
+	var output;
+	if(entities.length == 0) {
+		return entities[0];
+	}
+
+	$.each(entities, function (key, value) {
+		if(key == 0) {
+			output = value;
+		} else if(key == entities.length-1) {
+			output += " & "+value;
+		} else {
+			output += delimiter+" "+value;
+		}
+	});
+
+	return output;
+}
 
 function updateSNPclip() {
 	var id = "snpclip";
 
 	var $btn = $('#' + id).button('loading');
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-
 	var population = getPopulationCodes(id+'-population-codes');
 
 	var ldInputs = {
@@ -559,12 +586,17 @@ function updateSNPclip() {
 		maf_threshold: $("#"+id+"_maf_threshold").val(),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-	console.log('ldInputs');
-	console.dir(ldInputs);
+	//Show inital message
+	$('#snpclip-details').hide();
+	$('#snpclip-warnings').hide();
+	$('#snpclip-initial-message').show();
+
 	//Update href on
 	//Set file links
 	$("#snpclip-snps").attr('href', 'tmp/snp_list'+ldInputs.reference+'.txt');
 	$("#snpclip-details").attr('href', 'tmp/details'+ldInputs.reference+'.json');
+	// Set populations on LDThinned
+	$('.snpclip-populations').empty().append(explodeLegalArray(population));
 
 	var url = restServerUrl + "/snpclip";
 	var ajaxRequest = $.ajax({
@@ -672,11 +704,15 @@ function populateSNPlist(data) {
 	//Add the clipped list
 	$.each(data.snp_list, function( index, value ){
 		$("#snpclip-snp-list").append(
-			$("<a>")
-				.attr('id', value)
-				.attr('title', 'Click to view details')
-				.append(value)
-			).append("<br>");
+			$("<tr>").append(
+				$("<td>").append(
+					$("<a>")
+						.attr('id', value)
+						.attr('title', 'Click to view details')
+						.append(value)
+					)
+				)
+			)
 	});
 
 }
@@ -749,7 +785,7 @@ function loadSNPdetails(data, rs_number) {
 	console.dir(snpclipData);
 	console.log(JSON.stringify(snpclipData));
 	ko.mapping.fromJS(snpclipData, snpclipModel);
-	$('#snpclip-detail-title').text("Detail for "+rs_number); 
+	$('#snpclip-detail-title').text("Details for "+rs_number); 
 }
 
 function initClip(data) {
