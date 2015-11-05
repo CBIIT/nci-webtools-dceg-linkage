@@ -175,14 +175,14 @@ def ldhap():
 
     return out_json
 
-@app.route('/LDlinkRest/ldclip', methods = ['GET'])
-def ldclip():
+@app.route('/LDlinkRest/snpclip', methods = ['GET'])
+def snpclip():
 
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
 
     print
-    print 'Execute ldclip'
+    print 'Execute snpclip'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)

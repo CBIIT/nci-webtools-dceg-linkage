@@ -407,28 +407,27 @@ hr.header {
     margin: 0;
 }
 
-#ldclip-thresholds {
+#snpclip-thresholds {
 	width:130px; 
 	margin-left:10px;
 }
-#ldclip-thresholds > div > label {
-	float:left;
-	width:45px;
-	margin-top:5px;
+#snpclip-thresholds > div > label {
+	width:40px;
 }
-#ldclip-thresholds > div > input {
+#snpclip-thresholds > div > input {
 	width:50px;
 }
 
-#ldclip-thresholds > div:first-child {
+#snpclip-thresholds > div:first-child {
 	width:100px;
 	position:relative;
-	top:-8px;
+	top:-5px;
+	font-weight:bold;
 }
-#ldclip-thresholds > div:not(:first-child) {
-	padding-bottom:3px;
+#snpclip-thresholds > div:not(:first-child) {
+	padding-bottom:1px;
 }
-#ldclip-snp-list {
+#snpclip-snp-list {
 	/*width:175px; */
 	float:left;
 	border:1px solid #333;
@@ -437,16 +436,16 @@ hr.header {
 	overflow-y: auto;
 	margin-top: 20px;
 }
-#ldclip-snp-list > a {
+#snpclip-snp-list > a {
 	text-decoration: underline;
 	color: #428bca;
 }
-#ldclip-detail {
+#snpclip-detail {
 /*	border:1px solid #333; */
 	float:left;
 	padding:10px;
 }
-#ldclip-warning {
+#snpclip-warning {
 	float:left;
 	padding:10px;
 }
