@@ -22,14 +22,6 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
 
-
-	print "Hello let's look at what we got here:"
-	print type(r2_threshold)
-	print "r2_threshold"
-	print r2_threshold
-	print "maf_threshold"
-	print maf_threshold
-	
 	# Create JSON output
 	out_json=open(tmp_dir+"clip"+request+".json","w")
 	output={}

@@ -34,24 +34,7 @@ $(document).ready(function() {
 		var currentTab = e.target.id.substr(0, e.target.id.search('-'));
 		window.history.pushState({},'', "?tab="+currentTab);
 	});
-
-	//('#snpclip').attr('disabled', false); // Remove this. (only need for testing)
-	$('#snpclip-snp-list').on('click', "a", function(e) {
-		//console.log("clicking on link");
-		var rs_number = e.target.id;
-		$('#snpclip-snp-list').show();
-		$('#snpclip-initial-message').hide();
-		loadSNPdetails(ldClipRaw, rs_number);
-		$('#snpclip-details').show();
-		$('#snpclip-warnings').hide();
-		$('#snpclip-initial-message').hide();
-	});
-	$('#snpclip-warnings-button').click( function() {
-		$('#snpclip-details').hide();
-		$('#snpclip-warnings').show();
-		$('#snpclip-initial-message').hide();
-	});
-
+	setupSNPclipControls();
 	updateVersion(ldlink_version);
 	showFFWarning();
 	var ldproxyTable = $('#new-ldproxy').DataTable( {
@@ -203,6 +186,25 @@ $(document).on(
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
 );
+
+function setupSNPclipControls() {
+	//('#snpclip').attr('disabled', false); // Remove this. (only need for testing)
+	$('#snpclip-snp-list').on('click', "a", function(e) {
+		//console.log("clicking on link");
+		var rs_number = e.target.id;
+		$('#snpclip-snp-list').show();
+		$('#snpclip-initial-message').hide();
+		loadSNPdetails(ldClipRaw, rs_number);
+		$('#snpclip-details').show();
+		$('#snpclip-warnings').hide();
+		$('#snpclip-initial-message').hide();
+	});
+	$('#snpclip-warnings-button').click( function() {
+		$('#snpclip-details').hide();
+		$('#snpclip-initial-message').hide();
+		$('#snpclip-warnings').show();
+	});
+}
 
 function setupTabs() {
 	//Clear the active tab on a reload
@@ -593,8 +595,11 @@ function updateSNPclip() {
 
 	//Update href on
 	//Set file links
-	$("#snpclip-snps").attr('href', 'tmp/snp_list'+ldInputs.reference+'.txt');
-	$("#snpclip-details").attr('href', 'tmp/details'+ldInputs.reference+'.json');
+	$("#snpclip-snps-link").attr('href', 'tmp/snp_list'+ldInputs.reference+'.txt');
+	$("#snpclip-snps-link").attr('target', 'snp_thin_list_'+ldInputs.reference);
+	$("#snpclip-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
+	$("#snpclip-details-link").attr('target', 'snp_details_'+ldInputs.reference);
+
 	// Set populations on LDThinned
 	$('.snpclip-populations').empty().append(explodeLegalArray(population));
 
@@ -792,15 +797,22 @@ function initClip(data) {
 
 	ldClipRaw = data;
 	populateSNPlist(data);
-	//
 	// Get first element
-	//
-	console.dir(data);
-	//alert(data.);
-
-	var rs_number = data.snp_list[0];
+	//var rs_number = data.snp_list[0];
+	if(data.snp_list.length == 0) {
+		$('#snpclip-message-warning-content').text("SNPclip list returned no results for this calculation.");
+		$('#snpclip-results-container').hide();
+		$('#snpclip-message-warning').show();
+	}
 	populateSNPwarnings(data);
-	loadSNPdetails(data, rs_number);
+	//loadSNPdetails(data, rs_number);
+
+	if(snpclipData.warnings.length == 0) {
+		$('#snpclip-warnings-button').parent().hide();
+	} else {
+		$('#snpclip-warnings-button').parent().show();
+	}
+
 }
 
 function formatLDhapData(data) {
