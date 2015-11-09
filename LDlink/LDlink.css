@@ -461,7 +461,7 @@ caption {
 }
 .snpclip-table-scroller {
 	overflow-y:auto;
-	max-height:525px;
+	max-height:550px;
 }
 /* Testing */
 @media screen and (max-width: 767px) {

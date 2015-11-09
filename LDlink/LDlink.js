@@ -808,9 +808,9 @@ function initClip(data) {
 	//loadSNPdetails(data, rs_number);
 
 	if(snpclipData.warnings.length == 0) {
-		$('#snpclip-warnings-button').parent().hide();
+		$('#snpclip-warnings-button').hide();
 	} else {
-		$('#snpclip-warnings-button').parent().show();
+		$('#snpclip-warnings-button').show();
 	}
 
 }
