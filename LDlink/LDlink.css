@@ -430,7 +430,6 @@ hr.header {
 #snpclip-snp-list {
 	/*width:175px; */
 	float:left;
-	border:1px solid #333;
 	padding:10px;
 	max-height: 400px;
 	overflow-y: auto;
@@ -456,6 +455,13 @@ caption {
 	font-weight:bold;
 	font-size:110%;
 	margin-top:50px;
+}
+#snpclip-table-container {
+	min-height:500px;
+}
+.snpclip-table-scroller {
+	overflow-y:auto;
+	max-height:525px;
 }
 /* Testing */
 @media screen and (max-width: 767px) {

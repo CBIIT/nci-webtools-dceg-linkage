@@ -210,28 +210,25 @@ def snpclip():
     clip["snp_list"] = snp_list
     clip["details"] = details
     #write the snp_list file
+    print json.dumps(details, sort_keys=True, indent=2)
 
+    #SNP List file    
     f = open('tmp/snp_list'+reference+'.txt', 'w')
     for rs_number in snp_list:
         f.write(rs_number + '\n')
 
     f.close()
 
-    f = open('tmp/details'+reference+'.json', 'w')
-    f.write(json.dumps(details, sort_keys=True, indent=2))
+    #Detail file
+    f = open('tmp/details'+reference+'.txt', 'w')
+    f.write("RS Number\tPosition\tAlleles\tDetails\n")
+    for key, value in details.iteritems() :
+        f.write(key+"\t")
+        f.write(value[0]+"\t"+value[1]+"\t"+value[2]+"\n")
+
     f.close()
 
-    #Turn these into files, refrence them on page
-
-    print "snps"
-    dir(snps)
-    print snps
-    print "snp_list"
-    dir(snp_list)
-    print snp_list
-    print "details"
-    dir(snps)
-    print details
+    copy_output_files(reference)
 
     out_json = json.dumps(clip, sort_keys=True, indent=2)
     mimetype = 'application/json'

@@ -878,17 +878,26 @@
 				<div class="jumbotron">
 					<div class="container-fluid" id="snpclip-results-container">
 						<div class="row">
-							<div style="font-weight:bold;">LD Thinned SNP List (<span class="snpclip-populations"></span>)
+							<div style="font-weight:bold;"><span class="snpclip-populations"></span>
 							</div>
 						</div>
-						<div class="row snpclip-table-container">
-							<div class="col-sm-3 col-md-3">
+
+						<div id="snpclip-table-container" class="row">
+							<div class="col-sm-3 col-md-3 snpclip-table-scroller">
 								<table class="table table-striped">
-									<tbody id="snpclip-snp-list"></tbody>
+									<caption>LD Thinned SNP List</caption>
+									<!--
+									<thead>
+										<tr>
+											<td>LD Thinned SNP List</td>
+										</tr>
+									</thead>
+									-->
+									<tbody style="border: 1px solid #ccc;" id="snpclip-snp-list"></tbody>
 								</table>
 							</div>
 
-							<div class="col-sm-9 col-md-9" id="snpclip-detail">
+							<div class="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
 
 								<!-- Detail message -->
 								<table id="snpclip-details" class="table table-striped">
@@ -913,7 +922,7 @@
 
 								<!-- SNPs with warnings -->
 								<table id="snpclip-warnings" class="table table-striped">
-									<caption>SNPs With Warnings (<span class="snpclip-populations"></span>)</caption>
+									<caption>SNPs With Warnings</caption>
 									<thead>
 										<tr>
 											<td>RS Number</td>
@@ -946,7 +955,7 @@
 						</div>
 						-->
 						<div class="row">
-							<a id="snpclip-warnings-button">SNPs with Warnings (<span class="snpclip-populations"></span>)</a>
+							<a id="snpclip-warnings-button">SNPs with Warnings</a>
 						</div>
 						<br>
 						<div class="row">
