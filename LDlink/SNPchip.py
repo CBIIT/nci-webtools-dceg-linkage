@@ -8,15 +8,14 @@ from pymongo import MongoClient
 import os
 import bson.regex
 import json
-contents=open("Property_file.txt").read().split('\n')
-username=contents[0]
-password=contents[1]
-Database=contents[2]
+import json,operator,sqlite3,os
 
 # Create SNPchip function
 def calculate_chip(snplst,request):
-	import json,operator,sqlite3,os
-	
+	contents=open("Property_file.txt").read().split('\n')
+	username=contents[0]
+	password=contents[1]
+	Database=contents[2]
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	snp_dir=data_dir+"snp142/snp142_annot_2.db"
