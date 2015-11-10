@@ -410,6 +410,8 @@ hr.header {
 #snpclip-thresholds {
 	width:130px; 
 	margin-left:10px;
+	position: relative;
+	top:-17px;
 }
 #snpclip-thresholds > div > label {
 	width:40px;
@@ -420,20 +422,20 @@ hr.header {
 
 #snpclip-thresholds > div:first-child {
 	width:100px;
-	position:relative;
-	top:-5px;
 	font-weight:bold;
 }
 #snpclip-thresholds > div:not(:first-child) {
-	padding-bottom:1px;
+	/*padding-bottom:1px;*/
 }
 #snpclip-snp-list {
 	/*width:175px; */
 	float:left;
-	padding:10px;
 	max-height: 400px;
 	overflow-y: auto;
 	margin-top: 20px;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
 }
 #snpclip-snp-list > a {
 	text-decoration: underline;

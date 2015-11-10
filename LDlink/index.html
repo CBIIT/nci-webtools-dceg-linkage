@@ -877,15 +877,15 @@
 				<!-- snpclip CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="snpclip-results-container">
-						<div class="row">
-							<div style="font-weight:bold;"><span class="snpclip-populations"></span>
+						<div class="row" style="padding-bottom:10px;">
+							<div  class="col-sm-5 col-md-5" style="font-weight:bold;"><span class="snpclip-populations"></span>
 							</div>
 						</div>
 
 						<div id="snpclip-table-container" class="row">
 							<div class="col-sm-3 col-md-3 snpclip-table-scroller">
 								<table class="table table-striped">
-									<caption>LD Thinned SNP List</caption>
+									<caption style="text-align:left;">LD Thinned SNP List</caption>
 									<!--
 									<thead>
 										<tr>
@@ -893,7 +893,7 @@
 										</tr>
 									</thead>
 									-->
-									<tbody style="border: 1px solid #ccc;" id="snpclip-snp-list"></tbody>
+									<tbody id="snpclip-snp-list"></tbody>
 								</table>
 								<a id="snpclip-warnings-button">SNPs with Warnings</a>
 							</div>
@@ -913,8 +913,8 @@
 									</thead>
 									<tbody data-bind="foreach: details" style="border: 1px solid #ccc;">
 										<tr>
-											<td data-bind="text: rs_number"></td>
-											<td data-bind="text: position"></td>
+											<td data-bind="html: rs_number_link"></td>
+											<td data-bind="html: position_link"></td>
 											<td data-bind="text: alleles"></td>
 											<td data-bind="text: comment"></td>
 										</tr>
@@ -934,8 +934,8 @@
 									</thead>
 									<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
 										<tr>
-											<td data-bind="text: rs_number"></td>
-											<td data-bind="text: position"></td>
+											<td data-bind="html: rs_number_link"></td>
+											<td data-bind="html: position_link"></td>
 											<td data-bind="text: alleles"></td>
 											<td data-bind="text: comment"></td>
 										</tr>
@@ -1108,6 +1108,7 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script type="text/javascript"
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
