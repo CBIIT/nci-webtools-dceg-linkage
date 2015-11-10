@@ -8,6 +8,10 @@ from pymongo import MongoClient
 import os
 import bson.regex
 import json
+contents=open("Property_file.txt").read().split('\n')
+username=contents[0]
+password=contents[1]
+Database=contents[2]
 
 # Create SNPchip function
 def calculate_chip(snplst,request):
@@ -106,8 +110,9 @@ def calculate_chip(snplst,request):
 	
 	client = MongoClient()
 	client = MongoClient('localhost', 27017)
-	client.admin.authenticate("ncianalysis_readonly", "1234", mechanism='SCRAM-SHA-1')
-	db = client.LDLink_sandbox
+	
+        client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+	db = client.Database
 
 	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
