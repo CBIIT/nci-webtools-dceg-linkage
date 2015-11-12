@@ -227,11 +227,15 @@ def snpclip():
         print fin.read()
 
     #Detail file
+    print "details . type"
+    print type(details)
+
     f = open('tmp/details'+reference+'.txt', 'w')
     f.write("RS Number\tPosition\tAlleles\tDetails\n")
-    for key, value in details.iteritems() :
-        f.write(key+"\t")
-        f.write(value[0]+"\t"+value[1]+"\t"+value[2]+"\n")
+    if(type(details) is dict):
+        for key, value in details.iteritems() :
+            f.write(key+"\t")
+            f.write(value[0]+"\t"+value[1]+"\t"+value[2]+"\n")
 
     f.close()
 
