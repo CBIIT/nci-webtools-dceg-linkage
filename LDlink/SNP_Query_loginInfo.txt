@@ -1,3 +1,9 @@
 username
-password
-LDLink_sandbox
+password=
+Database=
+
+
+#File to store user information to query the LDLink mongoDB database
+#Username=username to query database
+#password=password of username
+#Database=Database to query
