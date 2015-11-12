@@ -197,27 +197,34 @@ def snpclip():
     print 'r2_threshold: ' + r2_threshold
     print 'maf_threshold: ' + maf_threshold
 
-    snplst = tmp_dir+'snps'+reference+'.txt'
-    print 'snplst" '+snplst
+    snpfile = tmp_dir+'snps'+reference+'.txt'
+    print 'snpfile: '+snpfile
+    snplist = snps.splitlines()
 
-    f = open(snplst, 'w')
-    f.write(snps)
+    f = open(snpfile, 'w')
+    for s in snplist:
+        if(s[:2].lower() == 'rs'):
+            f.write(s.lower()+'\n')
+
     f.close()
-    (snps,snp_list,details) = calculate_clip(snplst,pop,reference,float(r2_threshold),float(maf_threshold))
+    (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
     #(snps,snp_list,details) = calculate_clip(snplst,pop,reference)
 
     clip={}
     clip["snp_list"] = snp_list
     clip["details"] = details
     #write the snp_list file
-    print json.dumps(details, sort_keys=True, indent=2)
+    #print json.dumps(details, sort_keys=True, indent=2)
 
     #SNP List file    
     f = open('tmp/snp_list'+reference+'.txt', 'w')
     for rs_number in snp_list:
-        f.write(rs_number + '\n')
+        f.write(rs_number+'\n')
 
     f.close()
+    print "SNP clipped file contents"
+    with open('tmp/snp_list'+reference+'.txt', 'r') as fin:
+        print fin.read()
 
     #Detail file
     f = open('tmp/details'+reference+'.txt', 'w')
