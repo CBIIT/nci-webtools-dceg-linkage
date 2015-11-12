@@ -111,7 +111,7 @@ def calculate_chip(snplst,request):
 	client = MongoClient('localhost', 27017)
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
-	db = client.Database
+	db = client[Database]
 
 	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
