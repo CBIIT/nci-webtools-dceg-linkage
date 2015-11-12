@@ -19,8 +19,43 @@ var snpclipData = {
 "warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],
 "details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]
 };
+
+var snpchipData = {
+  "snp_0": [
+    "rs17724992",
+    "7:103489447",
+    "Affymetrix Axiom GW EUR_build37  Affymetrix Axiom GW ASI_build37 "
+  ],
+  "snp_1": [
+    "rs29941",
+    "4:164934874",
+    "Affymetrix Axiom Exome 1A_build37  Affymetrix Axiom GW CHB2_build37  Affymetrix Axiom GW AFR_build37  Affymetrix Axiom Exome 319_build37  Affymetrix Axiom GW Hu-CHB_build37  Affymetrix Axiom GW EUR_build37  Affymetrix Axiom GW ASI_build37  Affymetrix Axiom GW EAS_build37  Illumina Human1M-Duov3_build37  Affymetrix Axiom GW Hu_build37  Affymetrix SNP 6.0_build37  Affymetrix Axiom GW LAT_build37  Illumina Human1Mv1_build37  Illumina Human610-Quadv1_build37  Illumina Human660W-Quadv1_build37  Illumina HumanCNV370-Duov1_build37 "
+  ],
+  "snp_2": [
+    "rs2075650",
+    "5:462821199",
+    ""
+  ],
+  "snp_3": [
+    "rs11672660",
+    "5:163542505",
+    "Affymetrix Axiom Exome 1A_build37  Affymetrix Axiom GW CHB2_build37  Affymetrix Axiom GW AFR_build37  Affymetrix Axiom Exome 319_build37  Affymetrix Axiom GW Hu-CHB_build37  Affymetrix Axiom GW EUR_build37  Affymetrix Axiom GW ASI_build37  Affymetrix Axiom GW EAS_build37  Affymetrix Axiom GW Hu_build37  Affymetrix Axiom GW LAT_build37 "
+  ],
+  "snp_4": [
+    "rs2287019",
+    "14:2993645",
+    ""
+  ],
+  "snp_5": [
+    "rs3810291",
+    "2:44000834",
+    ""
+  ]
+};
+
+
 var ldClipRaw;
-var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "ldchip" ];
+var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip" ];
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -278,6 +313,7 @@ function showFFWarning() {
 var ldpairModel = ko.mapping.fromJS(ldPairData);
 var ldhapModel = ko.mapping.fromJS(ldhapData);
 var snpclipModel = ko.mapping.fromJS(snpclipData);
+var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
     table = $(tableId).dataTable();
@@ -469,7 +505,7 @@ function updateData(id, inputs) {
 			updateSNPclip();
 			break;
 		case 'snpchip':
-			updateLDchip();
+			updateSNPchip();
 			break;
 	}
 }
@@ -649,9 +685,10 @@ function updateSNPclip() {
 	hideLoadingIcon(ajaxRequest, id);
 }
 
-function updateLDchip() {
+function updateSNPchip() {
 
-	var id = "ldchip";
+	var id = "snpchip";
+	console.warn("Got an updateSNPchip");
 
 	var $btn = $('#' + id).button('loading');
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
@@ -663,7 +700,7 @@ function updateLDchip() {
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
 
-	var url = restServerUrl + "/ldchip";
+	var url = restServerUrl + "/snpchip";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
 		url : url,
@@ -678,7 +715,7 @@ function updateLDchip() {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
 			$('#'+id+"-loading").hide();
-			initClip(data);
+			initChip(data);
 		}
 	});
 	ajaxRequest
@@ -705,6 +742,14 @@ function updateLDchip() {
 
 	hideLoadingIcon(ajaxRequest, id);
 }
+
+function initChip(data) {
+	console.warn("initChip()");
+	console.warn(data);
+	console.dir(snpchipData);
+
+}
+
 function populateSNPlist(data) {
 
 	//clear out the list

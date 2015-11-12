@@ -236,21 +236,20 @@ def snpclip():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 
-@app.route('/LDlinkRest/ldchip', methods = ['GET'])
+@app.route('/LDlinkRest/snpchip', methods = ['GET'])
 def ldchip():
 
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
+    print "Hello CHIP"
 
     print
-    print 'Execute ldchip'
+    print 'Execute snpchip'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
-    pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
     print 'snps: ' + snps
-    print 'pop: ' + pop
     print 'request: ' + reference
 
     snplst = tmp_dir+'snps'+reference+'.txt'
@@ -259,7 +258,10 @@ def ldchip():
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
-    (snps,snp_list,details) = calculate_chip(snplst,pop,reference)
+
+    return "Hello"
+
+    (snps,snp_list,details) = calculate_chip(snplst,reference)
 
     clip={}
     clip["snp_list"] = snp_list
