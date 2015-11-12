@@ -156,12 +156,12 @@ def main():
 		json_dict["error"]
 	
 	except KeyError:
-		print ""
-		header=["SNP","Position (GRCh37)","Arrays"]
-		print "\t".join(header)
-		for k in sorted(json_dict.keys()):
-			if k!="error" and k!="warning":
-				print "\t".join(json_dict[k])
+	#	print ""
+	#	header=["SNP","Position (GRCh37)","Arrays"]
+	#	print "\t".join(header)
+	#	for k in sorted(json_dict.keys()):
+	#		if k!="error" and k!="warning":
+	#			print "\t".join(json_dict[k])
 
 		try:
 			json_dict["warning"]
