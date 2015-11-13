@@ -128,6 +128,7 @@ def calculate_chip(snplst,request):
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
+	return json_output
 	out_json.close()
 
 
@@ -156,12 +157,12 @@ def main():
 		json_dict["error"]
 	
 	except KeyError:
-	#	print ""
-	#	header=["SNP","Position (GRCh37)","Arrays"]
-	#	print "\t".join(header)
-	#	for k in sorted(json_dict.keys()):
-	#		if k!="error" and k!="warning":
-	#			print "\t".join(json_dict[k])
+		print ""
+		header=["SNP","Position (GRCh37)","Arrays"]
+		print "\t".join(header)
+		for k in sorted(json_dict.keys()):
+			if k!="error" and k!="warning":
+				print "\t".join(json_dict[k])
 
 		try:
 			json_dict["warning"]
