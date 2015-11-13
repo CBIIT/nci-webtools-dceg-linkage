@@ -1,3 +1,0 @@
-username
-password
-LDLink_sandbox

@@ -12,10 +12,10 @@ import json,operator,sqlite3,os
 
 # Create SNPchip function
 def calculate_chip(snplst,request):
-	contents=open("Property_file.txt").read().split('\n')
-	username=contents[0]
-	password=contents[1]
-	Database=contents[2]
+	contents=open("SNP_Query_loginInfo.txt").read().split('\n')
+	username=contents[0].split('=')[1]
+	password=contents[1].split('=')[1]
+	Database=contents[2].split('=')[1]
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	snp_dir=data_dir+"snp142/snp142_annot_2.db"
@@ -111,7 +111,7 @@ def calculate_chip(snplst,request):
 	client = MongoClient('localhost', 27017)
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
-	db = client.Database
+	db = client[Database]
 
 	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
@@ -123,11 +123,12 @@ def calculate_chip(snplst,request):
 		for document in cursor:	
 			for z in range(0,len(document["data"])):
 				if(document["data"][z]["chr"]==Chr):
-					platforms.append(document["data"][z]["platform"]+" ")
-		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),s.join(platforms)]
+					platforms.append(document["data"][z]["platform"])
+		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
+	return json_output
 	out_json.close()
 
 

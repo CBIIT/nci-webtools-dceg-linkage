@@ -172,7 +172,7 @@ $(document).ready(function() {
 		// Look for a return value
 		var code = e.keyCode || e.which;
 		if (code == 13) { // User pressed return key
-			alert("You pressed return");
+		//	alert("You pressed return");
 			// make sure focus is not in a textarea. If so ignore.
 			var event_id = e.target.id;
 			// Skip if you can't get event_id
