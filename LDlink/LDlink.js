@@ -72,6 +72,7 @@ $(document).ready(function() {
 		window.history.pushState({},'', "?tab="+currentTab);
 	});
 	setupSNPclipControls();
+	setupSNPchipControls();
 	updateVersion(ldlink_version);
 	showFFWarning();
 
@@ -122,10 +123,7 @@ $(document).ready(function() {
         ]
 	});
 
-	var new_proxy_data = {"aaData": [
-	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
+	var new_proxy_data = {"aaData": [["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
 	RefreshTable('#new-ldproxy', new_proxy_data);
 	
 	$('[data-toggle="popover"]').popover();
@@ -224,6 +222,11 @@ $(document).on(
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
 );
+function setupSNPchipControls() {
+
+	buildPopulationDropdownSNPchip("snpchip-platform-list");
+
+}
 
 function setupSNPclipControls() {
 	//('#snpclip').attr('disabled', false); // Remove this. (only need for testing)
@@ -254,14 +257,14 @@ function setupTabs() {
 	//Look for a tab variable on the url
 	var url = "{tab:''}";
 	var search = location.search.substring(1);
-	console.log(location.search);
-	console.log(search);
+	//console.log(location.search);
+	//console.log(search);
 	if(search.length >0 ) {
 		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
 	}
 
-	console.log(url);
-	console.dir(url);
+	//console.log(url);
+	//console.dir(url);
 	var currentTab;
 	if(typeof url.tab !="undefined") {
 		currentTab = url.tab.toLowerCase();
@@ -269,7 +272,7 @@ function setupTabs() {
 		currentTab = 'home';
 	}
 
-	console.log("Tab: "+currentTab);
+	//console.log("Tab: "+currentTab);
 
 	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
 	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
@@ -1069,7 +1072,7 @@ function updateLDproxyProgressBar(id, seconds) {
 		}
 	}, delay);
 }
-
+/*
 function createPopulationDropdown(id) {
 
 	alert("createPop");
@@ -1081,10 +1084,10 @@ function createPopulationDropdown(id) {
 			maxHeight : 500,
 			includeSelectAllOption : true,
 			dropRight : true,
-			allSelectedText : 'Hello All Populations',
-			nonSelectedText : 'Hello to you Select Population',
+			allSelectedText : 'All Populations',
+			nonSelectedText : 'Select Population',
 			numberDisplayed : 4,
-			selectAllText : 'Hello All Populations',
+			selectAllText : 'All Populations',
 
 			// buttonClass: 'btn btn-link',
 			buttonText : function(options, select) {
@@ -1129,6 +1132,7 @@ function createPopulationDropdown(id) {
             }
 		});
 }
+*/
 
 function updateLDproxy() {
 	var id = "ldproxy";
@@ -1489,7 +1493,112 @@ function addLDpairHyperLinks(data) {
 
 }
 
+function buildPopulationDropdownSNPchip(elementId) {
+
+	var snpchip_platform_list = {"Illumina": {"I1": "Illumina Human-1","I2": "Illumina HumanHap240S","I3": "Illumina HumanHap300","IC": "Illumina Human370CNV single","ICQ": "Illumina Human370CNV quad","I5": "Illumina HumanHap550","I6": "Illumina HumanHap550"},"Affymetrix": {"AX": "Affymetrix 50K Mapping Xbal","AH": "Affymetrix 50K Mapping Hindlll","HG": "Affymetrix 50K Human Gene Focused chip","AN": "Affymetrix 250K Mapping Nspl","AS": "Affymetrix 250K Mapping Styl","A5": "Affymetrix 5.0","A6": "Affymetrix 5.0"}};
+	console.log("snpchip_platform_list");
+	console.dir(snpchip_platform_list);
+	$("#"+elementId).empty();
+	$.each( snpchip_platform_list, function( group, platforms ) {
+		console.log( group + ": " + platforms );
+		console.dir(platforms);
+		//Add optgroup
+		$("#"+elementId).append(
+			$("<optgroup>")
+				.attr('value', "("+group+") All "+group+" Arrays")
+				.attr('label', "("+group+") All "+group+" Arrays")
+				.attr('id', group)
+		);
+
+		$.each( platforms, function( key, value ) {
+			$('#'+group).append(
+				$("<option>")
+					.attr('value', key)
+					.text("("+key+") "+value)
+			);
+		});
+	});
+	/*
+	var htmlText = "";
+	var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
+	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
+
+	for ( var popAbbrev in populations) {
+		var population = populations[popAbbrev];
+		htmlText += htmlText1
+			.replace(/ABBREV/g, popAbbrev)
+			.replace("FULLNAME", population.fullName);
+		for ( var subPopAbbrev in population.subPopulations) {
+			var subDetail = population.subPopulations[subPopAbbrev];
+			htmlText += htmlText2
+				.replace(/ABBREV/g, subPopAbbrev).replace("DETAIL", subDetail);
+		}
+		htmlText += "</optgroup>\n";
+	}
+
+	$('#' + elementId).html(htmlText);
+	*/
+	$('#' + elementId).multiselect({
+		enableClickableOptGroups : true,
+		buttonWidth : '180px',
+		maxHeight : 500,
+		buttonClass : 'btn btn-default btn-ldlink-multiselect',
+		includeSelectAllOption : true,
+		dropRight : false,
+		allSelectedText : 'All Arrays',
+		nonSelectedText : 'Select Arrays',
+		numberDisplayed : 4,
+		selectAllText : ' (ALL) All Arrays',
+		previousOptionLength: 0,
+		maxPopulationWarn: 2,
+		maxPopulationWarnTimeout: 5000,
+		maxPopulationWarnVisible: false,
+
+		// buttonClass: 'btn btn-link',
+		buttonText : function(options, select) {
+			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+				$('#'+elementId+'-popover').popover('show');
+				this.maxPopulatinWarnVisible=true;
+			}
+			this.previousOptionLength = options.length;
+			if (options.length === 0) {
+				return this.nonSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length == $('option', $(select)).length) {
+				return this.allSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length > this.numberDisplayed) {
+				return '<span class="badge">' + options.length
+						+ '</span> ' + this.nSelectedText
+						+ '<span class="caret"></span>';
+			} else {
+				var selected = '';
+				options.each(function() {
+					// var label = $(this).attr('label') :
+					// $(this).html();
+					selected += $(this).val() + '+';
+				});
+
+				return selected.substr(0, selected.length - 1)
+						+ ' <b class="caret"></b>';
+			}
+		},
+		buttonTitle : function(options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText;
+			} else {
+				var selected = '';
+				options.each(function() {
+					selected += $(this).text() + '\n';
+				});
+				return selected;
+			}
+		}
+	});
+}
+
 function buildPopulationDropdown(elementId) {
+
 	var htmlText = "";
 	var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
 	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
