@@ -56,12 +56,17 @@ def Multi(folder,db):
 def Single(file,db):
 	Insert(file,db)
 
+
 #Insert function: Inserts position and chromsome/platform pairs for each position
 def Insert(file,db):
 	db.snp_col.create_index("pos")
 	snp_data=csv.reader(open(file))
 	platform=(os.path.splitext(os.path.basename(file))[0])
-	print platform			
+	platform=platform[:-8]
+	print platform
+	db.platforms.insert(
+    		{ "platform": platform},
+		)	
 	for coord in snp_data:
 		Chr=coord[0].split(":")[0].strip("chr")
 		position=coord[0].split("-")[1]
@@ -73,3 +78,5 @@ def Insert(file,db):
 	print "finished "+platform
 
 main(sys.argv[1:])
+
+
