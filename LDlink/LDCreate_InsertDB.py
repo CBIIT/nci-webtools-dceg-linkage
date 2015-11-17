@@ -1,82 +1,212 @@
+#!/usr/bin/env python
+
+###########
+# SNPchip #
+###########
+
 from pymongo import MongoClient
 import os
-import csv
-import sys, getopt
+import bson.regex
+import json
+import json,operator,sqlite3,os
+contents=open("SNP_Query_loginInfo.txt").read().split('\n')
+username=contents[0].split('=')[1]
+password=contents[1].split('=')[1]
+Database=contents[2].split('=')[1]
 
-
-
-#Usr input: File (---file) or Folder (--folder)
-#User input: user name for mongo (--user) and password (--password)
-
-def main(argv):
-
-
-	# Open Database
-	user=""
-	password=""
-	multiple=False
-	input=""
-	opts, args = getopt.getopt(argv,"upf:upd",["file=","folder=","user=","password="])
-	for opt, arg in opts:                
-	        if opt in ("d","--folder"):
-    			multiple=True
-    			input=arg
-	        elif opt in ("f","--file"):
-	        	multiple=False
-	        	input=arg 
-	        elif opt in ("u","--user"): 
-	            user=arg
-	        elif opt in ("p","--password"): 
-	            password=arg
+def get_platform_request():
+	client = MongoClient()
 	client = MongoClient('localhost', 27017)
-	client.admin.authenticate(user, password, mechanism='SCRAM-SHA-1')
-	db = client.LDLink_sandbox
+	
+        client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+	db = client[Database]
+	cursor=db.platforms.find({"platform":{'$regex':'.*'}})
+	platforms=[]
+	for document in cursor:
+		platforms.append(document["platform"])
+		json_output=json.dumps(platforms, sort_keys=True, indent=2)	
+	return json_output
+
+# Create SNPchip function	
+def calculate_chip(snplst,platform_query,request):
+
+	# Set data directories
+	data_dir="/local/content/ldlink/data/"
+	snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	array_dir=data_dir+"arrays/snp142_arrays.db"
+	tmp_dir="./tmp/"
+	
+	# Ensure tmp directory exists
+	if not os.path.exists(tmp_dir):
+		os.makedirs(tmp_dir)
+	
+	# Create JSON output
+	out_json=open(tmp_dir+'proxy'+request+".json","w")
+	output={}
+	
+	# Open SNP list file
+	snps_raw=open(snplst).readlines()
+	if len(snps_raw)>1000:
+		output["error"]="Maximum SNP list is 1,000 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		raise
+	
+	# Remove duplicate RS numbers
+	snps=[]
+	for snp_raw in snps_raw:
+		snp=snp_raw.strip().split()
+		if snp not in snps:
+			snps.append(snp)
+	
+	# Connect to snp142 database
+	conn=sqlite3.connect(snp_dir)
+	conn.text_factory=str
+	cur=conn.cursor()
+	
+	def get_coords(rs):
+		id=rs.strip("rs")
+		t=(id,)
+		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+		return cur.fetchone()
+	
+	# Find RS numbers in snp142 database
+	rs_nums=[]
+	snp_pos=[]
+	snp_coords=[]
+	warn=[]
+	tabix_coords=""
+	for snp_i in snps:
+		if len(snp_i)>0:
+			if len(snp_i[0])>2:
+				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit():
+					snp_coord=get_coords(snp_i[0])
+					if snp_coord!=None:
+						rs_nums.append(snp_i[0])
+						snp_pos.append(snp_coord[2])
+						if snp_coord[1]=="X":
+							chr=23
+						elif snp_coord[1]=="Y":
+							chr=24
+						else:
+							chr=int(snp_coord[1])
+						temp=[snp_i[0],chr,int(snp_coord[2])]
+						snp_coords.append(temp)
+					else:
+						warn.append(snp_i[0])
+				else:
+					warn.append(snp_i[0])
+			else:
+				warn.append(snp_i[0])
+	
+	
+	if warn!=[]:
+		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+	
+	if len(rs_nums)==0:
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		return(json.dumps(output, sort_keys=True, indent=2))
+		raise
+	
+
+	# Sort by chromosome and then position
+	snp_coords_sort=sorted(snp_coords, key=operator.itemgetter(1,2))
+	
+	# Convert chromosome 23 and 24 back to X and Y
+	for i in range(len(snp_coords_sort)):
+		if snp_coords_sort[i][1]==23:
+			snp_coords_sort[i][1]="X"
+		elif snp_coords_sort[i][1]==24:
+			snp_coords_sort[i][1]="Y"
+		else:
+			snp_coords_sort[i][1]=str(snp_coords_sort[i][1])
+	
+	
+	client = MongoClient()
+	client = MongoClient('localhost', 27017)
+	
+        client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+	db = client[Database]
+
+	#Quering MongoDB to get platforms for position/chromsome pairs 
+	for k in range(len(snp_coords_sort)):
+		position=str(snp_coords_sort[k][2])
+		Chr=str(snp_coords_sort[k][1])
+		platforms=[]
+		platform_list=[]
+		if platform_query == "": #<--If user did not enter platforms as a request
+			print "null"
+			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]} ) #Json object that stores all the results
+		#Parsing each docuemnt to retrieve platforms 
+
+		elif platform_query != "": #<--If user did not enter platforms as a request
+			platform_list=platform_query.split('+')
+			print platform_list
+			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform":{"$in":platform_list}}]} ) #Json object that stores all the results
+				#Parsing each docuemnt to retrieve platforms 
+		for document in cursor:	
+			for z in range(0,len(document["data"])):
+				if(document["data"][z]["chr"]==Chr and document["data"][z]["platform"] in platform_list and platform_query!=""):
+					platforms.append(document["data"][z]["platform"])
+				elif(document["data"][z]["chr"]==Chr and platform_query==""):
+					platforms.append(document["data"][z]["platform"])
+		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
+
+	# Output JSON file
+	json_output=json.dumps(output, sort_keys=True, indent=2)
+	print >> out_json, json_output
+	return json_output
+	out_json.close()
 
 
-	if(multiple==True):
-		Multi(input,db)              
+def main():
+	import json,sys
+	
+	# Import SNPchip options
+	if len(sys.argv)==4:
+		snplst=sys.argv[1]
+		platform_query=sys.argv[2]
+		request=sys.argv[3]
 	else:
-		Single(input,db)
-	
-#if inserting a folder
-def Multi(folder,db):
-	
-	# Manifest Info
-	manifest_file=os.listdir(folder)
-	manifest=[]
-	for k in range(0,len(manifest_file)):
-		file_name=os.path.splitext(manifest_file[k])[0]
-		manifest.append(file_name)
-		manifest_file[k]=folder+manifest_file[k]
-
-	for i in range(len(manifest)):
-		Insert(manifest_file[i],db)			
+		print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwiese seperate each platform by a \"+\""
+		sys.exit()
 		
-#If inserting a single file
-def Single(file,db):
-	Insert(file,db)
+	
+	# Run function
+	calculate_chip(snplst,platform_query,request)
+	
+	
+	# Print output
+	with open("./tmp/proxy"+request+".json") as out_json:
+		json_dict=json.load(out_json)
+	
+	
+	try:
+		json_dict["error"]
+	
+	except KeyError:
+		print ""
+		header=["SNP","Position (GRCh37)","Arrays"]
+		print "\t".join(header)
+		for k in sorted(json_dict.keys()):
+			if k!="error" and k!="warning":
+				print "\t".join(json_dict[k])
+
+		try:
+			json_dict["warning"]
+		except KeyError:
+			print ""
+		else:
+			print ""
+			print "WARNING: "+json_dict["warning"]+"!"
+			print ""
+	
+	
+	else:
+		print ""
+		print json_dict["error"]
+		print ""
 
 
-#Insert function: Inserts position and chromsome/platform pairs for each position
-def Insert(file,db):
-	db.snp_col.create_index("pos")
-	snp_data=csv.reader(open(file))
-	platform=(os.path.splitext(os.path.basename(file))[0])
-	platform=platform[:-8]
-	print platform
-	db.platforms.insert(
-    		{ "platform": platform},
-		)	
-	for coord in snp_data:
-		Chr=coord[0].split(":")[0].strip("chr")
-		position=coord[0].split("-")[1]
-		db.snp_col.update(
-    		{ "pos": position },
-    		{ "$addToSet" : { "data" : { "$each" :[ { "chr" : Chr, "platform" :platform} ] } } },
-    		upsert=True,
-		)
-	print "finished "+platform
 
-main(sys.argv[1:])
-
-
+if __name__ == "__main__":
+	main()
