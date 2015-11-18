@@ -9,13 +9,35 @@ import os
 import bson.regex
 import json
 import json,operator,sqlite3,os
+contents=open("SNP_Query_loginInfo.txt").read().split('\n')
+username=contents[0].split('=')[1]
+password=contents[1].split('=')[1]
+Database=contents[2].split('=')[1]
 
-# Create SNPchip function
-def calculate_chip(snplst,request):
-	contents=open("SNP_Query_loginInfo.txt").read().split('\n')
-	username=contents[0].split('=')[1]
-	password=contents[1].split('=')[1]
-	Database=contents[2].split('=')[1]
+def get_platform_request():
+	client = MongoClient()
+	client = MongoClient('localhost', 27017)
+	
+        client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+	db = client[Database]
+	cursor=db.platforms.find({"platform":{'$regex':'.*'}})
+	platforms={}
+	for document in cursor:
+		platforms[document["code"]]=document["platform"]
+	json_output=json.dumps(platforms, sort_keys=True, indent=2)	
+	return json_output
+
+# Create SNPchip function	
+def convert_codeToPlatforms(platform_query,db):
+	platforms=[]
+	code_array=platform_query.split('+')
+	cursor=db.platforms.find( { "code": { '$in': code_array } } )
+	for document in cursor:
+		platforms.append(document["platform"])	
+	return platforms
+
+def calculate_chip(snplst,platform_query,request):
+
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	snp_dir=data_dir+"snp142/snp142_annot_2.db"
@@ -112,19 +134,28 @@ def calculate_chip(snplst,request):
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client[Database]
-
+	platforms=[]
+	if platform_query != "": #<--If user did not enter platforms as a request
+			platform_list=convert_codeToPlatforms(platform_query,db)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
 		position=str(snp_coords_sort[k][2])
 		Chr=str(snp_coords_sort[k][1])
-		cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]} ) #Json object that stores all the results
-		platforms=[]
-		#Parsing each docuemnt to retrieve platforms 
+		if platform_query == "": #<--If user did not enter platforms as a request
+			print "null"
+			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]} ) #Json object that stores all the results
+
+		elif platform_query != "": #<--If user did not enter platforms as a request
+			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform":{"$in":platform_list}}]} ) #Json object that stores all the results
+				#Parsing each docuemnt to retrieve platforms 
 		for document in cursor:	
 			for z in range(0,len(document["data"])):
-				if(document["data"][z]["chr"]==Chr):
+				if(document["data"][z]["chr"]==Chr and document["data"][z]["platform"] in platform_list and platform_query!=""):
+					platforms.append(document["data"][z]["platform"])
+				elif(document["data"][z]["chr"]==Chr and platform_query==""):
 					platforms.append(document["data"][z]["platform"])
 		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
+
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
@@ -136,16 +167,17 @@ def main():
 	import json,sys
 	
 	# Import SNPchip options
-	if len(sys.argv)==3:
+	if len(sys.argv)==4:
 		snplst=sys.argv[1]
-		request=sys.argv[2]
+		platform_query=sys.argv[2]
+		request=sys.argv[3]
 	else:
-		print "Correct useage is: SNPclip.py snplst request"
+		print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwiese seperate each platform by a \"+\""
 		sys.exit()
 		
 	
 	# Run function
-	calculate_chip(snplst,request)
+	calculate_chip(snplst,platform_query,request)
 	
 	
 	# Print output
