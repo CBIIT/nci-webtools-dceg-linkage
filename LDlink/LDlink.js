@@ -700,6 +700,7 @@ function updateSNPchip() {
 
 	var ldInputs = {
 		snps : snps,
+		platforms: "I1+I2",
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
 

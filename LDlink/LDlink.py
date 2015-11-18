@@ -253,14 +253,15 @@ def ldchip():
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
     print "Hello CHIP"
-
     print
     print 'Execute snpchip'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
+    platforms = request.args.get('platforms', False)
     reference = request.args.get('reference', False)
     print 'snps: ' + snps
+    print 'platforms: ' + platforms
     print 'request: ' + reference
 
     snplst = tmp_dir+'snps'+reference+'.txt'
@@ -272,7 +273,7 @@ def ldchip():
 
     return "Hello"
 
-    (snps,snp_list,details) = calculate_chip(snplst,reference)
+    (snps,snp_list,details) = calculate_chip(snplst,platforms,reference)
 
     clip={}
     clip["snp_list"] = snp_list
@@ -292,6 +293,13 @@ def ldchip():
     mimetype = 'application/json'
 
     return current_app.response_class(out_json, mimetype=mimetype)
+
+
+@app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
+def snpchip_platforms():
+
+    return "Your platforms"
+
 
 @app.route('/LDlinkRest/test', methods=['GET', 'POST'])
 def test():
