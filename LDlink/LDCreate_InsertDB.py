@@ -31,15 +31,20 @@ def main(argv):
 	client = MongoClient('localhost', 27017)
 	client.admin.authenticate(user, password, mechanism='SCRAM-SHA-1')
 	db = client.LDLink_sandbox
-
-
+	contents=open("platforms_abbr.txt").read().split('\n')
+	dictionary = {}
+	#Storing abbreviations in a dictionary to store in database
+	for i in range(len(contents)):
+		desciption=contents[i].split('\t')[0]
+		abbr=contents[i].split('\t')[1]
+		dictionary[desciption] = abbr
 	if(multiple==True):
-		Multi(input,db)              
+		Multi(input,db,dictionary)              
 	else:
-		Single(input,db)
+		Single(input,db,dictionary)
 	
 #if inserting a folder
-def Multi(folder,db):
+def Multi(folder,db,dictionary):
 	
 	# Manifest Info
 	manifest_file=os.listdir(folder)
@@ -50,26 +55,43 @@ def Multi(folder,db):
 		manifest_file[k]=folder+manifest_file[k]
 
 	for i in range(len(manifest)):
-		Insert(manifest_file[i],db)			
+		Insert(manifest_file[i],db,dictionary)			
 		
 #If inserting a single file
-def Single(file,db):
+def Single(file,db,dictionary):
 	Insert(file,db)
 
+def Insert_Platform(platform,dictionary,db):
+	db.platforms.update(
+		{ "platform": platform},
+		{ "$set" : { "code":"" }},
+		upsert=True,
+	)
+	if platform in dictionary:
+		db.platforms.update(
+			{ "platform": platform},
+			{ "$set" : { "code" : dictionary[platform]} },
+			upsert=True,
+		)
+	
 #Insert function: Inserts position and chromsome/platform pairs for each position
-def Insert(file,db):
+def Insert(file,db,dictionary):
 	db.snp_col.create_index("pos")
 	snp_data=csv.reader(open(file))
 	platform=(os.path.splitext(os.path.basename(file))[0])
-	print platform			
-	for coord in snp_data:
-		Chr=coord[0].split(":")[0].strip("chr")
-		position=coord[0].split("-")[1]
-		db.snp_col.update(
-    		{ "pos": position },
-    		{ "$addToSet" : { "data" : { "$each" :[ { "chr" : Chr, "platform" :platform} ] } } },
-    		upsert=True,
-		)
-	print "finished "+platform
+	platform=platform[:-8]
+	print platform
+	Insert_Platform(platform,dictionary,db)
+#	for coord in snp_data:
+#		Chr=coord[0].split(":")[0].strip("chr")
+#		position=coord[0].split("-")[1]
+#		db.snp_col.update(
+#    		{ "pos": position },
+#    		{ "$addToSet" : { "data" : { "$each" :[ { "chr" : Chr, "platform" :platform} ] } } },
+#    		upsert=True,
+#		)
+#	print "finished "+platform
 
 main(sys.argv[1:])
+
+
