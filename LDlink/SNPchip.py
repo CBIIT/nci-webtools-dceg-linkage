@@ -135,6 +135,7 @@ def calculate_chip(snplst,platform_query,request):
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client[Database]
 	platforms=[]
+	platform_list=[]
 	if platform_query != "": #<--If user did not enter platforms as a request
 			platform_list=convert_codeToPlatforms(platform_query,db)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
