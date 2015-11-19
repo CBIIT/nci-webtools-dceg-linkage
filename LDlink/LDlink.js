@@ -691,16 +691,18 @@ function updateSNPclip() {
 function updateSNPchip() {
 
 	var id = "snpchip";
-	console.warn("Got an updateSNPchip");
+	console.warn("Attempting to call updateSNPchip");
 
 	var $btn = $('#' + id).button('loading');
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-
+	var	platforms=  $('#'+id+'-platform-list').val();
+	console.warn("platforms selected by user:");
+	console.dir(platforms);
 	//var population = getPopulationCodes(id+'-population-codes');
 
 	var ldInputs = {
 		snps : snps,
-		platforms: "I1+I2",
+		platforms: platforms.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
 
@@ -748,9 +750,12 @@ function updateSNPchip() {
 }
 
 function initChip(data) {
-	console.warn("initChip()");
 	console.warn(data);
-	console.dir(snpchipData);
+	var snpChip = JSON.parse(data);
+	console.warn("initChip()");
+	console.dir(snpChip);
+
+	//#console.dir(snpchipData);
 
 }
 

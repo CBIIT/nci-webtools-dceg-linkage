@@ -271,25 +271,23 @@ def ldchip():
     f.write(snps)
     f.close()
 
-    return "Hello"
+    #return "Hello"
 
-    (snps,snp_list,details) = calculate_chip(snplst,platforms,reference)
+    snp_chip = calculate_chip(snplst,platforms,reference)
 
-    clip={}
-    clip["snp_list"] = snp_list
-    clip["details"] = details
+    chip={}
+    chip["snp_chip"] = snp_chip
 
-    print "snps"
-    dir(snps)
-    print snps
-    print "snp_list"
-    dir(snp_list)
-    print snp_list
-    print "details"
-    dir(snps)
-    print details
+    print "snp_chip"
+    dir(snp_chip)
+    print snp_chip
+    print "chip"
+    dir(chip)
+    print chip
 
-    out_json = json.dumps(clip, sort_keys=True, indent=2)
+    #out_json = json.dumps(chip, sort_keys=True, indent=2)
+    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+
     mimetype = 'application/json'
 
     return current_app.response_class(out_json, mimetype=mimetype)
