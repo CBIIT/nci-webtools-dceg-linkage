@@ -20,11 +20,11 @@ def get_platform_request():
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client[Database]
-	cursor=db.platforms.find({"platform":{'$regex':'.*'}})
+	cursor=db.platforms.find({"platform":{'$regex':'.*'}}).sort("platform",-1)
 	platforms={}
 	for document in cursor:
 		platforms[document["code"]]=document["platform"]
-	json_output=json.dumps(platforms, sort_keys=True, indent=2)	
+	json_output=json.dumps(platforms, sort_keys=True, indent=2)
 	return json_output
 
 # Create SNPchip function	
