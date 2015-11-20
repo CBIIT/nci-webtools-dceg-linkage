@@ -18,7 +18,7 @@ from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from SNPclip import calculate_clip
-from SNPchip import calculate_chip
+from SNPchip import *
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -273,7 +273,8 @@ def ldchip():
 
     #return "Hello"
 
-    snp_chip = calculate_chip(snplst,platforms,reference)
+    #snp_chip = calculate_chip(snplst,platforms,reference)
+    snp_chip = calculate_chip(snplst,"",reference)
 
     chip={}
     chip["snp_chip"] = snp_chip
@@ -295,8 +296,8 @@ def ldchip():
 
 @app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
 def snpchip_platforms():
-
-    return "Your platforms"
+    
+    return get_platform_request()
 
 
 @app.route('/LDlinkRest/test', methods=['GET', 'POST'])

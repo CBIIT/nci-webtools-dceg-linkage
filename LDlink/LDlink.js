@@ -223,9 +223,7 @@ $(document).on(
 	}
 );
 function setupSNPchipControls() {
-
-	buildPopulationDropdownSNPchip("snpchip-platform-list");
-
+	initChip();
 }
 
 function setupSNPclipControls() {
@@ -721,7 +719,7 @@ function updateSNPchip() {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
 			$('#'+id+"-loading").hide();
-			initChip(data);
+			loadSNPChip(data);
 		}
 	});
 	ajaxRequest
@@ -749,13 +747,49 @@ function updateSNPchip() {
 	hideLoadingIcon(ajaxRequest, id);
 }
 
-function initChip(data) {
-	console.warn(data);
-	var snpChip = JSON.parse(data);
-	console.warn("initChip()");
-	console.dir(snpChip);
+function initChip() {
+	//Setup the platform
+	var id = "snpchip";
 
-	//#console.dir(snpchipData);
+	var ldInputs = {
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+	};
+
+	var url = restServerUrl + "/snpchip_platforms";
+	var ajaxRequest = $.ajax({
+		type : 'GET',
+		url : url,
+		data : ldInputs,
+		contentType : 'application/json' // JSON
+	});
+
+	ajaxRequest.success(function(data) {
+		if (displayError(id, data) == false) {
+			buildPopulationDropdownSNPchip(data);
+		}
+	});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		console.log("header: "+ jqXHR+ "\nStatus: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		message = 'Service Unavailable: ' + textStatus + "<br>";
+		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+		message += "Unable to retrieve platform codes from the server."
+		$('#' + id + '-message').show();
+		$('#' + id + '-message-content').empty().append(message);
+		$('#' + id + '-progress').hide();
+		$('#' + id+ '-results-container').hide();
+		//hide loading icon
+		$('#'+id+"-loading").hide();
+	});
+
+}
+
+function loadSNPChip(data) {
+	//Setup data and display
+
+	//Detail
+	ko.mapping.fromJS(data, snpchipModel);
+
+	//Warnings...
 
 }
 
@@ -1499,8 +1533,17 @@ function addLDpairHyperLinks(data) {
 
 }
 
-function buildPopulationDropdownSNPchip(elementId) {
+function buildPopulationDropdownSNPchip(data) {
 
+	console.log("buildPopulationDropdownSNPchip()");
+	console.dir(JSON.parse(data));
+	var platforms = JSON.parse(data);
+	var illumina = [];
+	var illumina = [];
+	$.each( platforms, function( code, description ) {
+		console.log("code: "+code+":"+description);
+	});
+	var elementId = 'snpchip-platform-list';
 	var snpchip_platform_list = {"Illumina": {"I1": "Illumina Human-1","I2": "Illumina HumanHap240S","I3": "Illumina HumanHap300","IC": "Illumina Human370CNV single","ICQ": "Illumina Human370CNV quad","I5": "Illumina HumanHap550","I6": "Illumina HumanHap550"},"Affymetrix": {"AX": "Affymetrix 50K Mapping Xbal","AH": "Affymetrix 50K Mapping Hindlll","HG": "Affymetrix 50K Human Gene Focused chip","AN": "Affymetrix 250K Mapping Nspl","AS": "Affymetrix 250K Mapping Styl","A5": "Affymetrix 5.0","A6": "Affymetrix 5.0"}};
 	console.log("snpchip_platform_list");
 	console.dir(snpchip_platform_list);
