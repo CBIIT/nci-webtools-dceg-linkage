@@ -279,13 +279,6 @@ def ldchip():
     chip={}
     chip["snp_chip"] = snp_chip
 
-    print "snp_chip"
-    dir(snp_chip)
-    print snp_chip
-    print "chip"
-    dir(chip)
-    print chip
-
     #out_json = json.dumps(chip, sort_keys=True, indent=2)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
 

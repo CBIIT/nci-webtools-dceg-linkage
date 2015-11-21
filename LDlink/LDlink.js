@@ -15,52 +15,8 @@ var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Co
 //var ldClipData1={details:{rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]},snp_list:["rs11322783","rs8099917","rs955155","rs8101517","rs12980602","rs78605718"]};
 var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
 //var ldClipData = {warnings:[],details:[]};
-var snpclipData = {
-"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],
-"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]
-};
-
+var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]};
 var snpchipData = {"snpchip":[{"rs_number":"rs383","position":"13:32504939","map":["X","","X","X",""]},{"rs_number":"rs384","position":"13:32505201","map":["X","","X","X",""]}],"headers":["Affymetrix Axiom GW CHB2","Affymetrix Mapping 250K Nsp","Affymetrix SNP 5.0","Affymetrix SNP 6.0","Illumina Human1M-Duov3","Illumina Human1Mv1","Illumina Human610-Quadv1","Illumina Human660W-Quadv1","Illumina HumanCNV370-Duov1","Illumina HumanCNV370-Quadv3","Illumina HumanCore-12v1","Illumina HumanCoreExome-12v1","Illumina HumanCoreExome-12v1.1","Illumina HumanCoreExome-24v1","Illumina HumanCoreExome-24v1.1","Illumina HumanHap300-Duov2","Illumina HumanHap300v1","Illumina HumanHap550v1","Illumina HumanHap550v3","Illumina HumanHap650Yv3","Illumina HumanOmni1-Quadv1","Illumina HumanOmni2.5-4v1","Illumina HumanOmni2.5-8v1.2","Illumina HumanOmni2.5Exome-8v1","Illumina HumanOmni2.5Exome-8v1.1","Illumina HumanOmni2.5Exome-8v1.2","Illumina HumanOmni5-4v1","Illumina HumanOmni5Exome-4v1","Illumina HumanOmniExpress-12v1","Illumina HumanOmniExpress-12v1 FFPE","Illumina HumanOmniExpress-24v1","Illumina HumanOmniExpressExome-8v1","Illumina HumanOmniExpressExome-8v1.1","Illumina HumanOmniExpressExome-8v1.2","Illumina HumanOmniExpressExome-8v1.3","Illumina HumanOmniZhongHua-8v1","Illumina HumanOmniZhongHua-8v1.1","Illumina HumanOmniZhongHua-8v1.2","Illumina Infinium CytoSNP-850K","Illumina Infinium Multi-Ethnic Global-8","Illumina Infinium OncoArray-500K","Illumina Infinium PsychArray-24v1","Illumina Infinium PsychArray-24v1.1"]};
-
-var old2_snpchipData = {"snpchip":{"0":["rs383","13:32504939","Affymetrix SNP 5.0,Illumina HumanOmniExpress-24v1,Illumina HumanOmni2.5Exome-8v1.2,Affymetrix Axiom GW CHB2,Illumina HumanOmni2.5Exome-8v1,Illumina HumanOmni2.5-4v1,Illumina HumanHap300v1,Illumina HumanOmniExpressExome-8v1.1,Illumina HumanOmni5Exome-4v1,Illumina HumanOmniZhongHua-8v1,Illumina HumanCoreExome-24v1,Illumina Infinium CytoSNP-850K,Illumina Infinium PsychArray-24v1,Illumina HumanOmniZhongHua-8v1.1,Illumina HumanOmniExpress-12v1,Affymetrix Mapping 250K Nsp,Illumina HumanCNV370-Duov1,Illumina HumanOmni1-Quadv1,Illumina Infinium OncoArray-500K,Illumina Infinium PsychArray-24v1.1,Illumina HumanOmni2.5-8v1.2,Illumina HumanCNV370-Quadv3,Illumina HumanCore-12v1,Illumina HumanOmniExpressExome-8v1.3,Illumina HumanCoreExome-12v1.1,Illumina HumanOmniExpressExome-8v1.2,Illumina Human1Mv1,Illumina HumanOmniZhongHua-8v1.2,Illumina Infinium Multi-Ethnic Global-8,Illumina HumanOmniExpressExome-8v1,Illumina Human660W-Quadv1,Illumina Human610-Quadv1,Illumina Human1M-Duov3,Illumina HumanHap550v3,Illumina HumanCoreExome-12v1,Illumina HumanHap300-Duov2,Illumina HumanOmniExpress-12v1 FFPE,Affymetrix SNP 6.0,Illumina HumanHap550v1,Illumina HumanOmni5-4v1,Illumina HumanOmni2.5Exome-8v1.1,Illumina HumanCoreExome-24v1.1,Illumina HumanHap650Yv3"],"1":["rs384","13:32505201","Affymetrix SNP 5.0,Illumina HumanOmniExpress-24v1,Illumina HumanOmni2.5Exome-8v1.2,Affymetrix Axiom GW CHB2,Illumina HumanOmni2.5Exome-8v1,Illumina HumanOmni2.5-4v1,Illumina HumanHap300v1,Illumina HumanOmniExpressExome-8v1.1,Illumina HumanOmni5Exome-4v1,Illumina HumanOmniZhongHua-8v1,Illumina HumanCoreExome-24v1,Illumina Infinium CytoSNP-850K,Illumina Infinium PsychArray-24v1,Illumina HumanOmniZhongHua-8v1.1,Illumina HumanOmniExpress-12v1,Affymetrix Mapping 250K Nsp,Illumina HumanCNV370-Duov1,Illumina HumanOmni1-Quadv1,Illumina Infinium OncoArray-500K,Illumina Infinium PsychArray-24v1.1,Illumina HumanOmni2.5-8v1.2,Illumina HumanCNV370-Quadv3,Illumina HumanCore-12v1,Illumina HumanOmniExpressExome-8v1.3,Illumina HumanCoreExome-12v1.1,Illumina HumanOmniExpressExome-8v1.2,Illumina Human1Mv1,Illumina HumanOmniZhongHua-8v1.2,Illumina Infinium Multi-Ethnic Global-8,Illumina HumanOmniExpressExome-8v1,Illumina Human660W-Quadv1,Illumina Human610-Quadv1,Illumina Human1M-Duov3,Illumina HumanHap550v3,Illumina HumanCoreExome-12v1,Illumina HumanHap300-Duov2,Illumina HumanOmniExpress-12v1 FFPE,Affymetrix SNP 6.0,Illumina HumanHap550v1,Illumina HumanOmni5-4v1,Illumina HumanOmni2.5Exome-8v1.1,Illumina HumanCoreExome-24v1.1,Illumina HumanHap650Yv3,Illumina HumanOmniExpress-24v1,Illumina HumanOmni2.5Exome-8v1.2,Illumina HumanOmni2.5Exome-8v1,Illumina HumanOmni2.5-4v1,Illumina HumanOmniExpressExome-8v1.1,Illumina HumanOmni5Exome-4v1,Illumina HumanOmniZhongHua-8v1,Illumina Infinium CytoSNP-850K,Illumina HumanOmniZhongHua-8v1.1,Illumina HumanOmniExpress-12v1,Illumina HumanOmni1-Quadv1,Illumina HumanOmni2.5-8v1.2,Illumina HumanOmniExpressExome-8v1.3,Illumina HumanOmniExpressExome-8v1.2,Illumina HumanOmniZhongHua-8v1.2,Illumina HumanOmniExpressExome-8v1,Illumina HumanOmniExpress-12v1 FFPE,Illumina HumanOmni5-4v1,Illumina HumanOmni2.5Exome-8v1.1"]},"headers":["Affymetrix Axiom GW CHB2","Affymetrix Mapping 250K Nsp","Affymetrix SNP 5.0","Affymetrix SNP 6.0","Illumina Human1M-Duov3","Illumina Human1Mv1","Illumina Human610-Quadv1","Illumina Human660W-Quadv1","Illumina HumanCNV370-Duov1","Illumina HumanCNV370-Quadv3","Illumina HumanCore-12v1","Illumina HumanCoreExome-12v1","Illumina HumanCoreExome-12v1.1","Illumina HumanCoreExome-24v1","Illumina HumanCoreExome-24v1.1","Illumina HumanHap300-Duov2","Illumina HumanHap300v1","Illumina HumanHap550v1","Illumina HumanHap550v3","Illumina HumanHap650Yv3","Illumina HumanOmni1-Quadv1","Illumina HumanOmni2.5-4v1","Illumina HumanOmni2.5-8v1.2","Illumina HumanOmni2.5Exome-8v1","Illumina HumanOmni2.5Exome-8v1.1","Illumina HumanOmni2.5Exome-8v1.2","Illumina HumanOmni5-4v1","Illumina HumanOmni5Exome-4v1","Illumina HumanOmniExpress-12v1","Illumina HumanOmniExpress-12v1 FFPE","Illumina HumanOmniExpress-24v1","Illumina HumanOmniExpressExome-8v1","Illumina HumanOmniExpressExome-8v1.1","Illumina HumanOmniExpressExome-8v1.2","Illumina HumanOmniExpressExome-8v1.3","Illumina HumanOmniZhongHua-8v1","Illumina HumanOmniZhongHua-8v1.1","Illumina HumanOmniZhongHua-8v1.2","Illumina Infinium CytoSNP-850K","Illumina Infinium Multi-Ethnic Global-8","Illumina Infinium OncoArray-500K","Illumina Infinium PsychArray-24v1","Illumina Infinium PsychArray-24v1.1"]}
-;
-
-console.dir(snpchipData);
-
-var old_snpchipData = {
-  "snp_0": [
-    "rs17724992",
-    "7:103489447",
-    "Affymetrix Axiom GW EUR_build37  Affymetrix Axiom GW ASI_build37 "
-  ],
-  "snp_1": [
-    "rs29941",
-    "4:164934874",
-    "Affymetrix Axiom Exome 1A_build37  Affymetrix Axiom GW CHB2_build37  Affymetrix Axiom GW AFR_build37  Affymetrix Axiom Exome 319_build37  Affymetrix Axiom GW Hu-CHB_build37  Affymetrix Axiom GW EUR_build37  Affymetrix Axiom GW ASI_build37  Affymetrix Axiom GW EAS_build37  Illumina Human1M-Duov3_build37  Affymetrix Axiom GW Hu_build37  Affymetrix SNP 6.0_build37  Affymetrix Axiom GW LAT_build37  Illumina Human1Mv1_build37  Illumina Human610-Quadv1_build37  Illumina Human660W-Quadv1_build37  Illumina HumanCNV370-Duov1_build37 "
-  ],
-  "snp_2": [
-    "rs2075650",
-    "5:462821199",
-    ""
-  ],
-  "snp_3": [
-    "rs11672660",
-    "5:163542505",
-    "Affymetrix Axiom Exome 1A_build37  Affymetrix Axiom GW CHB2_build37  Affymetrix Axiom GW AFR_build37  Affymetrix Axiom Exome 319_build37  Affymetrix Axiom GW Hu-CHB_build37  Affymetrix Axiom GW EUR_build37  Affymetrix Axiom GW ASI_build37  Affymetrix Axiom GW EAS_build37  Affymetrix Axiom GW Hu_build37  Affymetrix Axiom GW LAT_build37 "
-  ],
-  "snp_4": [
-    "rs2287019",
-    "14:2993645",
-    ""
-  ],
-  "snp_5": [
-    "rs3810291",
-    "2:44000834",
-    ""
-  ]
-};
-
-
 var ldClipRaw;
 var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip" ];
 
@@ -152,7 +108,7 @@ $(document).ready(function() {
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		//$("#" + id + "-results-container").hide();
+		$("#" + id + "-results-container").hide();
 		$('#' + id + '-message').hide();
 		$('#' + id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
@@ -267,22 +223,16 @@ function setupTabs() {
 	//Look for a tab variable on the url
 	var url = "{tab:''}";
 	var search = location.search.substring(1);
-	//console.log(location.search);
-	//console.log(search);
 	if(search.length >0 ) {
 		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
 	}
 
-	//console.log(url);
-	//console.dir(url);
 	var currentTab;
 	if(typeof url.tab !="undefined") {
 		currentTab = url.tab.toLowerCase();
 	} else {
 		currentTab = 'home';
 	}
-
-	//console.log("Tab: "+currentTab);
 
 	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
 	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
@@ -329,17 +279,14 @@ var snpclipModel = ko.mapping.fromJS(snpclipData);
 var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
-    table = $(tableId).dataTable();
-    oSettings = table.fnSettings();
-
-    table.fnClearTable(this);
-
-    for (var i=0; i<json.aaData.length; i++) {
-      table.oApi._fnAddData(oSettings, json.aaData[i]);
-    }
-
-    oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
-    table.fnDraw();
+	table = $(tableId).dataTable();
+	oSettings = table.fnSettings();
+	table.fnClearTable(this);
+	for (var i=0; i<json.aaData.length; i++) {
+	  table.oApi._fnAddData(oSettings, json.aaData[i]);
+	}
+	oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+	table.fnDraw();
 }
 
 
@@ -399,10 +346,7 @@ function ldproxy_position_link(data, type, row ) {
 	};
 	var href = server + "?" + $.param(params);
 	var target = 'position_' + Math.floor(Math.random() * (99999 - 10000 + 1));
-	//console.log("url: "+url);
-	//$('#ldproxy-link').attr('href', url);
 	var link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
-	//return data +' ('+ row[3]+')';
 
 	return link;
 }
@@ -488,6 +432,7 @@ function calculate(e) {
 	initCalculate(id);
 	updateData(id);
 }
+
 function initCalculate(id) {
 	$('#' + id + '-results-container').hide();
 	$('#' + id + '-message').hide();
@@ -767,23 +712,20 @@ function initChip() {
 
 function loadSNPChip(data) {
 	//Setup data and display
-	var all_platforms_used = [];
-	var snp_platforms = [{
-		"snpchip":{},
-		"headers":{},
-		"warning":"",
-		"error":""
-	}];
+	//snpchipData = [];
+	// = "This is about error";
+	delete snpchipData["warning"];
+	delete snpchipData["error"];
+
 	var snpchip = JSON.parse(data);
+	var all_platforms_used = [];
 	var newchip = [];
-	var obj;
 	var snpData;
-	console.log("loadSNPChip");
-	//console.dir(JSON.parse(data));
+	var obj;
+
 	$.each(snpchip, function(row, detail){
 		if(row.search("warning")>=0 ||row.search("error")>=0) {
 			//Print the warning somewhere on the screen.
-			console.log("row:"+row+" detail: "+detail);
 			if(row.search("warning")>=0) {
 				snpchipData["warning"] = detail;
 			}
@@ -800,16 +742,11 @@ function loadSNPChip(data) {
 		}
 	});
 
-	console.log("platforms all count: "+all_platforms_used.length);
-	//console.dir(all_platforms_used);
 	//Find the unique one from all of the platforms
-	//console.time('a');
 	var used_platforms
 	var platform_list = all_platforms_used.unique();
 	var map = [];
-	//console.timeEnd('a');
 	platform_list.sort();
-	//console.dir(platform_list);
 	//Now that we have the platform list... Map each platform.
 	$.each(snpchip, function(row, detail){
 		//Walk throught the platform_list and determine if it has the list... create a map for the table.
@@ -832,26 +769,12 @@ function loadSNPChip(data) {
 
 	snpchipData["snpchip"] = newchip;
 	snpchipData["headers"] = platform_list;
-	//snpchipData["error"] = "This is about error";
 
-	console.log("platforms list count: "+platform_list.length);
-
-	//platform_list.sort();
-	//console.dir(snpchipData);
-	//console.log(JSON.stringify(snpchipData));
-
-	//remove warning, error, and gather list of platforms
-	//Detail
+	// = "This is about error";
+	console.dir(snpchipData);
 
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
-	//Warnings...
-	/*
-	if (typeof snpchipData.warning !== 'undefined' && snpchipData.warning.length > 0) {
-		$('#snpchip-message-warning-content').text(snpchipData.warning);
-		$('#snpchip-message-warning').show();
-	}
-	*/
 	checkAlert("snpchip", snpchipData.warning, "warning", true);
 	checkAlert("snpchip", snpchipData.error, "error", false);
 
@@ -865,6 +788,7 @@ function checkAlert(elementId, message, type, displayResults) {
 	} else {
 		prefix = elementId+'-message';
 	}
+	$('#'+prefix).hide();
 
 	if (typeof message !== 'undefined' && message.length > 0) {
 		$('#'+prefix+'-content').text(message);
