@@ -1011,19 +1011,19 @@
 					</div>
 					<!-- Message ERROR -->
 					<div class="row">
-						<div class="col-sm-7 col-sm-offset-2" id="snpchip-message">
+						<div id="snpchip-message" class="col-sm-7 col-sm-offset-2">
 							<div class="panel panel-danger">
 									<div class="panel-heading">Error</div>
-								<div class="panel-body" id="snpchip-message-content"></div>
+								<div id="snpchip-message-content" class="panel-body"></div>
 							</div>
 						</div>
 					</div>
 					<!-- Message WARNING -->
 					<div class="row">
-						<div class="col-sm-7 col-sm-offset-2" id="snpchip-message-warning">
+						<div id="snpchip-message-warning" class="col-sm-7 col-sm-offset-2">
 							<div class="panel panel-warning">
 								<div class="panel-heading">Warning</div>
-								<div class="panel-body" id="snpchip-message-warning-content">
+								<div id="snpchip-message-warning-content" class="panel-body">
 								</div>
 							</div>
 						</div>
@@ -1034,51 +1034,39 @@
 					<div class="container-fluid" id="snpchip-results-container">
 						<div id="snpclip-table-container" class="row">
 							<div class="col-sm-11 col-md-11 snpclip-table-scroller">
-								<table id="snpchip-warnings" class="table table-striped">
+								<table id="snpchip-warnings" class="">
 									<caption>SNP Clip List</caption>
 									<thead>
 										<tr>
-											<td>RS Number</td>
-											<td>Chromosome</td>
-											<td>Position (GRCh37)</td>
-											<td>Array 1</td>
-											<td>Array 2</td>
-											<td>Array 3</td>
+											<th>RS Number</th>
+											<th>Chromosome</th>
+											<th>Position (GRCh37)</th>
+											<!-- ko foreach: headers -->
+												<th class="rotate"><div><span data-bind="text: $data"></span></div></th>
+											<!-- /ko -->
 										</tr>
 									</thead>
-									<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
-										<tr>
-											<td>rs74423</td>
+									<tbody style="border: 1px solid #ccc;">
+										<!--
+										<tr data-bind="foreach: snpchip">
+											<td nowrap data-bind="text: snpchip[0][0]">Hello</td>
 											<td>4</td>
 											<td>2383784</td>
-											<td>x</td>
+											<td style="text-align:right">x</td>
 											<td></td>
 											<td></td>
 										</tr>
+										-->
+										<!-- ko foreach: snpchip -->
 										<tr>
-											<td>rs75423</td>
+											<td data-bind="text: rs_number"></td>
 											<td>4</td>
-											<td>32344</td>
-											<td></td>
-											<td>x</td>
-											<td>x</td>
+											<td data-bind="text: position"></td>
+											<!-- ko foreach: map -->
+												<td style="text-align:right" data-bind="text: $data"></td>
+											<!-- /ko -->
 										</tr>
-										<tr>
-											<td>rs23432</td>
-											<td>4</td>
-											<td>13383784</td>
-											<td></td>
-											<td>x</td>
-											<td>x</td>
-										</tr>
-										<tr>
-											<td>rs32432</td>
-											<td>4</td>
-											<td>2383784</td>
-											<td>x</td>
-											<td></td>
-											<td></td>
-										</tr>
+										<!-- /ko -->
 									</tbody>
 								</table>
 							</div>

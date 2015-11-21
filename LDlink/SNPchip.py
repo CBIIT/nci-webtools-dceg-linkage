@@ -155,7 +155,7 @@ def calculate_chip(snplst,platform_query,request):
 					platforms.append(document["data"][z]["platform"])
 				elif(document["data"][z]["chr"]==Chr and platform_query==""):
 					platforms.append(document["data"][z]["platform"])
-		output['snp_'+str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
+		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)

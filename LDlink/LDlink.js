@@ -20,7 +20,14 @@ var snpclipData = {
 "details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]
 };
 
-var snpchipData = {
+var snpchipData = {"snpchip":[{"rs_number":"rs383","position":"13:32504939","map":["X","","X","X",""]},{"rs_number":"rs384","position":"13:32505201","map":["X","","X","X",""]}],"headers":["Affymetrix Axiom GW CHB2","Affymetrix Mapping 250K Nsp","Affymetrix SNP 5.0","Affymetrix SNP 6.0","Illumina Human1M-Duov3","Illumina Human1Mv1","Illumina Human610-Quadv1","Illumina Human660W-Quadv1","Illumina HumanCNV370-Duov1","Illumina HumanCNV370-Quadv3","Illumina HumanCore-12v1","Illumina HumanCoreExome-12v1","Illumina HumanCoreExome-12v1.1","Illumina HumanCoreExome-24v1","Illumina HumanCoreExome-24v1.1","Illumina HumanHap300-Duov2","Illumina HumanHap300v1","Illumina HumanHap550v1","Illumina HumanHap550v3","Illumina HumanHap650Yv3","Illumina HumanOmni1-Quadv1","Illumina HumanOmni2.5-4v1","Illumina HumanOmni2.5-8v1.2","Illumina HumanOmni2.5Exome-8v1","Illumina HumanOmni2.5Exome-8v1.1","Illumina HumanOmni2.5Exome-8v1.2","Illumina HumanOmni5-4v1","Illumina HumanOmni5Exome-4v1","Illumina HumanOmniExpress-12v1","Illumina HumanOmniExpress-12v1 FFPE","Illumina HumanOmniExpress-24v1","Illumina HumanOmniExpressExome-8v1","Illumina HumanOmniExpressExome-8v1.1","Illumina HumanOmniExpressExome-8v1.2","Illumina HumanOmniExpressExome-8v1.3","Illumina HumanOmniZhongHua-8v1","Illumina HumanOmniZhongHua-8v1.1","Illumina HumanOmniZhongHua-8v1.2","Illumina Infinium CytoSNP-850K","Illumina Infinium Multi-Ethnic Global-8","Illumina Infinium OncoArray-500K","Illumina Infinium PsychArray-24v1","Illumina Infinium PsychArray-24v1.1"]};
+
+var old2_snpchipData = {"snpchip":{"0":["rs383","13:32504939","Affymetrix SNP 5.0,Illumina HumanOmniExpress-24v1,Illumina HumanOmni2.5Exome-8v1.2,Affymetrix Axiom GW CHB2,Illumina HumanOmni2.5Exome-8v1,Illumina HumanOmni2.5-4v1,Illumina HumanHap300v1,Illumina HumanOmniExpressExome-8v1.1,Illumina HumanOmni5Exome-4v1,Illumina HumanOmniZhongHua-8v1,Illumina HumanCoreExome-24v1,Illumina Infinium CytoSNP-850K,Illumina Infinium PsychArray-24v1,Illumina HumanOmniZhongHua-8v1.1,Illumina HumanOmniExpress-12v1,Affymetrix Mapping 250K Nsp,Illumina HumanCNV370-Duov1,Illumina HumanOmni1-Quadv1,Illumina Infinium OncoArray-500K,Illumina Infinium PsychArray-24v1.1,Illumina HumanOmni2.5-8v1.2,Illumina HumanCNV370-Quadv3,Illumina HumanCore-12v1,Illumina HumanOmniExpressExome-8v1.3,Illumina HumanCoreExome-12v1.1,Illumina HumanOmniExpressExome-8v1.2,Illumina Human1Mv1,Illumina HumanOmniZhongHua-8v1.2,Illumina Infinium Multi-Ethnic Global-8,Illumina HumanOmniExpressExome-8v1,Illumina Human660W-Quadv1,Illumina Human610-Quadv1,Illumina Human1M-Duov3,Illumina HumanHap550v3,Illumina HumanCoreExome-12v1,Illumina HumanHap300-Duov2,Illumina HumanOmniExpress-12v1 FFPE,Affymetrix SNP 6.0,Illumina HumanHap550v1,Illumina HumanOmni5-4v1,Illumina HumanOmni2.5Exome-8v1.1,Illumina HumanCoreExome-24v1.1,Illumina HumanHap650Yv3"],"1":["rs384","13:32505201","Affymetrix SNP 5.0,Illumina HumanOmniExpress-24v1,Illumina HumanOmni2.5Exome-8v1.2,Affymetrix Axiom GW CHB2,Illumina HumanOmni2.5Exome-8v1,Illumina HumanOmni2.5-4v1,Illumina HumanHap300v1,Illumina HumanOmniExpressExome-8v1.1,Illumina HumanOmni5Exome-4v1,Illumina HumanOmniZhongHua-8v1,Illumina HumanCoreExome-24v1,Illumina Infinium CytoSNP-850K,Illumina Infinium PsychArray-24v1,Illumina HumanOmniZhongHua-8v1.1,Illumina HumanOmniExpress-12v1,Affymetrix Mapping 250K Nsp,Illumina HumanCNV370-Duov1,Illumina HumanOmni1-Quadv1,Illumina Infinium OncoArray-500K,Illumina Infinium PsychArray-24v1.1,Illumina HumanOmni2.5-8v1.2,Illumina HumanCNV370-Quadv3,Illumina HumanCore-12v1,Illumina HumanOmniExpressExome-8v1.3,Illumina HumanCoreExome-12v1.1,Illumina HumanOmniExpressExome-8v1.2,Illumina Human1Mv1,Illumina HumanOmniZhongHua-8v1.2,Illumina Infinium Multi-Ethnic Global-8,Illumina HumanOmniExpressExome-8v1,Illumina Human660W-Quadv1,Illumina Human610-Quadv1,Illumina Human1M-Duov3,Illumina HumanHap550v3,Illumina HumanCoreExome-12v1,Illumina HumanHap300-Duov2,Illumina HumanOmniExpress-12v1 FFPE,Affymetrix SNP 6.0,Illumina HumanHap550v1,Illumina HumanOmni5-4v1,Illumina HumanOmni2.5Exome-8v1.1,Illumina HumanCoreExome-24v1.1,Illumina HumanHap650Yv3,Illumina HumanOmniExpress-24v1,Illumina HumanOmni2.5Exome-8v1.2,Illumina HumanOmni2.5Exome-8v1,Illumina HumanOmni2.5-4v1,Illumina HumanOmniExpressExome-8v1.1,Illumina HumanOmni5Exome-4v1,Illumina HumanOmniZhongHua-8v1,Illumina Infinium CytoSNP-850K,Illumina HumanOmniZhongHua-8v1.1,Illumina HumanOmniExpress-12v1,Illumina HumanOmni1-Quadv1,Illumina HumanOmni2.5-8v1.2,Illumina HumanOmniExpressExome-8v1.3,Illumina HumanOmniExpressExome-8v1.2,Illumina HumanOmniZhongHua-8v1.2,Illumina HumanOmniExpressExome-8v1,Illumina HumanOmniExpress-12v1 FFPE,Illumina HumanOmni5-4v1,Illumina HumanOmni2.5Exome-8v1.1"]},"headers":["Affymetrix Axiom GW CHB2","Affymetrix Mapping 250K Nsp","Affymetrix SNP 5.0","Affymetrix SNP 6.0","Illumina Human1M-Duov3","Illumina Human1Mv1","Illumina Human610-Quadv1","Illumina Human660W-Quadv1","Illumina HumanCNV370-Duov1","Illumina HumanCNV370-Quadv3","Illumina HumanCore-12v1","Illumina HumanCoreExome-12v1","Illumina HumanCoreExome-12v1.1","Illumina HumanCoreExome-24v1","Illumina HumanCoreExome-24v1.1","Illumina HumanHap300-Duov2","Illumina HumanHap300v1","Illumina HumanHap550v1","Illumina HumanHap550v3","Illumina HumanHap650Yv3","Illumina HumanOmni1-Quadv1","Illumina HumanOmni2.5-4v1","Illumina HumanOmni2.5-8v1.2","Illumina HumanOmni2.5Exome-8v1","Illumina HumanOmni2.5Exome-8v1.1","Illumina HumanOmni2.5Exome-8v1.2","Illumina HumanOmni5-4v1","Illumina HumanOmni5Exome-4v1","Illumina HumanOmniExpress-12v1","Illumina HumanOmniExpress-12v1 FFPE","Illumina HumanOmniExpress-24v1","Illumina HumanOmniExpressExome-8v1","Illumina HumanOmniExpressExome-8v1.1","Illumina HumanOmniExpressExome-8v1.2","Illumina HumanOmniExpressExome-8v1.3","Illumina HumanOmniZhongHua-8v1","Illumina HumanOmniZhongHua-8v1.1","Illumina HumanOmniZhongHua-8v1.2","Illumina Infinium CytoSNP-850K","Illumina Infinium Multi-Ethnic Global-8","Illumina Infinium OncoArray-500K","Illumina Infinium PsychArray-24v1","Illumina Infinium PsychArray-24v1.1"]}
+;
+
+console.dir(snpchipData);
+
+var old_snpchipData = {
   "snp_0": [
     "rs17724992",
     "7:103489447",
@@ -138,9 +145,14 @@ $(document).ready(function() {
 	ko.applyBindings(snpclipModel, document
 			.getElementById('snpclip-results-container'));
 
+	ko.applyBindings(snpchipModel, document
+			.getElementById('snpchip-results-container'));
+	
+	console.dir(snpchipModel);
+
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		$("#" + id + "-results-container").hide();
+		//$("#" + id + "-results-container").hide();
 		$('#' + id + '-message').hide();
 		$('#' + id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
@@ -482,16 +494,13 @@ function initCalculate(id) {
 	$('#' + id + '-message-warning').hide();
 }
 
-function updateData(id, inputs) {
-	console.log('updateData');
-	console.log('inputs:');
-	console.log(inputs);
+function updateData(id) {
 
 	$('#'+id+"-loading").show();
 
 	switch (id) {
 		case 'ldhap':
-			updateLDhap(inputs);
+			updateLDhap();
 			break;
 		case 'ldmatrix':
 			updateLDmatrix();
@@ -511,7 +520,7 @@ function updateData(id, inputs) {
 	}
 }
 
-function updateLDhap(inputs) {
+function updateLDhap() {
 
 	var id = "ldhap";
 
@@ -523,22 +532,6 @@ function updateLDhap(inputs) {
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-/*
-	if(typeof inputs === 'undefined') {
-		var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-		var population = getPopulationCodes(id+'-population-codes');
-		ldInputs = {
-			snps : snps,
-			pop : population.join("+"),
-			reference : Math.floor(Math.random() * (99999 - 10000 + 1))
-		};
-		var newInputs = ldInputs;
-		newInputs.snps = ldInputs.snps.replace(/\t/g, '').replace(/\n/g, '+');
-		pushInputs(id, newInputs);
-	} else {
-		ldInputs = JSON.parse(inputs.replace('+', '\n'));
-	}
-*/
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -689,14 +682,10 @@ function updateSNPclip() {
 function updateSNPchip() {
 
 	var id = "snpchip";
-	console.warn("Attempting to call updateSNPchip");
 
 	var $btn = $('#' + id).button('loading');
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
 	var	platforms=  $('#'+id+'-platform-list').val();
-	console.warn("platforms selected by user:");
-	console.dir(platforms);
-	//var population = getPopulationCodes(id+'-population-codes');
 
 	var ldInputs = {
 		snps : snps,
@@ -722,24 +711,18 @@ function updateSNPchip() {
 			loadSNPChip(data);
 		}
 	});
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				console.log("header: "
-					+ jqXHR
-					+ "\n"
-					+ "Status: "
-					+ textStatus
-					+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		console.log("header: "+jqXHR+"\n"+ "Status: "+ textStatus+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		message = 'Service Unavailable: ' + textStatus + "<br>";
+		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
 
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+		$('#' + id + '-message').show();
+		$('#' + id + '-message-content').empty().append(message);
+		$('#' + id + '-progress').hide();
+		$('#' + id+ '-results-container').hide();
+		//hide loading icon
+		$('#'+id+"-loading").hide();
+	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
@@ -759,7 +742,6 @@ function initChip() {
 	var ajaxRequest = $.ajax({
 		type : 'GET',
 		url : url,
-		data : ldInputs,
 		contentType : 'application/json' // JSON
 	});
 
@@ -785,12 +767,114 @@ function initChip() {
 
 function loadSNPChip(data) {
 	//Setup data and display
+	var all_platforms_used = [];
+	var snp_platforms = [{
+		"snpchip":{},
+		"headers":{},
+		"warning":"",
+		"error":""
+	}];
+	var snpchip = JSON.parse(data);
+	var newchip = [];
+	var obj;
+	var snpData;
+	console.log("loadSNPChip");
+	//console.dir(JSON.parse(data));
+	$.each(snpchip, function(row, detail){
+		if(row.search("warning")>=0 ||row.search("error")>=0) {
+			//Print the warning somewhere on the screen.
+			console.log("row:"+row+" detail: "+detail);
+			if(row.search("warning")>=0) {
+				snpchipData["warning"] = detail;
+			}
+			if(row.search("error")>=0) {
+				snpchipData["error"] = detail;
+			}
+			//Remove this item
+			delete snpchip[row];
+		} else {
+			//Gather all platforms
+			$.each(detail[2].split(","), function(key, value){
+				all_platforms_used.push(value);
+			});
+		}
+	});
 
+	console.log("platforms all count: "+all_platforms_used.length);
+	//console.dir(all_platforms_used);
+	//Find the unique one from all of the platforms
+	//console.time('a');
+	var used_platforms
+	var platform_list = all_platforms_used.unique();
+	var map = [];
+	//console.timeEnd('a');
+	platform_list.sort();
+	//console.dir(platform_list);
+	//Now that we have the platform list... Map each platform.
+	$.each(snpchip, function(row, detail){
+		//Walk throught the platform_list and determine if it has the list... create a map for the table.
+		map = [];
+		used_platforms = detail[2].split(",");
+		$.each(platform_list, function(key, value) {
+			if($.inArray(value, used_platforms) !==-1) {
+				map.push("");
+			} else {
+				map.push("X");
+			}
+		});
+		obj = {
+			"rs_number" : detail[0],
+			"position" : detail[1],
+			"map" : map
+		};
+		newchip.push(obj);
+	});
+
+	snpchipData["snpchip"] = newchip;
+	snpchipData["headers"] = platform_list;
+	//snpchipData["error"] = "This is about error";
+
+	console.log("platforms list count: "+platform_list.length);
+
+	//platform_list.sort();
+	//console.dir(snpchipData);
+	//console.log(JSON.stringify(snpchipData));
+
+	//remove warning, error, and gather list of platforms
 	//Detail
-	ko.mapping.fromJS(data, snpchipModel);
+
+	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	//Warnings...
+	/*
+	if (typeof snpchipData.warning !== 'undefined' && snpchipData.warning.length > 0) {
+		$('#snpchip-message-warning-content').text(snpchipData.warning);
+		$('#snpchip-message-warning').show();
+	}
+	*/
+	checkAlert("snpchip", snpchipData.warning, "warning", true);
+	checkAlert("snpchip", snpchipData.error, "error", false);
 
+}
+
+function checkAlert(elementId, message, type, displayResults) {
+	//type is either 'warning' or 'error'
+	var prefix;
+	if(type == 'warning') {
+		prefix = elementId+'-message-warning';
+	} else {
+		prefix = elementId+'-message';
+	}
+
+	if (typeof message !== 'undefined' && message.length > 0) {
+		$('#'+prefix+'-content').text(message);
+		$('#'+prefix).show();
+		if (typeof displayResults !== 'undefined' && displayResults) {
+			$('#'+elementId+'-results-container').show();
+		} else {
+			$('#'+elementId+'-results-container').hide();
+		}
+	}
 }
 
 function populateSNPlist(data) {
@@ -932,7 +1016,6 @@ function initClip(data) {
 	populateSNPwarnings(data);
 	populateSNPlist(data);
 	// Get first element
-	//var rs_number = data.snp_list[0];
 	if(data.snp_list.length == 0) {
 		$('#snpclip-message-warning-content').text("SNPclip list returned no results for this calculation.");
 		$('#snpclip-results-container').hide();
@@ -1535,22 +1618,28 @@ function addLDpairHyperLinks(data) {
 
 function buildPopulationDropdownSNPchip(data) {
 
-	console.log("buildPopulationDropdownSNPchip()");
-	console.dir(JSON.parse(data));
+	//Change platforms to multiselect json
+
 	var platforms = JSON.parse(data);
-	var illumina = [];
-	var illumina = [];
+	var illumina = {};
+	var affymetrix = {};
 	$.each( platforms, function( code, description ) {
-		console.log("code: "+code+":"+description);
+		if(description.search("Affymetrix") >= 0) {
+			affymetrix[code] = description;
+		}
+		if(description.search("Illumina") >= 0) {
+			illumina[code] = description;
+		}
 	});
+
 	var elementId = 'snpchip-platform-list';
-	var snpchip_platform_list = {"Illumina": {"I1": "Illumina Human-1","I2": "Illumina HumanHap240S","I3": "Illumina HumanHap300","IC": "Illumina Human370CNV single","ICQ": "Illumina Human370CNV quad","I5": "Illumina HumanHap550","I6": "Illumina HumanHap550"},"Affymetrix": {"AX": "Affymetrix 50K Mapping Xbal","AH": "Affymetrix 50K Mapping Hindlll","HG": "Affymetrix 50K Human Gene Focused chip","AN": "Affymetrix 250K Mapping Nspl","AS": "Affymetrix 250K Mapping Styl","A5": "Affymetrix 5.0","A6": "Affymetrix 5.0"}};
-	console.log("snpchip_platform_list");
-	console.dir(snpchip_platform_list);
+	var snpchip_platform_list = {
+		"Affymetrix": affymetrix,
+		"Illumina": illumina
+	};
+
 	$("#"+elementId).empty();
 	$.each( snpchip_platform_list, function( group, platforms ) {
-		console.log( group + ": " + platforms );
-		console.dir(platforms);
 		//Add optgroup
 		$("#"+elementId).append(
 			$("<optgroup>")
@@ -1567,42 +1656,22 @@ function buildPopulationDropdownSNPchip(data) {
 			);
 		});
 	});
-	/*
-	var htmlText = "";
-	var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
-	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
 
-	for ( var popAbbrev in populations) {
-		var population = populations[popAbbrev];
-		htmlText += htmlText1
-			.replace(/ABBREV/g, popAbbrev)
-			.replace("FULLNAME", population.fullName);
-		for ( var subPopAbbrev in population.subPopulations) {
-			var subDetail = population.subPopulations[subPopAbbrev];
-			htmlText += htmlText2
-				.replace(/ABBREV/g, subPopAbbrev).replace("DETAIL", subDetail);
-		}
-		htmlText += "</optgroup>\n";
-	}
-
-	$('#' + elementId).html(htmlText);
-	*/
 	$('#' + elementId).multiselect({
 		enableClickableOptGroups : true,
-		buttonWidth : '180px',
+		buttonWidth : '210px',
 		maxHeight : 500,
 		buttonClass : 'btn btn-default btn-ldlink-multiselect',
 		includeSelectAllOption : true,
 		dropRight : false,
 		allSelectedText : 'All Arrays',
 		nonSelectedText : 'Select Arrays',
-		numberDisplayed : 4,
+		numberDisplayed : 2,
 		selectAllText : ' (ALL) All Arrays',
 		previousOptionLength: 0,
 		maxPopulationWarn: 2,
 		maxPopulationWarnTimeout: 5000,
 		maxPopulationWarnVisible: false,
-
 		// buttonClass: 'btn btn-link',
 		buttonText : function(options, select) {
 			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
@@ -1627,7 +1696,6 @@ function buildPopulationDropdownSNPchip(data) {
 					// $(this).html();
 					selected += $(this).val() + '+';
 				});
-
 				return selected.substr(0, selected.length - 1)
 						+ ' <b class="caret"></b>';
 			}
@@ -1875,4 +1943,21 @@ function addValidators() {
         }
     });
 
+}
+/* Utilities */
+Array.prototype.contains = function(v) {
+    for(var i = 0; i < this.length; i++) {
+        if(this[i] === v) return true;
+    }
+    return false;
+};
+
+Array.prototype.unique = function() {
+    var arr = [];
+    for(var i = 0; i < this.length; i++) {
+        if(!arr.contains(this[i])) {
+            arr.push(this[i]);
+        }
+    }
+    return arr; 
 }

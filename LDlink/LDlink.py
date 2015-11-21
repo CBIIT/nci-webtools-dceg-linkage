@@ -296,7 +296,8 @@ def ldchip():
 
 @app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
 def snpchip_platforms():
-    
+    print "Retrieve SNPchip Platforms"
+
     return get_platform_request()
 
 

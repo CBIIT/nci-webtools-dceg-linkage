@@ -257,6 +257,11 @@ img.graph-legend {
 .multiselect-container > li.multiselect-group-clickable label {
 	text-decoration: underline;
 }
+/* Tighten up snpchip platform list only*/
+/*   .btn-ldlink-multiselec  */
+.multiselect-container > li > a > label {
+	padding: 0px 20px 0px 40px;
+}
 
 .form-control-feedback {
     top: 0;
@@ -464,6 +469,38 @@ caption {
 .snpclip-table-scroller {
 	overflow-y:auto;
 	max-height:550px;
+}
+
+/* Rotate the text on SNPchip table */
+th.rotate {
+  /* Something you can count on */
+  height: 140px;
+  white-space: nowrap;
+}
+
+th.rotate > div {
+  transform: 
+    /* Magic Numbers */
+    translate(25px, 51px)
+    /* 45 is really 360 - 45 */
+    rotate(315deg);
+  width: 30px;
+}
+th.rotate > div > span {
+  border-bottom: 1px solid #ccc;
+  padding: 5px 10px;
+}
+/* These aren't needed and will be weird if transforms don't work */
+.csstransforms & th.rotate {
+  height: 140px;
+  white-space: nowrap;
+}
+.snpchip-warnings {
+    border-collapse: collapse;
+}
+
+.snpchip-warnings > tbody > tr > td {
+    border: 1px solid black;
 }
 /* Testing */
 @media screen and (max-width: 767px) {
