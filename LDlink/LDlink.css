@@ -353,11 +353,11 @@ img.graph-legend {
     min-width: 0;
     display: table;
 }
-#left-c {	width:auto;
+.left-c {	width:auto;
 	display: inline-block;
 	vertical-align: top;
 }
-#right-c {
+.right-c {
 	min-width:300px;
 	width:60%;
 	display: inline-block;
@@ -374,17 +374,48 @@ img.graph-legend {
     overflow-y: auto;
 }
 
-#left-c > table > tfoot > tr > td,
-#right-c > table > tfoot > tr > td {
+.left-c > table > tfoot > tr > td,
+.right-c > table > tfoot > tr > td {
 	font-weight:bold;
 }
 
-#ldhap-container {
+
+/* New stuff */
+#snpchip-container {
 	overflow-x: scroll;
 }
 
-#ldhap-results-container {
+#snpchip-results-container {
 	overflow-y: auto;
+}
+
+.snpchip-table-container {
+	min-with: 700px;
+	width:auto;
+	white-space: nowrap;
+
+}
+#snpchip-table-right {
+    display: inline-block;
+    overflow-y: auto;
+}
+
+#snpchip-container {
+	overflow-x: scroll;
+}
+
+#snpchip-results-container {
+	overflow-y: auto;
+}
+.snpchip-table > tbody > tr:nth-child(odd) {
+	background: #F9F9F9;
+}
+.snpchip-table > tbody {
+	border: 1px solid #ccc;
+}
+.snpchip-table > thead > tr > th, .snpchip-table > tbody > tr > th, .snpchip-table > tfoot > tr > th, .snpchip-table > thead > tr > td, .snpchip-table > tbody > tr > td, .snpchip-table > tfoot > tr > td {
+    border-bottom: 1px solid #ddd;
+    border-top: 0 none;
 }
 /* Header and Footer */
 .header img {

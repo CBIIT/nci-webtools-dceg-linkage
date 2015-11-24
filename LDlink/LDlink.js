@@ -108,7 +108,7 @@ $(document).ready(function() {
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		$("#" + id + "-results-container").hide();
+		//$("#" + id + "-results-container").hide();
 		$('#' + id + '-message').hide();
 		$('#' + id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
@@ -714,6 +714,7 @@ function loadSNPChip(data) {
 	//Setup data and display
 	//snpchipData = [];
 	// = "This is about error";
+
 	delete snpchipData["warning"];
 	delete snpchipData["error"];
 
@@ -722,7 +723,8 @@ function loadSNPChip(data) {
 	var newchip = [];
 	var snpData;
 	var obj;
-
+	var test;
+	var associated_platforms;
 	$.each(snpchip, function(row, detail){
 		if(row.search("warning")>=0 ||row.search("error")>=0) {
 			//Print the warning somewhere on the screen.
@@ -736,17 +738,29 @@ function loadSNPChip(data) {
 			delete snpchip[row];
 		} else {
 			//Gather all platforms
-			$.each(detail[2].split(","), function(key, value){
-				all_platforms_used.push(value);
-			});
+			//if(parseInt(row)< 1) {
+				associated_platforms = detail[2].split(",");
+				console.log("associated_platforms: "+parseInt(row)+" "+detail[0]);
+				console.dir(associated_platforms.sort());
+
+				$.each(detail[2].split(","), function(key, value){
+					all_platforms_used.push(value);
+					test += key+") "+detail[2]+"\n";
+				});
+			//}
 		}
 	});
-
+	console.warn("All Platforms");
+	console.log("Count: "+all_platforms_used.length);
 	//Find the unique one from all of the platforms
 	var used_platforms
 	var platform_list = all_platforms_used.unique();
 	var map = [];
 	platform_list.sort();
+	console.warn("Filtered list of  Platforms");
+	console.log("Count: "+platform_list.length);
+	console.log(test);
+
 	//Now that we have the platform list... Map each platform.
 	$.each(snpchip, function(row, detail){
 		//Walk throught the platform_list and determine if it has the list... create a map for the table.
@@ -1571,12 +1585,11 @@ function buildPopulationDropdownSNPchip(data) {
 				.attr('label', "("+group+") All "+group+" Arrays")
 				.attr('id', group)
 		);
-
 		$.each( platforms, function( key, value ) {
 			$('#'+group).append(
 				$("<option>")
 					.attr('value', key)
-					.text("("+key+") "+value)
+					.text(value+" ("+key+")")
 			);
 		});
 	});

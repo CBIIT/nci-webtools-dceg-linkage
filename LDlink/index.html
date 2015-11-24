@@ -235,7 +235,7 @@
 				<div class="jumbotron">
 						<div class="container-fluid" id="ldhap-results-container">
 							<div class="row ldhap-table-container">
-								<div id="left-c">
+								<div class="left-c">
 									<table class="table table-condensed"> 
 										<thead>
 											<tr>
@@ -273,7 +273,7 @@
 										</tbody>
 									</table>
 								</div>
-								<div id="right-c">
+								<div class="right-c">
 									<table id="ldhap-table-right" class="table table-condensed">
 										<thead>
 											<tr>
@@ -1033,42 +1033,51 @@
 				<div class="jumbotron">
 					<div class="container-fluid" id="snpchip-results-container">
 						<div id="snpclip-table-container" class="row">
-							<div class="col-sm-11 col-md-11 snpclip-table-scroller">
-								<table id="snpchip-warnings" class="">
-									<caption>SNP Clip List</caption>
-									<thead>
-										<tr>
-											<th>RS Number</th>
-											<th>Chromosome</th>
-											<th>Position (GRCh37)</th>
-											<!-- ko foreach: headers -->
-												<th class="rotate"><div><span data-bind="text: $data"></span></div></th>
-											<!-- /ko -->
-										</tr>
-									</thead>
-									<tbody style="border: 1px solid #ccc;">
-										<!--
-										<tr data-bind="foreach: snpchip">
-											<td nowrap data-bind="text: snpchip[0][0]">Hello</td>
-											<td>4</td>
-											<td>2383784</td>
-											<td style="text-align:right">x</td>
-											<td></td>
-											<td></td>
-										</tr>
-										-->
-										<!-- ko foreach: snpchip -->
-										<tr>
-											<td data-bind="text: rs_number"></td>
-											<td>4</td>
-											<td data-bind="text: position"></td>
-											<!-- ko foreach: map -->
-												<td style="text-align:right" data-bind="text: $data"></td>
-											<!-- /ko -->
-										</tr>
-										<!-- /ko -->
-									</tbody>
-								</table>
+							<!-- LEFT SIDE -->
+							<div class="left-c">
+<table class="snpchip-table">
+	<thead>
+		<tr style="height:119px;">
+			<th colspan="3" style="text-align:center;">SNP Chip List</th>
+		</tr>
+		<tr>
+			<th>RS Number</th>
+			<th>Chromo</th>
+			<th>Position (GRCh37)</th>
+		</tr>
+	</thead>
+	<tbody>
+		<!-- ko foreach: snpchip -->
+		<tr>
+			<td data-bind="text: rs_number"></td>
+			<td>4</td>
+			<td data-bind="text: position"></td>
+		</tr>
+		<!-- /ko -->
+	</tbody>
+</table>
+							</div>
+							<!-- RIGHT SIDE -->
+							<div class="right-c">
+<table id="snpchip-table-right" class="snpchip-table">
+	<thead>
+		<tr>
+			<!-- ko foreach: headers -->
+				<th class="rotate"><div><span data-bind="text: $data"></span></div></th>
+			<!-- /ko -->
+		</tr>
+	</thead>
+	<tbody style="border: 1px solid #ccc;">
+		<!-- ko foreach: snpchip -->
+		<tr>
+			<!-- ko foreach: map -->
+				<td style="text-align:right" data-bind="text: $data"></td>
+			<!-- /ko -->
+		</tr>
+		<!-- /ko -->
+	</tbody>
+
+</table>
 							</div>
 						</div>
 					</div>

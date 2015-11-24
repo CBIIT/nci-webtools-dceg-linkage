@@ -4,7 +4,8 @@
 # SNPchip #
 ###########
 
-from pymongo import MongoClient
+#from pymongo import MongoClient
+from pymongo import *
 import os
 import bson.regex
 import json
@@ -15,8 +16,14 @@ password=contents[1].split('=')[1]
 Database=contents[2].split('=')[1]
 
 def get_platform_request():
-	client = MongoClient()
-	client = MongoClient('localhost', 27017)
+
+	try:
+		client = MongoClient()
+		client = MongoClient('localhost', 27017)
+	except pymongo.errors.ConnectionFailure:
+		print "MongoDB is down"
+		print "syntax: mongod --dbpath /local/content/ldlink/mongo/data/db/ --auth"
+		return "Failed to connect to server."
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client[Database]
