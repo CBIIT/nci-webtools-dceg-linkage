@@ -191,7 +191,94 @@ $(document).on(
 	}
 );
 function setupSNPchipControls() {
+	// Setup click listners for the platform selector
+
+	$('#selectAllChipTypes').click(function(e) {
+		if($(".illumina:checked").length == $("input.illumina").length &&
+				$(".affymetrix:checked").length == $("input.affymetrix").length) {
+			$(".illumina").prop("checked", false);
+			$(".affymetrix").prop("checked", false);
+			$("#selectAllIllumina").prop("checked", false);
+			$("#selectAllAffymetrix").prop("checked", false);
+		} else {
+			$(".illumina").prop("checked", true);
+			$(".affymetrix").prop("checked", true);
+			$("#selectAllIllumina").prop("checked", true);
+			$("#selectAllAffymetrix").prop("checked", true);
+		}
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+
+	$('#selectAllIllumina').click(function(e) {
+		var id = e.target.id;
+		console.log("Look for state");
+		//console.dir(e);
+		console.log($("#"+id).prop('checked'));
+		if($("#"+id).prop('checked') == true) {
+			$(".illumina").prop("checked", true);
+		} else {
+			$(".illumina").prop("checked", false);
+		}
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+	$('#selectAllAffymetrix').click(function(e) {
+		var id = e.target.id;
+		if($("#"+id).prop('checked') == true) {
+			$(".affymetrix").prop("checked", true);
+		} else {
+			$(".affymetrix").prop("checked", false);
+		}
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+	$('#collapseThree').on('click', "input.illumina, input.affymetrix", function(e) {
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
 	initChip();
+}
+
+function checkSelectAllCheckbox() {
+	//Determin if the master checkbox should be checked or not.
+	var illumina = $(".illumina:checked").length;
+	var affymetrix = $(".affymetrix:checked").length;
+	var total_illumina = $("input.illumina").length;
+	console.log(illumina+" out of "+total_illumina);
+	if($(".illumina:checked").length == $("input.illumina").length) {
+		$('#selectAllIllumina').prop('checked', true);
+	} else {
+		$('#selectAllIllumina').prop('checked', false);
+	}
+	if($(".affymetrix:checked").length == $("input.affymetrix").length) {
+		$('#selectAllAffymetrix').prop('checked', true);
+	} else {
+		$('#selectAllAffymetrix').prop('checked', false);
+	}
+
+	if($(".illumina:checked").length == $("input.illumina").length &&
+			$(".affymetrix:checked").length == $("input.affymetrix").length) {
+		$('#selectAllChipTypes').text("unselect all");
+	} else {
+		$('#selectAllChipTypes').text("select all");
+	}
+
+}
+
+function calculateChipTotals() {
+	
+	var illumina = $(".illumina:checked").length;
+	var affymetrix = $(".affymetrix:checked").length;
+
+	$('#illumina-count').text(illumina);
+	$('#affymetrix-count').text(affymetrix);
+	if(illumina == 0 && affymetrix == 0) {
+		$("#snpchip").prop('disabled', true);
+	} else {
+		$("#snpchip").prop('disabled', false);
+	}
+
 }
 
 function setupSNPclipControls() {
@@ -679,10 +766,6 @@ function initChip() {
 	//Setup the platform
 	var id = "snpchip";
 
-	var ldInputs = {
-		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
-	};
-
 	var url = restServerUrl + "/snpchip_platforms";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -692,7 +775,7 @@ function initChip() {
 
 	ajaxRequest.success(function(data) {
 		if (displayError(id, data) == false) {
-			buildPopulationDropdownSNPchip(data);
+			buildPlatformSNPchip(data);
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -1651,6 +1734,140 @@ function buildPopulationDropdownSNPchip(data) {
 	});
 }
 
+
+function addCheckBox(code, description, elementId, platform_class) {
+	$("#"+elementId).append(
+		$("<div>").append(
+			$("<span>").addClass("platform-checkbox").append(
+				$("<input>").attr('type','checkbox')
+					.attr('id',code)
+					.addClass(platform_class)
+				)
+			).append(
+			$("<span>").addClass("formw").append(
+				$("<label>").attr('for',code).css("font-weight", "normal")
+					.text(description+" ("+code+")")
+				)
+			)
+		);
+}
+
+function buildPlatformSNPchip(data) {
+
+	//Change platforms to multiselect json
+	/*
+                   <div>
+                       <span class="label">
+                       	<input type="checkbox" value="I1" class="illuminaArray" name="arrayList[]" id="illumina1">
+                       	</span>
+                       <span class="formw">
+                       	<label for="illumina1">Illumina Human-1 (I1)</label>
+                       </span>
+                   </div>
+
+                   <div class="row">
+                       <span class="label"><input type="checkbox" value="AAH" class="affymetrixArray" name="arrayList[]" id="affy12"></span>
+                       <span class="formw"><label for="affy12">Affymetrix Axiom GW Hu Origins 1 (AAH)</label></span>
+                   </div>
+
+	*/
+
+	var platforms = JSON.parse(data);
+	var illumina = {};
+	var affymetrix = {};
+
+	$.each(platforms, function( code, description ) {
+		if(description.search("Affymetrix") >= 0) {
+			affymetrix[code] = description;
+			addCheckBox(code, description, "columnBcheckbox", "affymetrix");
+		}
+		if(description.search("Illumina") >= 0) {
+			illumina[code] = description;
+			addCheckBox(code, description, "columnAcheckbox", "illumina");
+		}
+	});
+
+	var elementId = 'snpchip-platform-list';
+	var snpchip_platform_list = {
+		"Affymetrix": affymetrix,
+		"Illumina": illumina
+	};
+
+	$("#"+elementId).empty();
+	$.each( snpchip_platform_list, function( group, platforms ) {
+		//Add optgroup
+		$("#"+elementId).append(
+			$("<optgroup>")
+				.attr('value', "("+group+") All "+group+" Arrays")
+				.attr('label', "("+group+") All "+group+" Arrays")
+				.attr('id', group)
+		);
+		$.each( platforms, function( key, value ) {
+			$('#'+group).append(
+				$("<option>")
+					.attr('value', key)
+					.text(value+" ("+key+")")
+			);
+		});
+	});
+
+	$('#' + elementId).multiselect({
+		enableClickableOptGroups : true,
+		buttonWidth : '210px',
+		maxHeight : 500,
+		buttonClass : 'btn btn-default btn-ldlink-multiselect',
+		includeSelectAllOption : true,
+		dropRight : false,
+		allSelectedText : 'All Arrays',
+		nonSelectedText : 'Select Arrays',
+		numberDisplayed : 2,
+		selectAllText : ' (ALL) All Arrays',
+		previousOptionLength: 0,
+		maxPopulationWarn: 2,
+		maxPopulationWarnTimeout: 5000,
+		maxPopulationWarnVisible: false,
+		// buttonClass: 'btn btn-link',
+		buttonText : function(options, select) {
+			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+				$('#'+elementId+'-popover').popover('show');
+				this.maxPopulatinWarnVisible=true;
+			}
+			this.previousOptionLength = options.length;
+			if (options.length === 0) {
+				return this.nonSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length == $('option', $(select)).length) {
+				return this.allSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length > this.numberDisplayed) {
+				return '<span class="badge">' + options.length
+						+ '</span> ' + this.nSelectedText
+						+ '<span class="caret"></span>';
+			} else {
+				var selected = '';
+				options.each(function() {
+					// var label = $(this).attr('label') :
+					// $(this).html();
+					selected += $(this).val() + '+';
+				});
+				return selected.substr(0, selected.length - 1)
+						+ ' <b class="caret"></b>';
+			}
+		},
+		buttonTitle : function(options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText;
+			} else {
+				var selected = '';
+				options.each(function() {
+					selected += $(this).text() + '\n';
+				});
+				return selected;
+			}
+		}
+	});
+}
+
 function buildPopulationDropdown(elementId) {
 
 	var htmlText = "";
@@ -1882,6 +2099,17 @@ function addValidators() {
 
 }
 /* Utilities */
+
+function toggleChevron(e) {
+    $(e.target)
+        .prev('.panel-heading')
+        .find("i.indicator")
+        .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
+}
+
+$('#accordion').on('hidden.bs.collapse', toggleChevron);
+$('#accordion').on('shown.bs.collapse', toggleChevron);
+
 Array.prototype.contains = function(v) {
     for(var i = 0; i < this.length; i++) {
         if(this[i] === v) return true;

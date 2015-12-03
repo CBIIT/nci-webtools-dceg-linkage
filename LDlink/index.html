@@ -45,6 +45,7 @@
 <link rel="stylesheet" href="../common/css/style.css">
 <link rel="stylesheet" href="../common/css/social.css">
 <link rel="stylesheet" href="LDlink.css">
+
 </head>
 <body role="document">
 	<div class="header">
@@ -1004,6 +1005,51 @@
 							</div>
 						</form>
 					</div>
+					<!-- Accordian -->
+					<div id="filter-by-array" class="panel panel-default">
+					    <div class="panel-heading">
+					        <h4 class="panel-title">
+					            <a data-toggle="collapse" 
+					            	data-parent="#accordion"
+					            	href="#collapseThree">Filter by array</a>
+					            <i class="indicator glyphicon glyphicon-chevron-down  pull-right"></i>
+					            <span class="pull-right" style="margin-right:25px;">
+					            	<span id="illumina-count">0</span> Illumina array(s) and <span id="affymetrix-count">0</span> Affymetrix array(s) selected</span>
+					        </h4>
+					    </div>
+					    <div id="collapseThree" class="panel-collapse collapse in">
+					        <div class="panel-body">
+
+			<div id="collapseThree" style="display: block;">
+               <p class="instruction">
+                   Limit search results to only SNPs on the selected arrays (<span id="selectAllChipTypes" class="underlined">select all</span>)
+               </p>
+               <fieldset id="columnAcheckbox">
+                   <div class="bolded">
+                       <span class="label">
+                       		<input type="checkbox" id="selectAllIllumina">
+                       	</span>
+                       <span class="formw underlined">
+                       		<label for="selectAllIllumina">Select All Illumina</label>
+                       </span>
+                   </div>
+               </fieldset>
+               <fieldset id="columnBcheckbox">
+                   <div class="bolded">
+                       	<span class="label">
+                       		<input type="checkbox" id="selectAllAffymetrix">
+                       	</span>
+                       	<span class="formw underlined">
+                       		<label for="selectAllAffymetrix">Select All Affymetrix</label>
+                       	</span>
+                   </div>
+               </fieldset>
+           </div>
+
+					        </div>
+					    </div>
+					</div>
+
 					<hr>
 					<div id="snpchip-loading">
 						<img src="/LDlink/calculating_LD.gif" alt="loading icon"
