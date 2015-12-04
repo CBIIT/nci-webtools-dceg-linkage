@@ -16,7 +16,9 @@ var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Co
 var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
 //var ldClipData = {warnings:[],details:[]};
 var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]};
-var snpchipData = {"snpchip":[{"rs_number":"rs383","position":"13:32504939","map":["X","","X","X",""]},{"rs_number":"rs384","position":"13:32505201","map":["X","","X","X",""]}],"headers":["Affymetrix Axiom GW CHB2","Affymetrix Mapping 250K Nsp","Affymetrix SNP 5.0","Affymetrix SNP 6.0","Illumina Human1M-Duov3","Illumina Human1Mv1","Illumina Human610-Quadv1","Illumina Human660W-Quadv1","Illumina HumanCNV370-Duov1","Illumina HumanCNV370-Quadv3","Illumina HumanCore-12v1","Illumina HumanCoreExome-12v1","Illumina HumanCoreExome-12v1.1","Illumina HumanCoreExome-24v1","Illumina HumanCoreExome-24v1.1","Illumina HumanHap300-Duov2","Illumina HumanHap300v1","Illumina HumanHap550v1","Illumina HumanHap550v3","Illumina HumanHap650Yv3","Illumina HumanOmni1-Quadv1","Illumina HumanOmni2.5-4v1","Illumina HumanOmni2.5-8v1.2","Illumina HumanOmni2.5Exome-8v1","Illumina HumanOmni2.5Exome-8v1.1","Illumina HumanOmni2.5Exome-8v1.2","Illumina HumanOmni5-4v1","Illumina HumanOmni5Exome-4v1","Illumina HumanOmniExpress-12v1","Illumina HumanOmniExpress-12v1 FFPE","Illumina HumanOmniExpress-24v1","Illumina HumanOmniExpressExome-8v1","Illumina HumanOmniExpressExome-8v1.1","Illumina HumanOmniExpressExome-8v1.2","Illumina HumanOmniExpressExome-8v1.3","Illumina HumanOmniZhongHua-8v1","Illumina HumanOmniZhongHua-8v1.1","Illumina HumanOmniZhongHua-8v1.2","Illumina Infinium CytoSNP-850K","Illumina Infinium Multi-Ethnic Global-8","Illumina Infinium OncoArray-500K","Illumina Infinium PsychArray-24v1","Illumina Infinium PsychArray-24v1.1"]};
+var snpchipData = {"snpchip":[{"rs_number":"rs505066","chromosome":"1","position":"96882671","map":["X","X","X","X","&nbsp;"]},{"rs_number":"rs505067","chromosome":"11","position":"74544780","map":["X","X","X","X","X"]}],"headers":["A_Hu-CHB","I_1M-D","I_1M","I_Exon510S","I_ME-Global-8"],"warning":"The following RS numbers were not found in dbSNP 142: rs1"};
+//var snpchipData = {"snpchip":[{"rs_number":"rs383","position":"13:32504939","map":["X","","X","X",""]},{"rs_number":"rs384","position":"13:32505201","map":["X","","X","X",""]}],"headers":["Affymetrix Axiom GW CHB2","Affymetrix Mapping 250K Nsp","Affymetrix SNP 5.0","Affymetrix SNP 6.0","Illumina Human1M-Duov3","Illumina Human1Mv1","Illumina Human610-Quadv1","Illumina Human660W-Quadv1","Illumina HumanCNV370-Duov1","Illumina HumanCNV370-Quadv3","Illumina HumanCore-12v1","Illumina HumanCoreExome-12v1","Illumina HumanCoreExome-12v1.1","Illumina HumanCoreExome-24v1","Illumina HumanCoreExome-24v1.1","Illumina HumanHap300-Duov2","Illumina HumanHap300v1","Illumina HumanHap550v1","Illumina HumanHap550v3","Illumina HumanHap650Yv3","Illumina HumanOmni1-Quadv1","Illumina HumanOmni2.5-4v1","Illumina HumanOmni2.5-8v1.2","Illumina HumanOmni2.5Exome-8v1","Illumina HumanOmni2.5Exome-8v1.1","Illumina HumanOmni2.5Exome-8v1.2","Illumina HumanOmni5-4v1","Illumina HumanOmni5Exome-4v1","Illumina HumanOmniExpress-12v1","Illumina HumanOmniExpress-12v1 FFPE","Illumina HumanOmniExpress-24v1","Illumina HumanOmniExpressExome-8v1","Illumina HumanOmniExpressExome-8v1.1","Illumina HumanOmniExpressExome-8v1.2","Illumina HumanOmniExpressExome-8v1.3","Illumina HumanOmniZhongHua-8v1","Illumina HumanOmniZhongHua-8v1.1","Illumina HumanOmniZhongHua-8v1.2","Illumina Infinium CytoSNP-850K","Illumina Infinium Multi-Ethnic Global-8","Illumina Infinium OncoArray-500K","Illumina Infinium PsychArray-24v1","Illumina Infinium PsychArray-24v1.1"]};
+var snpchipReverseLookup = [];
 var ldClipRaw;
 var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip" ];
 
@@ -108,9 +110,9 @@ $(document).ready(function() {
 
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		//$("#" + id + "-results-container").hide();
-		$('#' + id + '-message').hide();
-		$('#' + id + '-message-warning').hide();
+		$("#"+ id + "-results-container").hide();
+		$('#'+ id + '-message').hide();
+		$('#'+ id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
 	});
 
@@ -192,6 +194,8 @@ $(document).on(
 );
 function setupSNPchipControls() {
 	// Setup click listners for the platform selector
+	$('#accordion').on('hidden.bs.collapse', toggleChevron);
+	$('#accordion').on('shown.bs.collapse', toggleChevron);
 
 	$('#selectAllChipTypes').click(function(e) {
 		if($(".illumina:checked").length == $("input.illumina").length &&
@@ -245,20 +249,20 @@ function checkSelectAllCheckbox() {
 	var illumina = $(".illumina:checked").length;
 	var affymetrix = $(".affymetrix:checked").length;
 	var total_illumina = $("input.illumina").length;
-	console.log(illumina+" out of "+total_illumina);
-	if($(".illumina:checked").length == $("input.illumina").length) {
+	var total_affymetrix = $("input.affymetrix").length;
+
+	if(illumina == total_illumina) {
 		$('#selectAllIllumina').prop('checked', true);
 	} else {
 		$('#selectAllIllumina').prop('checked', false);
 	}
-	if($(".affymetrix:checked").length == $("input.affymetrix").length) {
+	if(affymetrix == total_affymetrix) {
 		$('#selectAllAffymetrix').prop('checked', true);
 	} else {
 		$('#selectAllAffymetrix').prop('checked', false);
 	}
 
-	if($(".illumina:checked").length == $("input.illumina").length &&
-			$(".affymetrix:checked").length == $("input.affymetrix").length) {
+	if(illumina == total_illumina && affymetrix == total_affymetrix) {
 		$('#selectAllChipTypes').text("unselect all");
 	} else {
 		$('#selectAllChipTypes').text("select all");
@@ -716,15 +720,25 @@ function updateSNPchip() {
 	var id = "snpchip";
 
 	var $btn = $('#' + id).button('loading');
+	$("#collapseThree").removeClass("in");
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-	var	platforms=  $('#'+id+'-platform-list').val();
+	var platforms = [];
+
+	$('.affymetrix:checked').each(function() { 
+		platforms.push($(this).val());
+	});
+	$('.illumina:checked').each(function() { 
+		platforms.push($(this).val());
+	});
+	
 
 	var ldInputs = {
 		snps : snps,
 		platforms: platforms.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-
+	$('#snp_chip_list').attr('href', "tmp/snps"+ldInputs.reference+".txt");
+	//console.dir(ldInputs);
 	var url = restServerUrl + "/snpchip";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -775,6 +789,7 @@ function initChip() {
 
 	ajaxRequest.success(function(data) {
 		if (displayError(id, data) == false) {
+			//buildPopulationDropdownSNPchip(data);
 			buildPlatformSNPchip(data);
 		}
 	});
@@ -806,9 +821,10 @@ function loadSNPChip(data) {
 	var newchip = [];
 	var snpData;
 	var obj;
-	var test;
+	var test = "";
 	var associated_platforms;
-	$.each(snpchip, function(row, detail){
+
+	$.each(snpchip, function(row, detail) {
 		if(row.search("warning")>=0 ||row.search("error")>=0) {
 			//Print the warning somewhere on the screen.
 			if(row.search("warning")>=0) {
@@ -833,12 +849,14 @@ function loadSNPChip(data) {
 			//}
 		}
 	});
+
 	console.warn("All Platforms");
 	console.log("Count: "+all_platforms_used.length);
 	//Find the unique one from all of the platforms
 	var used_platforms
 	var platform_list = all_platforms_used.unique();
 	var map = [];
+	var reversed_platform_list = [];
 	platform_list.sort();
 	console.warn("Filtered list of  Platforms");
 	console.log("Count: "+platform_list.length);
@@ -849,27 +867,42 @@ function loadSNPChip(data) {
 		//Walk throught the platform_list and determine if it has the list... create a map for the table.
 		map = [];
 		used_platforms = detail[2].split(",");
+		console.log("used_platforms:");
+		console.dir(used_platforms);
+		console.warn("row: "+row);
+
 		$.each(platform_list, function(key, value) {
-			if($.inArray(value, used_platforms) !==-1) {
-				map.push("");
-			} else {
+			console.log(key+":"+value);
+			console.info($.inArray(value, used_platforms));
+			if($.inArray(value, used_platforms) >= 0) {
 				map.push("X");
+			} else {
+				map.push("&nbsp;");
 			}
 		});
+		//Split detail[1] into two parts
+		var chromo_position = detail[1].split(":");
 		obj = {
-			"rs_number" : detail[0],
-			"position" : detail[1],
+			"rs_number" : anchorRSnumber(detail[0]),
+			"chromosome" : chromo_position[0],
+			"position" : anchorRSposition("chr"+detail[1], detail[0], true),
 			"map" : map
 		};
+		console.dir(obj);
 		newchip.push(obj);
 	});
 
+	$.each(platform_list, function(key, value) {
+		reversed_platform_list.push(snpchipReverseLookup[value]);
+	});
 	snpchipData["snpchip"] = newchip;
-	snpchipData["headers"] = platform_list;
+	snpchipData["headers"] = reversed_platform_list;
 
 	// = "This is about error";
+	console.log("FINAL DATA HERE:");
 	console.dir(snpchipData);
-
+	console.log("FINAL DATA AS A STRING:");
+	console.log(JSON.stringify(snpchipData));
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	checkAlert("snpchip", snpchipData.warning, "warning", true);
@@ -930,10 +963,12 @@ function anchorRSnumber(rs_number) {
 	return '<a href="'+url+'" target="rs_number_'+rs_number+'">'+rs_number+'</a>';
 }
 
-function anchorRSposition(coord, rs_number) {
+function anchorRSposition(coord, rs_number, hide_chr) {
 	//
 	// Genome Browser:
 	//
+	hide_chr = hide_chr || false;
+
 	if(coord.toUpperCase() == "NA")
 		return "NA";
 
@@ -952,8 +987,11 @@ function anchorRSposition(coord, rs_number) {
 		'hgFind.matches' : rs_number
 	};
 	var url = server + "?" + $.param(params);
-
-	return '<a href="'+url+'" target="coord_'+coord+'">'+coord+'</a>';
+	if(hide_chr) {
+		return '<a href="'+url+'" target="coord_'+coord+'">'+positions[1]+'</a>';
+	} else {
+		return '<a href="'+url+'" target="coord_'+coord+'">'+coord+'</a>';
+	}
 }
 
 function populateSNPwarnings(data) {
@@ -1636,7 +1674,7 @@ function addLDpairHyperLinks(data) {
 	$('#snp2-coord').attr('href', url);
 
 }
-
+/*
 function buildPopulationDropdownSNPchip(data) {
 
 	//Change platforms to multiselect json
@@ -1733,7 +1771,7 @@ function buildPopulationDropdownSNPchip(data) {
 		}
 	});
 }
-
+*/
 
 function addCheckBox(code, description, elementId, platform_class) {
 	$("#"+elementId).append(
@@ -1741,11 +1779,13 @@ function addCheckBox(code, description, elementId, platform_class) {
 			$("<span>").addClass("platform-checkbox").append(
 				$("<input>").attr('type','checkbox')
 					.attr('id',code)
+					.attr('value', description)
 					.addClass(platform_class)
 				)
 			).append(
 			$("<span>").addClass("formw").append(
-				$("<label>").attr('for',code).css("font-weight", "normal")
+				$("<label>").attr('for',code)
+					.css("font-weight", "normal")
 					.text(description+" ("+code+")")
 				)
 			)
@@ -1775,6 +1815,7 @@ function buildPlatformSNPchip(data) {
 	var platforms = JSON.parse(data);
 	var illumina = {};
 	var affymetrix = {};
+	snpchipReverseLookup =[];
 
 	$.each(platforms, function( code, description ) {
 		if(description.search("Affymetrix") >= 0) {
@@ -1785,87 +1826,9 @@ function buildPlatformSNPchip(data) {
 			illumina[code] = description;
 			addCheckBox(code, description, "columnAcheckbox", "illumina");
 		}
+		snpchipReverseLookup[description] = code;
 	});
 
-	var elementId = 'snpchip-platform-list';
-	var snpchip_platform_list = {
-		"Affymetrix": affymetrix,
-		"Illumina": illumina
-	};
-
-	$("#"+elementId).empty();
-	$.each( snpchip_platform_list, function( group, platforms ) {
-		//Add optgroup
-		$("#"+elementId).append(
-			$("<optgroup>")
-				.attr('value', "("+group+") All "+group+" Arrays")
-				.attr('label', "("+group+") All "+group+" Arrays")
-				.attr('id', group)
-		);
-		$.each( platforms, function( key, value ) {
-			$('#'+group).append(
-				$("<option>")
-					.attr('value', key)
-					.text(value+" ("+key+")")
-			);
-		});
-	});
-
-	$('#' + elementId).multiselect({
-		enableClickableOptGroups : true,
-		buttonWidth : '210px',
-		maxHeight : 500,
-		buttonClass : 'btn btn-default btn-ldlink-multiselect',
-		includeSelectAllOption : true,
-		dropRight : false,
-		allSelectedText : 'All Arrays',
-		nonSelectedText : 'Select Arrays',
-		numberDisplayed : 2,
-		selectAllText : ' (ALL) All Arrays',
-		previousOptionLength: 0,
-		maxPopulationWarn: 2,
-		maxPopulationWarnTimeout: 5000,
-		maxPopulationWarnVisible: false,
-		// buttonClass: 'btn btn-link',
-		buttonText : function(options, select) {
-			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
-				$('#'+elementId+'-popover').popover('show');
-				this.maxPopulatinWarnVisible=true;
-			}
-			this.previousOptionLength = options.length;
-			if (options.length === 0) {
-				return this.nonSelectedText
-						+ '<span class="caret"></span>';
-			} else if (options.length == $('option', $(select)).length) {
-				return this.allSelectedText
-						+ '<span class="caret"></span>';
-			} else if (options.length > this.numberDisplayed) {
-				return '<span class="badge">' + options.length
-						+ '</span> ' + this.nSelectedText
-						+ '<span class="caret"></span>';
-			} else {
-				var selected = '';
-				options.each(function() {
-					// var label = $(this).attr('label') :
-					// $(this).html();
-					selected += $(this).val() + '+';
-				});
-				return selected.substr(0, selected.length - 1)
-						+ ' <b class="caret"></b>';
-			}
-		},
-		buttonTitle : function(options, select) {
-			if (options.length === 0) {
-				return this.nonSelectedText;
-			} else {
-				var selected = '';
-				options.each(function() {
-					selected += $(this).text() + '\n';
-				});
-				return selected;
-			}
-		}
-	});
 }
 
 function buildPopulationDropdown(elementId) {
@@ -2106,9 +2069,6 @@ function toggleChevron(e) {
         .find("i.indicator")
         .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
 }
-
-$('#accordion').on('hidden.bs.collapse', toggleChevron);
-$('#accordion').on('shown.bs.collapse', toggleChevron);
 
 Array.prototype.contains = function(v) {
     for(var i = 0; i < this.length; i++) {

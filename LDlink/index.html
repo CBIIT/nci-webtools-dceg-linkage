@@ -969,7 +969,6 @@
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPchip FORM -->
 						<form id="snpchipForm" class="ldlinkForm">
-
 							<div class="form-group">
 								<div class="col-sm-2">
 									<textarea id="snpchip-file-snp-numbers" placeholder="RS Numbers"
@@ -984,11 +983,12 @@
 										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
 									<label for="snpchip-file" style="display:none;">Browse for RS File</label>
-									<span	class="btn btn-default btn-file">Browse
+									<span class="btn btn-default btn-file">Browse
 										<input type="file" id="snpchip-file">
 									</span>
 								</div>
 							</div>
+							<!--
 							<div class="form-group">
 								<div class="col-sm-4">
 									<label for="snpchip-platform-list" style="display: none;">SNPChip Platforms</label>
@@ -997,15 +997,17 @@
 									</select>
 								</div>
 							</div>
+							-->
 							<div class="form-group">
 								<div class="col-sm-2">
 									<input type="submit" id="snpchip" value="Calculate"
-										class="btn btn-default calculate" />
+										class="btn btn-default calculate" disabled/>
 								</div>
 							</div>
 						</form>
 					</div>
 					<!-- Accordian -->
+					<div id="accordion" class="panel-group">
 					<div id="filter-by-array" class="panel panel-default">
 					    <div class="panel-heading">
 					        <h4 class="panel-title">
@@ -1019,32 +1021,32 @@
 					    </div>
 					    <div id="collapseThree" class="panel-collapse collapse in">
 					        <div class="panel-body">
-
-			<div id="collapseThree" style="display: block;">
-               <p class="instruction">
-                   Limit search results to only SNPs on the selected arrays (<span id="selectAllChipTypes" class="underlined">select all</span>)
-               </p>
-               <fieldset id="columnAcheckbox">
-                   <div class="bolded">
-                       <span class="label">
-                       		<input type="checkbox" id="selectAllIllumina">
-                       	</span>
-                       <span class="formw underlined">
-                       		<label for="selectAllIllumina">Select All Illumina</label>
-                       </span>
-                   </div>
-               </fieldset>
-               <fieldset id="columnBcheckbox">
-                   <div class="bolded">
-                       	<span class="label">
-                       		<input type="checkbox" id="selectAllAffymetrix">
-                       	</span>
-                       	<span class="formw underlined">
-                       		<label for="selectAllAffymetrix">Select All Affymetrix</label>
-                       	</span>
-                   </div>
-               </fieldset>
-           </div>
+								<div id="collapseThree" style="display: block;">
+									<p class="instruction">
+									   Limit search results to only SNPs on the selected arrays (<span id="selectAllChipTypes" class="underlined">select all</span>)
+									</p>
+									<fieldset id="columnAcheckbox">
+										<div class="bolded">
+											<span class="label">
+												<input type="checkbox" id="selectAllIllumina">
+											</span>
+											<span class="formw underlined">
+												<label for="selectAllIllumina">Select All Illumina</label>
+											</span>
+										</div>
+									</fieldset>
+									<fieldset id="columnBcheckbox">
+									   <div class="bolded">
+									       	<span class="label">
+									       		<input type="checkbox" id="selectAllAffymetrix">
+									       	</span>
+									       	<span class="formw underlined">
+									       		<label for="selectAllAffymetrix">Select All Affymetrix</label>
+									       	</span>
+									   </div>
+									</fieldset>
+								</div>
+							</div>
 
 					        </div>
 					    </div>
@@ -1081,49 +1083,53 @@
 						<div id="snpclip-table-container" class="row">
 							<!-- LEFT SIDE -->
 							<div class="left-c">
-<table class="snpchip-table">
-	<thead>
-		<tr style="height:119px;">
-			<th colspan="3" style="text-align:center;">SNP Chip List</th>
-		</tr>
-		<tr>
-			<th>RS Number</th>
-			<th>Chromo</th>
-			<th>Position (GRCh37)</th>
-		</tr>
-	</thead>
-	<tbody>
-		<!-- ko foreach: snpchip -->
-		<tr>
-			<td data-bind="text: rs_number"></td>
-			<td>4</td>
-			<td data-bind="text: position"></td>
-		</tr>
-		<!-- /ko -->
-	</tbody>
-</table>
+								<table class="snpchip-table">
+									<thead>
+										<tr>
+											<th colspan="3">SNP Chip List</th>
+										</tr>
+										<tr>
+											<th nowrap>RS Number</th>
+											<th nowrap>Chr</th>
+											<th nowrap>Position (GRCh37)</th>
+										</tr>
+									</thead>
+									<tbody>
+										<!-- ko foreach: snpchip -->
+										<tr>
+											<td data-bind="html: rs_number"></td>
+											<td data-bind="text: chromosome" style="text-align:center;"></td>
+											<td data-bind="html: position"></td>
+										</tr>
+										<!-- /ko -->
+									</tbody>
+								</table>
+								<div>
+									<a id="snp_chip_list" 
+												target="snp_chip_list">Download SNP List</a>
+								</div>
+
 							</div>
 							<!-- RIGHT SIDE -->
 							<div class="right-c">
-<table id="snpchip-table-right" class="snpchip-table">
-	<thead>
-		<tr>
-			<!-- ko foreach: headers -->
-				<th class="rotate"><div><span data-bind="text: $data"></span></div></th>
-			<!-- /ko -->
-		</tr>
-	</thead>
-	<tbody style="border: 1px solid #ccc;">
-		<!-- ko foreach: snpchip -->
-		<tr>
-			<!-- ko foreach: map -->
-				<td style="text-align:right" data-bind="text: $data"></td>
-			<!-- /ko -->
-		</tr>
-		<!-- /ko -->
-	</tbody>
-
-</table>
+								<table id="snpchip-table-right" class="snpchip-table">
+									<thead>
+										<tr>
+											<!-- ko foreach: headers -->
+												<th class="rotate"><div><span data-bind="text: $data"></span></div></th>
+											<!-- /ko -->
+										</tr>
+									</thead>
+									<tbody style="border: 1px solid #ccc;">
+										<!-- ko foreach: snpchip -->
+										<tr>
+											<!-- ko foreach: map -->
+												<td style="text-align:right" data-bind="html: $data"></td>
+											<!-- /ko -->
+										</tr>
+										<!-- /ko -->
+									</tbody>
+								</table>
 							</div>
 						</div>
 					</div>

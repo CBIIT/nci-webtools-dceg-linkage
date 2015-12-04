@@ -359,7 +359,7 @@ img.graph-legend {
 }
 .right-c {
 	min-width:300px;
-	width:60%;
+	width:65%;
 	display: inline-block;
 	vertical-align: top;
 }
@@ -505,7 +505,7 @@ caption {
 /* Rotate the text on SNPchip table */
 th.rotate {
   /* Something you can count on */
-  height: 140px;
+  height: 142px;
   white-space: nowrap;
 }
 
@@ -523,7 +523,7 @@ th.rotate > div > span {
 }
 /* These aren't needed and will be weird if transforms don't work */
 .csstransforms & th.rotate {
-  height: 140px;
+  height: 142px;
   white-space: nowrap;
 }
 .snpchip-warnings {
@@ -536,11 +536,13 @@ th.rotate > div > span {
 #filter-by-array {
 	margin-top: 10px;
 }
-label {
+
+span.formw > label {
 	margin-bottom: 0px;
     font-family: "Lucida Grande",Verdana,Arial,sans-serif;
-    font-size: smaller;
+    font-size: normal;
 }
+
 .platform-checkbox {
 	padding: 0.2em 0.6em 0.3em;
 }
@@ -578,8 +580,25 @@ fieldset#columnBcheckbox > div.row {
 	margin-bottom:-12px;
 	font-weight:lighter;
 	color: #333;
-    font-family: "Lucida Grande",Verdana,Arial,sans-serif;
-    font-size: smaller;
+	font-family: "Lucida Grande",Verdana,Arial,sans-serif;
+	font-size: smaller;
+}
+table.snpchip-table > thead > tr:first-child {
+	height: 121px;
+}
+table.snpchip-table > thead > tr:first-child > th {
+	text-align:center;
+	border-bottom: 0px;
+}
+table.snpchip-table > thead > tr:nth-child(2) > th {
+	padding-left:2px;
+	padding-right:10px;
+}
+table.snpchip-table {
+	margin-bottom:30px;
+}
+#snp_chip_list {
+	padding-left:60px;
 }
 /* Testing */
 @media screen and (max-width: 767px) {
@@ -588,12 +607,14 @@ fieldset#columnBcheckbox > div.row {
     float: none;
     text-align: center; }
   .dataTables_wrapper .dataTables_paginate {
-    margin-top: 0.5em; } }
+    margin-top: 0.5em; } 
+}
 @media screen and (max-width: 640px) {
   .dataTables_wrapper .dataTables_length,
   .dataTables_wrapper .dataTables_filter {
     float: none;
     text-align: center; }
   .dataTables_wrapper .dataTables_filter {
-    margin-top: 0.5em; } }
+    margin-top: 0.5em; } 
+}
     
