@@ -1487,6 +1487,16 @@ function getLDmatrixResults(jsonfile, request) {
 	});
 }
 
+function updateHistoryURL(id, inputs) {
+	//Update url with new vars
+	var params = inputs;
+	delete params.reference;
+	params["tab"] = id;
+	var recursiveEncoded = $.param( params );
+	window.history.pushState({},'', "?"+ recursiveEncoded);
+
+}
+
 function updateLDpair() {
 	var id = 'ldpair';
 	var $btn = $('#' + id).button('loading');
@@ -1503,6 +1513,8 @@ function updateLDpair() {
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
 	};
+
+	//updateHistoryURL(id, ldpairInputs);
 
 	var url = restServerUrl + "/ldpair";
 
