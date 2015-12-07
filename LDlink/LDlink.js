@@ -844,13 +844,14 @@ function loadSNPChip(data) {
 				//console.dir(associated_platforms.sort());
 
 				$.each(detail[2].split(","), function(key, value){
-					all_platforms_used.push(value);
-					test += key+") "+detail[2]+"\n";
+					if(value != "") {
+						all_platforms_used.push(value);
+						test += key+") "+detail[2]+"\n";
+					}
 				});
 			//}
 		}
 	});
-
 	//console.warn("All Platforms");
 	//console.log("Count: "+all_platforms_used.length);
 	//Find the unique one from all of the platforms
@@ -896,11 +897,25 @@ function loadSNPChip(data) {
 
 	$.each(platform_list, function(key, value) {
 		//reversed_platform_list.push(snpchipReverseLookup[value]);
+
 		obj ={
 			code: snpchipReverseLookup[value],
 			platform: value
 		};
-		snpchipData["headers"].push(obj);
+		if(typeof obj.code === "undefined") {
+			console.info("Reverse lookup does appear to exist");
+			console.info("Removing key "+key+" from platform_list below.");
+			console.info("This value doesn't seem to have a code: "+value);
+			console.log("platform_list:");
+			console.dir(platform_list);
+			obj ={
+				code: "unknown code",
+				platform: value
+			};
+			snpchipData["headers"].push(obj);
+		} else {
+			snpchipData["headers"].push(obj);
+		}
 	});
 	snpchipData["snpchip"] = newchip;
 	//snpchipData["headers"].push(= reversed_platform_list;
@@ -910,10 +925,10 @@ function loadSNPChip(data) {
 	//snpchipData["headers"].platform = platform_list;
 
 	// = "This is about error";
-	//console.log("FINAL DATA HERE:");
-	//console.dir(snpchipData);
-	//console.log("FINAL DATA AS A STRING:");
-	//console.log(JSON.stringify(snpchipData));
+	console.log("FINAL DATA HERE:");
+	console.dir(snpchipData);
+	console.log("FINAL DATA AS A STRING:");
+	console.log(JSON.stringify(snpchipData));
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	checkAlert("snpchip", snpchipData.warning, "warning", true);

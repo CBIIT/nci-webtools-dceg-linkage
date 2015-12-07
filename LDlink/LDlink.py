@@ -271,13 +271,13 @@ def ldchip():
     f.write(snps)
     f.close()
 
-    #return "Hello"
-
     #snp_chip = calculate_chip(snplst,platforms,reference)
     snp_chip = calculate_chip(snplst,"",reference)
 
     chip={}
     chip["snp_chip"] = snp_chip
+
+    copy_output_files(reference)
 
     #out_json = json.dumps(chip, sort_keys=True, indent=2)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
