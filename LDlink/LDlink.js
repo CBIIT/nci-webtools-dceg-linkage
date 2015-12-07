@@ -1818,6 +1818,7 @@ function addCheckBox(code, description, elementId, platform_class) {
 				$("<input>").attr('type','checkbox')
 					.attr('id',code)
 					.attr('value', description)
+					.attr('checked', true)
 					.addClass(platform_class)
 				)
 			).append(
