@@ -557,17 +557,14 @@ https://www.broadinstitute.org/mpg/snap/ldsearch.php */
     border-bottom: 1px dotted gray;
 }
 fieldset#columnAcheckbox {
-    float: left;
-    min-width: 275px;
-    width: 40%;
+    min-width: 450px;
 }
 fieldset#columnAcheckbox div.row span.label, fieldset#columnBcheckbox div.row span.label, fieldset.fullwidthcheckbox div.row span.label {
     padding-top: 1px;
     width: 20px;
 }
 fieldset#columnBcheckbox {
-    min-width: 340px;
-    width: 50%;
+    min-width: 365px;
 }
 fieldset div.row span.formw select.yesno {
     width: 80px;

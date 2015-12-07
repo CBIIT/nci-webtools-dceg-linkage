@@ -1025,7 +1025,7 @@
 									<p class="instruction">
 									   Limit search results to only SNPs on the selected arrays (<span id="selectAllChipTypes" class="underlined">select all</span>)
 									</p>
-									<fieldset id="columnAcheckbox">
+									<fieldset id="columnAcheckbox" class="col-sm-6">
 										<div class="bolded">
 											<span class="label">
 												<input type="checkbox" id="selectAllIllumina">
@@ -1035,7 +1035,7 @@
 											</span>
 										</div>
 									</fieldset>
-									<fieldset id="columnBcheckbox">
+									<fieldset id="columnBcheckbox" class="col-sm-5">
 									   <div class="bolded">
 									       	<span class="label">
 									       		<input type="checkbox" id="selectAllAffymetrix">
@@ -1116,7 +1116,11 @@
 									<thead>
 										<tr>
 											<!-- ko foreach: headers -->
-												<th class="rotate"><div><span data-bind="text: $data"></span></div></th>
+												<th class="rotate">
+													<div  data-bind="attr:{title: $data.platform }">
+													<span data-bind="text: $data.code"></span>
+													</div>
+												</th>
 											<!-- /ko -->
 										</tr>
 									</thead>
