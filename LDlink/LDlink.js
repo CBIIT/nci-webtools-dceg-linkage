@@ -925,10 +925,10 @@ function loadSNPChip(data) {
 	//snpchipData["headers"].platform = platform_list;
 
 	// = "This is about error";
-	console.log("FINAL DATA HERE:");
-	console.dir(snpchipData);
-	console.log("FINAL DATA AS A STRING:");
-	console.log(JSON.stringify(snpchipData));
+	//console.log("FINAL DATA HERE:");
+	//console.dir(snpchipData);
+	//console.log("FINAL DATA AS A STRING:");
+	//console.log(JSON.stringify(snpchipData));
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	checkAlert("snpchip", snpchipData.warning, "warning", true);
