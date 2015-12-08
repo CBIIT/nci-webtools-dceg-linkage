@@ -223,8 +223,6 @@ function setupTabs() {
 	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
 	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
 
-	//window.history.pushState({},'', "?tab="+currentTab);
-
 	$('#'+currentTab+'-tab').addClass("in").addClass('active');
 	$('#'+currentTab+'-tab-anchor').parent().addClass('active');
 
@@ -240,7 +238,7 @@ function refreshPopulation(pop, id) {
 	$.each(pop, function(key, value){
 		$('option[value="'+value+'"]', $('#'+id+'-population-codes')).prop('selected', true);
 	});
-	$('#ldpair-population-codes').multiselect('refresh');
+	$('#'+id+'-population-codes').multiselect('refresh');
 
 }
 
@@ -255,34 +253,26 @@ function autoCalculate() {
 	} else {
 		return;
 	}
-	//alert(url);
-	var id =url.tab.toLowerCase(); 
+	var id = url.tab.toLowerCase(); 
 	switch (id) {
 		case "ldpair":
 			if(url.snp1 && url.snp2 && url.pop) {
-				console.log("We got a dinner.");
 				$("#ldpair-snp1").prop('value', url.snp1);
 				$("#ldpair-snp2").prop('value', url.snp2);
 				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
-			} else {
-				console.warn("You have some missing vars unable to autoCalculate.");
-				break;
+				initCalculate(id);
+				updateData(id);
 			}
-			initCalculate(id);
-			updateData(id);
 			break;
 		case "ldproxy":
-			if(url.snp1 && url.snp2 && url.pop) {
-				console.log("We got a dinner.");
-				$("#ldpair-snp1").prop('value', url.snp1);
-				$("#ldpair-snp2").prop('value', url.snp2);
+			if(url.snp && url.pop && url.r2_d) {
+				$("#ldproxy-snp").prop('value', url.snp);
+				$("#proxy_color_r2").toggleClass('active', url.r2_d == "r2");
+				$("#proxy_color_r2").next().toggleClass('active', url.r2_d == "d");
 				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
-			} else {
-				console.log("Missing vars in url: unable to autoCalculate.");
-				break;
+				initCalculate(id);
+				updateData(id);
 			}
-			initCalculate(id);
-			updateData(id);
 			break;
 	} 
 }
@@ -1311,7 +1301,7 @@ function addLDMatrixHyperLinks(request) {
 	$('#ldmatrix-DPrime').attr('href', 'tmp/d_prime_' + request + '.txt');
 	$('#ldmatrix-R2').attr('href', 'tmp/r2_' + request + '.txt');
 }
-
+/*
 function updateLDproxyProgressBar(id, seconds) {
 
 	var milliseconds = seconds * 1000;
@@ -1335,6 +1325,7 @@ function updateLDproxyProgressBar(id, seconds) {
 		}
 	}, delay);
 }
+*/
 /*
 function createPopulationDropdown(id) {
 
@@ -1419,6 +1410,8 @@ function updateLDproxy() {
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
 		r2_d : r2_d
 	};
+
+	updateHistoryURL(id, ldproxyInputs);
 
 	//console.log(location.hostname);
 
@@ -1576,15 +1569,6 @@ function updateHistoryURL(id, inputs) {
 		var population;
 		var totalPopulations;
 		population =  $('#'+id+'-population-codes').val();
-
-		totalPopulations = countSubPopulations(populations);
-
-		console.log("Populations (static)");
-		console.log("Populations length: "+totalPopulations);
-
-		console.dir(populations);
-		console.log("Population selected");
-		console.log("Population length: "+population.length);
 		params.pop = population.join("+");
 	}
 
@@ -1592,7 +1576,7 @@ function updateHistoryURL(id, inputs) {
 	var recursiveEncoded = $.param( params );
 	window.history.pushState({},'', "?"+ recursiveEncoded);
 
-	console.log(JSON.stringify(params.pop));
+	//console.log(JSON.stringify(params.pop));
 
 }
 
