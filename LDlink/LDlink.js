@@ -34,6 +34,8 @@ Object.size = function(obj) {
 };
 
 $(document).ready(function() {
+
+	updateVersion(ldlink_version);
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {
 		var currentTab = e.target.id.substr(0, e.target.id.search('-'));
@@ -41,7 +43,6 @@ $(document).ready(function() {
 	});
 	setupSNPclipControls();
 	setupSNPchipControls();
-	updateVersion(ldlink_version);
 	showFFWarning();
 
 	var ldproxyTable = $('#new-ldproxy').DataTable( {
@@ -179,7 +180,7 @@ $(document).ready(function() {
 	});
 
 	setupTabs();
-
+	autoCalculate();
 });
 
 // Set file support trigger
@@ -193,6 +194,99 @@ $(document).on(
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
 );
+
+function setupTabs() {
+	//Clear the active tab on a reload
+	$.each(modules, function(key, id) {
+		$("#"+id+"-tab-anchor").removeClass('active');
+	});
+	$("#home-tab-anchor").removeClass('active');
+	$("#help-tab-anchor").removeClass('active');
+	//Look for a tab variable on the url
+	var url = "{tab:''}";
+	var search = location.search.substring(1);
+	if(search.length >0 ) {
+		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
+	}
+
+	var currentTab;
+	if(typeof url.tab !="undefined") {
+		currentTab = url.tab.toLowerCase();
+	} else {
+		currentTab = 'home';
+	}
+
+	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
+	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
+	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
+	if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
+	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
+	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
+
+	//window.history.pushState({},'', "?tab="+currentTab);
+
+	$('#'+currentTab+'-tab').addClass("in").addClass('active');
+	$('#'+currentTab+'-tab-anchor').parent().addClass('active');
+
+	if(typeof url.inputs !="undefined") {
+		console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
+		updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
+	}
+
+}
+
+function refreshPopulation(pop, id) {
+
+	$.each(pop, function(key, value){
+		$('option[value="'+value+'"]', $('#'+id+'-population-codes')).prop('selected', true);
+	});
+	$('#ldpair-population-codes').multiselect('refresh');
+
+}
+
+function autoCalculate() {
+	// if valid parameters exist in the url then calcluate
+	var url = {};
+	var search = location.search.substring(1);
+	if(search.length >0 ) {
+		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
+	}
+	if(typeof url.tab !="undefined") {
+	} else {
+		return;
+	}
+	//alert(url);
+	var id =url.tab.toLowerCase(); 
+	switch (id) {
+		case "ldpair":
+			if(url.snp1 && url.snp2 && url.pop) {
+				console.log("We got a dinner.");
+				$("#ldpair-snp1").prop('value', url.snp1);
+				$("#ldpair-snp2").prop('value', url.snp2);
+				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+			} else {
+				console.warn("You have some missing vars unable to autoCalculate.");
+				break;
+			}
+			initCalculate(id);
+			updateData(id);
+			break;
+		case "ldproxy":
+			if(url.snp1 && url.snp2 && url.pop) {
+				console.log("We got a dinner.");
+				$("#ldpair-snp1").prop('value', url.snp1);
+				$("#ldpair-snp2").prop('value', url.snp2);
+				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+			} else {
+				console.log("Missing vars in url: unable to autoCalculate.");
+				break;
+			}
+			initCalculate(id);
+			updateData(id);
+			break;
+	} 
+}
+
 function setupSNPchipControls() {
 	// Setup click listners for the platform selector
 	$('#accordion').on('hidden.bs.collapse', toggleChevron);
@@ -200,7 +294,7 @@ function setupSNPchipControls() {
 
 	$('#selectAllChipTypes').click(function(e) {
 		if($(".illumina:checked").length == $("input.illumina").length &&
-				$(".affymetrix:checked").length == $("input.affymetrix").length) {
+			$(".affymetrix:checked").length == $("input.affymetrix").length) {
 			$(".illumina").prop("checked", false);
 			$(".affymetrix").prop("checked", false);
 			$("#selectAllIllumina").prop("checked", false);
@@ -305,45 +399,6 @@ function setupSNPclipControls() {
 	});
 }
 
-function setupTabs() {
-	//Clear the active tab on a reload
-	$.each(modules, function(key, id) {
-		$("#"+id+"-tab-anchor").removeClass('active');
-	});
-	$("#home-tab-anchor").removeClass('active');
-	$("#help-tab-anchor").removeClass('active');
-	//Look for a tab variable on the url
-	var url = "{tab:''}";
-	var search = location.search.substring(1);
-	if(search.length >0 ) {
-		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
-	}
-
-	var currentTab;
-	if(typeof url.tab !="undefined") {
-		currentTab = url.tab.toLowerCase();
-	} else {
-		currentTab = 'home';
-	}
-
-	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
-	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
-	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
-	if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
-	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
-	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
-
-	//window.history.pushState({},'', "?tab="+currentTab);
-
-	$('#'+currentTab+'-tab').addClass("in").addClass('active');
-	$('#'+currentTab+'-tab-anchor').parent().addClass('active');
-
-	if(typeof url.inputs !="undefined") {
-		console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
-		updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
-	}
-
-}
 function pushInputs(currentTab, inputs) {
 	window.history.pushState({},'', "?tab="+currentTab+"&inputs="+JSON.stringify(inputs));
 }
@@ -383,7 +438,7 @@ function RefreshTable(tableId, json) {
 
 
 
-function ldproxy_rs_results_link(data, type, row ) {
+function ldproxy_rs_results_link(data, type, row) {
 
 
 	//if no rs number is available return without a link.
@@ -404,7 +459,7 @@ function ldproxy_rs_results_link(data, type, row ) {
 	return link;
 }
 
-function ldproxy_position_link(data, type, row ) {
+function ldproxy_position_link(data, type, row) {
 
 	// Find the coord of the rs number
 	//
@@ -1515,11 +1570,29 @@ function getLDmatrixResults(jsonfile, request) {
 
 function updateHistoryURL(id, inputs) {
 	//Update url with new vars
-	var params = inputs;
+	var params = $.extend({}, inputs);
 	delete params.reference;
+	if(params.pop) {
+		var population;
+		var totalPopulations;
+		population =  $('#'+id+'-population-codes').val();
+
+		totalPopulations = countSubPopulations(populations);
+
+		console.log("Populations (static)");
+		console.log("Populations length: "+totalPopulations);
+
+		console.dir(populations);
+		console.log("Population selected");
+		console.log("Population length: "+population.length);
+		params.pop = population.join("+");
+	}
+
 	params["tab"] = id;
 	var recursiveEncoded = $.param( params );
 	window.history.pushState({},'', "?"+ recursiveEncoded);
+
+	console.log(JSON.stringify(params.pop));
 
 }
 
@@ -1540,7 +1613,7 @@ function updateLDpair() {
 				+ 10000
 	};
 
-	//updateHistoryURL(id, ldpairInputs);
+	updateHistoryURL(id, ldpairInputs);
 
 	var url = restServerUrl + "/ldpair";
 
@@ -1970,7 +2043,6 @@ function buildPopulationDropdown(elementId) {
 }
 
 function getPopulationCodes(id) {
-	//alert(id);
 	var population;
 	var totalPopulations;
 	population =  $('#'+id).val();
