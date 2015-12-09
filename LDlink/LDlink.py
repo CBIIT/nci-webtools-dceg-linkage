@@ -272,7 +272,7 @@ def ldchip():
     f.close()
 
     #snp_chip = calculate_chip(snplst,platforms,reference)
-    snp_chip = calculate_chip(snplst,"",reference)
+    snp_chip = calculate_chip(snplst,platforms,reference)
 
     chip={}
     chip["snp_chip"] = snp_chip

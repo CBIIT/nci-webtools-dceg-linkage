@@ -144,7 +144,7 @@ def calculate_chip(snplst,platform_query,request):
 	platforms=[]
 	platform_list=[]
 	if platform_query != "": #<--If user did not enter platforms as a request
-			platform_list=convert_codeToPlatforms(platform_query,db)
+		platform_list=convert_codeToPlatforms(platform_query,db)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
 		position=str(snp_coords_sort[k][2])
@@ -167,8 +167,47 @@ def calculate_chip(snplst,platform_query,request):
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
-	return json_output
 	out_json.close()
+	createOutputFile(request)
+
+	return json_output
+
+def createOutputFile(request):
+	tmp_dir="./tmp/"
+	details_file = open(tmp_dir+'details'+request+".txt","w")
+
+	print "Hello output file"
+	# Print output
+	with open("./tmp/proxy"+request+".json") as out_json:
+		json_dict=json.load(out_json)
+	
+	
+	try:
+		json_dict["error"]
+
+	except KeyError:
+		print >>details_file, ""
+		header=["SNP","Position (GRCh37)","Arrays"]
+		print >>details_file, "\t".join(header)
+		for k in sorted(json_dict.keys()):
+			if k!="error" and k!="warning":
+				print >>details_file, "\t".join(json_dict[k])
+
+		try:
+			json_dict["warning"]
+		except KeyError:
+			print >>details_file, ""
+		else:
+			print >>details_file, ""
+			print >>details_file, "WARNING: "+json_dict["warning"]+"!"
+			print  >>details_file, ""
+
+	else:
+		print >>details_file, ""
+		print >>details_file, json_dict["error"]
+		print >>details_file, ""
+
+	details_file.close()
 
 
 def main():

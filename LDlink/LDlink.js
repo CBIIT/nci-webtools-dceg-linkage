@@ -783,7 +783,8 @@ function updateSNPchip() {
 		platforms: platforms.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-	$('#snp_chip_list').attr('href', "tmp/snps"+ldInputs.reference+".txt");
+	$('#snp_chip_list').attr('href', "tmp/details"+ldInputs.reference+".txt");
+	$('#snp_chip_list').attr('target', "chip_details"+ldInputs.reference+".txt");
 	//console.dir(ldInputs);
 	var url = restServerUrl + "/snpchip";
 	var ajaxRequest = $.ajax({
@@ -963,6 +964,18 @@ function loadSNPChip(data) {
 		}
 	});
 	snpchipData["snpchip"] = newchip;
+	//Based on header size remove overflow-y
+	//console.warn("Header size");
+	//console.log(snpchipData["headers"].length);
+	var header_len = snpchipData["headers"].length;
+	if( header_len < 20) {
+		//calcualte width
+		$('#snpchip-table-right').attr('width', 100+(header_len*30));
+	} else {
+		$('#snpchip-table-right').removeAttr('width');
+	}
+	//$('#snpchip-table-right')...
+
 	//snpchipData["headers"].push(= reversed_platform_list;
 	//snpchipData["headers"].platform = platform_list;
 
@@ -1874,7 +1887,7 @@ function addCheckBox(code, description, elementId, platform_class) {
 			$("<span>").addClass("platform-checkbox").append(
 				$("<input>").attr('type','checkbox')
 					.attr('id',code)
-					.attr('value', description)
+					.attr('value', code)
 					.attr('checked', true)
 					.addClass(platform_class)
 				)

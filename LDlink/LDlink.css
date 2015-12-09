@@ -390,23 +390,16 @@ img.graph-legend {
 }
 
 .snpchip-table-container {
-	min-with: 700px;
+	min-width: 700px;
 	width:auto;
 	white-space: nowrap;
 
 }
 #snpchip-table-right {
     display: inline-block;
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
-#snpchip-container {
-	overflow-x: scroll;
-}
-
-#snpchip-results-container {
-	overflow-y: auto;
-}
 .snpchip-table > tbody > tr:nth-child(odd) {
 	background: #F9F9F9;
 }
