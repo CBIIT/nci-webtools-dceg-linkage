@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="LDlink" default="replace" basedir=".">
       <target name="replace" depends="user_name_exist,password_exist,database_exist">
-         <replace file="SNP_Query_loginInfo.txt" token="@username@" value="${url}"/>
-	 <replace file="SNP_Query_loginInfo.txt" token="@password@" value="${url}"/>
-	 <replace file="SNP_Query_loginInfo.txt" token="@database@" value="${url}"/>
+         <replace file="SNP_Query_loginInfo.txt" token="@username@" value="${username}"/>
+	 <replace file="SNP_Query_loginInfo.txt" token="@password@" value="${password}"/>
+	 <replace file="SNP_Query_loginInfo.txt" token="@database@" value="${database}"/>
       </target>
       <target name="user_name_exist" unless="username">
         <fail> User Name is not set, stop</fail>
