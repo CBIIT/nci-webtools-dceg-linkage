@@ -1,6 +1,6 @@
-username=
-password=
-database=
+username=@username@
+password=@password@
+database=@database@
 
 
 #File to store user information to query the LDLink mongoDB database
