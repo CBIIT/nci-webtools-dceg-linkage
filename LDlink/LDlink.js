@@ -15,12 +15,15 @@ var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Co
 //var ldClipData1={details:{rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]},snp_list:["rs11322783","rs8099917","rs955155","rs8101517","rs12980602","rs78605718"]};
 var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
 //var ldClipData = {warnings:[],details:[]};
-var snpclipData = {
-"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],
-"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]
-};
+var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]};
+
+//var snpchipData = {"snpchip":[{"rs_number":"rs505066","chromosome":"1","position":"96882671","map":["X","X","X","X","&nbsp;"]},{"rs_number":"rs505067","chromosome":"11","position":"74544780","map":["X","X","X","X","X"]}],"headers":["A_Hu-CHB","I_1M-D","I_1M","I_Exon510S","I_ME-Global-8"],"warning":"The following RS numbers were not found in dbSNP 142: rs1"};
+//var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":["A_Hu-CHB","I_1M-D","I_1M","I_Exon510S","I_ME-Global-8"]};
+var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
+
+var snpchipReverseLookup = [];
 var ldClipRaw;
-var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "ldchip" ];
+var modules = [ "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip" ];
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -31,13 +34,15 @@ Object.size = function(obj) {
 };
 
 $(document).ready(function() {
+
+	updateVersion(ldlink_version);
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {
 		var currentTab = e.target.id.substr(0, e.target.id.search('-'));
 		window.history.pushState({},'', "?tab="+currentTab);
 	});
 	setupSNPclipControls();
-	updateVersion(ldlink_version);
+	setupSNPchipControls();
 	showFFWarning();
 
 	var ldproxyTable = $('#new-ldproxy').DataTable( {
@@ -87,10 +92,7 @@ $(document).ready(function() {
         ]
 	});
 
-	var new_proxy_data = {"aaData": [
-	["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
+	var new_proxy_data = {"aaData": [["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
 	RefreshTable('#new-ldproxy', new_proxy_data);
 	
 	$('[data-toggle="popover"]').popover();
@@ -105,11 +107,14 @@ $(document).ready(function() {
 	ko.applyBindings(snpclipModel, document
 			.getElementById('snpclip-results-container'));
 
+	ko.applyBindings(snpchipModel, document
+			.getElementById('snpchip-results-container'));
+
 	$.each(modules, function(key, id) {
 		buildPopulationDropdown(id + "-population-codes");
-		$("#" + id + "-results-container").hide();
-		$('#' + id + '-message').hide();
-		$('#' + id + '-message-warning').hide();
+		$("#"+ id + "-results-container").hide();
+		$('#'+ id + '-message').hide();
+		$('#'+ id + '-message-warning').hide();
 		$('#'+ id + "-loading").hide();
 	});
 
@@ -175,7 +180,7 @@ $(document).ready(function() {
 	});
 
 	setupTabs();
-
+	autoCalculate();
 });
 
 // Set file support trigger
@@ -189,6 +194,181 @@ $(document).on(
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
 );
+
+function setupTabs() {
+	//Clear the active tab on a reload
+	$.each(modules, function(key, id) {
+		$("#"+id+"-tab-anchor").removeClass('active');
+	});
+	$("#home-tab-anchor").removeClass('active');
+	$("#help-tab-anchor").removeClass('active');
+	//Look for a tab variable on the url
+	var url = "{tab:''}";
+	var search = location.search.substring(1);
+	if(search.length >0 ) {
+		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
+	}
+
+	var currentTab;
+	if(typeof url.tab !="undefined") {
+		currentTab = url.tab.toLowerCase();
+	} else {
+		currentTab = 'home';
+	}
+
+	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
+	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
+	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
+	if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
+	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
+	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
+
+	$('#'+currentTab+'-tab').addClass("in").addClass('active');
+	$('#'+currentTab+'-tab-anchor').parent().addClass('active');
+
+	if(typeof url.inputs !="undefined") {
+		console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
+		updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
+	}
+
+}
+
+function refreshPopulation(pop, id) {
+
+	$.each(pop, function(key, value){
+		$('option[value="'+value+'"]', $('#'+id+'-population-codes')).prop('selected', true);
+	});
+	$('#'+id+'-population-codes').multiselect('refresh');
+
+}
+
+function autoCalculate() {
+	// if valid parameters exist in the url then calcluate
+	var url = {};
+	var search = location.search.substring(1);
+	if(search.length >0 ) {
+		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
+	}
+	if(typeof url.tab !="undefined") {
+	} else {
+		return;
+	}
+	var id = url.tab.toLowerCase(); 
+	switch (id) {
+		case "ldpair":
+			if(url.snp1 && url.snp2 && url.pop) {
+				$("#ldpair-snp1").prop('value', url.snp1);
+				$("#ldpair-snp2").prop('value', url.snp2);
+				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+				initCalculate(id);
+				updateData(id);
+			}
+			break;
+		case "ldproxy":
+			if(url.snp && url.pop && url.r2_d) {
+				$("#ldproxy-snp").prop('value', url.snp);
+				$("#proxy_color_r2").toggleClass('active', url.r2_d == "r2");
+				$("#proxy_color_r2").next().toggleClass('active', url.r2_d == "d");
+				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+				initCalculate(id);
+				updateData(id);
+			}
+			break;
+	} 
+}
+
+function setupSNPchipControls() {
+	// Setup click listners for the platform selector
+	$('#accordion').on('hidden.bs.collapse', toggleChevron);
+	$('#accordion').on('shown.bs.collapse', toggleChevron);
+
+	$('#selectAllChipTypes').click(function(e) {
+		if($(".illumina:checked").length == $("input.illumina").length &&
+			$(".affymetrix:checked").length == $("input.affymetrix").length) {
+			$(".illumina").prop("checked", false);
+			$(".affymetrix").prop("checked", false);
+			$("#selectAllIllumina").prop("checked", false);
+			$("#selectAllAffymetrix").prop("checked", false);
+		} else {
+			$(".illumina").prop("checked", true);
+			$(".affymetrix").prop("checked", true);
+			$("#selectAllIllumina").prop("checked", true);
+			$("#selectAllAffymetrix").prop("checked", true);
+		}
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+
+	$('#selectAllIllumina').click(function(e) {
+		var id = e.target.id;
+		console.log("Look for state");
+		//console.dir(e);
+		console.log($("#"+id).prop('checked'));
+		if($("#"+id).prop('checked') == true) {
+			$(".illumina").prop("checked", true);
+		} else {
+			$(".illumina").prop("checked", false);
+		}
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+	$('#selectAllAffymetrix').click(function(e) {
+		var id = e.target.id;
+		if($("#"+id).prop('checked') == true) {
+			$(".affymetrix").prop("checked", true);
+		} else {
+			$(".affymetrix").prop("checked", false);
+		}
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+	$('#collapseThree').on('click', "input.illumina, input.affymetrix", function(e) {
+		checkSelectAllCheckbox();
+		calculateChipTotals();
+	});
+	initChip();
+}
+
+function checkSelectAllCheckbox() {
+	//Determin if the master checkbox should be checked or not.
+	var illumina = $(".illumina:checked").length;
+	var affymetrix = $(".affymetrix:checked").length;
+	var total_illumina = $("input.illumina").length;
+	var total_affymetrix = $("input.affymetrix").length;
+
+	if(illumina == total_illumina) {
+		$('#selectAllIllumina').prop('checked', true);
+	} else {
+		$('#selectAllIllumina').prop('checked', false);
+	}
+	if(affymetrix == total_affymetrix) {
+		$('#selectAllAffymetrix').prop('checked', true);
+	} else {
+		$('#selectAllAffymetrix').prop('checked', false);
+	}
+
+	if(illumina == total_illumina && affymetrix == total_affymetrix) {
+		$('#selectAllChipTypes').text("unselect all");
+	} else {
+		$('#selectAllChipTypes').text("select all");
+	}
+
+}
+
+function calculateChipTotals() {
+	
+	var illumina = $(".illumina:checked").length;
+	var affymetrix = $(".affymetrix:checked").length;
+
+	$('#illumina-count').text(illumina);
+	$('#affymetrix-count').text(affymetrix);
+	if(illumina == 0 && affymetrix == 0) {
+		$("#snpchip").prop('disabled', true);
+	} else {
+		$("#snpchip").prop('disabled', false);
+	}
+
+}
 
 function setupSNPclipControls() {
 	//('#snpclip').attr('disabled', false); // Remove this. (only need for testing)
@@ -209,51 +389,6 @@ function setupSNPclipControls() {
 	});
 }
 
-function setupTabs() {
-	//Clear the active tab on a reload
-	$.each(modules, function(key, id) {
-		$("#"+id+"-tab-anchor").removeClass('active');
-	});
-	$("#home-tab-anchor").removeClass('active');
-	$("#help-tab-anchor").removeClass('active');
-	//Look for a tab variable on the url
-	var url = "{tab:''}";
-	var search = location.search.substring(1);
-	console.log(location.search);
-	console.log(search);
-	if(search.length >0 ) {
-		url = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"').replace(/\n/, '\\\\n').replace(/\t/, '') + '"}');
-	}
-
-	console.log(url);
-	console.dir(url);
-	var currentTab;
-	if(typeof url.tab !="undefined") {
-		currentTab = url.tab.toLowerCase();
-	} else {
-		currentTab = 'home';
-	}
-
-	console.log("Tab: "+currentTab);
-
-	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
-	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
-	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
-	if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
-	if(currentTab.search('clip')>=0) currentTab = 'snpclip';
-	if(currentTab.search('chip')>=0) currentTab = 'snpchip';
-
-	//window.history.pushState({},'', "?tab="+currentTab);
-
-	$('#'+currentTab+'-tab').addClass("in").addClass('active');
-	$('#'+currentTab+'-tab-anchor').parent().addClass('active');
-
-	if(typeof url.inputs !="undefined") {
-		console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
-		updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
-	}
-
-}
 function pushInputs(currentTab, inputs) {
 	window.history.pushState({},'', "?tab="+currentTab+"&inputs="+JSON.stringify(inputs));
 }
@@ -278,24 +413,22 @@ function showFFWarning() {
 var ldpairModel = ko.mapping.fromJS(ldPairData);
 var ldhapModel = ko.mapping.fromJS(ldhapData);
 var snpclipModel = ko.mapping.fromJS(snpclipData);
+var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
-    table = $(tableId).dataTable();
-    oSettings = table.fnSettings();
-
-    table.fnClearTable(this);
-
-    for (var i=0; i<json.aaData.length; i++) {
-      table.oApi._fnAddData(oSettings, json.aaData[i]);
-    }
-
-    oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
-    table.fnDraw();
+	table = $(tableId).dataTable();
+	oSettings = table.fnSettings();
+	table.fnClearTable(this);
+	for (var i=0; i<json.aaData.length; i++) {
+	  table.oApi._fnAddData(oSettings, json.aaData[i]);
+	}
+	oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+	table.fnDraw();
 }
 
 
 
-function ldproxy_rs_results_link(data, type, row ) {
+function ldproxy_rs_results_link(data, type, row) {
 
 
 	//if no rs number is available return without a link.
@@ -316,7 +449,7 @@ function ldproxy_rs_results_link(data, type, row ) {
 	return link;
 }
 
-function ldproxy_position_link(data, type, row ) {
+function ldproxy_position_link(data, type, row) {
 
 	// Find the coord of the rs number
 	//
@@ -350,10 +483,7 @@ function ldproxy_position_link(data, type, row ) {
 	};
 	var href = server + "?" + $.param(params);
 	var target = 'position_' + Math.floor(Math.random() * (99999 - 10000 + 1));
-	//console.log("url: "+url);
-	//$('#ldproxy-link').attr('href', url);
 	var link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
-	//return data +' ('+ row[3]+')';
 
 	return link;
 }
@@ -439,22 +569,20 @@ function calculate(e) {
 	initCalculate(id);
 	updateData(id);
 }
+
 function initCalculate(id) {
 	$('#' + id + '-results-container').hide();
 	$('#' + id + '-message').hide();
 	$('#' + id + '-message-warning').hide();
 }
 
-function updateData(id, inputs) {
-	console.log('updateData');
-	console.log('inputs:');
-	console.log(inputs);
+function updateData(id) {
 
 	$('#'+id+"-loading").show();
 
 	switch (id) {
 		case 'ldhap':
-			updateLDhap(inputs);
+			updateLDhap();
 			break;
 		case 'ldmatrix':
 			updateLDmatrix();
@@ -469,12 +597,12 @@ function updateData(id, inputs) {
 			updateSNPclip();
 			break;
 		case 'snpchip':
-			updateLDchip();
+			updateSNPchip();
 			break;
 	}
 }
 
-function updateLDhap(inputs) {
+function updateLDhap() {
 
 	var id = "ldhap";
 
@@ -486,22 +614,6 @@ function updateLDhap(inputs) {
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-/*
-	if(typeof inputs === 'undefined') {
-		var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-		var population = getPopulationCodes(id+'-population-codes');
-		ldInputs = {
-			snps : snps,
-			pop : population.join("+"),
-			reference : Math.floor(Math.random() * (99999 - 10000 + 1))
-		};
-		var newInputs = ldInputs;
-		newInputs.snps = ldInputs.snps.replace(/\t/g, '').replace(/\n/g, '+');
-		pushInputs(id, newInputs);
-	} else {
-		ldInputs = JSON.parse(inputs.replace('+', '\n'));
-	}
-*/
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -649,21 +761,32 @@ function updateSNPclip() {
 	hideLoadingIcon(ajaxRequest, id);
 }
 
-function updateLDchip() {
+function updateSNPchip() {
 
-	var id = "ldchip";
+	var id = "snpchip";
 
 	var $btn = $('#' + id).button('loading');
+	$("#collapseThree").removeClass("in");
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+	var platforms = [];
 
-	//var population = getPopulationCodes(id+'-population-codes');
+	$('.affymetrix:checked').each(function() { 
+		platforms.push($(this).val());
+	});
+	$('.illumina:checked').each(function() { 
+		platforms.push($(this).val());
+	});
+	
 
 	var ldInputs = {
 		snps : snps,
+		platforms: platforms.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
-
-	var url = restServerUrl + "/ldchip";
+	$('#snp_chip_list').attr('href', "tmp/details"+ldInputs.reference+".txt");
+	$('#snp_chip_list').attr('target', "chip_details"+ldInputs.reference+".txt");
+	//console.dir(ldInputs);
+	var url = restServerUrl + "/snpchip";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
 		url : url,
@@ -678,33 +801,220 @@ function updateLDchip() {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
 			$('#'+id+"-loading").hide();
-			initClip(data);
+			loadSNPChip(data);
 		}
 	});
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				console.log("header: "
-					+ jqXHR
-					+ "\n"
-					+ "Status: "
-					+ textStatus
-					+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		console.log("header: "+jqXHR+"\n"+ "Status: "+ textStatus+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		message = 'Service Unavailable: ' + textStatus + "<br>";
+		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
 
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+		$('#' + id + '-message').show();
+		$('#' + id + '-message-content').empty().append(message);
+		$('#' + id + '-progress').hide();
+		$('#' + id+ '-results-container').hide();
+		//hide loading icon
+		$('#'+id+"-loading").hide();
+	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
 
 	hideLoadingIcon(ajaxRequest, id);
 }
+
+function initChip() {
+	//Setup the platform
+	var id = "snpchip";
+
+	var url = restServerUrl + "/snpchip_platforms";
+	var ajaxRequest = $.ajax({
+		type : 'GET',
+		url : url,
+		contentType : 'application/json' // JSON
+	});
+
+	ajaxRequest.success(function(data) {
+		if (displayError(id, data) == false) {
+			//buildPopulationDropdownSNPchip(data);
+			buildPlatformSNPchip(data);
+		}
+	});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		console.log("header: "+ jqXHR+ "\nStatus: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		message = 'Service Unavailable: ' + textStatus + "<br>";
+		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+		message += "Unable to retrieve platform codes from the server."
+		$('#' + id + '-message').show();
+		$('#' + id + '-message-content').empty().append(message);
+		$('#' + id + '-progress').hide();
+		$('#' + id+ '-results-container').hide();
+		//hide loading icon
+		$('#'+id+"-loading").hide();
+	});
+
+}
+
+function loadSNPChip(data) {
+	//Setup data and display
+	//snpchipData = [];
+	// = "This is about error";
+
+	delete snpchipData["warning"];
+	delete snpchipData["error"];
+
+	var snpchip = JSON.parse(data);
+	var all_platforms_used = [];
+	var newchip = [];
+	var snpData;
+	var obj;
+	var test = "";
+	var associated_platforms;
+
+	$.each(snpchip, function(row, detail) {
+		if(row.search("warning")>=0 ||row.search("error")>=0) {
+			//Print the warning somewhere on the screen.
+			if(row.search("warning")>=0) {
+				snpchipData["warning"] = detail;
+			}
+			if(row.search("error")>=0) {
+				snpchipData["error"] = detail;
+			}
+			//Remove this item
+			delete snpchip[row];
+		} else {
+			//Gather all platforms
+			//if(parseInt(row)< 1) {
+				associated_platforms = detail[2].split(",");
+				//console.log("associated_platforms: "+parseInt(row)+" "+detail[0]);
+				//console.dir(associated_platforms.sort());
+
+				$.each(detail[2].split(","), function(key, value){
+					if(value != "") {
+						all_platforms_used.push(value);
+						test += key+") "+detail[2]+"\n";
+					}
+				});
+			//}
+		}
+	});
+	//console.warn("All Platforms");
+	//console.log("Count: "+all_platforms_used.length);
+	//Find the unique one from all of the platforms
+	var used_platforms
+	var platform_list = all_platforms_used.unique();
+	var map = [];
+	var reversed_platform_list = [];
+	snpchipData["headers"] = [];
+	platform_list.sort();
+	//console.warn("Filtered list of  Platforms");
+	//console.log("Count: "+platform_list.length);
+	//console.log(test);
+
+	//Now that we have the platform list... Map each platform.
+	$.each(snpchip, function(row, detail){
+		//Walk throught the platform_list and determine if it has the list... create a map for the table.
+		map = [];
+		used_platforms = detail[2].split(",");
+		//console.log("used_platforms:");
+		//console.dir(used_platforms);
+		//console.warn("row: "+row);
+
+		$.each(platform_list, function(key, value) {
+			//console.log(key+":"+value);
+			//console.info($.inArray(value, used_platforms));
+			if($.inArray(value, used_platforms) >= 0) {
+				map.push("X");
+			} else {
+				map.push("&nbsp;");
+			}
+		});
+		//Split detail[1] into two parts
+		var chromo_position = detail[1].split(":");
+		obj = {
+			"rs_number" : anchorRSnumber(detail[0]),
+			"chromosome" : chromo_position[0],
+			"position" : anchorRSposition("chr"+detail[1], detail[0], true),
+			"map" : map
+		};
+		//console.dir(obj);
+		newchip.push(obj);
+	});
+
+	$.each(platform_list, function(key, value) {
+		//reversed_platform_list.push(snpchipReverseLookup[value]);
+
+		obj ={
+			code: snpchipReverseLookup[value],
+			platform: value
+		};
+		if(typeof obj.code === "undefined") {
+			console.info("Reverse lookup does appear to exist");
+			console.info("Removing key "+key+" from platform_list below.");
+			console.info("This value doesn't seem to have a code: "+value);
+			console.log("platform_list:");
+			console.dir(platform_list);
+			obj ={
+				code: "unknown code",
+				platform: value
+			};
+			snpchipData["headers"].push(obj);
+		} else {
+			snpchipData["headers"].push(obj);
+		}
+	});
+	snpchipData["snpchip"] = newchip;
+	//Based on header size remove overflow-y
+	//console.warn("Header size");
+	//console.log(snpchipData["headers"].length);
+	var header_len = snpchipData["headers"].length;
+	if( header_len < 20) {
+		//calcualte width
+		$('#snpchip-table-right').attr('width', 100+(header_len*30));
+	} else {
+		$('#snpchip-table-right').removeAttr('width');
+	}
+	//$('#snpchip-table-right')...
+
+	//snpchipData["headers"].push(= reversed_platform_list;
+	//snpchipData["headers"].platform = platform_list;
+
+	//snpchipData["headers"].code = reversed_platform_list;
+	//snpchipData["headers"].platform = platform_list;
+
+	// = "This is about error";
+	//console.log("FINAL DATA HERE:");
+	//console.dir(snpchipData);
+	//console.log("FINAL DATA AS A STRING:");
+	//console.log(JSON.stringify(snpchipData));
+	ko.mapping.fromJS(snpchipData, snpchipModel);
+
+	checkAlert("snpchip", snpchipData.warning, "warning", true);
+	checkAlert("snpchip", snpchipData.error, "error", false);
+
+}
+
+function checkAlert(elementId, message, type, displayResults) {
+	//type is either 'warning' or 'error'
+	var prefix;
+	if(type == 'warning') {
+		prefix = elementId+'-message-warning';
+	} else {
+		prefix = elementId+'-message';
+	}
+	$('#'+prefix).hide();
+
+	if (typeof message !== 'undefined' && message.length > 0) {
+		$('#'+prefix+'-content').text(message);
+		$('#'+prefix).show();
+		if (typeof displayResults !== 'undefined' && displayResults) {
+			$('#'+elementId+'-results-container').show();
+		} else {
+			$('#'+elementId+'-results-container').hide();
+		}
+	}
+}
+
 function populateSNPlist(data) {
 
 	//clear out the list
@@ -737,10 +1047,12 @@ function anchorRSnumber(rs_number) {
 	return '<a href="'+url+'" target="rs_number_'+rs_number+'">'+rs_number+'</a>';
 }
 
-function anchorRSposition(coord, rs_number) {
+function anchorRSposition(coord, rs_number, hide_chr) {
 	//
 	// Genome Browser:
 	//
+	hide_chr = hide_chr || false;
+
 	if(coord.toUpperCase() == "NA")
 		return "NA";
 
@@ -759,8 +1071,11 @@ function anchorRSposition(coord, rs_number) {
 		'hgFind.matches' : rs_number
 	};
 	var url = server + "?" + $.param(params);
-
-	return '<a href="'+url+'" target="coord_'+coord+'">'+coord+'</a>';
+	if(hide_chr) {
+		return '<a href="'+url+'" target="coord_'+coord+'">'+positions[1]+'</a>';
+	} else {
+		return '<a href="'+url+'" target="coord_'+coord+'">'+coord+'</a>';
+	}
 }
 
 function populateSNPwarnings(data) {
@@ -844,7 +1159,6 @@ function initClip(data) {
 	populateSNPwarnings(data);
 	populateSNPlist(data);
 	// Get first element
-	//var rs_number = data.snp_list[0];
 	if(data.snp_list.length == 0) {
 		$('#snpclip-message-warning-content').text("SNPclip list returned no results for this calculation.");
 		$('#snpclip-results-container').hide();
@@ -961,7 +1275,7 @@ function updateLDmatrix() {
 	});
 
 	ajaxRequest.success(function(data) {
-			$('#ldmatrix-bokeh-graph').empty().append(data);
+		$('#ldmatrix-bokeh-graph').empty().append(data);
 		$('#' + id + '-progress-container').hide();
 		$('#' + id + '-results-container').show();
 		getLDmatrixResults(ldmatrixInputs.reference + ".json",
@@ -1000,7 +1314,7 @@ function addLDMatrixHyperLinks(request) {
 	$('#ldmatrix-DPrime').attr('href', 'tmp/d_prime_' + request + '.txt');
 	$('#ldmatrix-R2').attr('href', 'tmp/r2_' + request + '.txt');
 }
-
+/*
 function updateLDproxyProgressBar(id, seconds) {
 
 	var milliseconds = seconds * 1000;
@@ -1024,7 +1338,8 @@ function updateLDproxyProgressBar(id, seconds) {
 		}
 	}, delay);
 }
-
+*/
+/*
 function createPopulationDropdown(id) {
 
 	alert("createPop");
@@ -1036,10 +1351,10 @@ function createPopulationDropdown(id) {
 			maxHeight : 500,
 			includeSelectAllOption : true,
 			dropRight : true,
-			allSelectedText : 'Hello All Populations',
-			nonSelectedText : 'Hello to you Select Population',
+			allSelectedText : 'All Populations',
+			nonSelectedText : 'Select Population',
 			numberDisplayed : 4,
-			selectAllText : 'Hello All Populations',
+			selectAllText : 'All Populations',
 
 			// buttonClass: 'btn btn-link',
 			buttonText : function(options, select) {
@@ -1084,6 +1399,7 @@ function createPopulationDropdown(id) {
             }
 		});
 }
+*/
 
 function updateLDproxy() {
 	var id = "ldproxy";
@@ -1107,6 +1423,8 @@ function updateLDproxy() {
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
 		r2_d : r2_d
 	};
+
+	updateHistoryURL(id, ldproxyInputs);
 
 	//console.log(location.hostname);
 
@@ -1256,6 +1574,25 @@ function getLDmatrixResults(jsonfile, request) {
 	});
 }
 
+function updateHistoryURL(id, inputs) {
+	//Update url with new vars
+	var params = $.extend({}, inputs);
+	delete params.reference;
+	if(params.pop) {
+		var population;
+		var totalPopulations;
+		population =  $('#'+id+'-population-codes').val();
+		params.pop = population.join("+");
+	}
+
+	params["tab"] = id;
+	var recursiveEncoded = $.param( params );
+	window.history.pushState({},'', "?"+ recursiveEncoded);
+
+	//console.log(JSON.stringify(params.pop));
+
+}
+
 function updateLDpair() {
 	var id = 'ldpair';
 	var $btn = $('#' + id).button('loading');
@@ -1272,6 +1609,8 @@ function updateLDpair() {
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
 	};
+
+	updateHistoryURL(id, ldpairInputs);
 
 	var url = restServerUrl + "/ldpair";
 
@@ -1443,8 +1782,166 @@ function addLDpairHyperLinks(data) {
 	$('#snp2-coord').attr('href', url);
 
 }
+/*
+function buildPopulationDropdownSNPchip(data) {
+
+	//Change platforms to multiselect json
+
+	var platforms = JSON.parse(data);
+	var illumina = {};
+	var affymetrix = {};
+	$.each( platforms, function( code, description ) {
+		if(description.search("Affymetrix") >= 0) {
+			affymetrix[code] = description;
+		}
+		if(description.search("Illumina") >= 0) {
+			illumina[code] = description;
+		}
+	});
+
+	var elementId = 'snpchip-platform-list';
+	var snpchip_platform_list = {
+		"Affymetrix": affymetrix,
+		"Illumina": illumina
+	};
+
+	$("#"+elementId).empty();
+	$.each( snpchip_platform_list, function( group, platforms ) {
+		//Add optgroup
+		$("#"+elementId).append(
+			$("<optgroup>")
+				.attr('value', "("+group+") All "+group+" Arrays")
+				.attr('label', "("+group+") All "+group+" Arrays")
+				.attr('id', group)
+		);
+		$.each( platforms, function( key, value ) {
+			$('#'+group).append(
+				$("<option>")
+					.attr('value', key)
+					.text(value+" ("+key+")")
+			);
+		});
+	});
+
+	$('#' + elementId).multiselect({
+		enableClickableOptGroups : true,
+		buttonWidth : '210px',
+		maxHeight : 500,
+		buttonClass : 'btn btn-default btn-ldlink-multiselect',
+		includeSelectAllOption : true,
+		dropRight : false,
+		allSelectedText : 'All Arrays',
+		nonSelectedText : 'Select Arrays',
+		numberDisplayed : 2,
+		selectAllText : ' (ALL) All Arrays',
+		previousOptionLength: 0,
+		maxPopulationWarn: 2,
+		maxPopulationWarnTimeout: 5000,
+		maxPopulationWarnVisible: false,
+		// buttonClass: 'btn btn-link',
+		buttonText : function(options, select) {
+			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+				$('#'+elementId+'-popover').popover('show');
+				this.maxPopulatinWarnVisible=true;
+			}
+			this.previousOptionLength = options.length;
+			if (options.length === 0) {
+				return this.nonSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length == $('option', $(select)).length) {
+				return this.allSelectedText
+						+ '<span class="caret"></span>';
+			} else if (options.length > this.numberDisplayed) {
+				return '<span class="badge">' + options.length
+						+ '</span> ' + this.nSelectedText
+						+ '<span class="caret"></span>';
+			} else {
+				var selected = '';
+				options.each(function() {
+					// var label = $(this).attr('label') :
+					// $(this).html();
+					selected += $(this).val() + '+';
+				});
+				return selected.substr(0, selected.length - 1)
+						+ ' <b class="caret"></b>';
+			}
+		},
+		buttonTitle : function(options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText;
+			} else {
+				var selected = '';
+				options.each(function() {
+					selected += $(this).text() + '\n';
+				});
+				return selected;
+			}
+		}
+	});
+}
+*/
+
+function addCheckBox(code, description, elementId, platform_class) {
+	$("#"+elementId).append(
+		$("<div>").append(
+			$("<span>").addClass("platform-checkbox").append(
+				$("<input>").attr('type','checkbox')
+					.attr('id',code)
+					.attr('value', code)
+					.attr('checked', true)
+					.addClass(platform_class)
+				)
+			).append(
+			$("<span>").addClass("formw").append(
+				$("<label>").attr('for',code)
+					.css("font-weight", "normal")
+					.text(description+" ("+code+")")
+				)
+			)
+		);
+}
+
+function buildPlatformSNPchip(data) {
+
+	//Change platforms to multiselect json
+	/*
+                   <div>
+                       <span class="label">
+                       	<input type="checkbox" value="I1" class="illuminaArray" name="arrayList[]" id="illumina1">
+                       	</span>
+                       <span class="formw">
+                       	<label for="illumina1">Illumina Human-1 (I1)</label>
+                       </span>
+                   </div>
+
+                   <div class="row">
+                       <span class="label"><input type="checkbox" value="AAH" class="affymetrixArray" name="arrayList[]" id="affy12"></span>
+                       <span class="formw"><label for="affy12">Affymetrix Axiom GW Hu Origins 1 (AAH)</label></span>
+                   </div>
+
+	*/
+
+	var platforms = JSON.parse(data);
+	var illumina = {};
+	var affymetrix = {};
+	snpchipReverseLookup =[];
+
+	$.each(platforms, function( code, description ) {
+		if(description.search("Affymetrix") >= 0) {
+			affymetrix[code] = description;
+			addCheckBox(code, description, "columnBcheckbox", "affymetrix");
+		}
+		if(description.search("Illumina") >= 0) {
+			illumina[code] = description;
+			addCheckBox(code, description, "columnAcheckbox", "illumina");
+		}
+		snpchipReverseLookup[description] = code;
+	});
+
+}
 
 function buildPopulationDropdown(elementId) {
+
 	var htmlText = "";
 	var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
 	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
@@ -1543,7 +2040,6 @@ function buildPopulationDropdown(elementId) {
 }
 
 function getPopulationCodes(id) {
-	//alert(id);
 	var population;
 	var totalPopulations;
 	population =  $('#'+id).val();
@@ -1672,4 +2168,29 @@ function addValidators() {
         }
     });
 
+}
+/* Utilities */
+
+function toggleChevron(e) {
+    $(e.target)
+        .prev('.panel-heading')
+        .find("i.indicator")
+        .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
+}
+
+Array.prototype.contains = function(v) {
+    for(var i = 0; i < this.length; i++) {
+        if(this[i] === v) return true;
+    }
+    return false;
+};
+
+Array.prototype.unique = function() {
+    var arr = [];
+    for(var i = 0; i < this.length; i++) {
+        if(!arr.contains(this[i])) {
+            arr.push(this[i]);
+        }
+    }
+    return arr; 
 }
