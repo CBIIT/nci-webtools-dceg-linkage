@@ -18,7 +18,7 @@ from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from SNPclip import calculate_clip
-from SNPchip import calculate_chip
+from SNPchip import *
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -247,21 +247,21 @@ def snpclip():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 
-@app.route('/LDlinkRest/ldchip', methods = ['GET'])
+@app.route('/LDlinkRest/snpchip', methods = ['GET'])
 def ldchip():
 
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
-
+    print "Hello CHIP"
     print
-    print 'Execute ldchip'
+    print 'Execute snpchip'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
-    pop = request.args.get('pop', False)
+    platforms = request.args.get('platforms', False)
     reference = request.args.get('reference', False)
     print 'snps: ' + snps
-    print 'pop: ' + pop
+    print 'platforms: ' + platforms
     print 'request: ' + reference
 
     snplst = tmp_dir+'snps'+reference+'.txt'
@@ -270,26 +270,29 @@ def ldchip():
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
-    (snps,snp_list,details) = calculate_chip(snplst,pop,reference)
 
-    clip={}
-    clip["snp_list"] = snp_list
-    clip["details"] = details
+    #snp_chip = calculate_chip(snplst,platforms,reference)
+    snp_chip = calculate_chip(snplst,platforms,reference)
 
-    print "snps"
-    dir(snps)
-    print snps
-    print "snp_list"
-    dir(snp_list)
-    print snp_list
-    print "details"
-    dir(snps)
-    print details
+    chip={}
+    chip["snp_chip"] = snp_chip
 
-    out_json = json.dumps(clip, sort_keys=True, indent=2)
+    copy_output_files(reference)
+
+    #out_json = json.dumps(chip, sort_keys=True, indent=2)
+    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+
     mimetype = 'application/json'
 
     return current_app.response_class(out_json, mimetype=mimetype)
+
+
+@app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
+def snpchip_platforms():
+    print "Retrieve SNPchip Platforms"
+
+    return get_platform_request()
+
 
 @app.route('/LDlinkRest/test', methods=['GET', 'POST'])
 def test():
