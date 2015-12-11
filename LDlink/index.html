@@ -25,13 +25,13 @@
 
 
 <link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
 <!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
  -->
 <link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css">
+	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
 <link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.css">
 <!--
@@ -45,6 +45,7 @@
 <link rel="stylesheet" href="../common/css/style.css">
 <link rel="stylesheet" href="../common/css/social.css">
 <link rel="stylesheet" href="LDlink.css">
+
 </head>
 <body role="document">
 	<div class="header">
@@ -90,11 +91,9 @@
 				<a id="snpclip-tab-anchor" href="#snpclip-tab" data-toggle="tab" title="Clip snp list">SNPclip</a>
 			</li>
 			<!-- CHIP -->
-			<!--
 			<li>
-				<a href="#ldchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a>
+				<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a>
 			</li>
-			-->
 			<!-- HELP -->
 			<li>
 				<a id="help-tab-anchor" href="#help-tab" data-toggle="tab">Help</a>
@@ -237,7 +236,7 @@
 				<div class="jumbotron">
 						<div class="container-fluid" id="ldhap-results-container">
 							<div class="row ldhap-table-container">
-								<div id="left-c">
+								<div class="left-c">
 									<table class="table table-condensed"> 
 										<thead>
 											<tr>
@@ -275,7 +274,7 @@
 										</tbody>
 									</table>
 								</div>
-								<div id="right-c">
+								<div class="right-c">
 									<table id="ldhap-table-right" class="table table-condensed">
 										<thead>
 											<tr>
@@ -801,7 +800,7 @@
 							<div class="col-sm-3">
 								<div class="input-group">
 									<label for="snpclip-file-label" style="display:none;">Uplaod RS File</label>
-									<input type="text" id="ldhap-file-label" readonly
+									<input type="text" id="snpclip-file-label" readonly
 										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
 									<label for="snpclip-file" style="display:none;">Browse for RS File</label>
@@ -961,104 +960,186 @@
 				</div> <!-- jumbotron -->
 
 			</div>
-<!--  END OF ldchip -->
+			<!--  END OF snpclip -->
 
-			<!-- LDchip -->
-			<div class="tab-pane fade" id="ldchip-tab">
-				<!-- LDchip INPUTS-->
+			<!-- SNPchip -->
+			<div class="tab-pane fade" id="snpchip-tab">
+				<!-- SNPchip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
-						<!-- LDchip FORM -->
-						<form id="ldchipForm" class="ldlinkForm">
-
+						<!-- SNPchip FORM -->
+						<form id="snpchipForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-2">
-									<textarea id="ldchip-file-snp-numbers" placeholder="RS Numbers"
+									<textarea id="snpchip-file-snp-numbers" placeholder="RS Numbers"
 										class="form-control"
 										title="Enter list of RS numbers (one per line)"></textarea>
 								</div>
 							</div>
 							<div class="col-sm-4">
 								<div class="input-group">
-									<label for="ldchip-file-label" style="display:none;">Uplaod RS File</label>
-									<input type="text" id="ldhap-file-label" readonly
+									<label for="snpchip-file-label" style="display:none;">Uplaod RS File</label>
+									<input type="text" id="snpchip-file-label" readonly
 										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
-									<label for="ldchip-file" style="display:none;">Browse for RS File</label>
-									<span	class="btn btn-default btn-file">Browse
-										<input type="file" id="ldchip-file">
+									<label for="snpchip-file" style="display:none;">Browse for RS File</label>
+									<span class="btn btn-default btn-file">Browse
+										<input type="file" id="snpchip-file">
 									</span>
 								</div>
 							</div>
 							<!--
 							<div class="form-group">
 								<div class="col-sm-4">
-									<label for="ldchip-population-codes" style="display: none;">Populations</label>
-									<select id="ldchip-population-codes" multiple="multiple"
-										name="populations" required>
+									<label for="snpchip-platform-list" style="display: none;">SNPChip Platforms</label>
+									<select id="snpchip-platform-list" multiple="multiple"
+										name="platforms" required>
 									</select>
 								</div>
 							</div>
 							-->
 							<div class="form-group">
 								<div class="col-sm-2">
-									<input type="submit" id="ldchip" value="Calculate"
-										class="btn btn-default calculate" />
+									<input type="submit" id="snpchip" value="Calculate"
+										class="btn btn-default calculate"/>
 								</div>
 							</div>
 						</form>
 					</div>
+					<!-- Accordian -->
+					<div id="accordion" class="panel-group">
+					<div id="filter-by-array" class="panel panel-default">
+					    <div class="panel-heading">
+					        <h4 class="panel-title">
+					            <a data-toggle="collapse" 
+					            	data-parent="#accordion"
+					            	href="#collapseThree">Filter by array</a>
+					            <i class="indicator glyphicon glyphicon-chevron-down  pull-right"></i>
+					            <span class="pull-right" style="margin-right:25px;">
+					            	<span id="illumina-count">0</span> Illumina array(s) and <span id="affymetrix-count">0</span> Affymetrix array(s) selected</span>
+					        </h4>
+					    </div>
+					    <div id="collapseThree" class="panel-collapse collapse in">
+					        <div class="panel-body">
+								<div id="collapseThree" style="display: block;">
+									<p class="instruction">
+									   Limit search results to only SNPs on the selected arrays (<span id="selectAllChipTypes" class="underlined">unselect all</span>)
+									</p>
+									<fieldset id="columnAcheckbox" class="col-sm-6">
+										<div class="bolded">
+											<span class="label">
+												<input type="checkbox" id="selectAllIllumina" checked>
+											</span>
+											<span class="formw underlined">
+												<label for="selectAllIllumina">Select All Illumina</label>
+											</span>
+										</div>
+									</fieldset>
+									<fieldset id="columnBcheckbox" class="col-sm-5">
+									   <div class="bolded">
+									       	<span class="label">
+									       		<input type="checkbox" id="selectAllAffymetrix" checked>
+									       	</span>
+									       	<span class="formw underlined">
+									       		<label for="selectAllAffymetrix">Select All Affymetrix</label>
+									       	</span>
+									   </div>
+									</fieldset>
+								</div>
+							</div>
+
+					        </div>
+					    </div>
+					</div>
+
 					<hr>
-					<div id="ldchip-loading">
+					<div id="snpchip-loading">
 						<img src="/LDlink/calculating_LD.gif" alt="loading icon"
 							class="loading">
 					</div>
 					<!-- Message ERROR -->
 					<div class="row">
-						<div class="col-sm-7 col-sm-offset-2" id="ldchip-message">
+						<div id="snpchip-message" class="col-sm-7 col-sm-offset-2">
 							<div class="panel panel-danger">
 									<div class="panel-heading">Error</div>
-								<div class="panel-body" id="ldchip-message-content"></div>
+								<div id="snpchip-message-content" class="panel-body"></div>
 							</div>
 						</div>
 					</div>
 					<!-- Message WARNING -->
 					<div class="row">
-						<div class="col-sm-7 col-sm-offset-2" id="ldchip-message-warning">
+						<div id="snpchip-message-warning" class="col-sm-7 col-sm-offset-2">
 							<div class="panel panel-warning">
 								<div class="panel-heading">Warning</div>
-								<div class="panel-body" id="ldchip-message-warning-content">
+								<div id="snpchip-message-warning-content" class="panel-body">
 								</div>
 							</div>
 						</div>
 					</div>
 				</div>
-				<!-- ldchip CONTAINER -->
+				<!-- snpchip CONTAINER -->
 				<div class="jumbotron">
-						<div class="container-fluid" id="ldchip-results-container">
-							<div class="row ldchip-table-container">
-								<div id="ldchip-snp-list" style="width:300px;float:left;border:1px solid;padding:10px;">
-									The left side
+					<div class="container-fluid" id="snpchip-results-container">
+						<div id="snpclip-table-container" class="row">
+							<!-- LEFT SIDE -->
+							<div class="left-c">
+								<table class="snpchip-table">
+									<thead>
+										<tr>
+											<th colspan="3">SNP Chip List</th>
+										</tr>
+										<tr>
+											<th nowrap>RS Number</th>
+											<th nowrap>Chr</th>
+											<th nowrap>Position (GRCh37)</th>
+										</tr>
+									</thead>
+									<tbody>
+										<!-- ko foreach: snpchip -->
+										<tr>
+											<td data-bind="html: rs_number"></td>
+											<td data-bind="text: chromosome" style="text-align:center;"></td>
+											<td data-bind="html: position"></td>
+										</tr>
+										<!-- /ko -->
+									</tbody>
+								</table>
+								<div>
+									<a id="snp_chip_list" 
+										target="snp_chip_list">Download Chip Details</a>
 								</div>
-								<div id="ldchip-detail" style="width:675px;border:1px solid;float:right;padding:10px;">
-									The right side
-								</div>
+
+							</div>
+							<!-- RIGHT SIDE -->
+							<div class="right-c">
+								<table id="snpchip-table-right" class="snpchip-table">
+									<thead>
+										<tr>
+											<!-- ko foreach: headers -->
+												<th class="rotate">
+													<div  data-bind="attr:{title: $data.platform }">
+													<span data-bind="text: $data.code"></span>
+													</div>
+												</th>
+											<!-- /ko -->
+										</tr>
+									</thead>
+									<tbody style="border: 1px solid #ccc;">
+										<!-- ko foreach: snpchip -->
+										<tr>
+											<!-- ko foreach: map -->
+												<td style="text-align:right" data-bind="html: $data"></td>
+											<!-- /ko -->
+										</tr>
+										<!-- /ko -->
+									</tbody>
+								</table>
 							</div>
 						</div>
-						<div id="ldchip-links-container" class="col-md-12" style="display:none;">
-							<span>
-								<a target="_blank" id="ldchip-snps" href=""></a>
-							</span>&nbsp;&nbsp;&nbsp;&nbsp;
-							<span>
-								<a target="_blank" id="ldchip-details" href=""></a>
-							</span>
-						</div>
+					</div>
 				</div>
 			</div>
-<!--  END OF ldchip -->
-
-
-
+			<!--  END OF snpchip -->
 
 			<!-- Help -->
 			<div class="tab-pane fade" id="help-tab">
@@ -1114,7 +1195,7 @@
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
 	</script>
 	<script type="text/javascript"
-		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js">
+		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js">
 	</script>
 	<script type="text/javascript"
 		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js">
