@@ -1888,7 +1888,7 @@ function addCheckBox(code, description, elementId, platform_class) {
 				$("<input>").attr('type','checkbox')
 					.attr('id',code)
 					.attr('value', code)
-					.attr('checked', true)
+					.prop('checked', true)
 					.addClass(platform_class)
 				)
 			).append(
@@ -1897,29 +1897,13 @@ function addCheckBox(code, description, elementId, platform_class) {
 					.css("font-weight", "normal")
 					.text(description+" ("+code+")")
 				)
-			)
-		);
+		)
+	);
 }
 
 function buildPlatformSNPchip(data) {
 
 	//Change platforms to multiselect json
-	/*
-                   <div>
-                       <span class="label">
-                       	<input type="checkbox" value="I1" class="illuminaArray" name="arrayList[]" id="illumina1">
-                       	</span>
-                       <span class="formw">
-                       	<label for="illumina1">Illumina Human-1 (I1)</label>
-                       </span>
-                   </div>
-
-                   <div class="row">
-                       <span class="label"><input type="checkbox" value="AAH" class="affymetrixArray" name="arrayList[]" id="affy12"></span>
-                       <span class="formw"><label for="affy12">Affymetrix Axiom GW Hu Origins 1 (AAH)</label></span>
-                   </div>
-
-	*/
 
 	var platforms = JSON.parse(data);
 	var illumina = {};
@@ -1937,7 +1921,9 @@ function buildPlatformSNPchip(data) {
 		}
 		snpchipReverseLookup[description] = code;
 	});
-
+	$("#selectAllIllumina").prop('checked', true);
+	$("#selectAllAffymetrix").prop('checked', true);
+	calculateChipTotals();
 }
 
 function buildPopulationDropdown(elementId) {
