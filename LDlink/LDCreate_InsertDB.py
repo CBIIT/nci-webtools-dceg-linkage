@@ -82,15 +82,15 @@ def Insert(file,db,dictionary):
 	platform=platform[:-8]
 	print platform
 	Insert_Platform(platform,dictionary,db)
-#	for coord in snp_data:
-#		Chr=coord[0].split(":")[0].strip("chr")
-#		position=coord[0].split("-")[1]
-#		db.snp_col.update(
-#    		{ "pos": position },
-#    		{ "$addToSet" : { "data" : { "$each" :[ { "chr" : Chr, "platform" :platform} ] } } },
-#    		upsert=True,
-#		)
-#	print "finished "+platform
+	for coord in snp_data:
+		Chr=coord[0].split(":")[0].strip("chr")
+		position=coord[0].split("-")[1]
+		db.snp_col.update(
+    		{ "pos": position },
+    		{ "$addToSet" : { "data" : { "$each" :[ { "chr" : Chr, "platform" :platform} ] } } },
+    		upsert=True,
+		)
+	print "finished "+platform
 
 main(sys.argv[1:])
 

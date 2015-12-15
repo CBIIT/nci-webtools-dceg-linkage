@@ -13,20 +13,20 @@ import json,operator,sqlite3,os
 contents=open("SNP_Query_loginInfo.txt").read().split('\n')
 username=contents[0].split('=')[1]
 password=contents[1].split('=')[1]
-Database=contents[2].split('=')[1]
+port=int(contents[2].split('=')[1])
 
 def get_platform_request():
 
 	try:
 		client = MongoClient()
-		client = MongoClient('localhost', 27017)
+		client = MongoClient('localhost', port)
 	except pymongo.errors.ConnectionFailure:
 		print "MongoDB is down"
 		print "syntax: mongod --dbpath /local/content/ldlink/mongo/data/db/ --auth"
 		return "Failed to connect to server."
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
-	db = client[Database]
+	db = client["LDLink"]
 	cursor=db.platforms.find({"platform":{'$regex':'.*'}}).sort("platform",-1)
 	platforms={}
 	for document in cursor:
@@ -137,10 +137,10 @@ def calculate_chip(snplst,platform_query,request):
 	
 	
 	client = MongoClient()
-	client = MongoClient('localhost', 27017)
+	client = MongoClient('localhost', port)
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
-	db = client[Database]
+	db = client["LDLink"]
 	platforms=[]
 	platform_list=[]
 	if platform_query != "": #<--If user did not enter platforms as a request
