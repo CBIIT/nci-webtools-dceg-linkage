@@ -35,12 +35,17 @@ def get_platform_request():
 	return json_output
 
 # Create SNPchip function	
-def convert_codeToPlatforms(platform_query,db):
+def convert_codeToPlatforms(platform_query):
 	platforms=[]
+	client = MongoClient()
+	client = MongoClient('localhost', port)
+	client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+	db = client["LDLink"]
 	code_array=platform_query.split('+')
 	cursor=db.platforms.find( { "code": { '$in': code_array } } )
 	for document in cursor:
-		platforms.append(document["platform"])	
+		platforms.append(document["platform"])
+	print platforms	
 	return platforms
 
 def calculate_chip(snplst,platform_query,request):
@@ -139,15 +144,17 @@ def calculate_chip(snplst,platform_query,request):
 	client = MongoClient()
 	client = MongoClient('localhost', port)
 	
-        client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+	client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client["LDLink"]
 
 	if platform_query != "": #<--If user did not enter platforms as a request
-		platform_list=convert_codeToPlatforms(platform_query,db)
+		platform_list=convert_codeToPlatforms(platform_query)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
-	platforms=[]
-	platform_list=[]
+	else:
+		platform_list=[]
 	for k in range(len(snp_coords_sort)):
+		platforms=[]
+		
 		print (k)
 		position=str(snp_coords_sort[k][2])
 		Chr=str(snp_coords_sort[k][1])
@@ -164,10 +171,12 @@ def calculate_chip(snplst,platform_query,request):
 					platforms.append(document["data"][z]["platform"])
 				elif(document["data"][z]["chr"]==Chr and platform_query==""):
 					platforms.append(document["data"][z]["platform"])
+		
 		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
+	print json_output
 	print >> out_json, json_output
 	out_json.close()
 	createOutputFile(request)
