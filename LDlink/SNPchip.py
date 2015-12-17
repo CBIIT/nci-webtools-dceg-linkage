@@ -145,9 +145,9 @@ def calculate_chip(snplst,platform_query,request):
 	if platform_query != "": #<--If user did not enter platforms as a request
 		platform_list=convert_codeToPlatforms(platform_query,db)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
+	platforms=[]
+	platform_list=[]
 	for k in range(len(snp_coords_sort)):
-		platforms=[]
-		platform_list=[]
 		print (k)
 		position=str(snp_coords_sort[k][2])
 		Chr=str(snp_coords_sort[k][1])
