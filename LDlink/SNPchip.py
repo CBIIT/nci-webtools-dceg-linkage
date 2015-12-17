@@ -141,18 +141,20 @@ def calculate_chip(snplst,platform_query,request):
 	
         client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client["LDLink"]
-	platforms=[]
-	platform_list=[]
+
 	if platform_query != "": #<--If user did not enter platforms as a request
 		platform_list=convert_codeToPlatforms(platform_query,db)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
 	for k in range(len(snp_coords_sort)):
+		platforms=[]
+		platform_list=[]
+		print (k)
 		position=str(snp_coords_sort[k][2])
 		Chr=str(snp_coords_sort[k][1])
+		cursor=()
 		if platform_query == "": #<--If user did not enter platforms as a request
-			print "null"
-			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]} ) #Json object that stores all the results
-
+			cursor=db.snp_col.find({'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]}) #Json object that stores all the results
+			print snp_coords_sort[k]
 		elif platform_query != "": #<--If user did not enter platforms as a request
 			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform":{"$in":platform_list}}]} ) #Json object that stores all the results
 				#Parsing each docuemnt to retrieve platforms 
