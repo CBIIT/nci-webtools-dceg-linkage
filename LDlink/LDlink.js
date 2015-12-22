@@ -501,6 +501,7 @@ function ldproxy_regulome_link(data, type, row ) {
 	var link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
 
 	return link;
+
 }
 
 function ldproxy_haploreg_link(data, type, row) {
@@ -548,20 +549,9 @@ function loadHelp() {
 	$('#help-tab').load('help.html');
 }
 
-
 function calculate(e) {
 	var formId = e.target.id;
 	e.preventDefault();
-
-/*
-	var f = document.getElementsByTagName('form')[0];
-	if(f.checkValidity()) {
-		f.submit();
-	} else {
-		alert(document.getElementById('example').validationMessage);
-	}
-*/
-	// var firstClick = $('#'+id+'-results-container').hasClass( "hidden" );
 
 	// strip out "Form" from id
 	var id = formId.slice(0, formId.length - 4);
@@ -870,6 +860,7 @@ function loadSNPChip(data) {
 	var obj;
 	var test = "";
 	var associated_platforms;
+	var total_platform_count = 0;
 
 	$.each(snpchip, function(row, detail) {
 		if(row.search("warning")>=0 ||row.search("error")>=0) {
@@ -919,12 +910,15 @@ function loadSNPChip(data) {
 		//console.log("used_platforms:");
 		//console.dir(used_platforms);
 		//console.warn("row: "+row);
+		var platform_count = 0;
 
 		$.each(platform_list, function(key, value) {
 			//console.log(key+":"+value);
 			//console.info($.inArray(value, used_platforms));
 			if($.inArray(value, used_platforms) >= 0) {
 				map.push("X");
+				platform_count++;
+				total_platform_count++;
 			} else {
 				map.push("&nbsp;");
 			}
@@ -935,7 +929,9 @@ function loadSNPChip(data) {
 			"rs_number" : anchorRSnumber(detail[0]),
 			"chromosome" : chromo_position[0],
 			"position" : anchorRSposition("chr"+detail[1], detail[0], true),
-			"map" : map
+			"map" : map,
+			"rs_number_original" : detail[0],
+			"platform_count" : platform_count
 		};
 		//console.dir(obj);
 		newchip.push(obj);
@@ -974,6 +970,7 @@ function loadSNPChip(data) {
 	} else {
 		$('#snpchip-table-right').removeAttr('width');
 	}
+
 	//$('#snpchip-table-right')...
 
 	//snpchipData["headers"].push(= reversed_platform_list;
@@ -989,9 +986,30 @@ function loadSNPChip(data) {
 	//console.log(JSON.stringify(snpchipData));
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
+	$('#snpchip-message-warning-content').empty();
 	checkAlert("snpchip", snpchipData.warning, "warning", true);
 	checkAlert("snpchip", snpchipData.error, "error", false);
+	//Display warning if an rs has no platform arrays
+	if(total_platform_count == 0) {
+		//Hide table and display an error.
+		$('#snpchip-results-container').hide();
+		$('#snpchip-message-warning').show();
+		$('#snpchip-message-warning-content')
+			.append($("<div>")
+				.text("None of the RS numbers in the list has a platform array.")
+			);
 
+	} else {
+		$.each(snpchipData["snpchip"], function(key, value) {
+			if(value.platform_count == 0) {
+				$('#snpchip-message-warning').show();
+				$('#snpchip-message-warning-content')
+					.append($("<div>")
+						.text(value.rs_number_original+" has no platform arrays.")
+					);
+			}
+		});
+	}
 }
 
 function checkAlert(elementId, message, type, displayResults) {
@@ -1005,7 +1023,7 @@ function checkAlert(elementId, message, type, displayResults) {
 	$('#'+prefix).hide();
 
 	if (typeof message !== 'undefined' && message.length > 0) {
-		$('#'+prefix+'-content').text(message);
+		$('#'+prefix+'-content').html("<div>"+message+"</div>");
 		$('#'+prefix).show();
 		if (typeof displayResults !== 'undefined' && displayResults) {
 			$('#'+elementId+'-results-container').show();
