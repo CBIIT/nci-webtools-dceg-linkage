@@ -382,7 +382,10 @@ def calculate_pair(snp1,snp2,pop,request):
 		statistics["d_prime"]=str(round(D_prime,4))
 		statistics["r2"]=str(round(r2,4))
 		statistics["chisq"]=str(round(chisq,4))
-		statistics["p"]=str(round(p,4))
+		if p>=0.0001:
+			statistics["p"]=str(round(p,4))
+		else:
+			statistics["p"]="<0.0001"
 	else:
 		statistics["d_prime"]=D_prime
 		statistics["r2"]=r2
