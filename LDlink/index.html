@@ -17,7 +17,7 @@
 	content="LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
 					population groups.">
-<meta name="keywords" content="linkage, disequilibrium, LD, equilibrium, haplotype, genotype, SNP, LDpair, LDproxy, LDhap, LDmatrix, dbSNP, Haploview">
+<meta name="keywords" content="linkage, disequilibrium, LD, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDproxy, LDhap, LDmatrix, dbSNP, Haploview">
 <meta name="author" content="">
 
 <title>LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups</title>
@@ -80,19 +80,19 @@
 			</li>
 			<!-- PAIR -->
 			<li>
-				<a id="ldpair-tab-anchor" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of SNPs">LDpair</a>
+				<a id="ldpair-tab-anchor" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
 			</li>
 			<!-- PROXY -->
 			<li>
-				<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional SNPs">LDproxy</a>
+				<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
 			</li>
 			<!-- CLIP -->
 			<li>
-				<a id="snpclip-tab-anchor" href="#snpclip-tab" data-toggle="tab" title="Clip snp list">SNPclip</a>
+				<a id="snpclip-tab-anchor" href="#snpclip-tab" data-toggle="tab" title="Thin a list of variants by linkage disequilibrium">SNPclip</a>
 			</li>
 			<!-- CHIP -->
 			<li>
-				<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="A new way to chip the genome">SNPchip</a>
+				<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find a commercial genotyping platforms for variants">SNPchip</a>
 			</li>
 			<!-- HELP -->
 			<li>
@@ -107,26 +107,26 @@
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
 					population groups. All population genotype data originates from
-					Phase 3 of the 1000 Genomes Project and SNP RS numbers are indexed
+					Phase 3 of the 1000 Genomes Project and variant RS numbers are indexed
 					based on dbSNP build 142. Only bi-allelic
-					SNPs are permitted as input. LDlink includes the following
+					variants are permitted as input. LDlink includes the following
 					components:<br><br></p>
 
 				<p style="margin-left: 40px;">
 					<b>LDhap</b>: Calculate population specific haplotype
-				frequencies of all haplotypes observed for a list of query SNPs.
-						Input is a list of SNP RS numbers (one per line) and a population
+						frequencies of all haplotypes observed for a list of query variants.
+						Input is a list of variant RS numbers (one per line) and a population
 						group.<br> <br>
 
 					<b>LDmatrix</b>: Create an interactive heatmap matrix of pairwise
-						linkage disequilibrium statistics. Input is a list of SNP
+						linkage disequilibrium statistics. Input is a list of variant
 						RS numbers (one per line) and a population group.<br> <br>
 
-					<b>LDpair</b>: Investigate correlated alleles for a pair of SNPs in
+					<b>LDpair</b>: Investigate correlated alleles for a pair of variants in
 						high LD. Input is two RS numbers and a population group.<br> <br>
 
 					<b>LDproxy</b>: Interactively explore proxy and putatively
-						functional SNPs for a query SNP. Input is an RS number and a
+						functional variants for a query variant. Input is an RS number and a
 						population group.<br> <br>
 				</p>
 
