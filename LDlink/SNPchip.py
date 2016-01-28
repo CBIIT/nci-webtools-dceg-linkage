@@ -1,4 +1,4 @@
-54e4#!/usr/bin/env python
+#!/usr/bin/env python
 
 ###########
 # SNPchip #
@@ -120,13 +120,15 @@ def calculate_chip(snplst,platform_query,request):
 	
 	output["warning"]=""
 	output["error"]=""
-	if warn!=[]:
+	if warn!=[] and len(rs_nums)!=0:
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)+"\n "
-	if len(rs_nums)==0:
+	elif len(rs_nums)==0:
 		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142.\n "
-		return(json.dumps(output, sort_keys=True, indent=2))
-		raise
-	
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print >> out_json, json_output
+		out_json.close()
+		createOutputFile(request)
+		return json_output
 
 	# Sort by chromosome and then position
 	snp_coords_sort=sorted(snp_coords, key=operator.itemgetter(1,2))
@@ -177,7 +179,7 @@ def calculate_chip(snplst,platform_query,request):
 			rs=snp_coords_sort[k][0]
 			platform_NOT.append(rs)	
 		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
-	if(platform_NOT!=[]):
+	if(platform_NOT!=[] and len(platform_NOT)!=count):
 		warning=output["warning"]
 		warning=warning+"The following RS numbers did not have any platforms found: "+",".join(platform_NOT)+""
 		output["warning"]=warning
@@ -188,7 +190,6 @@ def calculate_chip(snplst,platform_query,request):
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
-	print json_output
 	out_json.close()
 	createOutputFile(request)
 
@@ -221,14 +222,14 @@ def createOutputFile(request):
 		print  ""
 		print "WARNING: "+json_dict["warning"]+"!"
 
-
+		print json_dict["error"]
 	try:
 		json_dict["error"]
 	except KeyError:
 			print >>details_file, ""
-	if(json_dict["error"]!=""):
+	if (json_dict["error"]!=""):
 		print >>details_file, ""
-		print >>details_file, "ERROR: "+json_dict["warning"]+"!"
+		print >>details_file, "ERROR: "+json_dict["error"]+"!"
 		print  >>details_file, ""
 		print  ""
 		print "ERROR: "+json_dict["error"]+"!"
@@ -252,6 +253,8 @@ def main():
 	
 	# Run function
 	calculate_chip(snplst,platform_query,request)
+
+
 
 if __name__ == "__main__":
 	main()
