@@ -853,8 +853,8 @@ function loadSNPChip(data) {
 	//delete snpchipData["error"];
 
 	var snpchip = JSON.parse(data);
-	console.warn("Here is the return Data.  What do we do now?");
-	console.dir(snpchip);
+	//console.warn("Here is the return Data.  What do we do now?");
+	//console.dir(snpchip);
 
 	var all_platforms_used = [];
 	var newchip = [];
@@ -891,8 +891,8 @@ function loadSNPChip(data) {
 			//}
 		}
 	});
-	console.warn("All Platforms");
-	console.log("Count: "+all_platforms_used.length);
+	//console.warn("All Platforms");
+	//console.log("Count: "+all_platforms_used.length);
 	//Find the unique one from all of the platforms
 	var used_platforms
 	var platform_list = all_platforms_used.unique();
@@ -900,10 +900,11 @@ function loadSNPChip(data) {
 	var reversed_platform_list = [];
 	snpchipData["headers"] = [];
 	platform_list.sort();
+	/*
 	console.warn("Filtered list of  Platforms");
 	console.log("Count: "+platform_list.length);
 	console.log(test);
-
+	*/
 	//Now that we have the platform list... Map each platform.
 	$.each(snpchip, function(row, detail){
 		//Walk throught the platform_list and determine if it has the list... create a map for the table.
@@ -947,11 +948,13 @@ function loadSNPChip(data) {
 			platform: value
 		};
 		if(typeof obj.code === "undefined") {
+			/*
 			console.info("Reverse lookup does appear to exist");
 			console.info("Removing key "+key+" from platform_list below.");
 			console.info("This value doesn't seem to have a code: "+value);
 			console.log("platform_list:");
 			console.dir(platform_list);
+			*/
 			obj ={
 				code: "unknown code",
 				platform: value
@@ -982,12 +985,14 @@ function loadSNPChip(data) {
 	//snpchipData["headers"].platform = platform_list;
 
 	// = "This is about error";
+	/*
 	console.log("FINAL DATA HERE:");
 	console.dir(snpchipData);
 	console.log("ERROR Count: "+snpchipData.error.length);
 	console.log("WARNING Count: "+snpchipData.warning.length);
 	console.log("FINAL DATA AS A STRING:");
 	console.log(JSON.stringify(snpchipData));
+	*/
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	$('#snpchip-message-warning-content').empty();
@@ -1012,7 +1017,7 @@ function loadSNPChip(data) {
 		});
 	}
 	*/
-	console.log("Finished");
+	//console.log("Finished");
 }
 
 function checkAlert(elementId, message, type, displayResults) {
