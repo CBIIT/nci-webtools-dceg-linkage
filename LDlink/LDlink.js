@@ -752,7 +752,6 @@ function updateSNPclip() {
 }
 
 function updateSNPchip() {
-
 	var id = "snpchip";
 
 	var $btn = $('#' + id).button('loading');
@@ -850,10 +849,13 @@ function loadSNPChip(data) {
 	//snpchipData = [];
 	// = "This is about error";
 
-	delete snpchipData["warning"];
-	delete snpchipData["error"];
+	//delete snpchipData["warning"];
+	//delete snpchipData["error"];
 
 	var snpchip = JSON.parse(data);
+	console.warn("Here is the return Data.  What do we do now?");
+	console.dir(snpchip);
+
 	var all_platforms_used = [];
 	var newchip = [];
 	var snpData;
@@ -877,8 +879,8 @@ function loadSNPChip(data) {
 			//Gather all platforms
 			//if(parseInt(row)< 1) {
 				associated_platforms = detail[2].split(",");
-				//console.log("associated_platforms: "+parseInt(row)+" "+detail[0]);
-				//console.dir(associated_platforms.sort());
+				console.log("associated_platforms: "+parseInt(row)+" "+detail[0]);
+				console.dir(associated_platforms.sort());
 
 				$.each(detail[2].split(","), function(key, value){
 					if(value != "") {
@@ -889,8 +891,8 @@ function loadSNPChip(data) {
 			//}
 		}
 	});
-	//console.warn("All Platforms");
-	//console.log("Count: "+all_platforms_used.length);
+	console.warn("All Platforms");
+	console.log("Count: "+all_platforms_used.length);
 	//Find the unique one from all of the platforms
 	var used_platforms
 	var platform_list = all_platforms_used.unique();
@@ -898,9 +900,9 @@ function loadSNPChip(data) {
 	var reversed_platform_list = [];
 	snpchipData["headers"] = [];
 	platform_list.sort();
-	//console.warn("Filtered list of  Platforms");
-	//console.log("Count: "+platform_list.length);
-	//console.log(test);
+	console.warn("Filtered list of  Platforms");
+	console.log("Count: "+platform_list.length);
+	console.log(test);
 
 	//Now that we have the platform list... Map each platform.
 	$.each(snpchip, function(row, detail){
@@ -980,10 +982,12 @@ function loadSNPChip(data) {
 	//snpchipData["headers"].platform = platform_list;
 
 	// = "This is about error";
-	//console.log("FINAL DATA HERE:");
-	//console.dir(snpchipData);
-	//console.log("FINAL DATA AS A STRING:");
-	//console.log(JSON.stringify(snpchipData));
+	console.log("FINAL DATA HERE:");
+	console.dir(snpchipData);
+	console.log("ERROR Count: "+snpchipData.error.length);
+	console.log("WARNING Count: "+snpchipData.warning.length);
+	console.log("FINAL DATA AS A STRING:");
+	console.log(JSON.stringify(snpchipData));
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	$('#snpchip-message-warning-content').empty();
@@ -993,13 +997,10 @@ function loadSNPChip(data) {
 	if(total_platform_count == 0) {
 		//Hide table and display an error.
 		$('#snpchip-results-container').hide();
-		$('#snpchip-message-warning').show();
-		$('#snpchip-message-warning-content')
-			.append($("<div>")
-				.text("None of the RS numbers in the list has a platform array.")
-			);
 
-	} else {
+	} 
+	/*
+	else {
 		$.each(snpchipData["snpchip"], function(key, value) {
 			if(value.platform_count == 0) {
 				$('#snpchip-message-warning').show();
@@ -1010,6 +1011,8 @@ function loadSNPChip(data) {
 			}
 		});
 	}
+	*/
+	console.log("Finished");
 }
 
 function checkAlert(elementId, message, type, displayResults) {
