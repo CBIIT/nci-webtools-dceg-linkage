@@ -175,17 +175,15 @@ def calculate_chip(snplst,platform_query,request):
 					platform=document["data"][z]["platform"]
 		if(platforms==[]):
 			rs=snp_coords_sort[k][0]
-			print rs
 			platform_NOT.append(rs)	
 		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
-	print len(platform_NOT)
 	if(platform_NOT!=[]):
 		warning=output["warning"]
-		warning=warning+"The following RS numbers did not have any platforms found: "+",".join(platform_NOT)+"\n "
+		warning=warning+"The following RS numbers did not have any platforms found: "+",".join(platform_NOT)+""
 		output["warning"]=warning
 	elif (len(platform_NOT)==count):
 		error=output["error"]
-		error=error+"Input SNP list does not contain any valid RS numbers in the platform list query\n "
+		error=error+"Input SNP list does not contain any valid RS numbers in the platform list query "
 		output["error"]=error
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -203,32 +201,38 @@ def createOutputFile(request):
 	# Print output
 	with open("./tmp/proxy"+request+".json") as out_json:
 		json_dict=json.load(out_json)
-	
-	
+	print >>details_file, ""
+	header=["SNP","Position (GRCh37)","Arrays"]
+	print >>details_file, "\t".join(header)
+	print  "\t".join(header)
+	for k in sorted(json_dict.keys()):
+		if k!="error" and k!="warning":
+			print "\t".join(json_dict[k])
+			print >>details_file, "\t".join(json_dict[k])
+
+	try:
+		json_dict["warning"]
+	except KeyError:
+			print >>details_file, ""
+	if(json_dict["warning"]!=""):
+		print >>details_file, ""
+		print >>details_file, "WARNING: "+json_dict["warning"]+"!"
+		print  >>details_file, ""
+		print  ""
+		print "WARNING: "+json_dict["warning"]+"!"
+
+
 	try:
 		json_dict["error"]
-
 	except KeyError:
-		print >>details_file, ""
-		header=["SNP","Position (GRCh37)","Arrays"]
-		print >>details_file, "\t".join(header)
-		for k in sorted(json_dict.keys()):
-			if k!="error" and k!="warning":
-				print >>details_file, "\t".join(json_dict[k])
-
-		try:
-			json_dict["warning"]
-		except KeyError:
 			print >>details_file, ""
-		else:
-			print >>details_file, ""
-			print >>details_file, "WARNING: "+json_dict["warning"]+"!"
-			print  >>details_file, ""
+	if(json_dict["error"]!=""):
+		print >>details_file, ""
+		print >>details_file, "ERROR: "+json_dict["warning"]+"!"
+		print  >>details_file, ""
+		print  ""
+		print "ERROR: "+json_dict["error"]+"!"
 
-	else:
-		print >>details_file, ""
-		print >>details_file, json_dict["error"]
-		print >>details_file, ""
 
 	details_file.close()
 
@@ -248,40 +252,6 @@ def main():
 	
 	# Run function
 	calculate_chip(snplst,platform_query,request)
-	
-	
-	# Print output
-	with open("./tmp/proxy"+request+".json") as out_json:
-		json_dict=json.load(out_json)
-	
-	
-	try:
-		json_dict["error"]
-	
-	except KeyError:
-		print ""
-		header=["SNP","Position (GRCh37)","Arrays"]
-		print "\t".join(header)
-		for k in sorted(json_dict.keys()):
-			if k!="error" and k!="warning":
-				print "\t".join(json_dict[k])
-
-		try:
-			json_dict["warning"]
-		except KeyError:
-			print ""
-		else:
-			print ""
-			print "WARNING: "+json_dict["warning"]+"!"
-			print ""
-	
-	
-	else:
-		print ""
-		print json_dict["error"]
-		print ""
-
-
 
 if __name__ == "__main__":
 	main()
