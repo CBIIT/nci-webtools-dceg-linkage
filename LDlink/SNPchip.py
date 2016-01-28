@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+54e4#!/usr/bin/env python
 
 ###########
 # SNPchip #
@@ -118,12 +118,12 @@ def calculate_chip(snplst,platform_query,request):
 			else:
 				warn.append(snp_i[0])
 	
-	
+	output["warning"]=""
+	output["error"]=""
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
-	
+		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)+"\n "
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142.\n "
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
@@ -143,10 +143,11 @@ def calculate_chip(snplst,platform_query,request):
 	
 	client = MongoClient()
 	client = MongoClient('localhost', port)
-	
+	platformcount=0
 	client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
 	db = client["LDLink"]
-
+	count=0
+	platform_NOT=[]
 	if platform_query != "": #<--If user did not enter platforms as a request
 		platform_list=convert_codeToPlatforms(platform_query)
 	#Quering MongoDB to get platforms for position/chromsome pairs 
@@ -154,30 +155,42 @@ def calculate_chip(snplst,platform_query,request):
 		platform_list=[]
 	for k in range(len(snp_coords_sort)):
 		platforms=[]
-		
-		print (k)
 		position=str(snp_coords_sort[k][2])
 		Chr=str(snp_coords_sort[k][1])
 		cursor=()
+		platform=""
+		count=count+1
 		if platform_query == "": #<--If user did not enter platforms as a request
 			cursor=db.snp_col.find({'$and':[{"pos": position},{"data.chr":Chr},{"data.platform": { '$regex': '.*'}}]}) #Json object that stores all the results
-			print snp_coords_sort[k]
 		elif platform_query != "": #<--If user did not enter platforms as a request
 			cursor=db.snp_col.find( {'$and':[{"pos": position},{"data.chr":Chr},{"data.platform":{"$in":platform_list}}]} ) #Json object that stores all the results
 				#Parsing each docuemnt to retrieve platforms 
 		for document in cursor:	
 			for z in range(0,len(document["data"])):
 				if(document["data"][z]["chr"]==Chr and document["data"][z]["platform"] in platform_list and platform_query!=""):
+					platform=document["data"][z]["platform"]
 					platforms.append(document["data"][z]["platform"])
 				elif(document["data"][z]["chr"]==Chr and platform_query==""):
 					platforms.append(document["data"][z]["platform"])
-		
+					platform=document["data"][z]["platform"]
+		if(platforms==[]):
+			rs=snp_coords_sort[k][0]
+			print rs
+			platform_NOT.append(rs)	
 		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
-
+	print len(platform_NOT)
+	if(platform_NOT!=[]):
+		warning=output["warning"]
+		warning=warning+"The following RS numbers did not have any platforms found: "+",".join(platform_NOT)+"\n "
+		output["warning"]=warning
+	elif (len(platform_NOT)==count):
+		error=output["error"]
+		error=error+"Input SNP list does not contain any valid RS numbers in the platform list query\n "
+		output["error"]=error
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
-	print json_output
 	print >> out_json, json_output
+	print json_output
 	out_json.close()
 	createOutputFile(request)
 
@@ -187,7 +200,6 @@ def createOutputFile(request):
 	tmp_dir="./tmp/"
 	details_file = open(tmp_dir+'details'+request+".txt","w")
 
-	print "Hello output file"
 	# Print output
 	with open("./tmp/proxy"+request+".json") as out_json:
 		json_dict=json.load(out_json)
