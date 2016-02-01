@@ -240,7 +240,7 @@
 									<table class="table table-condensed"> 
 										<thead>
 											<tr>
-												<th>SNP</th>
+												<th>RS Number</th>
 												<th>Position (GRCh37)</th>
 												<th nowrap>Allele Frequencies</th>
 											</tr>
@@ -309,7 +309,7 @@
 						</div>
 						<div id="ldhap-links-container" class="col-md-12" style="display:none;">
 							<span> <a target="_blank" id="ldhap-snps" href="">Download
-									SNP File</a>
+									Variant File</a>
 							</span>&nbsp;&nbsp;&nbsp;&nbsp;<span> <a
 								target="_blank" id="ldhap-haplotypes" href="">
 									Download Haplotype File</a>
@@ -443,7 +443,7 @@
 							<div class="form-group">
 								<div class="col-sm-2">
 									<input id="ldpair-snp1" name="snp1" type="text"
-										class="form-control" placeholder="SNP1 RS Number"
+										class="form-control" placeholder="Variant1 RS Number"
 										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
@@ -452,7 +452,7 @@
 							<div class="form-group">
 								<div class="col-sm-2">
 									<input id="ldpair-snp2" name="snp2" type="text"
-										class="form-control" placeholder="SNP2 RS Number"
+										class="form-control" placeholder="Variant2 RS Number"
 										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
 										pattern="^rs\d+$" />
 								</div>
@@ -737,12 +737,12 @@
 						<div id="ldproxy-table-container" class="row overflowy">
 							<div class="table-responsive">
 								<div>
-									<h3>Proxy SNPs</h3>
+									<h3>Proxy Variants</h3>
 								</div>
 								<table id="new-ldproxy" class="table display compact">
 									<thead>
 										<tr>
-											<th>RS Results</th>
+											<th>RS Number</th>
 											<th class="dt-body-center">Chr</th>
 											<th>Position (GRCh37)</th>
 											<th>Alleles</th>
@@ -775,7 +775,7 @@
 								</table>
 								<div>
 									<a id="ldproxy-results-link" target="LDProxy-SNP-File"> <span>Download
-											all proxy SNPs</span>
+											all proxy Variants</span>
 									</a>
 								</div>
 							</div>
@@ -884,7 +884,7 @@
 						<div id="snpclip-table-container" class="row">
 							<div class="col-sm-3 col-md-3 snpclip-table-scroller">
 								<table class="table table-striped">
-									<caption style="text-align:left;">LD Thinned SNP List</caption>
+									<caption style="text-align:left;">LD Thinned Variant List</caption>
 									<!--
 									<thead>
 										<tr>
@@ -894,7 +894,7 @@
 									-->
 									<tbody id="snpclip-snp-list"></tbody>
 								</table>
-								<a id="snpclip-warnings-button">SNPs with Warnings</a>
+								<a id="snpclip-warnings-button">Variants with Warnings</a>
 							</div>
 
 							<div class="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
@@ -922,7 +922,7 @@
 
 								<!-- SNPs with warnings -->
 								<table id="snpclip-warnings" class="table table-striped">
-									<caption>SNPs With Warnings</caption>
+									<caption>Variants With Warnings</caption>
 									<thead>
 										<tr>
 											<td>RS Number</td>
@@ -942,17 +942,17 @@
 								</table>
 
 								<!-- Initial Message -->
-								<div id="snpclip-initial-message" >Click SNP on the left to view detail.</div>
+								<div id="snpclip-initial-message" >Click Variant on the left to view detail.</div>
 
 							</div>
 						</div>
 						<div class="row">
 							<div id="snpclip-links-container">
 								<span>
-									<a target="snp_thin_list" id="snpclip-snps-link" href="yahoo.com">Download Thinned SNP List</a>
+									<a target="snp_thin_list" id="snpclip-snps-link" href="yahoo.com">Download Thinned Variant List</a>
 								</span>&nbsp;&nbsp;&nbsp;&nbsp;
 								<span>
-									<a target="snp_details" id="snpclip-details-link" href="yahoo.com">Download Thinned SNP List with Details</a>
+									<a target="snp_details" id="snpclip-details-link" href="yahoo.com">Download Thinned Variant List with Details</a>
 								</span>
 							</div>
 						</div>
