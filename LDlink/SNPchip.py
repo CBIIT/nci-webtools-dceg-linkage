@@ -203,7 +203,7 @@ def createOutputFile(request):
 	with open("./tmp/proxy"+request+".json") as out_json:
 		json_dict=json.load(out_json)
 	print >>details_file, ""
-	header=["SNP","Position (GRCh37)","Arrays"]
+	header=["RS Number","Position (GRCh37)","Arrays"]
 	print >>details_file, "\t".join(header)
 	print  "\t".join(header)
 	for k in sorted(json_dict.keys()):
