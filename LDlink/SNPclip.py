@@ -97,7 +97,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-						details[snp_i[0]]=["NA","NA","SNP not found in dbSNP142, SNP removed."]
+						details[snp_i[0]]=["NA","NA","Variant not found in dbSNP142, variant removed."]
 				else:
 					warn.append(snp_i[0])
 					details[snp_i[0]]=["NA","NA","Not an RS number, query removed."]
@@ -270,7 +270,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			r2=calc_r2(hap_dict[snp_list[i]][0],hap_dict[snp_list[j]][0])
 			if r2_threshold<=r2:
 				snp=snp_list[j]
-				details[snp].append("SNP in LD with "+snp_list[i]+" (R2="+str(round(r2,4))+"), SNP removed.")
+				details[snp].append("Variant in LD with "+snp_list[i]+" (R2="+str(round(r2,4))+"), variant removed.")
 				remove_list.append(snp)
 		for snp in remove_list:
 			snp_list.remove(snp)
