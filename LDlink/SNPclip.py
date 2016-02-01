@@ -250,16 +250,16 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 					hap_dict[rsnum]=[temp_genos]
 					snp_list.append(rsnum)
 				else:
-					details[rsnum].append("Variant MAF is "+str(maf)+", variant removed")
+					details[rsnum].append("Variant MAF is "+str(maf)+", variant removed.")
 			else:
 				details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
-				details[rsnum].append("Variant is not biallelic, variant removed")
+				details[rsnum].append("Variant is not biallelic, variant removed.")
 	
 	for i in rs_nums:
 		if i not in snp_list:
 			if i not in details:
 				index_i=rs_nums.index(i)
-				details[i]=["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-"+snp_coords[index_i][2],"NA","Variant not in 1000G VCF file, variant removed"]
+				details[i]=["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-"+snp_coords[index_i][2],"NA","Variant not in 1000G VCF file, variant removed."]
 	
 	# Thin the SNPs
 	i=0
@@ -270,7 +270,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			r2=calc_r2(hap_dict[snp_list[i]][0],hap_dict[snp_list[j]][0])
 			if r2_threshold<=r2:
 				snp=snp_list[j]
-				details[snp].append("SNP in LD with "+snp_list[i]+" (R2="+str(round(r2,4))+"), SNP removed")
+				details[snp].append("SNP in LD with "+snp_list[i]+" (R2="+str(round(r2,4))+"), SNP removed.")
 				remove_list.append(snp)
 		for snp in remove_list:
 			snp_list.remove(snp)
