@@ -217,10 +217,10 @@ def createOutputFile(request):
 			print >>details_file, ""
 	if(json_dict["warning"]!=""):
 		print >>details_file, ""
-		print >>details_file, "WARNING: "+json_dict["warning"]+"!"
+		print >>details_file, "WARNING: "+json_dict["warning"]
 		print  >>details_file, ""
 		print  ""
-		print "WARNING: "+json_dict["warning"]+"!"
+		print "WARNING: "+json_dict["warning"]
 
 		print json_dict["error"]
 	try:
@@ -229,10 +229,10 @@ def createOutputFile(request):
 			print >>details_file, ""
 	if (json_dict["error"]!=""):
 		print >>details_file, ""
-		print >>details_file, "ERROR: "+json_dict["error"]+"!"
+		print >>details_file, "ERROR: "+json_dict["error"]
 		print  >>details_file, ""
 		print  ""
-		print "ERROR: "+json_dict["error"]+"!"
+		print "ERROR: "+json_dict["error"]
 
 
 	details_file.close()
@@ -247,7 +247,7 @@ def main():
 		platform_query=sys.argv[2]
 		request=sys.argv[3]
 	else:
-		print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwiese seperate each platform by a \"+\""
+		print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\""
 		sys.exit()
 		
 	
