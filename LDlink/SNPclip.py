@@ -8,7 +8,7 @@
 def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	import json,math,operator,os,sqlite3,subprocess,sys
 
-	max_list=6000
+	max_list=5000
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
@@ -229,12 +229,25 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		if geno[1] in snp_pos:
 			rsnum=rs_nums[snp_pos.index(geno[1])]
 			if rsnum!=geno[2]:
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
+				count=-2
+				found="false"
+				while count<=2:
+					geno_next=vcf[g+count].strip().split()
+					if rsnum==geno_next[2]:
+						found="true"
+						break
+					count+=1
+				
+				if found=="false":
+					if "warning" in output:
+						output["warning"]=output["warning"]+". Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
+					else:
+						output["warning"]="Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
+					indx=[i[0] for i in snps].index(rsnum)
+					snps[indx][0]=geno[2]
+					rsnum=geno[2]
 				else:
-					output["warning"]="Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
-				snps[snps.index([rsnum])]=[geno[2]]
-				rsnum=geno[2]
+					continue
 			
 			details[rsnum]=["chr"+geno[0]+":"+geno[1]]
 
