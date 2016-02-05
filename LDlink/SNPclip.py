@@ -275,7 +275,8 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 				details[i]=["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-"+snp_coords[index_i][2],"NA","Variant not in 1000G VCF file, variant removed."]
 	
 	# Thin the SNPs
-	sup_2=u"\u00B2"
+	#sup_2=u"\u00B2"
+	sup_2="2"
 	i=0
 	while i<len(snp_list):
 		details[snp_list[i]].append("SNP kept")
