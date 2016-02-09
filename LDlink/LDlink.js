@@ -1139,11 +1139,11 @@ function loadSNPdetails(data, rs_number) {
 
 	console.log("Here is the rs_number to populate");
 	console.log("rs_number: "+rs_number);
-	//console.dir(data.details);
+	console.dir(data.details);
 	console.log("find key for the rs_number");
 
-	//console.log("Found one::::");
-	//console.dir(data.details[rs_number]);
+	console.log("Found one::::");
+	console.dir(data.details[rs_number]);
 
 	var found = false;
 
@@ -1171,6 +1171,7 @@ function loadSNPdetails(data, rs_number) {
 			}
 		}
 	});
+
 	console.dir(snpclipData);
 	console.log(JSON.stringify(snpclipData));
 	ko.mapping.fromJS(snpclipData, snpclipModel);

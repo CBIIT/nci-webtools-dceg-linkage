@@ -239,6 +239,9 @@ def snpclip():
 
     f.close()
 
+    for key, value in details.iteritems() :
+        print(key+"\t"+value[0]+"\t"+value[1]+"\t"+value[2])
+
     copy_output_files(reference)
 
     out_json = json.dumps(clip, sort_keys=True, indent=2)
@@ -248,7 +251,7 @@ def snpclip():
 
 
 @app.route('/LDlinkRest/snpchip', methods = ['GET'])
-def ldchip():
+def snpchip():
 
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
@@ -280,7 +283,7 @@ def ldchip():
     copy_output_files(reference)
 
     #out_json = json.dumps(chip, sort_keys=True, indent=2)
-    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+    out_json = json.dumps(snp_chip, sort_keys=False, indent=2)
 
     mimetype = 'application/json'
 
