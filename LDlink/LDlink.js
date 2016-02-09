@@ -1029,9 +1029,8 @@ function checkAlert(elementId, message, type, displayResults) {
 		prefix = elementId+'-message';
 	}
 	$('#'+prefix).hide();
-
 	if (typeof message !== 'undefined' && message.length > 0) {
-		$('#'+prefix+'-content').html("<div>"+message+"</div>");
+		$('#'+prefix+'-content').html("<div>"+message.replace(/(?:\r\n|\r|\n)/g, '<br />')+"</div>");
 		$('#'+prefix).show();
 		if (typeof displayResults !== 'undefined' && displayResults) {
 			$('#'+elementId+'-results-container').show();
