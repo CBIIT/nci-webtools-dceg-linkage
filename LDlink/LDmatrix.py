@@ -201,8 +201,58 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	rsnum_lst=[]
 	allele_lst=[]
 	pos_lst=[]
+	
 	for g in range(h+1,len(vcf)):
 		geno=vcf[g].strip().split()
+		if geno[1] not in snp_pos:
+			if "warning" in output:
+				output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+			else:
+				output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+			continue
+		
+		if snp_pos.count(geno[1])==1:
+			rs_query=rs_nums[snp_pos.index(geno[1])]
+		
+		else:
+			pos_index=[]
+			for p in range(len(snp_pos)):
+				if snp_pos[p]==geno[1]:
+					pos_index.append(p)
+			for p in pos_index:
+				if rs_nums[p] not in rsnum_lst:
+					rs_query=rs_nums[p]
+					break
+		
+		if rs_query in rsnum_lst:
+			continue		
+		
+		rs_1000g=geno[2]
+		
+		if rs_query==rs_1000g:
+			rsnum=rs_1000g
+		else:
+			count=-2
+			found="false"
+			while count<=2:
+				geno_next=vcf[g+count].strip().split()
+				if rs_query==geno_next[2]:
+					found="true"
+					break
+				count+=1
+			
+			if found=="false":
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+				else:
+					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+
+				indx=[i[0] for i in snps].index(rsnum)
+				snps[indx][0]=geno[2]
+				rsnum=geno[2]
+			else:
+				continue
+		
 		if "," not in geno[3] and "," not in geno[4]:
 			a1,a2=set_alleles(geno[3],geno[4])
 			for i in range(len(index)):
@@ -227,25 +277,6 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 				else:
 					hap1[i].append(".")
 					hap2[i].append(".")
-
-			if geno[1] in snp_pos:
-				rs_query=rs_nums[snp_pos.index(geno[1])]
-				rs_1000g=geno[2]
-				if rs_query==rs_1000g:
-					rsnum=rs_1000g
-				else:
-					rsnum=rs_1000g
-					if "warning" in output:
-						output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
-					else:
-						output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
-					
-			else:
-				rsnum=geno[2]
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
-				else:
-					output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
 			
 			rsnum_lst.append(rsnum)
 
