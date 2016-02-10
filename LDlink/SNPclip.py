@@ -222,54 +222,79 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		if head[i] in pop_ids:
 			pop_index.append(i)
 	
-	snp_list=[]
+	rsnum_lst=[]
 	
 	for g in range(h+1,len(vcf)):
 		geno=vcf[g].strip().split()
-		if geno[1] in snp_pos:
-			rsnum=rs_nums[snp_pos.index(geno[1])]
-			if rsnum!=geno[2]:
-				count=-2
-				found="false"
-				while count<=2:
-					geno_next=vcf[g+count].strip().split()
-					if rsnum==geno_next[2]:
-						found="true"
-						break
-					count+=1
-				
-				if found=="false":
-					if "warning" in output:
-						output["warning"]=output["warning"]+". Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
-					else:
-						output["warning"]="Genomic position for query variant ("+rsnum+") does not match RS number at 1000G position ("+geno[2]+")"
-					indx=[i[0] for i in snps].index(rsnum)
-					snps[indx][0]=geno[2]
-					rsnum=geno[2]
-				else:
-					continue
-			
-			details[rsnum]=["chr"+geno[0]+":"+geno[1]]
-
-			
-			if "," not in geno[3] and "," not in geno[4]:
-				temp_genos=[]
-				for i in range(len(pop_index)):
-					temp_genos.append(geno[pop_index[i]])
-				f0,f1,maf=calc_maf(temp_genos)
-				a0,a1=set_alleles(geno[3],geno[4])
-				details[rsnum].append(a0+"="+str(round(f0,3))+", "+a1+"="+str(round(f1,3)))
-				if maf_threshold<=maf:
-					hap_dict[rsnum]=[temp_genos]
-					snp_list.append(rsnum)
-				else:
-					details[rsnum].append("Variant MAF is "+str(round(maf,4))+", variant removed.")
+		if geno[1] not in snp_pos:
+			if "warning" in output:
+				output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
 			else:
-				details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
-				details[rsnum].append("Variant is not biallelic, variant removed.")
+				output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+			continue
+		
+		if snp_pos.count(geno[1])==1:
+			rs_query=rs_nums[snp_pos.index(geno[1])]
+		
+		else:
+			pos_index=[]
+			for p in range(len(snp_pos)):
+				if snp_pos[p]==geno[1]:
+					pos_index.append(p)
+			for p in pos_index:
+				if rs_nums[p] not in rsnum_lst:
+					rs_query=rs_nums[p]
+					break
+
+		if rs_query in rsnum_lst:
+			continue		
+		
+		rs_1000g=geno[2]
+		
+		if rs_query==rs_1000g:
+			rsnum=rs_1000g
+		else:
+			count=-2
+			found="false"
+			while count<=2:
+				geno_next=vcf[g+count].strip().split()
+				if rs_query==geno_next[2]:
+					found="true"
+					break
+				count+=1
+			
+			if found=="false":
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+geno[2]+")"
+				else:
+					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+geno[2]+")"
+				
+				indx=[i[0] for i in snps].index(rs_query) ############################## Fix in LDhap and LDmatrix
+				snps[indx][0]=geno[2]
+				rsnum=geno[2]
+			else:
+				continue
+		
+		details[rsnum]=["chr"+geno[0]+":"+geno[1]]
+		
+		if "," not in geno[3] and "," not in geno[4]:
+			temp_genos=[]
+			for i in range(len(pop_index)):
+				temp_genos.append(geno[pop_index[i]])
+			f0,f1,maf=calc_maf(temp_genos)
+			a0,a1=set_alleles(geno[3],geno[4])
+			details[rsnum].append(a0+"="+str(round(f0,3))+", "+a1+"="+str(round(f1,3)))
+			if maf_threshold<=maf:
+				hap_dict[rsnum]=[temp_genos]
+				rsnum_lst.append(rsnum)
+			else:
+				details[rsnum].append("Variant MAF is "+str(round(maf,4))+", variant removed.")
+		else:
+			details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
+			details[rsnum].append("Variant is not biallelic, variant removed.")
 	
 	for i in rs_nums:
-		if i not in snp_list:
+		if i not in rsnum_lst:
 			if i not in details:
 				index_i=rs_nums.index(i)
 				details[i]=["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-"+snp_coords[index_i][2],"NA","Variant not in 1000G VCF file, variant removed."]
@@ -278,17 +303,17 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	#sup_2=u"\u00B2"
 	sup_2="2"
 	i=0
-	while i<len(snp_list):
-		details[snp_list[i]].append("SNP kept")
+	while i<len(rsnum_lst):
+		details[rsnum_lst[i]].append("SNP kept")
 		remove_list=[]
-		for j in range(i+1,len(snp_list)):
-			r2=calc_r2(hap_dict[snp_list[i]][0],hap_dict[snp_list[j]][0])
+		for j in range(i+1,len(rsnum_lst)):
+			r2=calc_r2(hap_dict[rsnum_lst[i]][0],hap_dict[rsnum_lst[j]][0])
 			if r2_threshold<=r2:
-				snp=snp_list[j]
-				details[snp].append("Variant in LD with "+snp_list[i]+" (R"+sup_2+"="+str(round(r2,4))+"), variant removed.")
+				snp=rsnum_lst[j]
+				details[snp].append("Variant in LD with "+rsnum_lst[i]+" (R"+sup_2+"="+str(round(r2,4))+"), variant removed.")
 				remove_list.append(snp)
 		for snp in remove_list:
-			snp_list.remove(snp)
+			rsnum_lst.remove(snp)
 		i+=1
 	
 	
@@ -297,7 +322,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
 	out_json.close()
-	return(snps,snp_list,details)
+	return(snps,rsnum_lst,details)
 
 
 def main():
