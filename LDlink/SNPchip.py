@@ -121,9 +121,9 @@ def calculate_chip(snplst,platform_query,request):
 	output["warning"]=""
 	output["error"]=""
 	if warn!=[] and len(rs_nums)!=0:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)+"\n "
+		output["warning"]="The following RS numbers were not found in dbSNP 142: "+", ".join(warn)+". "
 	elif len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142.\n "
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142. "
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -178,15 +178,14 @@ def calculate_chip(snplst,platform_query,request):
 		if(platforms==[]):
 			rs=snp_coords_sort[k][0]
 			platform_NOT.append(rs)	
-		elif(platforms!=[]):
-			output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
+		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 	if(platform_NOT!=[] and len(platform_NOT)!=count):
 		warning=output["warning"]
-		warning=warning+"The following RS numbers did not have any platforms found: "+",".join(platform_NOT)+""
+		warning=warning+"The following RS numbers did not have any platforms found: "+", ".join(platform_NOT)+". "
 		output["warning"]=warning
 	elif (len(platform_NOT)==count):
 		error=output["error"]
-		error=error+"Input SNP list does not contain any valid RS numbers in the platform list query "
+		error=error+"Entries from the input variant list were not found in any of the selected arrays. "
 		output["error"]=error
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -204,7 +203,7 @@ def createOutputFile(request):
 	with open("./tmp/proxy"+request+".json") as out_json:
 		json_dict=json.load(out_json)
 	print >>details_file, ""
-	header=["SNP","Position (GRCh37)","Arrays"]
+	header=["RS Number","Position (GRCh37)","Arrays"]
 	print >>details_file, "\t".join(header)
 	print  "\t".join(header)
 	for k in sorted(json_dict.keys()):
@@ -218,10 +217,10 @@ def createOutputFile(request):
 			print >>details_file, ""
 	if(json_dict["warning"]!=""):
 		print >>details_file, ""
-		print >>details_file, "WARNING: "+json_dict["warning"]+"!"
+		print >>details_file, "WARNING: "+json_dict["warning"]
 		print  >>details_file, ""
 		print  ""
-		print "WARNING: "+json_dict["warning"]+"!"
+		print "WARNING: "+json_dict["warning"]
 
 		print json_dict["error"]
 	try:
@@ -230,10 +229,10 @@ def createOutputFile(request):
 			print >>details_file, ""
 	if (json_dict["error"]!=""):
 		print >>details_file, ""
-		print >>details_file, "ERROR: "+json_dict["error"]+"!"
+		print >>details_file, "ERROR: "+json_dict["error"]
 		print  >>details_file, ""
 		print  ""
-		print "ERROR: "+json_dict["error"]+"!"
+		print "ERROR: "+json_dict["error"]
 
 
 	details_file.close()
@@ -248,7 +247,7 @@ def main():
 		platform_query=sys.argv[2]
 		request=sys.argv[3]
 	else:
-		print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwiese seperate each platform by a \"+\""
+		print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\""
 		sys.exit()
 		
 	
