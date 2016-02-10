@@ -247,7 +247,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 				else:
 					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
 
-				indx=[i[0] for i in snps].index(rsnum)
+				indx=[i[0] for i in snps].index(rs_query)
 				snps[indx][0]=geno[2]
 				rsnum=geno[2]
 			else:
