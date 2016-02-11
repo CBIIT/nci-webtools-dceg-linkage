@@ -464,8 +464,8 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	
 	hover=proxy_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
-		("Query SNP", "@qrs @q_alle"),
-		("Proxy SNP", "@prs @p_alle"),
+		("Query Variant", "@qrs @q_alle"),
+		("Proxy Variant", "@prs @p_alle"),
 		("Distance (Mb)", "@dist"),
 		("MAF (Query,Proxy)", "@q_maf,@p_maf"),
 		("R"+sup_2, "@r"),
