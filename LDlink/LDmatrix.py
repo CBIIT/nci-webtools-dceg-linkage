@@ -566,8 +566,8 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	
 	hover=matrix_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
-		("SNP 1", " "+"@yname (@yA)"),
-		("SNP 2", " "+"@xname (@xA)"),
+		("Variant 1", " "+"@yname (@yA)"),
+		("Variant 2", " "+"@xname (@xA)"),
 		("D\'", " "+"@Dp"),
 		("R"+sup_2, " "+"@R2"),
 		("Correlated Alleles", " "+"@corA"),
