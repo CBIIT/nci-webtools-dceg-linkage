@@ -178,16 +178,15 @@ def calculate_chip(snplst,platform_query,request):
 		if(platforms==[]):
 			rs=snp_coords_sort[k][0]
 			platform_NOT.append(rs)	
-		elif(platforms!=[]):
-			output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
+		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 	if(platform_NOT!=[] and len(platform_NOT)!=count):
 		warning=output["warning"]
 		warning=warning+"The following RS numbers did not have any platforms found: "+", ".join(platform_NOT)+". "
 		output["warning"]=warning
 	elif (len(platform_NOT)==count):
-		error=output["error"]
+		error=output["warning"]
 		error=error+"Entries from the input variant list were not found in any of the selected arrays. "
-		output["error"]=error
+		output["warning"]=error
 	# Output JSON file
 	json_output=json.dumps(output, sort_keys=True, indent=2)
 	print >> out_json, json_output
