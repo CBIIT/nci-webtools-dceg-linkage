@@ -13,6 +13,8 @@ import pandas as pd
 import numpy as np
 from pandas import DataFrame
 import urllib
+import collections
+
 from LDpair import calculate_pair
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
@@ -210,6 +212,9 @@ def snpclip():
     (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
     #(snps,snp_list,details) = calculate_clip(snplst,pop,reference)
 
+    print "Here is the DETAILS"
+    print type(details)
+    
     clip={}
     clip["snp_list"] = snp_list
     clip["details"] = details
@@ -232,7 +237,7 @@ def snpclip():
 
     f = open('tmp/details'+reference+'.txt', 'w')
     f.write("RS Number\tPosition\tAlleles\tDetails\n")
-    if(type(details) is dict):
+    if(type(details) is collections.OrderedDict):
         for snp in snps:
             f.write(snp[0]+"\t"+"\t".join(details[snp[0]]))
             f.write("\n")
@@ -247,7 +252,7 @@ def snpclip():
 
     copy_output_files(reference)
 
-    out_json = json.dumps(clip, sort_keys=True, indent=2)
+    out_json = json.dumps(clip, sort_keys=False)
     mimetype = 'application/json'
 
     return current_app.response_class(out_json, mimetype=mimetype)
@@ -286,7 +291,7 @@ def snpchip():
     copy_output_files(reference)
 
     #out_json = json.dumps(chip, sort_keys=True, indent=2)
-    out_json = json.dumps(snp_chip, sort_keys=False, indent=2)
+    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
 
     mimetype = 'application/json'
 

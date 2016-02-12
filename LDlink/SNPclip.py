@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import collections
+
 ###########
 # SNPclip #
 ###########
@@ -79,7 +81,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 
 
 	# Find RS numbers in snp142 database
-	details={}
+	details=collections.OrderedDict()
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
@@ -369,7 +371,7 @@ def main():
 	print "new details"
 	print json.dumps(new_details, sort_keys=True)
 
-	sys.exit()
+	#sys.exit()
 
 
 	# Print output

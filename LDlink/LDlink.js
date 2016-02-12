@@ -1117,7 +1117,7 @@ function populateSNPwarnings(data) {
 			rs_number_link: anchorRSnumber(index),
 			position_link: anchorRSposition(value[0], index)
 		};
-		console.log(index+" - "+value);
+		//console.log(index+" - "+value);
 		if(detail.comment != 'SNP kept' && detail.comment.substring(0, 9) != 'SNP in LD') {
 			// Place message on the warning table.
 			snpclipData.warnings.push(detail);
@@ -1185,6 +1185,8 @@ function loadSNPdetails(data, rs_number) {
 function initClip(data) {
 
 	ldClipRaw = data;
+	console.log("data....");
+	console.dir(data);
 
 	populateSNPwarnings(data);
 	populateSNPlist(data);
