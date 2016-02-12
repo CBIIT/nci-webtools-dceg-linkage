@@ -1146,6 +1146,8 @@ function loadSNPdetails(data, rs_number) {
 	console.dir(data.details[rs_number]);
 
 	var found = false;
+	var match = 'Variant in LD with '+rs_number;
+;
 
 	$.each(data.details, function( index, value ){
 		var detail = {
@@ -1166,7 +1168,9 @@ function loadSNPdetails(data, rs_number) {
 				// List is complete, exit loop
 				return false;
 			}
-			if(detail.comment == 'SNP kept' || detail.comment.substring(0, 9) =='SNP in LD') {
+			console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
+			if(detail.comment == 'SNP kept' || 
+				detail.comment.indexOf(match)>=0) {
 				snpclipData.details.push(detail);
 			}
 		}

@@ -355,6 +355,21 @@ def main():
 
 	# Run function
 	snps,thin_list,details=calculate_clip(snplst,pop,request,r2_threshold,maf_threshold)
+	#TESTING
+	new_details = {}
+
+	print "Convert the dictionary"
+	print "LD Thinned SNP list ("+pop+"):"
+	for snp in snps:
+		print snp
+		print snp[0]+"\t"+"\t".join(details[snp[0]])
+		new_details[snp[0]] = details[snp[0]]
+
+	print ""
+	print "new details"
+	print json.dumps(new_details, sort_keys=True)
+
+	sys.exit()
 
 
 	# Print output
