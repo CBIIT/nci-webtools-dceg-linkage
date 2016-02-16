@@ -115,6 +115,8 @@ def get_regDB(chr,pos):
 	a=curr.fetchone()
 	if a==None:
 		return "."
+	elif a[1] in ["5","6","7"]:   ### Lindsay request
+		return "."                ### Lindsay request
 	else:
 		return a[1]
 
