@@ -593,6 +593,9 @@ table.snpchip-table {
 #snpclip-links-container {
 	padding-top:30px;
 }
+#ldpair-snp1, #ldpair-snp2 {
+	min-width:145px;
+}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,
