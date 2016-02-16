@@ -590,6 +590,9 @@ table.snpchip-table {
 #snp_chip_list {
 	padding-left:60px;
 }
+#snpclip-links-container {
+	padding-top:30px;
+}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,

@@ -706,7 +706,7 @@ function updateSNPclip() {
 	$("#snpclip-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
 	// Set populations on LDThinned
-	$('.snpclip-populations').empty().append(explodeLegalArray(population));
+	//$('.snpclip-populations').empty().append(explodeLegalArray(population));
 
 	var url = restServerUrl + "/snpclip";
 	var ajaxRequest = $.ajax({
