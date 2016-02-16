@@ -1109,7 +1109,6 @@
 										</tr>
 										<tr>
 											<th nowrap>RS Number</th>
-											<th nowrap>Chr</th>
 											<th nowrap>Position (GRCh37)</th>
 										</tr>
 									</thead>
@@ -1117,8 +1116,13 @@
 										<!-- ko foreach: snpchip -->
 										<tr>
 											<td data-bind="html: rs_number"></td>
+											<td>chr<span data-bind="text: chromosome" style="text-align:center;"></span>:
+											<span data-bind="html: position"></span>
+											</td>
+											<!--
 											<td data-bind="text: chromosome" style="text-align:center;"></td>
 											<td data-bind="html: position"></td>
+											-->
 										</tr>
 										<!-- /ko -->
 									</tbody>
