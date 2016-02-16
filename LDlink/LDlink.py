@@ -81,17 +81,17 @@ def ldpair():
     print
     print 'Execute TEST'
     print 'Gathering Variables from url'
-    snp1 = request.args.get('snp1', False)
-    snp2 = request.args.get('snp2', False)
+    var1 = request.args.get('var1', False)
+    var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
     # reference = "939393"
-    print 'snp1: ' + snp1
-    print 'snp2: ' + snp2
+    print 'var1: ' + var1
+    print 'var2: ' + var2
     print 'pop: ' + pop
     print 'request: ' + reference
     print
-    out_json = calculate_pair(snp1, snp2, pop, reference)
+    out_json = calculate_pair(var1, var2, pop, reference)
     mimetype = 'application/json'
 
     return current_app.response_class(out_json, mimetype=mimetype)
@@ -102,19 +102,19 @@ def ldproxy():
     print
     print 'Execute ldproxy'
     print 'Gathering Variables from url'
-    snp = request.args.get('snp', False)
+    var = request.args.get('var', False)
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
     r2_d = request.args.get('r2_d', False)
 
-    print 'snp: ' + snp
+    print 'var: ' + var
     print 'pop: ' + pop
     print 'request: ' + reference
     print 'r2_d: ' + r2_d
     print
 
     #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
-    out_script,out_div = calculate_proxy(snp, pop, reference, r2_d)
+    out_script,out_div = calculate_proxy(var, pop, reference, r2_d)
 
     copy_output_files(reference)
 

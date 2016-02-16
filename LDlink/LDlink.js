@@ -256,17 +256,17 @@ function autoCalculate() {
 	var id = url.tab.toLowerCase(); 
 	switch (id) {
 		case "ldpair":
-			if(url.snp1 && url.snp2 && url.pop) {
-				$("#ldpair-snp1").prop('value', url.snp1);
-				$("#ldpair-snp2").prop('value', url.snp2);
+			if(url.var1 && url.var2 && url.pop) {
+				$("#ldpair-snp1").prop('value', url.var1);
+				$("#ldpair-snp2").prop('value', url.var2);
 				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
 				initCalculate(id);
 				updateData(id);
 			}
 			break;
 		case "ldproxy":
-			if(url.snp && url.pop && url.r2_d) {
-				$("#ldproxy-snp").prop('value', url.snp);
+			if(url.var && url.pop && url.r2_d) {
+				$("#ldproxy-snp").prop('value', url.var);
 				$("#proxy_color_r2").toggleClass('active', url.r2_d == "r2");
 				$("#proxy_color_r2").next().toggleClass('active', url.r2_d == "d");
 				refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
@@ -606,7 +606,7 @@ function updateLDhap() {
 	};
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
-		type : 'POST',
+		type : 'GET',
 		url : url,
 		data : ldInputs,
 		contentType : 'application/json' // JSON
@@ -1450,7 +1450,7 @@ function updateLDproxy() {
 	}
 
 	var ldproxyInputs = {
-		snp : $('#ldproxy-snp').val(),
+		"var" : $('#ldproxy-snp').val(),
 		pop : population.join("+"),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
 		r2_d : r2_d
@@ -1641,6 +1641,8 @@ function updateLDpair() {
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
 	};
+	console.log("ldpairInputs");
+	console.dir(ldpairInputs);
 
 	updateHistoryURL(id, ldpairInputs);
 
