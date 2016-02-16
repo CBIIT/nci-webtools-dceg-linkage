@@ -606,7 +606,7 @@ function updateLDhap() {
 	};
 	var url = restServerUrl + "/ldhap";
 	var ajaxRequest = $.ajax({
-		type : 'GET',
+		type : 'POST',
 		url : url,
 		data : ldInputs,
 		contentType : 'application/json' // JSON
@@ -1118,7 +1118,7 @@ function populateSNPwarnings(data) {
 			position_link: anchorRSposition(value[0], index)
 		};
 		//console.log(index+" - "+value);
-		if(detail.comment != 'SNP kept' && detail.comment.substring(0, 9) != 'SNP in LD') {
+		if(detail.comment != 'Variant kept' && detail.comment.substring(0, 9) != 'Variant in LD') {
 			// Place message on the warning table.
 			snpclipData.warnings.push(detail);
 		}
@@ -1164,12 +1164,12 @@ function loadSNPdetails(data, rs_number) {
 		}
 		//if(found == true && detail.rs_number == rs_number) {
 		if(found) {
-			if(detail.comment == 'SNP kept' && detail.rs_number != rs_number){
+			if(detail.comment == 'Variant kept' && detail.rs_number != rs_number){
 				// List is complete, exit loop
 				return false;
 			}
 			console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
-			if(detail.comment == 'SNP kept' || 
+			if(detail.comment == 'Variant kept' || 
 				detail.comment.indexOf(match)>=0) {
 				snpclipData.details.push(detail);
 			}
@@ -1635,8 +1635,8 @@ function updateLDpair() {
 	//console.log('population');
 	//console.dir(population);
 	var ldpairInputs = {
-		snp1 : $('#ldpair-snp1').val(),
-		snp2 : $('#ldpair-snp2').val(),
+		var1 : $('#ldpair-snp1').val(),
+		var2 : $('#ldpair-snp2').val(),
 		pop : population.join("+"),
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
