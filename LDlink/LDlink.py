@@ -205,6 +205,7 @@ def snpclip():
 
     f = open(snpfile, 'w')
     for s in snplist:
+    	s = s.lstrip()
         if(s[:2].lower() == 'rs'):
             f.write(s.lower()+'\n')
 
