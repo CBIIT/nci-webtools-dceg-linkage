@@ -8,6 +8,7 @@ var restService = {
 	route : "LDlinkRest"
 }
 
+
 var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
 var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
 var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
@@ -931,7 +932,7 @@ function loadSNPChip(data) {
 		obj = {
 			"rs_number" : anchorRSnumber(detail[0]),
 			"chromosome" : chromo_position[0],
-			"position" : anchorRSposition("chr"+detail[1], detail[0], true),
+			"position" : anchorRSposition("chr"+detail[1], detail[0]),
 			"map" : map,
 			"rs_number_original" : detail[0],
 			"platform_count" : platform_count
@@ -985,14 +986,14 @@ function loadSNPChip(data) {
 	//snpchipData["headers"].platform = platform_list;
 
 	// = "This is about error";
-	/*
+	
 	console.log("FINAL DATA HERE:");
 	console.dir(snpchipData);
 	console.log("ERROR Count: "+snpchipData.error.length);
 	console.log("WARNING Count: "+snpchipData.warning.length);
 	console.log("FINAL DATA AS A STRING:");
 	console.log(JSON.stringify(snpchipData));
-	*/
+	
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	$('#snpchip-message-warning-content').empty();
@@ -1072,11 +1073,11 @@ function anchorRSnumber(rs_number) {
 	return '<a href="'+url+'" target="rs_number_'+rs_number+'">'+rs_number+'</a>';
 }
 
-function anchorRSposition(coord, rs_number, hide_chr) {
+function anchorRSposition(coord, rs_number) {
 	//
 	// Genome Browser:
 	//
-	hide_chr = hide_chr || false;
+	//hide_chr = hide_chr || false;
 
 	if(coord.toUpperCase() == "NA")
 		return "NA";
@@ -1096,11 +1097,11 @@ function anchorRSposition(coord, rs_number, hide_chr) {
 		'hgFind.matches' : rs_number
 	};
 	var url = server + "?" + $.param(params);
-	if(hide_chr) {
-		return '<a href="'+url+'" target="coord_'+coord+'">'+positions[1]+'</a>';
-	} else {
-		return '<a href="'+url+'" target="coord_'+coord+'">'+coord+'</a>';
-	}
+	//if(hide_chr) {
+	//	return '<a href="'+url+'" target="coord_'+coord+'">'+positions[1]+'</a>';
+	//} else {
+	return '<a href="'+url+'" target="coord_'+coord+'">'+coord+'</a>';
+	//}
 }
 
 function populateSNPwarnings(data) {
