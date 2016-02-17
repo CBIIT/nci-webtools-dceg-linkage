@@ -1,6 +1,6 @@
-username=@username@
-password=@password@
-port=@port@
+username=ncianalysis_readonly
+password=1234
+port=27020
 
 #File to store user information to query the LDLink mongoDB database
 #Username=username to query database
