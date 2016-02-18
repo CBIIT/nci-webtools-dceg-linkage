@@ -461,7 +461,6 @@ hr.header {
 	float:left;
 	max-height: 400px;
 	overflow-y: auto;
-	margin-top: 20px;
 	border-top: 1px solid #ccc;
 	border-left: 1px solid #ccc;
 	border-right: 1px solid #ccc;
@@ -482,6 +481,10 @@ hr.header {
 caption {
 	font-weight:bold;
 }
+caption.snpclip-caption {
+	min-height:60px;
+}
+
 #snpclip-initial-message {
 	font-weight:bold;
 	font-size:110%;
@@ -493,6 +496,7 @@ caption {
 .snpclip-table-scroller {
 	overflow-y:auto;
 	max-height:550px;
+	padding-top:10px;
 }
 
 /* Rotate the text on SNPchip table */

@@ -2,6 +2,7 @@
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect
 from functools import wraps
 from flask import current_app
+from flask import jsonify
 
 import cgi
 import shutil
@@ -71,6 +72,24 @@ def jsonp(func):
         else:
             return func(*args, **kwargs)
     return decorated_function
+
+@app.route("/LDlinkRest/demoapp/add", methods=['POST'])
+def restAdd():
+    print type(request.args)
+    for arg in request.args:
+        print arg
+
+    data = str(request.args)
+    json_dumps = json.dumps(data)
+
+    print "HI"
+    first = request.args.get('first', False)
+    second = request.form.get('second')
+    test = request.form.get('test')
+    print "Hi"
+    print first
+    print json_dumps
+    return jsonify(success=True, data=jsonData)
 
 @app.route('/LDlinkRest/ldpair', methods = ['GET'])
 def ldpair():
@@ -259,7 +278,7 @@ def snpclip():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 
-@app.route('/LDlinkRest/snpchip', methods = ['GET'])
+@app.route('/LDlinkRest/snpchip', methods = ['GET', 'POST'])
 def snpchip():
 
     #Command line example

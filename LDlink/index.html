@@ -899,13 +899,13 @@
 						<div id="snpclip-table-container" class="row">
 							<div class="col-sm-3 col-md-3 snpclip-table-scroller">
 								<table class="table table-striped">
-									<caption style="text-align:left;">LD Thinned Variant List</caption>
+									<caption class="snpclip-caption">LD Thinned Variant List</caption>
 									<thead>
 										<tr>
 											<td>RS Number</td>
 										</tr>
 									</thead>
-									<tbody id="snpclip-snp-list"></tbody>
+									<tbody id="snpclip-snp-list" style="border: 1px solid #ccc;"></tbody>
 								</table>
 								<a id="snpclip-warnings-button">Variants with Warnings</a>
 							</div>
@@ -914,7 +914,7 @@
 
 								<!-- Detail message -->
 								<table id="snpclip-details" class="table table-striped">
-								<caption id="snpclip-detail-title">Details for rs1234</caption>
+								<caption id="snpclip-detail-title" class="snpclip-caption">Details for rs1234</caption>
 									<thead>
 										<tr>
 											<td>RS Number</td>
@@ -1208,6 +1208,32 @@
 				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i class="fa fa-lg fa-linkedin"></i></a>
 			</div>
 	</div>
+
+<html>
+<head>
+    <title>Add Numbers!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
+    <script src="demoPost.js"></script>
+</head>
+
+<body>
+    First number:
+    <input type="text" id="first">
+    <br>
+    Second number:
+    <input type="text" id="second">
+    <br>
+    <button id="submit" onclick="submitForm()">Add these numbers!</button>
+    
+    <br>
+    Results:
+    <span id="results"></span>
+    
+</body>
+
+
+
+</html>
 
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>

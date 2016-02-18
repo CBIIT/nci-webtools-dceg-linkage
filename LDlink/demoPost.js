@@ -7,12 +7,17 @@ function submitForm() {
         second: second,
     }
     
-	var url = "/demoapp/add";
+	var url = "../LDlinkRest/demoapp/add";
 	var ajaxRequest = $.ajax({
 		type : 'POST',
 		url : url,
 		data : json,
-		contentType : 'application/json' // JSON
+		contentType : 'application/json',
+        success : function(result) {
+            jQuery("#results").html(result); 
+        },error : function(result){
+            console.log(result);
+        }
 	});
     
     console.log('JSON',json);
