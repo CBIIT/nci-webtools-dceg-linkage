@@ -481,10 +481,20 @@ hr.header {
 caption {
 	font-weight:bold;
 }
-caption.snpclip-caption {
+table.table-chip > caption {
 	min-height:60px;
 }
+table.table-chip > thead > tr > td {
+	text-align: left;
+}
 
+table.table-chip > tbody {
+    border:1px solid #ccc;
+}
+table#snpclip-table-thin > tbody {
+    max-height: 400px;
+    overflow-y: auto;
+}
 #snpclip-initial-message {
 	font-weight:bold;
 	font-size:110%;
