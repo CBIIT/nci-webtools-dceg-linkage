@@ -713,7 +713,7 @@ function updateSNPclip() {
 	var ajaxRequest = $.ajax({
 		type : 'POST',
 		url : url,
-		data : ldInputs,
+		data : JSON.stringify(ldInputs),
 		contentType : 'application/json' // JSON
 	});
 
