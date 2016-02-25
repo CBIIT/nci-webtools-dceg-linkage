@@ -694,6 +694,7 @@ function updateSNPclip() {
 		maf_threshold: $("#"+id+"_maf_threshold").val(),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
 	};
+
 	//Show inital message
 	$('#snpclip-details').hide();
 	$('#snpclip-warnings').hide();
@@ -727,24 +728,18 @@ function updateSNPclip() {
 			initClip(data);
 		}
 	});
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				console.log("header: "
-					+ jqXHR
-					+ "\n"
-					+ "Status: "
-					+ textStatus
-					+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		console.log("header: "+jqXHR+"\n"+"Status: "+ textStatus
+			+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+		message = 'Service Unavailable: ' + textStatus + "<br>";
+		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+		$('#' + id + '-message').show();
+		$('#' + id + '-message-content').empty().append(message);
+		$('#' + id + '-progress').hide();
+		$('#' + id+ '-results-container').hide();
+		//hide loading icon
+		$('#'+id+"-loading").hide();
+	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});

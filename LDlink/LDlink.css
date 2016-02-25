@@ -610,6 +610,10 @@ table.snpchip-table {
 #ldpair-snp1, #ldpair-snp2 {
 	min-width:145px;
 }
+#snpclip-thresholds > div.input-group {
+	display:block;
+}
+
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,
@@ -627,4 +631,5 @@ table.snpchip-table {
   .dataTables_wrapper .dataTables_filter {
     margin-top: 0.5em; } 
 }
+
     
