@@ -234,7 +234,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 		else:
 			count=-2
 			found="false"
-			while count<=2:
+			while count<=2 and count+g<len(vcf):
 				geno_next=vcf[g+count].strip().split()
 				if rs_query==geno_next[2]:
 					found="true"

@@ -711,9 +711,9 @@ function updateSNPclip() {
 
 	var url = restServerUrl + "/snpclip";
 	var ajaxRequest = $.ajax({
-		type : 'GET',
+		type : 'POST',
 		url : url,
-		data : ldInputs,
+		data : JSON.stringify(ldInputs),
 		contentType : 'application/json' // JSON
 	});
 
