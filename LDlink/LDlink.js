@@ -920,7 +920,7 @@ function loadSNPChip(data) {
 			//console.log(key+":"+value);
 			//console.info($.inArray(value, used_platforms));
 			if($.inArray(value, used_platforms) >= 0) {
-				map.push("X");
+				map.push("&#x2713;");
 				platform_count++;
 				total_platform_count++;
 			} else {

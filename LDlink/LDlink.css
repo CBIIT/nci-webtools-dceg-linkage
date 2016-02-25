@@ -407,7 +407,7 @@ img.graph-legend {
 	border: 1px solid #ccc;
 }
 .snpchip-table > thead > tr > th, .snpchip-table > tbody > tr > th, .snpchip-table > tfoot > tr > th, .snpchip-table > thead > tr > td, .snpchip-table > tbody > tr > td, .snpchip-table > tfoot > tr > td {
-    border-bottom: 1px solid #ddd;
+    border: 1px solid #ddd;
     border-top: 0 none;
 }
 /* Header and Footer */
@@ -518,21 +518,20 @@ th.rotate {
 
 th.rotate > div {
   transform: 
-    /* Magic Numbers */
-    translate(25px, 51px)
-    /* 45 is really 360 - 45 */
-    rotate(315deg);
-  width: 30px;
+    translate(0px, 51px)
+    rotate(270deg);
+  width: 20px;
 }
 th.rotate > div > span {
-  border-bottom: 1px solid #ccc;
-  padding: 5px 10px;
+  /*border-bottom: 1px solid #ccc;*/
+  /*padding: 5px 10px;*/
 }
 /* These aren't needed and will be weird if transforms don't work */
 .csstransforms & th.rotate {
   height: 142px;
   white-space: nowrap;
 }
+
 .snpchip-warnings {
     border-collapse: collapse;
 }
@@ -540,6 +539,7 @@ th.rotate > div > span {
 .snpchip-warnings > tbody > tr > td {
     border: 1px solid black;
 }
+
 #filter-by-array {
 	margin-top: 10px;
 }

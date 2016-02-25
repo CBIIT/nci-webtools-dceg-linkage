@@ -89,7 +89,7 @@ def restAdd():
     print "Hi"
     print first
     print json_dumps
-    return jsonify(success=True, data=jsonData)
+    return jsonify(success=True, data=json_dumps)
 
 @app.route('/LDlinkRest/ldpair', methods = ['GET'])
 def ldpair():
@@ -202,9 +202,9 @@ def snpclip():
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
 
-    print
-    print 'Execute snpclip'
-    print 'Gathering Variables from url'
+    #print
+    #print 'Execute snpclip'
+    #print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
@@ -212,14 +212,14 @@ def snpclip():
     maf_threshold = request.args.get('maf_threshold', False)
 
     reference = request.args.get('reference', False)
-    print 'snps: ' + snps
-    print 'pop: ' + pop
-    print 'request: ' + reference
-    print 'r2_threshold: ' + r2_threshold
-    print 'maf_threshold: ' + maf_threshold
+    #print 'snps: ' + snps
+    #print 'pop: ' + pop
+    #print 'request: ' + reference
+    #print 'r2_threshold: ' + r2_threshold
+    #print 'maf_threshold: ' + maf_threshold
 
     snpfile = tmp_dir+'snps'+reference+'.txt'
-    print 'snpfile: '+snpfile
+    #print 'snpfile: '+snpfile
     snplist = snps.splitlines()
 
     f = open(snpfile, 'w')
@@ -232,8 +232,8 @@ def snpclip():
     (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
     #(snps,snp_list,details) = calculate_clip(snplst,pop,reference)
 
-    print "Here is the DETAILS"
-    print type(details)
+    #print "Here is the DETAILS"
+    #print type(details)
     
     clip={}
     clip["snp_list"] = snp_list
@@ -247,13 +247,13 @@ def snpclip():
         f.write(rs_number+'\n')
 
     f.close()
-    print "SNP clipped file contents"
-    with open('tmp/snp_list'+reference+'.txt', 'r') as fin:
-        print fin.read()
+    #print "SNP clipped file contents"
+    #with open('tmp/snp_list'+reference+'.txt', 'r') as fin:
+    #    print fin.read()
 
     #Detail file
-    print "details . type"
-    print type(details)
+    #print "details . type"
+    #print type(details)
 
     f = open('tmp/details'+reference+'.txt', 'w')
     f.write("RS Number\tPosition\tAlleles\tDetails\n")
@@ -267,8 +267,8 @@ def snpclip():
 
     f.close()
 
-    for key, value in details.iteritems() :
-        print(key+"\t"+value[0]+"\t"+value[1]+"\t"+value[2])
+    #for key, value in details.iteritems() :
+    #    print(key+"\t"+value[0]+"\t"+value[1]+"\t"+value[2])
 
     copy_output_files(reference)
 
