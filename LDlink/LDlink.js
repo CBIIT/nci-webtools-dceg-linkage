@@ -543,7 +543,7 @@ function cleanSNP(text) {
 
 function populateTextArea(event, numFiles, label) {
 	id = event.target.id;
-	alert(id);
+	//alert(id);
 	if (window.FileReader) {
 
 		var input = event.target;
@@ -2228,11 +2228,13 @@ function validateTextarea() {
     //console.dir(textarea);
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text
+    /*
     if($(this).val().length == 0) {
     	console.log("You are zero");
     	textarea.setCustomValidity(errorMsg);
     	return false;
     }
+    */
     $.each($(this).val().split("\n"), function (index, value) {
     	//console.dir(this);
         // check if the line matches the pattern
