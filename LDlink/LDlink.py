@@ -196,7 +196,7 @@ def ldhap():
 
     return out_json
 
-@app.route('/LDlinkRest/snpclip', methods = ['GET'])
+@app.route('/LDlinkRest/snpclip', methods = ['POST'])
 def snpclip():
 
     #Command line example
@@ -206,10 +206,14 @@ def snpclip():
     #print 'Execute snpclip'
     #print 'Gathering Variables from url'
 
-    snps = request.args.get('snps', False)
-    pop = request.args.get('pop', False)
-    r2_threshold = request.args.get('r2_threshold', False)
-    maf_threshold = request.args.get('maf_threshold', False)
+    data = json.loads(request.stream.read())
+    print 'Execute snpclip'
+    print 'Gathering Variables from url'
+    print data
+    snps = data['snps']
+    pop = data['pop']
+    r2_threshold = data['r2_threshold']
+    maf_threshold = data['maf_threshold']
 
     reference = request.args.get('reference', False)
     #print 'snps: ' + snps
