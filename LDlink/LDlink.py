@@ -222,7 +222,7 @@ def snpclip():
     #print 'r2_threshold: ' + r2_threshold
     #print 'maf_threshold: ' + maf_threshold
 
-    snpfile = tmp_dir+'snps'+reference+'.txt'
+    snpfile = str(tmp_dir+'snps'+reference+'.txt')
     #print 'snpfile: '+snpfile
     snplist = snps.splitlines()
 
