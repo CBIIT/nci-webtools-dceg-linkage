@@ -614,6 +614,12 @@ table.snpchip-table {
 	display:block;
 }
 
+textarea:valid, .ok {
+    color: #555;
+}
+textarea:invalid, .error {
+    color: red;
+}
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,

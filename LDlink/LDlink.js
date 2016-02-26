@@ -189,9 +189,8 @@ $(document).on(
 	'change',
 	'.btn-file :file',
 	function() {
-		var input = $(this), numFiles = input.get(0).files ? input
-			.get(0).files.length : 1, label = input.val()
-			.replace(/\\/g, '/').replace(/.*\//, '');
+		var input = $(this), numFiles = input.get(0).files ? 
+			input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
 );
@@ -529,15 +528,31 @@ function updateVersion(version) {
 	$("#ldlink_version").text(version);
 }
 
+function cleanSNP(text) {
+	//Clean up file remove spaces.
+	//console.warn("text");
+	//console.log(text);
+	//console.dir(text.split('\n'));
+	// Clean text
+	//console.warn("clean");
+
+	var clean = text.replace(/[^A-Z0-9\n]/ig, "");
+	//console.log(clean);
+	return clean;
+}
+
 function populateTextArea(event, numFiles, label) {
 	id = event.target.id;
+	alert(id);
 	if (window.FileReader) {
 
 		var input = event.target;
 		var reader = new FileReader();
 		reader.onload = function() {
 			var text = reader.result;
-			$('#' + id + '-snp-numbers').val(text);
+			$('#'+id+'-snp-numbers').val(cleanSNP(text));
+			//console.warn("Attempting to call keyup for "+id+"-file-snp-numbers.");
+			$('#'+id+'-snp-numbers').keyup();
 		};
 		reader.readAsText(input.files[0]);
 	} else {
@@ -2185,7 +2200,61 @@ function addValidators() {
     });
 
 }
+
 /* Utilities */
+/*
+$('#snpchip-file-snp-numbers').on('keyup', function() {
+   $(this).parent().append('<p>' 
+   		+ this.checkValidity() + ' ' 
+   		+ this.validity.patternMismatch + '</p>'); 
+});
+*/
+
+$(document).ready(function() {
+	$('#ldhap-file-snp-numbers').keyup(validateTextarea);
+	$('#ldmatrix-file-snp-numbers').keyup(validateTextarea);
+	$('#snpchip-file-snp-numbers').keyup(validateTextarea);
+	$('#snpclip-file-snp-numbers').keyup(validateTextarea);
+	//$('#ldhap-file-snp-numbers').keyup();
+	//$('#ldmatrix-file-snp-numbers').keyup();
+	//$('#snpchip-file-snp-numbers').keyup();
+	//$('#snpclip-file-snp-numbers').keyup();
+});
+
+function validateTextarea() {
+	//console.warn("keyup for"+$(this).val());
+    var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted";
+    var textarea = this;
+    //console.dir(textarea);
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
+    // check each line of text
+    if($(this).val().length == 0) {
+    	console.log("You are zero");
+    	textarea.setCustomValidity(errorMsg);
+    	return false;
+    }
+    $.each($(this).val().split("\n"), function (index, value) {
+    	//console.dir(this);
+        // check if the line matches the pattern
+        var hasError = !this.match(pattern);
+        //console.log(hasError);
+        if (typeof textarea.setCustomValidity === 'function') {
+        	if(value.length>2) {
+            	textarea.setCustomValidity(hasError ? errorMsg : '');
+        	}
+        } else {
+            // Not supported by the browser, fallback to manual error display...
+            $(textarea).toggleClass('error', !!hasError);
+            $(textarea).toggleClass('ok', !hasError);
+            if (hasError) {
+                $(textarea).attr('title', errorMsg);
+            } else {
+                $(textarea).removeAttr('title');
+            }
+        }
+        return !hasError;
+    });
+}
 
 function toggleChevron(e) {
     $(e.target)

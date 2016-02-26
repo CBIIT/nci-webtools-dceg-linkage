@@ -189,7 +189,8 @@
 									<textarea id="ldhap-file-snp-numbers" 
 										placeholder="RS Numbers"
 										class="form-control"
-										title="Enter list of RS numbers (one per line)"></textarea>
+										title="Enter list of RS numbers (one per line)"
+										pattern="[r|R][s|S]\d+"></textarea>
 								</div>
 							</div>
 							<!-- Broswe RS numbers -->
@@ -349,7 +350,8 @@
 								<div class="col-sm-2">
 									<textarea id="ldmatrix-file-snp-numbers"
 										placeholder="RS Numbers" class="form-control"
-										title="Enter list of RS numbers (one per line)"></textarea>
+										title="Enter list of RS numbers (one per line)"
+										pattern="[r|R][s|S]\d+"></textarea>
 								</div>
 								<!-- COLUMN2 - sm-3 -->
 								<div class="col-sm-3">
@@ -809,7 +811,8 @@
 								<textarea id="snpclip-file-snp-numbers" 
 									placeholder="RS Numbers"
 									class="form-control"
-									title="Enter list of RS numbers (one per line)"></textarea>
+									title="Enter list of RS numbers (one per line)"
+									pattern="^rs\d+$"></textarea>
 							</div>
 							<div class="col-sm-3">
 								<div class="input-group">
@@ -984,9 +987,11 @@
 						<form id="snpchipForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-2">
-									<textarea id="snpchip-file-snp-numbers" placeholder="RS Numbers"
+									<textarea id="snpchip-file-snp-numbers"
+										placeholder="RS Numbers"
 										class="form-control"
-										title="Enter list of RS numbers (one per line)"></textarea>
+										title="Enter list of RS numbers (one per line)"
+										pattern="[r|R][s|S]\d+"></textarea>
 								</div>
 							</div>
 							<div class="col-sm-4">
@@ -1239,7 +1244,6 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
-	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script type="text/javascript"
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
