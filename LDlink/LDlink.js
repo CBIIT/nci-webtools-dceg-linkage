@@ -120,6 +120,8 @@ $(document).ready(function() {
 	});
 
 	$('.ldlinkForm').on('submit', function(e) {
+		//alert('Validate');
+		//debugger;
 		calculate(e);
 	});
 
@@ -167,7 +169,8 @@ $(document).ready(function() {
 
 			var active_tab = $("div.tab-pane.active").attr('id');
 			var id = active_tab.split("-");
-			if (id.length == 2) { // Check to make sure we are on a
+			if (id.length == 2) { 
+				// Check to make sure we are on a
 				// calculate
 				// tab
 				// check if the form is valid before sending to server
@@ -551,7 +554,6 @@ function populateTextArea(event, numFiles, label) {
 		reader.onload = function() {
 			var text = reader.result;
 			$('#'+id+'-snp-numbers').val(cleanSNP(text));
-			//console.warn("Attempting to call keyup for "+id+"-file-snp-numbers.");
 			$('#'+id+'-snp-numbers').keyup();
 		};
 		reader.readAsText(input.files[0]);
@@ -577,9 +579,9 @@ function calculate(e) {
 }
 
 function initCalculate(id) {
-	$('#' + id + '-results-container').hide();
-	$('#' + id + '-message').hide();
-	$('#' + id + '-message-warning').hide();
+	$('#'+id+'-results-container').hide();
+	$('#'+id+'-message').hide();
+	$('#'+id+'-message-warning').hide();
 }
 
 function updateData(id) {
@@ -736,6 +738,7 @@ function updateSNPclip() {
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
 		var jsonObj=data;
+		console.dir(data);
 		if (displayError(id, jsonObj) == false) {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
@@ -744,6 +747,7 @@ function updateSNPclip() {
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
+		console.log("We got a comm fail");
 		console.log("header: "+jqXHR+"\n"+"Status: "+ textStatus
 			+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
 		message = 'Service Unavailable: ' + textStatus + "<br>";
@@ -2068,6 +2072,11 @@ function buildPopulationDropdown(elementId) {
 			//console.dir(checked);
 		}
 	});
+
+	//console.log(elementId);
+	//console.dir($('#' + elementId));
+
+
 }
 
 function getPopulationCodes(id) {
@@ -2228,13 +2237,6 @@ function validateTextarea() {
     //console.dir(textarea);
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text
-    /*
-    if($(this).val().length == 0) {
-    	console.log("You are zero");
-    	textarea.setCustomValidity(errorMsg);
-    	return false;
-    }
-    */
     $.each($(this).val().split("\n"), function (index, value) {
     	//console.dir(this);
         // check if the line matches the pattern
@@ -2259,9 +2261,7 @@ function validateTextarea() {
 }
 
 function toggleChevron(e) {
-    $(e.target)
-        .prev('.panel-heading')
-        .find("i.indicator")
+    $(e.target).prev('.panel-heading').find("i.indicator")
         .toggleClass('glyphicon-chevron-down glyphicon-chevron-up');
 }
 
