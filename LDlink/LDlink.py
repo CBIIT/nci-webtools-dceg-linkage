@@ -7,6 +7,7 @@ from flask import jsonify
 import cgi
 import shutil
 import os
+import sys, traceback
 from xml.sax.saxutils import escape, unescape
 from socket import gethostname
 import json
@@ -205,7 +206,7 @@ def snpclip():
     #print
     #print 'Execute snpclip'
     #print 'Gathering Variables from url'
-
+    mimetype = 'application/json'
     data = json.loads(request.stream.read())
     print 'Execute snpclip'
     print 'Gathering Variables from url'
@@ -233,15 +234,69 @@ def snpclip():
             f.write(s.lower()+'\n')
 
     f.close()
-    (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
+
+    clip={}
+
+    try:
+        (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
+    except RuntimeError as e:
+        print "RuntimeError"
+        clip["error"] = "Raised when a generated error does not fall into any category."
+        clip["traceback"] = "Raised when a generated error does not fall into any category."
+    except SyntaxError:
+        print "SyntaxError"
+        clip["error"] = "Syntax Error"
+    except:
+        print "Unexpected error:", sys.exc_info()[0]
+        traceback.print_exc()
+        clip["error"] = "Raised when a generated error does not fall into any category."
+        clip["traceback"] = traceback.format_exc()
+        out_json = json.dumps(clip, sort_keys=False)
+        return current_app.response_class(out_json, mimetype=mimetype)
+
+    clip["snp_list"] = snp_list
+    clip["details"] = details
+
     #(snps,snp_list,details) = calculate_clip(snplst,pop,reference)
+    # Print output
+    with open(tmp_dir+"clip"+reference+".json") as f:
+        json_dict=json.load(f)
+
+    try:
+        json_dict["error"]
+
+    except KeyError:
+        #print ""
+        print "LD Thinned SNP list ("+pop+"):"
+        for snp in snp_list:
+            print snp
+        
+        print ""
+        print "RS Number\tPosition\tAlleles\tDetails"
+        for snp in snps:
+            print snp[0]+"\t"+"\t".join(details[snp[0]])
+
+        try:
+            json_dict["warning"]
+
+        except KeyError:
+            print ""
+        else:
+            print ""
+            print "WARNING: "+json_dict["warning"]+"!"
+            print ""
+            clip["warning"] = json_dict["warning"]
+
+    else:
+        print ""
+        print json_dict["error"]
+        print ""
+        clip["error"] = json_dict["error"]
+
 
     #print "Here is the DETAILS"
     #print type(details)
     
-    clip={}
-    clip["snp_list"] = snp_list
-    clip["details"] = details
     #write the snp_list file
     #print json.dumps(details, sort_keys=True, indent=2)
 
@@ -277,8 +332,6 @@ def snpclip():
     copy_output_files(reference)
 
     out_json = json.dumps(clip, sort_keys=False)
-    mimetype = 'application/json'
-
     return current_app.response_class(out_json, mimetype=mimetype)
 
 

@@ -633,6 +633,8 @@ function updateLDhap() {
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
 		var jsonObj=JSON.parse(data);
+
+		console.dir(jsonObj);
 		if (displayError(id, jsonObj) == false) {
 			//console.info("LDhap is here");
 			//console.dir($.parseJSON(data));
@@ -734,11 +736,10 @@ function updateSNPclip() {
 		data : JSON.stringify(ldInputs),
 		contentType : 'application/json' // JSON
 	});
-
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
 		var jsonObj=data;
-		console.dir(data);
+		//console.dir(data);
 		if (displayError(id, jsonObj) == false) {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
@@ -748,6 +749,10 @@ function updateSNPclip() {
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		console.log("We got a comm fail");
+		console.log("jqXHR");
+		console.dir(jqXHR);
+		console.log("status");
+		console.dir(textStatus);
 		console.log("header: "+jqXHR+"\n"+"Status: "+ textStatus
 			+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
 		message = 'Service Unavailable: ' + textStatus + "<br>";
@@ -1698,7 +1703,14 @@ function updateLDpair() {
 
 function displayError(id, data) {
 	// Display error or warning if available.
+	console.log("displayError()");
+	console.log("id ="+id);
+	//console.dir(JSON.parse(data));
 	var error = false;
+	if (data.traceback) {
+		console.warn("traceback");
+		console.warn(data.traceback);
+	}
 	if (data.warning) {
 		$('#' + id + '-message-warning').show();
 		$('#' + id + '-message-warning-content').empty().append(data.warning);
