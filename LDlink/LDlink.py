@@ -215,7 +215,7 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
 
-    reference = data['reference']
+    reference = str(data['reference'])
     #print 'snps: ' + snps
     #print 'pop: ' + pop
     #print 'request: ' + reference
