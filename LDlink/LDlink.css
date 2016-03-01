@@ -465,6 +465,7 @@ hr.header {
 	float:left;
 	max-height: 400px;
 	overflow-y: auto;
+	overflow-x: hidden;
 	border-top: 1px solid #ccc;
 	border-left: 1px solid #ccc;
 	border-right: 1px solid #ccc;

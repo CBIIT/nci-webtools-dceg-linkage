@@ -7,6 +7,7 @@
 <html class="no-js">
 <!--<![endif]-->
 
+
 <head>
 <meta name="generator"
 	content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
@@ -209,9 +210,16 @@
 
 							<div class="form-group">
 								<div class="col-sm-4">
+									<a id="ldhap-population-codes-zero"
+										style="position:relative;left:180px;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a population."></a>
 									<label for="ldhap-population-codes" style="display: none;">Populations</label>
 									<select id="ldhap-population-codes" multiple="multiple"
-										name="populations" required>
+										name="populations">
 									</select>
 								</div>
 							</div>
@@ -370,9 +378,16 @@
 							<div class="form-group">
 								<!-- COLUMN3 - sm-2 -->
 								<div class="col-sm-2">
+									<a id="ldmatrix-population-codes-zero"
+										style="position:relative;left:180px;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a population."></a>
 									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
-										name="populations" required>
+										name="populations">
 									</select>
 								</div>
 							</div>
@@ -476,9 +491,16 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
+									<a id="ldpair-population-codes-zero"
+										style="position:relative;left:180px;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a population."></a>
 									<label for="ldpair-population-codes" style="display: none;">Populations</label>
 									<select id="ldpair-population-codes" multiple="multiple"
-										name="populations" required>
+										name="populations">
 									</select>
 								</div>
 							</div>
@@ -666,6 +688,13 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
+									<a id="ldproxy-population-codes-zero"
+										style="position:relative;left:180px;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a population."></a>
 									<a id="ldproxy-population-codes-popover"
 											style="position:relative;left:180px;"
 											href="#"
@@ -675,7 +704,7 @@
 											data-content="Warning: Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
 											<label for="ldproxy-population-codes" style="display: none;">Populations</label>
 									<select id="ldproxy-population-codes" multiple="multiple"
-										name="populations" required>
+										name="populations">
 									</select>
 								</div>
 							</div>
@@ -827,9 +856,16 @@
 								</div>
 							</div>
 							<div class="form-group col-sm-3">
+								<a id="snpclip-population-codes-zero"
+									style="position:relative;left:180px;"
+									href="#"
+									data-toggle="popover"
+									trigger="manual"
+									data-placement="right"
+									data-content="Please select a population."></a>
 								<label for="snpclip-population-codes" style="display: none;">Populations</label>
 								<select id="snpclip-population-codes" multiple="multiple"
-									name="populations" required>
+									name="populations">
 								</select>
 							</div>
 							<div class="col-sm-2">
@@ -893,12 +929,6 @@
 				<!-- snpclip CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="snpclip-results-container">
-						<!--
-						<div class="row" style="padding-bottom:10px;">
-							<div  class="col-sm-5 col-md-5" style="font-weight:bold;"><span class="snpclip-populations"></span>
-							</div>
-						</div>
-						-->
 						<div id="snpclip-table-container" class="row">
 							<div class="col-sm-3 col-md-3 snpclip-table-scroller">
 								<table id="snpclip-table-thin" class="table table-striped table-chip">
@@ -920,10 +950,10 @@
 								<caption id="snpclip-detail-title">Details for rs1234</caption>
 									<thead>
 										<tr>
-											<td>RS Number</td>
-											<td>Position</td>
-											<td>Alleles</td>
-											<td>Details</td>
+											<th nowrap>RS Number</th>
+											<th>Position</th>
+											<th>Alleles</th>
+											<th>Details</th>
 										</tr>
 									</thead>
 									<tbody data-bind="foreach: details">
@@ -937,14 +967,14 @@
 								</table>
 
 								<!-- SNPs with warnings -->
-								<table id="snpclip-warnings" class="table table-striped">
+								<table id="snpclip-warnings" class="table table-striped table-chip">
 									<caption>Variants With Warnings</caption>
 									<thead>
 										<tr>
-											<td>RS Number</td>
-											<td>Position</td>
-											<td>Alleles</td>
-											<td>Details</td>
+											<th no wrap>RS Number</th>
+											<th>Position</th>
+											<th>Alleles</th>
+											<th>Details</th>
 										</tr>
 									</thead>
 									<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
@@ -974,7 +1004,6 @@
 						</div>
 					</div>
 				</div> <!-- jumbotron -->
-
 			</div>
 			<!--  END OF snpclip -->
 
@@ -1244,6 +1273,7 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script type="text/javascript"
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
