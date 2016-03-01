@@ -1212,9 +1212,10 @@ function initClip(data) {
 	populateSNPlist(data);
 	// Get first element
 	if(data.snp_list.length == 0) {
-		$('#snpclip-message-warning-content').text("SNPclip list returned no results for this calculation.");
-		$('#snpclip-results-container').hide();
-		$('#snpclip-message-warning').show();
+		//$('#snpclip-message-warning-content').text("SNPclip list returned no results for this calculation.");
+		//$('#snpclip-results-container').hide();
+		//$('#snpclip-message-warning').show();
+		console.log("No list.");
 	}
 	//loadSNPdetails(data, rs_number);
 	if(snpclipData.warnings.length == 0) {
