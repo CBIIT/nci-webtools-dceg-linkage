@@ -586,27 +586,55 @@ function initCalculate(id) {
 
 function updateData(id) {
 
-	$('#'+id+"-loading").show();
 
 	switch (id) {
 		case 'ldhap':
-			updateLDhap();
+			if(isPopulationSet(id)) {
+				$('#'+id+"-loading").show();
+				updateLDhap();
+			}
 			break;
 		case 'ldmatrix':
-			updateLDmatrix();
+			if(isPopulationSet(id)) {
+				$('#'+id+"-loading").show();
+				updateLDmatrix();
+			}
 			break;
 		case 'ldpair':
-			updateLDpair();
+			if(isPopulationSet(id)) {
+				$('#'+id+"-loading").show();
+				updateLDpair();
+			}
 			break;
 		case 'ldproxy':
-			updateLDproxy();
+			if(isPopulationSet(id)) {
+				$('#'+id+"-loading").show();
+				updateLDproxy();
+			}
 			break;
 		case 'snpclip':
-			updateSNPclip();
+			if(isPopulationSet(id)) {
+				$('#'+id+"-loading").show();
+				updateSNPclip();
+			}
 			break;
 		case 'snpchip':
+			$('#'+id+"-loading").show();
 			updateSNPchip();
 			break;
+	}
+}
+function isPopulationSet(elementId) {
+	//console.log("Check population: "+elementId);
+
+	var	population =  $('#'+elementId+'-population-codes').val();
+	//console.dir(population);
+	if(population == null ) {
+		$('#'+elementId+'-population-codes-zero').popover('show');
+		return false;
+	} else {
+		$('#'+elementId+'-population-codes-zero').popover('hide');
+		return true;
 	}
 }
 
@@ -634,7 +662,6 @@ function updateLDhap() {
 		//data is returned as a string representation of JSON instead of JSON obj
 		var jsonObj=JSON.parse(data);
 
-		console.dir(jsonObj);
 		if (displayError(id, jsonObj) == false) {
 			//console.info("LDhap is here");
 			//console.dir($.parseJSON(data));
@@ -739,7 +766,6 @@ function updateSNPclip() {
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
 		var jsonObj=data;
-		//console.dir(data);
 		if (displayError(id, jsonObj) == false) {
 			$('#' + id + '-results-container').show();
 			$('#' + id + '-links-container').show();
@@ -899,8 +925,8 @@ function loadSNPChip(data) {
 			//Gather all platforms
 			//if(parseInt(row)< 1) {
 				associated_platforms = detail[2].split(",");
-				console.log("associated_platforms: "+parseInt(row)+" "+detail[0]);
-				console.dir(associated_platforms.sort());
+				//console.log("associated_platforms: "+parseInt(row)+" "+detail[0]);
+				//console.dir(associated_platforms.sort());
 
 				$.each(detail[2].split(","), function(key, value){
 					if(value != "") {
@@ -1005,14 +1031,14 @@ function loadSNPChip(data) {
 	//snpchipData["headers"].platform = platform_list;
 
 	// = "This is about error";
-	
+	/*
 	console.log("FINAL DATA HERE:");
 	console.dir(snpchipData);
 	console.log("ERROR Count: "+snpchipData.error.length);
 	console.log("WARNING Count: "+snpchipData.warning.length);
 	console.log("FINAL DATA AS A STRING:");
 	console.log(JSON.stringify(snpchipData));
-	
+	*/
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	$('#snpchip-message-warning-content').empty();
@@ -1156,7 +1182,7 @@ function populateSNPwarnings(data) {
 function loadSNPdetails(data, rs_number) {
 
 	snpclipData.details =[];
-
+	/*
 	console.log("Here is the rs_number to populate");
 	console.log("rs_number: "+rs_number);
 	console.dir(data.details);
@@ -1164,7 +1190,7 @@ function loadSNPdetails(data, rs_number) {
 
 	console.log("Found one::::");
 	console.dir(data.details[rs_number]);
-
+	*/
 	var found = false;
 	var match = 'Variant in LD with '+rs_number;
 ;
@@ -1704,9 +1730,6 @@ function updateLDpair() {
 
 function displayError(id, data) {
 	// Display error or warning if available.
-	console.log("displayError()");
-	console.log("id ="+id);
-	//console.dir(JSON.parse(data));
 	var error = false;
 	if (data.traceback) {
 		console.warn("traceback");
@@ -1844,104 +1867,6 @@ function addLDpairHyperLinks(data) {
 	$('#snp2-coord').attr('href', url);
 
 }
-/*
-function buildPopulationDropdownSNPchip(data) {
-
-	//Change platforms to multiselect json
-
-	var platforms = JSON.parse(data);
-	var illumina = {};
-	var affymetrix = {};
-	$.each( platforms, function( code, description ) {
-		if(description.search("Affymetrix") >= 0) {
-			affymetrix[code] = description;
-		}
-		if(description.search("Illumina") >= 0) {
-			illumina[code] = description;
-		}
-	});
-
-	var elementId = 'snpchip-platform-list';
-	var snpchip_platform_list = {
-		"Affymetrix": affymetrix,
-		"Illumina": illumina
-	};
-
-	$("#"+elementId).empty();
-	$.each( snpchip_platform_list, function( group, platforms ) {
-		//Add optgroup
-		$("#"+elementId).append(
-			$("<optgroup>")
-				.attr('value', "("+group+") All "+group+" Arrays")
-				.attr('label', "("+group+") All "+group+" Arrays")
-				.attr('id', group)
-		);
-		$.each( platforms, function( key, value ) {
-			$('#'+group).append(
-				$("<option>")
-					.attr('value', key)
-					.text(value+" ("+key+")")
-			);
-		});
-	});
-
-	$('#' + elementId).multiselect({
-		enableClickableOptGroups : true,
-		buttonWidth : '210px',
-		maxHeight : 500,
-		buttonClass : 'btn btn-default btn-ldlink-multiselect',
-		includeSelectAllOption : true,
-		dropRight : false,
-		allSelectedText : 'All Arrays',
-		nonSelectedText : 'Select Arrays',
-		numberDisplayed : 2,
-		selectAllText : ' (ALL) All Arrays',
-		previousOptionLength: 0,
-		maxPopulationWarn: 2,
-		maxPopulationWarnTimeout: 5000,
-		maxPopulationWarnVisible: false,
-		// buttonClass: 'btn btn-link',
-		buttonText : function(options, select) {
-			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
-				$('#'+elementId+'-popover').popover('show');
-				this.maxPopulatinWarnVisible=true;
-			}
-			this.previousOptionLength = options.length;
-			if (options.length === 0) {
-				return this.nonSelectedText
-						+ '<span class="caret"></span>';
-			} else if (options.length == $('option', $(select)).length) {
-				return this.allSelectedText
-						+ '<span class="caret"></span>';
-			} else if (options.length > this.numberDisplayed) {
-				return '<span class="badge">' + options.length
-						+ '</span> ' + this.nSelectedText
-						+ '<span class="caret"></span>';
-			} else {
-				var selected = '';
-				options.each(function() {
-					// var label = $(this).attr('label') :
-					// $(this).html();
-					selected += $(this).val() + '+';
-				});
-				return selected.substr(0, selected.length - 1)
-						+ ' <b class="caret"></b>';
-			}
-		},
-		buttonTitle : function(options, select) {
-			if (options.length === 0) {
-				return this.nonSelectedText;
-			} else {
-				var selected = '';
-				options.each(function() {
-					selected += $(this).text() + '\n';
-				});
-				return selected;
-			}
-		}
-	});
-}
-*/
 
 function addCheckBox(code, description, elementId, platform_class) {
 	$("#"+elementId).append(
@@ -2007,7 +1932,7 @@ function buildPopulationDropdown(elementId) {
 	}
 
 	$('#' + elementId).html(htmlText);
-
+	//alert(elemtnId);
 	$('#' + elementId).multiselect({
 		enableClickableOptGroups : true,
 		buttonWidth : '180px',
@@ -2026,6 +1951,7 @@ function buildPopulationDropdown(elementId) {
 
 		// buttonClass: 'btn btn-link',
 		buttonText : function(options, select) {
+			//console.log("elementId: "+elementId);
 			if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
 				$('#'+elementId+'-popover').popover('show');
 				this.maxPopulatinWarnVisible=true;
@@ -2036,8 +1962,12 @@ function buildPopulationDropdown(elementId) {
 			} else {
 				//Destory popover if it is currently being displayed.
 				if(this.maxPopulatinWarnVisible) {
-						$('#'+elementId+'-popover').popover('destroy');
+					$('#'+elementId+'-popover').popover('destroy');
 				}
+			}
+
+			if(options.length>0) {
+				$('#'+elementId+'-zero').popover('hide');
 			}
 			this.previousOptionLength = options.length;
 			if (options.length === 0) {
@@ -2097,18 +2027,17 @@ function getPopulationCodes(id) {
 	var totalPopulations;
 	population =  $('#'+id).val();
 	totalPopulations = countSubPopulations(populations);
-/*
-	console.log("Populations (static)");
-	console.log("Populations length: "+totalPopulations);
 
-	console.dir(populations);
-	console.log("Population selected");
-	console.log("Population length: "+population.length);
-*/
+	//console.log("Populations (static)");
+	//console.log("Populations length: "+totalPopulations);
+
+	//console.dir(populations);
+	//console.log("Population selected");
+	//console.log("Population length: "+population.length);
+
 	//Check for selection of All
 	// If total subPopulations equals number of population then popluation = array("All");
 	if(totalPopulations == population.length) {
-		//console.log("YOU SELECTED ALL.  CONGRATS!!!");
 		population = ["ALL"];
 		return population;
 	}
@@ -2135,13 +2064,10 @@ function replaceSubGroups(population) {
 	var subPopulationsFound = 0;
 	var currentSubPopulations = [];
 	//Determine if a group has all subPopulations selected.
-	//console.dir(populations);
 	$.each(populations, function(currentGroup, val) {
 		totalGroupPopulations = Number(Object.size(val.subPopulations));
 		subPopulationsFound = 0;
 		currentSubPopulations = [];
-		//console.info("currentGroup: "+currentGroup+ " ("+val.fullName+")");
-		//console.log("Check all subPopulations in the currentGroup of "+currentGroup);
 		//if there is one miss then abbondon effort
 		$.each(val.subPopulations, function(pop, desc) {
 			if($.inArray(pop, population) !== -1) {
@@ -2155,17 +2081,11 @@ function replaceSubGroups(population) {
 		});
 		if(currentSubPopulations.length == totalGroupPopulations) {
 			//Remove populations of Group then add Group acronymn
-			//console.warn("ADD This GROUP: "+currentGroup+"  ... all sub population were found for this group.");
-			//console.log("BEFORE: "+population);
-			//console.log("REMOVE THESE Populations:");
-			//console.dir(currentSubPopulations);
 			$.each(currentSubPopulations, function(key, value) {
 				//Find position in array
 				population.splice( $.inArray(value, population), 1 );
-				//console.log("REMOVE: "+key+": "+value);
 			});
 			population.push(currentGroup);
-			//console.dir(population);
 
 		}
 		//If all are found then 
@@ -2224,37 +2144,22 @@ function addValidators() {
 }
 
 /* Utilities */
-/*
-$('#snpchip-file-snp-numbers').on('keyup', function() {
-   $(this).parent().append('<p>' 
-   		+ this.checkValidity() + ' ' 
-   		+ this.validity.patternMismatch + '</p>'); 
-});
-*/
 
 $(document).ready(function() {
 	$('#ldhap-file-snp-numbers').keyup(validateTextarea);
 	$('#ldmatrix-file-snp-numbers').keyup(validateTextarea);
 	$('#snpchip-file-snp-numbers').keyup(validateTextarea);
 	$('#snpclip-file-snp-numbers').keyup(validateTextarea);
-	//$('#ldhap-file-snp-numbers').keyup();
-	//$('#ldmatrix-file-snp-numbers').keyup();
-	//$('#snpchip-file-snp-numbers').keyup();
-	//$('#snpclip-file-snp-numbers').keyup();
 });
 
 function validateTextarea() {
-	//console.warn("keyup for"+$(this).val());
     var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted";
     var textarea = this;
-    //console.dir(textarea);
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text
     $.each($(this).val().split("\n"), function (index, value) {
-    	//console.dir(this);
         // check if the line matches the pattern
         var hasError = !this.match(pattern);
-        //console.log(hasError);
         if (typeof textarea.setCustomValidity === 'function') {
         	if(value.length>2) {
             	textarea.setCustomValidity(hasError ? errorMsg : '');
