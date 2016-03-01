@@ -1204,7 +1204,7 @@ function loadSNPdetails(data, rs_number) {
 			rs_number_link: anchorRSnumber(index),
 			position_link: anchorRSposition(value[0], index)
 		};
-		console.log(index+" - "+value);
+		//console.log(index+" - "+value);
 		if(detail.rs_number == rs_number) {
 			found = true;
 		}
@@ -1214,7 +1214,7 @@ function loadSNPdetails(data, rs_number) {
 				// List is complete, exit loop
 				return false;
 			}
-			console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
+			//console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
 			if(detail.comment == 'Variant kept' || 
 				detail.comment.indexOf(match)>=0) {
 				snpclipData.details.push(detail);
@@ -1222,8 +1222,8 @@ function loadSNPdetails(data, rs_number) {
 		}
 	});
 
-	console.dir(snpclipData);
-	console.log(JSON.stringify(snpclipData));
+	//console.dir(snpclipData);
+	//console.log(JSON.stringify(snpclipData));
 	ko.mapping.fromJS(snpclipData, snpclipModel);
 	$('#snpclip-detail-title').text("Details for "+rs_number); 
 }
@@ -1231,8 +1231,8 @@ function loadSNPdetails(data, rs_number) {
 function initClip(data) {
 
 	ldClipRaw = data;
-	console.log("data....");
-	console.dir(data);
+	//console.log("data....");
+	//console.dir(data);
 
 	populateSNPwarnings(data);
 	populateSNPlist(data);
@@ -1688,8 +1688,8 @@ function updateLDpair() {
 		reference : "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))
 				+ 10000
 	};
-	console.log("ldpairInputs");
-	console.dir(ldpairInputs);
+	//console.log("ldpairInputs");
+	//console.dir(ldpairInputs);
 
 	updateHistoryURL(id, ldpairInputs);
 
