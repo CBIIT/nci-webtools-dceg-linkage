@@ -1231,8 +1231,6 @@ function loadSNPdetails(data, rs_number) {
 function initClip(data) {
 
 	ldClipRaw = data;
-	//console.log("data....");
-	//console.dir(data);
 
 	populateSNPwarnings(data);
 	populateSNPlist(data);
@@ -1249,14 +1247,9 @@ function initClip(data) {
 	} else {
 		$('#snpclip-warnings-button').show();
 	}
-
 }
 
 function formatLDhapData(data) {
-
-	//console.info("LDhap Starts here:");
-	//console.log('original data structure for ldhap:');
-	//console.dir(data);
 
 	//console.log("get the two main parts of the data as hplotypes and snps");
 	//var indels = [];
@@ -2159,11 +2152,13 @@ function validateTextarea() {
     // check each line of text
     $.each($(this).val().split("\n"), function (index, value) {
         // check if the line matches the pattern
+        //console.log(value);
         var hasError = !this.match(pattern);
+        if(value == "" || value == "\n" || this.length<=2 )
+        	hasError = false;
+        //console.log("hasError: "+hasError);
         if (typeof textarea.setCustomValidity === 'function') {
-        	if(value.length>2) {
             	textarea.setCustomValidity(hasError ? errorMsg : '');
-        	}
         } else {
             // Not supported by the browser, fallback to manual error display...
             $(textarea).toggleClass('error', !!hasError);

@@ -79,12 +79,10 @@
 
 /* Reset bootstrap table*/
 .table > thead > tr > th,
-.table > tbody > tr > th,
-.table > tfoot > tr > th,
 .table > tbody > tr > td,
-.table > tfoot > tr > td {
+.table > tfoot > tr > th {
 	border-top: 0px;
-   	border-bottom: 1px solid #ddd;
+   	border-bottom: 0px;
 }
 }
 
@@ -402,6 +400,7 @@ img.graph-legend {
 #snpchip-table-right {
     display: inline-block;
     overflow-y: hidden;
+    margin-top: 0px;
 }
 
 .snpchip-table > tbody > tr:nth-child(odd) {
@@ -413,6 +412,9 @@ img.graph-legend {
 .snpchip-table > thead > tr > th, .snpchip-table > tbody > tr > th, .snpchip-table > tfoot > tr > th, .snpchip-table > thead > tr > td, .snpchip-table > tbody > tr > td, .snpchip-table > tfoot > tr > td {
     border: 1px solid #ddd;
     border-top: 0 none;
+}
+table#snpchip-thinned-list > tbody > tr > td {
+	padding: 0 5px;
 }
 /* Header and Footer */
 .header img {
@@ -489,8 +491,9 @@ caption {
 table.table-chip > caption {
 	min-height:60px;
 }
-table.table-chip > thead > tr > td {
+table.table-chip > thead > tr > th {
 	text-align: left;
+	white-space:nowrap;
 }
 
 table.table-chip > tbody {
@@ -594,6 +597,7 @@ fieldset#columnBcheckbox > div.row {
 }
 table.snpchip-table > thead > tr:first-child {
 	height: 121px;
+	border-top: 1px solid #ccc;
 }
 table.snpchip-table > thead > tr:first-child > th {
 	text-align:center;
@@ -605,6 +609,9 @@ table.snpchip-table > thead > tr:nth-child(2) > th {
 }
 table.snpchip-table {
 	margin-bottom:30px;
+}
+table#snpchip-thinned-list > thead > tr {
+	border-top: 1px solid #ccc;
 }
 #snp_chip_list {
 	padding-left:60px;

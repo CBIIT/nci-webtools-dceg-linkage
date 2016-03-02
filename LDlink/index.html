@@ -366,7 +366,7 @@
 									<div class="input-group">
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
 										
-										<input type="text" name="ldmatrix-file-label" readonly
+										<input type="text" id="ldmatrix-file-label" readonly
 											placeholder="Upload file with RS numbers" class="readonly-input-text">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
 										<span	class="btn btn-default btn-file">Browse
@@ -930,12 +930,12 @@
 				<div class="jumbotron">
 					<div class="container-fluid" id="snpclip-results-container">
 						<div id="snpclip-table-container" class="row">
-							<div class="col-sm-3 col-md-3 snpclip-table-scroller">
+							<div class="col-md-2 snpclip-table-scroller">
 								<table id="snpclip-table-thin" class="table table-striped table-chip">
 									<caption>LD Thinned Variant List</caption>
 									<thead>
 										<tr>
-											<td>RS Number</td>
+											<th>RS Number</th>
 										</tr>
 									</thead>
 									<tbody id="snpclip-snp-list"></tbody>
@@ -950,7 +950,7 @@
 								<caption id="snpclip-detail-title">Details for rs1234</caption>
 									<thead>
 										<tr>
-											<th nowrap>RS Number</th>
+											<th>RS Number</th>
 											<th>Position</th>
 											<th>Alleles</th>
 											<th>Details</th>
@@ -971,7 +971,7 @@
 									<caption>Variants With Warnings</caption>
 									<thead>
 										<tr>
-											<th no wrap>RS Number</th>
+											<th>RS Number</th>
 											<th>Position</th>
 											<th>Alleles</th>
 											<th>Details</th>
@@ -1134,7 +1134,7 @@
 						<div id="snpclip-table-container" class="row">
 							<!-- LEFT SIDE -->
 							<div class="left-c">
-								<table class="snpchip-table">
+								<table id="snpchip-thinned-list" class="snpchip-table">
 									<thead>
 										<tr>
 											<th colspan="3">SNP Chip List</th>
