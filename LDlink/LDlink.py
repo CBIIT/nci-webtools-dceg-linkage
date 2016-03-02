@@ -74,6 +74,19 @@ def jsonp(func):
             return func(*args, **kwargs)
     return decorated_function
 
+def sendTraceback():
+    custom = {}
+    print "Unexpected error:", sys.exc_info()[0]
+    traceback.print_exc()
+    custom["error"] = "Raised when a generated error does not fall into any category."
+    custom["traceback"] = traceback.format_exc()
+    out_json = json.dumps(custom, sort_keys=False)
+    return current_app.response_class(out_json, mimetype='application/json')
+
+def sendJSON(inputString):
+    out_json = json.dumps(inputString, sort_keys=False)
+    return current_app.response_class(out_json, mimetype='application/json')
+
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
 def restAdd():
     print type(request.args)
@@ -111,7 +124,11 @@ def ldpair():
     print 'pop: ' + pop
     print 'request: ' + reference
     print
-    out_json = calculate_pair(var1, var2, pop, reference)
+    try:
+        out_json = calculate_pair(var1, var2, pop, reference)
+    except:
+        return sendTraceback()
+
     mimetype = 'application/json'
 
     return current_app.response_class(out_json, mimetype=mimetype)
@@ -134,7 +151,11 @@ def ldproxy():
     print
 
     #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
-    out_script,out_div = calculate_proxy(var, pop, reference, r2_d)
+    try:
+        out_script,out_div = calculate_proxy(var, pop, reference, r2_d)
+    except:
+        return sendTraceback()
+
 
     copy_output_files(reference)
 
@@ -142,10 +163,7 @@ def ldproxy():
 
 @app.route('/LDlinkRest/ldmatrix', methods = ['GET'])
 def ldmatrix():
-    # python LDmatrix.py snps.txt EUR 5
-    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?pop=EUR&reference=5&snp=sr3
-    #http://analysistools-sandbox.nci.nih.gov/LDlinkRest/ldmatrix?filename=get+from+input&pop=LWK%2BGWD&reference=76178
-    print
+
     print 'Execute ldmatrix'
     print 'Gathering Variables from url'
 
@@ -165,7 +183,10 @@ def ldmatrix():
     f.write(snps)
     f.close()
 
-    out_script,out_div = calculate_matrix(snplst,pop,reference,r2_d)
+    try:
+        out_script,out_div = calculate_matrix(snplst,pop,reference,r2_d)
+    except:
+        return sendTraceback()
 
     copy_output_files(reference)
     return out_script+"\n "+out_div
@@ -192,39 +213,31 @@ def ldhap():
     f.write(snps)
     f.close()
 
-    out_json = calculate_hap(snplst,pop,reference)
+    try:
+        out_json = calculate_hap(snplst,pop,reference)
+    except:
+        return sendTraceback()
+
     copy_output_files(reference)
 
-    return out_json
+    return sendJSON(out_json)
 
 @app.route('/LDlinkRest/snpclip', methods = ['POST'])
 def snpclip():
 
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
-
-    #print
-    #print 'Execute snpclip'
-    #print 'Gathering Variables from url'
     mimetype = 'application/json'
     data = json.loads(request.stream.read())
     print 'Execute snpclip'
-    print 'Gathering Variables from url'
-    print data
     snps = data['snps']
     pop = data['pop']
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
 
     reference = str(data['reference'])
-    #print 'snps: ' + snps
-    #print 'pop: ' + pop
-    #print 'request: ' + reference
-    #print 'r2_threshold: ' + r2_threshold
-    #print 'maf_threshold: ' + maf_threshold
 
     snpfile = str(tmp_dir+'snps'+reference+'.txt')
-    #print 'snpfile: '+snpfile
     snplist = snps.splitlines()
 
     f = open(snpfile, 'w')
@@ -239,25 +252,12 @@ def snpclip():
 
     try:
         (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
-    except RuntimeError as e:
-        print "RuntimeError"
-        clip["error"] = "Raised when a generated error does not fall into any category."
-        clip["traceback"] = "Raised when a generated error does not fall into any category."
-    except SyntaxError:
-        print "SyntaxError"
-        clip["error"] = "Syntax Error"
     except:
-        print "Unexpected error:", sys.exc_info()[0]
-        traceback.print_exc()
-        clip["error"] = "Raised when a generated error does not fall into any category."
-        clip["traceback"] = traceback.format_exc()
-        out_json = json.dumps(clip, sort_keys=False)
-        return current_app.response_class(out_json, mimetype=mimetype)
+        return sendTraceback()
 
     clip["snp_list"] = snp_list
     clip["details"] = details
 
-    #(snps,snp_list,details) = calculate_clip(snplst,pop,reference)
     # Print output
     with open(tmp_dir+"clip"+reference+".json") as f:
         json_dict=json.load(f)
@@ -293,26 +293,12 @@ def snpclip():
         print ""
         clip["error"] = json_dict["error"]
 
-
-    #print "Here is the DETAILS"
-    #print type(details)
-    
-    #write the snp_list file
-    #print json.dumps(details, sort_keys=True, indent=2)
-
     #SNP List file    
     f = open('tmp/snp_list'+reference+'.txt', 'w')
     for rs_number in snp_list:
         f.write(rs_number+'\n')
 
     f.close()
-    #print "SNP clipped file contents"
-    #with open('tmp/snp_list'+reference+'.txt', 'r') as fin:
-    #    print fin.read()
-
-    #Detail file
-    #print "details . type"
-    #print type(details)
 
     f = open('tmp/details'+reference+'.txt', 'w')
     f.write("RS Number\tPosition\tAlleles\tDetails\n")
@@ -320,17 +306,9 @@ def snpclip():
         for snp in snps:
             f.write(snp[0]+"\t"+"\t".join(details[snp[0]]))
             f.write("\n")
-#        for key, value in details.iteritems() :
-#            f.write(key+"\t")
-#            f.write(value[0]+"\t"+value[1]+"\t"+value[2]+"\n")
 
     f.close()
-
-    #for key, value in details.iteritems() :
-    #    print(key+"\t"+value[0]+"\t"+value[1]+"\t"+value[2])
-
     copy_output_files(reference)
-
     out_json = json.dumps(clip, sort_keys=False)
     return current_app.response_class(out_json, mimetype=mimetype)
 
@@ -340,10 +318,7 @@ def snpchip():
 
     #Command line example
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
-    print "Hello CHIP"
-    print
-    print 'Execute snpchip'
-    print 'Gathering Variables from url'
+    print "snpChip"
 
     snps = request.args.get('snps', False)
     platforms = request.args.get('platforms', False)
@@ -359,77 +334,24 @@ def snpchip():
     f.write(snps)
     f.close()
 
-    #snp_chip = calculate_chip(snplst,platforms,reference)
-    snp_chip = calculate_chip(snplst,platforms,reference)
+    try:
+        snp_chip = calculate_chip(snplst,platforms,reference)
+    except:
+        return sendTraceback()
 
     chip={}
     chip["snp_chip"] = snp_chip
-
     copy_output_files(reference)
-
-    #out_json = json.dumps(chip, sort_keys=True, indent=2)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
 
-    mimetype = 'application/json'
-
-    return current_app.response_class(out_json, mimetype=mimetype)
+    return current_app.response_class(out_json, mimetype='application/json')
 
 
 @app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
-
     return get_platform_request()
 
-
-@app.route('/LDlinkRest/test', methods=['GET', 'POST'])
-def test():
-    print 'In /LDlinkRest/test'
-    print 'request.headers[Content-Type]'
-    print request.headers['Content-Type']
-    print ''
-    print 'request.data'
-    print request.data
-    print 'request.args'
-    print json.dumps(request.args)
-
-    print 'request.files'
-    print request.files
-
-    print 'request.method'
-    print request.method
-
-    print
-    print 'Execute ldmatrix'
-    print 'Gathering Variables from url'
-    snps = request.args.get('snps', False)
-    #filename = request.args.get('filename', False)
-    pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
-    print 'snp: ' + snp
-    print 'pop: ' + pop
-    print 'request: ' + reference
-    print
-    snplst = 'snps2.txt'
-
-    if request.headers['Content-Type'] == 'text/plain':
-        return "Text Message: " + request.data
-
-    elif request.headers['Content-Type'] == 'application/json':
-        return "JSON Message: " + json.dumps(request.json)
-
-    elif request.headers['Content-Type'] == 'application/octet-stream':
-        f = open('./binary', 'wb')
-        f.write(request.data)
-        f.close()
-        return "Binary message written!"
-    elif request.headers['Content-Type'] == 'multipart/form-data':
-        return 'multipart/form-data'
-    elif request.headers['Content-Type'] == 'application/x-www-form-urlencoded':
-        return 'application/x-www-form-urlencoded'
-
-    else:
-        return "415 Unsupported Media Type ;)"
 
 import argparse
 if __name__ == '__main__':

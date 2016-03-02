@@ -660,7 +660,14 @@ function updateLDhap() {
 
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
-		var jsonObj=JSON.parse(data);
+		console.log(typeof data);
+		console.dir(data);
+		var jsonObj;
+		if(typeof data == 'string') {
+			jsonObj = JSON.parse(data);
+		} else {
+			jsonObj = data;
+		}
 
 		if (displayError(id, jsonObj) == false) {
 			//console.info("LDhap is here");
@@ -676,26 +683,9 @@ function updateLDhap() {
 			addLDHapHyperLinks(ldInputs.reference, ldhapTable);
 		}
 	});
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				console.log("header: "
-								+ jqXHR
-								+ "\n"
-								+ "Status: "
-								+ textStatus
-								+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				// alert('Communication problem: ' + textStatus);
-				// ERROR
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		displayCommFail(id, jqXHR, textStatus);
+	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
@@ -722,7 +712,6 @@ function explodeLegalArray(entities) {
 			output += delimiter+" "+value;
 		}
 	});
-
 	return output;
 }
 
@@ -774,21 +763,7 @@ function updateSNPclip() {
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
-		console.log("We got a comm fail");
-		console.log("jqXHR");
-		console.dir(jqXHR);
-		console.log("status");
-		console.dir(textStatus);
-		console.log("header: "+jqXHR+"\n"+"Status: "+ textStatus
-			+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-		message = 'Service Unavailable: ' + textStatus + "<br>";
-		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-		$('#' + id + '-message').show();
-		$('#' + id + '-message-content').empty().append(message);
-		$('#' + id + '-progress').hide();
-		$('#' + id+ '-results-container').hide();
-		//hide loading icon
-		$('#'+id+"-loading").hide();
+		displayCommFail(id, jqXHR, textStatus);
 	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -840,16 +815,7 @@ function updateSNPchip() {
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
-		console.log("header: "+jqXHR+"\n"+ "Status: "+ textStatus+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-		message = 'Service Unavailable: ' + textStatus + "<br>";
-		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-		$('#' + id + '-message').show();
-		$('#' + id + '-message-content').empty().append(message);
-		$('#' + id + '-progress').hide();
-		$('#' + id+ '-results-container').hide();
-		//hide loading icon
-		$('#'+id+"-loading").hide();
+		displayCommFail(id, jqXHR, textStatus);
 	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
@@ -876,16 +842,7 @@ function initChip() {
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
-		console.log("header: "+ jqXHR+ "\nStatus: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-		message = 'Service Unavailable: ' + textStatus + "<br>";
-		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-		message += "Unable to retrieve platform codes from the server."
-		$('#' + id + '-message').show();
-		$('#' + id + '-message-content').empty().append(message);
-		$('#' + id + '-progress').hide();
-		$('#' + id+ '-results-container').hide();
-		//hide loading icon
-		$('#'+id+"-loading").hide();
+		displayCommFail(id, jqXHR, textStatus);
 	});
 
 }
@@ -1347,34 +1304,23 @@ function updateLDmatrix() {
 	});
 
 	ajaxRequest.success(function(data) {
-		$('#ldmatrix-bokeh-graph').empty().append(data);
-		$('#' + id + '-progress-container').hide();
-		$('#' + id + '-results-container').show();
-		getLDmatrixResults(ldmatrixInputs.reference + ".json",
-				ldmatrixInputs.reference);
+		console.log("ldmatrix");
+		console.log(typeof data);
+		console.dir(data);
+		if(typeof data == 'string') {
+			$('#ldmatrix-bokeh-graph').empty().append(data);
+			$('#' + id + '-progress-container').hide();
+			$('#' + id + '-results-container').show();
+			getLDmatrixResults(ldmatrixInputs.reference + ".json",
+					ldmatrixInputs.reference);
+		} else {
+			displayError(id, data);
+		}
 
 	});
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				console
-						.log("header: "
-								+ jqXHR
-								+ "\n"
-								+ "Status: "
-								+ textStatus
-								+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				// alert('Communication problem: ' + textStatus);
-				// ERROR
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		displayCommFail(id, jqXHR, textStatus);
+	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
@@ -1505,8 +1451,7 @@ function updateLDproxy() {
 		+ ldproxyInputs.reference + '.txt');
 
 	//console.dir(ldproxyInputs);
-	$('#ldproxy-results-link').attr('href',
-			'tmp/proxy' + ldproxyInputs.reference + '.txt');
+	$('#ldproxy-results-link').attr('href','tmp/proxy' + ldproxyInputs.reference + '.txt');
 	var url = restServerUrl + "/ldproxy";
 	var ajaxRequest = $.ajax({
 		type : "GET",
@@ -1515,40 +1460,20 @@ function updateLDproxy() {
 	});
 
 	ajaxRequest.success(function(data) {
-		$('#' + id + '-progress-container').hide();
-		//Remove bokeh while testing.
-		//$('#ldproxy-bokeh-graph').empty().append(data);
-		$('#ldproxy-bokeh-graph').empty().append(data);
-		$('#' + id + '-results-container').show();
-		getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
-
+		if (displayError(id, data) == false) {
+			$('#' + id + '-progress-container').hide();
+			$('#ldproxy-bokeh-graph').empty().append(data);
+			$('#' + id + '-results-container').show();
+			getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
+		}
+		$("#"+id+"-loading").hide();
 	});
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				console
-						.log("header: "
-								+ jqXHR
-								+ "\n"
-								+ "Status: "
-								+ textStatus
-								+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				// alert('Communication problem: ' + textStatus);
-				// ERROR
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		displayCommFail(id, jqXHR, textStatus);
+	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
 	});
-
-	//hideLoadingIcon(ajaxRequest, id);
 }
 
 function hideLoadingIcon(ajaxRequest, id) {
@@ -1582,27 +1507,25 @@ function getLDProxyResults(jsonfile) {
 	});
 
 	ajaxRequest.fail(function(jqXHR, textStatus) {
-				// alert('Fail');
-				console
-						.log("header: "
-								+ jqXHR
-								+ "\n"
-								+ "Status: "
-								+ textStatus
-								+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				$('#' + id+ '-results-container').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+		displayCommFail(id, jqXHR, textStatus);
+	});
 	ajaxRequest.always(function() {
 	});
 	hideLoadingIcon(ajaxRequest, id);
+}
+
+function displayCommFail(id, jqXHR, textStatus) {
+	console.warn("header: "+jqXHR+"\n"+"Status: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+	//console.dir(jqXHR);
+	message = 'Service Unavailable: '+textStatus+"<br>";
+	message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+	$('#' + id + '-message').show();
+	$('#' + id + '-message-content').empty().append(message);
+	$('#' + id + '-progress').hide();
+	$('#' + id+ '-results-container').hide();
+	//hide loading icon
+	$('#'+id+"-loading").hide();
+
 }
 
 function getLDmatrixResults(jsonfile, request) {
@@ -1618,30 +1541,12 @@ function getLDmatrixResults(jsonfile, request) {
 		//catch error and warning in json
 		if (displayError(id, data) == false) {
 			addLDMatrixHyperLinks(request);
-			//matrix specific
 			$('#'+id+"-download-links").show();
 		}
 	});
-
-	ajaxRequest
-			.fail(function(jqXHR, textStatus) {
-				// alert('Fail');
-				console
-						.log("header: "
-								+ jqXHR
-								+ "\n"
-								+ "Status: "
-								+ textStatus
-								+ "\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-				message = 'Service Unavailable: ' + textStatus + "<br>";
-				message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-
-				$('#' + id + '-message').show();
-				$('#' + id + '-message-content').empty().append(message);
-				$('#' + id + '-progress').hide();
-				//hide loading icon
-				$('#'+id+"-loading").hide();
-			});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		displayCommFail(id, jqXHR, textStatus);
+	});
 	ajaxRequest.always(function() {
 	});
 }
@@ -1703,17 +1608,7 @@ function updateLDpair() {
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
-		console.log("header: " + jqXHR + "\n" + "Status: " + textStatus
-				+ "\n\nMake sure Flask Python server is available.");
-		// alert('Communication problem: ' + textStatus);
-		// ERROR
-		$('#' + id + '-message').show();
-		$('#' + id + '-message-content').empty().append(
-				'Communication problem: ' + textStatus
-						+ "<br>Make sure Flask Python server is available.");
-		$('#' + id+ '-results-container').hide();
-		//hide loading icon
-		$('#'+id+"-loading").hide();
+		displayCommFail(id, jqXHR, textStatus);
 	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
