@@ -306,7 +306,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	sup_2="2"
 	i=0
 	while i<len(rsnum_lst):
-		details[rsnum_lst[i]].append("Variant kept")
+		details[rsnum_lst[i]].append("Variant kept.")
 		remove_list=[]
 		for j in range(i+1,len(rsnum_lst)):
 			r2=calc_r2(hap_dict[rsnum_lst[i]][0],hap_dict[rsnum_lst[j]][0])
