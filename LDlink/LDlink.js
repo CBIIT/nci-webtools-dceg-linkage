@@ -1093,7 +1093,7 @@ function populateSNPwarnings(data) {
 			position_link: anchorRSposition(value[0], index)
 		};
 		//console.log(index+" - "+value);
-		if(detail.comment != 'Variant kept' && detail.comment.substring(0, 9) != 'Variant in LD') {
+		if(detail.comment != 'Variant kept' && detail.comment.substring(0, 13) != 'Variant in LD') {
 			// Place message on the warning table.
 			snpclipData.warnings.push(detail);
 		}
