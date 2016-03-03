@@ -104,12 +104,9 @@ function createEnterEvent() {
 
 function createFileSelectEvent() {
 	// Add file select file listener
-	$('.btn-file :file').on(
-		'fileselect',
-		function(event, numFiles, label) {
-			populateTextArea(event, numFiles, label);
-			var input = $(this).parents('.input-group').find(
-				':text'), log = numFiles > 1 ? numFiles
+	$('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+		populateTextArea(event, numFiles, label);
+		var input = $(this).parents('.input-group').find(':text'), log = numFiles > 1 ? numFiles
 				+ ' files selected' : label;
 		if (input.length) {
 			input.val(log);
@@ -505,16 +502,22 @@ function updateVersion(version) {
 }
 
 function cleanSNP(text) {
+	//
 	//Clean up file remove spaces.
-	//console.warn("text");
-	//console.log(text);
-	//console.dir(text.split('\n'));
-	// Clean text
-	//console.warn("clean");
-
-	var clean = text.replace(/[^A-Z0-9\n]/ig, "");
-	//console.log(clean);
-	return clean;
+	//  Only allow first column
+	//
+	var lines = text.split('\n');
+	var list = "";
+	$.each(lines, function (key, value) {
+		var clean = value.replace(/\t/, " ");
+		var line = clean.replace(/[^RS0-9\n ]/ig, "");
+		line = line.split(' ');
+		//console.dir(line);
+		if(line[0].length > 2) {
+			list += line[0]+'\n';
+		}
+	}); 
+	return list;
 }
 
 function populateTextArea(event, numFiles, label) {
