@@ -25,14 +25,21 @@ $(document).ready(function() {
 	updateVersion(ldlink_version);
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {
-		console.warn("You clicked a tab");
-		console.info("Check for an attribute called data-url");
+		//console.warn("You clicked a tab");
+		//console.info("Check for an attribute called data-url");
 		//If data-url use that.
 		var currentTab = e.target.id.substr(0, e.target.id.search('-'));
-		console.log(currentTab);
+		//console.log(currentTab);
+		var last_url_params = $("#"+currentTab+"-tab-anchor").attr("data-url-params");
+		//console.log("last_url_params: "+last_url_params);
+		if(typeof last_url_params === "undefined") {
+			window.history.pushState({},'', "?tab="+currentTab);
+		} else {
+			window.history.pushState({},'', "?"+last_url_params);
+		}
 
-		window.history.pushState({},'', "?tab="+currentTab);
 	});
+	
 	setupSNPclipControls();
 	setupSNPchipControls();
 	showFFWarning();
@@ -515,13 +522,28 @@ function cleanSNP(text) {
 	//
 	var lines = text.split('\n');
 	var list = "";
+	var rsnumber = "";
+
 	$.each(lines, function (key, value) {
 		var clean = value.replace(/\t/, " ");
-		var line = clean.replace(/[^RS0-9\n ]/ig, "");
+		var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
 		line = line.split(' ');
 		//console.dir(line);
-		if(line[0].length > 2) {
-			list += line[0]+'\n';
+		rsnumber = "";
+		$.each(line, function(key,value){
+			if(value != "") {
+				rsnumber = value;
+				return false;
+			}
+		});
+		//console.log("rsnumber is "+rsnumber);
+		if(rsnumber.length > 2) {
+			//console.log(line[0]);
+			var pos = rsnumber.search(/^[R|r][S|s]\d+$/);
+			//console.log("pos: "+pos);
+			if(pos == 0) {
+				list += rsnumber+'\n';
+			}
 		}
 	}); 
 	return list;
@@ -1501,6 +1523,7 @@ function updateHistoryURL(id, inputs) {
 	var recursiveEncoded = $.param( params );
 	console.log(recursiveEncoded);
 	window.history.pushState({},'', "?"+ recursiveEncoded);
+	$("#"+id+"-tab-anchor").attr("data-url-params", recursiveEncoded);
 
 	//console.log(JSON.stringify(params.pop));
 
