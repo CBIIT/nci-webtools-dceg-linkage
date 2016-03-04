@@ -1086,7 +1086,7 @@ function populateSNPwarnings(data) {
 			position_link: anchorRSposition(value[0], index)
 		};
 		//console.log(index+" - "+value);
-		if(detail.comment != 'Variant kept' && detail.comment.substring(0, 13) != 'Variant in LD') {
+		if(detail.comment != 'Variant kept.' && detail.comment.substring(0, 13) != 'Variant in LD') {
 			// Place message on the warning table.
 			snpclipData.warnings.push(detail);
 		}
@@ -1132,12 +1132,12 @@ function loadSNPdetails(data, rs_number) {
 		}
 		//if(found == true && detail.rs_number == rs_number) {
 		if(found) {
-			if(detail.comment == 'Variant kept' && detail.rs_number != rs_number){
+			if(detail.comment == 'Variant kept.' && detail.rs_number != rs_number){
 				// List is complete, exit loop
 				return false;
 			}
 			//console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
-			if(detail.comment == 'Variant kept' || 
+			if(detail.comment == 'Variant kept.' || 
 				detail.comment.indexOf(match)>=0) {
 				snpclipData.details.push(detail);
 			}
