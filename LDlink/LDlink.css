@@ -503,17 +503,21 @@ table#snpclip-table-thin > tbody {
     max-height: 400px;
     overflow-y: auto;
 }
+table#snpclip-table-thin > tbody > tr > td {
+	padding: 8px 20px 8px 10px;
+}
+
 #snpclip-initial-message {
 	font-weight:bold;
 	font-size:110%;
 	margin-top:50px;
 }
 #snpclip-table-container {
-	min-height:500px;
+	min-height:580px;
 }
 .snpclip-table-scroller {
 	overflow-y:auto;
-	max-height:550px;
+	max-height:575px;
 	padding-top:10px;
 }
 
@@ -613,6 +617,7 @@ table.snpchip-table {
 table#snpchip-thinned-list > thead > tr {
 	border-top: 1px solid #ccc;
 }
+
 #snp_chip_list {
 	padding-left:60px;
 }
@@ -631,6 +636,9 @@ textarea:valid, .ok {
 }
 textarea:invalid, .error {
     color: red;
+}
+.panel-body > h1 {
+	font-size: 1.7em;
 }
 /* Testing */
 @media screen and (max-width: 767px) {

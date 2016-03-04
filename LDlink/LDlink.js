@@ -25,7 +25,12 @@ $(document).ready(function() {
 	updateVersion(ldlink_version);
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {
+		console.warn("You clicked a tab");
+		console.info("Check for an attribute called data-url");
+		//If data-url use that.
 		var currentTab = e.target.id.substr(0, e.target.id.search('-'));
+		console.log(currentTab);
+
 		window.history.pushState({},'', "?tab="+currentTab);
 	});
 	setupSNPclipControls();
@@ -363,9 +368,11 @@ function setupSNPclipControls() {
 	});
 }
 
+/*
 function pushInputs(currentTab, inputs) {
 	window.history.pushState({},'', "?tab="+currentTab+"&inputs="+JSON.stringify(inputs));
 }
+*/
 
 function showFFWarning() {
 	// Is this a version of Mozilla?
@@ -828,8 +835,6 @@ function loadSNPChip(data) {
 	//delete snpchipData["error"];
 
 	var snpchip = JSON.parse(data);
-	//console.warn("Here is the return Data.  What do we do now?");
-	//console.dir(snpchip);
 
 	var all_platforms_used = [];
 	var newchip = [];
@@ -940,9 +945,6 @@ function loadSNPChip(data) {
 		}
 	});
 	snpchipData["snpchip"] = newchip;
-	//Based on header size remove overflow-y
-	//console.warn("Header size");
-	//console.log(snpchipData["headers"].length);
 	var header_len = snpchipData["headers"].length;
 	if( header_len < 20) {
 		//calcualte width
@@ -951,23 +953,6 @@ function loadSNPChip(data) {
 		$('#snpchip-table-right').removeAttr('width');
 	}
 
-	//$('#snpchip-table-right')...
-
-	//snpchipData["headers"].push(= reversed_platform_list;
-	//snpchipData["headers"].platform = platform_list;
-
-	//snpchipData["headers"].code = reversed_platform_list;
-	//snpchipData["headers"].platform = platform_list;
-
-	// = "This is about error";
-	/*
-	console.log("FINAL DATA HERE:");
-	console.dir(snpchipData);
-	console.log("ERROR Count: "+snpchipData.error.length);
-	console.log("WARNING Count: "+snpchipData.warning.length);
-	console.log("FINAL DATA AS A STRING:");
-	console.log(JSON.stringify(snpchipData));
-	*/
 	ko.mapping.fromJS(snpchipData, snpchipModel);
 
 	$('#snpchip-message-warning-content').empty();
@@ -979,20 +964,6 @@ function loadSNPChip(data) {
 		$('#snpchip-results-container').hide();
 
 	} 
-	/*
-	else {
-		$.each(snpchipData["snpchip"], function(key, value) {
-			if(value.platform_count == 0) {
-				$('#snpchip-message-warning').show();
-				$('#snpchip-message-warning-content')
-					.append($("<div>")
-						.text(value.rs_number_original+" has no platform arrays.")
-					);
-			}
-		});
-	}
-	*/
-	//console.log("Finished");
 }
 
 function checkAlert(elementId, message, type, displayResults) {
@@ -1026,7 +997,7 @@ function populateSNPlist(data) {
 				$("<td>").append(
 					$("<a>")
 						.attr('id', value)
-						.attr('title', 'Click to view details')
+						.attr('title', 'View details.')
 						.append(value)
 					)
 				)
@@ -1462,11 +1433,8 @@ function getLDProxyResults(jsonfile) {
 	ajaxRequest.success(function(data) {
 		//catch error and warning in json
 		if (displayError(id, data) == false) {
-			//console.info("Data from Proxy");
-			//console.dir(data);
 			RefreshTable('#new-ldproxy', data);
 			//ko.mapping.fromJS(data, ldproxyModel);
-			//addLDproxyHyperLinks(data);
 		}
 
 	});
@@ -1474,16 +1442,17 @@ function getLDProxyResults(jsonfile) {
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		displayCommFail(id, jqXHR, textStatus);
 	});
-	ajaxRequest.always(function() {
-	});
 	hideLoadingIcon(ajaxRequest, id);
 }
 
 function displayCommFail(id, jqXHR, textStatus) {
-	console.warn("header: "+jqXHR+"\n"+"Status: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+	console.log(textStatus);
 	//console.dir(jqXHR);
-	message = 'Service Unavailable: '+textStatus+"<br>";
-	message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+	//console.warn("header: "+jqXHR+"\n"+"Status: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
+	//console.dir(jqXHR);
+	//message = jqXHR.statusText+": "+textStatus+"<br><br>";
+	var message = jqXHR.responseText;
+	message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
 	$('#' + id + '-message').show();
 	$('#' + id + '-message-content').empty().append(message);
 	$('#' + id + '-progress').hide();
@@ -1517,6 +1486,7 @@ function getLDmatrixResults(jsonfile, request) {
 }
 
 function updateHistoryURL(id, inputs) {
+	console.log('updateHistoryURL: id:'+id+' inputs:'+inputs);
 	//Update url with new vars
 	var params = $.extend({}, inputs);
 	delete params.reference;
@@ -1529,6 +1499,7 @@ function updateHistoryURL(id, inputs) {
 
 	params["tab"] = id;
 	var recursiveEncoded = $.param( params );
+	console.log(recursiveEncoded);
 	window.history.pushState({},'', "?"+ recursiveEncoded);
 
 	//console.log(JSON.stringify(params.pop));
