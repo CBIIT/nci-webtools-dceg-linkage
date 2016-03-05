@@ -1072,12 +1072,19 @@ function anchorRSposition(coord, rs_number) {
 }
 
 function populateSNPwarnings(data) {
+	console.info("Here is the info on clip");
+	console.dir(data);
+	console.log("Length of data.snp_list.length: "+data.snp_list.length);
+	console.log("Length of data.snps.length: "+data.snps.length);
+	console.log("Length of data.details.length: "+data.details.length);
+	console.log("Length of data.filtered.length: "+data.filtered.length);
 
+	
 	snpclipData.warnings = [];
 
-	$.each(data.details, function( index, value ){
+	$.each(data.filtered, function( index, value ){
 
-		var detail = {
+		var filtered = {
 			rs_number: index,
 			position: value[0],
 			alleles: value[1],
@@ -1086,11 +1093,14 @@ function populateSNPwarnings(data) {
 			position_link: anchorRSposition(value[0], index)
 		};
 		//console.log(index+" - "+value);
-		if(detail.comment != 'Variant kept.' && detail.comment.substring(0, 13) != 'Variant in LD') {
+		if(filtered.comment != 'Variant kept.' && filtered.comment.substring(0, 13) != 'Variant in LD') {
 			// Place message on the warning table.
-			snpclipData.warnings.push(detail);
+			snpclipData.warnings.push(filtered);
 		}
 	});
+	
+	//console.log("Warning Data");
+	//console.dir(snpclipData.warnings);
 
 	if(snpclipData.warnings.length == 0) {
 		$('#snpclip-warning').hide();
@@ -1416,7 +1426,6 @@ function updateLDproxy() {
 		url : url,
 		data : ldproxyInputs
 	});
-
 	ajaxRequest.success(function(data) {
 		if (displayError(id, data) == false) {
 			$('#' + id + '-progress-container').hide();
@@ -1451,7 +1460,6 @@ function getLDProxyResults(jsonfile) {
 		type : "GET",
 		url : url
 	});
-
 	ajaxRequest.success(function(data) {
 		//catch error and warning in json
 		if (displayError(id, data) == false) {
@@ -1460,7 +1468,6 @@ function getLDProxyResults(jsonfile) {
 		}
 
 	});
-
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		displayCommFail(id, jqXHR, textStatus);
 	});
@@ -1468,11 +1475,9 @@ function getLDProxyResults(jsonfile) {
 }
 
 function displayCommFail(id, jqXHR, textStatus) {
-	console.log(textStatus);
+	//console.log(textStatus);
 	//console.dir(jqXHR);
-	//console.warn("header: "+jqXHR+"\n"+"Status: "+textStatus+"\n\nThe server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.");
-	//console.dir(jqXHR);
-	//message = jqXHR.statusText+": "+textStatus+"<br><br>";
+	console.warn("CommFail\n"+"Status: "+textStatus);
 	var message = jqXHR.responseText;
 	message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
 	$('#' + id + '-message').show();

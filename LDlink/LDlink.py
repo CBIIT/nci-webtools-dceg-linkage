@@ -257,6 +257,8 @@ def snpclip():
 
     clip["snp_list"] = snp_list
     clip["details"] = details
+    clip["snps"] = snps
+    clip["filtered"] = collections.OrderedDict()
 
     # Print output
     with open(tmp_dir+"clip"+reference+".json") as f:
@@ -264,17 +266,22 @@ def snpclip():
 
     try:
         json_dict["error"]
-
     except KeyError:
         #print ""
         print "LD Thinned SNP list ("+pop+"):"
         for snp in snp_list:
             print snp
+
+        print "The snps.."
+        for snp in snps:
+            print snp
         
         print ""
         print "RS Number\tPosition\tAlleles\tDetails"
         for snp in snps:
+            print "Were does this go"
             print snp[0]+"\t"+"\t".join(details[snp[0]])
+            clip["filtered"][snp[0]] =details[snp[0]]
 
         try:
             json_dict["warning"]
