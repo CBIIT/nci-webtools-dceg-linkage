@@ -279,7 +279,6 @@ def snpclip():
         print ""
         print "RS Number\tPosition\tAlleles\tDetails"
         for snp in snps:
-            print "Were does this go"
             print snp[0]+"\t"+"\t".join(details[snp[0]])
             clip["filtered"][snp[0]] =details[snp[0]]
 
