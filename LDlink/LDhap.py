@@ -153,10 +153,7 @@ def calculate_hap(snplst,pop,request):
 	# Make sure there are genotype data in VCF file
 	if vcf[-1][0:6]=="#CHROM":
 		output["error"]="No query variants were found in 1000G VCF file"
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
+		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
 	h=0
