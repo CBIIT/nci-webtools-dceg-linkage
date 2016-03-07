@@ -1506,7 +1506,7 @@ function getLDmatrixResults(jsonfile, request) {
 }
 
 function updateHistoryURL(id, inputs) {
-	console.log('updateHistoryURL: id:'+id+' inputs:'+inputs);
+	//console.log('updateHistoryURL: id:'+id+' inputs:'+inputs);
 	//Update url with new vars
 	var params = $.extend({}, inputs);
 	delete params.reference;
@@ -1519,7 +1519,7 @@ function updateHistoryURL(id, inputs) {
 
 	params["tab"] = id;
 	var recursiveEncoded = $.param( params );
-	console.log(recursiveEncoded);
+	//console.log(recursiveEncoded);
 	window.history.pushState({},'', "?"+ recursiveEncoded);
 	$("#"+id+"-tab-anchor").attr("data-url-params", recursiveEncoded);
 
