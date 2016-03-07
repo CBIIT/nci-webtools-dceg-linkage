@@ -1072,14 +1072,7 @@ function anchorRSposition(coord, rs_number) {
 }
 
 function populateSNPwarnings(data) {
-	console.info("Here is the info on clip");
-	console.dir(data);
-	console.log("Length of data.snp_list.length: "+data.snp_list.length);
-	console.log("Length of data.snps.length: "+data.snps.length);
-	console.log("Length of data.details.length: "+data.details.length);
-	console.log("Length of data.filtered.length: "+data.filtered.length);
 
-	
 	snpclipData.warnings = [];
 
 	$.each(data.filtered, function( index, value ){
