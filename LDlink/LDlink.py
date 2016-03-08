@@ -3,7 +3,7 @@ from flask import Flask, render_template, Response, abort, request, make_respons
 from functools import wraps
 from flask import current_app
 from flask import jsonify
-
+import sys, getopt
 import cgi
 import shutil
 import os
@@ -363,9 +363,11 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", dest="port_number", default="9982", help="Sets the Port")
+    parser.add_argument("-d", dest="debug", default="False", help="Sets the Debugging Option")
     # Default port is production value; prod,stage,dev = 9982, sandbox=9983
     args = parser.parse_args()
     port_num = int(args.port_number);
+    debugger = args.debug == 'True'
 
     hostname = gethostname()
-    app.run(host='0.0.0.0', port=port_num, debug = False)
+    app.run(host='0.0.0.0', port=port_num, debug = debugger)
