@@ -370,4 +370,4 @@ if __name__ == '__main__':
     debugger = args.debug == 'True'
 
     hostname = gethostname()
-    app.run(host='0.0.0.0', port=port_num, debug = debugger)
+    app.run(host='0.0.0.0', port=port_num, debug = debugger,use_evalex = False)
