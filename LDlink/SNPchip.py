@@ -200,43 +200,51 @@ def calculate_chip(snplst,platform_query,request):
 
 def createOutputFile(request):
 	tmp_dir="./tmp/"
-	details_file = open(tmp_dir+'details'+request+".txt","w")
 
-	# Print output
+	details_file = open(tmp_dir+'details'+request+".txt","w")
+	
 	with open("./tmp/proxy"+request+".json") as out_json:
 		json_dict=json.load(out_json)
-	print >>details_file, ""
+
+	rs_dict = dict(json_dict)
+	del rs_dict['error'];
+	del rs_dict['warning'];
+
+	#Header
 	header=["RS Number","Position (GRCh37)","Arrays"]
 	print >>details_file, "\t".join(header)
-	print  "\t".join(header)
-	for k in sorted(json_dict.keys()):
-		if k!="error" and k!="warning":
-			print "\t".join(json_dict[k])
-			print >>details_file, "\t".join(json_dict[k])
 
+	#Body
+	for i in range(0, len(rs_dict)):
+		print >>details_file, "\t".join(rs_dict[str(i)])
+
+
+	#Footer
 	try:
 		json_dict["warning"]
 	except KeyError:
-			print >>details_file, ""
-	if(json_dict["warning"]!=""):
 		print >>details_file, ""
-		print >>details_file, "WARNING: "+json_dict["warning"]
-		print  >>details_file, ""
-		print  ""
-		print "WARNING: "+json_dict["warning"]
+	else:
+		print json_dict["warning"]
+		if(json_dict["warning"]!=""):
+			print >>details_file, ""
+			print >>details_file, "WARNING: "+json_dict["warning"]
+			print >>details_file, ""
+			print  ""
+			print "WARNING: "+json_dict["warning"]
 
-		print json_dict["error"]
 	try:
 		json_dict["error"]
 	except KeyError:
 			print >>details_file, ""
-	if (json_dict["error"]!=""):
-		print >>details_file, ""
-		print >>details_file, "ERROR: "+json_dict["error"]
-		print  >>details_file, ""
-		print  ""
-		print "ERROR: "+json_dict["error"]
-
+	else:
+		print json_dict["error"]
+		if (json_dict["error"]!=""):
+			print >>details_file, ""
+			print >>details_file, "ERROR: "+json_dict["error"]
+			print >>details_file, ""
+			print  ""
+			print "ERROR: "+json_dict["error"]
 
 	details_file.close()
 
