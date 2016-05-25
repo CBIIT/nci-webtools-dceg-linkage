@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_assoc(file,snp,pop,request,r2_d="r2"):
+def calculate_assoc(file,snp,pop,request,parameters):
 	import csv,json,operator,os,sqlite3,subprocess,sys,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
@@ -55,15 +55,10 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 	
 	
 	# Open Association Data
-	# Header dictionary
-	header_def={}
-	header_def["P"]="P"
-	header_def["CHR"]="CHR"
-	header_def["POS"]="BP"
-	
 	header_list=[]
-	for key in header_def:
-		header_list.append(header_def[key])	
+	header_list.append(parameters["CHR"])
+	header_list.append(parameters["POS"])
+	header_list.append(parameters["P"])
 	
 	# Load input file
 	assoc_data=open(file).readlines()
@@ -79,16 +74,17 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 			return("","")
 			raise		
 	
-	chr_index=header.index(header_def["CHR"])
-	pos_index=header.index(header_def["POS"])
-	p_index=header.index(header_def["P"])
+	chr_index=header.index(parameters["CHR"])
+	pos_index=header.index(parameters["POS"])
+	p_index=header.index(parameters["P"])
 	
 	# Define window of interest around query SNP
-	window=500000
-	coord1=int(snp_coord[2])-window
+	window=parameters["WINDOW"]
+	delta=window/2
+	coord1=int(snp_coord[2])-delta
 	if coord1<0:
 		coord1=0
-	coord2=int(snp_coord[2])+window
+	coord2=int(snp_coord[2])+delta
 	
 	# Generate Coordinate list
 	assoc_coords=[]
@@ -96,9 +92,14 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 	for i in range(1,len(assoc_data)):
 		col=assoc_data[i].strip().split()
 		if int(col[chr_index])==int(snp_coord[1]) and coord1<=int(col[pos_index])<=coord2:
-			coord_i=col[chr_index]+":"+col[pos_index]+"-"+col[pos_index]
-			assoc_coords.append(coord_i)
-			assoc_dict[coord_i]=[col[p_index]]
+			try:
+				float(col[p_index])
+			except ValueError:
+				continue
+			else:
+				coord_i=col[chr_index]+":"+col[pos_index]+"-"+col[pos_index]
+				assoc_coords.append(coord_i)
+				assoc_dict[coord_i]=[col[p_index]]
 			
 	# Coordinate list checks
 	if len(assoc_coords)==0:
@@ -270,15 +271,6 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 				col.append(float(assoc_dict[coord_i_j][0]))
 				out_prox.append(col)
 	
-		
-	# Sort output
-	if r2_d not in ["r2","d"]:
-		if "warning" in output:
-			output["warning"]=output["warning"]+". "+r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-		else:
-			output["warning"]=r2_d+" is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-		r2_d="r2"
-	
 	
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
 	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=True)
@@ -320,11 +312,7 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 	temp2=[chr,pos,pos,query_snp["RS"]]
 	print >> track, "\t".join(temp2)
 	print >> track, ""
-	if r2_d=="r2":
-		print >> track, "track name=\"0.8<R2<1.0\" description=\"Proxy Variants with 0.8<R2<1.0\" color=198,129,0"
-	else:
-		print >> track, "track name=\"0.8<D'<1.0\" description=\"Proxy Variants with 0.8<D'<1.0\" color=198,129,0"
-	
+	print >> track, "track name=\"0.8<R2<1.0\" description=\"Proxy Variants with 0.8<R2<1.0\" color=198,129,0"
 	
 	
 	proxies={}
@@ -374,19 +362,12 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 			temp2=[chr,pos,pos,proxy_info["RS"]]
 			print >> track, "\t".join(temp2)
 			
-			if r2_d=="r2" and cutoff[counter]<r2_d_prior and float(proxy_info["R2"])<=cutoff[counter]:
+			if cutoff[counter]<r2_d_prior and float(proxy_info["R2"])<=cutoff[counter]:
 				print >> track, ""
 				print >> track, "track name=\""+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" description=\"Proxy Variants with "+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" color=198,129,0"
 				counter+=1
-			elif r2_d=="d" and cutoff[counter]<r2_d_prior and float(proxy_info["Dprime"])<=cutoff[counter]:
-				print >> track, ""
-				print >> track, "track name=\""+str(cutoff[counter+1])+"<D'<"+str(cutoff[counter])+"\" description=\"Proxy Variants with "+str(cutoff[counter+1])+"<D'<"+str(cutoff[counter])+"\" color=198,129,0"
-				counter+=1
 			
-			if r2_d=="r2":
-				r2_d_prior=proxy_info["R2"]
-			else:
-				r2_d_prior=proxy_info["Dprime"]
+			r2_d_prior=proxy_info["R2"]
 
 	output["aaData"]=rows
 	output["proxy_snps"]=proxies
@@ -460,9 +441,9 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 		funct.append(funct_i)
 		
 		# Set Color
-		if i==0:
+		if p_rs_i==snp:
 			color_i="blue"
-			alpha_i=0
+			alpha_i=0.7
 		else:
 			color_i="red"
 			alpha_i=1-(0.8-0.5*float(r2_i))
@@ -472,9 +453,6 @@ def calculate_assoc(file,snp,pop,request,r2_d="r2"):
 		# Set Size
 		size_i=9+float(p_maf_i)*14.0
 		size.append(size_i)
-	
-	print color[0:20]
-	print alpha[0:20]
 	
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
@@ -732,25 +710,34 @@ def main():
 	import json,sys
 	tmp_dir="./tmp/"
 
+	# Create header mapping
+	parameters={}
+	parameters["P"]="P"
+	parameters["CHR"]="CHR"
+	parameters["POS"]="BP"
+	parameters["WINDOW"]=1500000
+	
 	# Import LDproxy options
 	if len(sys.argv)==5:
 		file=sys.argv[1]
 		snp=sys.argv[2]
 		pop=sys.argv[3]
 		request=sys.argv[4]
-		r2_d="r2"
+		parameters=parameters
 	elif len(sys.argv)==6:
 		file=sys.argv[1]
 		snp=sys.argv[2]
 		pop=sys.argv[3]
 		request=sys.argv[4]
-		r2_d=sys.argv[5]
+		parameters=sys.argv[5]
 	else:
-		print "Correct useage is: LDassoc.py file snp populations request (optional: r2_d)"
+		print "Correct useage is: LDassoc.py file snp populations request parameters"
 		sys.exit()
 
+
+	
 	# Run function
-	out_script,out_div=calculate_assoc(file,snp,pop,request,r2_d)
+	out_script,out_div=calculate_assoc(file,snp,pop,request,parameters)
 	
 	# Print script and div output
 	#out_script_line=out_script.split("\n")
