@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_assoc(file,snp,pop,request,parameters):
-	import csv,json,operator,os,sqlite3,subprocess,sys,time
+def calculate_assoc(file,region,pop,request,args):
+	import csv,json,operator,os,sqlite3,subprocess,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
 
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
+	gene_dir2=data_dir+"refGene/gene_names_coords.db"
 	recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
 	snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	pop_dir=data_dir+"1000G/Phase3/samples/"
@@ -25,40 +26,70 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	out_json=open(tmp_dir+'proxy'+request+".json","w")
 	output={}
 
-
-	# Find coordinates (GRCh37/hg19) for SNP RS number
-	# Connect to snp142 database
-	conn=sqlite3.connect(snp_dir)
-	conn.text_factory=str
-	cur=conn.cursor()
+	chrs=["1","2","3","4","4","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 	
-	def get_coords(rs):
-		id=rs.strip("rs")
-		t=(id,)
-		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-		return cur.fetchone()
-
-	# Find RS number in snp142 database
-	snp_coord=get_coords(snp)
+	# Define parameters for --variant option
+	if region=="variant":
+		if args.origin==None:
+			output["error"]="--origin required when --variant is specified."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+	if args.origin!=None:
+		# Find coordinates (GRCh37/hg19) for SNP RS number
+		if args.origin[0:2]=="rs":
+			snp=args.origin
 	
-	# Close snp142 connection
-	cur.close()
-	conn.close()
-	
-	if snp_coord==None:
-		output["error"]=snp+" is not in dbSNP build 142."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
-		raise
+			# Connect to snp142 database
+			conn=sqlite3.connect(snp_dir)
+			conn.text_factory=str
+			cur=conn.cursor()
+			
+			def get_coords(rs):
+				id=rs.strip("rs")
+				t=(id,)
+				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+				return cur.fetchone()
+			
+			# Find RS number in snp142 database
+			var_coord=get_coords(snp)
+			
+			# Close snp142 connection
+			cur.close()
+			conn.close()
+			
+			if var_coord==None:
+				output["error"]=snp+" is not in dbSNP build 142."
+				json_output=json.dumps(output, sort_keys=True, indent=2)
+				print >> out_json, json_output
+				out_json.close()
+				return("","")
+				raise
+		
+		elif args.origin.split(":")[0].strip("chr") in chrs and len(args.origin.split(":"))==2:
+			snp=args.origin
+			var_coord=[None,args.origin.split(":")[0].strip("chr"),args.origin.split(":")[1]]
+		
+		else:
+			output["error"]="--origin ("+args.origin+") is not an RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+		chromosome=var_coord[1]
+		org_coord=var_coord[2]
 	
 	
 	# Open Association Data
 	header_list=[]
-	header_list.append(parameters["CHR"])
-	header_list.append(parameters["POS"])
-	header_list.append(parameters["P"])
+	header_list.append(args.chr)
+	header_list.append(args.bp)
+	header_list.append(args.pval)
 	
 	# Load input file
 	assoc_data=open(file).readlines()
@@ -67,31 +98,184 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	# Check header
 	for item in header_list:
 		if item not in header:
-			output["error"]=key+" is not in the association file header."
+			output["error"]=item+" is not in the association file header."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
 			raise		
 	
-	chr_index=header.index(parameters["CHR"])
-	pos_index=header.index(parameters["POS"])
-	p_index=header.index(parameters["P"])
+	chr_index=header.index(args.chr)
+	pos_index=header.index(args.bp)
+	p_index=header.index(args.pval)
 	
 	# Define window of interest around query SNP
-	window=parameters["WINDOW"]
-	delta=window/2
-	coord1=int(snp_coord[2])-delta
-	if coord1<0:
-		coord1=0
-	coord2=int(snp_coord[2])+delta
+	if args.window==None:
+		if region=="variant":
+			window=500000
+		elif region=="gene":
+			window=100000
+		else:
+			window=0
+	else:
+		window=args.window
+	
+	if region=="variant":
+		coord1=int(org_coord)-window
+		if coord1<0:
+			coord1=0
+		coord2=int(org_coord)+window
+	
+	elif region=="gene":
+		if args.name==None:
+			output["error"]="Gene name (--name) is needed when --gene option is used."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+	
+		# Connect to gene database
+		conn=sqlite3.connect(gene_dir2)
+		conn.text_factory=str
+		cur=conn.cursor()
+		
+		def get_coords(gene):
+			t=(gene,)
+			cur.execute("SELECT * FROM genes WHERE name=?", t)
+			return cur.fetchone()
+		
+		# Find RS number in snp142 database
+		gene_coord=get_coords(args.name)
+		
+		# Close snp142 connection
+		cur.close()
+		conn.close()
+		
+		if gene_coord==None:
+			output["error"]="Gene name "+args.name+" is not in RefSeq database."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+		# Define search coordinates
+		coord1=int(gene_coord[2])-window
+		if coord1<0:
+			coord1=0
+		coord2=int(gene_coord[3])+window
+		
+		# Run with --origin option
+		if args.origin!=None:
+			if gene_coord[1]!=chromosome:
+				output["error"]="Origin variant "+args.origin+" is not on the same chromosome as "+args.gene+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
+				json_output=json.dumps(output, sort_keys=True, indent=2)
+				print >> out_json, json_output
+				out_json.close()
+				return("","")
+				raise
+			if coord1>int(org_coord) or int(org_coord)>coord2:
+				output["error"]="Origin variant "+args.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
+				json_output=json.dumps(output, sort_keys=True, indent=2)
+				print >> out_json, json_output
+				out_json.close()
+				return("","")
+				raise
+		else:
+			chromosome=gene_coord[1]
+	
+	elif region=="region":
+		if args.start==None:
+			output["error"]="Start coordinate is needed when --region option is used."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		if args.end==None:
+			output["error"]="End coordinate is needed when --region option is used."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+		# Parse out chr and positions for --region option
+		if len(args.start.split(":"))!=2:
+			output["error"]="Start coordinate is not in correct format (ex: chr22:25855459)."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		if len(args.end.split(":"))!=2:
+			output["error"]="End coordinate is not in correct format (ex: chr22:25855459)."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+		chr_s=args.start.strip("chr").split(":")[0]
+		coord_s=args.start.split(":")[1]
+		chr_e=args.end.strip("chr").split(":")[0]
+		coord_e=args.end.split(":")[1]
+		
+		if chr_s not in chrs:
+			output["error"]="Start chromosome (chr"+chr_s+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chrY)."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		if chr_e not in chrs:
+			output["error"]="End chromosome (chr"+chr_e+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chr Y)."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		if chr_s!=chr_e:
+			output["error"]="Start and end chromosome must be the same (chr"+chr_s+" is not equal to chr"+chr_e+")."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+		coord1=int(coord_s)-window
+		if coord1<0:
+			coord1=0
+		coord2=int(coord_e)+window
+		
+		# Run with --origin option
+		if args.origin!=None:
+			if chr_s!=chromosome:
+				output["error"]="Origin variant "+args.origin+" is not on the same chromosome as start and stop coordinates (chr"+chromosome+" is not equal to chr"+chr_e+")."
+				json_output=json.dumps(output, sort_keys=True, indent=2)
+				print >> out_json, json_output
+				out_json.close()
+				return("","")
+				raise
+			if coord1>int(org_coord) or int(org_coord)>coord2:
+				output["error"]="Origin variant "+args.origin+" is not in the coordinate range "+args.start+" to "+args.end+" -/+ a "+str(window)+" bp window."
+				json_output=json.dumps(output, sort_keys=True, indent=2)
+				print >> out_json, json_output
+				out_json.close()
+				return("","")
+				raise
+		else:
+			chromosome=chr_s
 	
 	# Generate Coordinate list
 	assoc_coords=[]
+	lowest_p=1.0
+	lowest_p_pos=None
 	assoc_dict={}
 	for i in range(1,len(assoc_data)):
 		col=assoc_data[i].strip().split()
-		if int(col[chr_index])==int(snp_coord[1]) and coord1<=int(col[pos_index])<=coord2:
+		if col[chr_index]==chromosome and coord1<=int(col[pos_index])<=coord2:
 			try:
 				float(col[p_index])
 			except ValueError:
@@ -100,6 +284,9 @@ def calculate_assoc(file,snp,pop,request,parameters):
 				coord_i=col[chr_index]+":"+col[pos_index]+"-"+col[pos_index]
 				assoc_coords.append(coord_i)
 				assoc_dict[coord_i]=[col[p_index]]
+				if float(col[p_index])<lowest_p:
+					lowest_p_pos=col[pos_index]
+					lowest_p=float(col[p_index])
 			
 	# Coordinate list checks
 	if len(assoc_coords)==0:
@@ -110,13 +297,24 @@ def calculate_assoc(file,snp,pop,request,parameters):
 		return("","")
 		raise
 	
-	if snp_coord[1]+":"+snp_coord[2]+"-"+snp_coord[2] not in assoc_coords:
-		output["error"]="Association file is missing a p-value for index variant "+snp+"."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
-		raise
+	# Define LD origin coordinate
+	try:
+		org_coord
+	except NameError:
+		org_coord=lowest_p_pos
+	else:
+		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
+			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+	
+	try:
+		snp
+	except NameError:
+		snp="chr"+chromosome+":"+org_coord
 	
 	
 	
@@ -148,13 +346,13 @@ def calculate_assoc(file,snp,pop,request,parameters):
 
 
 	# Extract query SNP phased genotypes
-	vcf_file=vcf_dir+snp_coord[1]+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 	
 	tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
 	proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 	head=proc_h.stdout.readlines()[0].strip().split()
 	
-	tabix_snp="tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, snp_coord[1], snp_coord[2], tmp_dir+"snp_no_dups_"+request+".vcf")
+	tabix_snp="tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf")
 	subprocess.call(tabix_snp, shell=True)
 
 
@@ -187,7 +385,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	else:
 		geno=vcf[0].strip().split()
 	
-	if geno[2]!=snp:
+	if geno[2]!=snp and snp[0:2]=="rs":
 		output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
 		snp=geno[2]
 		
@@ -235,13 +433,13 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	commands=[]
 	for i in range(threads):
 		if i==min(range(threads)) and i==max(range(threads)):
-			command="python LDassoc_sub.py "+snp+" "+snp_coord[1]+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
+			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
 		elif i==min(range(threads)):
-			command="python LDassoc_sub.py "+snp+" "+snp_coord[1]+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
+			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
 		elif i==max(range(threads)):
-			command="python LDassoc_sub.py "+snp+" "+snp_coord[1]+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
+			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
 		else:
-			command="python LDassoc_sub.py "+snp+" "+snp_coord[1]+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
+			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
 		commands.append(command)
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
@@ -266,7 +464,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 			col[8]=float(col[8])
 			col.append(abs(int(col[6])))
 			pos_i_j=col[5].split(":")[1]
-			coord_i_j=snp_coord[1]+":"+pos_i_j+"-"+pos_i_j
+			coord_i_j=chromosome+":"+pos_i_j+"-"+pos_i_j
 			if coord_i_j in assoc_dict:
 				col.append(float(assoc_dict[coord_i_j][0]))
 				out_prox.append(col)
@@ -286,7 +484,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	print >> outfile, "\t".join(header)
 	
 	track=open(tmp_dir+"track"+request+".txt","w")
-	print >> track, "browser position chr"+str(snp_coord[1])+":"+str(coord1)+"-"+str(coord2)
+	print >> track, "browser position chr"+str(chromosome)+":"+str(coord1)+"-"+str(coord2)
 	print >> track, ""
 	print >> track, "track name=\""+snp+"\" description=\"Query Variant: "+snp+"\" color=108,108,255"
 	
@@ -441,11 +639,11 @@ def calculate_assoc(file,snp,pop,request,parameters):
 		funct.append(funct_i)
 		
 		# Set Color
-		if p_rs_i==snp:
-			color_i="blue"
+		if q_coord_i==p_coord_i:
+			color_i="#0000FF"
 			alpha_i=0.7
 		else:
-			color_i="red"
+			color_i="#FF0000"
 			alpha_i=1-(0.8-0.5*float(r2_i))
 		color.append(color_i)
 		alpha.append(alpha_i)
@@ -492,7 +690,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	sup_2=u"\u00B2"
 
 	proxy_plot=figure(
-				title="Proxies for "+snp+" in "+pop,
+				title="P-values and Regional LD for "+snp+" in "+pop,
 				min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
 				plot_width=900,
 				plot_height=600,
@@ -501,7 +699,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 				toolbar_location="above")
 	
 	# Add recombination rate
-	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord[1], coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
+	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
 	subprocess.call(tabix_recomb, shell=True)
 	filename=tmp_dir+"recomb_"+request+".txt"
 	recomb_raw=open(filename).readlines()
@@ -558,7 +756,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 	
 	
 	# Gene Plot
-	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coord[1], coord1, coord2, tmp_dir+"genes_"+request+".txt")
+	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 	subprocess.call(tabix_gene, shell=True)
 	filename=tmp_dir+"genes_"+request+".txt"
 	genes_raw=open(filename).readlines()
@@ -647,7 +845,7 @@ def calculate_assoc(file,snp,pop,request,parameters):
 					
 	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	gene_plot.xaxis.axis_label="Chromosome "+snp_coord[1]+" Coordinate (Mb)(GRCh37)"
+	gene_plot.xaxis.axis_label="Chromosome "+chromosome+" Coordinate (Mb)(GRCh37)"
 	gene_plot.yaxis.axis_label="Genes"
 	gene_plot.ygrid.grid_line_color=None
 	gene_plot.yaxis.axis_line_color=None
@@ -707,37 +905,40 @@ def calculate_assoc(file,snp,pop,request,parameters):
 
 
 def main():
-	import json,sys
+	import argparse,json
 	tmp_dir="./tmp/"
-
-	# Create header mapping
-	parameters={}
-	parameters["P"]="P"
-	parameters["CHR"]="CHR"
-	parameters["POS"]="BP"
-	parameters["WINDOW"]=1500000
 	
-	# Import LDproxy options
-	if len(sys.argv)==5:
-		file=sys.argv[1]
-		snp=sys.argv[2]
-		pop=sys.argv[3]
-		request=sys.argv[4]
-		parameters=parameters
-	elif len(sys.argv)==6:
-		file=sys.argv[1]
-		snp=sys.argv[2]
-		pop=sys.argv[3]
-		request=sys.argv[4]
-		parameters=sys.argv[5]
-	else:
-		print "Correct useage is: LDassoc.py file snp populations request parameters"
-		sys.exit()
-
-
+	# Import LDassoc options
+	parser=argparse.ArgumentParser()
+	parser.add_argument("file", type=str, help="association file containing p-values")
+	region=parser.add_mutually_exclusive_group(required=True)
+	region.add_argument("-g", "--gene", help="run LDassoc in gene mode (--name required)", action="store_true")
+	region.add_argument("-r", "--region", help="run LDassoc in region mode (--start and --stop required)", action="store_true")  ## What to do with window??
+	region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
+	parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
+	parser.add_argument("request", type=str, help="id for submitted command")
+	parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
+	parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
+	parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
+	parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
+	parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
+	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number or coordinate (required with --variant)(default is lowest p-value in region)")
+	parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
+	parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
+	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- Kb) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
+	
+	args=parser.parse_args()
+	
+	if args.gene:
+		region="gene"
+	elif args.region:
+		region="region"
+	elif args.variant:
+		region="variant"
+	
 	
 	# Run function
-	out_script,out_div=calculate_assoc(file,snp,pop,request,parameters)
+	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
 	
 	# Print script and div output
 	#out_script_line=out_script.split("\n")
@@ -750,7 +951,7 @@ def main():
 	
 	
 	# Print output
-	with open(tmp_dir+"proxy"+request+".json") as f:
+	with open(tmp_dir+"proxy"+args.request+".json") as f:
 		json_dict=json.load(f)
 
 	try:
