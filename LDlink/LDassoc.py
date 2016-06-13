@@ -643,8 +643,12 @@ def calculate_assoc(file,region,pop,request,args):
 			color_i="#0000FF"
 			alpha_i=0.7
 		else:
-			color_i="#FF0000"
-			alpha_i=1-(0.8-0.5*float(r2_i))
+			if args.dprime==True:
+				color_i="#FF0000"
+				alpha_i=1-(0.8-0.5*float(d_prime_i))
+			elif args.dprime==False:
+				color_i="#FF0000"
+				alpha_i=1-(0.8-0.5*float(r2_i))	
 		color.append(color_i)
 		alpha.append(alpha_i)
 		
@@ -913,19 +917,20 @@ def main():
 	parser.add_argument("file", type=str, help="association file containing p-values")
 	region=parser.add_mutually_exclusive_group(required=True)
 	region.add_argument("-g", "--gene", help="run LDassoc in gene mode (--name required)", action="store_true")
-	region.add_argument("-r", "--region", help="run LDassoc in region mode (--start and --stop required)", action="store_true")  ## What to do with window??
+	region.add_argument("-r", "--region", help="run LDassoc in region mode (--start and --stop required)", action="store_true")
 	region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
 	parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
 	parser.add_argument("request", type=str, help="id for submitted command")
 	parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
 	parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
+	parser.add_argument("-d", "--dprime", help="plot D prime rather than R2", action="store_true")
 	parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
 	parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
 	parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
 	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number or coordinate (required with --variant)(default is lowest p-value in region)")
 	parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
 	parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
-	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- Kb) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
+	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 	
 	args=parser.parse_args()
 	
