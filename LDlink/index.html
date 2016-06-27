@@ -71,6 +71,10 @@
 			<li>
 				<a id="home-tab-anchor" href="#home-tab" data-toggle="tab">Home</a>
 			</li>
+			<!-- ASSOC -->
+			<li>
+				<a id="ldassoc-tab-anchor" href="#ldassoc-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDassoc</a>
+			</li>
 			<!-- HAP -->
 			<li>
 				<a id="ldhap-tab-anchor" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
@@ -176,7 +180,87 @@
 				</p>
 				<p id="ldlink_version"></p>
 			</div>
-
+			<!-- LDassoc -->
+			<div class="tab-pane fade" id="ldassoc-tab">
+				<!-- ldassoc INPUTS-->
+				<div class="container-fluid">
+					<div class="row" style="padding-top: 10px;">
+						<!-- ldassoc FORM -->
+						<form id="ldassocForm" class="ldlinkForm">
+							<!-- RS numbers -->
+							<div class="form-group">
+								<div class="col-sm-2">
+									<textarea id="ldassoc-file-snp-numbers" 
+										placeholder="RS Numbers"
+										class="form-control"
+										title="Enter list of RS numbers (one per line)"
+										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+								</div>
+							</div>
+							<!-- Population -->
+							<div class="form-group">
+								<div class="col-sm-4">
+									<a id="ldassoc-population-codes-zero"
+										style="position:relative;left:180px;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a population."></a>
+									<label for="ldassoc-population-codes" style="display: none;">Populations</label>
+									<select id="ldassoc-population-codes" multiple="multiple"
+										name="populations">
+									</select>
+								</div>
+							</div>
+							<!-- Broswe RS numbers -->
+							<div class="col-sm-4">
+								<div class="input-group">
+									<label for="ldassoc-file-label" style="display:none;">Uplaod RS File</label>
+									<input type="text" id="ldassoc-file-label" readonly
+										placeholder="Upload file with RS numbers"
+										class="readonly-input-text">
+									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
+									<span	class="btn btn-default btn-file">Browse
+										<input type="file" id="ldassoc-file">
+									</span>
+								</div>
+							</div>
+							<!-- Calculate -->
+							<div class="form-group">
+								<div class="col-sm-2">
+									<input type="submit" id="ldassoc" value="Calculate"
+										class="btn btn-default calculate" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<hr>
+					<div id="ldassoc-loading">
+						<img src="/LDlink/calculating_LD.gif" alt="loading icon"
+							class="loading">
+					</div>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldassoc-message">
+							<div class="panel panel-danger">
+									<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldassoc-message-content"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldassoc-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldassoc-message-warning-content">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
 			<!-- LDhap -->
 			<div class="tab-pane fade" id="ldhap-tab">
 				<!-- LDhap INPUTS-->
