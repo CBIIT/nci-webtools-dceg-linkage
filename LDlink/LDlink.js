@@ -200,7 +200,7 @@ function setupTabs() {
 	} else {
 		currentTab = 'home';
 	}
-
+	if(currentTab.search('assoc')>=0) currentTab = 'ldassoc';
 	if(currentTab.search('hap')>=0) currentTab = 'ldhap';
 	if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
 	if(currentTab.search('pair')>=0) currentTab = 'ldpair';
