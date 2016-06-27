@@ -73,7 +73,7 @@
 			</li>
 			<!-- ASSOC -->
 			<li>
-				<a id="ldassoc-tab-anchor" href="#ldassoc-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDassoc</a>
+				<a id="ldassoc-tab-anchor" href="#ldassoc-tab" data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
 			</li>
 			<!-- HAP -->
 			<li>
@@ -199,7 +199,7 @@
 							</div>
 							<!-- Population -->
 							<div class="form-group">
-								<div class="col-sm-4">
+								<div class="col-sm-3">
 									<a id="ldassoc-population-codes-zero"
 										style="position:relative;left:180px;"
 										href="#"
@@ -216,9 +216,9 @@
 							<!-- Broswe RS numbers -->
 							<div class="col-sm-4">
 								<div class="input-group">
-									<label for="ldassoc-file-label" style="display:none;">Uplaod RS File</label>
+									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
 									<input type="text" id="ldassoc-file-label" readonly
-										placeholder="Upload file with RS numbers"
+										placeholder="Upload data file (chr, pos, p-value)"
 										class="readonly-input-text">
 									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
 									<span	class="btn btn-default btn-file">Browse
@@ -259,6 +259,9 @@
 							</div>
 						</div>
 					</div>
+				</div>
+				<div>
+				<img src="chrom.png" style="border:1px solid black" />
 				</div>
 			</div>
 			<!-- LDhap -->
@@ -1357,8 +1360,6 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
-	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
-
 	<script type="text/javascript"
 		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
 	</script>
