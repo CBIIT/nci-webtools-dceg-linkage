@@ -10,7 +10,7 @@ import os
 import bson.regex
 import json
 import json,operator,sqlite3,os
-contents=open("SNP_Query_loginInfo.txt").read().split('\n')
+contents=open("SNP_Query_loginInfo.ini").read().split('\n')
 username=contents[0].split('=')[1]
 password=contents[1].split('=')[1]
 port=int(contents[2].split('=')[1])
