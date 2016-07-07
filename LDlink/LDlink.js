@@ -24,6 +24,23 @@ Object.size = function(obj) {
 };
 
 $(document).ready(function() {
+	$(".draggable").draggable();
+	$(".dropzone").droppable({
+		accept: "li",
+		hoverClass: "highlight",
+		tolerance: "fit",
+		activate: function(evt, ui) {
+			$(this).find("h3").css("background-color", "cornsilk");
+		},
+		deactivate: function(evt, ui) {
+			$(this).find("h3").css("background-color", "");
+		},
+		drop: function(evt, ui) {
+			$(this).find("h3").text("Dropped");
+			//ui.draggable.find("h3").text("Dropped");
+		}
+	});
+
 	updateVersion(ldlink_version);
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {

@@ -657,5 +657,17 @@ textarea:invalid, .error {
   .dataTables_wrapper .dataTables_filter {
     margin-top: 0.5em; } 
 }
+.dropzone {
+	width: 200px;
+	height: 100px;
+	background-color: #b3c8d0;
+	padding: 5pt;
+	margin: 10pt;
+	overflow: hidden;
+}
+.no-bullet {
+	list-style: none;
+}
+
 
     
