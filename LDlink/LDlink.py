@@ -157,7 +157,7 @@ def ldproxy():
         return sendTraceback()
 
 
-    copy_output_files(reference)
+    #copy_output_files(reference)
 
     return out_script+"\n "+out_div
 
@@ -188,7 +188,7 @@ def ldmatrix():
     except:
         return sendTraceback()
 
-    copy_output_files(reference)
+    #copy_output_files(reference)
     return out_script+"\n "+out_div
 
 
@@ -218,7 +218,7 @@ def ldhap():
     except:
         return sendTraceback()
 
-    copy_output_files(reference)
+    #copy_output_files(reference)
 
     return sendJSON(out_json)
 
@@ -314,7 +314,7 @@ def snpclip():
             f.write("\n")
 
     f.close()
-    copy_output_files(reference)
+    #copy_output_files(reference)
     out_json = json.dumps(clip, sort_keys=False)
     return current_app.response_class(out_json, mimetype=mimetype)
 
@@ -347,7 +347,7 @@ def snpchip():
 
     chip={}
     chip["snp_chip"] = snp_chip
-    copy_output_files(reference)
+    #copy_output_files(reference)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
 
     return current_app.response_class(out_json, mimetype='application/json')

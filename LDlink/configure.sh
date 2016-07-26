@@ -23,7 +23,7 @@ done
 if [ $valid = true ]; then
 
         for key in "${!parameters[@]}"; do
-                sed -e "s|\@${key}@|${parameters[$key]}|" $filename > config.tmp && mv config.tmp $filename
+                sed -i "s|\@${key}@|${parameters[$key]}|g" $filename
         done
 
         echo -e "\e[92mLDlink configured successfully\e[39m"
