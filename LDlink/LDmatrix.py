@@ -320,6 +320,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 			B=hap[sorted(hap)[1]]
 			C=hap[sorted(hap)[2]]
 			D=hap[sorted(hap)[3]]
+			tmax=max(A,B,C,D)
 			delta=float(A*D-B*C)
 			Ms=float((A+C)*(B+D)*(A+B)*(C+D))
 			if Ms!=0:
@@ -348,7 +349,12 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 					dD=(D-eD)**2
 					dmax=max(dA,dB,dC,dD)
 
-					if dmax==dA or dmax==dD:
+					if dA==dB==dC==dD:
+						if tmax==dA or tmax==dD:
+							match=sorted(hap)[0][0]+"="+sorted(hap)[0][1]+","+sorted(hap)[2][0]+"="+sorted(hap)[1][1]
+						else:
+							match=sorted(hap)[0][0]+"="+sorted(hap)[1][1]+","+sorted(hap)[2][0]+"="+sorted(hap)[0][1]
+					elif dmax==dA or dmax==dD:
 						match=sorted(hap)[0][0]+"="+sorted(hap)[0][1]+","+sorted(hap)[2][0]+"="+sorted(hap)[1][1]
 					else:
 						match=sorted(hap)[0][0]+"="+sorted(hap)[1][1]+","+sorted(hap)[2][0]+"="+sorted(hap)[0][1]

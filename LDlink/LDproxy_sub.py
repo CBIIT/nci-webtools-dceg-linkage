@@ -57,6 +57,7 @@ def LD_calcs(hap,allele,allele_n):
 	D=hap["11"]
 	
 	N=A+B+C+D
+	tmax=max(A,B,C,D)
 	delta=float(A*D-B*C)
 	Ms=float((A+C)*(B+D)*(A+B)*(C+D))
 	
@@ -92,7 +93,12 @@ def LD_calcs(hap,allele,allele_n):
 			dD=(D-eD)**2
 			dmax=max(dA,dB,dC,dD)
 			
-			if dmax==dA or dmax==dD:
+			if dA==dB==dC==dD:
+				if tmax==dA or tmax==dD:
+					match=allele["0"]+equiv+allele_n["0"]+","+allele["1"]+equiv+allele_n["1"]
+				else:
+					match=allele["0"]+equiv+allele_n["1"]+","+allele["1"]+equiv+allele_n["0"]
+			elif dmax==dA or dmax==dD:
 				match=allele["0"]+equiv+allele_n["0"]+","+allele["1"]+equiv+allele_n["1"]
 			else:
 				match=allele["0"]+equiv+allele_n["1"]+","+allele["1"]+equiv+allele_n["0"]

@@ -245,6 +245,7 @@ def calculate_pair(snp1,snp2,pop,request):
 	C=hap[sorted(hap)[2]]
 	D=hap[sorted(hap)[3]]
 	N=A+B+C+D
+	tmax=max(A,B,C,D)
 
 	hap1=sorted(hap, key=hap.get, reverse=True)[0]
 	hap2=sorted(hap, key=hap.get, reverse=True)[1]
@@ -278,6 +279,7 @@ def calculate_pair(snp1,snp2,pop,request):
 
 	# Find Correlated Alleles
 	if r2>0.1 and r2!="NA":
+		
 		# Expected Cell Counts
 		eA=(A+B)*(A+C)/N
 		eB=(B+A)*(B+D)/N
@@ -291,7 +293,16 @@ def calculate_pair(snp1,snp2,pop,request):
 		dD=(D-eD)**2
 		dmax=max(dA,dB,dC,dD)
 
-		if dmax==dA or dmax==dD:
+		if dA==dB==dC==dD:
+			if tmax==A or tmax==D:
+				corr1=snp1+"("+sorted(hap)[0].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split("_")[1]+") allele"
+				corr2=snp1+"("+sorted(hap)[2].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split("_")[1]+") allele"
+				corr_alleles=[corr1,corr2]
+			else:
+				corr1=snp1+"("+sorted(hap)[0].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split("_")[1]+") allele"
+				corr2=snp1+"("+sorted(hap)[2].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split("_")[1]+") allele"
+				corr_alleles=[corr1,corr2]	
+		elif dmax==dA or dmax==dD:
 			corr1=snp1+"("+sorted(hap)[0].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[0].split("_")[1]+") allele"
 			corr2=snp1+"("+sorted(hap)[2].split("_")[0]+") allele is correlated with "+snp2+"("+sorted(hap)[1].split("_")[1]+") allele"
 			corr_alleles=[corr1,corr2]
