@@ -38,6 +38,6 @@ else
         echo -e "\e[32mOptions:"
         echo -e "\e[39m --username\e[92m user.name"
         echo -e "\e[39m --password\e[92m user.password"
-        echo -e "\e[39m --port\e[92m 0-65535"
+        echo -e "\e[39m --port\e[92m 0-65535\e[39m"
 fi
 
