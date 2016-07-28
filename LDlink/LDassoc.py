@@ -26,7 +26,7 @@ def calculate_assoc(file,region,pop,request,args):
 	out_json=open(tmp_dir+'proxy'+request+".json","w")
 	output={}
 
-	chrs=["1","2","3","4","4","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
+	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 	
 	# Define parameters for --variant option
 	if region=="variant":
@@ -472,10 +472,11 @@ def calculate_assoc(file,region,pop,request,args):
 	
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
 	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=True)
-	####################################
-	# No longer sorting by R2 or D'!!! #
+	#######################################
+	# No longer sorting by R2 or D'!!!    #
 	# Need to decide on UCSC output style #
-	####################################
+	# As is query SNP!=index SNP          #
+	#######################################
 	
 	
 	# Populate JSON and text output
