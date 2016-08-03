@@ -221,7 +221,7 @@
 										placeholder="Upload data file (chr, pos, p-value)"
 										class="readonly-input-text">
 									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
-									<span	class="btn btn-default btn-file">Browse
+									<span class="btn btn-default btn-file btn-csv-file">Browse
 										<input type="file" id="ldassoc-file">
 									</span>
 								</div>
@@ -325,7 +325,7 @@
 										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
 									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
-									<span	class="btn btn-default btn-file">Browse
+									<span	class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="ldhap-file">
 									</span>
 								</div>
@@ -492,7 +492,7 @@
 										<input type="text" id="ldmatrix-file-label" readonly
 											placeholder="Upload file with RS numbers" class="readonly-input-text">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
-										<span	class="btn btn-default btn-file">Browse
+										<span	class="btn btn-default btn-file btn-snp">Browse
 											<input type="file" id="ldmatrix-file">
 										</span>
 									</div>
@@ -973,7 +973,7 @@
 										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
 									<label for="snpclip-file" style="display:none;">Browse for RS File</label>
-									<span	class="btn btn-default btn-file">Browse
+									<span	class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="snpclip-file">
 									</span>
 								</div>
@@ -1153,7 +1153,7 @@
 										placeholder="Upload file with RS numbers"
 										class="readonly-input-text">
 									<label for="snpchip-file" style="display:none;">Browse for RS File</label>
-									<span class="btn btn-default btn-file">Browse
+									<span class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="snpchip-file">
 									</span>
 								</div>
@@ -1365,32 +1365,14 @@
 				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i class="fa fa-lg fa-linkedin"></i></a>
 			</div>
 	</div>
+
 <!--
-<html>
-<head>
-    <title>Add Numbers!</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js"></script>
-    <script src="demoPost.js"></script>
-</head>
-
-<body>
-    First number:
-    <input type="text" id="first">
-    <br>
-    Second number:
-    <input type="text" id="second">
-    <br>
-    <button id="submit" onclick="submitForm()">Add these numbers!</button>
-    
-    <br>
-    Results:
-    <span id="results"></span>
-    
-</body>
-
-
-
-</html>
+	Dialogs
+-->
+<!--
+<div id="dialog" title="Basic dialog">
+  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
+</div>
 -->
 
 <!--  Temp during testing
@@ -1438,6 +1420,10 @@
 	<script type="text/javascript"
 		src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.js">
 	</script>
+	<script type="text/javascript"
+		src="jquery.csv.js"> 
+	</script>
+
 	<!-- Google Analytics -->
 	<script async src='//www.google-analytics.com/analytics.js'></script>
 	<script>

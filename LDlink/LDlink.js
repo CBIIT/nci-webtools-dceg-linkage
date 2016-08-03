@@ -102,12 +102,17 @@ $(document).ready(function() {
 });
 
 // Set file support trigger
-$(document).on('change','.btn-file :file',function() {
-		var input = $(this), numFiles = input.get(0).files ? 
-		input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-		input.trigger('fileselect', [ numFiles, label ]);
-	}
-);
+$(document).on('change','.btn-snp :file',function() {
+	var input = $(this);
+	var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	input.trigger('fileselect');
+});
+//ldAssoc File Change
+$(document).on('change','.btn-csv-file :file',function() {
+	var input = $(this);
+	var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	input.trigger('fileselect');
+});
 
 function createEnterEvent() {
 	$("body").keypress(function(e) {
@@ -135,10 +140,17 @@ function createEnterEvent() {
 
 function createFileSelectEvent() {
 	// Add file select file listener
-	$('.btn-file :file').on('fileselect', function(event, numFiles, label) {
+	$('.btn-snp :file').on('fileselect', function(event, numFiles, label) {
+		alert('createFileSelectEvent');
+		console.log("Event");
+		console.dir(event);
+		console.log("numFiles");
+		console.dir(numFiles);
+		console.log("label");
+		console.log(label);
 		populateTextArea(event, numFiles, label);
-		var input = $(this).parents('.input-group').find(':text'), log = numFiles > 1 ? numFiles
-				+ ' files selected' : label;
+		var input = $(this).parents('.input-group').find(':text')
+		var log = numFiles > 1 ? numFiles + ' files selected' : label;
 		if (input.length) {
 			input.val(log);
 		} else {
@@ -146,8 +158,39 @@ function createFileSelectEvent() {
 				alert(log);
 		}
 	});
+	//Customize for ldAssoc
+	$('.btn-csv-file :file').on('fileselect', function(event) {
+		//console.log("Event");
+		//console.dir(event);
+		loadCSVFile(event);
+	});
 
 }
+/*
+Action item:
+
+*/
+function loadCSVFile(event) {
+	console.warn("Load CSV parse.  Let's take a look at what we got");
+	alert("Hello");
+	var id = event.target.id;
+	if (window.FileReader) {
+
+		var input = event.target;
+		var reader = new FileReader();
+		reader.onload = function() {
+			var text = reader.result;
+			alert(text);
+			var data = $.csv.toObjects(text);
+			alert(text);
+			console.dir(data);
+		};
+	} else {
+		console.warn('FileReader not supported');
+		return;
+	}
+}
+
 
 function createProxyTable() {
 
@@ -570,7 +613,6 @@ function cleanSNP(text) {
 
 function populateTextArea(event, numFiles, label) {
 	id = event.target.id;
-	//alert(id);
 	if (window.FileReader) {
 
 		var input = event.target;
