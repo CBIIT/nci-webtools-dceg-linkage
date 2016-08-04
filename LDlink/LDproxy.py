@@ -2,7 +2,7 @@
 
 # Create LDproxy function
 def calculate_proxy(snp,pop,request,r2_d="r2"):
-	import csv,json,operator,os,sqlite3,subprocess,sys,time
+        import csv,json,operator,os,sqlite3,subprocess,sys,time,threading,weakref
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
 
@@ -192,6 +192,8 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	def get_output(process):
 		return process.communicate()[0].splitlines()
 
+        if not hasattr(threading.current_thread(), "_children"):
+             threading.current_thread()._children = weakref.WeakKeyDictionary()
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
 	pool.close()
