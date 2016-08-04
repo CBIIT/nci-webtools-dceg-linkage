@@ -2,6 +2,9 @@
 
 # Create LDproxy function
 def calculate_assoc(file,region,pop,request,args):
+	args.origin = "rs1231"
+	print "Inside calculate_assoc"
+	print args
 	import csv,json,operator,os,sqlite3,subprocess,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
@@ -934,6 +937,7 @@ def main():
 	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 	
 	args=parser.parse_args()
+	#dir args
 	
 	if args.gene:
 		region="gene"

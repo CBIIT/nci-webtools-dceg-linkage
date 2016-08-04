@@ -260,8 +260,67 @@
 						</div>
 					</div>
 				</div>
+				<!-- ldassoc CONTAINER -->
+				<div class="jumbotron">
+					<div class="container-fluid" id="ldassoc-results-container">
+					<div class="row" style="padding:10px;">
+						<div class="col-sm-9 col-sm-offset-1">Namespace(bp='BP', chr='CHR', dprime=False, end=None, file='meta_assoc.meta', gene=False, id='SNP', name=None, origin='rs1231', pop='ALL', pval='P', region=False, request='8383', start=None, variant=True, window=None)
+						</div>
+					</div>
+					<div class="row" style="padding:10px;">
+						<div class="col-sm-7 col-sm-offset-1">
+							<ul style="list-style-type: none;">
+								<li>Number of Individuals: <b>2504</b></li>
+								<li>SNPs in Region: <b>2451</b></li>
+								<li>Run time: <b>6.39</b> seconds</li>
+							</ul>
+						</div>
+					</div>
 
-<div id="header-match" class="hidden">
+						<table id="new-ldassoc" class="table display compact">
+							<thead>
+								<tr>
+									<th>RS Number</th>
+									<th class="dt-body-center">Chr</th>
+									<th>Position (GRCh37)</th>
+									<th>Alleles</th>
+									<th>MAF</th>
+									<th>Distance</th>
+									<th>D'</th>
+									<th>R<sup>2</sup></th>
+									<th>Correlated Alleles</th>
+									<th>RegulomeDB</th>
+									<th>HaploReg</th>
+									<th>Functional Class</th>
+								</tr>
+							</thead>
+							<tfoot>
+								<tr>
+									<th>RS Results</th>
+									<th>Chr</th>
+									<th>Position (GRCh37)</th>
+									<th>Alleles</th>
+									<th>MAF</th>
+									<th>Distance</th>
+									<th>D'</th>
+									<th>R<sup>2</sup></th>
+									<th>Correlated Alleles</th>
+									<th>RegulomeDB</th>
+									<th>HaploReg</th>
+									<th>Functional Class</th>
+								</tr>
+							</tfoot>
+						</table>
+						<div class="row" style="padding:10px;">
+							<div class="col-sm-7">
+								<ul style="list-style-type: none;">
+									<li><i>Note: Data is simulated</i></li>
+								</ul>
+							</div>
+						</div>
+					</div>
+				</div>
+<div id="header-match" style="display:none;">
 <div class="container-fluid">
     <hr>
     	<h2 class="">Drag and Drop header titles to coresponding values</h2>
@@ -1378,6 +1437,8 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
+
 	<script type="text/javascript"
 		src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
 	</script>
