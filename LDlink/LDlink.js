@@ -103,15 +103,16 @@ $(document).ready(function() {
 
 // Set file support trigger
 $(document).on('change','.btn-snp :file',function() {
-	var input = $(this);
-	var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-	input.trigger('fileselect');
+	var input = $(this), numFiles = input.get(0).files ? 
+	input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	input.trigger('fileselect', [numFiles, label]);
 });
+
 //ldAssoc File Change
 $(document).on('change','.btn-csv-file :file',function() {
-	var input = $(this);
-	var label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-	input.trigger('fileselect');
+	var input = $(this), numFiles = input.get(0).files ? 
+	input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
+	input.trigger('fileselect', [numFiles, label]);
 });
 
 function createEnterEvent() {
@@ -141,36 +142,55 @@ function createEnterEvent() {
 function createFileSelectEvent() {
 	// Add file select file listener
 	$('.btn-snp :file').on('fileselect', function(event, numFiles, label) {
-		alert('createFileSelectEvent');
-		console.log("Event");
-		console.dir(event);
-		console.log("numFiles");
-		console.dir(numFiles);
-		console.log("label");
-		console.log(label);
+		$(this).parents('.input-group').find(':text').val(label);
 		populateTextArea(event, numFiles, label);
-		var input = $(this).parents('.input-group').find(':text')
-		var log = numFiles > 1 ? numFiles + ' files selected' : label;
-		if (input.length) {
-			input.val(log);
-		} else {
-			if (log)
-				alert(log);
-		}
+
 	});
 	//Customize for ldAssoc
-	$('.btn-csv-file :file').on('fileselect', function(event) {
+	$('.btn-csv-file :file').on('fileselect', function(event, numFiles, label) {
+		$(this).parents('.input-group').find(':text').val(label);
 		//console.log("Event");
 		//console.dir(event);
-		loadCSVFile(event);
+		populateTextArea(event, numFiles, label);
+		$("#header-match").removeClass('hidden');
+		//Changing loadCSVFile because the file size is 722Meg
+		//loadCSVFile(event);
 	});
 
 }
-/*
+
+function readSingleFile(evt) {
+    //Retrieve the first (and only!) File from the FileList object
+    var f = evt.target.files[0]; 
+    if (f) {
+      var r = new FileReader();
+      r.onload = function(e) { 
+        console.log( "Got the file.n" 
+              +"name: " + f.name + "n"
+              +"type: " + f.type + "n"
+              +"size: " + f.size + " bytesn"
+              + "starts with: " 
+        );
+
+		var contents = e.target.result;
+		var defaults = {
+			separator:' ',
+			delimiter:' ',
+			headers:true
+		};
+        var data = $.csv.toObjects(contents, defaults);
+        console.dir(data);  
+      }
+      r.readAsText(f);
+    } else { 
+      alert("Failed to load file");
+    }
+  }/*
 Action item:
 
 */
 function loadCSVFile(event) {
+	readSingleFile(event);
 	console.warn("Load CSV parse.  Let's take a look at what we got");
 	alert("Hello");
 	var id = event.target.id;
@@ -635,6 +655,7 @@ function loadHelp() {
 
 function calculate(e) {
 	var formId = e.target.id;
+	alert("You just hit formId:"+formId);
 	e.preventDefault();
 
 	// strip out "Form" from id
@@ -653,6 +674,13 @@ function initCalculate(id) {
 function updateData(id) {
 
 	switch (id) {
+		case 'ldassoc':
+			if(isPopulationSet(id)) {
+				$('#'+id+"-loading").show();
+				alert("Got this far");
+				updateLDassoc();
+			}
+			break;
 		case 'ldhap':
 			if(isPopulationSet(id)) {
 				$('#'+id+"-loading").show();
@@ -702,6 +730,56 @@ function isPopulationSet(elementId) {
 		$('#'+elementId+'-population-codes-zero').popover('hide');
 		return true;
 	}
+}
+
+function updateLDassoc() {
+
+	var id = "ldassoc";
+
+	var $btn = $('#' + id).button('loading');
+	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+	var population = getPopulationCodes(id+'-population-codes');
+	var ldInputs = {
+		snps : snps,
+		pop : population.join("+"),
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+	};
+	var url = restServerUrl + "/ldassoc";
+	var ajaxRequest = $.ajax({
+		type : 'GET',
+		url : url,
+		data : ldInputs,
+		contentType : 'application/json' // JSON
+	});
+
+	ajaxRequest.success(function(data) {
+		//data is returned as a string representation of JSON instead of JSON obj
+		//JSON.parse() cleans up this json string.
+		var jsonObj;
+		if(typeof data == 'string') {
+			jsonObj = JSON.parse(data);
+		} else {
+			jsonObj = data;
+		}
+
+		if (displayError(id, jsonObj) == false) {
+			$('#' + id + '-results-container').show();
+			$("#header-match").hide();
+			//$('#' + id + '-links-container').show();
+			//var ldhapTable = formatLDhapData($.parseJSON(data));
+			//$('#ldhap-haplotypes-column').attr('colspan',ldhapTable.footer.length);
+			//ko.mapping.fromJS(ldhapTable, ldhapModel);
+			//addLDHapHyperLinks(ldInputs.reference, ldhapTable);
+		}
+	});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		displayCommFail(id, jqXHR, textStatus);
+	});
+	ajaxRequest.always(function() {
+		$btn.button('reset');
+	});
+
+	hideLoadingIcon(ajaxRequest, id);
 }
 
 function updateLDhap() {

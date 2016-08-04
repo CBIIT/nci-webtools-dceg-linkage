@@ -21,7 +21,9 @@ from LDpair import calculate_pair
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
+from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
+
 from SNPchip import *
 
 #import os
@@ -360,31 +362,32 @@ def snpchip_platforms():
 
 @app.route('/LDlinkRest/ldassoc', methods = ['GET'])
 def ldassoc():
-    # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
-    # python LDpair.py rs2720460 rs11733615 EUR 38
-    # r1 = '{"corr_alleles":["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],"haplotypes":{"hap1":{"alleles":"AC","count":"576","frequency":"0.573"},"hap2":{"alleles":"GT","count":"361","frequency":"0.359"},"hap3":{"alleles":"GC","count":"42","frequency":"0.042"},"hap4":{"alleles":"AT","count":"27","frequency":"0.027"}},"snp1":{"allele_1":{"allele":"A","count":"603","frequency":"0.599"},"allele_2":{"allele":"G","count":"403","frequency":"0.401"},"coord":"chr4:104054686","rsnum":"rs2720460"},"snp2":{"allele_1":{"allele":"C","count":"618","frequency":"0.614"},"allele_2":{"allele":"T","count":"388","frequency":"0.386"},"coord":"chr4:104157164","rsnum":"rs11733615"},"statistics":{"chisq":"738.354","d_prime":"0.8839","p":"0.0","r2":"0.734"},"two_by_two":{"cells":{"11":"576","12":"27","21":"42","22":"361"},"total":"1006"}'
-
-    print
-    print 'LDAssoc'
+    print "LDassoc"
     print 'Gathering Variables from url'
-    var1 = request.args.get('var1', False)
-    var2 = request.args.get('var2', False)
+
+    snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
-    # reference = "939393"
-    print 'var1: ' + var1
-    print 'var2: ' + var2
+    print 'snps: ' + snps
     print 'pop: ' + pop
     print 'request: ' + reference
-    print
+
+    snplst = tmp_dir+'snps'+reference+'.txt'
+    print 'snplst: '+snplst
+
+    f = open(snplst, 'w')
+    f.write(snps)
+    f.close()
+
     try:
-        out_json = calculate_pair(var1, var2, pop, reference)
+        out_json = calculate_assoc(file,region,pop,request,args)
     except:
         return sendTraceback()
 
-    mimetype = 'application/json'
+    #copy_output_files(reference)
 
-    return current_app.response_class(out_json, mimetype=mimetype)
+    return sendJSON(out_json)
+
 
 import argparse
 if __name__ == '__main__':
