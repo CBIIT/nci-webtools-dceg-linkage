@@ -27,6 +27,18 @@ Object.size = function(obj) {
 };
 
 $(document).ready(function() {
+	$("#assoc-chromosome > .dropdown-menu li a").click(function(){
+		$("#assoc-chromosome > .btn:first-child").text($(this).text());
+		$("#assoc-chromosome > .btn:first-child").val($(this).text());
+	});
+	$("#assoc-position > .dropdown-menu li a").click(function(){
+		$("#assoc-position > .btn:first-child").text($(this).text());
+		$("#assoc-position > .btn:first-child").val($(this).text());
+	});
+	$("#assoc-p-value > .dropdown-menu li a").click(function(){
+		$("#assoc-p-value > .btn:first-child").text($(this).text());
+		$("#assoc-p-value > .btn:first-child").val($(this).text());
+	});
 	console.dir(ldassocData);
 	$(".draggable").draggable();
 	$(".dropzone").droppable({

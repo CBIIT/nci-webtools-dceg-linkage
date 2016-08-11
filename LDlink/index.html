@@ -187,17 +187,58 @@
 					<div class="row" style="padding-top: 10px;">
 						<!-- ldassoc FORM -->
 						<form id="ldassocForm" class="ldlinkForm">
-							<!-- RS numbers -->
-							<div class="form-group">
-								<div class="col-sm-2">
-									<textarea id="ldassoc-file-snp-numbers" 
-										placeholder="RS Numbers"
-										class="form-control"
-										title="Enter list of RS numbers (one per line)"
-										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
-								</div>
-							</div>
 							<!-- Population -->
+							<!-- Broswe RS numbers -->
+							<div class="col-sm-4">
+								<div class="input-group">
+									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
+									<input type="text" id="ldassoc-file-label" readonly
+										placeholder="Upload data association file"
+										class="readonly-input-text">
+									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
+									<span class="btn btn-default btn-file btn-csv-file">Browse
+										<input type="file" id="ldassoc-file">
+									</span>
+								</div>
+								<div class="vertical-text" style="color:#800000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data Details</div>
+								<div id="header-values">
+									<div class="pull-left" style="width:300px;">
+  <div id="assoc-chromosome" class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;color:#800000">Select Chromosome
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+      <li role="presentation" class="divider"></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+    </ul>
+  </div>
+<div id="assoc-position" class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;color:#800000">Select Position
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+      <li role="presentation" class="divider"></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+    </ul>
+  </div>
+<div id="assoc-p-value" class="dropdown">
+    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;color:#800000">Select P-value
+    <span class="caret"></span></button>
+    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+      <li role="presentation" class="divider"></li>
+      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+    </ul>
+  </div>
+									</div>
+								</div> <!-- End header-values -->
+							</div>
 							<div class="form-group">
 								<div class="col-sm-3">
 									<a id="ldassoc-population-codes-zero"
@@ -211,19 +252,6 @@
 									<select id="ldassoc-population-codes" multiple="multiple"
 										name="populations">
 									</select>
-								</div>
-							</div>
-							<!-- Broswe RS numbers -->
-							<div class="col-sm-4">
-								<div class="input-group">
-									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
-									<input type="text" id="ldassoc-file-label" readonly
-										placeholder="Upload data file (chr, pos, p-value)"
-										class="readonly-input-text">
-									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
-									<span class="btn btn-default btn-file btn-csv-file">Browse
-										<input type="file" id="ldassoc-file">
-									</span>
 								</div>
 							</div>
 							<!-- Calculate -->
