@@ -675,7 +675,21 @@ textarea:invalid, .error {
 .vertical-text {
 	float: left;
 }
+.dropdown-toggle {
+	text-align:left;
+}
+#ldassocForm button.dropdown-toggle {
+	color:#800000;
+}
+#region-gene-container > div *, #region-region-container > div *, #region-variant-container > div * {
+	margin-top:5px;
+	white-space:nowrap;
+}
+#header-values > div > div * {
+	margin-top:5px;
+	white-space:nowrap;
+}
+#assoc-region {
+	margin-bottom:20px;
+}
 
-
-
-    

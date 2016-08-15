@@ -39,6 +39,34 @@ $(document).ready(function() {
 		$("#assoc-p-value > .btn:first-child").text($(this).text());
 		$("#assoc-p-value > .btn:first-child").val($(this).text());
 	});
+	$("#assoc-region > .dropdown-menu li a").click(function(e){
+		$("#assoc-region > .btn:first-child").text($(this).text());
+		$("#assoc-region > .btn:first-child").val($(this).text());
+		$("#region-gene-container").hide();
+		$("#region-region-container").hide();
+		$("#region-variant-container").hide();
+		console.log(e.target.id);
+		switch($(this).text()) {
+			case "Gene":
+				$("#region-gene-container").show();
+				break;
+			case "Region":
+				$("#region-region-container").show();
+				break;
+			case "Variant":
+				$("#region-variant-container").show();
+				break;
+		} 
+	});
+
+	/*
+	$("#ldassoc-region").multiselect({
+	   multiple: false,
+	   header: "Select a Region",
+	   noneSelectedText: "Region",
+	   selectedList: 1
+	});
+	*/
 	console.dir(ldassocData);
 	$(".draggable").draggable();
 	$(".dropzone").droppable({
