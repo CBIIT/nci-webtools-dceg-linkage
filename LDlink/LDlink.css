@@ -671,6 +671,7 @@ textarea:invalid, .error {
 .vertical-text {
 	transform: rotate(90deg);
 	transform-origin: left top 0;
+	color:#800000;
 }
 .vertical-text {
 	float: left;

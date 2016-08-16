@@ -209,10 +209,10 @@ function createFileSelectEvent() {
 	//Customize for ldAssoc
 	$('.btn-csv-file :file').on('fileselect', function(event, numFiles, label) {
 		$(this).parents('.input-group').find(':text').val(label);
-		//console.log("Event");
-		//console.dir(event);
+		console.log("Event");
+		console.dir(event);
 		populateTextArea(event, numFiles, label);
-		$("#header-match").show();
+		$("#header-values").show();
 		//Changing loadCSVFile because the file size is 722Meg
 		//loadCSVFile(event);
 	});
@@ -782,7 +782,7 @@ function initCalculate(id) {
 
 function simulateLDassoc() {
 	$('#ldassoc-results-container').show();
-	$("#header-match").hide();
+	//$("#header-match").hide();
 	$("#ldassoc-loading").hide();
 
 	//$('#' + id + '-links-container').show();
@@ -792,7 +792,7 @@ function updateData(id) {
 
 	switch (id) {
 		case 'ldassoc':
-			$("#header-match").hide();
+			//$("#header-match").hide();
 			if(isPopulationSet(id)) {
 				$('#'+id+"-loading").show();
 				//updateLDassoc();

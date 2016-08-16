@@ -189,7 +189,7 @@
 						<form id="ldassocForm" class="ldlinkForm">
 							<!-- Population -->
 							<!-- Broswe RS numbers -->
-							<div class="col-sm-3">
+							<div class="col-sm-3" style="width:280px;">
 								<div class="input-group">
 									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
 									<input type="text" id="ldassoc-file-label" readonly
@@ -200,9 +200,9 @@
 										<input type="file" id="ldassoc-file">
 									</span>
 								</div>
-								<div class="vertical-text" style="color:#800000">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data Details</div>
-								<div id="header-values">
-									<div class="pull-left" style="width:300px;">
+								<div id="header-values" style="display:none;">
+									<div class="vertical-text">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Data Details</div>
+									<div class="" style="width:300px;">
 									  <div id="assoc-chromosome" class="dropdown">
 									    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;">Select Chromosome
 									    <span class="caret"></span></button>
@@ -240,7 +240,7 @@
 								</div> <!-- End header-values -->
 							</div>
 							<div class="form-group">
-								<div class="col-sm-3">
+								<div class="col-sm-3" style="width:275px;">
 									<div id="assoc-region" class="dropdown">
 										<button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:155px;">Select Region
 										<span class="caret"></span></button>
@@ -252,22 +252,22 @@
 										</ul>
 									</div>
 									<!-- region = Gene -->
-									<div id="region-gene-container" class="input-group">
-										<div>
+									<div id="region-gene-container" class="form-inline" style="display:none;">
+										<div class="form-group">
 											<label for="region-gene-name" style="display:none;">Gene Name</label>
 											<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name">
 										</div>
-										<div>
+										<div class="form-group">
 											<label for="region-gene-base-pair-window" >&plusmn;</label>
 											<input type="number" id="region-gene-base-pair-window" class="form-control" value="100000" step="10000" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
 										</div>
-										<div>
+										<div class="form-group">
 											<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
 											<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)">
 										</div>
 									</div>
 									<!-- region = Region -->
-									<div id="region-region-container" class="input-group" style="display:none;">
+									<div id="region-region-container" class="form-inline" style="display:none;">
 										<div>
 											<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000)</label>
 											<input type="text" id="region-region-start-coord" class="form-control" placeholder="Start Coord (chr1:50000)">
@@ -282,12 +282,12 @@
 										</div>
 									</div>
 									<!-- region = Variant -->
-									<div id="region-variant-container" class="input-group" style="display:none;">
-										<div>
+									<div id="region-variant-container" class="form-inline" style="display:none;">
+										<div class="form-group">
 											<label for="region-variant-index" style="display:none;">Index variant (optional)</label>
 											<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant">
 										</div>
-										<div>
+										<div class="form-group">
 											<label for="region-variant-base-pair-window" >&plusmn;</label>
 											<input type="number" id="region-variant-base-pair-window" class="form-control" value="500000" step="10000" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
 										</div>
@@ -295,7 +295,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-2">
+								<div class="col-sm-2" style="width:190px;">
 									<a id="ldassoc-population-codes-zero"
 										style="position:relative;left:180px;"
 										href="#"
