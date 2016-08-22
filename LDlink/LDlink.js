@@ -788,8 +788,12 @@ function populateAssocDropDown(headers) {
 
 function parseHeaderValues(header_line) {
 	//alert(header_line);
-	var clean = header_line.replace(/\t/, " ");
+	//Assumption: No spaces in the header title for each column.  Either a space or comma between header titles.
+	var clean = header_line.replace(/\t/g, " ");
+	clean = clean.replace(/","/g, " ");
+	clean = clean.replace(/,/g, " ");
 	//var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
+	console.log("Here is clean");
 	console.log(clean);
 	var headers = clean.split(" ");
 	console.log(headers);
