@@ -28,15 +28,18 @@ Object.size = function(obj) {
 
 $(document).ready(function() {
 	$("#assoc-chromosome > .dropdown-menu li a").click(function(){
-		$("#assoc-chromosome > .btn:first-child").text($(this).text());
+		var msg = "Chromosome: "+$(this).text()+" column";
+		$("#assoc-chromosome > .btn:first-child").text(msg);
 		$("#assoc-chromosome > .btn:first-child").val($(this).text());
 	});
 	$("#assoc-position > .dropdown-menu li a").click(function(){
-		$("#assoc-position > .btn:first-child").text($(this).text());
+		var msg = "Position: "+$(this).text()+" column";
+		$("#assoc-position > .btn:first-child").text(msg);
 		$("#assoc-position > .btn:first-child").val($(this).text());
 	});
 	$("#assoc-p-value > .dropdown-menu li a").click(function(){
-		$("#assoc-p-value > .btn:first-child").text($(this).text());
+		var msg = "P-value: "+$(this).text()+" column";
+		$("#assoc-p-value > .btn:first-child").text(msg);
 		$("#assoc-p-value > .btn:first-child").val($(this).text());
 	});
 	$("#assoc-region > .dropdown-menu li a").click(function(e){
@@ -67,6 +70,7 @@ $(document).ready(function() {
 	   selectedList: 1
 	});
 	*/
+	/*
 	console.dir(ldassocData);
 	$(".draggable").draggable();
 	$(".dropzone").droppable({
@@ -84,7 +88,7 @@ $(document).ready(function() {
 			//ui.draggable.find("h3").text("Dropped");
 		}
 	});
-
+	*/
 	updateVersion(ldlink_version);
 	//addValidators();
 	$('#ldlink-tabs').on('click', 'a', function(e) {
@@ -155,25 +159,21 @@ $(document).ready(function() {
 
 	setupTabs();
 	autoCalculate();
-
 	createFileSelectEvent();
 	createEnterEvent();
 
 });
 
 // Set file support trigger
-$(document).on('change','.btn-snp :file',function() {
-	var input = $(this), numFiles = input.get(0).files ? 
-	input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
-	input.trigger('fileselect', [numFiles, label]);
-});
-
+$(document).on('change','.btn-snp :file', createFileSelectTrigger);
 //ldAssoc File Change
-$(document).on('change','.btn-csv-file :file',function() {
+$(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
+
+function createFileSelectTrigger() {
 	var input = $(this), numFiles = input.get(0).files ? 
 	input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
 	input.trigger('fileselect', [numFiles, label]);
-});
+} 
 
 function createEnterEvent() {
 	$("body").keypress(function(e) {
@@ -210,11 +210,11 @@ function createFileSelectEvent() {
 	$('.btn-csv-file :file').on('fileselect', function(event, numFiles, label) {
 		$(this).parents('.input-group').find(':text').val(label);
 		console.log("Event");
-		console.dir(event);
-		populateTextArea(event, numFiles, label);
+		populateHeaderValues(event, numFiles, label);
 		$("#header-values").show();
 		//Changing loadCSVFile because the file size is 722Meg
 		//loadCSVFile(event);
+
 	});
 
 }
@@ -758,7 +758,26 @@ function populateTextArea(event, numFiles, label) {
 		return;
 	}
 }
+function populateHeaderValues(event, numFiles, label) {
 
+	console.warn("populateHeaderValues");
+
+	id = event.target.id;
+	if (window.FileReader) {
+
+		var input = event.target;
+		var reader = new FileReader();
+		reader.onload = function() {
+			var text = reader.result;
+			$('#'+id+'-snp-numbers').val(cleanSNP(text));
+			$('#'+id+'-snp-numbers').keyup();
+		};
+		reader.readAsText(input.files[0]);
+	} else {
+		alert('FileReader not supported');
+		return;
+	}
+}
 function loadHelp() {
 	$('#help-tab').load('help.html');
 }
@@ -2303,4 +2322,38 @@ Array.prototype.unique = function() {
         }
     }
     return arr; 
+}
+function parseFile(file, callback) {
+    var fileSize   = file.size;
+    var chunkSize  = 64 * 1024; // bytes
+    var offset     = 0;
+    var self       = this; // we need a reference to the current object
+    var chunkReaderBlock = null;
+
+    var readEventHandler = function(evt) {
+        if (evt.target.error == null) {
+            offset += evt.target.result.length;
+            callback(evt.target.result); // callback for handling read chunk
+        } else {
+            console.log("Read error: " + evt.target.error);
+            return;
+        }
+        if (offset >= fileSize) {
+            console.log("Done reading file");
+            return;
+        }
+
+        // of to the next chunk
+        chunkReaderBlock(offset, chunkSize, file);
+    }
+
+    chunkReaderBlock = function(_offset, length, _file) {
+        var r = new FileReader();
+        var blob = _file.slice(_offset, length + _offset);
+        r.onload = readEventHandler;
+        r.readAsText(blob);
+    }
+
+    // now let's start the read with the first block
+    chunkReaderBlock(offset, chunkSize, file);
 }
