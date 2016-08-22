@@ -5,6 +5,7 @@ var ldlink_version = "Version 3.0";
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
 var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRest'}
 var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
+var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
 
 var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
 var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
@@ -26,21 +27,31 @@ Object.size = function(obj) {
     return size;
 };
 
+function setBootstrapSelector(id, value) {
+	var str = id.substr(6);
+	str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+		return letter.toUpperCase();
+	});			
+	var msg = str+": "+value+" column";
+	$("#"+id+" > .btn:first-child").text(msg);
+	$("#"+id+" > .btn:first-child").val(value);
+}
+function resetBootstrapSelector(id) {
+	var str = id.substr(6);
+	str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+		return letter.toUpperCase();
+	});
+	var msg = "Select "+str+'&nbsp;<span class="caret"></span>';
+	$("#"+id+" > .btn:first-child").html(msg);
+	$("#"+id+" > .btn:first-child").val("");
+}
+
 $(document).ready(function() {
-	$("#assoc-chromosome > .dropdown-menu li a").click(function(){
-		var msg = "Chromosome: "+$(this).text()+" column";
-		$("#assoc-chromosome > .btn:first-child").text(msg);
-		$("#assoc-chromosome > .btn:first-child").val($(this).text());
-	});
-	$("#assoc-position > .dropdown-menu li a").click(function(){
-		var msg = "Position: "+$(this).text()+" column";
-		$("#assoc-position > .btn:first-child").text(msg);
-		$("#assoc-position > .btn:first-child").val($(this).text());
-	});
-	$("#assoc-p-value > .dropdown-menu li a").click(function(){
-		var msg = "P-value: "+$(this).text()+" column";
-		$("#assoc-p-value > .btn:first-child").text(msg);
-		$("#assoc-p-value > .btn:first-child").val($(this).text());
+	$.each(dropdowns, function(i, id) {
+		$("#"+id+" > .dropdown-menu").on("click", "li a", function(){
+			createCookie(id, $(this).text(), 10);
+			setBootstrapSelector(id, $(this).text());
+		});
 	});
 	$("#assoc-region > .dropdown-menu li a").click(function(e){
 		$("#assoc-region > .btn:first-child").text($(this).text());
@@ -758,10 +769,60 @@ function populateTextArea(event, numFiles, label) {
 		return;
 	}
 }
+
+function populateAssocDropDown(headers) {
+	$.each(dropdowns, function(i, id) {
+		$("#"+id).find("ul").empty();
+		$.each(headers, function(key, value){
+			$("#"+id).find("ul").append('<li role="presentation"><a role="menuitem" tabindex="-1" href="#">'+value+'</a></li>');
+		});
+		var previous_value = readCookie(id);
+		console.log("You previous selected: "+previous_value);
+		if($.inArray(previous_value, headers) != -1) {
+			setBootstrapSelector(id, previous_value);
+		} else {
+			resetBootstrapSelector(id);
+		}
+	});
+}
+
+function parseHeaderValues(header_line) {
+	//alert(header_line);
+	var clean = header_line.replace(/\t/, " ");
+	//var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
+	console.log(clean);
+	var headers = clean.split(" ");
+	console.log(headers);
+	var new_headers = headers.filter(function(v){return v!==''});
+	console.log(new_headers);
+
+	populateAssocDropDown(new_headers);
+
+}
+
+function getHeaderLine(header) {
+	console.log(header);
+	var index = 0;
+    //var view = new Uint8Array(header);
+    var view = header;
+	for(index=0;index<=header.length;index++) {
+        if (header.charCodeAt(index) === 10 || header.charCodeAt(index) === 13) {
+        	console.log("Found a return");
+			parseHeaderValues(header.substr(0, index));
+        	return;
+        }
+	}
+
+	console.warn("Did not find a return in the header line. Please fix input file.  Make sure the header line is the first line and has a return.");
+
+}
+
 function populateHeaderValues(event, numFiles, label) {
 
 	console.warn("populateHeaderValues");
-
+	//findColumnLength(event.target.files[0], printLength);
+	parseFile(event.target.files[0], getHeaderLine);
+	/*  
 	id = event.target.id;
 	if (window.FileReader) {
 
@@ -777,6 +838,7 @@ function populateHeaderValues(event, numFiles, label) {
 		alert('FileReader not supported');
 		return;
 	}
+	*/
 }
 function loadHelp() {
 	$('#help-tab').load('help.html');
@@ -2323,6 +2385,7 @@ Array.prototype.unique = function() {
     }
     return arr; 
 }
+
 function parseFile(file, callback) {
     var fileSize   = file.size;
     var chunkSize  = 64 * 1024; // bytes
@@ -2342,12 +2405,12 @@ function parseFile(file, callback) {
             console.log("Done reading file");
             return;
         }
-
         // of to the next chunk
         chunkReaderBlock(offset, chunkSize, file);
     }
 
     chunkReaderBlock = function(_offset, length, _file) {
+    	console.log("Reading a block, offset is "+_offset);
         var r = new FileReader();
         var blob = _file.slice(_offset, length + _offset);
         r.onload = readEventHandler;
@@ -2356,4 +2419,29 @@ function parseFile(file, callback) {
 
     // now let's start the read with the first block
     chunkReaderBlock(offset, chunkSize, file);
+}
+
+function createCookie(name,value,days) {
+    if (days) {
+        var date = new Date();
+        date.setTime(date.getTime()+(days*24*60*60*1000));
+        var expires = "; expires="+date.toGMTString();
+    }
+    else var expires = "";
+    document.cookie = name+"="+value+expires+"; path=/";
+}
+
+function readCookie(name) {
+    var nameEQ = name + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0;i < ca.length;i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+    }
+    return null;
+}
+
+function eraseCookie(name) {
+    createCookie(name,"",-1);
 }
