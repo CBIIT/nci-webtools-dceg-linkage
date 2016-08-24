@@ -693,4 +693,7 @@ textarea:invalid, .error {
 #assoc-region {
 	margin-bottom:20px;
 }
+.progress {
+	margin-bottom:18px;
+}
 

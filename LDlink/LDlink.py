@@ -29,6 +29,7 @@ from SNPchip import *
 #import os
 #from flask import Flask, request, redirect, url_for
 from werkzeug import secure_filename
+from werkzeug.debug import DebuggedApplication
 
 tmp_dir = "./tmp/"
 # Ensure tmp directory exists
@@ -36,7 +37,9 @@ if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 		
 app = Flask(__name__, static_folder='', static_url_path='/')
-#app.debug = True
+app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
+app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
+app.debug = True
 
 #app = Flask(__name__, static_folder='static', static_url_path='/static')
 
@@ -88,6 +91,40 @@ def sendTraceback():
 def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
+
+@app.route('/LDlinkRest/upload', methods=['POST'])
+def upload():
+    #print "Processing upload"
+    print "****** Stage 1: UPLOAD BUTTON ***** "
+    print "UPLOAD_DIR = %s" % (app.config['UPLOAD_DIR'])
+    for arg in request.args:
+        print arg
+    print "request.method = %s" % (request.method)
+    if request.method == 'POST':
+        # check if the post request has the file part
+        print " We got a POST"
+        print dir(request.files)
+        if 'ldassocFile' not in request.files:
+            print('No file part')
+            return 'No file part...'
+        file = request.files['ldassocFile']
+
+        # if user does not select file, browser also
+        # submit a empty part without filename
+        print type(file)
+        if file.filename == '':
+            print('No selected file')
+            return 'No selected file'
+        if file:
+            print 'file.filename '+file.filename
+            print('file and allowed_file')
+            filename = secure_filename(file.filename)
+            print "About to SAVE file"
+            file.save(os.path.join(app.config['UPLOAD_DIR'], file.filename))
+            print "FILE SAVED.  Alright!"
+            return '{"status" : "File was saved"}'
+
+    return 'No Success'
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
 def restAdd():
@@ -199,6 +236,7 @@ def ldhap():
 
     print
     print 'Execute ldhap'
+    print 'working'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
@@ -391,6 +429,7 @@ def ldassoc():
 
 import argparse
 if __name__ == '__main__':
+
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", dest="port_number", default="9982", help="Sets the Port")
     parser.add_argument("-d", dest="debug", default="False", help="Sets the Debugging Option")
@@ -401,3 +440,4 @@ if __name__ == '__main__':
 
     hostname = gethostname()
     app.run(host='0.0.0.0', port=port_num, debug = debugger,use_evalex = False)
+    application = DebuggedApplication(app, True)

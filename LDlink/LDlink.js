@@ -19,6 +19,7 @@ var snpchipReverseLookup = [];
 var ldClipRaw;
 var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip" ];
 
+
 Object.size = function(obj) {
     var size = 0, key;
     for (key in obj) {
@@ -27,26 +28,24 @@ Object.size = function(obj) {
     return size;
 };
 
-function setBootstrapSelector(id, value) {
-	var str = id.substr(6);
-	str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
-		return letter.toUpperCase();
-	});			
-	var msg = str+": "+value+" column";
-	$("#"+id+" > .btn:first-child").text(msg);
-	$("#"+id+" > .btn:first-child").val(value);
-}
-function resetBootstrapSelector(id) {
-	var str = id.substr(6);
-	str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
-		return letter.toUpperCase();
-	});
-	var msg = "Select "+str+'&nbsp;<span class="caret"></span>';
-	$("#"+id+" > .btn:first-child").html(msg);
-	$("#"+id+" > .btn:first-child").val("");
-}
-
 $(document).ready(function() {
+	console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
+	$('#progressbar').progressbar();
+    //$('#progressbar').progressbar('setPosition', 85);
+	//$('#ldassoc-progressbar').progressbar('reset');
+	$('#ldassoc-progressbar').on("positionChanged", function (e) {
+	    console.log(e.position);
+	    console.log(e.percent);
+	});
+
+	$(':file').change(function(){
+	    var file = this.files[0];
+	    var name = file.name;
+	    var size = file.size;
+	    var type = file.type;
+	    //Your validation
+	    console.dir(file);
+	});
 	$.each(dropdowns, function(i, id) {
 		$("#"+id+" > .dropdown-menu").on("click", "li a", function(){
 			createCookie(id, $(this).text(), 10);
@@ -180,7 +179,27 @@ $(document).on('change','.btn-snp :file', createFileSelectTrigger);
 //ldAssoc File Change
 $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 
+function setBootstrapSelector(id, value) {
+	var str = id.substr(6);
+	str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+		return letter.toUpperCase();
+	});			
+	var msg = str+": "+value+" column";
+	$("#"+id+" > .btn:first-child").text(msg);
+	$("#"+id+" > .btn:first-child").val(value);
+}
+function resetBootstrapSelector(id) {
+	var str = id.substr(6);
+	str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
+		return letter.toUpperCase();
+	});
+	var msg = "Select "+str+'&nbsp;<span class="caret"></span>';
+	$("#"+id+" > .btn:first-child").html(msg);
+	$("#"+id+" > .btn:first-child").val("");
+}
+
 function createFileSelectTrigger() {
+	console.log("createFileSelectTrigger");
 	var input = $(this), numFiles = input.get(0).files ? 
 	input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
 	input.trigger('fileselect', [numFiles, label]);
@@ -206,22 +225,102 @@ function createEnterEvent() {
 			}
 		}
 	});
+}
 
+function uploadFile() {
 
+	var filename = $("#ldassocFile").val();
+	console.log(filename);
+
+	var fileInput = document.getElementById('ldassoc-file');
+	var file = fileInput.files[0];
+	var formData = new FormData();
+	//console.log("formData before");
+	//console.dir(formData);
+	formData.append('ldassocFile', file);
+	//console.log("formData after");
+	//console.dir(formData);
+	// Display the keys
+	for (var key of formData.keys()) {
+	   console.log(key); 
+	}
+    $.ajax({
+        url: restServerUrl+'/upload',  //Server script to process data
+        type: 'POST',
+        xhr: function() {  // Custom XMLHttpRequest
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){ // Check if upload property exists
+                myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // For handling the progress of the upload
+            }
+            return myXhr;
+        },
+        //Ajax events
+        beforeSend: beforeSendHandler,
+        success: completeHandler,
+        error: errorHandler,
+        // Form data
+        data: formData,
+        //Options to tell jQuery not to process data or worry about content-type.
+        cache: false,
+        contentType: false,
+        processData: false
+    });
+}
+
+function progressHandlingFunction(e){
+
+    if(e.lengthComputable){
+        //$('progress').attr({value:e.loaded,max:e.total});
+    	var percent = Math.floor(e.loaded/e.total*100);
+		$( "#progressbar" ).progressbar({value: percent});
+		$( "#progressbar" ).css('width', percent+"%");
+		$( "#progressbar" ).html(percent+'% Completed');
+
+    }
+}
+function beforeSendHandler() {
+	console.warn('beforeSendHandler');
+	var percent = 0;
+	$( "#progressbar" ).css('width', percent+"%");
+	$( "#progressbar" ).html(percent+'% Completed');
+	$('#ldassoc-file-container').hide();
+	$('#progressbar').parent().show();
+}
+function completeHandler() {
+	console.warn('completeHandler');
+	$('#progressbar').parent().hide();
+	$('#ldassoc-file-container').fadeIn(1000);
+}
+function errorHandler(e) {
+	showCommError(e);
+	console.warn('errorHandler');
+	$('#progressbar').parent().hide();
+	$('#ldassoc-file-container').fadeIn(1000);
+	console.error("Comm Error");
+	console.dir(e);
+}
+
+function showCommError(e) {
+	$('#myModal').find('.modal-title').html(e.status+" - "+e.statusText);
+	$('#myModal').find('.modal-body').html(e.responseText);
+	$("#myModal").modal();
 }
 
 function createFileSelectEvent() {
 	// Add file select file listener
 	$('.btn-snp :file').on('fileselect', function(event, numFiles, label) {
+		console.log(label);
 		$(this).parents('.input-group').find(':text').val(label);
 		populateTextArea(event, numFiles, label);
 
 	});
 	//Customize for ldAssoc
 	$('.btn-csv-file :file').on('fileselect', function(event, numFiles, label) {
+		console.log(label);
 		$(this).parents('.input-group').find(':text').val(label);
 		console.log("Event");
 		populateHeaderValues(event, numFiles, label);
+		uploadFile();
 		$("#header-values").show();
 		//Changing loadCSVFile because the file size is 722Meg
 		//loadCSVFile(event);
@@ -777,7 +876,7 @@ function populateAssocDropDown(headers) {
 			$("#"+id).find("ul").append('<li role="presentation"><a role="menuitem" tabindex="-1" href="#">'+value+'</a></li>');
 		});
 		var previous_value = readCookie(id);
-		console.log("You previous selected: "+previous_value);
+		//console.log("You previous selected: "+previous_value);
 		if($.inArray(previous_value, headers) != -1) {
 			setBootstrapSelector(id, previous_value);
 		} else {
@@ -793,31 +892,31 @@ function parseHeaderValues(header_line) {
 	clean = clean.replace(/","/g, " ");
 	clean = clean.replace(/,/g, " ");
 	//var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
-	console.log("Here is clean");
-	console.log(clean);
+	//console.log("Here is clean");
+	//console.log(clean);
 	var headers = clean.split(" ");
-	console.log(headers);
+	//console.log(headers);
 	var new_headers = headers.filter(function(v){return v!==''});
-	console.log(new_headers);
+	//console.log(new_headers);
 
 	populateAssocDropDown(new_headers);
 
 }
 
 function getHeaderLine(header) {
-	console.log(header);
+	//console.log(header);
 	var index = 0;
     //var view = new Uint8Array(header);
     var view = header;
 	for(index=0;index<=header.length;index++) {
         if (header.charCodeAt(index) === 10 || header.charCodeAt(index) === 13) {
-        	console.log("Found a return");
+        	//console.log("Found a return");
 			parseHeaderValues(header.substr(0, index));
         	return;
         }
 	}
 
-	console.warn("Did not find a return in the header line. Please fix input file.  Make sure the header line is the first line and has a return.");
+	//console.warn("Did not find a return in the header line. Please fix input file.  Make sure the header line is the first line and has a return.");
 
 }
 
@@ -1947,6 +2046,74 @@ function displayError(id, data) {
 	return error;
 }
 
+function displayCommFail(id, jqXHR, textStatus) {
+	console.log(textStatus);
+	console.dir(jqXHR);
+	console.warn("CommFail\n"+"Status: "+textStatus);
+	//$("#calculating-spinner").modal('hide');
+	//alert("Comm Fail");
+	var message;
+	var errorThrown = "";
+	console.warn("header: " + jqXHR
+	+ "\ntextStatus: " + textStatus
+	+ "\nerrorThrown: " + errorThrown);
+	//alert('Communication problem: ' + textStatus);
+	// ERROR
+	if(jqXHR.status == 500) {
+		message = 'Internal Server Error: ' + textStatus + "<br>";
+		message += jqXHR.responseText;
+		message += "<br>code("+jqXHR.status+")";
+		message_type = 'warning';
+	} else {
+		message = jqXHR.statusText+" ("+ textStatus + ")<br><br>";
+		message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+		message += "<br>code("+jqXHR.status+")";
+		message_type = 'error';
+	}
+	showMessage(id, message, message_type);
+
+}
+function showMessage(id, message, message_type) {
+
+	//
+	//	Display either a warning an error.
+	//
+	$("#right_panel").show();
+	$("#help").hide();
+	$("#icon").css('visibility', 'visible');
+
+	console.log("Show Message");
+
+	var css_class = "";
+	var header = "";
+	var container_id = id+"-message-container";
+	console.log(container_id);
+
+	if(message_type.toUpperCase() == 'ERROR') {
+		css_class = 'panel-danger';
+		header = 'Error';
+	} else {
+		css_class = 'panel-warning';
+		header = 'Warning';
+	}
+	$("#"+container_id).empty().show();
+	$("#"+container_id).append(
+		$('<div>')
+			.addClass('panel')
+			.addClass(css_class)
+			.append(
+				$('<div>')
+					.addClass('panel-heading')
+					.append(header)
+					)
+			.append(
+				$('<div>')
+					.addClass('panel-body')
+					.append(message)
+					)
+		);
+}
+
 function addLDHapHyperLinks(request, ldhapTable) {
 	$('#ldhap-snps').attr('href', 'tmp/snps_' + request + '.txt');
 	$('#ldhap-haplotypes').attr('href', 'tmp/haplotypes_' + request + '.txt');
@@ -2392,7 +2559,7 @@ Array.prototype.unique = function() {
 
 function parseFile(file, callback) {
     var fileSize   = file.size;
-    var chunkSize  = 64 * 1024; // bytes
+    var chunkSize  = 4 * 1024; // bytes
     var offset     = 0;
     var self       = this; // we need a reference to the current object
     var chunkReaderBlock = null;
@@ -2401,6 +2568,7 @@ function parseFile(file, callback) {
         if (evt.target.error == null) {
             offset += evt.target.result.length;
             callback(evt.target.result); // callback for handling read chunk
+            return; //Only call the callback once. return.
         } else {
             console.log("Read error: " + evt.target.error);
             return;
@@ -2414,7 +2582,7 @@ function parseFile(file, callback) {
     }
 
     chunkReaderBlock = function(_offset, length, _file) {
-    	console.log("Reading a block, offset is "+_offset);
+    	//console.log("Reading a block, offset is "+_offset);
         var r = new FileReader();
         var blob = _file.slice(_offset, length + _offset);
         r.onload = readEventHandler;
@@ -2423,6 +2591,25 @@ function parseFile(file, callback) {
 
     // now let's start the read with the first block
     chunkReaderBlock(offset, chunkSize, file);
+}
+
+function supportAjaxUploadWithProgress() {
+  return supportFileAPI() && supportAjaxUploadProgressEvents() && supportFormData();
+
+  function supportFileAPI() {
+    var fi = document.createElement('INPUT');
+    fi.type = 'file';
+    return 'files' in fi;
+  };
+
+  function supportAjaxUploadProgressEvents() {
+    var xhr = new XMLHttpRequest();
+    return !! (xhr && ('upload' in xhr) && ('onprogress' in xhr.upload));
+  };
+
+  function supportFormData() {
+    return !! window.FormData;
+  }
 }
 
 function createCookie(name,value,days) {
