@@ -979,8 +979,8 @@ function updateData(id) {
 			//$("#header-match").hide();
 			if(isPopulationSet(id)) {
 				$('#'+id+"-loading").show();
-				//updateLDassoc();
-				setTimeout(simulateLDassoc, 3000);
+				updateLDassoc();
+//				setTimeout(simulateLDassoc, 3000);
 			}
 			break;
 		case 'ldhap':
@@ -1036,16 +1036,49 @@ function isPopulationSet(elementId) {
 
 function updateLDassoc() {
 
+	console.log("Calling updateLDassoc");
+
 	var id = "ldassoc";
 
-	var $btn = $('#' + id).button('loading');
-	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+	//var $btn = $('#' + id).button('loading');
+	//var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+	var ldassocForm = new FormData($("#ldassocForm")[0]);
+	console.dir(ldassocForm);
+	for (var key of ldassocForm.keys()) {
+		console.log(key); 
+		console.log(ldassocForm.get(key));
+	}
+	//values
+
 	var population = getPopulationCodes(id+'-population-codes');
 	var ldInputs = {
-		snps : snps,
 		pop : population.join("+"),
-		reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+		filename : $("#ldassoc-file-label").val(),
+		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+		columns : new Object,
+		caclulateRegion: $("#assoc-region > button").val(),
+		gene: new Object(),
+		region: new Object(),
+		variant: new Object(),
+		matrixVariable: $("#assoc-matrix-color-r2").hasClass('active') ? "R2" :"DPrime"
 	};
+	ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
+	ldInputs.columns.position = $("#assoc-position > button").val();
+	ldInputs.columns.pvalue = $("#assoc-p-value > button").val();
+	//gene
+	ldInputs.gene.name = $("#region-gene-name").val();
+	ldInputs.gene.basepair = $("#region-gene-base-pair-window").val();
+	ldInputs.gene.index = $("#region-gene-index").val();
+	//region
+	ldInputs.region.start = $("#region-region-start-coord").val();
+	ldInputs.region.end = $("#region-region-end-coord").val();
+	ldInputs.region.index = $("#region-region-index").val();
+	//variant
+	ldInputs.variant.index = $("#region-variant-index").val();
+	ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
+	console.dir(ldInputs);
+	return;
+
 	var url = restServerUrl + "/ldassoc";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -1077,7 +1110,7 @@ function updateLDassoc() {
 		}
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
-		//displayCommFail(id, jqXHR, textStatus);
+		displayCommFail(id, jqXHR, textStatus);
 	});
 	ajaxRequest.always(function() {
 		$btn.button('reset');
