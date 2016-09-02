@@ -225,6 +225,9 @@ img.graph-legend {
   margin-left: auto;
   margin-right: auto;
 }
+#ldassoc-legend {
+	width: 700px;
+}
 #ldproxy-legend {
 	width: 700px;
 }

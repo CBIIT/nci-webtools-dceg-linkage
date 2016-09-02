@@ -115,6 +115,16 @@
 			</form>
 			<progress></progress>
 			-->
+<!--
+<h2> HTML 5 File Upload Progress Bar Demo</h2>
+<form id="upload_form" enctype="multipart/form-data" method="post">
+<input type="file" name="file1" id="file1"/><br/>
+<input type="button" id="uploadButton" value="Upload File" onclick="fileUpload('file1', 'uploadButton')"/>
+<progress id="progressBar" value="0" max="100" style="width:300px;"></progress>
+<h3 id="status"></h3>
+<p id="loaded_n_total"></p>
+</form> 
+-->
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -332,7 +342,7 @@
 										</div>
 									</div>
 								</div>
-							
+							</div>
 							<div class="form-group">
 								<div class="col-sm-2" style="width:190px;">
 									<a id="ldassoc-population-codes-zero"
@@ -350,7 +360,7 @@
 							</div>
 							<div class="col-sm-2">
 								<div title="Select heat map variable" data-toggle="buttons" class="btn-group">
-									<label class="btn btn-default active" id="matrix_color_r2">
+									<label class="btn btn-default active" id="assoc-matrix-color-r2">
 								 		<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
 									</label>
 									<label class="btn btn-default">
@@ -395,19 +405,30 @@
 				<!-- ldassoc CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldassoc-results-container">
-					<div class="row" style="padding:10px;">
-						<div class="col-sm-9 col-sm-offset-1">Namespace(bp='BP', chr='CHR', dprime=False, end=None, file='meta_assoc.meta', gene=False, id='SNP', name=None, origin='rs1231', pop='ALL', pval='P', region=False, request='8383', start=None, variant=True, window=None)
+						<div class="row overflowy">
+							<div class="col-sm-11 col-sm-offset-1">
+								<div id="ldassoc-bokeh-graph"></div>
+								<br />
+								<div>
+									<img id="ldassoc-legend" src="LDproxy_legend.png" title="LDassoc Legend" class="graph-legend" alt="LDassoc legend">
+								</div>
+							</div>
 						</div>
-					</div>
-					<div class="row" style="padding:10px;">
-						<div class="col-sm-7 col-sm-offset-1">
-							<ul style="list-style-type: none;">
-								<li>Number of Individuals: <b>2504</b></li>
-								<li>SNPs in Region: <b>2451</b></li>
-								<li>Run time: <b>6.39</b> seconds</li>
-							</ul>
+						<br />
+
+						<div class="row" style="padding:10px;">
+							<div class="col-sm-9 col-sm-offset-1">Namespace(bp='BP', chr='CHR', dprime=False, end=None, file='meta_assoc.meta', gene=False, id='SNP', name=None, origin='rs1231', pop='ALL', pval='P', region=False, request='8383', start=None, variant=True, window=None)
+							</div>
 						</div>
-					</div>
+						<div class="row" style="padding:10px;">
+							<div class="col-sm-7 col-sm-offset-1">
+								<ul style="list-style-type: none;">
+									<li>Number of Individuals: <b>2504</b></li>
+									<li>SNPs in Region: <b>2451</b></li>
+									<li>Run time: <b>6.39</b> seconds</li>
+								</ul>
+							</div>
+						</div>
 
 						<table id="new-ldassoc" class="table display compact">
 							<thead>
@@ -446,51 +467,11 @@
 						<div class="row" style="padding:10px;">
 							<div class="col-sm-7">
 								<ul style="list-style-type: none;">
-									<li><i>Note: Data is simulated</i></li>
+									<li><i></i></li>
 								</ul>
 							</div>
 						</div>
 					</div>
-				</div>
-
-<!--
-<div id="header-match" style="display:none;">
-<div class="container-fluid">
-    <hr>
-    	<h2 class="">Drag and Drop header titles to coresponding values</h2>
-	<div class="panel panel-default">
-	    <div class="row">
-	        <div class="well col-md-9">
-	            <div class="col-md-6">
-	                <ul class="no-bullet">
-	                  <li class=""><div class="dropzone"><h3>Chromosome</h3></div></li>
-	                    <li class=""><div class="dropzone"><h3>Position</h3></div></li>
-	                    <li class=""><div class="dropzone"><h3>P-Value</h3></div></li>
-	                </ul>
-	            </div>
-	            <div class="col-md-3">
-	                <ul class="nav nav-list">
-	                  	<li class="draggable"><h3><span class="label label-primary lb-lg">BP</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">SNP</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">A1</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">A2</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">N</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">P.R.</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">OR</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">OR.R</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">Q</span></h3></li>
-	                    <li class="draggable"><h3><span class="label label-primary">I</span></h3></li>
-	                </ul>
-	            </div>
-	      </div>
-	    </div>
-	</div>
-</div>
--->
-
-
-
-
 				</div>
 			</div>
 			<!-- LDhap -->
@@ -711,7 +692,7 @@
 								<!-- COLUMN4 - sm-2 -->
 								<div class="col-sm-2 col-sm-offset-1">
 									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
-										<label id="assoc-matrix-color-r2" class="btn btn-default active">
+										<label id="matrix_color_r2" class="btn btn-default active">
 									 		<input type="radio" name="options" autocomplete="off" checked> R<sup>2</sup>
 										</label>
 										<label class="btn btn-default">
@@ -1614,6 +1595,7 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
+	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script type="text/javascript"
 		src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
@@ -1640,6 +1622,11 @@
 <!--
 	<script type="text/javascript"
 		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
+	</script>
+-->
+<!--
+	<script type="text/javascript"
+		src="../common/js/fileUpload.js">
 	</script>
 -->
 	<script type="text/javascript"

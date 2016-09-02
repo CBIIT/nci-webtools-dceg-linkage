@@ -5,6 +5,7 @@ var ldlink_version = "Version 3.0";
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
 var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRest'}
 var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
+
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
 
 var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, Nigera",LWK:" Luhya in Webuye, Kenya",GWD:" Gambian in Western Gambia",MSL:"  Mende in Sierra Leone",ESN:"  Esan in Nigera",ASW:" Americans of African Ancestry in SW USA",ACB:"  African Carribbeans in Barbados"}},AMR:{fullName:"Ad Mixed American",subPopulations:{MXL:"  Mexican Ancestry from Los Angeles, USA",PUR:" Puerto Ricans from Puerto Rico",CLM:" Colombians from Medellin, Colombia",PEL:" Peruvians from Lima, Peru"}},EAS:{fullName:"East Asian",subPopulations:{CHB:" Han Chinese in Bejing, China",JPT:" Japanese in Tokyo, Japan",CHS:" Southern Han Chinese",CDX:" Chinese Dai in Xishuangbanna, China",KHV:"  Kinh in Ho Chi Minh City, Vietnam"}},EUR:{fullName:"European",subPopulations:{CEU:" Utah Residents from North and West Europe",TSI:"  Toscani in Italia",FIN:"  Finnish in Finland",GBR:" British in England and Scotland",IBS:"  Iberian population in Spain"}},SAS:{fullName:"South Asian",subPopulations:{GIH:"  Gujarati Indian from Houston, Texas",PJL:"  Punjabi from Lahore, Pakistan",BEB:"  Bengali from Bangladesh",STU:"  Sri Lankan Tamil from the UK",ITU:" Indian Telugu from the UK"}}};
@@ -54,7 +55,7 @@ $(document).ready(function() {
 	});
 	$("#assoc-region > .dropdown-menu li a").click(function(e){
 		$("#assoc-region > .btn:first-child").text($(this).text());
-		$("#assoc-region > .btn:first-child").val($(this).text());
+		$("#assoc-region > .btn:first-child").val($(this).text().toLowerCase());
 		$("#region-gene-container").hide();
 		$("#region-region-container").hide();
 		$("#region-variant-container").hide();
@@ -227,7 +228,11 @@ function createEnterEvent() {
 	});
 }
 
-function uploadFile() {
+function uploadFile2() {
+
+
+	restService.route = 'LDlinkRest';
+	restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
 	var filename = $("#ldassocFile").val();
 	console.log(filename);
@@ -320,13 +325,18 @@ function createFileSelectEvent() {
 		$(this).parents('.input-group').find(':text').val(label);
 		console.log("Event");
 		populateHeaderValues(event, numFiles, label);
-		uploadFile();
+		uploadFile2();
 		$("#header-values").show();
 		//Changing loadCSVFile because the file size is 722Meg
 		//loadCSVFile(event);
-
 	});
+}
 
+function fileUpload(fieldName, buttonName){
+	
+	restService.route = 'LDlinkRest/load';
+	//restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
+	uploadFile(fieldName, buttonName);
 }
 
 function readSingleFile(evt) {
@@ -966,7 +976,6 @@ function initCalculate(id) {
 
 function simulateLDassoc() {
 	$('#ldassoc-results-container').show();
-	//$("#header-match").hide();
 	$("#ldassoc-loading").hide();
 
 	//$('#' + id + '-links-container').show();
@@ -976,7 +985,6 @@ function updateData(id) {
 
 	switch (id) {
 		case 'ldassoc':
-			//$("#header-match").hide();
 			if(isPopulationSet(id)) {
 				$('#'+id+"-loading").show();
 				updateLDassoc();
@@ -1036,31 +1044,20 @@ function isPopulationSet(elementId) {
 
 function updateLDassoc() {
 
-	console.log("Calling updateLDassoc");
-
 	var id = "ldassoc";
 
-	//var $btn = $('#' + id).button('loading');
-	//var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-	var ldassocForm = new FormData($("#ldassocForm")[0]);
-	console.dir(ldassocForm);
-	for (var key of ldassocForm.keys()) {
-		console.log(key); 
-		console.log(ldassocForm.get(key));
-	}
-	//values
-
+	var $btn = $('#' + id).button('loading');
 	var population = getPopulationCodes(id+'-population-codes');
 	var ldInputs = {
 		pop : population.join("+"),
 		filename : $("#ldassoc-file-label").val(),
 		reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
 		columns : new Object,
-		caclulateRegion: $("#assoc-region > button").val(),
+		calculateRegion: $("#assoc-region > button").val(),
 		gene: new Object(),
 		region: new Object(),
 		variant: new Object(),
-		matrixVariable: $("#assoc-matrix-color-r2").hasClass('active') ? "R2" :"DPrime"
+		dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True"
 	};
 	ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
 	ldInputs.columns.position = $("#assoc-position > button").val();
@@ -1077,7 +1074,6 @@ function updateLDassoc() {
 	ldInputs.variant.index = $("#region-variant-index").val();
 	ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
 	console.dir(ldInputs);
-	return;
 
 	var url = restServerUrl + "/ldassoc";
 	var ajaxRequest = $.ajax({
@@ -1090,6 +1086,7 @@ function updateLDassoc() {
 	ajaxRequest.success(function(data) {
 		//data is returned as a string representation of JSON instead of JSON obj
 		//JSON.parse() cleans up this json string.
+		console.log("Success!");
 		console.dir(data);
 
 		var jsonObj;
@@ -1100,14 +1097,14 @@ function updateLDassoc() {
 		}
 
 		if (displayError(id, jsonObj) == false) {
+//			$('#' + id + '-results-container').show();
+//			$('#ldassoc-results-container').show();
+//			$("#ldassoc-loading").hide();
+			$('#ldassoc-bokeh-graph').empty().append(data);
 			$('#' + id + '-results-container').show();
-			$("#header-match").hide();
-			//$('#' + id + '-links-container').show();
-			//var ldhapTable = formatLDhapData($.parseJSON(data));
-			//$('#ldhap-haplotypes-column').attr('colspan',ldhapTable.footer.length);
-			//ko.mapping.fromJS(ldhapTable, ldhapModel);
-			//addLDHapHyperLinks(ldInputs.reference, ldhapTable);
+			getLDAssocResults('proxy'+ldInputs.reference+".json");
 		}
+		$("#"+id+"-loading").hide();
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		displayCommFail(id, jqXHR, textStatus);
@@ -1932,6 +1929,30 @@ function getLDProxyResults(jsonfile) {
 		//catch error and warning in json
 		if (displayError(id, data) == false) {
 			RefreshTable('#new-ldproxy', data);
+			//ko.mapping.fromJS(data, ldproxyModel);
+		}
+
+	});
+	ajaxRequest.fail(function(jqXHR, textStatus) {
+		displayCommFail(id, jqXHR, textStatus);
+	});
+	hideLoadingIcon(ajaxRequest, id);
+}
+
+function getLDAssocResults(jsonfile) {
+	var id = "ldassoc";
+	var url = "tmp/"+jsonfile;
+	//console.info("Here is the LOG file");
+	//console.log(url);
+
+	var ajaxRequest = $.ajax({
+		type : "GET",
+		url : url
+	});
+	ajaxRequest.success(function(data) {
+		//catch error and warning in json
+		if (displayError(id, data) == false) {
+			RefreshTable('#new-ldassoc', data);
 			//ko.mapping.fromJS(data, ldproxyModel);
 		}
 

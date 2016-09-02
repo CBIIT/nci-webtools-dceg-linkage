@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_assoc(file,region,pop,request,args):
-	args.origin = "rs1231"
+def calculate_assoc(file,region,pop,request,myargs):
+	#myargs.origin = "rs1231"
 	print "Inside calculate_assoc"
-	print args
+	print myargs
 	import csv,json,operator,os,sqlite3,subprocess,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
@@ -33,7 +33,7 @@ def calculate_assoc(file,region,pop,request,args):
 	
 	# Define parameters for --variant option
 	if region=="variant":
-		if args.origin==None:
+		if myargs.origin==None:
 			output["error"]="--origin required when --variant is specified."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
@@ -41,10 +41,10 @@ def calculate_assoc(file,region,pop,request,args):
 			return("","")
 			raise
 		
-	if args.origin!=None:
+	if myargs.origin!=None:
 		# Find coordinates (GRCh37/hg19) for SNP RS number
-		if args.origin[0:2]=="rs":
-			snp=args.origin
+		if myargs.origin[0:2]=="rs":
+			snp=myargs.origin
 	
 			# Connect to snp142 database
 			conn=sqlite3.connect(snp_dir)
@@ -72,12 +72,12 @@ def calculate_assoc(file,region,pop,request,args):
 				return("","")
 				raise
 		
-		elif args.origin.split(":")[0].strip("chr") in chrs and len(args.origin.split(":"))==2:
-			snp=args.origin
-			var_coord=[None,args.origin.split(":")[0].strip("chr"),args.origin.split(":")[1]]
+		elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
+			snp=myargs.origin
+			var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
 		
 		else:
-			output["error"]="--origin ("+args.origin+") is not an RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
+			output["error"]="--origin ("+myargs.origin+") is not an RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
@@ -90,9 +90,9 @@ def calculate_assoc(file,region,pop,request,args):
 	
 	# Open Association Data
 	header_list=[]
-	header_list.append(args.chr)
-	header_list.append(args.bp)
-	header_list.append(args.pval)
+	header_list.append(myargs.chr)
+	header_list.append(myargs.bp)
+	header_list.append(myargs.pval)
 	
 	# Load input file
 	assoc_data=open(file).readlines()
@@ -103,17 +103,18 @@ def calculate_assoc(file,region,pop,request,args):
 		if item not in header:
 			output["error"]=item+" is not in the association file header."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print json_output
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
 			raise		
 	
-	chr_index=header.index(args.chr)
-	pos_index=header.index(args.bp)
-	p_index=header.index(args.pval)
+	chr_index=header.index(myargs.chr)
+	pos_index=header.index(myargs.bp)
+	p_index=header.index(myargs.pval)
 	
 	# Define window of interest around query SNP
-	if args.window==None:
+	if myargs.window==None:
 		if region=="variant":
 			window=500000
 		elif region=="gene":
@@ -121,7 +122,7 @@ def calculate_assoc(file,region,pop,request,args):
 		else:
 			window=0
 	else:
-		window=args.window
+		window=myargs.window
 	
 	if region=="variant":
 		coord1=int(org_coord)-window
@@ -130,7 +131,7 @@ def calculate_assoc(file,region,pop,request,args):
 		coord2=int(org_coord)+window
 	
 	elif region=="gene":
-		if args.name==None:
+		if myargs.name==None:
 			output["error"]="Gene name (--name) is needed when --gene option is used."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
@@ -149,14 +150,14 @@ def calculate_assoc(file,region,pop,request,args):
 			return cur.fetchone()
 		
 		# Find RS number in snp142 database
-		gene_coord=get_coords(args.name)
+		gene_coord=get_coords(myargs.name)
 		
 		# Close snp142 connection
 		cur.close()
 		conn.close()
 		
 		if gene_coord==None:
-			output["error"]="Gene name "+args.name+" is not in RefSeq database."
+			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
@@ -170,16 +171,16 @@ def calculate_assoc(file,region,pop,request,args):
 		coord2=int(gene_coord[3])+window
 		
 		# Run with --origin option
-		if args.origin!=None:
+		if myargs.origin!=None:
 			if gene_coord[1]!=chromosome:
-				output["error"]="Origin variant "+args.origin+" is not on the same chromosome as "+args.gene+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
+				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as "+myargs.gene+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
 				raise
 			if coord1>int(org_coord) or int(org_coord)>coord2:
-				output["error"]="Origin variant "+args.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
+				output["error"]="Origin variant "+myargs.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
@@ -189,14 +190,14 @@ def calculate_assoc(file,region,pop,request,args):
 			chromosome=gene_coord[1]
 	
 	elif region=="region":
-		if args.start==None:
+		if myargs.start==None:
 			output["error"]="Start coordinate is needed when --region option is used."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
 			raise
-		if args.end==None:
+		if myargs.end==None:
 			output["error"]="End coordinate is needed when --region option is used."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
@@ -205,14 +206,14 @@ def calculate_assoc(file,region,pop,request,args):
 			raise
 		
 		# Parse out chr and positions for --region option
-		if len(args.start.split(":"))!=2:
+		if len(myargs.start.split(":"))!=2:
 			output["error"]="Start coordinate is not in correct format (ex: chr22:25855459)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
 			raise
-		if len(args.end.split(":"))!=2:
+		if len(myargs.end.split(":"))!=2:
 			output["error"]="End coordinate is not in correct format (ex: chr22:25855459)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
@@ -220,10 +221,10 @@ def calculate_assoc(file,region,pop,request,args):
 			return("","")
 			raise
 		
-		chr_s=args.start.strip("chr").split(":")[0]
-		coord_s=args.start.split(":")[1]
-		chr_e=args.end.strip("chr").split(":")[0]
-		coord_e=args.end.split(":")[1]
+		chr_s=myargs.start.strip("chr").split(":")[0]
+		coord_s=myargs.start.split(":")[1]
+		chr_e=myargs.end.strip("chr").split(":")[0]
+		coord_e=myargs.end.split(":")[1]
 		
 		if chr_s not in chrs:
 			output["error"]="Start chromosome (chr"+chr_s+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chrY)."
@@ -253,16 +254,16 @@ def calculate_assoc(file,region,pop,request,args):
 		coord2=int(coord_e)+window
 		
 		# Run with --origin option
-		if args.origin!=None:
+		if myargs.origin!=None:
 			if chr_s!=chromosome:
-				output["error"]="Origin variant "+args.origin+" is not on the same chromosome as start and stop coordinates (chr"+chromosome+" is not equal to chr"+chr_e+")."
+				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as start and stop coordinates (chr"+chromosome+" is not equal to chr"+chr_e+")."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
 				raise
 			if coord1>int(org_coord) or int(org_coord)>coord2:
-				output["error"]="Origin variant "+args.origin+" is not in the coordinate range "+args.start+" to "+args.end+" -/+ a "+str(window)+" bp window."
+				output["error"]="Origin variant "+myargs.origin+" is not in the coordinate range "+myargs.start+" to "+myargs.end+" -/+ a "+str(window)+" bp window."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
@@ -647,10 +648,10 @@ def calculate_assoc(file,region,pop,request,args):
 			color_i="#0000FF"
 			alpha_i=0.7
 		else:
-			if args.dprime==True:
+			if myargs.dprime==True:
 				color_i="#FF0000"
 				alpha_i=1-(0.8-0.5*float(d_prime_i))
-			elif args.dprime==False:
+			elif myargs.dprime==False:
 				color_i="#FF0000"
 				alpha_i=1-(0.8-0.5*float(r2_i))	
 		color.append(color_i)
@@ -937,7 +938,9 @@ def main():
 	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 	
 	args=parser.parse_args()
-	#dir args
+	print args
+	print type(args)
+	#dir myargs
 	
 	if args.gene:
 		region="gene"

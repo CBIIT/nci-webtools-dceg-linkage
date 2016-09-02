@@ -25,6 +25,9 @@ from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 
 from SNPchip import *
+filePath = "../../common/modules/FileUpload/"
+sys.path.insert(0, filePath)
+import fileUploadService
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -35,9 +38,9 @@ tmp_dir = "./tmp/"
 # Ensure tmp directory exists
 if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
-		
+
 app = Flask(__name__, static_folder='', static_url_path='/')
-app.config['MAX_CONTENT_LENGTH'] = 100 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
@@ -94,7 +97,8 @@ def sendJSON(inputString):
 
 @app.route('/LDlinkRest/upload', methods=['POST'])
 def upload():
-    #print "Processing upload"
+
+    print "Processing upload"
     print "****** Stage 1: UPLOAD BUTTON ***** "
     print "UPLOAD_DIR = %s" % (app.config['UPLOAD_DIR'])
     for arg in request.args:
@@ -104,6 +108,7 @@ def upload():
         # check if the post request has the file part
         print " We got a POST"
         print dir(request.files)
+    
         if 'ldassocFile' not in request.files:
             print('No file part')
             return 'No file part...'
@@ -120,11 +125,14 @@ def upload():
             print('file and allowed_file')
             filename = secure_filename(file.filename)
             print "About to SAVE file"
-            file.save(os.path.join(app.config['UPLOAD_DIR'], file.filename))
-            print "FILE SAVED.  Alright!"
-            return '{"status" : "File was saved"}'
+    #        file.save(os.path.join(app.config['UPLOAD_DIR'], file.filename))
+    #        print "FILE SAVED.  Alright!"
+    #        return '{"status" : "File was saved"}'
+    print filename
 
-    return 'No Success'
+    message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
+    return message
+    #return 'No Success'
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
 def restAdd():
@@ -400,29 +408,72 @@ def snpchip_platforms():
 
 @app.route('/LDlinkRest/ldassoc', methods = ['GET'])
 def ldassoc():
+
+    myargs = argparse.Namespace()
+
     print "LDassoc"
     print 'Gathering Variables from url'
 
-    snps = request.args.get('snps', False)
+    print type(request.args)
+    for arg in request.args:
+        print arg
+
+    data = str(request.args)
+    json_dumps = json.dumps(data)
+
     pop = request.args.get('pop', False)
     reference = request.args.get('reference', False)
-    print 'snps: ' + snps
+    filename = request.args.get('filename', False)
+    matrixVariable = request.args.get('matrixVariable')
+    region = request.args.get('calculateRegion')
+
+    myargs.dprime = bool(request.args.get("dprime") == "True")
+    print "dprime: "+str(myargs.dprime)
+
+    #Column settings
+    myargs.chr = str(request.args.get('columns[chromosome]'))
+    myargs.bp = str(request.args.get('columns[position]'))
+    myargs.pval = str(request.args.get('columns[pvalue]'))
+
+    print "myargs:"
+    print type(myargs.chr)
+    #regionValues = json.loads(request.args.get('region'))
+    #variantValues = json.loads(request.args.get('variant'))
+    #columns = json.loads(request.args.get('columns'))
+    filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
+
+    print 'filename: ' + filename
+    print 'region: ' + region
     print 'pop: ' + pop
-    print 'request: ' + reference
+    print 'reference: ' + reference
+    print 'region: ' + region
 
-    snplst = tmp_dir+'snps'+reference+'.txt'
-    print 'snplst: '+snplst
+    if region == "variant":
+        print "Region is variant"
+        myargs.origin = "rs234"
 
-    f = open(snplst, 'w')
-    f.write(snps)
-    f.close()
+    if region == "gene":
+        print "Region is gene"
+        myargs.origin = "rs234"
+
+    if region == "region":
+        print "Region is region"
+        myargs.start = str(request.args.get('region[start]'))
+        myargs.end = str(request.args.get('region[pvalue]'))
+        myargs.window = str(request.args.get('region[index]'))
+        myargs.name = "hello"
+        myargs.origin = "rs234"
+
+    myargs.window=None
 
     try:
-        out_json = calculate_assoc(file,region,pop,request,args)
+        out_json = calculate_assoc(filename,region,pop,reference,myargs)
     except:
         return sendTraceback()
 
     #copy_output_files(reference)
+    print "out_json:"
+    print out_json
 
     return sendJSON(out_json)
 
