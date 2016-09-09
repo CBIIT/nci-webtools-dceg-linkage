@@ -25,9 +25,6 @@ from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 
 from SNPchip import *
-filePath = "../../common/modules/FileUpload/"
-sys.path.insert(0, filePath)
-import fileUploadService
 
 #import os
 #from flask import Flask, request, redirect, url_for
@@ -459,10 +456,10 @@ def ldassoc():
     if region == "region":
         print "Region is region"
         myargs.start = str(request.args.get('region[start]'))
-        myargs.end = str(request.args.get('region[pvalue]'))
+        myargs.end = str(request.args.get('region[end]'))
         myargs.window = str(request.args.get('region[index]'))
         myargs.name = "hello"
-        myargs.origin = "rs234"
+        myargs.origin = str(request.args.get('region[index]'))
 
     myargs.window=None
 
