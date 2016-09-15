@@ -100,15 +100,16 @@ def upload():
     print "UPLOAD_DIR = %s" % (app.config['UPLOAD_DIR'])
     for arg in request.args:
         print arg
+
     print "request.method = %s" % (request.method)
     if request.method == 'POST':
         # check if the post request has the file part
         print " We got a POST"
-        print dir(request.files)
-    
+        #print dir(request.files)
         if 'ldassocFile' not in request.files:
             print('No file part')
             return 'No file part...'
+
         file = request.files['ldassocFile']
 
         # if user does not select file, browser also
@@ -122,14 +123,17 @@ def upload():
             print('file and allowed_file')
             filename = secure_filename(file.filename)
             print "About to SAVE file"
-    #        file.save(os.path.join(app.config['UPLOAD_DIR'], file.filename))
+            print "filename = "+filename
+            file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+            return 'Hello. File was saved'
     #        print "FILE SAVED.  Alright!"
     #        return '{"status" : "File was saved"}'
-    print filename
+    #print filename
 
-    message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
-    return message
+    #message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
+    #return message
     #return 'No Success'
+
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
 def restAdd():
@@ -178,7 +182,6 @@ def ldpair():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 @app.route('/LDlinkRest/ldproxy', methods = ['GET'])
-
 def ldproxy():
     print
     print 'Execute ldproxy'

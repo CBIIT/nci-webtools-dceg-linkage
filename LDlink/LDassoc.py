@@ -99,9 +99,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 	header=assoc_data[0].strip().split()
 	
 	# Check header
+	print header_list
 	for item in header_list:
 		if item not in header:
-			output["error"]=item+" is not in the association file header."
+			output["error"]="Variables mapping is not listed in the in the association file header."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print json_output
 			print >> out_json, json_output
