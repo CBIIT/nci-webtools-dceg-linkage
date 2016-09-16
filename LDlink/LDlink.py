@@ -125,7 +125,7 @@ def upload():
             print "About to SAVE file"
             print "filename = "+filename
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-            return 'Hello. File was saved'
+            return 'File was saved'
     #        print "FILE SAVED.  Alright!"
     #        return '{"status" : "File was saved"}'
     #print filename
@@ -410,6 +410,7 @@ def snpchip_platforms():
 def ldassoc():
 
     myargs = argparse.Namespace()
+    myargs.window=None
 
     print "LDassoc"
     print 'Gathering Variables from url'
@@ -440,7 +441,7 @@ def ldassoc():
     #regionValues = json.loads(request.args.get('region'))
     #variantValues = json.loads(request.args.get('variant'))
     #columns = json.loads(request.args.get('columns'))
-    filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
+    filename = os.path.join(app.config['UPLOAD_DIR'], str(request.args.get('filename')))
 
     print 'filename: ' + filename
     print 'region: ' + region
@@ -450,22 +451,37 @@ def ldassoc():
 
     if region == "variant":
         print "Region is variant"
-        myargs.origin = "rs234"
+        print "index: "+str(request.args.get('variant[index]'))
+        print "base pair window: "+request.args.get('variant[basepair]')
+        print 
+        
+        myargs.window = int(request.args.get('variant[basepair]'))
+
+        if request.args.get('variant[index]') == "":
+            myargs.origin=None
+        else:
+            myargs.origin = request.args.get('variant[index]')
 
     if region == "gene":
         print "Region is gene"
-        myargs.origin = "rs234"
+        if request.args.get('gene[index]') == "":
+            myargs.origin=None
+        else:
+            myargs.origin = request.args.get('gene[index]')
+
+        myargs.name = request.args.get('gene[name]')
+        myargs.window = int(request.args.get('gene[basepair]'))
 
     if region == "region":
         print "Region is region"
+        if request.args.get('region[index]') == "":
+            myargs.origin=None
+        else:
+            myargs.origin = request.args.get('region[index]')
+
         myargs.start = str(request.args.get('region[start]'))
         myargs.end = str(request.args.get('region[end]'))
-        myargs.window = str(request.args.get('region[index]'))
-        myargs.name = "hello"
-        myargs.origin = str(request.args.get('region[index]'))
-
-    myargs.window=None
-
+    
     try:
         out_json = calculate_assoc(filename,region,pop,reference,myargs)
     except:

@@ -126,17 +126,9 @@ $(document).ready(function() {
 	createProxyTable();
 	var new_assoc_data = {"aaData": 
 	[
-	["rs75563749","chr7","24958977","(C/T)","0.2037",-726,"0.234","0.234","C-C","7","HaploReg link","NA"],
-	["rs75563749","chr7","24958977","(C/T)","0.5433",-726,"1.0","0.5433","C-C,T-T","7","HaploReg link","NA"],
-	["rs75563749","chr7","24958977","(C/G)","0.1432",-432,"1.0","1.0","C-C","7","HaploReg link","NA"],
-	["rs75563749","chr7","24958977","(C/T)","0.6543",-543,"0.5433","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs75543241","chr7","24958977","(G/C)","0.7564",-223,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs72344317","chr7","24958977","(TGCG/-)","0.2132",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs45234062","chr7","24958977","(A/G)","0.321`",-112,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs49534561","chr7","24958977","(TTTTCTC/-)","0.6643",-434,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-	["rs96969484","chr7","24958977","(C/T)","0.234321",-232,"1.0","0.234","T-T","7","HaploReg link","NA"],
-	["rs83483733","chr7","2432977","(C/T)","0.2037",-726,"1.0","1.0","C-C","7","HaploReg link","NA"],
-	["rs95696732","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","T-T","7","HaploReg link","NA"]]};
+	["rs75563749","chr7","24958977","(C/T)","0.2037",-726,"0.234","0.234","C-C","0.0", "7","HaploReg link","NA"],
+	["rs95696732","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","T-T","0.0","7","HaploReg link","NA"]]};
+
 	var new_proxy_data = {"aaData": [["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
 	RefreshTable('#new-ldassoc', new_assoc_data);
 	RefreshTable('#new-ldproxy', new_proxy_data);
@@ -403,7 +395,7 @@ function createAssocTable() {
 		"bAutoWidth": true,
 		"bProcessing": false,
 		"deferRender": false,
-		"order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
+		"order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
 		"columnDefs": [
 			{
 				"render": function ( data, type, row ) {
@@ -428,15 +420,15 @@ function createAssocTable() {
 				"render": function ( data, type, row ) {
 					return ldproxy_regulome_link(data, type, row);
 				},
-				"targets": 9
+				"targets": 10
 			},
 			{
 				"render": function ( data, type, row ) {
 					return ldproxy_haploreg_link(data, type, row);
 				},
-				"targets": 10
+				"targets": 11
 			},
-			{ className: "dt-body-center", "targets": [ 1, 9, 10 ] }
+			{ className: "dt-body-center", "targets": [ 1, 10, 11 ] }
         ]
 	});
 

@@ -554,10 +554,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 			row.append(str(round(float(proxy_info["Dprime"]),4)))
 			row.append(str(round(float(proxy_info["R2"]),4)))
 			row.append(proxy_info["Corr_Alleles"])
+			row.append(proxy_info["P-value"])
 			row.append(proxy_info["RegulomeDB"])
 			row.append("HaploReg link")
 			row.append(proxy_info["Function"])
-			row.append(proxy_info["P-value"])
 			rows.append(row)
 			
 			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
