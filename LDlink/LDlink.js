@@ -1102,7 +1102,7 @@ function updateLDassoc() {
 //			$("#ldassoc-loading").hide();
 			$('#ldassoc-bokeh-graph').empty().append(data);
 			$('#' + id + '-results-container').show();
-			getLDAssocResults('proxy'+ldInputs.reference+".json");
+			getLDAssocResults('assoc'+ldInputs.reference+".json");
 		}
 		$("#"+id+"-loading").hide();
 	});
@@ -1951,11 +1951,32 @@ function getLDAssocResults(jsonfile) {
 	});
 	ajaxRequest.success(function(data) {
 		//catch error and warning in json
+		console.warn("HERE IS THE ldassoc data");
+		console.dir(data);
 		if (displayError(id, data) == false) {
 			RefreshTable('#new-ldassoc', data);
 			//ko.mapping.fromJS(data, ldproxyModel);
 		}
-
+		//Add namespace and other vars here
+		$("#ldassoc-namespace").empty();
+		$("#ldassoc-namespace").append(
+			$("<div>").append("namespace("+
+				JSON.stringify(data.report.namespace)
+				+")"
+			)
+		);
+		$("#ldassoc-namespace").append(
+			$("<div>").append("region = "+data.report.region)
+		);
+		$("#ldassoc-stats").empty().append(
+			$("<li>").append("Number of Individuals: <b>"+data.report.statistics.individuals+"</b>")
+		);
+		$("#ldassoc-stats").append(
+			$("<li>").append("Variants in Region: <b>"+data.report.statistics.in_region+"</b>")
+		);
+		$("#ldassoc-stats").append(
+			$("<li>").append("Run time: <b>"+data.report.statistics.runtime+"</b> seconds")
+		);
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		displayCommFail(id, jqXHR, textStatus);

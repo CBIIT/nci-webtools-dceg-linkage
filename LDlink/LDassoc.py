@@ -26,7 +26,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 
 	# Create JSON output
-	out_json=open(tmp_dir+'proxy'+request+".json","w")
+	out_json=open(tmp_dir+'assoc'+request+".json","w")
 	output={}
 
 	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
@@ -573,12 +573,29 @@ def calculate_assoc(file,region,pop,request,myargs):
 			
 			r2_d_prior=proxy_info["R2"]
 
+	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
+	print "\nNumber of Individuals: "+str(len(pop_list))
+
+	print "SNPs in Region: "+str(len(out_prox))
+
+	duration=time.time() - start_time
+	print "Run time: "+str(duration)+" seconds\n"
+
+	statsistics={}
+	statsistics["individuals"] = str(len(pop_list))
+	statsistics["in_region"] = str(len(out_prox))
+	statsistics["runtime"] = str(duration) 
+
 	output["aaData"]=rows
 	output["proxy_snps"]=proxies
-	
+	output["report"]={}
+	output["report"]["namespace"]={}
+	output["report"]["namespace"].update(vars(myargs))
+	output["report"]["region"] = region
+	output["report"]["statistics"] = statsistics
 	
 	# Output JSON and text file
-	json_output=json.dumps(output, sort_keys=True, indent=2)
+	json_output=json.dumps(output, sort_keys=False, indent=2)
 	print >> out_json, json_output
 	out_json.close()
 	
@@ -965,7 +982,7 @@ def main():
 	
 	
 	# Print output
-	with open(tmp_dir+"proxy"+args.request+".json") as f:
+	with open(tmp_dir+"assoc"+args.request+".json") as f:
 		json_dict=json.load(f)
 
 	try:
