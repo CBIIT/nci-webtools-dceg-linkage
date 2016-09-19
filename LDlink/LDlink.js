@@ -1969,6 +1969,23 @@ function getLDAssocResults(jsonfile) {
 		$("#ldassoc-stats").append(
 			$("<li>").append("Run time: <b>"+data.report.statistics.runtime+"</b> seconds")
 		);
+		//Adjust links
+		if($('#assoc-matrix-color-r2').hasClass('active')) {
+			$('#ldassoc-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
+			//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
+		} else {
+			$('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
+			//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
+		}
+
+		$('#ldassoc-genome').attr('href',
+			'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
+			+ id + '.txt');
+
+		//console.dir(ldproxyInputs);
+		$('#ldproxy-results-link').attr('href','tmp/assoc' + id + '.txt');
+
+
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		displayCommFail(id, jqXHR, textStatus);

@@ -442,6 +442,7 @@ def ldassoc():
     #variantValues = json.loads(request.args.get('variant'))
     #columns = json.loads(request.args.get('columns'))
     filename = os.path.join(app.config['UPLOAD_DIR'], str(request.args.get('filename')))
+    #filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
 
     print 'filename: ' + filename
     print 'region: ' + region
