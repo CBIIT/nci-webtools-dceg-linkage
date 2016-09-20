@@ -279,7 +279,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	lowest_p=1.0
 	lowest_p_pos=None
 	assoc_dict={}
-	for i in range(1,len(assoc_data)):
+	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
 		if col[chr_index].strip("chr")==chromosome and coord1<=int(col[pos_index])<=coord2:
 			try:
@@ -663,16 +663,17 @@ def calculate_assoc(file,region,pop,request,myargs):
 		funct.append(funct_i)
 		
 		# Set Color
+		reds=["#FFCCCC","#FFCACA","#FFC8C8","#FFC6C6","#FFC4C4","#FFC2C2","#FFC0C0","#FFBEBE","#FFBCBC","#FFBABA","#FFB8B8","#FFB6B6","#FFB4B4","#FFB1B1","#FFAFAF","#FFADAD","#FFABAB","#FFA9A9","#FFA7A7","#FFA5A5","#FFA3A3","#FFA1A1","#FF9F9F","#FF9D9D","#FF9B9B","#FF9999","#FF9797","#FF9595","#FF9393","#FF9191","#FF8F8F","#FF8D8D","#FF8B8B","#FF8989","#FF8787","#FF8585","#FF8383","#FF8181","#FF7E7E","#FF7C7C","#FF7A7A","#FF7878","#FF7676","#FF7474","#FF7272","#FF7070","#FF6E6E","#FF6C6C","#FF6A6A","#FF6868","#FF6666","#FF6464","#FF6262","#FF6060","#FF5E5E","#FF5C5C","#FF5A5A","#FF5858","#FF5656","#FF5454","#FF5252","#FF5050","#FF4E4E","#FF4B4B","#FF4949","#FF4747","#FF4545","#FF4343","#FF4141","#FF3F3F","#FF3D3D","#FF3B3B","#FF3939","#FF3737","#FF3535","#FF3333","#FF3131","#FF2F2F","#FF2D2D","#FF2B2B","#FF2929","#FF2727","#FF2525","#FF2323","#FF2121","#FF1F1F","#FF1D1D","#FF1B1B","#FF1818","#FF1616","#FF1414","#FF1212","#FF1010","#FF0E0E","#FF0C0C","#FF0A0A","#FF0808","#FF0606","#FF0404","#FF0202","#FF0000"]
 		if q_coord_i==p_coord_i:
 			color_i="#0000FF"
 			alpha_i=0.7
 		else:
 			if myargs.dprime==True:
-				color_i="#FF0000"
-				alpha_i=1-(0.8-0.5*float(d_prime_i))
+				color_i=reds[int(d_prime_i*100.0)]
+				alpha_i=0.7
 			elif myargs.dprime==False:
-				color_i=(int(255*r2_i),0,0)
-				alpha_i=0.7	
+				color_i=reds[int(r2_i*100.0)]
+				alpha_i=0.7
 		color.append(color_i)
 		alpha.append(alpha_i)
 		
@@ -686,6 +687,9 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
+	
+	import bokeh
+	print bokeh.__version__
 	
 	reset_output()
 	
@@ -736,16 +740,16 @@ def calculate_assoc(file,region,pop,request,myargs):
 	for i in range(len(recomb_raw)):
 		chr,pos,rate=recomb_raw[i].strip().split()
 		recomb_x.append(int(pos)/1000000.0)
-		recomb_y.append(float(rate)/1.0)  ## Divided by 100 previously
+		recomb_y.append(float(rate)/100*max(y))
 	
 	proxy_plot.line(recomb_x, recomb_y, size=12, color="black", alpha=0.5)
 	
 	# Add genome-wide significance
-	a = [min(p_coord),max(p_coord)]
+	a = [coord1/1000000.0-whitespace,coord2/1000000.0+whitespace]
 	b = [-log10(0.00000005),-log10(0.00000005)]
 	proxy_plot.line(a, b, color="blue", alpha=0.5)
 	
-	proxy_plot.circle(x, y, size=size, source=source, color=color)
+	proxy_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
 	
 	hover=proxy_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
