@@ -281,18 +281,19 @@ def calculate_assoc(file,region,pop,request,myargs):
 	assoc_dict={}
 	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
-		if col[chr_index].strip("chr")==chromosome and coord1<=int(col[pos_index])<=coord2:
-			try:
-				float(col[p_index])
-			except ValueError:
-				continue
-			else:
-				coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
-				assoc_coords.append(coord_i)
-				assoc_dict[coord_i]=[col[p_index]]
-				if float(col[p_index])<lowest_p:
-					lowest_p_pos=col[pos_index]
-					lowest_p=float(col[p_index])
+		if col[chr_index].strip("chr")==chromosome:
+			if coord1<=int(col[pos_index])<=coord2:
+				try:
+					float(col[p_index])
+				except ValueError:
+					continue
+				else:
+					coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+					assoc_coords.append(coord_i)
+					assoc_dict[coord_i]=[col[p_index]]
+					if float(col[p_index])<lowest_p:
+						lowest_p_pos=col[pos_index]
+						lowest_p=float(col[p_index])
 			
 	# Coordinate list checks
 	if len(assoc_coords)==0:
