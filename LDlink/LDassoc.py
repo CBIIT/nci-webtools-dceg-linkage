@@ -671,8 +671,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 				color_i="#FF0000"
 				alpha_i=1-(0.8-0.5*float(d_prime_i))
 			elif myargs.dprime==False:
-				color_i="#FF0000"
-				alpha_i=1-(0.8-0.5*float(r2_i))	
+				color_i=(int(255*r2_i),0,0)
+				alpha_i=0.7	
 		color.append(color_i)
 		alpha.append(alpha_i)
 		
@@ -708,7 +708,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	)
 	
 	
-	# Proxy Plot
+	# P-value Plot
 	x=p_coord
 	y=neg_log_p
 	
