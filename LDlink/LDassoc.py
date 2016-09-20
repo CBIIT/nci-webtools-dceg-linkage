@@ -145,7 +145,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		conn.text_factory=str
 		cur=conn.cursor()
 		
-		def get_coords(gene):
+		def get_coords(gene_raw):
+			gene=gene_raw.upper()
 			t=(gene,)
 			cur.execute("SELECT * FROM genes WHERE name=?", t)
 			return cur.fetchone()
@@ -286,7 +287,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 			except ValueError:
 				continue
 			else:
-				coord_i=col[chr_index]+":"+col[pos_index]+"-"+col[pos_index]
+				coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
 				assoc_coords.append(coord_i)
 				assoc_dict[coord_i]=[col[p_index]]
 				if float(col[p_index])<lowest_p:
