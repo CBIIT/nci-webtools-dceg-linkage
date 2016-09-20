@@ -745,7 +745,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	b = [-log10(0.00000005),-log10(0.00000005)]
 	proxy_plot.line(a, b, color="blue", alpha=0.5)
 	
-	proxy_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
+	proxy_plot.circle(x, y, size=size, source=source, color=color)
 	
 	hover=proxy_plot.select(dict(type=HoverTool))
 	hover.tooltips=OrderedDict([
