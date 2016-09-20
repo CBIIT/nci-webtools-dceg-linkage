@@ -281,7 +281,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	assoc_dict={}
 	for i in range(1,len(assoc_data)):
 		col=assoc_data[i].strip().split()
-		if col[chr_index]==chromosome and coord1<=int(col[pos_index])<=coord2:
+		if col[chr_index].strip("chr")==chromosome and coord1<=int(col[pos_index])<=coord2:
 			try:
 				float(col[p_index])
 			except ValueError:
