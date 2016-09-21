@@ -448,7 +448,6 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	from bokeh.embed import components,file_html
 	from bokeh.layouts import gridplot
 	from bokeh.models import HoverTool,LinearAxis,Range1d
-	from bokeh.models.tools import ToolbarBox
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN	
 	from math import pi
@@ -753,7 +752,6 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	
 	gene_plot.toolbar_location="below"
 	
-	#ToolbarBox(logo=None)
 	out_grid=gridplot(matrix_plot,connector,rug,gene_plot, ncols=1, toolbar_options=dict(logo=None))
 
 	
