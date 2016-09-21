@@ -617,7 +617,7 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	
 	
 	# Combine plots into a grid
-	out_grid=gridplot(proxy_plot,rug,gene_plot, ncols=1)
+	out_grid=gridplot(proxy_plot,rug,gene_plot, ncols=1, toolbar_options=dict(logo=None))
 	
 	
 	###########################

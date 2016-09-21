@@ -898,7 +898,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	gene_plot.toolbar_location="below"
 
 	# Combine plots into a grid
-	out_grid=gridplot(assoc_plot,rug,gene_plot, ncols=1)
+	out_grid=gridplot(assoc_plot,rug,gene_plot, ncols=1, toolbar_options=dict(logo=None))
 	
 	###########################
 	# Html output for testing #
@@ -976,12 +976,12 @@ def main():
 	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
 	
 	# Print script and div output
-	#out_script_line=out_script.split("\n")
-	#for i in range(len(out_script_line)):
-	#	print out_script_line[i]
-	#print ""
+	out_script_line=out_script.split("\n")
+	for i in range(len(out_script_line)):
+		print out_script_line[i]
+	print ""
 	#
-	#print out_div
+	print out_div
 	#print ""
 	
 	
