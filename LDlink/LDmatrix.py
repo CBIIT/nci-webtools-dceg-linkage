@@ -446,6 +446,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	# Import plotting modules
 	from collections import OrderedDict
 	from bokeh.embed import components,file_html
+	from bokeh.layouts import gridplot
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN	
@@ -545,14 +546,14 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	if len(snps)<threshold:
 		matrix_plot=figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
 	       x_range=xr, y_range=list(reversed(rsnum_lst)),
-	       h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None, logo=None,
-		   tools="hover,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+	       h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+		   tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 	
 	else:
 		matrix_plot=figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5, 
 	       x_range=xr, y_range=list(reversed(rsnum_lst)),
-		   h_symmetry=False, v_symmetry=False, border_fill='white', x_axis_type=None, y_axis_type=None, logo=None,
-		   tools="hover,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+		   h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+		   tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 	
 	matrix_plot.rect('xname_pos', 'yname', 0.95*spacing, 0.95, source=source,
 		 color="box_color", alpha="box_trans", line_color=None)
@@ -585,7 +586,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	# Connector Plot
 	if len(snps)<threshold:
 		connector=figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
-			x_range=xr, y_range=yr2, border_fill='white',
+			x_range=xr, y_range=yr2, border_fill_color='white',
 			title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
 			plot_width=800, plot_height=90, tools="xpan,tap")
 		connector.segment(x, y0, x, y1, color="black")
@@ -594,7 +595,7 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 		connector.text(x2,y4,text=snp_id_plot,alpha=1, angle=pi/2, text_font_size="8pt",text_baseline="middle", text_align="left")
 	else:
 		connector=figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
-			x_range=xr, y_range=yr3, border_fill='white',
+			x_range=xr, y_range=yr3, border_fill_color='white',
 			title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
 			plot_width=800, plot_height=30, tools="xpan,tap")
 		connector.segment(x, y0, x, y1, color="black")
@@ -713,9 +714,9 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	    plot_h_pix=150+(len(lines)-2)*50
 	
 	gene_plot=figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
-        x_range=xr, y_range=yr2, border_fill='white',
+        x_range=xr, y_range=yr2, border_fill_color='white',
         title="", h_symmetry=False, v_symmetry=False, logo=None,
-        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,reset,previewsave")
+        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 	
 	if len(genes_raw)<=max_genes:
 		gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
@@ -752,13 +753,17 @@ def calculate_matrix(snplst,pop,request,r2_d="r2"):
 	gene_plot.toolbar_location="below"
 	
 	
+	out_grid=gridplot(matrix_plot,connector,rug,gene_plot, ncols=1)
 	
-	#html=file_html(curdoc(), CDN, "Test Plot")
+	###########################
+	# Html output for testing #
+	###########################
+	#html=file_html(out_grid, CDN, "Test Plot")
 	#out_html=open("LDmatrix.html","w")
 	#print >> out_html, html
 	#out_html.close()
 	
-	out_script,out_div=components(curdoc(), CDN)
+	out_script,out_div=components(out_grid, CDN)
 	reset_output()
 	
 	
