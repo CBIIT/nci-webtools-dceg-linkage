@@ -976,12 +976,12 @@ def main():
 	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
 	
 	# Print script and div output
-	out_script_line=out_script.split("\n")
-	for i in range(len(out_script_line)):
-		print out_script_line[i]
-	print ""
+	#out_script_line=out_script.split("\n")
+	#for i in range(len(out_script_line)):
+	#	print out_script_line[i]
+	#print ""
 	#
-	print out_div
+	#print out_div
 	#print ""
 	
 	
