@@ -403,6 +403,7 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
 	from bokeh.embed import components,file_html
+	from bokeh.layouts import gridplot
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
@@ -444,8 +445,10 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 				plot_width=900,
 				plot_height=600,
 				x_range=xr, y_range=yr,
-				tools="hover,tap,pan,box_zoom,box_select,reset,previewsave", logo=None,
+				tools="hover,tap,pan,box_zoom,box_select,undo,redo,reset,previewsave", logo=None,
 				toolbar_location="above")
+	
+	proxy_plot.title.align="center"
 	
 	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord[1], coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
 	subprocess.call(tabix_recomb, shell=True)
@@ -458,7 +461,7 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 		recomb_x.append(int(pos)/1000000.0)
 		recomb_y.append(float(rate)/100.0)
 	
-	proxy_plot.line(recomb_x, recomb_y, size=12, color="black", alpha=0.5)
+	proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
 	
 	proxy_plot.circle(x, y, size=size, source=source, color=color, alpha=0.5)
 	
@@ -493,9 +496,9 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	yr_rug=Range1d(start=-0.03, end=1.03)
 	
 	rug=figure(
-			x_range=xr, y_range=yr_rug, border_fill='white', y_axis_type=None,
+			x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
 			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-			plot_width=900, plot_height=50, tools="xpan,tap")
+			plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
 
 	rug.segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=0.5, line_width=1)
 	rug.toolbar_location=None
@@ -585,9 +588,9 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 		
 	
 	gene_plot=figure(
-					x_range=xr, y_range=yr2, border_fill='white', 
+					x_range=xr, y_range=yr2, border_fill_color='white', 
 					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,reset,previewsave", logo=None)
+					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
 					
 	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
@@ -613,12 +616,19 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 	gene_plot.toolbar_location="below"
 	
 	
-	#html=file_html(curdoc(), CDN, "Test Plot")
+	# Combine plots into a grid
+	out_grid=gridplot(proxy_plot,rug,gene_plot, ncols=1)
+	
+	
+	###########################
+	# Html output for testing #
+	###########################
+	#html=file_html(out_grid, CDN, "Test Plot")
 	#out_html=open("LDproxy.html","w")
 	#print >> out_html, html
 	#out_html.close()
 	
-	out_script,out_div=components(curdoc(), CDN)
+	out_script,out_div=components(out_grid, CDN)
 	reset_output()
 	
 	
