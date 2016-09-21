@@ -576,12 +576,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 			r2_d_prior=proxy_info["R2"]
 
 	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	print "\nNumber of Individuals: "+str(len(pop_list))
-
-	print "SNPs in Region: "+str(len(out_prox))
 
 	duration=time.time() - start_time
-	print "Run time: "+str(duration)+" seconds\n"
 
 	statsistics={}
 	statsistics["individuals"] = str(len(pop_list))
@@ -685,12 +681,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
 	from bokeh.embed import components,file_html
+	from bokeh.layouts import gridplot
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
-	
-	import bokeh
-	print bokeh.__version__
 	
 	reset_output()
 	
@@ -728,8 +722,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 				plot_width=900,
 				plot_height=600,
 				x_range=xr, y_range=yr,
-				tools="tap,pan,box_zoom,box_select,reset,previewsave", logo=None,
+				tools="tap,pan,box_zoom,box_select,undo,redo,reset,previewsave", logo=None,
 				toolbar_location="above")
+	
+	assoc_plot.title.align="center"
 	
 	# Add recombination rate
 	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
@@ -743,7 +739,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		recomb_x.append(int(pos)/1000000.0)
 		recomb_y.append(float(rate)/100*max(y))
 	
-	assoc_plot.line(recomb_x, recomb_y, line_width=2, color="black", alpha=0.5)
+	assoc_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
 	
 	# Add genome-wide significance
 	a = [coord1/1000000.0-whitespace,coord2/1000000.0+whitespace]
@@ -784,7 +780,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	rug=figure(
 			x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
 			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-			plot_width=900, plot_height=50, tools="xpan,tap")
+			plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
 
 	rug.segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=alpha, line_width=1)
 	rug.toolbar_location=None
@@ -876,7 +872,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	gene_plot=figure(
 					x_range=xr, y_range=yr2, border_fill_color='white', 
 					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,reset,previewsave", logo=None)
+					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
 					
 	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
 	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
@@ -900,22 +896,21 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 
 	gene_plot.toolbar_location="below"
+
+	# Combine plots into a grid
+	out_grid=gridplot(assoc_plot,rug,gene_plot, ncols=1)
 	
-	#############################
-	# Comment out after testing #
-	#############################
-	#html=file_html(curdoc(), CDN, "Test Plot")
-	html=file_html(gene_plot, CDN, "Test Plot")
-	out_html=open("LDassoc.html","w")
-	print >> out_html, html
-	out_html.close()
+	###########################
+	# Html output for testing #
+	###########################
+	#html=file_html(out_grid, CDN, "Test Plot")
+	#out_html=open("LDassoc.html","w")
+	#print >> out_html, html
+	#out_html.close()
 	
-	out_script,out_div=components(curdoc(), CDN)
+	
+	out_script,out_div=components(out_grid, CDN)
 	reset_output()
-	
-	
-	
-	
 	
 	
 	
@@ -983,7 +978,7 @@ def main():
 	# Print script and div output
 	#out_script_line=out_script.split("\n")
 	#for i in range(len(out_script_line)):
-		#print out_script_line[i]
+	#	print out_script_line[i]
 	#print ""
 	#
 	#print out_div
