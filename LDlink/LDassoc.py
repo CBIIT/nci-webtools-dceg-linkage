@@ -713,7 +713,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	)
 	
 	
-	# P-value Plot
+	# Assoc Plot
 	x=p_coord
 	y=neg_log_p
 	
@@ -722,13 +722,13 @@ def calculate_assoc(file,region,pop,request,myargs):
 	yr=Range1d(start=-0.03, end=max(y)*1.03)
 	sup_2=u"\u00B2"
 
-	proxy_plot=figure(
+	assoc_plot=figure(
 				title="P-values and Regional LD for "+snp+" in "+pop,
 				min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
 				plot_width=900,
 				plot_height=600,
 				x_range=xr, y_range=yr,
-				tools="hover,tap,pan,box_zoom,box_select,reset,previewsave", logo=None,
+				tools="tap,pan,box_zoom,box_select,reset,previewsave", logo=None,
 				toolbar_location="above")
 	
 	# Add recombination rate
@@ -743,16 +743,16 @@ def calculate_assoc(file,region,pop,request,myargs):
 		recomb_x.append(int(pos)/1000000.0)
 		recomb_y.append(float(rate)/100*max(y))
 	
-	proxy_plot.line(recomb_x, recomb_y, size=12, color="black", alpha=0.5)
+	assoc_plot.line(recomb_x, recomb_y, line_width=2, color="black", alpha=0.5)
 	
 	# Add genome-wide significance
 	a = [coord1/1000000.0-whitespace,coord2/1000000.0+whitespace]
 	b = [-log10(0.00000005),-log10(0.00000005)]
-	proxy_plot.line(a, b, color="blue", alpha=0.5)
+	assoc_plot.line(a, b, color="blue", alpha=0.5)
 	
-	proxy_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
+	assoc_points=assoc_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
 	
-	hover=proxy_plot.select(dict(type=HoverTool))
+	hover=HoverTool(renderers=[assoc_points])
 	hover.tooltips=OrderedDict([
 		("Variant", "@prs @p_alle"),
 		("P-value", "@p_val"),
@@ -765,13 +765,15 @@ def calculate_assoc(file,region,pop,request,myargs):
 		("Functional Class", "@funct"),
 	])
 	
-	proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
+	assoc_plot.add_tools(hover)
+	
+	assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
 					text_baseline="middle", text_align="center", angle=0)
 	
-	proxy_plot.yaxis.axis_label="-log10 P-value"
+	assoc_plot.yaxis.axis_label="-log10 P-value"
 	
-	proxy_plot.extra_y_ranges = {"y2_axis": Range1d(start=-3, end=103)}
-	proxy_plot.add_layout(LinearAxis(y_range_name="y2_axis", axis_label="Combined Recombination Rate (cM/Mb)"), "right")  ## Need to confirm units
+	assoc_plot.extra_y_ranges = {"y2_axis": Range1d(start=-3, end=103)}
+	assoc_plot.add_layout(LinearAxis(y_range_name="y2_axis", axis_label="Combined Recombination Rate (cM/Mb)"), "right")  ## Need to confirm units
 	
 	
 	# Rug Plot
@@ -780,7 +782,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	yr_rug=Range1d(start=-0.03, end=1.03)
 	
 	rug=figure(
-			x_range=xr, y_range=yr_rug, border_fill='white', y_axis_type=None,
+			x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
 			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
 			plot_width=900, plot_height=50, tools="xpan,tap")
 
@@ -872,7 +874,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		
 	
 	gene_plot=figure(
-					x_range=xr, y_range=yr2, border_fill='white', 
+					x_range=xr, y_range=yr2, border_fill_color='white', 
 					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
 					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,reset,previewsave", logo=None)
 					
@@ -902,7 +904,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 	#############################
 	# Comment out after testing #
 	#############################
-	html=file_html(curdoc(), CDN, "Test Plot")
+	#html=file_html(curdoc(), CDN, "Test Plot")
+	html=file_html(gene_plot, CDN, "Test Plot")
 	out_html=open("LDassoc.html","w")
 	print >> out_html, html
 	out_html.close()
