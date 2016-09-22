@@ -31,6 +31,7 @@ squared</strong></a></p>
 of
 Fit</strong></a></p>
 <p style="margin-left: 40px;"> <a href="#Modules"><strong>Modules</strong></a></p>
+<p style="margin-left: 80px;"> <a href="#LDassoc"><strong>LDassoc</strong></a></p>
 <p style="margin-left: 80px;"> <a href="#LDhap"><strong>LDhap</strong></a></p>
 <p style="margin-left: 80px;"> <a href="#LDmatrix"><strong>LDmatrix</strong></a></p>
 <p style="margin-left: 80px;"> <a href="#LDpair"><strong>LDpair</strong></a></p>
@@ -138,7 +139,7 @@ disequilibrium may be present.
 <br>
 <p> <strong><a name="Modules"></a>Modules</strong>
 </p>
-<p>LDlink consists of six modules: <a href="#LDhap">LDhap</a>,
+<p>LDlink consists of seven modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
 <a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>,
 <a href="#LDproxy">LDproxy</a>, <a href="#SNPchip">SNPchip</a>, 
 and <a href="#SNPclip">SNPclip</a>. Each module can be
@@ -146,6 +147,66 @@ accessed by clicking on the desired tab at
 the top of all LDlink pages. Below is a description of each module, the
 required user input, and an explanation of the returned output.</p>
 <br>
+
+
+<p style="margin-left: 40px;"> <strong><a name="LDassoc"></a><span style="text-decoration: underline;">LDassoc</span></strong>
+- Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.
+ Based on the file size, number of variants and selected query populations, this module may take some time to run.
+</p>
+<p style="margin-left: 80px;"> <strong>Input:</strong>
+</p>
+<p style="margin-left: 120px;"><u>Association data file</u>
+- upload a space or tab delimited file containing chromosome, position and p-value for each variant.
+A file header, while not required, will be useful when selecting input columns. Once the file is uploaded
+the user needs to specify which columns are the respective chromosome, position, and association p-values.
+</p>
+<p style="margin-left: 120px;"><u>Select region</u>
+- choices are <i>Gene</i>, <i>Region</i>, or <i>Variant</i>. <i>Gene</i>
+requires a RefSeq gene name and base pair window and allows for an optional index variant. <i>Region</i> requires genomic
+start and end coordinates and allows for an optional index variant. <i>Variant</i> requires an index variant and allows for an optional
+base pair window (500,000bp is the default). The index variant will be plotted in blue and is used to calculate all pairwise
+LD statistics. If not required, LDassoc will designate the variant with the lowest p-value as the index variant, unless otherwise
+specified.
+</p>
+<p style="margin-left: 120px;"><u>Reference population(s)</u> - selected
+from the drop down menu. At least one 1000 Genomes Project
+sub-population is required, but more than one may be selected.
+</p>
+<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+ - select if desired output is based on estimated R<sup>2</sup> or D'.
+</p>
+<p style="margin-left: 80px;"> <strong>Output:</strong>
+</p>
+<p style="margin-left: 120px;"><u>Interactive plot</u>
+- interactive plot
+of index variant and p-values of all bi-allelic variants in the specified
+plotting region. X axis is the chromosomal coordinates and the Y axis
+is the -log10 p-value as well as the combined recombination rate from HapMap.
+Each point represents a variant and is colored based on D' or R<sup>2</sup>,
+sized based on minor allele frequency, and labeled based on regulatory
+potential. Hovering over the point will display detailed information on
+the index and proxy variants.
+</p>
+<p style="margin-left: 120px;"><u>UCSC link</u>
+- external link to the
+plotted region in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+Genome Browser</a>. This
+is useful for exploring nearby genes and regulatory elements in the
+region.
+</p>
+<p style="margin-left: 120px;"><u>Table of Association Results</u> - by default, the ten
+variants with the lowest p-values and closest
+distance to the index variant are displayed. External links lead to the variant
+RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+Genome Browser</a>, and
+regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
+</p>
+<p style="margin-left: 120px;"><u>Download association data for all
+variants</u> - download a
+file with information on all variants within the plotting region.
+</p>
+<br>
+
 
 
 <p style="margin-left: 40px;"> <strong><u><a name="LDhap"></a>LDhap</u></strong>
@@ -319,8 +380,7 @@ Genome Browser</a>. This
 is useful for exploring nearby genes and regulatory elements in the
 region.
 </p>
-<p style="margin-left: 120px;"><u>Table of top 10
-proxies</u> - the ten
+<p style="margin-left: 120px;"><u>Table of proxy variants</u> - by default, the ten
 variants with the highest R<sup>2</sup> values and closest
 distance to the query variant are displayed. External links lead to the variant
 RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
