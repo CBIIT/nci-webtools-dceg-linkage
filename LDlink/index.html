@@ -132,9 +132,15 @@
 					Phase 3 of the 1000 Genomes Project and variant RS numbers are indexed
 					based on dbSNP build 142. Only bi-allelic
 					variants are permitted as input. LDlink includes the following
-					components:<br></p>
+					modules:<br></p>
 
 				<p style="margin-left: 40px;">
+
+					<b>LDassoc</b>: Interactively visualize association p-value results
+						and linkage disequilibrium patterns for a genomic region of interest.
+						Input is a tab or space delimited association output file and a population
+						group.<br>
+						
 					<b>LDhap</b>: Calculate population specific haplotype
 						frequencies of all haplotypes observed for a list of query variants.
 						Input is a list of variant RS numbers (one per line) and a population
@@ -164,6 +170,13 @@
 				<div class="row">
 					<h4 class="col-sm-offset-1" >News and Updates</h4>
 					<div class="well col-sm-10 col-sm-offset-1 whats_new" >
+						<p><b>11/01/2016</b> -- New features in <b>LDlink 3.0</b>.</p>
+						 <ul>
+						 <li><b>LDassoc</b> released for visualizing association results.</li>
+						 <li>Update Bokeh interactive plotting library to release 0.12.2.</li>
+						 <li>Improve performance of allele matching algorithm.</li>
+						</ul>
+						<br>
 						<p><b>03/10/2016</b> -- New features in <b>LDlink 2.0</b>.</p>
 						 <ul>
 						 <li><b>SNPclip</b> released for LD pruning a list of variants.</li>
