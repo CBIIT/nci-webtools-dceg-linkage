@@ -119,9 +119,12 @@ def calculate_assoc(file,region,pop,request,myargs):
 			return("","")
 			raise		
 	
+	len_head=len(header)
+		
 	chr_index=header.index(myargs.chr)
 	pos_index=header.index(myargs.bp)
 	p_index=header.index(myargs.pval)
+	
 	
 	# Define window of interest around query SNP
 	if myargs.window==None:
@@ -283,26 +286,38 @@ def calculate_assoc(file,region,pop,request,myargs):
 		else:
 			chromosome=chr_s
 	
-	# Generate Coordinate list
+	# Generate coordinate list and P-value dictionary
+	max_window=3000000
+	if coord2-coord1>max_window:
+			output["error"]="Queried regioin is "+str(coord2-coord1)+"base pairs. Max size is "+str(max_window)+" base pairs."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise	
+	
 	assoc_coords=[]
 	lowest_p=1.0
 	lowest_p_pos=None
 	assoc_dict={}
 	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
-		if col[chr_index].strip("chr")==chromosome:
-			if coord1<=int(col[pos_index])<=coord2:
-				try:
-					float(col[p_index])
-				except ValueError:
-					continue
-				else:
-					coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
-					assoc_coords.append(coord_i)
-					assoc_dict[coord_i]=[col[p_index]]
-					if float(col[p_index])<lowest_p:
-						lowest_p_pos=col[pos_index]
-						lowest_p=float(col[p_index])
+		if len(col)==len_head:
+			if col[chr_index].strip("chr")==chromosome:
+				if coord1<=int(col[pos_index])<=coord2:
+					try:
+						float(col[p_index])
+					except ValueError:
+						continue
+					else:
+						coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+						assoc_coords.append(coord_i)
+						assoc_dict[coord_i]=[col[p_index]]
+						if float(col[p_index])<lowest_p:
+							lowest_p_pos=col[pos_index]
+							lowest_p=float(col[p_index])
+		else:
+			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
 			
 	# Coordinate list checks
 	if len(assoc_coords)==0:
@@ -402,7 +417,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 		geno=vcf[0].strip().split()
 	
 	if geno[2]!=snp and snp[0:2]=="rs":
-		output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+		if "warning" in output:
+			output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+		else:
+			output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
 		snp=geno[2]
 		
 	if "," in geno[3] or "," in geno[4]:
