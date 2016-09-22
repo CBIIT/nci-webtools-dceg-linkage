@@ -97,6 +97,15 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Load input file
 	assoc_data=open(file).readlines()
 	header=assoc_data[0].strip().split()
+	first=assoc_data[1].strip().split()
+	if len(header)!=len(first):
+		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print json_output
+		print >> out_json, json_output
+		out_json.close()
+		return("","")
+		raise	
 	
 	# Check header
 	print header_list
