@@ -242,7 +242,7 @@
 								<div class="input-group" id="ldassoc-file-container">
 									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
 									<input type="text" id="ldassoc-file-label" readonly
-										placeholder="Upload data association file"
+										placeholder="Upload association data file"
 										class="readonly-input-text">
 									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
 									<span class="btn btn-default btn-file btn-csv-file">Browse
@@ -317,41 +317,41 @@
 									<div id="region-gene-container" class="form-inline" style="display:none;">
 										<div class="form-group">
 											<label for="region-gene-name" style="display:none;">Gene Name</label>
-											<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name">
+											<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name" pattern="(^[A-Za-z0-9\-]+$)">
 										</div>
 										<div class="form-group">
 											<label for="region-gene-base-pair-window" >&plusmn;</label>
-											<input type="number" id="region-gene-base-pair-window" class="form-control" value="100000" step="10000" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
+											<input id="region-gene-base-pair-window" class="form-control" value="100000" type="text" pattern="^\d+$" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
 										</div>
 										<div class="form-group">
 											<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)">
+											<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)"  pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
 										</div>
 									</div>
 									<!-- region = Region -->
 									<div id="region-region-container" class="form-inline" style="display:none;">
 										<div>
 											<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000)</label>
-											<input type="text" id="region-region-start-coord" class="form-control" placeholder="Start Coord (chr1:50000)">
+											<input type="text" id="region-region-start-coord" class="form-control" placeholder="Start Coord (chr1:50000)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
 										</div>
 										<div>
 											<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
-											<input type="text" id="region-region-end-coord" class="form-control" placeholder="End Coord (chr1:50000)">
+											<input type="text" id="region-region-end-coord" class="form-control" placeholder="End Coord (chr1:50000)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
 										</div>
 										<div>
 											<label for="region-region-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-region-index" class="form-control" placeholder="Index variant (optional)">
+											<input type="text" id="region-region-index" class="form-control" placeholder="Index variant (optional)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
 										</div>
 									</div>
 									<!-- region = Variant -->
 									<div id="region-variant-container" class="form-inline" style="display:none;">
 										<div class="form-group">
 											<label for="region-variant-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant">
+											<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
 										</div>
 										<div class="form-group">
 											<label for="region-variant-base-pair-window" >&plusmn;</label>
-											<input type="number" id="region-variant-base-pair-window" class="form-control" value="500000" step="10000" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
+											<input id="region-variant-base-pair-window" class="form-control" type="text" pattern="^\d+$" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
 										</div>
 									</div>
 								</div>

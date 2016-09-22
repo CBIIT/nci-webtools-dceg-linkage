@@ -2589,7 +2589,66 @@ $(document).ready(function() {
 	$('#ldmatrix-file-snp-numbers').keyup(validateTextarea);
 	$('#snpchip-file-snp-numbers').keyup(validateTextarea);
 	$('#snpclip-file-snp-numbers').keyup(validateTextarea);
+	$('#region-gene-base-pair-window').keyup(validateBasePairWindows);
+	$('#region-variant-base-pair-window').keyup(validateBasePairWindows);
+	$('#region-variant-index').keyup(validateIndex);
+	$('#region-region-start-coord').keyup(validateIndex);
+	$('#region-region-end-coord').keyup(validateIndex);
+	$('#region-region-index').keyup(validateIndex);
+	$('#region-gene-index').keyup(validateIndex);
+	$('#region-gene-name').keyup(validateGeneName);
 });
+
+function validateGeneName() {
+    var errorMsg = "Enter a valid Gene Name";
+    var textarea = this;
+    console.log($(textarea).attr('pattern'));
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
+    var currentValue = $(this).val();
+    $(this).val(currentValue.toUpperCase());
+    var hasError = !currentValue.match(pattern);
+    console.log('hasError:'+hasError);
+    $(textarea).toggleClass('error', !!hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+    } else {
+        $(textarea).removeAttr('title');
+    }
+}
+
+function validateIndex() {
+    var errorMsg = "chr(1-22 or X or Y):###### or rs######";
+    var textarea = this;
+    console.log($(textarea).attr('pattern'));
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
+    var currentValue = $(this).val();
+    var hasError = !currentValue.match(pattern);
+    console.log('hasError:'+hasError);
+    $(textarea).toggleClass('error', !!hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+    } else {
+        $(textarea).removeAttr('title');
+    }
+}
+
+function validateBasePairWindows() {
+    var errorMsg = "Enter a positive number";
+    var textarea = this;
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
+    var currentValue = $(this).val();
+    var hasError = !currentValue.match(pattern);
+    console.log('hasError:'+hasError);
+    $(textarea).toggleClass('error', !!hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+    } else {
+        $(textarea).removeAttr('title');
+    }
+}
 
 function validateTextarea() {
     var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted";
@@ -2604,7 +2663,7 @@ function validateTextarea() {
         	hasError = false;
         //console.log("hasError: "+hasError);
         if (typeof textarea.setCustomValidity === 'function') {
-            	textarea.setCustomValidity(hasError ? errorMsg : '');
+			textarea.setCustomValidity(hasError ? errorMsg : '');
         } else {
             // Not supported by the browser, fallback to manual error display...
             $(textarea).toggleClass('error', !!hasError);
