@@ -261,6 +261,13 @@ def calculate_assoc(file,region,pop,request,myargs):
 			out_json.close()
 			return("","")
 			raise
+		if coord_s>=coord_e:
+			output["error"]="End coordinate ("+myargs.end+") must be greater than start coordinate("+myargs.start+")."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
 		
 		coord1=int(coord_s)-window
 		if coord1<0:
@@ -289,7 +296,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Generate coordinate list and P-value dictionary
 	max_window=3000000
 	if coord2-coord1>max_window:
-			output["error"]="Queried regioin is "+str(coord2-coord1)+"base pairs. Max size is "+str(max_window)+" base pairs."
+			output["error"]="Queried regioin is "+str(coord2-coord1)+" base pairs. Max size is "+str(max_window)+" base pairs."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
