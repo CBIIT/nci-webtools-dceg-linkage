@@ -521,8 +521,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	
 	# Populate JSON and text output
-	outfile=open(tmp_dir+"proxy"+request+".txt","w")
-	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Function"]
+	outfile=open(tmp_dir+"assoc"+request+".txt","w")
+	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","MAF","Function","P-value"]
 	print >> outfile, "\t".join(header)
 	
 	track=open(tmp_dir+"track"+request+".txt","w")
@@ -545,7 +545,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 	output["query_snp"]=query_snp
 	
-	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],query_snp["RegulomeDB"],query_snp["Function"]]
+	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],query_snp["RegulomeDB"],query_snp["Function"],str(query_snp["P-value"])]
 	print >> outfile, "\t".join(temp)
 	
 	chr,pos=query_snp["Coord"].split(':')

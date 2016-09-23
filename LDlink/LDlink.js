@@ -966,13 +966,6 @@ function initCalculate(id) {
 	$('#'+id+'-message-warning').hide();
 }
 
-function simulateLDassoc() {
-	$('#ldassoc-results-container').show();
-	$("#ldassoc-loading").hide();
-
-	//$('#' + id + '-links-container').show();
-}
-
 function updateData(id) {
 
 	switch (id) {
@@ -980,7 +973,6 @@ function updateData(id) {
 			if(isPopulationSet(id)) {
 				$('#'+id+"-loading").show();
 				updateLDassoc();
-//				setTimeout(simulateLDassoc, 3000);
 			}
 			break;
 		case 'ldhap':
@@ -1067,6 +1059,14 @@ function updateLDassoc() {
 	ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
 	console.dir(ldInputs);
 
+	$('#ldassoc-genome').attr('href',
+		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
+		+ ldInputs.reference + '.txt');
+
+	//console.dir(ldproxyInputs);
+	$('#ldassoc-results-link').attr('href','tmp/assoc' + ldInputs.reference + '.txt');
+
+
 	var url = restServerUrl + "/ldassoc";
 	var ajaxRequest = $.ajax({
 		type : 'GET',
@@ -1089,9 +1089,6 @@ function updateLDassoc() {
 		}
 
 		if (displayError(id, jsonObj) == false) {
-//			$('#' + id + '-results-container').show();
-//			$('#ldassoc-results-container').show();
-//			$("#ldassoc-loading").hide();
 			$('#ldassoc-bokeh-graph').empty().append(data);
 			$('#' + id + '-results-container').show();
 			getLDAssocResults('assoc'+ldInputs.reference+".json");
@@ -1977,15 +1974,6 @@ function getLDAssocResults(jsonfile) {
 			$('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
 			//$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
 		}
-
-		$('#ldassoc-genome').attr('href',
-			'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
-			+ id + '.txt');
-
-		//console.dir(ldproxyInputs);
-		$('#ldproxy-results-link').attr('href','tmp/assoc' + id + '.txt');
-
-
 	});
 	ajaxRequest.fail(function(jqXHR, textStatus) {
 		displayCommFail(id, jqXHR, textStatus);
@@ -2592,8 +2580,8 @@ $(document).ready(function() {
 	$('#region-gene-base-pair-window').keyup(validateBasePairWindows);
 	$('#region-variant-base-pair-window').keyup(validateBasePairWindows);
 	$('#region-variant-index').keyup(validateIndex);
-	$('#region-region-start-coord').keyup(validateIndex);
-	$('#region-region-end-coord').keyup(validateIndex);
+	$('#region-region-start-coord').keyup(validateChr);
+	$('#region-region-end-coord').keyup(validateChr);
 	$('#region-region-index').keyup(validateIndex);
 	$('#region-gene-index').keyup(validateIndex);
 	$('#region-gene-name').keyup(validateGeneName);
@@ -2617,6 +2605,24 @@ function validateGeneName() {
     }
 }
 
+function validateChr() {
+    var errorMsg = "chr(1-22 or X or Y):######";
+    var textarea = this;
+    console.log($(textarea).attr('pattern'));
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
+    var currentValue = $(this).val();
+    var hasError = !currentValue.match(pattern);
+    console.log('hasError:'+hasError);
+    $(textarea).toggleClass('error', !!hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    //textarea.setCustomValidity('Hello');
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+    } else {
+        $(textarea).removeAttr('title');
+    }
+}
+
 function validateIndex() {
     var errorMsg = "chr(1-22 or X or Y):###### or rs######";
     var textarea = this;
@@ -2627,6 +2633,7 @@ function validateIndex() {
     console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
+    //textarea.setCustomValidity('Hello');
     if (hasError) {
         $(textarea).attr('title', errorMsg);
     } else {
