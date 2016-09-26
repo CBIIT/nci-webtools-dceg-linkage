@@ -2590,6 +2590,7 @@ function validateGeneName() {
     var textarea = this;
     console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
+    //Check to see if user selected chr10 thru chr22.  
     var currentValue = $(this).val();
     $(this).val(currentValue.toUpperCase());
     var hasError = !currentValue.match(pattern);

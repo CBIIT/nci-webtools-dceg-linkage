@@ -1,0 +1,56 @@
+GITHUB Project name: nci-webtools-dceg-linkage
+
+Sandbox URL: https://analysistools-sandbox.nci.nih.gov/LDlink
+Dev URL: https://analysistools-dev.nci.nih.gov/LDlink
+
+Large data file to use with ldassoc calculation:
+/local/content/ldlink/data/assoc/meta_assoc.meta
+
+username on server: ncianalysis
+development server name nciws-d275-v
+
+Most reasearchers get their data from a program called plink.
+Two ways to list a positon on a genome.
+1. The Chromosome method is chr#(1-22 or x or y):######(pos)
+2. The direct index called rs number. rs#######
+chr1:1 is equal to rs1
+chr1:2 is equal to rs2
+
+File upload max file size is set to 2 gig in the apache configuration file.
+
+Two ajax calles:
+1. Upload files /LDlinkRest/upload
+2. Calculate /LDlinkRest/ldassoc
+Gene names:
+BRCA1
+BRCA2
+EWSR1
+FLI1
+BHLHE41
+TP53
+
+How ldAssoc works:
+
+1. Set ldassocData global
+2. Populates a jquery dataTable
+3. Load a large datafile with multiple columns
+4. Get column names from first line of file
+5. Ask user to map column names to variables: chromosome, position, and p-value
+6. Ask user what region: (region, gene, or variant)
+7. Based on what the select for region they will be asked to fillout additonal variables.
+8.  Select populations
+9. Select D'(D prime) or R^2
+10. Calculate
+11. Display bokeh graph.  It is a python graphing that create javascript.  The javacript is then loaded and exectued on the page to create the graph.
+12. Create links to data.
+13. Poplate data into dataTable via ldassocData
+
+
+Custom commands you can use on the server:
+list - Will list the ports used by product
+loader - Will show what flask servers are currently running
+sandbox - Will take you to the sandbox code
+dev - Will take you to the dev code
+
+http://analysistools-dev.nci.nih.gov/jpsurv/?request=true&file_control_filename=Breast_causespecific.dic&file_data_filename=Breast_causespecific.txt&output_filename=form-255663.json&status=uploaded&tokenId=193972
+
