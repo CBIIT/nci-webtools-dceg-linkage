@@ -52,5 +52,9 @@ loader - Will show what flask servers are currently running
 sandbox - Will take you to the sandbox code
 dev - Will take you to the dev code
 
+Same batch link to solution to calculation for JPSurv: 
 http://analysistools-dev.nci.nih.gov/jpsurv/?request=true&file_control_filename=Breast_causespecific.dic&file_data_filename=Breast_causespecific.txt&output_filename=form-255663.json&status=uploaded&tokenId=193972
+
+Locatinon of tmp directory where files are stored: /analysistools-sandbox/public_html/apps/LDlink/app
+
 
