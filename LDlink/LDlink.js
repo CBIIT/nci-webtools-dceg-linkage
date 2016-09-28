@@ -238,9 +238,9 @@ function uploadFile2() {
 	//console.log("formData after");
 	//console.dir(formData);
 	// Display the keys
-	for (var key of formData.keys()) {
-	   console.log(key); 
-	}
+    //	for (var key of formData.keys()) {
+    //	   console.log(key); 
+    //	}
     $.ajax({
         url: restServerUrl+'/upload',  //Server script to process data
         type: 'POST',
