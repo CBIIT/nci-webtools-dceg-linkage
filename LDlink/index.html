@@ -26,20 +26,20 @@
 
 
 <link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
 <!--
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
  -->
 <link rel="stylesheet"
-	href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-<link rel="stylesheet" href="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.css">
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.css">
 <!--
 <link rel="stylesheet"
 	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css">
 -->
-<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
 
 <link rel="stylesheet" href="../common/css/bootstrap-multiselect.css">
@@ -61,7 +61,7 @@
 	<!--[if lt IE 9]>
             <div class="alert alert-danger" role="alert">You are using an <strong>outdated</strong> version of IE that is not supported for this tool.  Please upgrade your browser to IE version 10.</div>
     <![endif]-->
-		<!-- 
+		<!--
 		<div >
 			<img src="LDlink_logo.png" alt="Logo for the LDlink tool" class="logo pull-left" style="width:100px;">
 		</div>
@@ -129,11 +129,11 @@
 					<b>LDproxy</b>: Interactively explore proxy and putatively
 						functional variants for a query variant. Input is an RS number and a
 						population group.<br>
-						
+
 					<b>SNPclip</b>: Prune a list of variants by linkage disequilibrium.
-						Input is a list of variant RS numbers (one per line) and a population 
+						Input is a list of variant RS numbers (one per line) and a population
 						group.<br>
-						
+
 					<b>SNPchip</b>: Find commercial genotyping platforms for variants.
 						Input is a list of variant RS numbers (one per line) and desired arrays.<br>
 				</p>
@@ -159,18 +159,18 @@
 						  <li><b>LDhap</b> haplotypes are now color coded by alleles for easier viewing.</li>
 						  <li><b>LDmatrix</b> now includes a R<sup>2</sup>/D' toggle for plotting R<sup>2</sup> or D' matrices.</li>
 						  <li>Minor tweaks to improve visualization on a variety of device screen sizes.</li>
-						</ul> 
+						</ul>
 					</div>
 				</div>
-				<p> <b>Citation</b>: Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific 
+				<p> <b>Citation</b>: Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
 				    haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed" target="PubMed">26139635</a>.
 				</p>
-				
+
 				<p> LDlink was developed by Mitchell Machiela in collaboration
 					with NCI's Center for Biomedical Informatics and Information
 					Technology (CBIIT). Support comes from the Division of Cancer
 					Epidemiology and Genetics Informatics Tool Challenge.</p>
-					
+
 				<p>	Questions or comments? Contact us via <a
 					href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
 				</p>
@@ -187,7 +187,7 @@
 							<!-- RS numbers -->
 							<div class="form-group">
 								<div class="col-sm-2">
-									<textarea id="ldhap-file-snp-numbers" 
+									<textarea id="ldhap-file-snp-numbers"
 										placeholder="RS Numbers"
 										class="form-control"
 										title="Enter list of RS numbers (one per line)"
@@ -261,7 +261,7 @@
 						<div class="container-fluid" id="ldhap-results-container">
 							<div class="row ldhap-table-container">
 								<div class="left-c">
-									<table class="table table-condensed"> 
+									<table class="table table-condensed">
 										<thead>
 											<tr>
 												<th>RS Number</th>
@@ -281,7 +281,7 @@
 										<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
 											<tr>
 												<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
-													<a 	title="Cluster Report" 
+													<a 	title="Cluster Report"
 													data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
 														<span data-bind="text: RS"></span>
 													</a>
@@ -320,7 +320,7 @@
 										<tbody data-bind="foreach: rows" style="border: 1px solid #ccc;">
 											<tr>
 												<!-- ko foreach: $data.Haplotypes -->
-													<td class="cell-center haplotype" 
+													<td class="cell-center haplotype"
 														data-bind="css: { haplotype_a: $data == 'A', haplotype_t: $data == 'T', haplotype_c: $data == 'C', haplotype_g: $data == 'G', haplotype_dash: $data == '-'}">
 														<span data-bind="text: $data"></span>
 													</td>
@@ -365,7 +365,7 @@
 								<div class="col-sm-3">
 									<div class="input-group">
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
-										
+
 										<input type="text" id="ldmatrix-file-label" readonly
 											placeholder="Upload file with RS numbers" class="readonly-input-text">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
@@ -774,7 +774,7 @@
 						<a id="ldproxy-genome" class="ldproxy-link"
 							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track78816.txt"
 
-							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a> 
+							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
 						<a class="ldproxy-link"
 							href="http://www.regulomedb.org/help#score"
 							target="LDProxy-genome-browser_RegulomeDB" title="RegulomeDB scoring scheme">View
@@ -837,7 +837,7 @@
 						<!-- SNPclip FORM -->
 						<form id="snpclipForm" class="ldlinkForm">
 							<div class="form-group col-sm-2">
-								<textarea id="snpclip-file-snp-numbers" 
+								<textarea id="snpclip-file-snp-numbers"
 									placeholder="RS Numbers"
 									class="form-control"
 									title="Enter list of RS numbers (one per line)"
@@ -873,8 +873,8 @@
 									<div>Thresholds</div>
 									<div class="input-group">
 										<label for="snpclip_r2_threshold">R<sup>2</sup>:</label>
-										<input id="snpclip_r2_threshold" 
-											type="text" 
+										<input id="snpclip_r2_threshold"
+											type="text"
 											pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)"
 											value="0.1"
 											title="R2 Threshold must be a number between 0 and 1"
@@ -883,10 +883,10 @@
 									<div style="clear:both:"></div>
 									<div>
 										<label for="snpclip_maf_threshold">MAF:</label>
-										<input id="snpclip_maf_threshold" 
-											type="text" 
+										<input id="snpclip_maf_threshold"
+											type="text"
 											pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)"
-											value="0.01" 
+											value="0.01"
 											title="MAF Threshold must be a number between 0 and 1"
 											required>
 									</div>
@@ -1058,10 +1058,10 @@
 					<div id="filter-by-array" class="panel panel-default">
 					    <div class="panel-heading">
 					        <h4 class="panel-title">
-					            <a data-toggle="collapse" 
+					            <a data-toggle="collapse"
 					            	data-parent="#accordion"
 					            	href="#collapseThree">Filter by array</a>
-					            <a data-toggle="collapse" 
+					            <a data-toggle="collapse"
 					            	data-parent="#accordion"
 					            	href="#collapseThree">
 					            <i class="indicator glyphicon glyphicon-chevron-up  pull-right"></i>
@@ -1162,7 +1162,7 @@
 									</tbody>
 								</table>
 								<div>
-									<a id="snp_chip_list" 
+									<a id="snp_chip_list"
 										target="snp_chip_list">Download Chip Details</a>
 								</div>
 
@@ -1258,11 +1258,11 @@
     <input type="text" id="second">
     <br>
     <button id="submit" onclick="submitForm()">Add these numbers!</button>
-    
+
     <br>
     Results:
     <span id="results"></span>
-    
+
 </body>
 
 
@@ -1273,19 +1273,19 @@
 <!--  Temp during testing
 	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 -->
-	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
+	<script src="https://cdn.pydata.org/bokeh/release/bokeh-0.8.0.min.js"></script>
 
 	<script type="text/javascript"
-		src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
+		src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">
 	</script>
 	<script type="text/javascript"
-		src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js">
+		src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js">
 	</script>
 	<script type="text/javascript"
-		src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js">
+		src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js">
 	</script>
 	<script type="text/javascript"
-		src="http://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js">
+		src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js">
 	</script>
 	<!--
 	<script type="text/javascript"
@@ -1298,7 +1298,7 @@
 	</script>
 -->
 	<script type="text/javascript"
-		src="LDlink.js"> 
+		src="LDlink.js">
 	</script>
 	<script type="text/javascript"
 		src="../common/js/purify.js">
@@ -1306,7 +1306,7 @@
 	<script type="text/javascript"
 		src="../common/js/bootstrap-multiselect.js">
 	</script>
-	<script type="text/javascript" 
+	<script type="text/javascript"
 		src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js">
 	</script>
 	<script type="text/javascript"
