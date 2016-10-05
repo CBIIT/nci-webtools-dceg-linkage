@@ -292,7 +292,7 @@ def calculate_proxy(snp,pop,request,r2_d="r2"):
 			row.append(pos)
 			row.append(proxy_info["Alleles"])
 			row.append(str(round(float(proxy_info["MAF"]),4)))
-			row.append(proxy_info["Dist"])
+			row.append(abs(proxy_info["Dist"]))
 			row.append(str(round(float(proxy_info["Dprime"]),4)))
 			row.append(str(round(float(proxy_info["R2"]),4)))
 			row.append(proxy_info["Corr_Alleles"])
