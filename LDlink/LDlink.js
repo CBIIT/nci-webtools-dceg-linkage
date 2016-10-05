@@ -448,7 +448,7 @@ function createProxyTable() {
         "bAutoWidth": true,
         "bProcessing": false,
         "deferRender": false,
-        "order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
+        "order": [[ 7, "desc" ], [ 5, "asc"]], //Order desc on DPrime
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
