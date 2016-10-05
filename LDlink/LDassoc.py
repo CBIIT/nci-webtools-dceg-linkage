@@ -2,9 +2,6 @@
 
 # Create LDproxy function
 def calculate_assoc(file,region,pop,request,myargs):
-	#myargs.origin = "rs1231"
-	print "Inside calculate_assoc"
-	print myargs
 	import csv,json,operator,os,sqlite3,subprocess,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
@@ -108,12 +105,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 		raise	
 	
 	# Check header
-	print header_list
 	for item in header_list:
 		if item not in header:
 			output["error"]="Variables mapping is not listed in the in the association file header."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print json_output
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
@@ -512,23 +507,18 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
-	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=True)
-	#######################################
-	# No longer sorting by R2 or D'!!!    #
-	# Need to decide on UCSC output style #
-	# As is query SNP!=index SNP          #
-	#######################################
+	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=False)
 	
 	
 	# Populate JSON and text output
+	from math import log10
+	
 	outfile=open(tmp_dir+"assoc"+request+".txt","w")
-	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","MAF","Function","P-value"]
+	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","P-value","RegulomeDB","Function"]
 	print >> outfile, "\t".join(header)
 	
-	track=open(tmp_dir+"track"+request+".txt","w")
-	print >> track, "browser position chr"+str(chromosome)+":"+str(coord1)+"-"+str(coord2)
-	print >> track, ""
-	print >> track, "track name=\""+snp+"\" description=\"Query Variant: "+snp+"\" color=108,108,255"
+	ucsc_track={}
+	ucsc_track["header"]=["chr","pos","rsid","-log10_p-value"]
 	
 	query_snp={}
 	query_snp["RS"]=out_p_sort[0][3]
@@ -545,25 +535,24 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 	output["query_snp"]=query_snp
 	
-	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],query_snp["RegulomeDB"],query_snp["Function"],str(query_snp["P-value"])]
+	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["RegulomeDB"],query_snp["Function"]]
 	print >> outfile, "\t".join(temp)
 	
 	chr,pos=query_snp["Coord"].split(':')
-	temp2=[chr,pos,pos,query_snp["RS"]]
-	print >> track, "\t".join(temp2)
-	print >> track, ""
-	print >> track, "track name=\"0.8<R2<1.0\" description=\"Proxy Variants with 0.8<R2<1.0\" color=198,129,0"
+	temp2=[chr,pos,query_snp["RS"],-log10(query_snp["P-value"])]
+	ucsc_track["lowest_p"]=temp2
 	
+	ucsc_track["gwas_sig"]=[]
+	ucsc_track["marg_sig"]=[]
+	ucsc_track["sugg_sig"]=[]
+	ucsc_track["not_sig"]=[]
 	
 	proxies={}
 	rows=[]
 	digits=len(str(len(out_p_sort)))
-	r2_d_prior=1
-	counter=0
-	cutoff=[0.8,0.6,0.4,0.2,0.0]
 	
 	for i in range(1,len(out_p_sort)):
-		if float(out_p_sort[i][8])>0.01 and out_p_sort[i][3]!=snp:
+		if out_p_sort[i][3]!=snp:
 			proxy_info={}
 			row=[]
 			proxy_info["RS"]=out_p_sort[i][3]
@@ -596,20 +585,68 @@ def calculate_assoc(file,region,pop,request,myargs):
 			row.append(proxy_info["Function"])
 			rows.append(row)
 			
-			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],proxy_info["RegulomeDB"],proxy_info["Function"]]
+			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["RegulomeDB"],proxy_info["Function"]]
 			print >> outfile, "\t".join(temp)
 			
-			temp2=[chr,pos,pos,proxy_info["RS"]]
-			print >> track, "\t".join(temp2)
+			chr,pos=proxy_info["Coord"].split(':')
+			p_val=-log10(proxy_info["P-value"])
+			temp2=[chr,pos,proxy_info["RS"],p_val]
 			
-			if cutoff[counter]<r2_d_prior and float(proxy_info["R2"])<=cutoff[counter]:
-				print >> track, ""
-				print >> track, "track name=\""+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" description=\"Proxy Variants with "+str(cutoff[counter+1])+"<R2<"+str(cutoff[counter])+"\" color=198,129,0"
-				counter+=1
-			
-			r2_d_prior=proxy_info["R2"]
-
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
+			if p_val>-log10(5e-8):
+				ucsc_track["gwas_sig"].append(temp2)
+			elif -log10(5e-8)>=p_val>5:
+				ucsc_track["marg_sig"].append(temp2)
+			elif 5>=p_val>3:
+				ucsc_track["sugg_sig"].append(temp2)
+			else:
+				ucsc_track["not_sig"].append(temp2)
+	
+	track=open(tmp_dir+"track"+request+".txt","w")
+	print >> track, "browser position chr"+str(chromosome)+":"+str(coord1)+"-"+str(coord2)
+	print >> track, ""
+	
+	print >> track, "track type=bedGraph name=\"Manhattan Plot\" description=\"Plot of -log10 association p-values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar yLineMark=7.301029995663981 yLineOnOff=on maxHeightPixels=60"
+	print >> track, "\t".join([str(ucsc_track["lowest_p"][i]) for i in [0,1,1,3]])
+	if len(ucsc_track["gwas_sig"])>0:
+		for var in ucsc_track["gwas_sig"]:
+			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
+	if len(ucsc_track["marg_sig"])>0:
+		for var in ucsc_track["marg_sig"]:
+			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
+	if len(ucsc_track["sugg_sig"])>0:
+		for var in ucsc_track["sugg_sig"]:
+			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
+	if len(ucsc_track["not_sig"])>0:
+		for var in ucsc_track["not_sig"]:
+			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
+	
+	print >> track, "track type=bed name=\""+snp+"\" description=\"Variant with lowest association p-value: "+snp+"\" color=108,108,255"
+	print >> track, "\t".join([ucsc_track["lowest_p"][i] for i in [0,1,1,2]])
+	print >> track, ""
+	
+	print >> track, "track type=bed name=\"P<5e-8\" description=\"Variants with association p-values <5e-8\" color=198,129,0"
+	if len(ucsc_track["gwas_sig"])>0:
+		for var in ucsc_track["gwas_sig"]:
+			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
+		print >> track, ""
+	
+	print >> track, "track type=bed name=\"5e-8<=P<1e-5\" description=\"Variants with association p-values >=5e-8 and <1e-5\" color=198,129,0"
+	if len(ucsc_track["marg_sig"])>0:
+		for var in ucsc_track["marg_sig"]:
+			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
+		print >> track, ""
+	
+	print >> track, "track type=bed name=\"1e-5<=P<1e-3\" description=\"Variants with association p-values >=1e-5 and <1e-3\" color=198,129,0"
+	if len(ucsc_track["sugg_sig"])>0:
+		for var in ucsc_track["sugg_sig"]:
+			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
+		print >> track, ""
+	
+	print >> track, "track type=bed name=\"1e-3<=P<=1\" description=\"Variants with association p-values >=1e-3 and <=1\" color=198,129,0"
+	if len(ucsc_track["not_sig"])>0:
+		for var in ucsc_track["not_sig"]:
+			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
+	
 
 	duration=time.time() - start_time
 
@@ -637,7 +674,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	
 	# Organize scatter plot data
-	from math import log10
 	q_rs=[]
 	q_allele=[]
 	q_coord=[]
@@ -949,11 +985,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	
 	# Print run time statistics
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	print "\nNumber of Individuals: "+str(len(pop_list))
-
+	print "Number of Individuals: "+str(len(pop_list))
 	print "SNPs in Region: "+str(len(out_prox))
-
 	duration=time.time() - start_time
 	print "Run time: "+str(duration)+" seconds\n"
 
@@ -994,9 +1027,6 @@ def main():
 	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 	
 	args=parser.parse_args()
-	print args
-	print type(args)
-	#dir myargs
 	
 	if args.gene:
 		region="gene"
@@ -1027,14 +1057,13 @@ def main():
 		json_dict["error"]
 
 	except KeyError:
-		head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","RegulomeDB","Functional_Class"]
+		head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
 		print "\t".join(head)
-		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
+		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 		print "\t".join(temp)
 		for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
-			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
 			print "\t".join(temp)
-		print ""
 
 	else:
 		print ""
