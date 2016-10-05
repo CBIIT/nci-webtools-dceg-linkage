@@ -619,6 +619,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	if len(ucsc_track["not_sig"])>0:
 		for var in ucsc_track["not_sig"]:
 			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
+	print >> track, ""
 	
 	print >> track, "track type=bed name=\""+snp+"\" description=\"Variant with lowest association p-value: "+snp+"\" color=108,108,255"
 	print >> track, "\t".join([ucsc_track["lowest_p"][i] for i in [0,1,1,2]])
