@@ -28,17 +28,10 @@
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 
-<!--
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ladda-bootstrap/0.9.4/ladda-themeless.min.css" type="text/css">
- -->
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
 <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.2.min.css">
-<!--
-<link rel="stylesheet"
-	href="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/css/bootstrapvalidator.min.css">
--->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
 
@@ -61,11 +54,7 @@
 	<!--[if lt IE 9]>
             <div class="alert alert-danger" role="alert">You are using an <strong>outdated</strong> version of IE that is not supported for this tool.  Please upgrade your browser to IE version 10.</div>
     <![endif]-->
-		<!--
-		<div >
-			<img src="LDlink_logo.png" alt="Logo for the LDlink tool" class="logo pull-left" style="width:100px;">
-		</div>
- 		-->
+
 		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
 			<!-- HOME -->
 			<li>
@@ -91,6 +80,11 @@
 			<li>
 				<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
 			</li>
+
+			<!-- BATCH -->
+			<li>
+				<a id="ldbatch-tab-anchor" href="#ldbatch-tab" data-toggle="tab" title="Batch processing">LDbatch</a>
+			</li>
 			<!-- CHIP -->
 			<li>
 				<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
@@ -108,23 +102,7 @@
 		<!-- Tab Content -->
 		<div class="tab-content">
 			<div class="tab-pane fade" id="home-tab">
-			<!--
-			<form enctype="multipart/form-data">
-				<input name="ldassocFile" type="file" />
-				<input type="button" value="Upload" />
-			</form>
-			<progress></progress>
-			-->
-<!--
-<h2> HTML 5 File Upload Progress Bar Demo</h2>
-<form id="upload_form" enctype="multipart/form-data" method="post">
-<input type="file" name="file1" id="file1"/><br/>
-<input type="button" id="uploadButton" value="Upload File" onclick="fileUpload('file1', 'uploadButton')"/>
-<progress id="progressBar" value="0" max="100" style="width:300px;"></progress>
-<h3 id="status"></h3>
-<p id="loaded_n_total"></p>
-</form>
--->
+
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
 				<p>LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
@@ -220,19 +198,6 @@
 							<!-- Population -->
 							<!-- Broswe RS numbers -->
 							<div class="col-sm-3" style="width:280px;">
-								<!--
-								<form enctype="multipart/form-data" id="ldassoc-file-form">
-									<input id="ldassocFile" name="ldassocFile" type="file" />
-									<input type="button" value="Upload" />
-								</form>
-								<progress></progress>
-<div id="ldassoc-progressbar" class="progress">
-  <div  class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
-  aria-valuemin="0" aria-valuemax="100" style="width:50%">
-    50% Complete (info)
-  </div>
-</div>
-								-->
 								<div class="progress" style="display:none;">
 								  <div id="progressbar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
 								  aria-valuemin="0" aria-valuemax="100">
@@ -1160,6 +1125,37 @@
 				</div>
 			</div>
 
+			<!-- LDbatch -->
+			<div class="tab-pane fade" id="ldbatch-tab">
+				<!-- LDpbatch INPUTS-->
+				<div class="row">
+					<!-- LDbatch FORM -->
+					<form id="ldbatchForm">
+						<div class="col-xs-12">
+							<div id="ldbatch-messages">
+								<span id="iconType"></span>
+								<b id='message'></b>
+							</div>
+						</div>
+						<div class="col-xs-12 col-sm-5">
+							<div class="form-group">
+								<input type="file" id="batchFile" name="batchFile" class="form-control" required="You must upload a batch file to process" />
+								<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
+								<span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
+							</div>
+						</div>
+						<div class="col-xs-12 col-sm-5">
+							<div class="form-group">
+								<input type="email" id="recipientEmail" name="recipientEmail" class="form-control" 
+								required="You must enter a valid email adress" placeholder="Email" aria-label="Email" />
+							</div>
+						</div>
+						<button type="submit" class="btn btn-default">Submit</button>
+					</form>
+				</div>
+				<hr>
+			</div>
+
 			<!-- SNPclip -->
 			<div class="tab-pane fade" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
@@ -1648,21 +1644,6 @@
 	<script type="text/javascript"
 		src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js">
 	</script>
-	<!--
-	<script type="text/javascript"
-		src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.2.8/jquery.form-validator.min.js">
-	</script>
-	-->
-<!--
-	<script type="text/javascript"
-		src="http://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.4.5/js/bootstrapvalidator.min.js">
-	</script>
--->
-<!--
-	<script type="text/javascript"
-		src="../common/js/fileUpload.js">
-	</script>
--->
 	<script type="text/javascript"
 		src="LDlink.js">
 	</script>

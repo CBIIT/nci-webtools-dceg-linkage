@@ -1,47 +1,34 @@
 #!flask/bin/python
-from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect
-from functools import wraps
-from flask import current_app
-from flask import jsonify
-import sys, getopt
-import cgi
-import shutil
-import os
-import sys, traceback
-from xml.sax.saxutils import escape, unescape
-from socket import gethostname
-import json
+
 import pandas as pd
 import numpy as np
+import sys, getopt, cgi, shutil, os, traceback, urllib, collections, argparse, json
+from flask import Flask, render_template, Response, abort,request, make_response, url_for, jsonify, redirect, current_app, jsonify
+from functools import wraps
+from xml.sax.saxutils import escape, unescape
+from socket import gethostname 
 from pandas import DataFrame
-import urllib
-import collections
-
 from LDpair import calculate_pair
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
-
 from SNPchip import *
-
-#import os
-#from flask import Flask, request, redirect, url_for
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
 tmp_dir = "./tmp/"
 # Ensure tmp directory exists
 if not os.path.exists(tmp_dir):
-        os.makedirs(tmp_dir)
+    os.makedirs(tmp_dir)
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
-#app = Flask(__name__, static_folder='static', static_url_path='/static')
+# app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 @app.route('/')
 
@@ -56,10 +43,10 @@ def copy_output_files(reference):
 
     # Ensure apache tmp directory exists
     if not os.path.exists(apache_tmp_dir):
-	os.makedirs(apache_tmp_dir)
-		
-    #copy *<reference_no>.* to htodocs
-    os.system("cp "+ tmp_dir+"*"+reference+".* "+apache_tmp_dir);
+        os.makedirs(apache_tmp_dir)
+        
+    # copy *<reference_no>.* to htodocs
+    os.system("cp "+ tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
 
 def index():
     return render_template('index.html')
@@ -72,15 +59,21 @@ def jsonp(func):
         if callback:
             data = str(func(*args, **kwargs).data)
             content = str(callback) + '(' + data + ')'
-            #mimetype = 'application/javascript'
+            # mimetype = 'application/javascript'
             mimetype = 'application/json'
             return current_app.response_class(content, mimetype=mimetype)
         else:
             return func(*args, **kwargs)
     return decorated_function
 
-def sendTraceback():
+def sendTraceback(error=None):
     custom = {}
+
+    if (error is None):
+        custom["error"] = "Raised when a generated error does not fall into any category."
+    else:
+        custom["error"] = error
+
     print "Unexpected error:", sys.exc_info()[0]
     traceback.print_exc()
     custom["error"] = "Raised when a generated error does not fall into any category."
@@ -128,12 +121,11 @@ def upload():
             return 'File was saved'
     #        print "FILE SAVED.  Alright!"
     #        return '{"status" : "File was saved"}'
-    #print filename
+    # print filename
 
-    #message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
-    #return message
-    #return 'No Success'
-
+    # message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
+    # return message
+    # return 'No Success'
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
 def restAdd():
@@ -197,14 +189,14 @@ def ldproxy():
     print 'r2_d: ' + r2_d
     print
 
-    #out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
+    # out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
     try:
         out_script,out_div = calculate_proxy(var, pop, reference, r2_d)
     except:
         return sendTraceback()
 
 
-    #copy_output_files(reference)
+    # copy_output_files(reference)
 
     return out_script+"\n "+out_div
 
@@ -235,9 +227,8 @@ def ldmatrix():
     except:
         return sendTraceback()
 
-    #copy_output_files(reference)
+    # copy_output_files(reference)
     return out_script+"\n "+out_div
-
 
 @app.route('/LDlinkRest/ldhap', methods = ['GET'])
 def ldhap():
@@ -266,15 +257,15 @@ def ldhap():
     except:
         return sendTraceback()
 
-    #copy_output_files(reference)
+    # copy_output_files(reference)
 
     return sendJSON(out_json)
 
 @app.route('/LDlinkRest/snpclip', methods = ['POST'])
 def snpclip():
 
-    #Command line example
-    #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
+    # Command line example
+    # [ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
     mimetype = 'application/json'
     data = json.loads(request.stream.read())
     print 'Execute snpclip'
@@ -290,7 +281,7 @@ def snpclip():
 
     f = open(snpfile, 'w')
     for s in snplist:
-    	s = s.lstrip()
+        s = s.lstrip()
         if(s[:2].lower() == 'rs'):
             f.write(s.lower()+'\n')
 
@@ -315,7 +306,7 @@ def snpclip():
     try:
         json_dict["error"]
     except KeyError:
-        #print ""
+        # print ""
         print "LD Thinned SNP list ("+pop+"):"
         for snp in snp_list:
             print snp
@@ -347,7 +338,7 @@ def snpclip():
         print ""
         clip["error"] = json_dict["error"]
 
-    #SNP List file    
+    # SNP List file    
     f = open('tmp/snp_list'+reference+'.txt', 'w')
     for rs_number in snp_list:
         f.write(rs_number+'\n')
@@ -362,16 +353,15 @@ def snpclip():
             f.write("\n")
 
     f.close()
-    #copy_output_files(reference)
+    # copy_output_files(reference)
     out_json = json.dumps(clip, sort_keys=False)
     return current_app.response_class(out_json, mimetype=mimetype)
-
 
 @app.route('/LDlinkRest/snpchip', methods = ['GET', 'POST'])
 def snpchip():
 
-    #Command line example
-    #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
+    # Command line example
+    # [ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
     print "snpChip"
 
     snps = request.args.get('snps', False)
@@ -395,11 +385,10 @@ def snpchip():
 
     chip={}
     chip["snp_chip"] = snp_chip
-    #copy_output_files(reference)
+    # copy_output_files(reference)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
 
     return current_app.response_class(out_json, mimetype='application/json')
-
 
 @app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
 def snpchip_platforms():
@@ -431,18 +420,18 @@ def ldassoc():
     myargs.dprime = bool(request.args.get("dprime") == "True")
     print "dprime: "+str(myargs.dprime)
 
-    #Column settings
+    # Column settings
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
     myargs.pval = str(request.args.get('columns[pvalue]'))
 
     print "myargs:"
     print type(myargs.chr)
-    #regionValues = json.loads(request.args.get('region'))
-    #variantValues = json.loads(request.args.get('variant'))
-    #columns = json.loads(request.args.get('columns'))
+    # regionValues = json.loads(request.args.get('region'))
+    # variantValues = json.loads(request.args.get('variant'))
+    # columns = json.loads(request.args.get('columns'))
     filename = os.path.join(app.config['UPLOAD_DIR'], str(request.args.get('filename')))
-    #filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
+    # filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
 
     print 'filename: ' + filename
     print 'region: ' + region
@@ -455,7 +444,6 @@ def ldassoc():
         print "index: "+str(request.args.get('variant[index]'))
         print "base pair window: "+request.args.get('variant[basepair]')
         print 
-        
         myargs.window = int(request.args.get('variant[basepair]'))
 
         if request.args.get('variant[index]') == "":
@@ -476,36 +464,70 @@ def ldassoc():
     if region == "region":
         print "Region is region"
         if request.args.get('region[index]') == "":
-            myargs.origin=None
+            myargs.origin = None
         else:
             myargs.origin = request.args.get('region[index]')
 
         myargs.start = str(request.args.get('region[start]'))
         myargs.end = str(request.args.get('region[end]'))
-    
+
     try:
-        out_json = calculate_assoc(filename,region,pop,reference,myargs)
+        out_json = calculate_assoc(filename, region, pop, reference, myargs)
     except:
         return sendTraceback()
 
-    #copy_output_files(reference)
+    # copy_output_files(reference)
     print "out_json:"
     print out_json
 
     return sendJSON(out_json)
 
+@app.route('/LDlinkRest/ldbatch/upload', methods = ['POST'])
+def batch_upload():
+    try:
+        print "In batch_upload"
+        if 'batchFile' in request.files:
+            print "has batch file"
+            file = request.files['batchFile']
+            file.save(os.path.join(app.config['UPLOAD_DIR'], secure_filename(file.filename)))
+            resp = jsonify({ "message": "The file has been sucessfully uploaded." })
+        else:
+            raise IOError("No batch file has been uploaded to be processed")
+    except IOError as e:
+        print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
+        errorType, error, traceback = sys.exc_info()
+        resp.status_code = 404
+    except Exception, e:
+        print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
+        resp = jsonify({ message: e.args })
+        resp.status_code = 400
+    finally:
+        return resp
 
-import argparse
+@app.route('/LDlinkRest/ldbatch/process', methods = ['POST'])
+def batch_process():
+    try:
+        if 'recipientEmail' in request.form:
+            email=request.form['recipientEmail']
+            resp = jsonify({ "message": "The batch process has begun. The results will be emailed to '{0}'".format(email) })
+        else:
+            raise KeyError("The recipient's E-Mail address must be entered")
+    except Exception, e:
+        print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
+        resp = jsonify({ message: e.args })
+        resp.status_code = 400
+    finally:
+        return resp
+
 if __name__ == '__main__':
-
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", dest="port_number", default="9982", help="Sets the Port")
     parser.add_argument("-d", dest="debug", default="False", help="Sets the Debugging Option")
     # Default port is production value; prod,stage,dev = 9982, sandbox=9983
     args = parser.parse_args()
-    port_num = int(args.port_number);
+    port_num = int(args.port_number)
     debugger = args.debug == 'True'
 
     hostname = gethostname()
-    app.run(host='0.0.0.0', port=port_num, debug = debugger,use_evalex = False)
+    app.run(host='0.0.0.0', port=port_num, debug=debugger, use_evalex=False)
     application = DebuggedApplication(app, True)

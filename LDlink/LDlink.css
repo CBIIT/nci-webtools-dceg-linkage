@@ -700,3 +700,17 @@ textarea:invalid, .error {
 	margin-bottom:18px;
 }
 
+.form-group > .form-control-feedback:not(.show) {
+	display: none;
+}
+
+.form-group.has-success > input,
+.form-group.has-success > select {
+	background-image: linear-gradient(to bottom,#dff0d8 0,#c8e5bc 100%);
+	background-repeat: repeat-x;
+}
+.form-group.has-error > input,
+.form-group.has-error > select {
+	background-image: linear-gradient(to bottom,#f2dede 0,#e7c3c3 100%);
+	background-repeat: repeat-x;
+}
