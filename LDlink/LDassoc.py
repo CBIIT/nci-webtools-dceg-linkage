@@ -552,7 +552,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	digits=len(str(len(out_p_sort)))
 	
 	for i in range(1,len(out_p_sort)):
-		if float(out_p_sort[i][8])>0.01 and out_p_sort[i][3]!=snp:
+		if out_p_sort[i][3]!=snp:
 			proxy_info={}
 			row=[]
 			proxy_info["RS"]=out_p_sort[i][3]
