@@ -58,7 +58,7 @@ class QueueProcessor(DisconnectListener):
         testFile = open('tmp/snps_39828.txt', 'r')
         filesList = []
         filesList.append(testFile)
-        createMail(sendTo="tony.hall@mail.nih.gov", message="Testing complete", files=filesList)
+        createMail(sendTo="Email_address", message="Testing complete", files=filesList)
 
     def queueConsumer(self, client, frame):
         print "In queueConsumer"
