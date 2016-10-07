@@ -10,6 +10,7 @@ from socket import gethostname
 from pandas import DataFrame
 from LDpair import calculate_pair
 from LDproxy import calculate_proxy
+from LDbatch import toQueue
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -486,16 +487,20 @@ def ldassoc():
 def batch_upload():
     try:
         print "In batch_upload"
+        resp = ""
         if 'batchFile' in request.files:
             print "has batch file"
             file = request.files['batchFile']
-            file.save(os.path.join(app.config['UPLOAD_DIR'], secure_filename(file.filename)))
-            resp = jsonify({ "message": "The file has been sucessfully uploaded." })
+            token = request.form['token']
+
+            file.save(os.path.join(app.config['UPLOAD_DIR'], secure_filename(token)))
+            resp = jsonify({ "message": "The file has been sucessfully uploaded.", "token" : token })
         else:
             raise IOError("No batch file has been uploaded to be processed")
     except IOError as e:
         print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
         errorType, error, traceback = sys.exc_info()
+        resp = jsonify({ message: e.args })
         resp.status_code = 404
     except Exception, e:
         print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
@@ -505,11 +510,18 @@ def batch_upload():
         return resp
 
 @app.route('/LDlinkRest/ldbatch/process', methods = ['POST'])
-def batch_process():
+def ldbatch_process():
     try:
-        if 'recipientEmail' in request.form:
-            email=request.form['recipientEmail']
-            resp = jsonify({ "message": "The batch process has begun. The results will be emailed to '{0}'".format(email) })
+        if 'token' not in request.form:
+            resp = jsonify({ "message": "Try again"})
+            resp.status_code = 400
+            print "process not executed, missing token from request at {0}".format(time.strftime("%m.%d.%Y %H%:M:%S"))
+        elif 'recipientEmail' in request.form:
+            email = request.form['recipientEmail']
+            batchFile = open(os.path.join('tmp', request.form['token']), 'r')
+            queueResponse = toQueue(email, batchFile)
+
+            resp=jsonify({ "message": queueResponse })
         else:
             raise KeyError("The recipient's E-Mail address must be entered")
     except Exception, e:
