@@ -448,7 +448,7 @@ function createProxyTable() {
         "bAutoWidth": true,
         "bProcessing": false,
         "deferRender": false,
-        "order": [[ 7, "desc" ], [ 5, "asc"]], //Order desc on DPrime
+        "order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
@@ -2860,7 +2860,8 @@ function batchProcess(e) {
             beforeSend: beforeSendHandler,
             success: function(data, statusText, xhr) {
                 e.target.reset();
-                $(e.target).find('.form-group').removeClass("has-feedback has-success has-error");
+
+                $(e.target.recipientEmail).find('.form-group').removeClass("has-feedback has-error").addClass("has-success");
 
                 messageElement.find("#iconType").empty().html("<span class='glyphicon glyphicon-ok'></span>");
                 messageElement.addClass("alert alert-success show").find("#message").html(data.message);

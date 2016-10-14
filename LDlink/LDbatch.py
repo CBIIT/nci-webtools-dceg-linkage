@@ -1,29 +1,58 @@
 #!/usr/bin/env python
-import QueueProcessor
+import json
+import logging
 
-def toQueue(email, batchFile, tokenId):
-    client = Stomp(qp)
+from stompest.async import Stomp
+from stompest.config import StompConfig
+from stompest.protocol import StompSpec
+from QueueProcessor import QueueProcessor
+import os, sys, time
+from flask import jsonify, json
 
-    data = json.dumps({ 
-        "filepath": batchFile,
-        "token": tokenId,
-        "timestamp": time.strftime("%Y-%m-%d")
-    })
+def toQueue(email, tokenId):
+    # print "in toQueue"
+    resp = ""
+    try:
+        qp = QueueProcessor(
+            PRODUCT_NAME = "LDlink Batch Processing Module",
+            CONFIG_FILE = r"QueueConfig.ini",
+            Q_NAME = 'queue.name',
+            Q_URL = 'queue.url',
+            Q_PORT = 'queue.port',
+            Q_ERROR = 'queue.error.name',
+            MAIL_HOST = 'mail.host',
+            MAIL_ADMIN = 'mail.admin')
 
-    #opening connection to queue
-    client.connect()
-    client.send(qp.Q_NAME, data)
-    client.disconnect()
+        batchFile = open(os.path.join('tmp', tokenId))
+        # print batchFile
 
-    return jsonify({ message: "The batch process has begun. The results will be emailed to '{0}'".format(email) })
+        ts = time.strftime("%Y-%m-%d")
+        data = json.dumps({ 
+            "filepath": batchFile.name,
+            "token": tokenId,
+            "timestamp": ts
+        })
 
-if __name__ == '__main__':
-    from PropertyUtil import PropertyUtil
-    qp = QueueProcessor
-    qp.CONFIG_FILE = PropertyUtil(r"QueueConfig.ini")
-    qp.PRODUCT_NAME = "LDlink Batch Processing Module"
-    qp.Q_CONFIG = qp.CONFIG_FILE.getAsString('queue.config')
-    qp.Q_NAME = qp.CONFIG_FILE.getAsString('queue.name')
-    qp.Q_URL = qp.CONFIG_FILE.getAsString('queue.url')
-    qp.Q_ERROR = qp.CONFIG_FILE.getAsString('queue.error.name')
-    qp.MAIL_HOST= qp.CONFIG_FILE.getAsString('mail.host')
+        print "before client connect"
+        print "Stomp( {0}, {1} )".format(qp.Q_URL, qp.Q_PORT)
+
+        print type(qp.Q_URL)
+        print type(qp.Q_PORT)
+        
+        client = Stomp("tcp://{0}:{1}".format(qp.Q_URL, qp.Q_PORT))
+
+        #opening connection to queue
+        client.connect()
+        client.send(qp.Q_NAME, data)
+        client.disconnect()
+
+        return jsonify({ "message": "The batch process has begun. The results will be emailed to " + email })
+    except Exception, e:
+        errorType, error, traceback = sys.exc_info()
+        print errorType
+        print error
+        print traceback
+        print e.args[1:]
+        resp = jsonify({ "message" : e.args })
+        resp.status_code = 400
+        return resp
