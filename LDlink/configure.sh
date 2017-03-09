@@ -23,7 +23,7 @@ done
 if [ $valid = true ]; then
 
         for key in "${!parameters[@]}"; do
-                sed -e "s|\@${key}@|${parameters[$key]}|" $filename > config.tmp && mv config.tmp $filename
+                sed -i "s|\@${key}@|${parameters[$key]}|g" $filename
         done
 
         echo -e "\e[92mLDlink configured successfully\e[39m"
@@ -38,6 +38,6 @@ else
         echo -e "\e[32mOptions:"
         echo -e "\e[39m --username\e[92m user.name"
         echo -e "\e[39m --password\e[92m user.password"
-        echo -e "\e[39m --port\e[92m 0-65535"
+        echo -e "\e[39m --port\e[92m 0-65535\e[39m"
 fi
 

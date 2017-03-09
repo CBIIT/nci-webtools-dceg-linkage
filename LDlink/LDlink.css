@@ -225,6 +225,9 @@ img.graph-legend {
   margin-left: auto;
   margin-right: auto;
 }
+#ldassoc-legend {
+	width: 700px;
+}
 #ldproxy-legend {
 	width: 700px;
 }
@@ -657,5 +660,57 @@ textarea:invalid, .error {
   .dataTables_wrapper .dataTables_filter {
     margin-top: 0.5em; } 
 }
+.dropzone {
+	width: 200px;
+	height: 100px;
+	background-color: #b3c8d0;
+	padding: 5pt;
+	margin: 10pt;
+	overflow: hidden;
+}
+.no-bullet {
+	list-style: none;
+}
+.vertical-text {
+	transform: rotate(90deg);
+	transform-origin: left top 0;
+	color:#800000;
+}
+.vertical-text {
+	float: left;
+}
+.dropdown-toggle {
+	text-align:left;
+}
+#ldassocForm button.dropdown-toggle {
+	color:#800000;
+}
+#region-gene-container > div *, #region-region-container > div *, #region-variant-container > div * {
+	margin-top:5px;
+	white-space:nowrap;
+}
+#header-values > div > div * {
+	margin-top:5px;
+	white-space:nowrap;
+}
+#assoc-region {
+	margin-bottom:20px;
+}
+.progress {
+	margin-bottom:18px;
+}
 
-    
+.form-group > .form-control-feedback:not(.show) {
+	display: none;
+}
+
+.form-group.has-success > input,
+.form-group.has-success > select {
+	background-image: linear-gradient(to bottom,#dff0d8 0,#c8e5bc 100%);
+	background-repeat: repeat-x;
+}
+.form-group.has-error > input,
+.form-group.has-error > select {
+	background-image: linear-gradient(to bottom,#f2dede 0,#e7c3c3 100%);
+	background-repeat: repeat-x;
+}
