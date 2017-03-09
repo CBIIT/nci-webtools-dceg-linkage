@@ -50,14 +50,14 @@ $(document).ready(function() {
 		}
 
 	});
-	
+
 	setupSNPclipControls();
 	setupSNPchipControls();
 	showFFWarning();
 	createProxyTable();
 	var new_proxy_data = {"aaData": [["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
 	RefreshTable('#new-ldproxy', new_proxy_data);
-	
+
 	$('[data-toggle="popover"]').popover();
 	loadHelp();
 	// Apply Bindings
@@ -95,7 +95,7 @@ $(document).ready(function() {
 
 // Set file support trigger
 $(document).on('change','.btn-file :file',function() {
-		var input = $(this), numFiles = input.get(0).files ? 
+		var input = $(this), numFiles = input.get(0).files ?
 		input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
 		input.trigger('fileselect', [ numFiles, label ]);
 	}
@@ -250,7 +250,7 @@ function autoCalculate() {
 	} else {
 		return;
 	}
-	var id = url.tab.toLowerCase(); 
+	var id = url.tab.toLowerCase();
 	switch (id) {
 		case "ldpair":
 			if(url.var1 && url.var2 && url.pop) {
@@ -271,7 +271,7 @@ function autoCalculate() {
 				updateData(id);
 			}
 			break;
-	} 
+	}
 }
 
 function setupSNPchipControls() {
@@ -353,7 +353,7 @@ function checkSelectAllCheckbox() {
 }
 
 function calculateChipTotals() {
-	
+
 	var illumina = $(".illumina:checked").length;
 	var affymetrix = $(".affymetrix:checked").length;
 
@@ -515,7 +515,7 @@ function ldproxy_haploreg_link(data, type, row) {
 	};
 	var href = server + "?" + $.param(params);
 	var target = 'haploreg_' + Math.floor(Math.random() * (99999 - 10000 + 1));
-	var img = '<img src="LDproxy_external_link.png" alt="HaploReg Details" title="HaploReg Details" class="haploreg_external_link" style="width:16px;height:16px;">'; 
+	var img = '<img src="LDproxy_external_link.png" alt="HaploReg Details" title="HaploReg Details" class="haploreg_external_link" style="width:16px;height:16px;">';
 	var link = '<a href="'+href+'" target="'+target+'">'+img+'</a>';
 
 	return link;
@@ -556,7 +556,7 @@ function cleanSNP(text) {
 				list += rsnumber+'\n';
 			}
 		}
-	}); 
+	});
 	return list;
 }
 
@@ -792,13 +792,13 @@ function updateSNPchip() {
 	var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
 	var platforms = [];
 
-	$('.affymetrix:checked').each(function() { 
+	$('.affymetrix:checked').each(function() {
 		platforms.push($(this).val());
 	});
-	$('.illumina:checked').each(function() { 
+	$('.illumina:checked').each(function() {
 		platforms.push($(this).val());
 	});
-	
+
 
 	var ldInputs = {
 		snps : snps,
@@ -996,7 +996,7 @@ function loadSNPChip(data) {
 		//Hide table and display an error.
 		$('#snpchip-results-container').hide();
 
-	} 
+	}
 }
 
 function checkAlert(elementId, message, type, displayResults) {
@@ -1102,7 +1102,7 @@ function populateSNPwarnings(data) {
 			snpclipData.warnings.push(filtered);
 		}
 	});
-	
+
 	//console.log("Warning Data");
 	//console.dir(snpclipData.warnings);
 
@@ -1148,10 +1148,10 @@ function loadSNPdetails(data, rs_number) {
 		if(found) {
 			if(detail.comment == 'Variant kept.' && detail.rs_number != rs_number){
 				// List is complete, exit loop
-				return false;
+				// return false;
 			}
 			//console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
-			if(detail.comment == 'Variant kept.' || 
+			if(detail.comment == 'Variant kept.' ||
 				detail.comment.indexOf(match)>=0) {
 				snpclipData.details.push(detail);
 			}
@@ -1161,7 +1161,7 @@ function loadSNPdetails(data, rs_number) {
 	//console.dir(snpclipData);
 	//console.log(JSON.stringify(snpclipData));
 	ko.mapping.fromJS(snpclipData, snpclipModel);
-	$('#snpclip-detail-title').text("Details for "+rs_number); 
+	$('#snpclip-detail-title').text("Details for "+rs_number);
 }
 
 function initClip(data) {
@@ -1203,8 +1203,8 @@ function formatLDhapData(data) {
 		var obj = {
 			Count : haplotypes[key].Count,
 			Frequency : haplotypes[key].Frequency,
-			Haplotype : haplotypes[key].indels  
-			/* Haplotype : ["A", "GGA", "-", 'G'] */ 
+			Haplotype : haplotypes[key].indels
+			/* Haplotype : ["A", "GGA", "-", 'G'] */
 		};
 		// Add Haplotypes with a frequency of 1% or greater.
 		if (haplotypes[key].Frequency * 100 > 1) {
@@ -1419,7 +1419,7 @@ function updateLDproxy() {
 	//console.log(location.hostname);
 
 	$('#ldproxy-genome').attr('href',
-		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track' 
+		'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
 		+ ldproxyInputs.reference + '.txt');
 
 	//console.dir(ldproxyInputs);
@@ -1625,7 +1625,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
 	var url;
 	//server = 'http://genome.ucsc.edu/cgi-bin/hgTracks';
 	//console.log("ldhapData");
-	
+
 
 	$.each(ldhapTable.rows, function(index, value) {
 		//console.log(index + ": " + value);
@@ -1944,7 +1944,7 @@ function replaceSubGroups(population) {
 			population.push(currentGroup);
 
 		}
-		//If all are found then 
+		//If all are found then
 		//totalPopulations += Number(Object.size(val.subPopulations));
 	});
 
@@ -2055,5 +2055,5 @@ Array.prototype.unique = function() {
             arr.push(this[i]);
         }
     }
-    return arr; 
+    return arr;
 }

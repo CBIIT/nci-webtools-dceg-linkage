@@ -69,8 +69,8 @@ def calculate_chip(snplst,platform_query,request):
 	
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
-	if len(snps_raw)>1000:
-		output["error"]="Maximum SNP list is 1,000 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
+	if len(snps_raw)>5000:
+		output["error"]="Maximum SNP list is 5,000 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
