@@ -326,9 +326,14 @@ def snpchip():
     #[ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
     print "snpChip"
 
-    snps = request.args.get('snps', False)
-    platforms = request.args.get('platforms', False)
-    reference = request.args.get('reference', False)
+    data = json.loads(request.stream.read())
+    snps = data['snps'];
+    platforms = data['platforms'];
+    reference = '' + `data['reference']`;
+
+    #snps = request.args.get('snps', False)
+    #platforms = request.args.get('platforms', False)
+    #reference = request.args.get('reference', False)
     print 'snps: ' + snps
     print 'platforms: ' + platforms
     print 'request: ' + reference

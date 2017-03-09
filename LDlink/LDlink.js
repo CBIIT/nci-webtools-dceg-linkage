@@ -810,9 +810,9 @@ function updateSNPchip() {
 	//console.dir(ldInputs);
 	var url = restServerUrl + "/snpchip";
 	var ajaxRequest = $.ajax({
-		type : 'GET',
+		type : 'POST',
 		url : url,
-		data : ldInputs,
+		data : JSON.stringify(ldInputs),
 		contentType : 'application/json' // JSON
 	});
 
