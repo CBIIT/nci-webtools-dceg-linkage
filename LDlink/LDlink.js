@@ -1264,7 +1264,7 @@ function updateSNPchip() {
     var ajaxRequest = $.ajax({
         type : 'POST',
         url : url,
-		data : JSON.stringify(ldInputs),
+	data : JSON.stringify(ldInputs),
         contentType : 'application/json' // JSON
     });
 
