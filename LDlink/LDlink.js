@@ -160,8 +160,6 @@ $(document).ready(function() {
         calculate(e);
     });
 
-    $("form#ldbatchForm").on('submit', batchProcess);
-
     setupTabs();
     autoCalculate();
     createFileSelectEvent();
@@ -1264,7 +1262,7 @@ function updateSNPchip() {
     var ajaxRequest = $.ajax({
         type : 'POST',
         url : url,
-	data : JSON.stringify(ldInputs),
+    data : JSON.stringify(ldInputs),
         contentType : 'application/json' // JSON
     });
 
@@ -2787,100 +2785,3 @@ function readCookie(name) {
 function eraseCookie(name) {
     createCookie(name,"",-1);
 }
-
-function batchUpload(e) {
-    var messageElement = $("#ldbatch-messages");
-
-    if(e.target.files.length > 0) {
-        var tok = (Math.random() * (1000000 - 1000) + 1000).toFixed(0) +  new Date().getTime();
-        var formData = new FormData();
-        formData.append(e.target.id, e.target.files[0]);
-        formData.append("token", tok);
-        inputControl = e.target;
-        $.ajax({
-            url: restServerUrl + '/ldbatch/upload',  //Server script to process data
-            type: 'POST',
-            xhr: function() {  // Custom XMLHttpRequest
-                var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload) // Check if upload property exists
-                    myXhr.upload.addEventListener('progress', progressHandlingFunction, false); // For handling the progress of the upload
-
-                return myXhr;
-            },
-            //Ajax events
-            beforeSend: function () {
-                var percent = 0;
-                $('form#ldbatch progressbar' ).css('width', percent + "%");
-                $('form#ldbatch progressbar' ).html(percent + '% Completed');
-                $('form#ldbatch #ldassoc-file-container').hide();
-                $('form#ldbatch progressbar').addClass('show');
-            },
-            success: function(data, statusText, xhr) {
-                $(inputControl).parent().addClass("has-feedback has-success");
-                messageElement.find("#iconType").empty().html("<span class='glyphicon glyphicon-ok'></span>");
-                messageElement.addClass("alert alert-success show").find("#message").html(data.message);
-                createCookie("token", data.token)
-            },
-            // completeHandler,
-            error:function(data, statusText, xhr) {
-                $(inputControl).parent().addClass("has-feedback has-error");
-                messageElement.find("#iconType").empty().html("<span class='glyphicon glyphicon-remove'></span>");
-                messageElement.addClass("alert alert-danger show").find("#message").html(data.message);
-            },
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false
-        });
-    }
-}
-
-function batchProcess(e) {
-    e.preventDefault();
-
-    var messageElement = $("#ldbatch-messages");
-    var inputControl = e.target.recipientEmail;
-
-    if(inputControl.validity.valid) {
-        var formData = new FormData();
-        formData.append("recipientEmail", inputControl.value);
-        formData.append("token", readCookie("token"));
-
-        $.ajax({
-            url: restServerUrl+'/ldbatch/process',
-            type: 'POST',
-            xhr: function() {  // Custom XMLHttpRequest
-                var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload) { // Check if upload property exists
-                    myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // For handling the progress of the upload
-                }
-                return myXhr;
-            },
-            //Ajax events
-            beforeSend: beforeSendHandler,
-            success: function(data, statusText, xhr) {
-                e.target.reset();
-
-                $(e.target.recipientEmail).find('.form-group').removeClass("has-feedback has-error").addClass("has-success");
-
-                messageElement.find("#iconType").empty().html("<span class='glyphicon glyphicon-ok'></span>");
-                messageElement.addClass("alert alert-success show").find("#message").html(data.message);
-            },
-            // completeHandler,
-            error:function(data, statusText, xhr) {
-                $(inputControl).parent().addClass("has-feedback has-error");
-                messageElement.find("#iconType").empty().html("<span class='glyphicon glyphicon-remove'></span>");
-                messageElement.addClass("alert alert-danger show").find("#message").html(data.message);
-            },
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false
-        });
-    }
-    else {
-        $(inputControl).parent().addClass("has-feedback has-error");
-    }
-}
-
-$("#batchFile").on("change", batchUpload);
