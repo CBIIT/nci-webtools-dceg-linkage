@@ -197,7 +197,6 @@ def ldproxy():
 
     print 'var: ' + var
     print 'pop: ' + pop
-    print 'request: ' + str(reference)
     print 'r2_d: ' + r2_d
 
     try:
@@ -216,7 +215,11 @@ def ldmatrix():
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
+
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S"))
 
     r2_d = request.args.get('r2_d', False)
     print 'snps: ' + snps
@@ -224,7 +227,7 @@ def ldmatrix():
     print 'request: ' + str(reference)
     print 'r2_d: ' + r2_d
 
-    snplst = tmp_dir + 'snps' + reference + '.txt'
+    snplst = tmp_dir + 'snps' + str(reference) + '.txt'
     print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
