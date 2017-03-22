@@ -81,10 +81,6 @@
 				<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
 			</li>
 
-			<!-- BATCH -->
-			<li>
-				<a id="ldbatch-tab-anchor" href="#ldbatch-tab" data-toggle="tab" title="Batch processing">LDbatch</a>
-			</li>
 			<!-- CHIP -->
 			<li>
 				<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
@@ -1127,37 +1123,6 @@
 				</div>
 			</div>
 
-			<!-- LDbatch -->
-			<div class="tab-pane fade" id="ldbatch-tab">
-				<!-- LDpbatch INPUTS-->
-				<div class="row">
-					<!-- LDbatch FORM -->
-					<form id="ldbatchForm">
-						<div class="col-xs-12">
-							<div id="ldbatch-messages">
-								<span id="iconType"></span>
-								<b id='message'></b>
-							</div>
-						</div>
-						<div class="col-xs-12 col-sm-5">
-							<div class="form-group">
-								<input type="file" id="batchFile" name="batchFile" class="form-control" required="You must upload a batch file to process" />
-								<span class="glyphicon glyphicon-remove form-control-feedback" aria-hidden="true"></span>
-								<span class="glyphicon glyphicon-ok form-control-feedback" aria-hidden="true"></span>
-							</div>
-						</div>
-						<div class="col-xs-12 col-sm-5">
-							<div class="form-group">
-								<input type="email" id="recipientEmail" name="recipientEmail" class="form-control" 
-								required="You must enter a valid email adress" placeholder="Email" aria-label="Email" />
-							</div>
-						</div>
-						<button type="submit" class="btn btn-default">Submit</button>
-					</form>
-				</div>
-				<hr>
-			</div>
-
 			<!-- SNPclip -->
 			<div class="tab-pane fade" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
@@ -1675,4 +1640,3 @@
 	<!-- End Google Analytics -->
 </body>
 </html>
-

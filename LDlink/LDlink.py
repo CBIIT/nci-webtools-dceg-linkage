@@ -2,15 +2,24 @@
 
 import pandas as pd
 import numpy as np
-import sys, getopt, cgi, shutil, os, traceback, urllib, collections, argparse, json
-from flask import Flask, render_template, Response, abort,request, make_response, url_for, jsonify, redirect, current_app, jsonify
+import sys
+import getopt
+import cgi
+import shutil
+import os
+import traceback
+import urllib
+import collections
+import argparse
+import json
+import time
+from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
-from socket import gethostname 
+from socket import gethostname
 from pandas import DataFrame
 from LDpair import calculate_pair
 from LDproxy import calculate_proxy
-from LDbatch import toQueue
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -29,10 +38,8 @@ app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
-# app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 @app.route('/')
-
 # copy output files from tools' tmp directory to apache tmp directory
 def copy_output_files(reference):
     apache_root = "/analysistools/"
@@ -40,17 +47,19 @@ def copy_output_files(reference):
     if 'sandbox' in request.url_root:
         apache_root = "/analysistools-sandbox/"
 
-    apache_tmp_dir = apache_root+"public_html/apps/LDlink/tmp/"
+    apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
 
     # Ensure apache tmp directory exists
     if not os.path.exists(apache_tmp_dir):
         os.makedirs(apache_tmp_dir)
-        
+
     # copy *<reference_no>.* to htodocs
-    os.system("cp "+ tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
+    os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
+
 
 def index():
     return render_template('index.html')
+
 
 def jsonp(func):
     """Wraps JSONified output for JSONP requests."""
@@ -67,6 +76,7 @@ def jsonp(func):
             return func(*args, **kwargs)
     return decorated_function
 
+
 def sendTraceback(error=None):
     custom = {}
 
@@ -79,12 +89,14 @@ def sendTraceback(error=None):
     traceback.print_exc()
     custom["error"] = "Raised when a generated error does not fall into any category."
     custom["traceback"] = traceback.format_exc()
-    out_json = json.dumps(custom, sort_keys=False)
+    out_json = json.dumps(custom, sort_keys=False, indent=2)
     return current_app.response_class(out_json, mimetype='application/json')
+
 
 def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
+
 
 @app.route('/LDlinkRest/upload', methods=['POST'])
 def upload():
@@ -99,7 +111,7 @@ def upload():
     if request.method == 'POST':
         # check if the post request has the file part
         print " We got a POST"
-        #print dir(request.files)
+        # print dir(request.files)
         if 'ldassocFile' not in request.files:
             print('No file part')
             return 'No file part...'
@@ -113,11 +125,11 @@ def upload():
             print('No selected file')
             return 'No selected file'
         if file:
-            print 'file.filename '+file.filename
+            print 'file.filename ' + file.filename
             print('file and allowed_file')
             filename = secure_filename(file.filename)
             print "About to SAVE file"
-            print "filename = "+filename
+            print "filename = " + filename
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return 'File was saved'
     #        print "FILE SAVED.  Alright!"
@@ -127,6 +139,7 @@ def upload():
     # message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
     # return message
     # return 'No Success'
+
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
 def restAdd():
@@ -146,13 +159,13 @@ def restAdd():
     print json_dumps
     return jsonify(success=True, data=json_dumps)
 
-@app.route('/LDlinkRest/ldpair', methods = ['GET'])
+
+@app.route('/LDlinkRest/ldpair', methods=['GET'])
 def ldpair():
     # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
     # python LDpair.py rs2720460 rs11733615 EUR 38
     # r1 = '{"corr_alleles":["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],"haplotypes":{"hap1":{"alleles":"AC","count":"576","frequency":"0.573"},"hap2":{"alleles":"GT","count":"361","frequency":"0.359"},"hap3":{"alleles":"GC","count":"42","frequency":"0.042"},"hap4":{"alleles":"AT","count":"27","frequency":"0.027"}},"snp1":{"allele_1":{"allele":"A","count":"603","frequency":"0.599"},"allele_2":{"allele":"G","count":"403","frequency":"0.401"},"coord":"chr4:104054686","rsnum":"rs2720460"},"snp2":{"allele_1":{"allele":"C","count":"618","frequency":"0.614"},"allele_2":{"allele":"T","count":"388","frequency":"0.386"},"coord":"chr4:104157164","rsnum":"rs11733615"},"statistics":{"chisq":"738.354","d_prime":"0.8839","p":"0.0","r2":"0.734"},"two_by_two":{"cells":{"11":"576","12":"27","21":"42","22":"361"},"total":"1006"}'
 
-    print
     print 'Execute TEST'
     print 'Gathering Variables from url'
     var1 = request.args.get('var1', False)
@@ -163,20 +176,18 @@ def ldpair():
     print 'var1: ' + var1
     print 'var2: ' + var2
     print 'pop: ' + pop
-    print 'request: ' + reference
-    print
+    print 'request: ' + str(reference)
+
     try:
         out_json = calculate_pair(var1, var2, pop, reference)
     except:
         return sendTraceback()
 
-    mimetype = 'application/json'
+    return current_app.response_class(out_json, mimetype='application/json')
 
-    return current_app.response_class(out_json, mimetype=mimetype)
 
-@app.route('/LDlinkRest/ldproxy', methods = ['GET'])
+@app.route('/LDlinkRest/ldproxy', methods=['GET'])
 def ldproxy():
-    print
     print 'Execute ldproxy'
     print 'Gathering Variables from url'
     var = request.args.get('var', False)
@@ -186,22 +197,17 @@ def ldproxy():
 
     print 'var: ' + var
     print 'pop: ' + pop
-    print 'request: ' + reference
     print 'r2_d: ' + r2_d
-    print
 
-    # out_json,out_script,out_div=calculate_proxy(snp, pop, reference)
     try:
-        out_script,out_div = calculate_proxy(var, pop, reference, r2_d)
+        out_script, out_div = calculate_proxy(var, pop, reference, r2_d)
     except:
         return sendTraceback()
 
+    return out_script + "\n " + out_div
 
-    # copy_output_files(reference)
 
-    return out_script+"\n "+out_div
-
-@app.route('/LDlinkRest/ldmatrix', methods = ['GET'])
+@app.route('/LDlinkRest/ldmatrix', methods=['GET'])
 def ldmatrix():
 
     print 'Execute ldmatrix'
@@ -209,32 +215,36 @@ def ldmatrix():
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
+
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S"))
+
     r2_d = request.args.get('r2_d', False)
     print 'snps: ' + snps
     print 'pop: ' + pop
-    print 'request: ' + reference
+    print 'request: ' + str(reference)
     print 'r2_d: ' + r2_d
 
-    snplst = tmp_dir+'snps'+reference+'.txt'
-    print 'snplst: '+snplst
+    snplst = tmp_dir + 'snps' + str(reference) + '.txt'
+    print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
 
     try:
-        out_script,out_div = calculate_matrix(snplst,pop,reference,r2_d)
+        out_script, out_div = calculate_matrix(snplst, pop, reference, r2_d)
     except:
         return sendTraceback()
 
     # copy_output_files(reference)
-    return out_script+"\n "+out_div
+    return out_script + "\n " + out_div
 
-@app.route('/LDlinkRest/ldhap', methods = ['GET'])
+
+@app.route('/LDlinkRest/ldhap', methods=['GET'])
 def ldhap():
-
-    print
     print 'Execute ldhap'
     print 'working'
     print 'Gathering Variables from url'
@@ -244,25 +254,27 @@ def ldhap():
     reference = request.args.get('reference', False)
     print 'snps: ' + snps
     print 'pop: ' + pop
-    print 'request: ' + reference
+    print 'request: ' + str(reference)
 
-    snplst = tmp_dir+'snps'+reference+'.txt'
-    print 'snplst: '+snplst
+    if reference is False:
+        reference = str(time.strftime("%I%M%S"))
+
+    snplst = tmp_dir + 'snps' + reference + '.txt'
+    print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
 
     try:
-        out_json = calculate_hap(snplst,pop,reference)
+        out_json = calculate_hap(snplst, pop, reference)
     except:
         return sendTraceback()
 
-    # copy_output_files(reference)
-
     return sendJSON(out_json)
 
-@app.route('/LDlinkRest/snpclip', methods = ['POST'])
+
+@app.route('/LDlinkRest/snpclip', methods=['POST'])
 def snpclip():
 
     # Command line example
@@ -275,23 +287,28 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
 
-    reference = str(data['reference'])
+    if data['reference']:
+        reference = str(data['reference'])
+    else:
+        print "reference" + str(data['reference'])
+        reference = str(time.strftime("%I%M%S"))
 
-    snpfile = str(tmp_dir+'snps'+reference+'.txt')
+    snpfile = str(tmp_dir + 'snps' + reference + '.txt')
     snplist = snps.splitlines()
 
     f = open(snpfile, 'w')
     for s in snplist:
         s = s.lstrip()
         if(s[:2].lower() == 'rs'):
-            f.write(s.lower()+'\n')
+            f.write(s.lower() + '\n')
 
     f.close()
 
-    clip={}
+    clip = {}
 
     try:
-        (snps,snp_list,details) = calculate_clip(snpfile,pop,reference,float(r2_threshold),float(maf_threshold))
+        (snps, snp_list, details) = calculate_clip(snpfile, pop,
+                                                   reference, float(r2_threshold), float(maf_threshold))
     except:
         return sendTraceback()
 
@@ -301,26 +318,26 @@ def snpclip():
     clip["filtered"] = collections.OrderedDict()
 
     # Print output
-    with open(tmp_dir+"clip"+reference+".json") as f:
-        json_dict=json.load(f)
+    with open(tmp_dir + "clip" + reference + ".json") as f:
+        json_dict = json.load(f)
 
     try:
         json_dict["error"]
     except KeyError:
         # print ""
-        print "LD Thinned SNP list ("+pop+"):"
+        print "LD Thinned SNP list (" + pop + "):"
         for snp in snp_list:
             print snp
 
         print "The snps.."
         for snp in snps:
             print snp
-        
+
         print ""
         print "RS Number\tPosition\tAlleles\tDetails"
         for snp in snps:
-            print snp[0]+"\t"+"\t".join(details[snp[0]])
-            clip["filtered"][snp[0]] =details[snp[0]]
+            print snp[0] + "\t" + "\t".join(details[snp[0]])
+            clip["filtered"][snp[0]] = details[snp[0]]
 
         try:
             json_dict["warning"]
@@ -329,7 +346,7 @@ def snpclip():
             print ""
         else:
             print ""
-            print "WARNING: "+json_dict["warning"]+"!"
+            print "WARNING: " + json_dict["warning"] + "!"
             print ""
             clip["warning"] = json_dict["warning"]
 
@@ -339,18 +356,18 @@ def snpclip():
         print ""
         clip["error"] = json_dict["error"]
 
-    # SNP List file    
-    f = open('tmp/snp_list'+reference+'.txt', 'w')
+    # SNP List file
+    f = open('tmp/snp_list' + reference + '.txt', 'w')
     for rs_number in snp_list:
-        f.write(rs_number+'\n')
+        f.write(rs_number + '\n')
 
     f.close()
 
-    f = open('tmp/details'+reference+'.txt', 'w')
+    f = open('tmp/details' + reference + '.txt', 'w')
     f.write("RS Number\tPosition\tAlleles\tDetails\n")
     if(type(details) is collections.OrderedDict):
         for snp in snps:
-            f.write(snp[0]+"\t"+"\t".join(details[snp[0]]))
+            f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
             f.write("\n")
 
     f.close()
@@ -358,17 +375,21 @@ def snpclip():
     out_json = json.dumps(clip, sort_keys=False)
     return current_app.response_class(out_json, mimetype=mimetype)
 
-@app.route('/LDlinkRest/snpchip', methods = ['GET', 'POST'])
+
+@app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
 def snpchip():
 
     # Command line example
-    # [ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
     print "snpChip"
 
     data = json.loads(request.stream.read())
-    snps = data['snps'];
-    platforms = data['platforms'];
-    reference = '' + `data['reference']`;
+    snps = data['snps']
+    platforms = data['platforms']
+
+    if data['reference']:
+        reference = '' + `data['reference']`
+    else:
+        reference = str(time.strftime("%I%M%S"))
 
     #snps = request.args.get('snps', False)
     #platforms = request.args.get('platforms', False)
@@ -377,35 +398,37 @@ def snpchip():
     print 'platforms: ' + platforms
     print 'request: ' + reference
 
-    snplst = tmp_dir+'snps'+reference+'.txt'
-    print 'snplst: '+snplst
+    snplst = tmp_dir + 'snps' + reference + '.txt'
+    print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
     f.write(snps)
     f.close()
 
     try:
-        snp_chip = calculate_chip(snplst,platforms,reference)
+        snp_chip = calculate_chip(snplst, platforms, reference)
     except:
         return sendTraceback()
 
-    chip={}
+    chip = {}
     chip["snp_chip"] = snp_chip
     # copy_output_files(reference)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
 
     return current_app.response_class(out_json, mimetype='application/json')
 
-@app.route('/LDlinkRest/snpchip_platforms', methods = ['GET'])
+
+@app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
     return get_platform_request()
 
-@app.route('/LDlinkRest/ldassoc', methods = ['GET'])
+
+@app.route('/LDlinkRest/ldassoc', methods=['GET'])
 def ldassoc():
 
     myargs = argparse.Namespace()
-    myargs.window=None
+    myargs.window = None
 
     print "LDassoc"
     print 'Gathering Variables from url'
@@ -418,13 +441,18 @@ def ldassoc():
     json_dumps = json.dumps(data)
 
     pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
+
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S"))
+
     filename = request.args.get('filename', False)
     matrixVariable = request.args.get('matrixVariable')
     region = request.args.get('calculateRegion')
 
     myargs.dprime = bool(request.args.get("dprime") == "True")
-    print "dprime: "+str(myargs.dprime)
+    print "dprime: " + str(myargs.dprime)
 
     # Column settings
     myargs.chr = str(request.args.get('columns[chromosome]'))
@@ -436,7 +464,8 @@ def ldassoc():
     # regionValues = json.loads(request.args.get('region'))
     # variantValues = json.loads(request.args.get('variant'))
     # columns = json.loads(request.args.get('columns'))
-    filename = os.path.join(app.config['UPLOAD_DIR'], str(request.args.get('filename')))
+    filename = os.path.join(
+        app.config['UPLOAD_DIR'], str(request.args.get('filename')))
     # filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
 
     print 'filename: ' + filename
@@ -447,20 +476,20 @@ def ldassoc():
 
     if region == "variant":
         print "Region is variant"
-        print "index: "+str(request.args.get('variant[index]'))
-        print "base pair window: "+request.args.get('variant[basepair]')
-        print 
+        print "index: " + str(request.args.get('variant[index]'))
+        print "base pair window: " + request.args.get('variant[basepair]')
+        print
         myargs.window = int(request.args.get('variant[basepair]'))
 
         if request.args.get('variant[index]') == "":
-            myargs.origin=None
+            myargs.origin = None
         else:
             myargs.origin = request.args.get('variant[index]')
 
     if region == "gene":
         print "Region is gene"
         if request.args.get('gene[index]') == "":
-            myargs.origin=None
+            myargs.origin = None
         else:
             myargs.origin = request.args.get('gene[index]')
 
@@ -488,58 +517,12 @@ def ldassoc():
 
     return sendJSON(out_json)
 
-@app.route('/LDlinkRest/ldbatch/upload', methods = ['POST'])
-def batch_upload():
-    try:
-        print "In batch_upload"
-        resp = ""
-        if 'batchFile' in request.files:
-            print "has batch file"
-            file = request.files['batchFile']
-            token = request.form['token']
-
-            file.save(os.path.join(app.config['UPLOAD_DIR'], secure_filename(token)))
-            resp = jsonify({ "message": "The file has been sucessfully uploaded.", "token" : token })
-        else:
-            raise IOError("No batch file has been uploaded to be processed")
-    except IOError as e:
-        print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
-        errorType, error, traceback = sys.exc_info()
-        resp = jsonify({ message: e.args })
-        resp.status_code = 404
-    except Exception, e:
-        print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
-        resp = jsonify({ message: e.args })
-        resp.status_code = 400
-    finally:
-        return resp
-
-@app.route('/LDlinkRest/ldbatch/process', methods = ['POST'])
-def ldbatch_process():
-    try:
-        if 'token' not in request.form:
-            resp = jsonify({ "message": "Try again"})
-            resp.status_code = 400
-            print "process not executed, missing token from request at {0}".format(time.strftime("%m.%d.%Y %H%:M:%S"))
-        elif 'recipientEmail' in request.form:
-            email = request.form['recipientEmail']
-            batchFile = open(os.path.join('tmp', request.form['token']), 'r')
-            queueResponse = toQueue(email, batchFile)
-
-            resp=jsonify({ "message": queueResponse })
-        else:
-            raise KeyError("The recipient's E-Mail address must be entered")
-    except Exception, e:
-        print "Error Type: {0} Error: {1} Trace: {2}".format(errorType, error, traceback)
-        resp = jsonify({ message: e.args })
-        resp.status_code = 400
-    finally:
-        return resp
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", dest="port_number", default="9982", help="Sets the Port")
-    parser.add_argument("-d", dest="debug", default="False", help="Sets the Debugging Option")
+    parser.add_argument("-p", dest="port_number",
+                        default="9982", help="Sets the Port")
+    parser.add_argument("-d", dest="debug", default="False",
+                        help="Sets the Debugging Option")
     # Default port is production value; prod,stage,dev = 9982, sandbox=9983
     args = parser.parse_args()
     port_num = int(args.port_number)
