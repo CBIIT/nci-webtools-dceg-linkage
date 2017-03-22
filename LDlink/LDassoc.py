@@ -299,8 +299,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 			raise	
 	
 	assoc_coords=[]
-	lowest_p=1.0
-	lowest_p_pos=None
 	assoc_dict={}
 	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
@@ -315,12 +313,11 @@ def calculate_assoc(file,region,pop,request,myargs):
 						coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
 						assoc_coords.append(coord_i)
 						assoc_dict[coord_i]=[col[p_index]]
-						if float(col[p_index])<lowest_p:
-							lowest_p_pos=col[pos_index]
-							lowest_p=float(col[p_index])
+		
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
-			
+	
+	
 	# Coordinate list checks
 	if len(assoc_coords)==0:
 		output["error"]="There are no variants in the association file with genomic coordinates inside the plotting window."
@@ -329,26 +326,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 		out_json.close()
 		return("","")
 		raise
-	
-	# Define LD origin coordinate
-	try:
-		org_coord
-	except NameError:
-		org_coord=lowest_p_pos
-	else:
-		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
-			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
-	
-	try:
-		snp
-	except NameError:
-		snp="chr"+chromosome+":"+org_coord
-	
 	
 	
 	# Select desired ancestral populations
@@ -375,38 +352,107 @@ def calculate_assoc(file,region,pop,request,myargs):
 	for i in range(len(pop_list)):
 		ids.append(pop_list[i].strip())
 
-	pop_ids=list(set(ids))
-
-
-	# Extract query SNP phased genotypes
-	vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	pop_ids=list(set(ids))	
 	
-	tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
-	proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-	head=proc_h.stdout.readlines()[0].strip().split()
 	
-	tabix_snp="tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf")
-	subprocess.call(tabix_snp, shell=True)
+	# Define LD origin coordinate
+
+	
+	
+	try:
+		org_coord
+	except NameError:
+		for var_p in sorted(assoc_dict.items(), key=operator.itemgetter(1)):
+			snp=var_p[0].split("-")[0]
+			
+			# Extract lowest P SNP phased genotypes
+			vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	
+			tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
+			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
+			head=proc_h.stdout.readlines()[0].strip().split()
+	
+			tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
+			subprocess.call(tabix_snp, shell=True)
 
 
-	# Check SNP is in the 1000G population, has the correct RS number, and not monoallelic 
-	vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+			# Check lowest P SNP is in the 1000G population and not monoallelic 
+			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 	
-	if len(vcf)==0:
-		output["error"]=snp+" is not in 1000G reference panel."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-		return("","")
-		raise
-	elif len(vcf)>1:
-		geno=[]
-		for i in range(len(vcf)):
-			if vcf[i].strip().split()[2]==snp:
-				geno=vcf[i].strip().split()
-		if geno==[]:
+			if len(vcf)==0:
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
+				else:
+					output["warning"]="Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
+				continue
+			elif len(vcf)>1:
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
+				else:
+					output["warning"]="Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
+				geno=vcf[0].strip().split()
+
+			else:
+				geno=vcf[0].strip().split()
+		
+			if "," in geno[3] or "," in geno[4]:
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not a biallelic variant, using next lowest P-value variant"
+				else:
+					output["warning"]="Lowest P-value variant ("+snp+" is not a biallelic variant, using next lowest P-value variant"
+				continue
+	
+	
+			index=[]
+			for i in range(9,len(head)):
+				if head[i] in pop_ids:
+					index.append(i)
+
+			genotypes={"0":0, "1":0}
+			for i in index:
+				sub_geno=geno[i].split("|")
+				for j in sub_geno:
+					if j in genotypes:
+						genotypes[j]+=1
+					else:
+						genotypes[j]=1
+
+			if genotypes["0"]==0 or genotypes["1"]==0:
+				output["error"]=snp+" is monoallelic in the "+pop+" population."
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
+				else:
+					output["warning"]="Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
+				continue
+			
+			org_coord=var_p[0].split("-")[1]
+			break
+	
+	
+	else:
+		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
+			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			return("","")
+			raise
+		
+		# Extract query SNP phased genotypes
+		vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+	
+		tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
+		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
+		head=proc_h.stdout.readlines()[0].strip().split()
+	
+		tabix_snp="tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf")
+		subprocess.call(tabix_snp, shell=True)
+
+
+		# Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic 
+		vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+	
+		if len(vcf)==0:
 			output["error"]=snp+" is not in 1000G reference panel."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
@@ -415,50 +461,64 @@ def calculate_assoc(file,region,pop,request,myargs):
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
 			raise
-	else:
-		geno=vcf[0].strip().split()
-	
-	if geno[2]!=snp and snp[0:2]=="rs":
-		if "warning" in output:
-			output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+		elif len(vcf)>1:
+			geno=[]
+			for i in range(len(vcf)):
+				if vcf[i].strip().split()[2]==snp:
+					geno=vcf[i].strip().split()
+			if geno==[]:
+				output["error"]=snp+" is not in 1000G reference panel."
+				json_output=json.dumps(output, sort_keys=True, indent=2)
+				print >> out_json, json_output
+				out_json.close()
+				subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+				subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+				return("","")
+				raise
 		else:
-			output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
-		snp=geno[2]
-		
-	if "," in geno[3] or "," in geno[4]:
-		output["error"]=snp+" is not a biallelic variant."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-		return("","")
-		raise
+			geno=vcf[0].strip().split()
 	
-	
-	index=[]
-	for i in range(9,len(head)):
-		if head[i] in pop_ids:
-			index.append(i)
-
-	genotypes={"0":0, "1":0}
-	for i in index:
-		sub_geno=geno[i].split("|")
-		for j in sub_geno:
-			if j in genotypes:
-				genotypes[j]+=1
+		if geno[2]!=snp and snp[0:2]=="rs":
+			if "warning" in output:
+				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
 			else:
-				genotypes[j]=1
+				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+			snp=geno[2]
+		
+		if "," in geno[3] or "," in geno[4]:
+			output["error"]=snp+" is not a biallelic variant."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+			return("","")
+			raise
+	
+	
+		index=[]
+		for i in range(9,len(head)):
+			if head[i] in pop_ids:
+				index.append(i)
 
-	if genotypes["0"]==0 or genotypes["1"]==0:
-		output["error"]=snp+" is monoallelic in the "+pop+" population."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-		subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-		return("","")
-		raise
+		genotypes={"0":0, "1":0}
+		for i in index:
+			sub_geno=geno[i].split("|")
+			for j in sub_geno:
+				if j in genotypes:
+					genotypes[j]+=1
+				else:
+					genotypes[j]=1
+
+		if genotypes["0"]==0 or genotypes["1"]==0:
+			output["error"]=snp+" is monoallelic in the "+pop+" population."
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print >> out_json, json_output
+			out_json.close()
+			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+			return("","")
+			raise
 	
 	
 	
