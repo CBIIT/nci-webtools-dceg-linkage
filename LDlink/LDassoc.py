@@ -300,6 +300,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	assoc_coords=[]
 	assoc_dict={}
+	assoc_list=[]
 	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
 		if len(col)==len_head:
@@ -313,6 +314,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 						coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
 						assoc_coords.append(coord_i)
 						assoc_dict[coord_i]=[col[p_index]]
+						assoc_list.append([coord_i,float(col[p_index])])
 		
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
@@ -359,7 +361,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	try:
 		org_coord
 	except NameError:
-		for var_p in sorted(assoc_dict.items(), key=operator.itemgetter(1)):
+		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
 			snp="chr"+var_p[0].split("-")[0]
 			
 			# Extract lowest P SNP phased genotypes
