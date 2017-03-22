@@ -356,9 +356,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	
 	# Define LD origin coordinate
-
-	
-	
 	try:
 		org_coord
 	except NameError:
@@ -367,18 +364,18 @@ def calculate_assoc(file,region,pop,request,myargs):
 			
 			# Extract lowest P SNP phased genotypes
 			vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-	
+			
 			tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
 			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 			head=proc_h.stdout.readlines()[0].strip().split()
 	
 			tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
 			subprocess.call(tabix_snp, shell=True)
-
-
+			
+			
 			# Check lowest P SNP is in the 1000G population and not monoallelic 
 			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-	
+			
 			if len(vcf)==0:
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
@@ -391,18 +388,17 @@ def calculate_assoc(file,region,pop,request,myargs):
 				else:
 					output["warning"]="Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
 				geno=vcf[0].strip().split()
-
+			
 			else:
 				geno=vcf[0].strip().split()
-		
+			
 			if "," in geno[3] or "," in geno[4]:
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not a biallelic variant, using next lowest P-value variant"
 				else:
 					output["warning"]="Lowest P-value variant ("+snp+" is not a biallelic variant, using next lowest P-value variant"
 				continue
-	
-	
+			
 			index=[]
 			for i in range(9,len(head)):
 				if head[i] in pop_ids:
@@ -521,10 +517,13 @@ def calculate_assoc(file,region,pop,request,myargs):
 			raise
 	
 	
-	
 	# Calculate proxy LD statistics in parallel
 	print ""
-	threads=4
+	if len(assoc_coords)<60:
+		threads=1
+	else:
+		threads=4
+		
 	block=len(assoc_coords)/threads
 	commands=[]
 	for i in range(threads):
@@ -537,7 +536,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		else:
 			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
 		commands.append(command)
-
+	
+	
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 	
 	# collect output in parallel
