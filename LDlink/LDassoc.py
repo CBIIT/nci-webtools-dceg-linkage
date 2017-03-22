@@ -360,7 +360,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		org_coord
 	except NameError:
 		for var_p in sorted(assoc_dict.items(), key=operator.itemgetter(1)):
-			snp=var_p[0].split("-")[0]
+			snp="chr"+var_p[0].split("-")[0]
 			
 			# Extract lowest P SNP phased genotypes
 			vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
