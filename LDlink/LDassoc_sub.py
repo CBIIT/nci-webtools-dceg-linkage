@@ -134,13 +134,7 @@ def get_coords(rs):
 
 # Import SNP VCF files
 vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
-if len(vcf)>1:
-	for i in range(len(vcf)):
-		if vcf[i].strip().split()[2]==snp:
-			geno=vcf[i].strip().split()
-else:
-	geno=vcf[0].strip().split()
+geno=vcf[0].strip().split()
 
 new_alleles=set_alleles(geno[3],geno[4])
 allele={"0":new_alleles[0],"1":new_alleles[1]}
