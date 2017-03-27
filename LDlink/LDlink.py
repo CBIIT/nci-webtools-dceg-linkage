@@ -171,8 +171,12 @@ def ldpair():
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
-    # reference = "939393"
+
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S"))
+
     print 'var1: ' + var1
     print 'var2: ' + var2
     print 'pop: ' + pop
@@ -188,19 +192,30 @@ def ldpair():
 
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
 def ldproxy():
+    isProgrammatic = False
     print 'Execute ldproxy'
     print 'Gathering Variables from url'
     var = request.args.get('var', False)
     pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
     r2_d = request.args.get('r2_d', False)
 
     print 'var: ' + var
     print 'pop: ' + pop
     print 'r2_d: ' + r2_d
 
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S"))
+        isProgrammatic = True
+
     try:
         out_script, out_div = calculate_proxy(var, pop, reference, r2_d)
+        if isProgrammatic:
+                fp = open('./tmp/proxy'+reference+'.txt', "r")
+                content = fp.read()
+                fp.close()
+                return content
     except:
         return sendTraceback()
 
@@ -251,7 +266,12 @@ def ldhap():
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
-    reference = request.args.get('reference', False)
+
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S"))
+
     print 'snps: ' + snps
     print 'pop: ' + pop
     print 'request: ' + str(reference)
