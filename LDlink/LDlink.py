@@ -225,6 +225,7 @@ def ldproxy():
 @app.route('/LDlinkRest/ldmatrix', methods=['GET'])
 def ldmatrix():
 
+    isProgrammatic = False
     print 'Execute ldmatrix'
     print 'Gathering Variables from url'
 
@@ -235,6 +236,7 @@ def ldmatrix():
         reference = request.args.get('reference', False)
     else:
         reference = str(time.strftime("%I%M%S"))
+        isProgrammatic = True
 
     r2_d = request.args.get('r2_d', False)
     print 'snps: ' + snps
@@ -251,6 +253,17 @@ def ldmatrix():
 
     try:
         out_script, out_div = calculate_matrix(snplst, pop, reference, r2_d)
+        if isProgrammatic:
+             resultFile = ""
+             if r2_d == "d":
+                resultFile = "./tmp/d_prime_"+reference+".txt"
+             else:
+                resultFile = "./tmp/r2_"+reference+".txt"
+
+             fp = open(resultFile, "r")
+             content = fp.read()
+             fp.close()
+             return content
     except:
         return sendTraceback()
 
@@ -258,8 +271,10 @@ def ldmatrix():
     return out_script + "\n " + out_div
 
 
+
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 def ldhap():
+    isProgrammatic = False
     print 'Execute ldhap'
     print 'working'
     print 'Gathering Variables from url'
@@ -271,6 +286,7 @@ def ldhap():
         reference = request.args.get('reference', False)
     else:
         reference = str(time.strftime("%I%M%S"))
+        isProgrammatic = True
 
     print 'snps: ' + snps
     print 'pop: ' + pop
@@ -288,6 +304,20 @@ def ldhap():
 
     try:
         out_json = calculate_hap(snplst, pop, reference)
+        if isProgrammatic:
+             resultFile = ""
+             resultFile1 = "./tmp/snps_"+reference+".txt"
+             resultFile2 = "./tmp/haplotypes_"+reference+".txt"
+
+             fp = open(resultFile1, "r")
+             content1 = fp.read()
+             fp.close()
+
+             fp = open(resultFile2, "r")
+             content2 = fp.read()
+             fp.close()
+
+             return content1 + "\n" + "#####################################################################################" + "\n\n" + content2;
     except:
         return sendTraceback()
 
@@ -297,6 +327,7 @@ def ldhap():
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
 def snpclip():
 
+    isProgrammatic = False
     # Command line example
     # [ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
     mimetype = 'application/json'
@@ -307,11 +338,11 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
 
-    if data['reference']:
+    if 'reference' in data.keys():
         reference = str(data['reference'])
     else:
-        print "reference" + str(data['reference'])
         reference = str(time.strftime("%I%M%S"))
+        isProgrammatic = True
 
     snpfile = str(tmp_dir + 'snps' + reference + '.txt')
     snplist = snps.splitlines()
@@ -393,6 +424,17 @@ def snpclip():
     f.close()
     # copy_output_files(reference)
     out_json = json.dumps(clip, sort_keys=False)
+
+    if isProgrammatic:
+             resultFile = "./tmp/details"+reference+".txt"
+
+             fp = open(resultFile, "r")
+             content = fp.read()
+             fp.close()
+
+             return content;
+
+
     return current_app.response_class(out_json, mimetype=mimetype)
 
 
