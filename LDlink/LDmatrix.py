@@ -4,13 +4,7 @@
 
 
 def calculate_matrix(snplst, pop, request, r2_d="r2"):
-    import json
-    import math
-    import operator
-    import os
-    import sqlite3
-    import subprocess
-    import sys
+    import json,math,operator,os,sqlite3,subprocess,sys
 
     # Set data directories
     data_dir = "/local/content/ldlink/data/"
@@ -107,8 +101,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     # Check RS numbers were found
     if warn != []:
-        output[
-            "warning"] = "The following RS numbers were not found in dbSNP 142: " + ",".join(warn)
+        output["warning"] = "The following RS numbers were not found in dbSNP 142: " + ",".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP 142."
@@ -121,8 +114,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # Check SNPs are all on the same chromosome
     for i in range(len(snp_coords)):
         if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(
-                snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
+            output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print >> out_json, json_output
             out_json.close()
@@ -136,12 +128,17 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     distance_max = max(distance_bp) - min(distance_bp)
     if distance_max > 1000000:
         if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Switch rate errors become more common as distance between query variants increases (Query range = " + str(
-                    distance_max) + " bp)"
+            output["warning"] = output["warning"] + ". Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
         else:
             output[
                 "warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
+    if distance_max > 2000000:
+            output["error"] = "Maximum allowed genomic distance between variants is 2 Mb (Query range = " + str(distance_max) + " bp)"
+            json_output = json.dumps(output, sort_keys=True, indent=2)
+            print >> out_json, json_output
+            out_json.close()
+            return("", "")
+            raise
 
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
