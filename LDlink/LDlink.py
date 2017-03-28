@@ -442,16 +442,18 @@ def snpclip():
 def snpchip():
 
     # Command line example
+    isProgrammatic = False
     print "snpChip"
 
     data = json.loads(request.stream.read())
     snps = data['snps']
     platforms = data['platforms']
 
-    if data['reference']:
-        reference = '' + `data['reference']`
+    if 'reference' in data.keys():
+        reference = str(data['reference'])
     else:
         reference = str(time.strftime("%I%M%S"))
+        isProgrammatic = True
 
     #snps = request.args.get('snps', False)
     #platforms = request.args.get('platforms', False)
@@ -476,6 +478,15 @@ def snpchip():
     chip["snp_chip"] = snp_chip
     # copy_output_files(reference)
     out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+
+    if isProgrammatic:
+             resultFile = "./tmp/details"+reference+".txt"
+
+             fp = open(resultFile, "r")
+             content = fp.read()
+             fp.close()
+
+             return content;
 
     return current_app.response_class(out_json, mimetype='application/json')
 
