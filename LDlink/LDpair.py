@@ -4,12 +4,7 @@
 
 
 def calculate_pair(snp1, snp2, pop, request=None):
-    import json
-    import math
-    import os
-    import sqlite3
-    import subprocess
-    import sys
+    import json,math,os,sqlite3,subprocess,sys
 
     # Set data directories
     data_dir = "/local/content/ldlink/data/"
@@ -429,7 +424,50 @@ def calculate_pair(snp1, snp2, pop, request=None):
     output["statistics"] = statistics
 
     output["corr_alleles"] = corr_alleles
-
+    
+    
+    # Generate output file
+    ldpair_out=open(tmp_dir + "LDpair_" + request + ".txt", "w")
+    print >> ldpair_out, "Query SNPs:"
+    print >> ldpair_out, output["snp1"]["rsnum"] + " (" + output["snp1"]["coord"] + ")"
+    print >> ldpair_out, output["snp2"]["rsnum"] + " (" + output["snp2"]["coord"] + ")"
+    print >> ldpair_out, ""
+    print >> ldpair_out, pop + " Haplotypes:"
+    print >> ldpair_out, " " * 15 + output["snp2"]["rsnum"]
+    print >> ldpair_out, " " * 15 + output["snp2"]["allele_1"]["allele"] + " " * 7 + output["snp2"]["allele_2"]["allele"]
+    print >> ldpair_out, " " * 13 + "-" * 17
+    print >> ldpair_out, " " * 11 + output["snp1"]["allele_1"]["allele"] + " | " + output["two_by_two"]["cells"]["c11"] + " " * (5 - len(output["two_by_two"]["cells"]["c11"])) + " | " + output["two_by_two"]["cells"]["c12"] + " " * (5 - len(output["two_by_two"]["cells"]["c12"])) + " | " + output["snp1"]["allele_1"]["count"] + " " * (5 - len(output["snp1"]["allele_1"]["count"])) + " (" + output["snp1"]["allele_1"]["frequency"] + ")"
+    print >> ldpair_out, output["snp1"]["rsnum"] + " " * (10 - len(output["snp1"]["rsnum"])) + " " * 3 + "-" * 17
+    print >> ldpair_out, " " * 11 + output["snp1"]["allele_2"]["allele"] + " | " + output["two_by_two"]["cells"]["c21"] + " " * (5 - len(output["two_by_two"]["cells"]["c21"])) + " | " + output["two_by_two"]["cells"]["c22"] + " " * (5 - len(output["two_by_two"]["cells"]["c22"])) + " | " + output["snp1"]["allele_2"]["count"] + " " * (5 - len(output["snp1"]["allele_2"]["count"])) + " (" + output["snp1"]["allele_2"]["frequency"] + ")"
+    print >> ldpair_out, " " * 13 + "-" * 17
+    print >> ldpair_out, " " * 15 + output["snp2"]["allele_1"]["count"] + " " * (5 - len(output["snp2"]["allele_1"]["count"])) + " " * 3 + output["snp2"]["allele_2"]["count"] + " " * (5 - len(output["snp2"]["allele_2"]["count"])) + " " * 3 + output["two_by_two"]["total"]
+    print >> ldpair_out, " " * 14 + "(" + output["snp2"]["allele_1"]["frequency"] + ")" + " " * (5 - len(output["snp2"]["allele_1"]["frequency"])) + " (" + output["snp2"]["allele_2"]["frequency"] + ")" + " " * (5 - len(output["snp2"]["allele_2"]["frequency"]))
+    print >> ldpair_out, ""
+    print >> ldpair_out, "          " + output["haplotypes"]["hap1"]["alleles"] + ": " + output["haplotypes"]["hap1"]["count"] + " (" + output["haplotypes"]["hap1"]["frequency"] + ")"
+    print >> ldpair_out, "          " + output["haplotypes"]["hap2"]["alleles"] + ": " + output["haplotypes"]["hap2"]["count"] + " (" + output["haplotypes"]["hap2"]["frequency"] + ")"
+    print >> ldpair_out, "          " + output["haplotypes"]["hap3"]["alleles"] + ": " + output["haplotypes"]["hap3"]["count"] + " (" + output["haplotypes"]["hap3"]["frequency"] + ")"
+    print >> ldpair_out, "          " + output["haplotypes"]["hap4"]["alleles"] + ": " + output["haplotypes"]["hap4"]["count"] + " (" + output["haplotypes"]["hap4"]["frequency"] + ")"
+    print >> ldpair_out, ""
+    print >> ldpair_out, "          D': " + output["statistics"]["d_prime"]
+    print >> ldpair_out, "          R2: " + output["statistics"]["r2"]
+    print >> ldpair_out, "      Chi-sq: " + output["statistics"]["chisq"]
+    print >> ldpair_out, "     p-value: " + output["statistics"]["p"]
+    print >> ldpair_out, ""
+    if len(output["corr_alleles"]) == 2:
+        print >> ldpair_out, output["corr_alleles"][0]
+        print >> ldpair_out, output["corr_alleles"][1]
+    else:
+        print >> ldpair_out, output["corr_alleles"][0]
+    
+    try:
+        output["warning"]
+    except KeyError:
+        www="do nothing"
+    else:
+        print >> ldpair_out, "WARNING: " + output["warning"] + "!"
+    ldpair_out.close()
+    
+    
     # Return output
     return(json.dumps(output, sort_keys=True, indent=2))
 
