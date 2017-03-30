@@ -433,18 +433,7 @@ function createAssocTable() {
     });
 
 }
-function createAssocQuerySNP(id,data){
-    var ul = $(id);
-    for (var k in data.query_snp){
-        if (typeof data.query_snp[k] != 'undefined') {
-            console.log("Key is " + k + ", value is" + data.query_snp[k]);
-            var li = document.createElement("li");
-            li.innerHTML =k+": '<b>"+data.query_snp[k]+"</b>";
-            ul.append(li);
-        }
-    }
 
-}
 function createProxyTable() {
 
     var ldproxyTable = $('#new-ldproxy').DataTable( {
@@ -1955,7 +1944,6 @@ function getLDAssocResults(jsonfile) {
         console.dir(data);
         if (displayError(id, data) == false) {
             RefreshTable('#new-ldassoc', data);
-            createAssocQuerySNP('#ldassoc-query', data);
             $("#ldassoc-namespace").empty();
             $("#ldassoc-namespace").append(
                 $("<div>").append("namespace("+
@@ -1973,7 +1961,7 @@ function getLDAssocResults(jsonfile) {
                 $("<li>").append("Variants in Region: <b>"+data.report.statistics.in_region+"</b>")
             );
             $("#ldassoc-stats").append(
-                $("<li>").append("Run time: <b>"+data.report.statistics.runtime+"</b> seconds")
+                $("<li>").append("Run time: <b>"+Number(data.report.statistics.runtime).toFixed(2)+"</b> seconds")
             );
             //Adjust links
             if($('#assoc-matrix-color-r2').hasClass('active')) {
