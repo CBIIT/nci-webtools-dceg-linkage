@@ -597,10 +597,27 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 	output["query_snp"]=query_snp
 	
+	rows=[]
+	row=[]
+	row.append(query_snp["RS"])
+	chr,pos=query_snp["Coord"].split(':')
+	row.append(chr)
+	row.append(pos)
+	row.append(query_snp["Alleles"])
+	row.append(str(round(float(query_snp["MAF"]),4)))
+	row.append(abs(query_snp["Dist"]))
+	row.append(str(round(float(query_snp["Dprime"]),4)))
+	row.append(str(round(float(query_snp["R2"]),4)))
+	row.append(query_snp["Corr_Alleles"])
+	row.append(query_snp["P-value"])
+	row.append(query_snp["RegulomeDB"])
+	row.append("HaploReg link")
+	row.append(query_snp["Function"])
+	rows.append(row)
+	
 	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["RegulomeDB"],query_snp["Function"]]
 	print >> outfile, "\t".join(temp)
 	
-	chr,pos=query_snp["Coord"].split(':')
 	temp2=[chr,pos,query_snp["RS"],-log10(query_snp["P-value"])]
 	ucsc_track["lowest_p"]=temp2
 	
@@ -610,7 +627,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 	ucsc_track["not_sig"]=[]
 	
 	proxies={}
-	rows=[]
 	digits=len(str(len(out_p_sort)))
 	
 	for i in range(1,len(out_p_sort)):
@@ -1050,7 +1066,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Print run time statistics
 	print "Number of Individuals: "+str(len(pop_list))
 	print "SNPs in Region: "+str(len(out_prox))
-	duration=time.time() - start_time
+	duration=round(time.time() - start_time,2)
 	print "Run time: "+str(duration)+" seconds\n"
 
 
