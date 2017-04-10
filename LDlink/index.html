@@ -4,7 +4,7 @@
 <!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!-->
 
-<html class="no-js">
+<html class="no-js" xmlns="https://www.w3.org/1999/xhtml" lang="en">
 <!--<![endif]-->
 
 
@@ -45,7 +45,7 @@
 	<div class="header">
 		<div class="container">
 			<a href="http://dceg.cancer.gov/" target="dceg">
-				<img class="division-logo" src="/common/images/DCEG-logo.svg" alt="Division of Cancer Epidemiology &amp; Genetics">
+				<img class="division-logo" src="/common/images/DCEG-logo.svg" alt="Division of Cancer Epidemiology &amp; Genetics"><span class="sr-only">NCI National Cancer Institute</span>
 			</a>
 		</div>
 	</div>
@@ -327,7 +327,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a population."></a>
+										data-content="Please select a population."><span class="sr-only">ldassoc population codes</span></a>
 									<label for="ldassoc-population-codes" style="display: none;">Populations</label>
 									<select id="ldassoc-population-codes" multiple="multiple"
 										name="populations">
@@ -511,7 +511,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a population."></a>
+										data-content="Please select a population."><span class="sr-only">ldhap population codes</span></a>
 									<label for="ldhap-population-codes" style="display: none;">Populations</label>
 									<select id="ldhap-population-codes" multiple="multiple"
 										name="populations">
@@ -578,14 +578,14 @@
 												<td nowrap data-bind="attr: { id: 'RSnumber_hap_' + $index() }">
 													<a 	title="Cluster Report"
 													data-bind="attr: { target: 'RSnumber_hap_' + $index() }">
-														<span data-bind="text: RS"></span>
+														<span data-bind="text: RS"></span><span class="sr-only">Cluster Report</span>
 													</a>
 												</td>
 												<td nowrap data-bind="attr: { id: 'Coord_hap_' + $index() }"
 													style="text-align: center">
 													<a title="Genome Browser"
 													data-bind="attr: { target: 'Coord_hap_' + $index() }">
-														<span data-bind="text: Coord"></span>
+														<span data-bind="text: Coord"></span><span class="sr-only">Genome Browser</span>
 													</a>
 												</td>
 												<td nowrap data-bind="text: $data.Alleles"></td>
@@ -679,7 +679,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a population."></a>
+										data-content="Please select a population."><span class="sr-only">Population codes</span></a>
 									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
 									<select id="ldmatrix-population-codes" multiple="multiple"
 										name="populations">
@@ -792,7 +792,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a population."></a>
+										data-content="Please select a population."><span class="sr-only">Population codes</span></a>
 									<label for="ldpair-population-codes" style="display: none;">Populations</label>
 									<select id="ldpair-population-codes" multiple="multiple"
 										name="populations">
@@ -845,9 +845,9 @@
 									<td></td>
 									<td colspan="2" class="cell-center"><a id="snp2-rsnum"
 										data-bind="text: snp2.rsnum" href="#" title="Cluster Report:"
-										target="LDPair-snp2-rsnum"></a><br /> <a id="snp2-coord"
+										target="LDPair-snp2-rsnum"><span class="sr-only">Cluster Report</span></a><br /> <a id="snp2-coord"
 										data-bind="text: snp2.coord" href="#" title="Genome Browser"
-										target="LDPair-snp2-coord">
+										target="LDPair-snp2-coord"><span class="sr-only">Genome Browser</span>
 									</a></td>
 									<td></td>
 									<td></td>
@@ -867,10 +867,10 @@
 										style="vertical-align: middle">
 										<a id="snp1-rsnum"
 										data-bind="text: snp1.rsnum" href="#" title="Cluster Report:"
-										target="LDPair-snp1-rsnum"></a><br />
+										target="LDPair-snp1-rsnum"><span class="sr-only">Cluster Report</span></a><br />
 										<a id="snp1-coord"
 										data-bind="text: snp1.coord" href="#" title="Genome Browser"
-										target="LDPair-snp1-coord"></a>
+										target="LDPair-snp1-coord"><span class="sr-only">Genome Browser</span></a>
 									</td>
 									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
 
@@ -958,7 +958,7 @@
 						<div data-bind="foreach: corr_alleles" style="margin-bottom:2%">
 							<div style="text-align: center" data-bind="text: $data"></div>
 						</div>
-											<a id="ldpair_results" style="margin-left:20%;margin-top:2%" target="ldpair"></a>
+											<a id="ldpair_results" style="margin-left:20%;margin-top:2%" target="ldpair"><span class="sr-only">LDpair Results</span></a>
 
 					</div>
 
@@ -992,14 +992,14 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a population."></a>
+										data-content="Please select a population."><span class="sr-only">Population codes</span></a>
 									<a id="ldproxy-population-codes-popover"
 											style="position:relative;left:180px;"
 											href="#"
 											data-toggle="popover"
 											trigger="manual"
 											data-placement="right"
-											data-content="Warning: Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources."></a>
+											data-content="Warning: Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources."><span class="sr-only">Warning: Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources.</span></a>
 											<label for="ldproxy-population-codes" style="display: none;">Populations</label>
 									<select id="ldproxy-population-codes" multiple="multiple"
 										name="populations">
@@ -1160,8 +1160,8 @@
 									data-toggle="popover"
 									trigger="manual"
 									data-placement="right"
-									data-content="Please select a population."></a>
-								<label for="snpclip-population-codes" style="display: none;">Populations</label>
+									data-content="Please select a population."><span class="sr-only">Population codes</span></a>
+								<label for="snpclip-population-codes" style="display: none;">Please Select a population</label>
 								<select id="snpclip-population-codes" multiple="multiple"
 									name="populations">
 								</select>
@@ -1362,7 +1362,7 @@
 					            <a data-toggle="collapse"
 					            	data-parent="#accordion"
 					            	href="#collapseThree">
-					            <i class="indicator glyphicon glyphicon-chevron-up  pull-right"></i>
+					            <i class="indicator glyphicon glyphicon-chevron-up  pull-right"><span class="sr-only">Collapse</span></i>
 					            </a>
 					            <span class="pull-right" style="margin-right:25px;">
 					            	<span id="illumina-count">0</span> Illumina array(s) and <span id="affymetrix-count">0</span> Affymetrix array(s) selected</span>
@@ -1576,10 +1576,10 @@
 
     <div class="container">
 			<div class="navbar-text social" style="float:right;">SHARE
-				<a href="http://www.facebook.com/sharer.php?u=http://analysistools.nci.nih.gov/LDlink&t=LDlink: an interactive suite of web-based applications designed to easily and efficiently explore linkage disequilibrium in population groups" target="facebook"><i class="fa fa-lg fa-facebook"></i></a>
-				<a href="http://twitter.com/share?url=http://analysistools.nci.nih.gov/LDlink&text=#LDlink: an interactive web tool to easily and efficiently explore linkage disequilibrium in population groups" target="twitter"><i class="fa fa-lg fa-twitter"></i></a>
-				<a href="https://plus.google.com/share?url=http://analysistools.nci.nih.gov/LDlink" target="googlePlus"><i class="fa fa-lg fa-google-plus"></i></a>
-				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i class="fa fa-lg fa-linkedin"></i></a>
+				<a href="http://www.facebook.com/sharer.php?u=http://analysistools.nci.nih.gov/LDlink&t=LDlink: an interactive suite of web-based applications designed to easily and efficiently explore linkage disequilibrium in population groups" target="facebook"><i class="fa fa-lg fa-facebook"></i><span class="sr-only">Facebook</span></a>
+				<a href="http://twitter.com/share?url=http://analysistools.nci.nih.gov/LDlink&text=#LDlink: an interactive web tool to easily and efficiently explore linkage disequilibrium in population groups" target="twitter"><i class="fa fa-lg fa-twitter"></i><span class="sr-only">Twitter</span></a>
+				<a href="https://plus.google.com/share?url=http://analysistools.nci.nih.gov/LDlink" target="googlePlus"><i class="fa fa-lg fa-google-plus"></i><span class="sr-only">Google Plus</span></a>
+				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i class="fa fa-lg fa-linkedin"></i><span class="sr-only">linkedin</span></a>
 			</div>
 	</div>
 
