@@ -754,13 +754,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     gene_plot.yaxis.major_tick_line_color = None
     gene_plot.yaxis.major_label_text_color = None
 
-    hover = gene_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Gene", "@exons_plot_name"),
-        ("ID", "@exons_plot_id"),
-        ("Exon", "@exons_plot_exon"),
-    ])
-
     gene_plot.toolbar_location = "below"
 
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
