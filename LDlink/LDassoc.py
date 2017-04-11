@@ -864,6 +864,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 	xr=Range1d(start=coord1/1000000.0-whitespace, end=coord2/1000000.0+whitespace)
 	yr=Range1d(start=-0.03, end=max(y)*1.03)
 	sup_2=u"\u00B2"
+	
+	print xr
 
 	assoc_plot=figure(
 				title="P-values and Regional LD for "+snp+" in "+pop,
@@ -952,6 +954,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	exons_plot_name=[]
 	exons_plot_id=[]
 	exons_plot_exon=[]
+	message = ["Too many genes to plot."]
 	lines=[0]
 	gap=80000
 	tall=0.75
@@ -1009,45 +1012,52 @@ def calculate_assoc(file,region,pop,request,myargs):
 			exons_plot_name=exons_plot_name,
 			exons_plot_id=exons_plot_id,
 			exons_plot_exon=exons_plot_exon,
+			message=message,
 		)
 	)
 	
-	if len(lines)<3:
-	    plot_h_pix=150
+	max_genes = 40
+	if len(lines) < 3 or len(genes_raw) > max_genes:
+		plot_h_pix = 150
 	else:
-	    plot_h_pix=150+(len(lines)-2)*50
-		
-	
-	gene_plot=figure(
-					x_range=xr, y_range=yr2, border_fill_color='white', 
-					title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-					plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
-					
-	gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end, genes_plot_yn, color="black", alpha=1, line_width=2)
-	gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h, source=source2, fill_color="grey", line_color="grey")
-	gene_plot.xaxis.axis_label="Chromosome "+chromosome+" Coordinate (Mb)(GRCh37)"
-	gene_plot.yaxis.axis_label="Genes"
-	gene_plot.ygrid.grid_line_color=None
-	gene_plot.yaxis.axis_line_color=None
-	gene_plot.yaxis.minor_tick_line_color=None
-	gene_plot.yaxis.major_tick_line_color=None
-	gene_plot.yaxis.major_label_text_color=None
-	
-	hover=gene_plot.select(dict(type=HoverTool))
-	hover.tooltips=OrderedDict([
-		("Gene", "@exons_plot_name"),
-		("ID", "@exons_plot_id"),
-		("Exon", "@exons_plot_exon"),
-	])
-	
-	gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-		 text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-	
+		plot_h_pix = 150 + (len(lines) - 2) * 50
 
-	gene_plot.toolbar_location="below"
+	gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+					   x_range=xr, y_range=yr2, border_fill_color='white',
+					   title="", h_symmetry=False, v_symmetry=False, logo=None,
+					   plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-	# Combine plots into a grid
-	out_grid=gridplot(assoc_plot,rug,gene_plot, ncols=1, toolbar_options=dict(logo=None))
+	if len(genes_raw) <= max_genes:
+		gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+						  genes_plot_yn, color="black", alpha=1, line_width=2)
+		gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
+					   source=source2, fill_color="grey", line_color="grey")
+		gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+					   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+		hover = gene_plot.select(dict(type=HoverTool))
+		hover.tooltips = OrderedDict([
+			("Gene", "@exons_plot_name"),
+			("ID", "@exons_plot_id"),
+			("Exon", "@exons_plot_exon"),
+		])
+
+	else:
+		x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+		gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
+					   text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+
+	gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+	gene_plot.yaxis.axis_label = "Genes"
+	gene_plot.ygrid.grid_line_color = None
+	gene_plot.yaxis.axis_line_color = None
+	gene_plot.yaxis.minor_tick_line_color = None
+	gene_plot.yaxis.major_tick_line_color = None
+	gene_plot.yaxis.major_label_text_color = None
+
+	gene_plot.toolbar_location = "below"
+
+	out_grid = gridplot(assoc_plot, rug, gene_plot,
+						ncols=1, toolbar_options=dict(logo=None))
 	
 	###########################
 	# Html output for testing #
