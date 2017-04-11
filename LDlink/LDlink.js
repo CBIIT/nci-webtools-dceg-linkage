@@ -958,6 +958,7 @@ function calculate(e) {
 
     initCalculate(id);
     updateData(id);
+
 }
 
 function initCalculate(id) {
@@ -973,6 +974,7 @@ function updateData(id) {
             if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
+
             }
             break;
         case 'ldhap':
@@ -1092,6 +1094,7 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph').empty().append(data);
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
+
         }
         $("#"+id+"-loading").hide();
     });
@@ -1100,9 +1103,14 @@ function updateLDassoc() {
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
+
+    setTimeout(function(){var checkbox=$(".bk-toolbar-inspector").children().first();
+    $(checkbox).attr('id', 'hover');
+    $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');},100);
     });
 
     hideLoadingIcon(ajaxRequest, id);
+
 }
 
 function updateLDhap() {
@@ -1745,6 +1753,9 @@ function updateLDmatrix() {
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
+        setTimeout(function(){var checkbox=$(".bk-toolbar-inspector").children().first();
+        $(checkbox).attr('id', 'hover');
+        $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');},100);
     });
 
     hideLoadingIcon(ajaxRequest, id);
@@ -1894,6 +1905,9 @@ function updateLDproxy() {
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
+        setTimeout(function(){var checkbox=$(".bk-toolbar-inspector").children().first();
+        $(checkbox).attr('id', 'hover');
+        $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');},100);
     });
 }
 
@@ -1971,6 +1985,7 @@ function getLDAssocResults(jsonfile) {
                 $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
                 //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
             }
+
         }
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
