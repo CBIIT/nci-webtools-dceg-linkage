@@ -132,13 +132,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         else:
             output[
                 "warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
-    if distance_max > 2000000:
-            output["error"] = "Maximum allowed genomic distance between variants is 2 Mb (Query range = " + str(distance_max) + " bp)"
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print >> out_json, json_output
-            out_json.close()
-            return("", "")
-            raise
 
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
@@ -731,7 +724,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                        title="", h_symmetry=False, v_symmetry=False, logo=None,
                        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-    if len(genes_raw) <= max_genes:
+    if len(genes_raw) <= max_genes and distance_max < 2000000:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                           genes_plot_yn, color="black", alpha=1, line_width=2)
         gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
