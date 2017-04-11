@@ -864,8 +864,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 	xr=Range1d(start=coord1/1000000.0-whitespace, end=coord2/1000000.0+whitespace)
 	yr=Range1d(start=-0.03, end=max(y)*1.03)
 	sup_2=u"\u00B2"
-	
-	print xr
 
 	assoc_plot=figure(
 				title="P-values and Regional LD for "+snp+" in "+pop,
