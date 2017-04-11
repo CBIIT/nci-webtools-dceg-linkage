@@ -653,6 +653,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     exons_plot_name = []
     exons_plot_id = []
     exons_plot_exon = []
+    message = ["Too many genes to plot."]
     lines = [0]
     gap = 80000
     tall = 0.75
@@ -710,6 +711,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             exons_plot_name=exons_plot_name,
             exons_plot_id=exons_plot_id,
             exons_plot_exon=exons_plot_exon,
+            message=message,
         )
     )
 
@@ -724,7 +726,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                        title="", h_symmetry=False, v_symmetry=False, logo=None,
                        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-    if len(genes_raw) <= max_genes and distance_max < 2000000:
+    if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                           genes_plot_yn, color="black", alpha=1, line_width=2)
         gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
@@ -740,7 +742,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     else:
         x_coord_text = x[0] + (x[-1] - x[0]) / 2.0
-        gene_plot.text(x_coord_text, n_rows / 2.0, text="Too many genes to plot.", alpha=1,
+        gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
                        text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
     gene_plot.xaxis.axis_label = "Chromosome " + \
@@ -767,9 +769,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     ###########################
     # Html output for testing #
     ###########################
-    #html=file_html(out_grid, CDN, "Test Plot")
+    # html=file_html(out_grid, CDN, "Test Plot")
     # out_html=open("LDmatrix.html","w")
-    #print >> out_html, html
+    # print >> out_html, html
     # out_html.close()
 
     out_script, out_div = components(out_grid, CDN)
