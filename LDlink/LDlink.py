@@ -13,6 +13,7 @@ import collections
 import argparse
 import json
 import time
+import random
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
@@ -176,7 +177,7 @@ def ldpair():
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
         isProgrammatic = True
 
     print 'var1: ' + var1
@@ -214,7 +215,7 @@ def ldproxy():
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
         isProgrammatic = True
 
     try:
@@ -243,7 +244,7 @@ def ldmatrix():
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
         isProgrammatic = True
 
     r2_d = request.args.get('r2_d', False)
@@ -293,7 +294,7 @@ def ldhap():
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
         isProgrammatic = True
 
     print 'snps: ' + snps
@@ -301,7 +302,7 @@ def ldhap():
     print 'request: ' + str(reference)
 
     if reference is False:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
 
     snplst = tmp_dir + 'snps' + reference + '.txt'
     print 'snplst: ' + snplst
@@ -349,7 +350,7 @@ def snpclip():
     if 'reference' in data.keys():
         reference = str(data['reference'])
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
         isProgrammatic = True
 
     snpfile = str(tmp_dir + 'snps' + reference + '.txt')
@@ -460,7 +461,7 @@ def snpchip():
     if 'reference' in data.keys():
         reference = str(data['reference'])
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
         isProgrammatic = True
 
     #snps = request.args.get('snps', False)
@@ -526,7 +527,7 @@ def ldassoc():
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
-        reference = str(time.strftime("%I%M%S"))
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
 
     filename = request.args.get('filename', False)
     matrixVariable = request.args.get('matrixVariable')
