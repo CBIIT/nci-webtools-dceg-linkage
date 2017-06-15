@@ -529,7 +529,7 @@ def ldassoc():
     else:
         reference = str(time.strftime("%I%M%S")) + `random.randint(0,10000)`
 
-    filename = request.args.get('filename', False)
+    filename = secure_filename(request.args.get('filename', False))
     matrixVariable = request.args.get('matrixVariable')
     region = request.args.get('calculateRegion')
 
@@ -547,7 +547,7 @@ def ldassoc():
     # variantValues = json.loads(request.args.get('variant'))
     # columns = json.loads(request.args.get('columns'))
     filename = os.path.join(
-        app.config['UPLOAD_DIR'], str(request.args.get('filename')))
+        app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     # filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
 
     print 'filename: ' + filename
