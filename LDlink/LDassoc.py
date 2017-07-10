@@ -912,8 +912,14 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	assoc_plot.add_tools(hover)
 	
-	assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
-					text_baseline="middle", text_align="center", angle=0)
+	# Annotate RebulomeDB scores
+	try:
+		myargs.annotate
+	except NameError:
+		assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
+	else:	
+		if myargs.annotate=True:
+			assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 	
 	assoc_plot.yaxis.axis_label="-log10 P-value"
 	
@@ -1102,6 +1108,7 @@ def main():
 	region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
 	parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
 	parser.add_argument("request", type=str, help="id for submitted command")
+	parser.add_argument("-a", "--annotate", type=str, help="annotate plot with RegulomeDB scores", action="store_true")
 	parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
 	parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
 	parser.add_argument("-d", "--dprime", help="plot D prime rather than R2", action="store_true")
