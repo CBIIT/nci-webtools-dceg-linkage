@@ -918,7 +918,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	except NameError:
 		assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 	else:	
-		if myargs.annotate=True:
+		if myargs.annotate==True:
 			assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 	
 	assoc_plot.yaxis.axis_label="-log10 P-value"
@@ -1118,6 +1118,7 @@ def main():
 	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number or coordinate (required with --variant)(default is lowest p-value in region)")
 	parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
 	parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
+	parser.add_argument("-t", "--transcript", help="plot all gene transcripts", action="store_true")
 	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 	
 	args=parser.parse_args()
