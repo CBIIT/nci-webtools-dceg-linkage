@@ -98,7 +98,7 @@ def LD_calcs(hap,allele,allele_n):
 				match=allele_n["1"]+equiv+allele["0"]+","+allele_n["0"]+equiv+allele["1"]
 			
 		else:
-			match=" "+equiv+" , "+equiv+" "
+			match="NA"
 	
 		return [maf_q,maf_p,D_prime,r2,match]
 
