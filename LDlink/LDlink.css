@@ -704,9 +704,10 @@ textarea:invalid, .error {
   float: left;
 }
 #ldassoc-sample {
+  position: absolute;
   float: left;
   clear: left;
-  margin-top: 4px;
+  margin-top: 38px;
 }
 .progress {
 	margin-bottom:18px;
