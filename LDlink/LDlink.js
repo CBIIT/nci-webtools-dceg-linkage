@@ -971,20 +971,19 @@ function updateData(id) {
 
     switch (id) {
         case 'ldassoc':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isRegionSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
-
             }
             break;
         case 'ldhap':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDhap();
             }
             break;
         case 'ldmatrix':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDmatrix();
             }
@@ -1002,15 +1001,45 @@ function updateData(id) {
             }
             break;
         case 'snpclip':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateSNPclip();
             }
             break;
         case 'snpchip':
-            $('#'+id+"-loading").show();
-            updateSNPchip();
+            if(isBrowseSet(id)) {
+                $('#'+id+"-loading").show();
+                updateSNPchip();
+            }
             break;
+    }
+}
+
+function isBrowseSet(elementId) {
+    console.log("Check browse: "+elementId);
+
+    var browse =  $('#'+elementId+'-file').val();
+    console.dir("File chosen? " + browse.toString());
+    if(browse != "" ) {
+        $('#'+elementId+'-browse-set-none').popover('hide');
+        return true;
+    } else {
+        $('#'+elementId+'-browse-set-none').popover('show');
+        return false;
+    }
+}
+
+function isRegionSet(elementId) {
+    // console.log("Check region: "+elementId);
+
+    var region =  $('#region-codes-menu1').text();
+    // console.log("Anything there? " + region);
+    if(region == "Gene" || region == "Region" || region == "Variant") {
+        $('#'+elementId+'-region-codes-zero').popover('hide');
+        return true;
+    } else {
+        $('#'+elementId+'-region-codes-zero').popover('show');
+        return false;
     }
 }
 
@@ -2091,7 +2120,7 @@ function updateLDpair() {
             addLDpairHyperLinks(data);
         }
         $("#ldpair_results").text("Download Results");
-            $('#ldpair_results').css("text-decoration", "underline");   
+            $('#ldpair_results').css("text-decoration", "underline");
             $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
