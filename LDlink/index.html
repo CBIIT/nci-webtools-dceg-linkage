@@ -114,7 +114,7 @@
 						and linkage disequilibrium patterns for a genomic region of interest.
 						Input is a tab or space delimited association output file and a population
 						group.<br>
-						
+
 					<b>LDhap</b>: Calculate population specific haplotype
 						frequencies of all haplotypes observed for a list of query variants.
 						Input is a list of variant RS numbers (one per line) and a population
@@ -212,6 +212,13 @@
 									<span class="btn btn-default btn-file btn-csv-file">Browse
 										<input type="file" id="ldassoc-file">
 									</span>
+									<a id="ldassoc-browse-set-none"
+										style="position:relative;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a file."></a>
 								</div>
 								<progress style="display:none;"></progress>
 
@@ -267,8 +274,15 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-3" style="width:275px;">
+									<a id="ldassoc-region-codes-zero"
+										style="position:relative;left:155px;top:17px"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a region."></a>
 									<div id="assoc-region" class="dropdown">
-										<button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:155px;">Select Region
+										<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu1" data-toggle="dropdown" style="width:155px;">Select Region
 										<span class="caret"></span></button>
 										<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="menu1">
 											<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Gene</a></li>
@@ -414,7 +428,7 @@
 								</ul>
 							</div>
 						</div>
-						
+
 
 						<div>
 							<h3>Association Results</h3>
@@ -499,6 +513,13 @@
 									<span	class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="ldhap-file">
 									</span>
+									<a id="ldhap-browse-set-none"
+										style="position:relative;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a file."></a>
 								</div>
 							</div>
 
@@ -666,6 +687,13 @@
 										<span	class="btn btn-default btn-file btn-snp">Browse
 											<input type="file" id="ldmatrix-file">
 										</span>
+										<a id="ldmatrix-browse-set-none"
+											style="position:relative;"
+											href="#"
+											data-toggle="popover"
+											trigger="manual"
+											data-placement="right"
+											data-content="Please select a file."></a>
 									</div>
 								</div>
 							</div>
@@ -1150,6 +1178,13 @@
 									<span	class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="snpclip-file">
 									</span>
+									<a id="snpclip-browse-set-none"
+										style="position:relative;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a file."></a>
 								</div>
 							</div>
 							<div class="form-group col-sm-3">
@@ -1330,6 +1365,13 @@
 									<span class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="snpchip-file">
 									</span>
+									<a id="snpchip-browse-set-none"
+										style="position:relative;"
+										href="#"
+										data-toggle="popover"
+										trigger="manual"
+										data-placement="right"
+										data-content="Please select a file."></a>
 								</div>
 							</div>
 							<!--
