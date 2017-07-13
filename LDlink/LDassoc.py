@@ -307,17 +307,22 @@ def calculate_assoc(file,region,pop,request,myargs):
 		col=assoc_data[i].strip().split()
 		if len(col)==len_head:
 			if col[chr_index].strip("chr")==chromosome:
-				if coord1<=int(col[pos_index])<=coord2:
-					try:
-						float(col[p_index])
-					except ValueError:
-						continue
-					else:
-						coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
-						assoc_coords.append(coord_i)
-						a_pos.append(col[pos_index])
-						assoc_dict[coord_i]=[col[p_index]]
-						assoc_list.append([coord_i,float(col[p_index])])
+				try:
+					int(col[pos_index])
+				except ValueError:
+					continue
+				else:
+					if coord1<=int(col[pos_index])<=coord2:
+						try:
+							float(col[p_index])
+						except ValueError:
+							continue
+						else:
+							coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+							assoc_coords.append(coord_i)
+							a_pos.append(col[pos_index])
+							assoc_dict[coord_i]=[col[p_index]]
+							assoc_list.append([coord_i,float(col[p_index])])
 		
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
@@ -1210,10 +1215,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 	###########################
 	# Html output for testing #
 	###########################
-	html=file_html(out_grid, CDN, "Test Plot")
-	out_html=open("LDassoc.html","w")
-	print >> out_html, html
-	out_html.close()
+	#html=file_html(out_grid, CDN, "Test Plot")
+	#out_html=open("LDassoc.html","w")
+	#print >> out_html, html
+	#out_html.close()
 	
 	
 	out_script,out_div=components(out_grid, CDN)
@@ -1231,7 +1236,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
+	subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
 
 
