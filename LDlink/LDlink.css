@@ -709,6 +709,24 @@ textarea:invalid, .error {
   clear: left;
   margin-top: 38px;
 }
+#ldassoc-file-container {
+  margin-top: 4px;
+}
+.toggle-labels {
+  position: relative;
+  float: left;
+}
+#toggle-label {
+  line-height: 35px;
+  text-align: right;
+}
+.ldassoc-population-col {
+  float: left;
+  margin-left: -100px;
+}
+.ldassoc-calculate-col {
+  float: left;
+}
 .dropdown-menu {
   max-height:350px;
   overflow-y:scroll;

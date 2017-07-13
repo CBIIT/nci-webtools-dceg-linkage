@@ -9,6 +9,7 @@
 
 
 <head>
+<script src="//assets.adobedtm.com/f1bfa9f7170c81b1a9a9ecdcc6c5215ee0b03c84/satelliteLib-4b219b82c4737db0e1797b6c511cf10c802c95cb.js"></script>
 <meta name="generator"
 	content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
 <meta charset="utf-8">
@@ -342,7 +343,7 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-2" style="width:190px;">
+								<div class="ldassoc-population-col" style="width:190px;">
 									<a id="ldassoc-population-codes-zero"
 										style="position:relative;left:180px;"
 										href="#"
@@ -356,19 +357,40 @@
 									</select>
 								</div>
 							</div>
+							<div class="toggle-labels">
+								<div id="toggle-label">LD Measure: </div>
+								<div id="toggle-label">Collapse transcripts: </div>
+								<div id="toggle-label">RegulomeDB annotation: </div>
+							</div>
 							<div class="col-sm-2">
 								<div title="Select heat map variable" data-toggle="buttons" class="btn-group">
 									<label class="btn btn-default active" id="assoc-matrix-color-r2">
-								 		<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
+								 		<input type="radio" checked="" autocomplete="off" name="options">R<sup>2</sup>
 									</label>
 									<label class="btn btn-default">
-										<input type="radio" autocomplete="off" name="options"> D'
+										<input type="radio" autocomplete="off" name="options">D'
+									</label>
+								</div>
+								<div title="Toggle collapse transcripts" data-toggle="buttons" class="btn-group">
+									<label class="btn btn-default active" id="assoc-collapse">
+										<input type="radio" checked="" autocomplete="off" name="options">Yes
+									</label>
+									<label class="btn btn-default">
+										<input type="radio" autocomplete="off" name="options">No
+									</label>
+								</div>
+								<div title="Toggle RegulomeDB annotation" data-toggle="buttons" class="btn-group">
+									<label class="btn btn-default active" id="assoc-annotation">
+										<input type="radio" checked="" autocomplete="off" name="options">Yes
+									</label>
+									<label class="btn btn-default">
+										<input type="radio" autocomplete="off" name="options">No
 									</label>
 								</div>
 							</div>
 							<!-- Calculate -->
 							<div class="form-group">
-								<div class="col-sm-2">
+								<div class="ldassoc-calculate-col">
 								<label for="ldassoc" class="sr-only">Submit</label>
 									<input type="submit" id="ldassoc" value="Calculate" class="btn btn-default calculate" ></input>
 								</div>
@@ -1687,5 +1709,6 @@
 		ga('send', 'pageview');
 	</script>
 	<!-- End Google Analytics -->
+	<script type="text/javascript">_satellite.pageBottom();</script>
 </body>
 </html>

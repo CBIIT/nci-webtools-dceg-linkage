@@ -1076,7 +1076,9 @@ function updateLDassoc() {
         gene: new Object(),
         region: new Object(),
         variant: new Object(),
-        dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True"
+        dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
+        collapse: $("#assoc-collapse").hasClass('active') ? "False" :"True",
+        annotation: $("#assoc-annotation").hasClass('active') ? "False" :"True"
     };
     ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
     ldInputs.columns.position = $("#assoc-position > button").val();
@@ -2012,6 +2014,22 @@ function getLDAssocResults(jsonfile) {
             );
             //Adjust links
             if($('#assoc-matrix-color-r2').hasClass('active')) {
+                $('#ldassoc-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
+                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
+            } else {
+                $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
+                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
+            }
+            //Collapse flag?
+            if($('#assoc-collapse').hasClass('active')) {
+                $('#ldassoc-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
+                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
+            } else {
+                $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
+                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
+            }
+            //Annotation flag?
+            if($('#assoc-annotation').hasClass('active')) {
                 $('#ldassoc-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
                 //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
             } else {
