@@ -709,6 +709,7 @@ textarea:invalid, .error {
   clear: left;
   margin-top: 38px;
 }
+<<<<<<< HEAD
 #ldassoc-file-container {
   margin-top: 4px;
 }
@@ -731,6 +732,8 @@ textarea:invalid, .error {
   max-height:350px;
   overflow-y:scroll;
 }
+=======
+>>>>>>> master
 .progress {
 	margin-bottom:18px;
 }

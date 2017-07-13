@@ -9,6 +9,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Set data directories
 	data_dir="/local/content/ldlink/data/"
 	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
+	gene_c_dir=data_dir+"refGene/sorted_refGene_collapsed.txt.gz"
 	gene_dir2=data_dir+"refGene/gene_names_coords.db"
 	recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
 	snp_dir=data_dir+"snp142/snp142_annot_2.db"
@@ -299,22 +300,29 @@ def calculate_assoc(file,region,pop,request,myargs):
 			raise	
 	
 	assoc_coords=[]
+	a_pos=[]
 	assoc_dict={}
 	assoc_list=[]
 	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
 		if len(col)==len_head:
 			if col[chr_index].strip("chr")==chromosome:
-				if coord1<=int(col[pos_index])<=coord2:
-					try:
-						float(col[p_index])
-					except ValueError:
-						continue
-					else:
-						coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
-						assoc_coords.append(coord_i)
-						assoc_dict[coord_i]=[col[p_index]]
-						assoc_list.append([coord_i,float(col[p_index])])
+				try:
+					int(col[pos_index])
+				except ValueError:
+					continue
+				else:
+					if coord1<=int(col[pos_index])<=coord2:
+						try:
+							float(col[p_index])
+						except ValueError:
+							continue
+						else:
+							coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+							assoc_coords.append(coord_i)
+							a_pos.append(col[pos_index])
+							assoc_dict[coord_i]=[col[p_index]]
+							assoc_list.append([coord_i,float(col[p_index])])
 		
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
@@ -760,6 +768,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	p_rs=[]
 	p_allele=[]
 	p_coord=[]
+	p_pos=[]
 	p_maf=[]
 	dist=[]
 	d_prime=[]
@@ -786,6 +795,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		p_rs.append(p_rs_i)
 		p_allele.append(p_allele_i)
 		p_coord.append(float(p_coord_i.split(":")[1])/1000000)
+		p_pos.append(p_coord_i.split(":")[1])
 		p_maf.append(str(round(float(p_maf_i),4)))
 		dist.append(str(round(dist_i/1000000.0,4)))
 		d_prime.append(float(d_prime_i))
@@ -827,6 +837,23 @@ def calculate_assoc(file,region,pop,request,myargs):
 		size_i=9+float(p_maf_i)*14.0
 		size.append(size_i)
 	
+
+	# Pull out SNPs from association file not found in 1000G
+	p_plot_pos=[]
+	p_plot_pval=[]
+	p_plot_pos2=[]
+	p_plot_pval2=[]
+	p_plot_dist=[]
+	index_var_pos=float(q_coord_i.split(":")[1])/1000000
+	for input_pos in a_pos:
+		if input_pos not in p_pos:
+			p_plot_pos.append(float(input_pos)/1000000)
+			p_plot_pval.append(-log10(float(assoc_dict[chromosome+":"+input_pos+"-"+input_pos][0])))
+			p_plot_pos2.append("chr"+chromosome+":"+input_pos)
+			p_plot_pval2.append(float(assoc_dict[chromosome+":"+input_pos+"-"+input_pos][0]))
+			p_plot_dist.append(str(round(float(input_pos)/1000000-index_var_pos,4)))
+			
+	
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
 	from bokeh.embed import components,file_html
@@ -836,6 +863,12 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.resources import CDN
 	
 	reset_output()
+	
+	source_p=ColumnDataSource(
+		data=dict(
+			p_plot_pos2=p_plot_pos2,
+			p_plot_pval2=p_plot_pval2,
+			p_plot_dist=p_plot_dist,))
 	
 	source=ColumnDataSource(
 		data=dict(
@@ -855,7 +888,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 		)
 	)
 	
-	
 	# Assoc Plot
 	x=p_coord
 	y=neg_log_p
@@ -871,7 +903,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 				plot_width=900,
 				plot_height=600,
 				x_range=xr, y_range=yr,
-				tools="tap,pan,box_zoom,box_select,undo,redo,reset,previewsave", logo=None,
+				tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,previewsave", logo=None,
 				toolbar_location="above")
 	
 	assoc_plot.title.align="center"
@@ -895,8 +927,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 	b = [-log10(0.00000005),-log10(0.00000005)]
 	assoc_plot.line(a, b, color="blue", alpha=0.5)
 	
-	assoc_points=assoc_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
+	assoc_points_not1000G=assoc_plot.circle(p_plot_pos, p_plot_pval, size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
+	assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
 	
+	assoc_points=assoc_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
 	hover=HoverTool(renderers=[assoc_points])
 	hover.tooltips=OrderedDict([
 		("Variant", "@prs @p_alle"),
@@ -912,14 +946,9 @@ def calculate_assoc(file,region,pop,request,myargs):
 	
 	assoc_plot.add_tools(hover)
 	
-	# Annotate RebulomeDB scores
-	try:
-		myargs.annotate
-	except NameError:
+	# Annotate RebulomeDB scores	
+	if myargs.annotate==True:
 		assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
-	else:	
-		if myargs.annotate==True:
-			assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 	
 	assoc_plot.yaxis.axis_label="-log10 P-value"
 	
@@ -935,133 +964,253 @@ def calculate_assoc(file,region,pop,request,myargs):
 	rug=figure(
 			x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
 			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-			plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
+			plot_width=900, plot_height=50, tools="xpan,tap,wheel_zoom", logo=None)
 
 	rug.segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=alpha, line_width=1)
 	rug.toolbar_location=None
 	
 	
-	# Gene Plot
-	tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
-	subprocess.call(tabix_gene, shell=True)
-	filename=tmp_dir+"genes_"+request+".txt"
-	genes_raw=open(filename).readlines()
-	
-	genes_plot_start=[]
-	genes_plot_end=[]
-	genes_plot_y=[]
-	genes_plot_name=[]
-	exons_plot_x=[]
-	exons_plot_y=[]
-	exons_plot_w=[]
-	exons_plot_h=[]
-	exons_plot_name=[]
-	exons_plot_id=[]
-	exons_plot_exon=[]
-	message = ["Too many genes to plot."]
-	lines=[0]
-	gap=80000
-	tall=0.75
-	if genes_raw!=None:
-		for i in range(len(genes_raw)):
-			bin,name_id,chrom,strand,txStart,txEnd,cdsStart,cdsEnd,exonCount,exonStarts,exonEnds,score,name2,cdsStartStat,cdsEndStat,exonFrames=genes_raw[i].strip().split()
-			name=name2
-			id=name_id
-			e_start=exonStarts.split(",")
-			e_end=exonEnds.split(",")
-			
-			# Determine Y Coordinate
-			i=0
-			y_coord=None
-			while y_coord==None:
-				if i>len(lines)-1:
-					y_coord=i+1
-					lines.append(int(txEnd))
-				elif int(txStart)>(gap+lines[i]):
-					y_coord=i+1
-					lines[i]=int(txEnd)
-				else:
-					i+=1
-			
-			genes_plot_start.append(int(txStart)/1000000.0)
-			genes_plot_end.append(int(txEnd)/1000000.0)
-			genes_plot_y.append(y_coord)
-			genes_plot_name.append(name+"  ")
-			
-			for i in range(len(e_start)-1):
-				if strand=="+":
-					exon=i+1
-				else:
-					exon=len(e_start)-1-i
+	# Gene Plot (All Transcripts)
+	if myargs.transcript==True:
+		tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
+		subprocess.call(tabix_gene, shell=True)
+		filename=tmp_dir+"genes_"+request+".txt"
+		genes_raw=open(filename).readlines()
+		
+		genes_plot_start=[]
+		genes_plot_end=[]
+		genes_plot_y=[]
+		genes_plot_name=[]
+		exons_plot_x=[]
+		exons_plot_y=[]
+		exons_plot_w=[]
+		exons_plot_h=[]
+		exons_plot_name=[]
+		exons_plot_id=[]
+		exons_plot_exon=[]
+		message = ["Too many genes to plot."]
+		lines=[0]
+		gap=80000
+		tall=0.75
+		if genes_raw!=None:
+			for i in range(len(genes_raw)):
+				bin,name_id,chrom,strand,txStart,txEnd,cdsStart,cdsEnd,exonCount,exonStarts,exonEnds,score,name2,cdsStartStat,cdsEndStat,exonFrames=genes_raw[i].strip().split()
+				name=name2
+				id=name_id
+				e_start=exonStarts.split(",")
+				e_end=exonEnds.split(",")
 				
-				width=(int(e_end[i])-int(e_start[i]))/1000000.0
-				x_coord=int(e_start[i])/1000000.0+(width/2)
+				# Determine Y Coordinate
+				i=0
+				y_coord=None
+				while y_coord==None:
+					if i>len(lines)-1:
+						y_coord=i+1
+						lines.append(int(txEnd))
+					elif int(txStart)>(gap+lines[i]):
+						y_coord=i+1
+						lines[i]=int(txEnd)
+					else:
+						i+=1
 				
-				exons_plot_x.append(x_coord)
-				exons_plot_y.append(y_coord)
-				exons_plot_w.append(width)
-				exons_plot_h.append(tall)
-				exons_plot_name.append(name)
-				exons_plot_id.append(id)
-				exons_plot_exon.append(exon)
-
-
-	n_rows=len(lines)
-	genes_plot_yn=[n_rows-x+0.5 for x in genes_plot_y]
-	exons_plot_yn=[n_rows-x+0.5 for x in exons_plot_y]
-	yr2=Range1d(start=0, end=n_rows)
-	
-	source2=ColumnDataSource(
-		data=dict(
-			exons_plot_name=exons_plot_name,
-			exons_plot_id=exons_plot_id,
-			exons_plot_exon=exons_plot_exon,
-			message=message,
+				genes_plot_start.append(int(txStart)/1000000.0)
+				genes_plot_end.append(int(txEnd)/1000000.0)
+				genes_plot_y.append(y_coord)
+				genes_plot_name.append(name+"  ")
+				
+				for i in range(len(e_start)-1):
+					if strand=="+":
+						exon=i+1
+					else:
+						exon=len(e_start)-1-i
+					
+					width=(int(e_end[i])-int(e_start[i]))/1000000.0
+					x_coord=int(e_start[i])/1000000.0+(width/2)
+					
+					exons_plot_x.append(x_coord)
+					exons_plot_y.append(y_coord)
+					exons_plot_w.append(width)
+					exons_plot_h.append(tall)
+					exons_plot_name.append(name)
+					exons_plot_id.append(id)
+					exons_plot_exon.append(exon)
+		
+		
+		n_rows=len(lines)
+		genes_plot_yn=[n_rows-x+0.5 for x in genes_plot_y]
+		exons_plot_yn=[n_rows-x+0.5 for x in exons_plot_y]
+		yr2=Range1d(start=0, end=n_rows)
+		
+		source2=ColumnDataSource(
+			data=dict(
+				exons_plot_name=exons_plot_name,
+				exons_plot_id=exons_plot_id,
+				exons_plot_exon=exons_plot_exon,
+				message=message,
+			)
 		)
-	)
+		
+		max_genes = 40
+		if len(lines) < 3 or len(genes_raw) > max_genes:
+			plot_h_pix = 150
+		else:
+			plot_h_pix = 150 + (len(lines) - 2) * 50
+		
+		gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+						   x_range=xr, y_range=yr2, border_fill_color='white',
+						   title="", h_symmetry=False, v_symmetry=False, logo=None,
+						   plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+		
+		if len(genes_raw) <= max_genes:
+			gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+							  genes_plot_yn, color="black", alpha=1, line_width=2)
+			gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
+						   source=source2, fill_color="grey", line_color="grey")
+			gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+						   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+			hover = gene_plot.select(dict(type=HoverTool))
+			hover.tooltips = OrderedDict([
+				("Gene", "@exons_plot_name"),
+				("Transcript ID", "@exons_plot_id"),
+				("Exon", "@exons_plot_exon"),
+			])
+		
+		else:
+			x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+			gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
+						   text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+		
+		gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+		gene_plot.yaxis.axis_label = "Genes (All Transcripts)"
+		gene_plot.ygrid.grid_line_color = None
+		gene_plot.yaxis.axis_line_color = None
+		gene_plot.yaxis.minor_tick_line_color = None
+		gene_plot.yaxis.major_tick_line_color = None
+		gene_plot.yaxis.major_label_text_color = None
+		
+		gene_plot.toolbar_location = "below"
+		
+		out_grid = gridplot(assoc_plot, rug, gene_plot,
+			ncols=1, toolbar_options=dict(logo=None))	
 	
-	max_genes = 40
-	if len(lines) < 3 or len(genes_raw) > max_genes:
-		plot_h_pix = 150
+	
+	
+	# Gene Plot (Collapsed)
 	else:
-		plot_h_pix = 150 + (len(lines) - 2) * 50
-
-	gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
-					   x_range=xr, y_range=yr2, border_fill_color='white',
-					   title="", h_symmetry=False, v_symmetry=False, logo=None,
-					   plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
-
-	if len(genes_raw) <= max_genes:
-		gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
-						  genes_plot_yn, color="black", alpha=1, line_width=2)
-		gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
-					   source=source2, fill_color="grey", line_color="grey")
-		gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-					   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-		hover = gene_plot.select(dict(type=HoverTool))
-		hover.tooltips = OrderedDict([
-			("Gene", "@exons_plot_name"),
-			("ID", "@exons_plot_id"),
-			("Exon", "@exons_plot_exon"),
-		])
-
-	else:
-		x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
-		gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
-					   text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
-
-	gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
-	gene_plot.yaxis.axis_label = "Genes"
-	gene_plot.ygrid.grid_line_color = None
-	gene_plot.yaxis.axis_line_color = None
-	gene_plot.yaxis.minor_tick_line_color = None
-	gene_plot.yaxis.major_tick_line_color = None
-	gene_plot.yaxis.major_label_text_color = None
-
-	gene_plot.toolbar_location = "below"
-
-	out_grid = gridplot(assoc_plot, rug, gene_plot,
-						ncols=1, toolbar_options=dict(logo=None))
+		tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
+		subprocess.call(tabix_gene_c, shell=True)
+		filename_c=tmp_dir+"genes_c_"+request+".txt"
+		genes_c_raw=open(filename_c).readlines()
+		
+		genes_c_plot_start=[]
+		genes_c_plot_end=[]
+		genes_c_plot_y=[]
+		genes_c_plot_name=[]
+		exons_c_plot_x=[]
+		exons_c_plot_y=[]
+		exons_c_plot_w=[]
+		exons_c_plot_h=[]
+		exons_c_plot_name=[]
+		exons_c_plot_id=[]
+		message_c = ["Too many genes to plot."]
+		lines_c=[0]
+		gap=80000
+		tall=0.75
+		if genes_c_raw!=None:
+			for i in range(len(genes_c_raw)):
+				chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
+				e_start=exonStarts.split(",")
+				e_end=exonEnds.split(",")
+				e_transcripts=transcripts.split(",")
+				
+				# Determine Y Coordinate
+				i=0
+				y_coord=None
+				while y_coord==None:
+					if i>len(lines_c)-1:
+						y_coord=i+1
+						lines_c.append(int(txEnd))
+					elif int(txStart)>(gap+lines_c[i]):
+						y_coord=i+1
+						lines_c[i]=int(txEnd)
+					else:
+						i+=1
+				
+				genes_c_plot_start.append(int(txStart)/1000000.0)
+				genes_c_plot_end.append(int(txEnd)/1000000.0)
+				genes_c_plot_y.append(y_coord)
+				genes_c_plot_name.append(name+"  ")
+				
+				for i in range(len(e_start)):
+				
+					width=(int(e_end[i])-int(e_start[i]))/1000000.0
+					x_coord=int(e_start[i])/1000000.0+(width/2)
+					
+					exons_c_plot_x.append(x_coord)
+					exons_c_plot_y.append(y_coord)
+					exons_c_plot_w.append(width)
+					exons_c_plot_h.append(tall)
+					exons_c_plot_name.append(name)
+					exons_c_plot_id.append(e_transcripts[i].replace("-",","))
+		
+		
+		n_rows_c=len(lines_c)
+		genes_c_plot_yn=[n_rows_c-x+0.5 for x in genes_c_plot_y]
+		exons_c_plot_yn=[n_rows_c-x+0.5 for x in exons_c_plot_y]
+		yr2_c=Range1d(start=0, end=n_rows_c)
+		
+		source2_c=ColumnDataSource(
+			data=dict(
+				exons_c_plot_name=exons_c_plot_name,
+				exons_c_plot_id=exons_c_plot_id,
+				message_c=message_c,
+			)
+		)
+		
+		max_genes_c = 40
+		if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
+			plot_c_h_pix = 150
+		else:
+			plot_c_h_pix = 150 + (len(lines_c) - 2) * 50
+		
+		gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+						   x_range=xr, y_range=yr2_c, border_fill_color='white',
+						   title="", h_symmetry=False, v_symmetry=False, logo=None,
+						   plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+		
+		if len(genes_c_raw) <= max_genes_c:
+			gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
+							  genes_c_plot_yn, color="black", alpha=1, line_width=2)
+			gene_c_plot.rect(exons_c_plot_x, exons_c_plot_yn, exons_c_plot_w, exons_c_plot_h,
+						   source=source2_c, fill_color="grey", line_color="grey")
+			gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
+						   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+			hover = gene_c_plot.select(dict(type=HoverTool))
+			hover.tooltips = OrderedDict([
+				("Gene", "@exons_c_plot_name"),
+				("Transcript IDs", "@exons_c_plot_id"),
+			])
+		
+		else:
+			x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+			gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
+						   text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+		
+		gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+		gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
+		gene_c_plot.ygrid.grid_line_color = None
+		gene_c_plot.yaxis.axis_line_color = None
+		gene_c_plot.yaxis.minor_tick_line_color = None
+		gene_c_plot.yaxis.major_tick_line_color = None
+		gene_c_plot.yaxis.major_label_text_color = None
+		
+		gene_c_plot.toolbar_location = "below"
+	
+		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
+					ncols=1, toolbar_options=dict(logo=None))	
+	
+	
+	
 	
 	###########################
 	# Html output for testing #
@@ -1087,7 +1236,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
+	subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
 
 
@@ -1108,7 +1257,7 @@ def main():
 	region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
 	parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
 	parser.add_argument("request", type=str, help="id for submitted command")
-	parser.add_argument("-a", "--annotate", type=str, help="annotate plot with RegulomeDB scores", action="store_true")
+	parser.add_argument("-a", "--annotate", help="annotate plot with RegulomeDB scores", action="store_true")
 	parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
 	parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
 	parser.add_argument("-d", "--dprime", help="plot D prime rather than R2", action="store_true")
