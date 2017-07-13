@@ -1019,8 +1019,12 @@ function isBrowseSet(elementId) {
     // console.log("Check browse: "+elementId);
 
     var browse =  $('#'+elementId+'-file').val();
+    // var query = $('#header-values');
+    // var isVisible = query.is(':visible');
+    // console.log("did it show? " + isVisible.toString());
     // console.dir("File chosen? " + browse.toString());
-    if(browse != "" ) {
+    // if(browse != "" || isVisible === true) {
+    if(browse != "") {
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
     } else {

@@ -709,6 +709,10 @@ textarea:invalid, .error {
   clear: left;
   margin-top: 38px;
 }
+.dropdown-menu {
+  max-height:350px;
+  overflow-y:scroll;
+}
 .progress {
 	margin-bottom:18px;
 }
