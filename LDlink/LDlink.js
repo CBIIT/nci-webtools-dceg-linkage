@@ -1016,7 +1016,6 @@ function updateData(id) {
 }
 
 function isBrowseSet(elementId) {
-<<<<<<< HEAD
     // console.log("Check browse: "+elementId);
 
     var browse =  $('#'+elementId+'-file').val();
@@ -1026,13 +1025,6 @@ function isBrowseSet(elementId) {
     // console.dir("File chosen? " + browse.toString());
     // if(browse != "" || isVisible === true) {
     if(browse != "") {
-=======
-    console.log("Check browse: "+elementId);
-
-    var browse =  $('#'+elementId+'-file').val();
-    console.dir("File chosen? " + browse.toString());
-    if(browse != "" ) {
->>>>>>> master
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
     } else {
