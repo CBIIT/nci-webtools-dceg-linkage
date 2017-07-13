@@ -209,17 +209,25 @@
 										placeholder="Upload association data file"
 										class="readonly-input-text">
 									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
-									<span class="btn btn-default btn-file btn-csv-file">Browse
-										<input type="file" id="ldassoc-file">
-									</span>
+									<div id="ldassoc-files">
+										<div id="ldassoc-browse-button">
+											<span class="btn btn-default btn-file btn-csv-file">Browse
+												<input type="file" id="ldassoc-file">
+											</span>
+										</div>
+										<div id="ldassoc-sample">
+											<a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.txt" download>Sample file</a>
+										</div>
+									</div>
 									<a id="ldassoc-browse-set-none"
-										style="position:relative;"
+										style="position:relative"
 										href="#"
 										data-toggle="popover"
 										trigger="manual"
-										data-placement="right"
+										data-placement="bottom"
 										data-content="Please select a file."></a>
 								</div>
+
 								<progress style="display:none;"></progress>
 
 								<div id="header-values" style="display:none;">
