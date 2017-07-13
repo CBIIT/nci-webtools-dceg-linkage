@@ -799,7 +799,7 @@ function ldproxy_haploreg_link(data, type, row) {
 
     // Create RegulomeDB links
 
-    var server = 'http://www.broadinstitute.org/mammals/haploreg/detail_v2.php';
+    var server = 'http://www.broadinstitute.org/mammals/haploreg/detail_v4.1.php';
 
     var rs_number = row[0];
     var params = {
