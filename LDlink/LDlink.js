@@ -1016,10 +1016,10 @@ function updateData(id) {
 }
 
 function isBrowseSet(elementId) {
-    console.log("Check browse: "+elementId);
+    // console.log("Check browse: "+elementId);
 
     var browse =  $('#'+elementId+'-file').val();
-    console.dir("File chosen? " + browse.toString());
+    // console.dir("File chosen? " + browse.toString());
     if(browse != "" ) {
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
