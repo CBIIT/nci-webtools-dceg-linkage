@@ -799,7 +799,7 @@ function ldproxy_haploreg_link(data, type, row) {
 
     // Create RegulomeDB links
 
-    var server = 'http://www.broadinstitute.org/mammals/haploreg/detail_v2.php';
+    var server = 'http://www.broadinstitute.org/mammals/haploreg/detail_v4.1.php';
 
     var rs_number = row[0];
     var params = {
@@ -971,20 +971,19 @@ function updateData(id) {
 
     switch (id) {
         case 'ldassoc':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isRegionSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
-
             }
             break;
         case 'ldhap':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDhap();
             }
             break;
         case 'ldmatrix':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDmatrix();
             }
@@ -1002,15 +1001,49 @@ function updateData(id) {
             }
             break;
         case 'snpclip':
-            if(isPopulationSet(id)) {
+            if(isBrowseSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateSNPclip();
             }
             break;
         case 'snpchip':
-            $('#'+id+"-loading").show();
-            updateSNPchip();
+            if(isBrowseSet(id)) {
+                $('#'+id+"-loading").show();
+                updateSNPchip();
+            }
             break;
+    }
+}
+
+function isBrowseSet(elementId) {
+    // console.log("Check browse: "+elementId);
+
+    var browse =  $('#'+elementId+'-file').val();
+    // var query = $('#header-values');
+    // var isVisible = query.is(':visible');
+    // console.log("did it show? " + isVisible.toString());
+    // console.dir("File chosen? " + browse.toString());
+    // if(browse != "" || isVisible === true) {
+    if(browse != "") {
+        $('#'+elementId+'-browse-set-none').popover('hide');
+        return true;
+    } else {
+        $('#'+elementId+'-browse-set-none').popover('show');
+        return false;
+    }
+}
+
+function isRegionSet(elementId) {
+    // console.log("Check region: "+elementId);
+
+    var region =  $('#region-codes-menu1').text();
+    // console.log("Anything there? " + region);
+    if(region == "Gene" || region == "Region" || region == "Variant") {
+        $('#'+elementId+'-region-codes-zero').popover('hide');
+        return true;
+    } else {
+        $('#'+elementId+'-region-codes-zero').popover('show');
+        return false;
     }
 }
 
@@ -1043,8 +1076,14 @@ function updateLDassoc() {
         gene: new Object(),
         region: new Object(),
         variant: new Object(),
-        dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True"
+        dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
+        transcript: $("#assoc-transcript").hasClass('active') ? "True" :"False",
+        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False"
     };
+
+    console.log("Transcript " + ldInputs.transcript.toString());
+    console.log("Annotate " + ldInputs.annotate.toString());
+
     ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
     ldInputs.columns.position = $("#assoc-position > button").val();
     ldInputs.columns.pvalue = $("#assoc-p-value > button").val();
@@ -1985,6 +2024,21 @@ function getLDAssocResults(jsonfile) {
                 $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
                 //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
             }
+            //transcript flag?
+            if($('#assoc-transcript').hasClass('active')) {
+                //Yes
+
+            } else {
+                //No
+            }
+            //annotate flag?
+            if($('#assoc-annotate').hasClass('active')) {
+                //Yes
+
+            } else {
+                //No
+
+            }
 
         }
     });
@@ -2091,7 +2145,7 @@ function updateLDpair() {
             addLDpairHyperLinks(data);
         }
         $("#ldpair_results").text("Download Results");
-            $('#ldpair_results').css("text-decoration", "underline");   
+            $('#ldpair_results').css("text-decoration", "underline");
             $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {

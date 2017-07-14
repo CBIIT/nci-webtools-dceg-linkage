@@ -8,3 +8,5 @@ LDlink/sftp-config-alt.json
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/
 # User-specific stuff:
 .idea/*
+/common
+common/

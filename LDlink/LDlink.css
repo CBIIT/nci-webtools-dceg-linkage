@@ -240,7 +240,7 @@ img.graph-legend {
 }
 
 .readonly-input-text {
-  width:172px;	
+  width:172px;
 }
 
 .btn-ldlink-multiselect {
@@ -306,7 +306,7 @@ img.graph-legend {
 
 .haplotype {
 	color: black;
-	background:#C0C0C0; /* if a multiple grouped */ 
+	background:#C0C0C0; /* if a multiple grouped */
 }
 
 /* LDhap Heat Map - Version 4 */
@@ -327,7 +327,7 @@ img.graph-legend {
 .haplotype_g {
 	background: #6DE96D; /* Light Purple; c2b2da; Contrast Ratio: 7.17:1 */
 	/*
-	background: linear-gradient(145deg, #d4c9e5 , #c2b2da); 
+	background: linear-gradient(145deg, #d4c9e5 , #c2b2da);
 	*/
 }
 #ldhap-bokeh-graph {
@@ -446,7 +446,7 @@ hr.header {
 }
 
 #snpclip-thresholds {
-	width:130px; 
+	width:130px;
 	margin-left:10px;
 	position: relative;
 	top:-17px;
@@ -532,7 +532,7 @@ th.rotate {
 }
 
 th.rotate > div {
-  transform: 
+  transform:
     translate(0px, 51px)
     rotate(270deg);
   width: 20px;
@@ -650,7 +650,7 @@ textarea:invalid, .error {
     float: none;
     text-align: center; }
   .dataTables_wrapper .dataTables_paginate {
-    margin-top: 0.5em; } 
+    margin-top: 0.5em; }
 }
 @media screen and (max-width: 640px) {
   .dataTables_wrapper .dataTables_length,
@@ -658,7 +658,7 @@ textarea:invalid, .error {
     float: none;
     text-align: center; }
   .dataTables_wrapper .dataTables_filter {
-    margin-top: 0.5em; } 
+    margin-top: 0.5em; }
 }
 .dropzone {
 	width: 200px;
@@ -695,6 +695,41 @@ textarea:invalid, .error {
 }
 #assoc-region {
 	margin-bottom:20px;
+}
+#ldassoc-files {
+  float: right;
+  margin-top: -4px;
+}
+#ldassoc-browse-button {
+  float: left;
+}
+#ldassoc-sample {
+  position: absolute;
+  float: left;
+  clear: left;
+  margin-top: 38px;
+}
+#ldassoc-file-container {
+  margin-top: 4px;
+}
+.toggle-labels {
+  position: relative;
+  float: left;
+}
+#toggle-label {
+  line-height: 35px;
+  text-align: right;
+}
+.ldassoc-population-col {
+  float: left;
+  margin-left: -100px;
+}
+.ldassoc-calculate-col {
+  float: left;
+}
+.dropdown-menu {
+  max-height:350px;
+  overflow-y:scroll;
 }
 .progress {
 	margin-bottom:18px;

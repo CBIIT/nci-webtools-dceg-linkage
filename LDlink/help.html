@@ -1,5 +1,6 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html><head>
+<script src="//assets.adobedtm.com/f1bfa9f7170c81b1a9a9ecdcc6c5215ee0b03c84/satelliteLib-4b219b82c4737db0e1797b6c511cf10c802c95cb.js"></script>
 </head>
 <body>
 <h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Documentation!</h3>
@@ -142,7 +143,7 @@ disequilibrium may be present.
 </p>
 <p>LDlink consists of seven modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
 <a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>,
-<a href="#LDproxy">LDproxy</a>, <a href="#SNPchip">SNPchip</a>, 
+<a href="#LDproxy">LDproxy</a>, <a href="#SNPchip">SNPchip</a>,
 and <a href="#SNPclip">SNPclip</a>. Each module can be
 accessed by clicking on the desired tab at
 the top of all LDlink pages. Below is a description of each module, the
@@ -408,7 +409,7 @@ pairwise R<sup>2</sup> value greater than 0.01.
 be entered one per line in the text entry box or uploaded as a file
 that contains a list of RS numbers in the first column. A maximum of
 5,000 variant RS numbers are permitted. All input variants do not need
-to be on the same chromosome. The text entry field is automatically 
+to be on the same chromosome. The text entry field is automatically
 filled with the contents of the uploaded file.
 </p>
 <p style="margin-left: 120px;"><u>Genotyping Arrays</u>
@@ -420,7 +421,7 @@ array must be selected, but more than one may be selected as input.
 <p style="margin-left: 120px;"><u>Array Table</u>
 - output table of variant rows and array columns. The presence of an "X" designates
 the variant is present on the respective commercial genotyping aray. Variants are ordered
-by genomic location. External links lead to the variant RS number in 
+by genomic location. External links lead to the variant RS number in
 <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
 and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
 Genome Browser</a>.
@@ -452,7 +453,7 @@ sub-population is required, but more than one may be selected.
 </p>
 <p style="margin-left: 120px;"><u>R<sup>2</sup> threshold</u>
 - set R<sup>2</sup> threshold for LD pruning. One of each pair of variants with a
-R<sup>2</sup> greater than the threshold is removed. Value needs to be in the 
+R<sup>2</sup> greater than the threshold is removed. Value needs to be in the
 range 0 to 1. Default value is 0.1.
 </p>
 <p style="margin-left: 120px;"><u>MAF threshold</u>
@@ -470,17 +471,17 @@ to force a variant to be in the LD thinned list it should be at the top of the i
 <p style="margin-left: 120px;"><u>Details Tables</u>
 - output table that appears when a variant in the thinned variant list is clicked.
 Details are provided on genomic position, alleles, and why the variant was included
-or excluded from the thinned variant list. External links lead to the variant RS number in 
+or excluded from the thinned variant list. External links lead to the variant RS number in
 <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
 and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
 Genome Browser</a>.
 </p>
 <p style="margin-left: 120px;"><u>Variants with Warnings</u>
 - output table that appears when a variant produces a warning in SNPclip. Common reasons
-for a variant to be on the warning list include a varinat with an MAF below the MAF threshold, 
+for a variant to be on the warning list include a varinat with an MAF below the MAF threshold,
 a query that is not an RS number, and an RS number not found in the 1000G reference VCF file.
 Details are provided on genomic position, alleles, and why the variant was included
-or excluded from the thinned variant list. External links lead to the variant RS number in 
+or excluded from the thinned variant list. External links lead to the variant RS number in
 <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
 and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
 Genome Browser</a>.
@@ -576,7 +577,7 @@ image, select "Save As&#8230;", and choose a filename for the plot image.</p>
 
 <p style="margin-left: 40px;"> <strong>Does LDproxy display all variants in the window around the query variant?</strong>
 </p>
-<p style="margin-left: 80px;">For plotting and performance issues, LDproxy plots only include variants with R<sup>2</sup> values greater than 0.01. 
+<p style="margin-left: 80px;">For plotting and performance issues, LDproxy plots only include variants with R<sup>2</sup> values greater than 0.01.
 Additionally, the LDproxy download also only includes variants with R<sup>2</sup> values greater than 0.01.</p>
 
 <p style="margin-left: 40px;"> <strong>What is the maximum number of variants LDhap and LDmatrix can accept as input?</strong>
@@ -604,14 +605,14 @@ Refreshing the LDlink webpage will remove all interactive plots.</p>
 
 <p style="margin-left: 40px;"> <strong>What genome build does LDlink use for genomic coordinates?</strong>
 </p>
-<p style="margin-left: 80px;">All coordinates in LDlink are based on 
+<p style="margin-left: 80px;">All coordinates in LDlink are based on
 GRCh37/hg19. For help with converting coordinates from one genome build to another, please
 refer to <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.</p>
 
 <p style="margin-left: 40px;"> <strong>Why do variant coordinates not always match dbSNP or UCSC coordinates?</strong>
 </p>
-<p style="margin-left: 80px;">All coordinates in LDlink are based on 
-variant positions in the 1000 Genomes VCF files. Slight difference in 
+<p style="margin-left: 80px;">All coordinates in LDlink are based on
+variant positions in the 1000 Genomes VCF files. Slight difference in
 positions may be observed due to updates in mapping and alignment. Please
 refer to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
 for the most up-to-date information on variant coordinates.</p>
@@ -625,8 +626,8 @@ will not display correctly with Internet Explorer 9 and below or Firefox 35 and 
 
 <p> <strong><a name="Citation"></a>Citation</strong>
 </p>
-<p> Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific 
-	haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 
+<p> Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
+	haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>.
 	2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed">26139635</a>.
 </p>
 <br>
@@ -636,4 +637,5 @@ will not display correctly with Internet Explorer 9 and below or Firefox 35 and 
 us</a>.
 </p>
 <br>
+<script type="text/javascript">_satellite.pageBottom();</script>
 </body></html>
