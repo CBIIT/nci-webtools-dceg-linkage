@@ -1077,9 +1077,13 @@ function updateLDassoc() {
         region: new Object(),
         variant: new Object(),
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
-        collapse: $("#assoc-collapse").hasClass('active') ? "False" :"True",
-        annotation: $("#assoc-annotation").hasClass('active') ? "False" :"True"
+        transcript: $("#assoc-transcript").hasClass('active') ? "True" :"False",
+        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False"
     };
+
+    console.log("Transcript " + ldInputs.transcript.toString());
+    console.log("Annotate " + ldInputs.annotate.toString());
+
     ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
     ldInputs.columns.position = $("#assoc-position > button").val();
     ldInputs.columns.pvalue = $("#assoc-p-value > button").val();
@@ -2020,21 +2024,20 @@ function getLDAssocResults(jsonfile) {
                 $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
                 //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
             }
-            //Collapse flag?
-            if($('#assoc-collapse').hasClass('active')) {
-                $('#ldassoc-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
-                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
+            //transcript flag?
+            if($('#assoc-transcript').hasClass('active')) {
+                //Yes
+
             } else {
-                $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
-                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
+                //No
             }
-            //Annotation flag?
-            if($('#assoc-annotation').hasClass('active')) {
-                $('#ldassoc-genome').html("View R<sup>2</sup> data in UCSC Genome Browser");
-                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_R2.png');
+            //annotate flag?
+            if($('#assoc-annotate').hasClass('active')) {
+                //Yes
+
             } else {
-                $('#ldassoc-genome').html("View D' data in UCSC Genome Browser");
-                //$("#ldmatrix-legend").attr('src', 'LDmatrix_legend_Dprime.png');
+                //No
+
             }
 
         }
