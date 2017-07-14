@@ -947,8 +947,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 	assoc_plot.add_tools(hover)
 
 	# Annotate RebulomeDB scores
-	print "ANNOTATE"
-	print myargs.annotate
 	if myargs.annotate==True:
 		assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 
@@ -973,8 +971,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 
 	# Gene Plot (All Transcripts)
-	print "TRANSCRIPT"
-	print myargs.transcript
 	if myargs.transcript==True:
 		tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 		subprocess.call(tabix_gene, shell=True)
