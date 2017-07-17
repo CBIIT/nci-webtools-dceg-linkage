@@ -588,6 +588,12 @@ def ldassoc():
         myargs.start = str(request.args.get('region[start]'))
         myargs.end = str(request.args.get('region[end]'))
 
+    myargs.transcript = bool(request.args.get("transcript") == "True")
+    print "transcript: " + str(myargs.transcript)
+
+    myargs.annotate = bool(request.args.get("annotate") == "True")
+    print "annotate: " + str(myargs.annotate)
+
     try:
         out_json = calculate_assoc(filename, region, pop, reference, myargs)
     except:
