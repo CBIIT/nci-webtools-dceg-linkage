@@ -588,9 +588,6 @@ def ldassoc():
         myargs.start = str(request.args.get('region[start]'))
         myargs.end = str(request.args.get('region[end]'))
 
-    myargs.annotate = False
-    myargs.transcript = False
-
     myargs.transcript = bool(request.args.get("transcript") == "True")
     print "transcript: " + str(myargs.transcript)
 
