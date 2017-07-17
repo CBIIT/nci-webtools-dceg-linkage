@@ -1077,7 +1077,7 @@ function updateLDassoc() {
         region: new Object(),
         variant: new Object(),
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
-        transcript: $("#assoc-transcript").hasClass('active') ? "True" :"False",
+        transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
         annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False"
     };
 
