@@ -1,7 +1,7 @@
 # nci-webtools-dceg-linkage
-## LDlink License Agreement
+### LDlink License Agreement
 
-### Non-Proprietary Software Transfer Agreement
+#### Non-Proprietary Software Transfer Agreement
 
 Provider: National Institutes of Health (NIH), National Cancer Institute (hereinafter "NCI")
 
