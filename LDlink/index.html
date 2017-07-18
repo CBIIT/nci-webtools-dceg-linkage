@@ -318,15 +318,15 @@
 									<div id="region-region-container" class="form-inline" style="display:none;">
 										<div>
 											<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in GRCh37</label>
-											<input type="text" id="region-region-start-coord" class="form-control" size="35" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
+											<input type="text" id="region-region-start-coord" class="form-control" size="39" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
 										</div>
 										<div>
 											<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
-											<input type="text" id="region-region-end-coord" class="form-control" size="35" placeholder="End Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
+											<input type="text" id="region-region-end-coord" class="form-control" size="39" placeholder="End Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
 										</div>
 										<div>
 											<label for="region-region-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-region-index" class="form-control" size="35" placeholder="Index variant (optional)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
+											<input type="text" id="region-region-index" class="form-control" size="39" placeholder="Index variant (optional)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
 										</div>
 									</div>
 									<!-- region = Variant -->
@@ -358,32 +358,38 @@
 								</div>
 							</div>
 							<div class="toggle-labels">
-								<div id="toggle-label">LD Measure: </div>
-								<div id="toggle-label">Collapse transcripts: </div>
-								<div id="toggle-label">RegulomeDB annotation: </div>
+								<div id="toggle-label">
+									<a href="?tab=help#LDassoc">LD Measure: </a>
+								</div>
+								<div id="toggle-label">
+									<a href="?tab=help#LDassoc">Collapse transcripts: </a>
+								</div>
+								<div id="toggle-label">
+									<a href="?tab=help#LDassoc">RegulomeDB annotation: </a>
+								</div>
 							</div>
 							<div class="col-sm-2">
-								<div title="Select heat map variable" data-toggle="buttons" class="btn-group">
-									<label class="btn btn-default active" id="assoc-matrix-color-r2">
+								<div id="toggle-switch" data-toggle="buttons" class="btn-group">
+									<label title="Select R-squared attribute" class="btn btn-default active" id="assoc-matrix-color-r2">
 								 		<input type="radio" checked="" autocomplete="off" name="options">R<sup>2</sup>
 									</label>
-									<label class="btn btn-default">
+									<label title="Select D-prime attribute" class="btn btn-default">
 										<input type="radio" autocomplete="off" name="options">D'
 									</label>
 								</div>
-								<div title="Toggle collapse transcripts" data-toggle="buttons" class="btn-group">
-									<label class="btn btn-default active" id="assoc-transcript">
+								<div id="toggle-switch" data-toggle="buttons" class="btn-group">
+									<label title="Collapse transcripts" class="btn btn-default active" id="assoc-transcript">
 										<input type="radio" checked="" autocomplete="off" name="options">Yes
 									</label>
-									<label class="btn btn-default">
+									<label title="Show transcripts" class="btn btn-default">
 										<input type="radio" autocomplete="off" name="options">No
 									</label>
 								</div>
-								<div title="Toggle RegulomeDB annotation" data-toggle="buttons" class="btn-group">
-									<label class="btn btn-default active" id="assoc-annotate">
+								<div id="toggle-switch" data-toggle="buttons" class="btn-group">
+									<label title="Show RegulomeDB annotation" class="btn btn-default active" id="assoc-annotate">
 										<input type="radio" checked="" autocomplete="off" name="options">Yes
 									</label>
-									<label class="btn btn-default">
+									<label title="Hide RegulomeDB annotation" class="btn btn-default">
 										<input type="radio" autocomplete="off" name="options">No
 									</label>
 								</div>
