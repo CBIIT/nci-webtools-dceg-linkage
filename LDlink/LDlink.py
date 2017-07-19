@@ -511,20 +511,20 @@ def ldassoc_example():
 
     example = {
         'filename': os.path.basename(example_filepath),
-        # 'headers': ['A', 'B', 'C']
-        'headers' = read_csv_headers(example_filepath)
+        'headers': ['A', 'B', 'C']
+        # 'headers' = read_csv_headers(example_filepath)
     }
     return json.dumps(example)
 
-def read_csv_headers(example_filepath):
-    final_headers = []
-    with open(example_filepath, 'r') as f:
-        first_line = f.split('\n')[0]
-        headers = first_line.split("\s+")
-        for heads in headers:
-            if heads.length > 0:
-                final_headers.append(head)
-    return final_headers
+# def read_csv_headers(example_filepath):
+#     final_headers = []
+#     with open(example_filepath, 'r') as f:
+#         first_line = f.split('\n')[0]
+#         headers = first_line.split("\s+")
+#         for heads in headers:
+#             if heads.length > 0:
+#                 final_headers.append(head)
+#     return final_headers
 
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
 def ldassoc():
