@@ -1136,7 +1136,7 @@ function updateLDassoc() {
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
         transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
         annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
-        useEx: $('#example-gwas').is(':checked')
+        useEx: $('#example-gwas').is(':checked')? "True" :"False"
     };
 
     console.log("Transcript " + ldInputs.transcript.toString());

@@ -566,8 +566,8 @@ def ldassoc():
     # regionValues = json.loads(request.args.get('region'))
     # variantValues = json.loads(request.args.get('variant'))
     # columns = json.loads(request.args.get('columns'))
-    filename = ''
-    if request.args.get('useEx'):
+
+    if bool(request.args.get("useEx") == "True"):
         filename = '/local/content/ldlink/data/example/prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
