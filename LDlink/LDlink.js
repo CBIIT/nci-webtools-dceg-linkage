@@ -89,6 +89,8 @@ $(document).ready(function() {
           populateAssocDropDown(data.headers);
         });
 
+        $('#ldassoc-file').val("prostate_example.txt");
+
         $("#header-values").show();
 
         console.log("Use example GWAS data.");
@@ -111,7 +113,7 @@ $(document).ready(function() {
         $('#ldassoc-file-label').val('');
         populateAssocDropDown([]);
         $("#header-values").hide();
-
+        $('#ldassoc-file').val('');
         console.log("Don't use example GWAS data.");
         $("#region-gene-container").hide();
         $("#region-region-container").hide();
