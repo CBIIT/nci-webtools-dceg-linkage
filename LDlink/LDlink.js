@@ -1031,7 +1031,7 @@ function updateData(id) {
             }
             break;
         case 'ldhap':
-            if(isBrowseSet(id) && isPopulationSet(id)) {
+            if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDhap();
             }
@@ -1055,16 +1055,18 @@ function updateData(id) {
             }
             break;
         case 'snpclip':
-            if(isBrowseSet(id) && isPopulationSet(id)) {
+            if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateSNPclip();
             }
             break;
         case 'snpchip':
-            if(isBrowseSet(id)) {
-                $('#'+id+"-loading").show();
-                updateSNPchip();
-            }
+            // if(isBrowseSet(id)) {
+            //     $('#'+id+"-loading").show();
+            //     updateSNPchip();
+            // }
+            $('#'+id+"-loading").show();
+            updateSNPchip();
             break;
     }
 }
