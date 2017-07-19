@@ -75,11 +75,41 @@ $(document).ready(function() {
     });
 
     $("#example-gwas").click(function(e){
-      var remember = document.getElementById('example-gwas');
-      if (remember.checked){
-        alert("checked") ;
+      var useEx = document.getElementById('example-gwas');
+      if (useEx.checked){
+        $("#header-values").show();
+
+        console.log("Use example GWAS data.");
+        $("#region-codes-menu1").val("Region");
+        $("#region-codes-menu1").text("Region");
+        // var element = document.getElementById('region-codes-menu1');
+        // element.value = "Region";
+        $("#region-region-container").show();
+        $("#region-region-start-coord").val("chr8:128289591");
+        $("#region-region-end-coord").val("chr8:128784397");
+        $("#region-region-index").val("rs7837688");
+        console.log($("#region-region-start-coord").val());
+        console.log($("#region-region-end-coord").val());
+        console.log($("#region-region-index").val());
+
+        // $("#ldassoc-population-codes").val(["CEU"]);
+        refreshPopulation(["CEU"],"ldassoc");
+        console.log($("#ldassoc-population-codes").val());
       }else{
-        alert("You didn't check it! Let me check it for you.")
+        $("#header-values").hide();
+
+        console.log("Don't use example GWAS data.");
+        $("#region-gene-container").hide();
+        $("#region-region-container").hide();
+        $("#region-variant-container").hide();
+        $("#region-codes-menu1").val('');
+        $("#region-codes-menu1").html('Select Region<span class="caret"></span>');
+        $("#region-region-start-coord").val('');
+        $("#region-region-end-coord").val('');
+        $("#region-region-index").val('');
+        $("#ldassoc-population-codes").val('');
+        refreshPopulation([],"ldassoc");
+        console.log($("#ldassoc-population-codes").val());
       }
     });
 
@@ -1061,7 +1091,8 @@ function isPopulationSet(elementId) {
     //console.log("Check population: "+elementId);
 
     var population =  $('#'+elementId+'-population-codes').val();
-    //console.dir(population);
+    console.dir(population);
+    console.log(population);
     if(population == null ) {
         $('#'+elementId+'-population-codes-zero').popover('show');
         return false;
