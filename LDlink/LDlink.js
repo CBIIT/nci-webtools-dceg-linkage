@@ -76,7 +76,19 @@ $(document).ready(function() {
 
     $("#example-gwas").click(function(e){
       var useEx = document.getElementById('example-gwas');
+      // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
+        var url = restServerUrl + "/ldassoc_example";
+        var ajaxRequest = $.ajax({
+            type : 'GET',
+            url : url,
+            contentType : 'application/json' // JSON
+        }).success(function(response) {
+          var data = JSON.parse(response);
+          $('#ldassoc-file-label').val(data.filename);
+          populateAssocDropDown(data.headers);
+        });
+
         $("#header-values").show();
 
         console.log("Use example GWAS data.");
@@ -96,6 +108,8 @@ $(document).ready(function() {
         refreshPopulation(["CEU"],"ldassoc");
         console.log($("#ldassoc-population-codes").val());
       }else{
+        $('#ldassoc-file-label').val('');
+        populateAssocDropDown([]);
         $("#header-values").hide();
 
         console.log("Don't use example GWAS data.");
@@ -1119,7 +1133,8 @@ function updateLDassoc() {
         variant: new Object(),
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
         transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
-        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False"
+        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
+        useEx: $('#example-gwas').is(':checked')
     };
 
     console.log("Transcript " + ldInputs.transcript.toString());

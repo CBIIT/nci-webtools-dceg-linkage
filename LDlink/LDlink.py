@@ -505,6 +505,16 @@ def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
     return get_platform_request()
 
+@app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
+def ldassoc_example():
+    example_filepath = '/local/content/path/graws_study.csv'
+
+    example = {
+        'filename': os.path.basename(example_filepath),
+        'headers': ['A', 'B', 'C']
+        #headers = read_csv_headers(example_filepath)
+    }
+    return json.dumps(example)
 
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
 def ldassoc():
@@ -546,8 +556,11 @@ def ldassoc():
     # regionValues = json.loads(request.args.get('region'))
     # variantValues = json.loads(request.args.get('variant'))
     # columns = json.loads(request.args.get('columns'))
-    filename = os.path.join(
-        app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
+    if request.args.get('useEx'):
+        filename = '/local/content/ldink/gwas_example.csv'
+    else:
+        filename = os.path.join(
+            app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     # filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
 
     print 'filename: ' + filename
