@@ -89,7 +89,7 @@ $(document).ready(function() {
           populateAssocDropDown(data.headers);
         });
 
-        $('#ldassoc-file').val("prostate_example.txt");
+        // $('#ldassoc-file').val("prostate_example.txt");
 
         $("#header-values").show();
 
@@ -1027,7 +1027,7 @@ function updateData(id) {
 
     switch (id) {
         case 'ldassoc':
-            if(isBrowseSet(id) && isRegionSet(id) && isPopulationSet(id)) {
+            if(isRegionSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
             }
