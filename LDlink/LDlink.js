@@ -78,16 +78,16 @@ $(document).ready(function() {
       var useEx = document.getElementById('example-gwas');
       // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
-        // var url = restServerUrl + "/ldassoc_example";
-        // var ajaxRequest = $.ajax({
-        //     type : 'GET',
-        //     url : url,
-        //     contentType : 'application/json' // JSON
-        // }).success(function(response) {
-        //   var data = JSON.parse(response);
-        //   $('#ldassoc-file-label').val(data.filename);
-        //   populateAssocDropDown(data.headers);
-        // });
+        var url = restServerUrl + "/ldassoc_example";
+        var ajaxRequest = $.ajax({
+            type : 'GET',
+            url : url,
+            contentType : 'application/json' // JSON
+        }).success(function(response) {
+          var data = JSON.parse(response);
+          $('#ldassoc-file-label').val(data.filename);
+          populateAssocDropDown(data.headers);
+        });
 
         $("#header-values").show();
 
