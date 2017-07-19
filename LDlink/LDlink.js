@@ -31,6 +31,7 @@ Object.size = function(obj) {
 
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
+
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
     //$('#ldassoc-progressbar').progressbar('reset');
@@ -71,6 +72,15 @@ $(document).ready(function() {
                 $("#region-variant-container").show();
                 break;
         }
+    });
+
+    $("#example-gwas").click(function(e){
+      var remember = document.getElementById('example-gwas');
+      if (remember.checked){
+        alert("checked") ;
+      }else{
+        alert("You didn't check it! Let me check it for you.")
+      }
     });
 
     /*
