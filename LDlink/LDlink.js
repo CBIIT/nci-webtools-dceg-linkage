@@ -78,6 +78,13 @@ $(document).ready(function() {
       var useEx = document.getElementById('example-gwas');
       // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
+        $("#assoc-chromosome > .btn:first-child").val("chr".toLowerCase());
+        $("#assoc-chromosome > .btn:first-child").text("Chromosome: chr column");
+        $("#assoc-position > .btn:first-child").val("pos".toLowerCase());
+        $("#assoc-position > .btn:first-child").text("Position: pos column");
+        $("#assoc-p-value > .btn:first-child").val("p".toLowerCase());
+        $("#assoc-p-value > .btn:first-child").text("P-Value: p column");
+
         var url = restServerUrl + "/ldassoc_example";
         var ajaxRequest = $.ajax({
             type : 'GET',
@@ -89,13 +96,11 @@ $(document).ready(function() {
           populateAssocDropDown(data.headers);
         });
 
-        // $('#ldassoc-file').val("prostate_example.txt");
-
         $("#header-values").show();
 
         console.log("Use example GWAS data.");
-        $("#region-codes-menu1").val("Region");
-        $("#region-codes-menu1").text("Region");
+        $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
+        $("#assoc-region > .btn:first-child").text("Region");
         // var element = document.getElementById('region-codes-menu1');
         // element.value = "Region";
         $("#region-region-container").show();
@@ -110,6 +115,13 @@ $(document).ready(function() {
         refreshPopulation(["CEU"],"ldassoc");
         console.log($("#ldassoc-population-codes").val());
       }else{
+        $("#assoc-chromosome > .btn:first-child").val('');
+        $("#assoc-chromosome > .btn:first-child").html('Select Chromosome&nbsp;<span class="caret"></span>');
+        $("#assoc-position > .btn:first-child").val('');
+        $("#assoc-position > .btn:first-child").html('Select Position&nbsp;<span class="caret"></span>');
+        $("#assoc-p-value > .btn:first-child").val('');
+        $("#assoc-p-value > .btn:first-child").html('Select P-Value&nbsp;<span class="caret"></span>');
+
         $('#ldassoc-file-label').val('');
         populateAssocDropDown([]);
         $("#header-values").hide();
@@ -118,8 +130,8 @@ $(document).ready(function() {
         $("#region-gene-container").hide();
         $("#region-region-container").hide();
         $("#region-variant-container").hide();
-        $("#region-codes-menu1").val('');
-        $("#region-codes-menu1").html('Select Region<span class="caret"></span>');
+        $("#assoc-region > .btn:first-child").val('');
+        $("#assoc-region > .btn:first-child").html('Select Region<span class="caret"></span>');
         $("#region-region-start-coord").val('');
         $("#region-region-end-coord").val('');
         $("#region-region-index").val('');
