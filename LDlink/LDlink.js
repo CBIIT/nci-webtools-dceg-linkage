@@ -101,6 +101,9 @@ $(document).ready(function() {
         $("#assoc-region > .btn:first-child").text("Region");
         // var element = document.getElementById('region-codes-menu1');
         // element.value = "Region";
+        $("#region-gene-container").hide();
+        $("#region-region-container").hide();
+        $("#region-variant-container").hide();
         $("#region-region-container").show();
         $("#region-region-start-coord").val("chr8:128289591");
         $("#region-region-end-coord").val("chr8:128784397");
