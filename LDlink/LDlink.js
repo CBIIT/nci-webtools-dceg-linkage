@@ -78,13 +78,6 @@ $(document).ready(function() {
       var useEx = document.getElementById('example-gwas');
       // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
-        $("#assoc-chromosome > .btn:first-child").val("chr".toLowerCase());
-        $("#assoc-chromosome > .btn:first-child").text("Chromosome: chr column");
-        $("#assoc-position > .btn:first-child").val("pos".toLowerCase());
-        $("#assoc-position > .btn:first-child").text("Position: pos column");
-        $("#assoc-p-value > .btn:first-child").val("p".toLowerCase());
-        $("#assoc-p-value > .btn:first-child").text("P-Value: p column");
-
         var url = restServerUrl + "/ldassoc_example";
         var ajaxRequest = $.ajax({
             type : 'GET',
@@ -95,6 +88,13 @@ $(document).ready(function() {
           $('#ldassoc-file-label').val(data.filename);
           populateAssocDropDown(data.headers);
         });
+
+        $("#assoc-chromosome > .btn:first-child").val("chr".toLowerCase());
+        $("#assoc-chromosome > .btn:first-child").text("Chromosome: chr column");
+        $("#assoc-position > .btn:first-child").val("pos".toLowerCase());
+        $("#assoc-position > .btn:first-child").text("Position: pos column");
+        $("#assoc-p-value > .btn:first-child").val("p".toLowerCase());
+        $("#assoc-p-value > .btn:first-child").text("P-Value: p column");
 
         $("#header-values").show();
 
