@@ -1027,7 +1027,7 @@ function updateData(id) {
 
     switch (id) {
         case 'ldassoc':
-            if(isRegionSet(id) && isPopulationSet(id)) {
+            if(isBrowseSet(id) && isRegionSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
             }
@@ -1039,7 +1039,7 @@ function updateData(id) {
             }
             break;
         case 'ldmatrix':
-            if(isBrowseSet(id) && isPopulationSet(id)) {
+            if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDmatrix();
             }
@@ -1076,13 +1076,13 @@ function updateData(id) {
 function isBrowseSet(elementId) {
     // console.log("Check browse: "+elementId);
 
-    var browse =  $('#'+elementId+'-file').val();
-    // var query = $('#header-values');
-    // var isVisible = query.is(':visible');
-    // console.log("did it show? " + isVisible.toString());
+    // var browse =  $('#'+elementId+'-file').val();
+    var query = $('#header-values');
+    var isVisible = query.is(':visible');
+    console.log("did it show? " + isVisible.toString());
     // console.dir("File chosen? " + browse.toString());
-    // if(browse != "" || isVisible === true) {
-    if(browse != "") {
+    // if(browse != "") {
+    if(isVisible === true) {
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
     } else {
