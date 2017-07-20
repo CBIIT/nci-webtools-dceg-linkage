@@ -524,7 +524,7 @@ def read_csv_headers(example_filepath):
         headers = first_line.split("\s+")
         for heads in headers:
             if len(heads) > 0:
-                final_headers.append(head)
+                final_headers.append(heads)
     return final_headers
 
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
