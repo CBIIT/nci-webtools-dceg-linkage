@@ -521,7 +521,7 @@ def read_csv_headers(example_filepath):
     with open(example_filepath, 'r') as f:
         lines = f.readlines()
         first_line = lines[0]
-        headers = first_line.split("\s+")
+        headers = first_line.split()
         for heads in headers:
             if len(heads) > 0:
                 final_headers.append(heads)
