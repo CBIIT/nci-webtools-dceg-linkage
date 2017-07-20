@@ -1037,7 +1037,7 @@ function updateData(id) {
 
     switch (id) {
         case 'ldassoc':
-            if(isBrowseSet(id) && isRegionSet(id) && isPopulationSet(id)) {
+            if(isBrowseSet(id) && isRegionSet(id) && areRegionDetailsSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
             }
@@ -1114,6 +1114,112 @@ function isRegionSet(elementId) {
         $('#'+elementId+'-region-codes-zero').popover('show');
         setTimeout(function() { $('#'+elementId+'-region-codes-zero').popover('hide'); }, 4000);
         return false;
+    }
+}
+
+function isGeneNameSet(elementId) {
+  if ($('#region-gene-name').val().toString().length > 0) {
+    $('#'+elementId+'-region-gene-name').popover('hide');
+    return true;
+  }
+  else {
+    $('#'+elementId+'-region-gene-name').popover('show');
+    setTimeout(function() { $('#'+elementId+'-region-gene-name').popover('hide'); }, 4000);
+    return false;
+  }
+}
+
+function isGeneBPSet(elementId) {
+  if ($('#region-gene-base-pair-window').val().toString().length > 0) {
+    $('#'+elementId+'-region-gene-bp').popover('hide');
+    return true;
+  }
+  else {
+    $('#'+elementId+'-region-gene-bp').popover('show');
+    setTimeout(function() { $('#'+elementId+'-region-gene-bp').popover('hide'); }, 4000);
+    return false;
+  }
+}
+
+function isRegionStartSet(elementId) {
+  if ($('#region-region-start-coord').val().toString().length > 0) {
+    $('#'+elementId+'-region-region-start').popover('hide');
+    return true;
+  }
+  else {
+    $('#'+elementId+'-region-region-start').popover('show');
+    setTimeout(function() { $('#'+elementId+'-region-region-start').popover('hide'); }, 4000);
+    return false;
+  }
+}
+
+function isRegionEndSet(elementId) {
+  if ($('#region-region-end-coord').val().toString().length > 0) {
+    $('#'+elementId+'-region-region-end').popover('hide');
+    return true;
+  }
+  else {
+    $('#'+elementId+'-region-region-end').popover('show');
+    setTimeout(function() { $('#'+elementId+'-region-region-end').popover('hide'); }, 4000);
+    return false;
+  }
+}
+
+function isVariantIndexSet(elementId) {
+  if ($('#region-variant-index').val().toString().length > 0) {
+    $('#'+elementId+'-variant-index-pop').popover('hide');
+    return true;
+  }
+  else {
+    $('#'+elementId+'-variant-index-pop').popover('show');
+    setTimeout(function() { $('#'+elementId+'-variant-index-pop').popover('hide'); }, 4000);
+    return false;
+  }
+}
+
+function isVariantBPSet(elementId) {
+  if ($('#region-variant-base-pair-window').val().toString().length > 0) {
+    $('#'+elementId+'-variant-bp-pop').popover('hide');
+    return true;
+  }
+  else {
+    $('#'+elementId+'-variant-bp-pop').popover('show');
+    setTimeout(function() { $('#'+elementId+'-variant-bp-pop').popover('hide'); }, 4000);
+    return false;
+  }
+}
+
+function areRegionDetailsSet(elementId) {
+    var region =  $('#region-codes-menu1').text();
+    if (region == "Gene") {
+      // gene name
+      // bp window
+      if (isGeneNameSet(elementId) && isGeneBPSet(elementId)) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    if (region == "Region") {
+      // region start
+      // region end
+      if (isRegionStartSet(elementId) && isRegionEndSet(elementId)) {
+        return true;
+      }
+      else {
+        return false;
+      }
+    }
+    if (region == "Variant") {
+      // index variant
+      // bp window
+      if (isVariantIndexSet(elementId) && isVariantBPSet(elementId)) {
+        return true;
+      }
+      else {
+        return false;
+      }
     }
 }
 
