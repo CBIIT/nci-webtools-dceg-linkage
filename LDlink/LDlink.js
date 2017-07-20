@@ -89,6 +89,8 @@ $(document).ready(function() {
           populateAssocDropDown(data.headers);
         });
 
+        $("#header-values").show();
+
         $("#assoc-chromosome > .btn:first-child").val("chr".toLowerCase());
         $("#assoc-chromosome > .btn:first-child").text("Chromosome: chr column");
         $("#assoc-position > .btn:first-child").val("pos".toLowerCase());
@@ -96,7 +98,6 @@ $(document).ready(function() {
         $("#assoc-p-value > .btn:first-child").val("p".toLowerCase());
         $("#assoc-p-value > .btn:first-child").text("P-Value: p column");
 
-        $("#header-values").show();
 
         console.log("Use example GWAS data.");
         $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
