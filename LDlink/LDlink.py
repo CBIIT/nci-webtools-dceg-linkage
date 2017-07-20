@@ -512,7 +512,7 @@ def ldassoc_example():
     example = {
         'filename': os.path.basename(example_filepath),
         # 'headers': ['A', 'B', 'C']
-        'headers' = read_csv_headers(example_filepath)
+        'headers': read_csv_headers(example_filepath)
     }
     return json.dumps(example)
 
