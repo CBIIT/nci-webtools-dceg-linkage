@@ -1097,6 +1097,7 @@ function isBrowseSet(elementId) {
         return true;
     } else {
         $('#'+elementId+'-browse-set-none').popover('show');
+        setTimeout(function() { $('#'+elementId+'-browse-set-none').popover('hide'); }, 4000);
         return false;
     }
 }
@@ -1111,6 +1112,7 @@ function isRegionSet(elementId) {
         return true;
     } else {
         $('#'+elementId+'-region-codes-zero').popover('show');
+        setTimeout(function() { $('#'+elementId+'-region-codes-zero').popover('hide'); }, 4000);
         return false;
     }
 }
@@ -1123,6 +1125,7 @@ function isPopulationSet(elementId) {
     console.log(population);
     if(population == null ) {
         $('#'+elementId+'-population-codes-zero').popover('show');
+        setTimeout(function() { $('#'+elementId+'-population-codes-zero').popover('hide'); }, 4000);
         return false;
     } else {
         $('#'+elementId+'-population-codes-zero').popover('hide');
@@ -2725,6 +2728,7 @@ $(document).ready(function() {
     $('#region-region-index').keyup(validateIndex);
     $('#region-gene-index').keyup(validateIndex);
     $('#region-gene-name').keyup(validateGeneName);
+
 });
 
 function validateGeneName() {
