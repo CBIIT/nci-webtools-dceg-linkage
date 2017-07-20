@@ -580,6 +580,8 @@ def ldassoc():
     print 'reference: ' + reference
     print 'region: ' + region
 
+    myargs.origin = request.args.get('variant[index]')
+
     if region == "variant":
         print "Region is variant"
         print "index: " + str(request.args.get('variant[index]'))
