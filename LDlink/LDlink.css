@@ -689,6 +689,9 @@ textarea:invalid, .error {
 	margin-top:5px;
 	white-space:nowrap;
 }
+#header-values {
+  margin-top:30px;
+}
 #header-values > div > div * {
 	margin-top:5px;
 	white-space:nowrap;
@@ -707,7 +710,11 @@ textarea:invalid, .error {
   position: absolute;
   float: left;
   clear: left;
-  margin-top: 38px;
+  margin-top: 40px;
+  margin-left: -172px;
+}
+#ldassoc-sample-label {
+  float:right;
 }
 #ldassoc-file-container {
   margin-top: 4px;
@@ -722,6 +729,62 @@ textarea:invalid, .error {
 }
 #toggle-switch {
   padding-bottom: 5px;
+}
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 20px;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+/* The slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 1px;
+  bottom: 2px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(16px);
+  -ms-transform: translateX(16px);
+  transform: translateX(16px);
+}
+
+.slider.round {
+  border-radius: 19px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
 }
 .ldassoc-population-col {
   float: left;
@@ -752,12 +815,7 @@ textarea:invalid, .error {
 	background-image: linear-gradient(to bottom,#f2dede 0,#e7c3c3 100%);
 	background-repeat: repeat-x;
 }
-/*.btn.btn-default.calculate {
-  background: blue;
-  color: white;
-  text-shadow: white;
-  letter-spacing: 1px;
-}*/
+
 .btn.btn-default.calculate {
   background-color: hsl(201, 100%, 30%) !important;
   background-repeat: repeat-x;

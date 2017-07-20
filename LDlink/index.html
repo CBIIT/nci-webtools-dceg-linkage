@@ -208,7 +208,8 @@
 									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
 									<input type="text" id="ldassoc-file-label" readonly
 										placeholder="Upload association data file"
-										class="readonly-input-text">
+										class="readonly-input-text"
+										>
 									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
 									<div id="ldassoc-files">
 										<div id="ldassoc-browse-button">
@@ -217,7 +218,12 @@
 											</span>
 										</div>
 										<div id="ldassoc-sample">
-											<a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a>
+											<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+											<label class="switch" for="example-gwas">
+  											<input id="example-gwas" type="checkbox" data-toggle="toggle">
+  											<span class="slider round"></span>
+											</label>
+											<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
 										</div>
 									</div>
 									<a id="ldassoc-browse-set-none"
@@ -233,7 +239,7 @@
 
 								<div id="header-values" style="display:none;">
 
-									<div style="color:#800000;margin-top:5%">Data Details:</div>
+									<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
 									<div class="" style="width:300px;">
 									<!--
 									<div style="clear:both;"></div>
@@ -291,8 +297,7 @@
 										data-placement="right"
 										data-content="Please select a region."></a>
 									<div id="assoc-region" class="dropdown">
-										<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu1" data-toggle="dropdown" style="width:155px;">Select Region
-										<span class="caret"></span></button>
+										<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu1" data-toggle="dropdown" style="width:155px;">Select Region<span class="caret"></span></button>
 										<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="menu1">
 											<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Gene</a></li>
 											<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Region</a></li>
@@ -300,7 +305,8 @@
 										</ul>
 									</div>
 									<!-- region = Gene -->
-									<div id="region-gene-container" class="form-inline" style="display:none;">
+									<div id="region-gene-container" class="form-inline" style="display
+									:none;">
 										<div class="form-group">
 											<label for="region-gene-name" style="display:none;">Gene Name</label>
 											<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name" pattern="(^[A-Za-z0-9\-]+$)">

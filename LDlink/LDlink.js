@@ -31,6 +31,7 @@ Object.size = function(obj) {
 
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
+
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
     //$('#ldassoc-progressbar').progressbar('reset');
@@ -71,6 +72,71 @@ $(document).ready(function() {
                 $("#region-variant-container").show();
                 break;
         }
+    });
+
+    $("#example-gwas").click(function(e){
+      var useEx = document.getElementById('example-gwas');
+      // var exampleHeaders = ['A', 'B', 'C'];
+      if (useEx.checked){
+        var url = restServerUrl + "/ldassoc_example";
+        var ajaxRequest = $.ajax({
+            type : 'GET',
+            url : url,
+            contentType : 'application/json' // JSON
+        }).success(function(response) {
+          var data = JSON.parse(response);
+          $('#ldassoc-file-label').val(data.filename);
+          populateAssocDropDown(data.headers);
+          $("#header-values").show();
+          $("#assoc-chromosome > button").val("chr");
+          $("#assoc-chromosome > button").text("Chromosome: chr column");
+          $("#assoc-position > button").val("pos");
+          $("#assoc-position > button").text("Position: pos column");
+          $("#assoc-p-value > button").val("p");
+          $("#assoc-p-value > button").text("P-Value: p column");
+        });
+
+        console.log("Use example GWAS data.");
+        $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
+        $("#assoc-region > .btn:first-child").text("Region");
+        // var element = document.getElementById('region-codes-menu1');
+        // element.value = "Region";
+        $("#region-region-container").show();
+        $("#region-region-start-coord").val("chr8:128289591");
+        $("#region-region-end-coord").val("chr8:128784397");
+        $("#region-region-index").val("rs7837688");
+        console.log($("#region-region-start-coord").val());
+        console.log($("#region-region-end-coord").val());
+        console.log($("#region-region-index").val());
+
+        // $("#ldassoc-population-codes").val(["CEU"]);
+        refreshPopulation(["CEU"],"ldassoc");
+        console.log($("#ldassoc-population-codes").val());
+      }else{
+        $("#assoc-chromosome > button").val('');
+        $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
+        $("#assoc-position > button").val('');
+        $("#assoc-position > button").html('Select Position&nbsp;<span class="caret"></span>');
+        $("#assoc-p-value > button").val('');
+        $("#assoc-p-value > button").html('Select P-Value&nbsp;<span class="caret"></span>');
+
+        $('#ldassoc-file-label').val('');
+        populateAssocDropDown([]);
+        $("#header-values").hide();
+        $('#ldassoc-file').val('');
+        console.log("Don't use example GWAS data.");
+        $("#region-gene-container").hide();
+        $("#region-region-container").hide();
+        $("#region-variant-container").hide();
+        $("#assoc-region > .btn:first-child").val('');
+        $("#assoc-region > .btn:first-child").html('Select Region<span class="caret"></span>');
+        $("#region-region-start-coord").val('');
+        $("#region-region-end-coord").val('');
+        $("#region-region-index").val('');
+        $("#ldassoc-population-codes").val('');
+        refreshPopulation([],"ldassoc");
+        console.log($("#ldassoc-population-codes").val());
+      }
     });
 
     /*
@@ -977,13 +1043,13 @@ function updateData(id) {
             }
             break;
         case 'ldhap':
-            if(isBrowseSet(id) && isPopulationSet(id)) {
+            if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDhap();
             }
             break;
         case 'ldmatrix':
-            if(isBrowseSet(id) && isPopulationSet(id)) {
+            if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDmatrix();
             }
@@ -1001,16 +1067,18 @@ function updateData(id) {
             }
             break;
         case 'snpclip':
-            if(isBrowseSet(id) && isPopulationSet(id)) {
+            if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateSNPclip();
             }
             break;
         case 'snpchip':
-            if(isBrowseSet(id)) {
-                $('#'+id+"-loading").show();
-                updateSNPchip();
-            }
+            // if(isBrowseSet(id)) {
+            //     $('#'+id+"-loading").show();
+            //     updateSNPchip();
+            // }
+            $('#'+id+"-loading").show();
+            updateSNPchip();
             break;
     }
 }
@@ -1018,13 +1086,13 @@ function updateData(id) {
 function isBrowseSet(elementId) {
     // console.log("Check browse: "+elementId);
 
-    var browse =  $('#'+elementId+'-file').val();
-    // var query = $('#header-values');
-    // var isVisible = query.is(':visible');
-    // console.log("did it show? " + isVisible.toString());
+    // var browse =  $('#'+elementId+'-file').val();
+    var query = $('#header-values');
+    var isVisible = query.is(':visible');
+    console.log("did it show? " + isVisible.toString());
     // console.dir("File chosen? " + browse.toString());
-    // if(browse != "" || isVisible === true) {
-    if(browse != "") {
+    // if(browse != "") {
+    if(isVisible === true) {
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
     } else {
@@ -1051,7 +1119,8 @@ function isPopulationSet(elementId) {
     //console.log("Check population: "+elementId);
 
     var population =  $('#'+elementId+'-population-codes').val();
-    //console.dir(population);
+    console.dir(population);
+    console.log(population);
     if(population == null ) {
         $('#'+elementId+'-population-codes-zero').popover('show');
         return false;
@@ -1078,7 +1147,8 @@ function updateLDassoc() {
         variant: new Object(),
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
         transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
-        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False"
+        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
+        useEx: $('#example-gwas').is(':checked')? "True" :"False"
     };
 
     console.log("Transcript " + ldInputs.transcript.toString());
