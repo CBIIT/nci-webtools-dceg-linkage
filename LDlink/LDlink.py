@@ -519,7 +519,8 @@ def ldassoc_example():
 def read_csv_headers(example_filepath):
     final_headers = []
     with open(example_filepath, 'r') as f:
-        first_line = f.split('\n')[0]
+        lines = f.readlines()
+        first_line = lines[0]
         headers = first_line.split("\s+")
         for heads in headers:
             if heads.length > 0:
