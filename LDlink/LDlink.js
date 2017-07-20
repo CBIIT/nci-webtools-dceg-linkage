@@ -87,17 +87,14 @@ $(document).ready(function() {
           var data = JSON.parse(response);
           $('#ldassoc-file-label').val(data.filename);
           populateAssocDropDown(data.headers);
+          $("#header-values").show();
+          $("#assoc-chromosome > button").val("chr");
+          $("#assoc-chromosome > button").text("Chromosome: chr column");
+          $("#assoc-position > button").val("pos");
+          $("#assoc-position > button").text("Position: pos column");
+          $("#assoc-p-value > button").val("p");
+          $("#assoc-p-value > button").text("P-Value: p column");
         });
-
-        $("#header-values").show();
-
-        $("#assoc-chromosome > .btn:first-child").val("chr".toLowerCase());
-        $("#assoc-chromosome > .btn:first-child").text("Chromosome: chr column");
-        $("#assoc-position > .btn:first-child").val("pos".toLowerCase());
-        $("#assoc-position > .btn:first-child").text("Position: pos column");
-        $("#assoc-p-value > .btn:first-child").val("p".toLowerCase());
-        $("#assoc-p-value > .btn:first-child").text("P-Value: p column");
-
 
         console.log("Use example GWAS data.");
         $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
@@ -116,12 +113,12 @@ $(document).ready(function() {
         refreshPopulation(["CEU"],"ldassoc");
         console.log($("#ldassoc-population-codes").val());
       }else{
-        $("#assoc-chromosome > .btn:first-child").val('');
-        $("#assoc-chromosome > .btn:first-child").html('Select Chromosome&nbsp;<span class="caret"></span>');
-        $("#assoc-position > .btn:first-child").val('');
-        $("#assoc-position > .btn:first-child").html('Select Position&nbsp;<span class="caret"></span>');
-        $("#assoc-p-value > .btn:first-child").val('');
-        $("#assoc-p-value > .btn:first-child").html('Select P-Value&nbsp;<span class="caret"></span>');
+        $("#assoc-chromosome > button").val('');
+        $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
+        $("#assoc-position > button").val('');
+        $("#assoc-position > button").html('Select Position&nbsp;<span class="caret"></span>');
+        $("#assoc-p-value > button").val('');
+        $("#assoc-p-value > button").html('Select P-Value&nbsp;<span class="caret"></span>');
 
         $('#ldassoc-file-label').val('');
         populateAssocDropDown([]);
