@@ -63,12 +63,36 @@ $(document).ready(function() {
         console.log(e.target.id);
         switch($(this).text()) {
             case "Gene":
+                $("#region-gene-name").val('');
+                // $("#region-gene-base-pair-window").val('');
+                $("#region-gene-index").val('');
+                $("#region-region-start-coord").val('');
+                $("#region-region-end-coord").val('');
+                $("#region-region-index").val('');
+                $("#region-variant-index").val('');
+                // $("#region-variant-base-pair-window").val('');
                 $("#region-gene-container").show();
                 break;
             case "Region":
+                $("#region-gene-name").val('');
+                // $("#region-gene-base-pair-window").val('');
+                $("#region-gene-index").val('');
+                $("#region-region-start-coord").val('');
+                $("#region-region-end-coord").val('');
+                $("#region-region-index").val('');
+                $("#region-variant-index").val('');
+                // $("#region-variant-base-pair-window").val('');
                 $("#region-region-container").show();
                 break;
             case "Variant":
+                $("#region-gene-name").val('');
+                // $("#region-gene-base-pair-window").val('');
+                $("#region-gene-index").val('');
+                $("#region-region-start-coord").val('');
+                $("#region-region-end-coord").val('');
+                $("#region-region-index").val('');
+                $("#region-variant-index").val('');
+                // $("#region-variant-base-pair-window").val('');
                 $("#region-variant-container").show();
                 break;
         }
