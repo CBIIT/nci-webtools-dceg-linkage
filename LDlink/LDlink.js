@@ -119,6 +119,7 @@ $(document).ready(function() {
           $("#assoc-position > button").text("Position: pos column");
           $("#assoc-p-value > button").val("p");
           $("#assoc-p-value > button").text("P-Value: p column");
+          $('#ldassoc-file').prop('disabled', true).addClass('disabled');
         });
 
         $('#region-gene-name').val('');
@@ -147,6 +148,7 @@ $(document).ready(function() {
         refreshPopulation(["CEU"],"ldassoc");
         console.log($("#ldassoc-population-codes").val());
       }else{
+        $('#ldassoc-file').prop('disabled', false);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
