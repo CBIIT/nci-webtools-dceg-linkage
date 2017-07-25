@@ -75,6 +75,7 @@ $(document).ready(function() {
     });
 
     $("#example-gwas").click(function(e){
+      console.log("Use example GWAS data.");
       var useEx = document.getElementById('example-gwas');
       // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
@@ -96,7 +97,11 @@ $(document).ready(function() {
           $("#assoc-p-value > button").text("P-Value: p column");
         });
 
-        console.log("Use example GWAS data.");
+        $('#region-gene-name').val('');
+        $('#region-gene-index').val('');
+        $('#region-variant-index').val('');
+
+
         $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
         $("#assoc-region > .btn:first-child").text("Region");
         // var element = document.getElementById('region-codes-menu1');
@@ -112,7 +117,9 @@ $(document).ready(function() {
         console.log($("#region-region-end-coord").val());
         console.log($("#region-region-index").val());
 
-        // $("#ldassoc-population-codes").val(["CEU"]);
+        $("#ldassoc-population-codes").val('');
+        refreshPopulation([],"ldassoc");
+        $("#ldassoc-population-codes").val(["CEU"]);
         refreshPopulation(["CEU"],"ldassoc");
         console.log($("#ldassoc-population-codes").val());
       }else{
