@@ -1139,7 +1139,7 @@ function isBrowseSet(elementId) {
 function isRegionSet(elementId) {
     // console.log("Check region: "+elementId);
 
-    var region =  $('#region-codes-menu1').text();
+    var region =  $('#region-codes-menu1').html().replace(/&nbsp;<span class="caret"><\/span>/, "");
     // console.log("Anything there? " + region);
     if(region == "Gene" || region == "Region" || region == "Variant") {
         $('#'+elementId+'-region-codes-zero').popover('hide');
@@ -1224,7 +1224,7 @@ function isVariantBPSet(elementId) {
 }
 
 function areRegionDetailsSet(elementId) {
-    var region =  $('#region-codes-menu1').text();
+    var region =  $('#region-codes-menu1').html().replace(/&nbsp;<span class="caret"><\/span>/, "");
     if (region == "Gene") {
       // gene name
       // bp window
