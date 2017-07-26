@@ -55,7 +55,7 @@ $(document).ready(function() {
         });
     });
     $("#assoc-region > .dropdown-menu li a").click(function(e){
-        $("#assoc-region > .btn:first-child").text($(this).text());
+        $("#assoc-region > .btn:first-child").html($(this).text() + '&nbsp;<span class="caret"></span>');
         $("#assoc-region > .btn:first-child").val($(this).text().toLowerCase());
         $("#region-gene-container").hide();
         $("#region-region-container").hide();
@@ -126,11 +126,9 @@ $(document).ready(function() {
         $('#region-gene-index').val('');
         $('#region-variant-index').val('');
 
-
         $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
-        $("#assoc-region > .btn:first-child").text("Region");
-        // var element = document.getElementById('region-codes-menu1');
-        // element.value = "Region";
+        $("#assoc-region > .btn:first-child").html("Region" + '&nbsp;<span class="caret"></span>');
+
         $("#region-gene-container").hide();
         $("#region-region-container").hide();
         $("#region-variant-container").hide();
