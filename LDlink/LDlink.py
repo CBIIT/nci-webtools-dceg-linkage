@@ -35,7 +35,7 @@ if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
 app = Flask(__name__, static_folder='', static_url_path='/')
-app.config['MAX_CONTENT_LENGTH'] = 1000 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
