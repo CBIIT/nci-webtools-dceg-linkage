@@ -150,6 +150,7 @@ $(document).ready(function() {
         console.log($("#ldassoc-population-codes").val());
       }else{
         $('#ldassoc-file').prop('disabled', false);
+        $('#ldassoc').prop('disabled', true);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
