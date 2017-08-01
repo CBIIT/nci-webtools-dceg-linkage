@@ -98,6 +98,8 @@ $(document).ready(function() {
         }
     });
 
+    $('#ldassoc').addClass('disabled').prop('disabled', true);
+
     $("#example-gwas").click(function(e){
       console.log("Use example GWAS data.");
       var useEx = document.getElementById('example-gwas');
@@ -119,7 +121,8 @@ $(document).ready(function() {
           $("#assoc-position > button").text("Position: pos column");
           $("#assoc-p-value > button").val("p");
           $("#assoc-p-value > button").text("P-Value: p column");
-          $('#ldassoc-file').prop('disabled', true).addClass('disabled');
+          $('#ldassoc-file').addClass('disabled').prop('disabled', true);
+          $('#ldassoc').prop('disabled', false);
         });
 
         $('#region-gene-name').val('');
@@ -387,6 +390,8 @@ function completeHandler() {
     console.warn('completeHandler');
     $('#progressbar').parent().hide();
     $('#ldassoc-file-container').fadeIn(1000);
+    // enable calculate button only when file is successfully uploaded
+    $('#ldassoc').prop('disabled', false);
 }
 function errorHandler(e) {
     showCommError(e);
