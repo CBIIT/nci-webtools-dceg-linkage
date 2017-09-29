@@ -174,8 +174,13 @@
 						</ul>
 					</div>
 				</div>
-				<p> <b>Citation</b>: Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
-				    haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed" target="PubMed">26139635</a>.
+				<p> <b>Citations</b>:<br />
+					Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
+					haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed" target="PubMed">26139635</a>.
+					<br />
+					<br />
+					Machiela MJ, Chanock SJ. LDassoc: an online tool for interactively exploring genome-wide
+					association study results and prioritizing variants for functional investigation. <i>Bioinformatics</i>. 2017 Sept 12. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed" target="PubMed">in progress</a>.
 				</p>
 
 				<p> LDlink was developed by Mitchell Machiela in collaboration
@@ -197,256 +202,278 @@
 						<form id="ldassocForm" class="ldlinkForm">
 							<!-- Population -->
 							<!-- Broswe RS numbers -->
-							<div class="col-sm-3" style="width:280px;">
-								<div class="progress" style="display:none;">
-								  <div id="progressbar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
-								  aria-valuemin="0" aria-valuemax="100">
-								    50% Complete (info)
-								  </div>
-								</div>
-								<div class="input-group" id="ldassoc-file-container">
-									<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
-									<input type="text" id="ldassoc-file-label" readonly
-										placeholder="Upload association data file"
-										class="readonly-input-text"
-										>
-									<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
-									<div id="ldassoc-files">
-										<div id="ldassoc-browse-button">
-											<span class="btn btn-default btn-file btn-csv-file">Browse
-												<input type="file" id="ldassoc-file">
-											</span>
-										</div>
-										<div id="ldassoc-sample">
-											<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
-											<label class="switch" for="example-gwas">
-  											<input id="example-gwas" type="checkbox" data-toggle="toggle">
-  											<span class="slider round"></span>
-											</label>
-											<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
-										</div>
-									</div>
-									<a id="ldassoc-browse-set-none"
-										style="position:relative"
-										href="#"
-										data-toggle="popover"
-										trigger="manual"
-										data-placement="bottom"
-										data-content="Please select a file."></a>
-								</div>
-
-								<progress style="display:none;"></progress>
-
-								<div id="header-values" style="display:none;">
-
-									<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
-									<div class="" style="width:300px;">
-									<!--
-									<div style="clear:both;"></div>
-									  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
-									  </div>
-									  -->
-									  <div id="assoc-chromosome" class="dropdown">
-									    <button class="btn btn-default dropdown-toggle" type="button" id="chromosomeColumn" data-toggle="dropdown" style="width:250px;">Select Chromosome
-									    <span class="caret"></span></button>
-									    <ul class="dropdown-menu" role="menu" aria-labelledby="chromosomeColumn">
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
-									      <li role="presentation" class="divider"></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
-									    </ul>
-									  </div>
-									  <!--
-									  <div style="clear:both;"></div>
-									  <div style="width:90px;float:left;"><span style="float:right;">Position:</span>
-									  </div>
-										-->
-									<div id="assoc-position" class="dropdown">
-									    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;">Select Position
-									    <span class="caret"></span></button>
-									    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
-									      <li role="presentation" class="divider"></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
-									    </ul>
-									  </div>
-									<div id="assoc-p-value" class="dropdown">
-									    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;">Select P-value
-									    <span class="caret"></span></button>
-									    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
-									      <li role="presentation" class="divider"></li>
-									      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
-									    </ul>
+							<div class="ldassoc-flex">
+								<div class="ldassoc-flex-item1">
+									<div class="col-sm-3" style="width:280px;">
+									<div class="progress" style="display:none;">
+									  <div id="progressbar" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+									  aria-valuemin="0" aria-valuemax="100">
+									    50% Complete (info)
 									  </div>
 									</div>
-								</div> <!-- End header-values -->
-							</div>
-							<div class="form-group">
-								<div class="col-sm-3" style="width:275px;">
-									<a id="ldassoc-region-codes-zero"
-										style="position:relative;left:155px;top:17px"
-										href="#"
-										data-toggle="popover"
-										trigger="manual"
-										data-placement="right"
-										data-content="Please select a region."></a>
-									<div id="assoc-region" class="dropdown">
-										<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu1" data-toggle="dropdown" style="width:155px;">Select Region<span class="caret"></span></button>
-										<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="menu1">
-											<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Gene</a></li>
-											<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Region</a></li>
-											<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Variant</a></li>
-										</ul>
-									</div>
-									<!-- region = Gene -->
-									<div id="region-gene-container" class="form-inline" style="display
-									:none;">
-										<a id="ldassoc-region-gene-name"
-											style="position:relative;left:155px;top:17px"
-											href="#"
-											data-toggle="popover"
-											trigger="manual"
-											data-placement="top"
-											data-content="Please fill out this field."></a>
-										<div class="form-group">
-											<label for="region-gene-name" style="display:none;">Gene Name</label>
-											<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name" pattern="(^[A-Za-z0-9\-]+$)">
+									<div class="input-group" id="ldassoc-file-container">
+										<label for="ldassoc-file-label" style="display:none;">Uplaod Data File</label>
+										<input type="text" id="ldassoc-file-label" readonly
+											placeholder="Upload association data file"
+											class="readonly-input-text"
+											>
+										<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
+										<div id="ldassoc-files">
+											<div id="ldassoc-browse-button">
+												<span class="btn btn-default btn-file btn-csv-file">Browse
+													<input type="file" id="ldassoc-file">
+												</span>
+											</div>
+											<div id="ldassoc-sample">
+												<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+												<label class="switch" for="example-gwas">
+	  											<input id="example-gwas" type="checkbox" data-toggle="toggle">
+	  											<span class="slider round"></span>
+												</label>
+												<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
+											</div>
 										</div>
-										<div class="form-group">
-											<a id="ldassoc-region-gene-bp"
-												style="position:relative;left:95px;top:5px"
-												href="#"
-												data-toggle="popover"
-												trigger="manual"
-												data-placement="bottom"
-												data-content="Please fill out this field."></a>
-											<label for="region-gene-base-pair-window" >&plusmn;</label>
-											<input id="region-gene-base-pair-window" class="form-control" value="100000" type="text" pattern="^\d+$" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
-										</div>
-										<div class="form-group">
-											<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)"  pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
-										</div>
-									</div>
-									<!-- region = Region -->
-									<div id="region-region-container" class="form-inline" style="display:none;">
-										<a id="ldassoc-region-region-start"
-											style="position:relative;left:155px;top:17px"
-											href="#"
-											data-toggle="popover"
-											trigger="manual"
-											data-placement="top"
-											data-content="Please fill out this field."></a>
-										<div>
-											<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in GRCh37</label>
-											<input type="text" id="region-region-start-coord" class="form-control" size="40" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
-										</div>
-										<a id="ldassoc-region-region-end"
-											style="position:relative;left:155px;top:17px"
+										<a id="ldassoc-browse-set-none"
+											style="position:relative"
 											href="#"
 											data-toggle="popover"
 											trigger="manual"
 											data-placement="bottom"
-											data-content="Please fill out this field."></a>
-										<div>
-											<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
-											<input type="text" id="region-region-end-coord" class="form-control" size="40" placeholder="End Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
-										</div>
-										<div>
-											<label for="region-region-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-region-index" class="form-control" size="40" placeholder="Index variant (optional)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
-										</div>
+											data-content="Please upload a file."></a>
 									</div>
-									<!-- region = Variant -->
-									<div id="region-variant-container" class="form-inline" style="display:none;">
-										<a id="ldassoc-variant-index-pop"
+
+									<progress style="display:none;"></progress>
+
+									<div id="header-values" style="display:none;">
+
+										<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
+										<div class="" style="width:300px;">
+										<!--
+										<div style="clear:both;"></div>
+										  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
+										  </div>
+										  -->
+										  <div id="assoc-chromosome" class="dropdown">
+										    <button class="btn btn-default dropdown-toggle" type="button" id="chromosomeColumn" data-toggle="dropdown" style="width:250px;">Select Chromosome
+										    <span class="caret"></span></button>
+										    <ul class="dropdown-menu" role="menu" aria-labelledby="chromosomeColumn">
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+										      <li role="presentation" class="divider"></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+										    </ul>
+										  </div>
+										  <!--
+										  <div style="clear:both;"></div>
+										  <div style="width:90px;float:left;"><span style="float:right;">Position:</span>
+										  </div>
+											-->
+										<div id="assoc-position" class="dropdown">
+										    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;">Select Position
+										    <span class="caret"></span></button>
+										    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+										      <li role="presentation" class="divider"></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+										    </ul>
+										  </div>
+										<div id="assoc-p-value" class="dropdown">
+										    <button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown" style="width:250px;">Select P-value
+										    <span class="caret"></span></button>
+										    <ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+										      <li role="presentation" class="divider"></li>
+										      <li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+										    </ul>
+										  </div>
+										</div>
+									</div> <!-- End header-values -->
+								</div>
+								</div>
+								<div class="ldassoc-flex-item2">
+									<div class="form-group">
+									<div class="col-sm-3" style="width:275px;">
+										<a id="ldassoc-region-codes-zero"
 											style="position:relative;left:155px;top:17px"
 											href="#"
 											data-toggle="popover"
 											trigger="manual"
-											data-placement="top"
-											data-content="Please fill out this field."></a>
-										<div class="form-group">
-											<label for="region-variant-index" style="display:none;">Index variant (optional)</label>
-											<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
+											data-placement="right"
+											data-content="Please select a region."></a>
+										<div id="assoc-region" class="dropdown">
+											<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu1" data-toggle="dropdown" style="width:155px;">Select Region<span class="caret"></span></button>
+											<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="menu1">
+												<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Gene</a></li>
+												<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Region</a></li>
+												<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Variant</a></li>
+											</ul>
 										</div>
-										<div class="form-group">
-											<a id="ldassoc-variant-bp-pop"
-												style="position:relative;left:95px;top:5px"
+										<!-- region = Gene -->
+										<div id="region-gene-container" class="form-inline" style="display
+										:none;">
+											<a id="ldassoc-region-gene-name"
+												style="position:relative;left:155px;top:17px"
+												href="#"
+												data-toggle="popover"
+												trigger="manual"
+												data-placement="top"
+												data-content="Please fill out this field."></a>
+											<div class="form-group">
+												<label for="region-gene-name" style="display:none;">Gene Name</label>
+												<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name" pattern="(^[A-Za-z0-9\-]+$)">
+											</div>
+											<div class="form-group">
+												<a id="ldassoc-region-gene-bp"
+													style="position:relative;left:95px;top:5px"
+													href="#"
+													data-toggle="popover"
+													trigger="manual"
+													data-placement="bottom"
+													data-content="Please fill out this field."></a>
+												<label for="region-gene-base-pair-window" >&plusmn;</label>
+												<input id="region-gene-base-pair-window" class="form-control" value="100000" type="text" pattern="^\d+$" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
+											</div>
+											<div class="form-group">
+												<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
+												<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)"  pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
+											</div>
+										</div>
+										<!-- region = Region -->
+										<div id="region-region-container" class="form-inline" style="display:none;">
+											<a id="ldassoc-region-region-start"
+												style="position:relative;left:155px;top:17px"
+												href="#"
+												data-toggle="popover"
+												trigger="manual"
+												data-placement="top"
+												data-content="Please fill out this field."></a>
+											<div>
+												<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in GRCh37</label>
+												<input type="text" id="region-region-start-coord" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
+											</div>
+											<a id="ldassoc-region-region-end"
+												style="position:relative;left:155px;top:17px"
 												href="#"
 												data-toggle="popover"
 												trigger="manual"
 												data-placement="bottom"
 												data-content="Please fill out this field."></a>
-											<label for="region-variant-base-pair-window" >&plusmn;</label>
-											<input id="region-variant-base-pair-window" class="form-control" value="500000" type="text" pattern="^\d+$" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
+											<div>
+												<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
+												<input type="text" id="region-region-end-coord" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000) in GRCh37" pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)" >
+											</div>
+											<div>
+												<label for="region-region-index" style="display:none;">Index variant (optional)</label>
+												<input type="text" id="region-region-index" class="form-control" style="width:300px;" placeholder="Index variant (optional)" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
+											</div>
+										</div>
+										<!-- region = Variant -->
+										<div id="region-variant-container" class="form-inline" style="display:none;">
+											<a id="ldassoc-variant-index-pop"
+												style="position:relative;left:155px;top:17px"
+												href="#"
+												data-toggle="popover"
+												trigger="manual"
+												data-placement="top"
+												data-content="Please fill out this field."></a>
+											<div class="form-group">
+												<label for="region-variant-index" style="display:none;">Index variant (optional)</label>
+												<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)" >
+											</div>
+											<div class="form-group">
+												<a id="ldassoc-variant-bp-pop"
+													style="position:relative;left:95px;top:5px"
+													href="#"
+													data-toggle="popover"
+													trigger="manual"
+													data-placement="bottom"
+													data-content="Please fill out this field."></a>
+												<label for="region-variant-base-pair-window" >&plusmn;</label>
+												<input id="region-variant-base-pair-window" class="form-control" value="500000" type="text" pattern="^\d+$" style="width:90px;"><span style="margin-left:10px;">base pair window</span>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
-							<div class="form-group">
-								<div class="ldassoc-population-col" style="width:190px;">
-									<a id="ldassoc-population-codes-zero"
-										style="position:relative;left:180px;"
-										href="#"
-										data-toggle="popover"
-										trigger="manual"
-										data-placement="right"
-										data-content="Please select a population."><span class="sr-only">ldassoc population codes</span></a>
-									<label for="ldassoc-population-codes" style="display: none;">Populations</label>
-									<select id="ldassoc-population-codes" multiple="multiple"
-										name="populations">
-									</select>
 								</div>
-							</div>
-							<div class="toggle-labels">
-								<div id="toggle-label">
-									<a href="?tab=help#LDassoc">LD Measure: </a>
+								<div class="ldassoc-flex-item3">
+									<div class="form-group">
+										<div class="ldassoc-population-col" style="width:190px;">
+											<a id="ldassoc-population-codes-zero"
+												style="position:relative;left:180px;"
+												href="#"
+												data-toggle="popover"
+												trigger="manual"
+												data-placement="right"
+												data-content="Please select a population."><span class="sr-only">ldassoc population codes</span></a>
+											<label for="ldassoc-population-codes" style="display: none;">Populations</label>
+											<select id="ldassoc-population-codes" multiple="multiple"
+												name="populations">
+											</select>
+										</div>
+									</div>
+									<div class="toggle-labels">
+										<div id="toggle-label">
+											<a href="?tab=help#LDassoc">LD Measure: </a>
+										</div>
+										<div id="toggle-label">
+											<a href="?tab=help#LDassoc">Collapse transcripts: </a>
+										</div>
+										<div id="toggle-label">
+											<a href="?tab=help#LDassoc">RegulomeDB annotation: </a>
+										</div>
+									</div>
+									<div class="col-sm-2">
+										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group">
+											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
+												<label title="Select R-squared attribute" class="btn btn-default active" id="assoc-matrix-color-r2">
+											 		<input type="radio" checked="" autocomplete="off" name="options">R<sup>2</sup>
+												</label>
+											</div>
+											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
+												<label title="Select D-prime attribute" class="btn btn-default">
+													<input type="radio" autocomplete="off" name="options">D'
+												</label>
+											</div>
+										</div>
+										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group">
+											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
+												<label title="Collapse transcripts" class="btn btn-default active" id="assoc-transcript">
+													<input type="radio" checked="" autocomplete="off" name="options">Yes
+												</label>
+											</div>
+											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
+												<label title="Show transcripts" class="btn btn-default">
+													<input type="radio" autocomplete="off" name="options">No
+												</label>
+											</div>
+										</div>
+										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group">
+											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
+												<label title="Show RegulomeDB annotation" class="btn btn-default active" id="assoc-annotate">
+													<input type="radio" checked="" autocomplete="off" name="options">Yes
+												</label>
+											</div>
+											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
+												<label title="Hide RegulomeDB annotation" class="btn btn-default">
+													<input type="radio" autocomplete="off" name="options">No
+												</label>
+											</div>
+										</div>
+									</div>
 								</div>
-								<div id="toggle-label">
-									<a href="?tab=help#LDassoc">Collapse transcripts: </a>
+								<!-- Calculate -->
+								<div class="ldassoc-flex-item4">
+									<div class="form-group">
+									<div class="ldassoc-calculate-col">
+									<label for="ldassoc" class="sr-only">Submit</label>
+										<input type="submit" id="ldassoc" value="Calculate" class="btn btn-default calculate" ></input>
+									</div>
 								</div>
-								<div id="toggle-label">
-									<a href="?tab=help#LDassoc">RegulomeDB annotation: </a>
-								</div>
-							</div>
-							<div class="col-sm-2">
-								<div id="toggle-switch" data-toggle="buttons" class="btn-group">
-									<label title="Select R-squared attribute" class="btn btn-default active" id="assoc-matrix-color-r2">
-								 		<input type="radio" checked="" autocomplete="off" name="options">R<sup>2</sup>
-									</label>
-									<label title="Select D-prime attribute" class="btn btn-default">
-										<input type="radio" autocomplete="off" name="options">D'
-									</label>
-								</div>
-								<div id="toggle-switch" data-toggle="buttons" class="btn-group">
-									<label title="Collapse transcripts" class="btn btn-default active" id="assoc-transcript">
-										<input type="radio" checked="" autocomplete="off" name="options">Yes
-									</label>
-									<label title="Show transcripts" class="btn btn-default">
-										<input type="radio" autocomplete="off" name="options">No
-									</label>
-								</div>
-								<div id="toggle-switch" data-toggle="buttons" class="btn-group">
-									<label title="Show RegulomeDB annotation" class="btn btn-default active" id="assoc-annotate">
-										<input type="radio" checked="" autocomplete="off" name="options">Yes
-									</label>
-									<label title="Hide RegulomeDB annotation" class="btn btn-default">
-										<input type="radio" autocomplete="off" name="options">No
-									</label>
-								</div>
-							</div>
-							<!-- Calculate -->
-							<div class="form-group">
-								<div class="ldassoc-calculate-col">
-								<label for="ldassoc" class="sr-only">Submit</label>
-									<input type="submit" id="ldassoc" value="Calculate" class="btn btn-default calculate" ></input>
 								</div>
 							</div>
 						</form>
@@ -603,7 +630,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a file."></a>
+										data-content="Please upload a file."></a>
 								</div>
 							</div>
 
@@ -777,7 +804,7 @@
 											data-toggle="popover"
 											trigger="manual"
 											data-placement="right"
-											data-content="Please select a file."></a>
+											data-content="Please upload a file."></a>
 									</div>
 								</div>
 							</div>
@@ -1268,7 +1295,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a file."></a>
+										data-content="Please upload a file."></a>
 								</div>
 							</div>
 							<div class="form-group col-sm-3">
@@ -1455,7 +1482,7 @@
 										data-toggle="popover"
 										trigger="manual"
 										data-placement="right"
-										data-content="Please select a file."></a>
+										data-content="Please upload a file."></a>
 								</div>
 							</div>
 							<!--

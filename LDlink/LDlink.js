@@ -98,6 +98,8 @@ $(document).ready(function() {
         }
     });
 
+    $('#ldassoc').prop('disabled', true);
+
     $("#example-gwas").click(function(e){
       console.log("Use example GWAS data.");
       var useEx = document.getElementById('example-gwas');
@@ -119,7 +121,8 @@ $(document).ready(function() {
           $("#assoc-position > button").text("Position: pos column");
           $("#assoc-p-value > button").val("p");
           $("#assoc-p-value > button").text("P-Value: p column");
-          $('#ldassoc-file').prop('disabled', true).addClass('disabled');
+          $('#ldassoc-file').prop('disabled', true);
+          $('#ldassoc').removeAttr('disabled');
         });
 
         $('#region-gene-name').val('');
@@ -147,6 +150,7 @@ $(document).ready(function() {
         console.log($("#ldassoc-population-codes").val());
       }else{
         $('#ldassoc-file').prop('disabled', false);
+        $('#ldassoc').prop('disabled', true);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
@@ -387,6 +391,8 @@ function completeHandler() {
     console.warn('completeHandler');
     $('#progressbar').parent().hide();
     $('#ldassoc-file-container').fadeIn(1000);
+    // enable calculate button only when file is successfully uploaded
+    $('#ldassoc').removeAttr('disabled');
 }
 function errorHandler(e) {
     showCommError(e);
