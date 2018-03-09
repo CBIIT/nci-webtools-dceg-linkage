@@ -100,6 +100,7 @@ def sendJSON(inputString):
 
 
 @app.route('/LDlinkRest/upload', methods=['POST'])
+@app.route('/LDlinkRest/web/upload', methods=['POST'])
 def upload():
 
     print "Processing upload"
@@ -143,6 +144,7 @@ def upload():
 
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
+@app.route("/LDlinkRest/web/demoapp/add", methods=['POST'])
 def restAdd():
     print type(request.args)
     for arg in request.args:
@@ -507,11 +509,13 @@ def snpchip():
 
 
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
+@app.route('/LDlinkRest/web/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
     return get_platform_request()
 
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
+@app.route('/LDlinkRest/web/ldassoc_example', methods=['GET'])
 def ldassoc_example():
     example_filepath = '/local/content/ldlink/data/example/prostate_example.txt'
 
@@ -534,6 +538,7 @@ def read_csv_headers(example_filepath):
     return final_headers
 
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
+@app.route('/LDlinkRest/web/ldassoc', methods=['GET'])
 def ldassoc():
 
     myargs = argparse.Namespace()
@@ -634,6 +639,16 @@ def ldassoc():
     print out_json
 
     return sendJSON(out_json)
+
+@app.route('/LDlinkRest/ping/', strict_slashes=False)
+@app.route('/ping/', strict_slashes=False)
+def ping():
+    try:
+        return r('"true"')[0]
+    except Exception as e:
+        print('------------EXCEPTION------------')
+        traceback.print_exc(1)
+        return str(e), 400
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
