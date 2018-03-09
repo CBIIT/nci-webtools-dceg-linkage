@@ -162,6 +162,7 @@ def restAdd():
 
 
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
+@app.route('/LDlinkRest/web/ldpair', methods=['GET'])
 def ldpair():
     # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
     # python LDpair.py rs2720460 rs11733615 EUR 38
@@ -200,6 +201,7 @@ def ldpair():
 
 
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
+@app.route('/LDlinkRest/web/ldproxy', methods=['GET'])
 def ldproxy():
     isProgrammatic = False
     print 'Execute ldproxy'
@@ -232,6 +234,7 @@ def ldproxy():
 
 
 @app.route('/LDlinkRest/ldmatrix', methods=['GET'])
+@app.route('/LDlinkRest/web/ldmatrix', methods=['GET'])
 def ldmatrix():
 
     isProgrammatic = False
@@ -282,6 +285,7 @@ def ldmatrix():
 
 
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
+@app.route('/LDlinkRest/web/ldhap', methods=['GET'])
 def ldhap():
     isProgrammatic = False
     print 'Execute ldhap'
@@ -334,6 +338,7 @@ def ldhap():
 
 
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
+@app.route('/LDlinkRest/web/snpclip', methods=['POST'])
 def snpclip():
 
     isProgrammatic = False
@@ -448,6 +453,7 @@ def snpclip():
 
 
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
+@app.route('/LDlinkRest/web/snpchip', methods=['GET', 'POST'])
 def snpchip():
 
     # Command line example
