@@ -644,7 +644,7 @@ def ldassoc():
 @app.route('/ping/', strict_slashes=False)
 def ping():
     try:
-        return r('"true"')[0]
+        return "true"
     except Exception as e:
         print('------------EXCEPTION------------')
         traceback.print_exc(1)
