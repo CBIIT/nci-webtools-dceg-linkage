@@ -1,9 +1,9 @@
 var ldlink_version = "Version 3.0";
 
 
-// var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRest"}
+// var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
-var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRest'}
+var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRestWeb'}
 var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
@@ -327,7 +327,7 @@ function createEnterEvent() {
 function uploadFile2() {
 
 
-    restService.route = 'LDlinkRest';
+    restService.route = 'LDlinkRestWeb';
     restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
     var filename = $("#ldassocFile").val();
@@ -432,7 +432,7 @@ function createFileSelectEvent() {
 
 function fileUpload(fieldName, buttonName){
 
-    restService.route = 'LDlinkRest/load';
+    restService.route = 'LDlinkRestWeb/load';
     //restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
     uploadFile(fieldName, buttonName);
 }
