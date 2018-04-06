@@ -788,6 +788,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         'y': y,
         'w': w,
         'h': h,
+        'exons_plot_name': exons_plot_name,
+        'exons_plot_id': exons_plot_id,
+        'exons_plot_exon': exons_plot_exon,
         'coord_snps_plot': coord_snps_plot,
         'snp_id_plot': snp_id_plot,
         'alleles_snp_plot': alleles_snp_plot
