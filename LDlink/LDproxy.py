@@ -380,52 +380,52 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
             print >> track, "\t".join([str(var[i]) for i in [0, 1, 1, 3]])
     print >> track, ""
 
-    print >> track, "track type=bed name=\"" + snp + \
+    print >> track, "track name=\"" + snp + \
         "\" description=\"Query Variant: " + snp + "\" color=108,108,255"
     print >> track, "\t".join([ucsc_track["query_snp"][i]
                                for i in [0, 1, 1, 2]])
     print >> track, ""
 
     if r2_d == "r2":
-        print >> track, "track type=bed name=\"0.8<R2<=1.0\" description=\"Proxy Variants with 0.8<R2<=1.0\" color=198,129,0"
+        print >> track, "track name=\"0.8<R2<=1.0\" description=\"Proxy Variants with 0.8<R2<=1.0\" color=198,129,0"
     else:
-        print >> track, "track type=bed name=\"0.8<D'<=1.0\" description=\"Proxy Variants with 0.8<D'<=1.0\" color=198,129,0"
+        print >> track, "track name=\"0.8<D'<=1.0\" description=\"Proxy Variants with 0.8<D'<=1.0\" color=198,129,0"
     if len(ucsc_track["0.8-1.0"]) > 0:
         for var in ucsc_track["0.8-1.0"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
         print >> track, ""
 
     if r2_d == "r2":
-        print >> track, "track type=bed name=\"0.6<R2<=0.8\" description=\"Proxy Variants with 0.6<R2<=0.8\" color=198,129,0"
+        print >> track, "track name=\"0.6<R2<=0.8\" description=\"Proxy Variants with 0.6<R2<=0.8\" color=198,129,0"
     else:
-        print >> track, "track type=bed name=\"0.6<D'<=0.8\" description=\"Proxy Variants with 0.6<D'<=0.8\" color=198,129,0"
+        print >> track, "track name=\"0.6<D'<=0.8\" description=\"Proxy Variants with 0.6<D'<=0.8\" color=198,129,0"
     if len(ucsc_track["0.6-0.8"]) > 0:
         for var in ucsc_track["0.6-0.8"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
         print >> track, ""
 
     if r2_d == "r2":
-        print >> track, "track type=bed name=\"0.4<R2<=0.6\" description=\"Proxy Variants with 0.4<R2<=0.6\" color=198,129,0"
+        print >> track, "track name=\"0.4<R2<=0.6\" description=\"Proxy Variants with 0.4<R2<=0.6\" color=198,129,0"
     else:
-        print >> track, "track type=bed name=\"0.4<D'<=0.6\" description=\"Proxy Variants with 0.4<D'<=0.6\" color=198,129,0"
+        print >> track, "track name=\"0.4<D'<=0.6\" description=\"Proxy Variants with 0.4<D'<=0.6\" color=198,129,0"
     if len(ucsc_track["0.4-0.6"]) > 0:
         for var in ucsc_track["0.4-0.6"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
         print >> track, ""
 
     if r2_d == "r2":
-        print >> track, "track type=bed name=\"0.2<R2<=0.4\" description=\"Proxy Variants with 0.2<R2<=0.4\" color=198,129,0"
+        print >> track, "track name=\"0.2<R2<=0.4\" description=\"Proxy Variants with 0.2<R2<=0.4\" color=198,129,0"
     else:
-        print >> track, "track type=bed name=\"0.2<D'<=0.4\" description=\"Proxy Variants with 0.2<D'<=0.4\" color=198,129,0"
+        print >> track, "track name=\"0.2<D'<=0.4\" description=\"Proxy Variants with 0.2<D'<=0.4\" color=198,129,0"
     if len(ucsc_track["0.2-0.4"]) > 0:
         for var in ucsc_track["0.2-0.4"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
         print >> track, ""
 
     if r2_d == "r2":
-        print >> track, "track type=bed name=\"0.0<R2<=0.2\" description=\"Proxy Variants with 0.0<R2<=0.2\" color=198,129,0"
+        print >> track, "track name=\"0.0<R2<=0.2\" description=\"Proxy Variants with 0.0<R2<=0.2\" color=198,129,0"
     else:
-        print >> track, "track type=bed name=\"0.0<D'<=0.2\" description=\"Proxy Variants with 0.0<D'<=0.2\" color=198,129,0"
+        print >> track, "track name=\"0.0<D'<=0.2\" description=\"Proxy Variants with 0.0<D'<=0.2\" color=198,129,0"
     if len(ucsc_track["0.0-0.2"]) > 0:
         for var in ucsc_track["0.0-0.2"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
