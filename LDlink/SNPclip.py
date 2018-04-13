@@ -272,9 +272,9 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+geno[2]+")"
 				
 				### try catch this index ... ValueError thrown when rs_query not found in snps
-				print "variable rs_query" + rs_query
+				print "variable rs_query " + rs_query
 				print
-				print "variable snps" + snps
+				print "variable snps " + str(snps)
 				indx=[i[0] for i in snps].index(rs_query)
 				snps[indx][0]=geno[2]
 				rsnum=geno[2]
