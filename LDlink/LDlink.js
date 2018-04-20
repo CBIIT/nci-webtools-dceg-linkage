@@ -1821,6 +1821,10 @@ function populateSNPwarnings(data) {
                 console.log(JSON.stringify(filtered));
                 snpclipData.warnings.push(filtered);
             }
+        } else {
+            console.log("filtered.comment is UNDEFINED ");
+            console.log(JSON.stringify(filtered));
+            // snpclipData.warnings.push(filtered);
         }
     });
 
@@ -1872,9 +1876,15 @@ function loadSNPdetails(data, rs_number) {
                 // return false;
             }
             //console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
-            if(detail.comment == 'Variant kept.' ||
-                detail.comment.indexOf(match)>=0) {
-                snpclipData.details.push(detail);
+            if(detail.comment != undefined) {
+                if(detail.comment == 'Variant kept.' ||
+                    detail.comment.indexOf(match)>=0) {
+                    snpclipData.details.push(detail);
+                }
+            } else {
+                console.log("detail.comment is UNDEFINED ");
+                console.log(JSON.stringify(detail));
+                // snpclipData.warnings.push(filtered);
             }
         }
     });
