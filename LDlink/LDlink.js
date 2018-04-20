@@ -1813,9 +1813,14 @@ function populateSNPwarnings(data) {
             position_link: anchorRSposition(value[0], index)
         };
         //console.log(index+" - "+value);
-        if(filtered.comment != 'Variant kept.' && filtered.comment.substring(0, 13) != 'Variant in LD') {
-            // Place message on the warning table.
-            snpclipData.warnings.push(filtered);
+        // if(filtered.comment != 'Variant kept.' && filtered.comment.substring(0, 13) != 'Variant in LD') {
+        if(filtered.comment != undefined) {
+            if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
+                // Place message on the warning table.
+                console.log("Push to warnings: ");
+                console.log(JSON.stringify(filtered));
+                snpclipData.warnings.push(filtered);
+            }
         }
     });
 
