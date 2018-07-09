@@ -100,6 +100,7 @@ def sendJSON(inputString):
 
 
 @app.route('/LDlinkRest/upload', methods=['POST'])
+@app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():
 
     print "Processing upload"
@@ -143,6 +144,7 @@ def upload():
 
 
 @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
+@app.route("/LDlinkRestWeb/demoapp/add", methods=['POST'])
 def restAdd():
     print type(request.args)
     for arg in request.args:
@@ -162,6 +164,7 @@ def restAdd():
 
 
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 def ldpair():
     # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
     # python LDpair.py rs2720460 rs11733615 EUR 38
@@ -200,6 +203,7 @@ def ldpair():
 
 
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 def ldproxy():
     isProgrammatic = False
     print 'Execute ldproxy'
@@ -232,6 +236,7 @@ def ldproxy():
 
 
 @app.route('/LDlinkRest/ldmatrix', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 def ldmatrix():
 
     isProgrammatic = False
@@ -282,6 +287,7 @@ def ldmatrix():
 
 
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 def ldhap():
     isProgrammatic = False
     print 'Execute ldhap'
@@ -334,6 +340,7 @@ def ldhap():
 
 
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
+@app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 def snpclip():
 
     isProgrammatic = False
@@ -448,6 +455,7 @@ def snpclip():
 
 
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
+@app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 def snpchip():
 
     # Command line example
@@ -501,11 +509,13 @@ def snpchip():
 
 
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
+@app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
     return get_platform_request()
 
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
     example_filepath = '/local/content/ldlink/data/example/prostate_example.txt'
 
@@ -528,6 +538,7 @@ def read_csv_headers(example_filepath):
     return final_headers
 
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
 
     myargs = argparse.Namespace()
@@ -628,6 +639,16 @@ def ldassoc():
     print out_json
 
     return sendJSON(out_json)
+
+@app.route('/LDlinkRest/ping/', strict_slashes=False)
+@app.route('/ping/', strict_slashes=False)
+def ping():
+    try:
+        return "true"
+    except Exception as e:
+        print('------------EXCEPTION------------')
+        traceback.print_exc(1)
+        return str(e), 400
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
