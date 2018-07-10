@@ -32,6 +32,32 @@ Object.size = function(obj) {
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
+    $("#redirect-message").hide();
+    redirect = "https://ldlink.nci.nih.gov/"
+    if (window.location.href.includes("analysistools")) {
+        $("#main-container").hide();
+        $("#redirect-message").show();
+        if (window.location.href.includes("dev")) {
+            redirect = "https://ldlink-dev.nci.nih.gov/";
+        } else if (window.location.href.includes("qa")) {
+            redirect = "https://ldlink-qa.nci.nih.gov/";
+        } else if (window.location.href.includes("stage")) {
+            redirect = "https://ldlink-stage.nci.nih.gov/";
+        } else {
+            redirect = "https://ldlink.nci.nih.gov/"
+        }
+        console.log("Redirect.");
+
+        $( function() {
+            $( "#redirect-dialog" ).dialog();
+        } );    
+
+        setTimeout(function() {
+            window.location.href = redirect;
+        }, 5000);
+        
+    }
+
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
     //$('#ldassoc-progressbar').progressbar('reset');
