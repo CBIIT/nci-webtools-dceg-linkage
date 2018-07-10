@@ -29,13 +29,16 @@ Object.size = function(obj) {
     return size;
 };
 
+$("#redirect-message").hide();
+
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
-    $("#redirect-message").hide();
+    // redirect to new URL if user enters old URL
     redirect = "https://ldlink.nci.nih.gov/"
     if (window.location.href.includes("analysistools")) {
         $("#main-container").hide();
+        //displays message
         $("#redirect-message").show();
         if (window.location.href.includes("dev")) {
             redirect = "https://ldlink-dev.nci.nih.gov/";
@@ -47,16 +50,10 @@ $(document).ready(function() {
             redirect = "https://ldlink.nci.nih.gov/"
         }
         console.log("Redirect.");
-
-        $( function() {
-            $( "#redirect-dialog" ).dialog();
-        } );    
-
-        setTimeout(function() {
-            window.location.href = redirect;
-        }, 5000);
-        
     }
+    setTimeout(function() {
+        window.location.href = redirect;
+    }, 10000);
 
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
