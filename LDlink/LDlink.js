@@ -29,15 +29,33 @@ Object.size = function(obj) {
     return size;
 };
 
+$(function() {
+    $('[data-countdown]').each(function(index, el) {
+      var time = $(el).attr('data-countdown');
+      $(el).text(time + " second" + (time != 1 ? 's' : ''));
+      setInterval(function() {
+          if (time <= 0) return;
+        
+        time --;
+        $(el).text(time + " second" + (time != 1 ? 's' : ''));
+      }, 1000)
+    
+    })
+  
+  })
+  
+
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
     // redirect to new URL if user enters old URL
     redirect = "https://ldlink.nci.nih.gov/"
     if (window.location.href.includes("analysistools")) {
-        $("#main-container").hide();
         //displays message
-        $("#redirect-message").show();
+        $('#myModal').modal({
+            backdrop: 'static',
+            show: true
+        });
 
         if (window.location.href.includes("dev")) {
             redirect = "https://ldlink-dev.nci.nih.gov/";
@@ -49,10 +67,11 @@ $(document).ready(function() {
             redirect = "https://ldlink.nci.nih.gov/"
         }
         console.log("Redirect.");
+        setTimeout(function() {
+            window.location.href = redirect;
+        }, 5000);
     }
-    setTimeout(function() {
-        window.location.href = redirect;
-    }, 10000);
+    
 
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);

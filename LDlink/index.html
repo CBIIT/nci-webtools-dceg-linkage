@@ -51,10 +51,19 @@
 		</div>
 	</div>
 
-	<div id="redirect-message" hidden title="Redirect Message">
-		<p>You are being redirected, please wait... <br /> 
-			If you haven't been redirected in 30 seconds, please click <a href="https://ldlink.nci.nih.gov/" target='redirect'>here</a>.</p>
-	</div>
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+			<div class="modal-dialog" role="document">
+			  <div class="modal-content">
+				<div class="modal-header">
+				  <h4 class="modal-title" id="myModalLabel">Redirect in <span data-countdown="5"></span> </h4>
+				</div>
+				<div class="modal-body">
+				  You are being redirected, please wait... <br />
+				  If you haven't been redirected in  <span data-countdown="5"></span>, please click here.
+				</div>
+			  </div>
+			</div>
+		  </div>
 
 	<div id="main-container" class="container theme-showcase" role="main">
 
