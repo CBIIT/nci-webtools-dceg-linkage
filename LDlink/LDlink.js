@@ -29,8 +29,6 @@ Object.size = function(obj) {
     return size;
 };
 
-$("#redirect-message").hide();
-
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
@@ -40,6 +38,7 @@ $(document).ready(function() {
         $("#main-container").hide();
         //displays message
         $("#redirect-message").show();
+
         if (window.location.href.includes("dev")) {
             redirect = "https://ldlink-dev.nci.nih.gov/";
         } else if (window.location.href.includes("qa")) {
