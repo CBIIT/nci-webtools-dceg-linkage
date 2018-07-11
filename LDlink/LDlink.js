@@ -59,12 +59,16 @@ $(document).ready(function() {
 
         if (window.location.href.includes("dev")) {
             redirect = "https://ldlink-dev.nci.nih.gov/";
+            $("#redirect-link").setAttribute('href', redirect);
         } else if (window.location.href.includes("qa")) {
             redirect = "https://ldlink-qa.nci.nih.gov/";
+            $("#redirect-link").setAttribute('href', redirect);
         } else if (window.location.href.includes("stage")) {
             redirect = "https://ldlink-stage.nci.nih.gov/";
+            $("#redirect-link").setAttribute('href', redirect);
         } else {
             redirect = "https://ldlink.nci.nih.gov/"
+            $("#redirect-link").setAttribute('href', redirect);
         }
         console.log("Redirect.");
         setTimeout(function() {
