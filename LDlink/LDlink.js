@@ -75,6 +75,11 @@ $(document).ready(function() {
             window.location.href = redirect;
         }, 5000);
     }
+
+    // Close URL change alert banner after 5 seconds
+    $("#url-alert").delay(5000).slideUp(600, function() {
+        $(this).alert('close');
+    });
     
 
     $('#progressbar').progressbar();
