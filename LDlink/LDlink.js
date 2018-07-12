@@ -29,58 +29,9 @@ Object.size = function(obj) {
     return size;
 };
 
-$(function() {
-    $('[data-countdown]').each(function(index, el) {
-      var time = $(el).attr('data-countdown');
-      $(el).text(time + " second" + (time != 1 ? 's' : ''));
-      setInterval(function() {
-          if (time <= 0) return;
-        
-        time --;
-        $(el).text(time + " second" + (time != 1 ? 's' : ''));
-      }, 1000)
-    
-    })
-  
-  })
-  
 
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
-
-    // redirect to new URL if user enters old URL
-    redirect = "https://ldlink.nci.nih.gov/"
-    if (window.location.href.includes("analysistools")) {
-        //displays message
-        $('#myModal').modal({
-            backdrop: 'static',
-            show: true
-        });
-
-        if (window.location.href.includes("dev")) {
-            redirect = "https://ldlink-dev.nci.nih.gov/";
-            $("#redirect-link").attr('href', redirect);
-        } else if (window.location.href.includes("qa")) {
-            redirect = "https://ldlink-qa.nci.nih.gov/";
-            $("#redirect-link").attr('href', redirect);
-        } else if (window.location.href.includes("stage")) {
-            redirect = "https://ldlink-stage.nci.nih.gov/";
-            $("#redirect-link").attr('href', redirect);
-        } else {
-            redirect = "https://ldlink.nci.nih.gov/"
-            $("#redirect-link").attr('href', redirect);
-        }
-        console.log("Redirect.");
-        setTimeout(function() {
-            window.location.href = redirect;
-        }, 5000);
-    }
-
-    // Close URL change alert banner after 5 seconds
-    $("#url-alert").delay(5000).slideUp(600, function() {
-        $(this).alert('close');
-    });
-    
 
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
@@ -1370,7 +1321,7 @@ function updateLDassoc() {
     console.dir(ldInputs);
 
     $('#ldassoc-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -2188,7 +2139,7 @@ function updateLDproxy() {
     //console.log(location.hostname);
 
     $('#ldproxy-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldproxyInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
