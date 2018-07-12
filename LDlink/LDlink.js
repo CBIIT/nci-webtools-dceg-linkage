@@ -33,6 +33,11 @@ Object.size = function(obj) {
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
+    // Close URL change alert banner after 5 seconds
+    $("#url-alert").delay(5000).slideUp(600, function() {
+        $(this).alert('close');
+    });
+    
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
     //$('#ldassoc-progressbar').progressbar('reset');
