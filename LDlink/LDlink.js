@@ -29,9 +29,15 @@ Object.size = function(obj) {
     return size;
 };
 
+
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
+    // Close URL change alert banner after 5 seconds
+    $("#url-alert").delay(5000).slideUp(600, function() {
+        $(this).alert('close');
+    });
+    
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
     //$('#ldassoc-progressbar').progressbar('reset');
@@ -1320,7 +1326,7 @@ function updateLDassoc() {
     console.dir(ldInputs);
 
     $('#ldassoc-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -2138,7 +2144,7 @@ function updateLDproxy() {
     //console.log(location.hostname);
 
     $('#ldproxy-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldproxyInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);

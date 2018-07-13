@@ -711,26 +711,26 @@ def calculate_assoc(file,region,pop,request,myargs):
 	print >> track, "\t".join([ucsc_track["lowest_p"][i] for i in [0,1,1,2]])
 	print >> track, ""
 
-	print >> track, "track type=bed name=\"P<5e-8\" description=\"Variants with association p-values <5e-8\" color=198,129,0"
 	if len(ucsc_track["gwas_sig"])>0:
+		print >> track, "track type=bed name=\"P<5e-8\" description=\"Variants with association p-values <5e-8\" color=198,129,0"
 		for var in ucsc_track["gwas_sig"]:
 			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
 		print >> track, ""
 
-	print >> track, "track type=bed name=\"5e-8<=P<1e-5\" description=\"Variants with association p-values >=5e-8 and <1e-5\" color=198,129,0"
 	if len(ucsc_track["marg_sig"])>0:
+		print >> track, "track type=bed name=\"5e-8<=P<1e-5\" description=\"Variants with association p-values >=5e-8 and <1e-5\" color=198,129,0"
 		for var in ucsc_track["marg_sig"]:
 			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
 		print >> track, ""
 
-	print >> track, "track type=bed name=\"1e-5<=P<1e-3\" description=\"Variants with association p-values >=1e-5 and <1e-3\" color=198,129,0"
 	if len(ucsc_track["sugg_sig"])>0:
+		print >> track, "track type=bed name=\"1e-5<=P<1e-3\" description=\"Variants with association p-values >=1e-5 and <1e-3\" color=198,129,0"
 		for var in ucsc_track["sugg_sig"]:
 			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
 		print >> track, ""
 
-	print >> track, "track type=bed name=\"1e-3<=P<=1\" description=\"Variants with association p-values >=1e-3 and <=1\" color=198,129,0"
 	if len(ucsc_track["not_sig"])>0:
+		print >> track, "track type=bed name=\"1e-3<=P<=1\" description=\"Variants with association p-values >=1e-3 and <=1\" color=198,129,0"
 		for var in ucsc_track["not_sig"]:
 			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
 

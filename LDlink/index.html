@@ -9,11 +9,11 @@
 
 
 <head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <script src="//assets.adobedtm.com/f1bfa9f7170c81b1a9a9ecdcc6c5215ee0b03c84/satelliteLib-4b219b82c4737db0e1797b6c511cf10c802c95cb.js"></script>
 <meta name="generator"
 	content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
 <meta charset="utf-8">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="description"
 	content="LDlink is a suite of web-based applications designed to
@@ -45,57 +45,61 @@
 <body role="document">
 	<div class="header">
 		<div class="container">
-			<a href="http://dceg.cancer.gov/" target="dceg">
+			<a href="http://dceg.cancer.gov/" target="_blank">
 				<img class="division-logo" src="/common/images/DCEG-logo.svg" alt="Division of Cancer Epidemiology &amp; Genetics"><span class="sr-only">NCI National Cancer Institute</span>
 			</a>
 		</div>
 	</div>
-	<div class="container theme-showcase" role="main">
-		<!-- Main Menu Tabs -->
-	<!--[if lt IE 9]>
-            <div class="alert alert-danger" role="alert">You are using an <strong>outdated</strong> version of IE that is not supported for this tool.  Please upgrade your browser to IE version 10.</div>
-    <![endif]-->
 
-		<ul id="ldlink-tabs" class="nav nav-tabs responsive">
-			<!-- HOME -->
-			<li>
-				<a id="home-tab-anchor" href="#home-tab" data-toggle="tab">Home</a>
-			</li>
-			<!-- ASSOC -->
-			<li>
-				<a id="ldassoc-tab-anchor" href="#ldassoc-tab" data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
-			</li>
-			<!-- HAP -->
-			<li>
-				<a id="ldhap-tab-anchor" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
-			</li>
-			<!-- MATRIX -->
-			<li>
-				<a id="ldmatrix-tab-anchor" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a>
-			</li>
-			<!-- PAIR -->
-			<li>
-				<a id="ldpair-tab-anchor" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
-			</li>
-			<!-- PROXY -->
-			<li>
-				<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
-			</li>
+	<div id="main-container" class="container theme-showcase" role="main">
 
-			<!-- CHIP -->
-			<li>
-				<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
-			</li>
-			<!-- CLIP -->
-			<li>
-				<a id="snpclip-tab-anchor" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium">SNPclip</a>
-			</li>
-			<!-- HELP -->
-			<li>
-				<a id="help-tab-anchor" href="#help-tab" data-toggle="tab">Help</a>
-			</li>
+	<!-- TEMPORARY ALERT BANNER. URL CHANGE -->
+	<div id="url-alert" class="alert">
+		<a href="#" class="close" data-dismiss="alert" aria-label="close"><span class="glyphicon glyphicon-menu-up" aria-hidden="true"></span></a>
+		<strong>This site's URL has been changed to <a href="#" class="dark-blue">ldlink.nci.nih.gov</a>.
+		The <a href="#" class="dark-blue">analysistools.nci.nih.gov/LDlink</a> URL will be automatically redirected.</strong> 
+	</div>
 
-		</ul>
+	<ul id="ldlink-tabs" class="nav nav-tabs responsive">
+		<!-- HOME -->
+		<li>
+			<a id="home-tab-anchor" href="#home-tab" data-toggle="tab">Home</a>
+		</li>
+		<!-- ASSOC -->
+		<li>
+			<a id="ldassoc-tab-anchor" href="#ldassoc-tab" data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
+		</li>
+		<!-- HAP -->
+		<li>
+			<a id="ldhap-tab-anchor" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
+		</li>
+		<!-- MATRIX -->
+		<li>
+			<a id="ldmatrix-tab-anchor" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a>
+		</li>
+		<!-- PAIR -->
+		<li>
+			<a id="ldpair-tab-anchor" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
+		</li>
+		<!-- PROXY -->
+		<li>
+			<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
+		</li>
+
+		<!-- CHIP -->
+		<li>
+			<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
+		</li>
+		<!-- CLIP -->
+		<li>
+			<a id="snpclip-tab-anchor" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium">SNPclip</a>
+		</li>
+		<!-- HELP -->
+		<li>
+			<a id="help-tab-anchor" href="#help-tab" data-toggle="tab">Help</a>
+		</li>
+	</ul>
+
 		<!-- Tab Content -->
 		<div class="tab-content">
 			<div class="tab-pane fade" id="home-tab">
@@ -176,14 +180,14 @@
 				</div>
 				<p> <b>Citations</b>:<br />
 					Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
-					haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed" target="PubMed">26139635</a>.
+					haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>. 2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed" target="_blank">26139635</a>.
 					<br />
 					<br />
 					Machiela MJ, Chanock SJ. LDassoc: an online tool for interactively exploring genome-wide
-					association study results and prioritizing variants for functional investigation. <i>Bioinformatics</i>. 2017 Sept 12. PMID:  <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" title="PubMed" target="PubMed">28968746</a>.
+					association study results and prioritizing variants for functional investigation. <i>Bioinformatics</i>. 2017 Sept 12. PMID:  <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" title="PubMed" target="_blank">28968746</a>.
 				</p>
 
-				<p> LDlink was developed by Mitchell Machiela in collaboration
+				<p> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell" title="Mitchell Machiela" target="_blank">Mitchell Machiela</a> in collaboration
 					with NCI's Center for Biomedical Informatics and Information
 					Technology (CBIIT). Support comes from the Division of Cancer
 					Epidemiology and Genetics Informatics Tool Challenge.</p>
@@ -518,7 +522,7 @@
 
 						<br />
 						<a id="ldassoc-genome" class="ldproxy-link"
-							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track78816.txt"
+							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://ldlink.nci.nih.gov/tmp/track78816.txt"
 
 							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
 						<a class="ldproxy-link"
@@ -1208,7 +1212,7 @@
 						</div>
 						<br />
 						<a id="ldproxy-genome" class="ldproxy-link"
-							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://analysistools.nci.nih.gov/LDlink/tmp/track78816.txt"
+							href="http://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://ldlink.nci.nih.gov/tmp/track78816.txt"
 
 							target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
 						<a class="ldproxy-link"
@@ -1323,7 +1327,7 @@
 											title="R2 Threshold must be a number between 0 and 1"
 											required>
 									</div>
-									<div style="clear:both:"></div>
+									<div style="clear:both;"></div>
 									<div>
 										<label for="snpclip_maf_threshold">MAF:</label>
 										<input id="snpclip_maf_threshold"
