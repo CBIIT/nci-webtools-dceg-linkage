@@ -403,7 +403,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
         for var in ucsc_track["0.6-0.8"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
         print >> track, ""
-
+    
     if len(ucsc_track["0.4-0.6"]) > 0:
         if r2_d == "r2":
             print >> track, "track type=bed name=\"0.4<R2<=0.6\" description=\"Proxy Variants with 0.4<R2<=0.6\" color=198,129,0"

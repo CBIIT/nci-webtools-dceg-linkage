@@ -1,3 +1,19 @@
+/* URL change banner */
+#url-alert {
+  color: #444; 
+  background-color: #ffd351; 
+  font-weight: 500; 
+  border: none;
+  margin-bottom: 1px;
+  height: 30px;
+  line-height:30px;
+  padding:0px 15px;
+}
+.close {
+padding: 5px 0px 0px 0px;
+}
+
+
 /*disable bk logo */
 .bk-logo-small {
    display:none;
@@ -413,7 +429,7 @@ img.graph-legend {
 	vertical-align: top;
 }
 .ldhap-table-container {
-	min-with: 700px;
+	min-width: 700px;
 	width:auto;
 	white-space: nowrap;
 
@@ -464,11 +480,11 @@ table#snpchip-thinned-list > tbody > tr > td {
 	padding: 0 5px;
 }
 /* Header and Footer */
-.header img {
-	/*
+/* .header img {
+	
     width: 60%;
-    */
-}
+    
+} */
 .header h4 {
     color: #fff;
     line-height: 0.5em;
@@ -506,9 +522,9 @@ hr.header {
 	width:100px;
 	font-weight:bold;
 }
-#snpclip-thresholds > div:not(:first-child) {
-	/*padding-bottom:1px;*/
-}
+/* #snpclip-thresholds > div:not(:first-child) {
+	padding-bottom:1px;
+} */
 #snpclip-snp-list {
 	/*width:175px; */
 	float:left;
@@ -587,15 +603,15 @@ th.rotate > div {
     rotate(270deg);
   width: 20px;
 }
-th.rotate > div > span {
-  /*border-bottom: 1px solid #ccc;*/
-  /*padding: 5px 10px;*/
-}
+/* th.rotate > div > span {
+  border-bottom: 1px solid #ccc;
+  padding: 5px 10px;
+} */
 /* These aren't needed and will be weird if transforms don't work */
-.csstransforms & th.rotate {
+/* .csstransforms & th.rotate {
   height: 142px;
   white-space: nowrap;
-}
+} */
 
 .snpchip-warnings {
     border-collapse: collapse;

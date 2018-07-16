@@ -1,9 +1,9 @@
 var ldlink_version = "Version 3.0";
 
 
-// var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRest"}
+// var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
-var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRest'}
+var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRestWeb'}
 var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
@@ -29,9 +29,15 @@ Object.size = function(obj) {
     return size;
 };
 
+
 $(document).ready(function() {
     console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
+    // Close URL change alert banner after 5 seconds
+    $("#url-alert").delay(5000).slideUp(600, function() {
+        $(this).alert('close');
+    });
+    
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
     //$('#ldassoc-progressbar').progressbar('reset');
@@ -327,7 +333,7 @@ function createEnterEvent() {
 function uploadFile2() {
 
 
-    restService.route = 'LDlinkRest';
+    restService.route = 'LDlinkRestWeb';
     restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
     var filename = $("#ldassocFile").val();
@@ -432,7 +438,7 @@ function createFileSelectEvent() {
 
 function fileUpload(fieldName, buttonName){
 
-    restService.route = 'LDlinkRest/load';
+    restService.route = 'LDlinkRestWeb/load';
     //restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
     uploadFile(fieldName, buttonName);
 }
@@ -1320,7 +1326,7 @@ function updateLDassoc() {
     console.dir(ldInputs);
 
     $('#ldassoc-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -2153,7 +2159,7 @@ function updateLDproxy() {
     //console.log(location.hostname);
 
     $('#ldproxy-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/LDlink/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldproxyInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
