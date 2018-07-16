@@ -504,19 +504,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     #     )
     # )
     # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
-    # source2 = ColumnDataSource(
-    #     data=dict(
-    #         x=x,
-    #         y=y,
-    #         w=w,
-    #         h=h,
-    #         coord_snps_plot=coord_snps_plot,
-    #         snp_id_plot=snp_id_plot,
-    #         alleles_snp_plot=alleles_snp_plot,
-    #     )
-    # )
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     buffer = (x[-1] - x[0]) * 0.025
     xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
