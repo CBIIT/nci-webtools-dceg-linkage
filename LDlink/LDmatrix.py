@@ -491,17 +491,19 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         return("", "")
         raise
 
-    source2 = ColumnDataSource(
-        data=dict(
-            x=x,
-            y=y,
-            w=w,
-            h=h,
-            coord_snps_plot=coord_snps_plot,
-            snp_id_plot=snp_id_plot,
-            alleles_snp_plot=alleles_snp_plot,
-        )
-    )
+    # OLD BOKEH VERSION FIX GLYPHS - START
+    # source2 = ColumnDataSource(
+    #     data=dict(
+    #         x=x,
+    #         y=y,
+    #         w=w,
+    #         h=h,
+    #         coord_snps_plot=coord_snps_plot,
+    #         snp_id_plot=snp_id_plot,
+    #         alleles_snp_plot=alleles_snp_plot,
+    #     )
+    # )
+    # OLD BOKEH VERSION FIX GLYPHS - END
 
     buffer = (x[-1] - x[0]) * 0.025
     xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
@@ -535,22 +537,42 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             xname_pos.append(i)
 
     # Matrix Plot
-    source = ColumnDataSource(
-        data=dict(
-            xname=xnames,
-            xname_pos=xname_pos,
-            yname=ynames,
-            xA=xA,
-            yA=yA,
-            xpos=xpos,
-            ypos=ypos,
-            R2=R,
-            Dp=D,
-            corA=corA,
-            box_color=box_color,
-            box_trans=box_trans,
-        )
-    )
+    # OLD BOKEH VERSION FIX GLYPHS - START
+    # source = ColumnDataSource(
+    #     data=dict(
+    #         xname=xnames,
+    #         xname_pos=xname_pos,
+    #         yname=ynames,
+    #         xA=xA,
+    #         yA=yA,
+    #         xpos=xpos,
+    #         ypos=ypos,
+    #         R2=R,
+    #         Dp=D,
+    #         corA=corA,
+    #         box_color=box_color,
+    #         box_trans=box_trans,
+    #     )
+    # )
+    # OLD BOKEH VERSION FIX GLYPHS - END
+    # NEW BOKEH VERSION FIX GLYPHS - START
+    data = {
+            'xname': xnames,
+            'xname_pos': xname_pos,
+            'yname': ynames,
+            'xA': xA,
+            'yA': yA,
+            'xpos': xpos,
+            'ypos': ypos,
+            'R2': R,
+            'Dp': D,
+            'corA': corA,
+            'box_color': box_color,
+            'box_trans': box_trans
+    }
+          
+    source = ColumnDataSource(data)
+    # NEW BOKEH VERSION FIX GLYPHS - END
 
     threshold = 70
     if len(snps) < threshold:
@@ -565,8 +587,16 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
-    matrix_plot.rect('xname_pos', 'yname', 0.95 * spacing, 0.95, source=source,
-                     color="box_color", alpha="box_trans", line_color=None)
+    # OLD BOKEH VERSION FIX GLYPHS - START
+    # matrix_plot.rect('xname_pos', 'yname', 0.95 * spacing, 0.95, source=source,
+    #                  color="box_color", alpha="box_trans", line_color=None)
+    # OLD BOKEH VERSION FIX GLYPHS - END
+    # NEW BOKEH VERSION FIX GLYPHS - START
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
+                    color="box_color", alpha="box_trans", line_color=None)
+    # NEW BOKEH VERSION FIX GLYPHS - END
+
+    
 
     matrix_plot.grid.grid_line_color = None
     matrix_plot.axis.axis_line_color = None
@@ -620,12 +650,31 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     connector.toolbar_location = None
 
+    # NEW BOKEH VERSION FIX GLYPHS - START
+    data_rug = {
+        'x': x,
+        'y': y,
+        'w': w,
+        'h': h,
+        'coord_snps_plot': coord_snps_plot,
+        'snp_id_plot': snp_id_plot,
+        'alleles_snp_plot': alleles_snp_plot
+    }
+
+    source_rug = ColumnDataSource(data_rug)
+    # NEW BOKEH VERSION FIX GLYPHS - END
+
     # Rug Plot
     rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
                  title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
                  plot_width=800, plot_height=50, tools="hover,xpan,tap")
-    rug.rect(x, y, w, h, source=source2, fill_color="red",
-             dilate=True, line_color=None, fill_alpha=0.6)
+    # OLD BOKEH VERSION FIX GLYPHS - START
+    # rug.rect(x, y, w, h, source=source2, fill_color="red",
+    #          dilate=True, line_color=None, fill_alpha=0.6)
+    # OLD BOKEH VERSION FIX GLYPHS - END
+    # NEW BOKEH VERSION FIX GLYPHS - START
+    rug.rect(x='x', y='y', width='w', height='h', fill_color='red', dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
+    # NEW BOKEH VERSION FIX GLYPHS - END
 
     hover = rug.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -706,14 +755,32 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     exons_plot_yn = [n_rows - w + 0.5 for w in exons_plot_y]
     yr2 = Range1d(start=0, end=n_rows)
 
-    source2 = ColumnDataSource(
-        data=dict(
-            exons_plot_name=exons_plot_name,
-            exons_plot_id=exons_plot_id,
-            exons_plot_exon=exons_plot_exon,
-            message=message,
-        )
-    )
+    # OLD BOKEH VERSION FIX GLYPHS - START
+    # source2 = ColumnDataSource(
+    #     data=dict(
+    #         exons_plot_name=exons_plot_name,
+    #         exons_plot_id=exons_plot_id,
+    #         exons_plot_exon=exons_plot_exon,
+    #         message=message,
+    #     )
+    # )
+    # OLD BOKEH VERSION FIX GLYPHS - END
+    # NEW BOKEH VERSION FIX GLYPHS - START
+    data_gene_plot = {
+        'exons_plot_x': exons_plot_x,
+        'exons_plot_yn': exons_plot_yn,
+        'exons_plot_w': exons_plot_w,
+        'exons_plot_h': exons_plot_h,
+        'exons_plot_name': exons_plot_name,
+        'exons_plot_id': exons_plot_id,
+        'exons_plot_exon': exons_plot_exon,
+        'coord_snps_plot': coord_snps_plot,
+        'snp_id_plot': snp_id_plot,
+        'alleles_snp_plot': alleles_snp_plot
+    }
+
+    source_gene_plot = ColumnDataSource(data_gene_plot)
+    # NEW BOKEH VERSION FIX GLYPHS - END
 
     max_genes = 40
     if len(lines) < 3 or len(genes_raw) > max_genes:
@@ -729,8 +796,14 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                           genes_plot_yn, color="black", alpha=1, line_width=2)
-        gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
-                       source=source2, fill_color="grey", line_color="grey")
+        # OLD BOKEH VERSION FIX GLYPHS - START
+        # gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
+        #                source=source2, fill_color="grey", line_color="grey")
+        # OLD BOKEH VERSION FIX GLYPHS - END
+        # NEW BOKEH VERSION FIX GLYPHS - START
+        gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
+                        source=source_gene_plot, fill_color='grey', line_color="grey")
+        # NEW BOKEH VERSION FIX GLYPHS - END
         gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
         hover = gene_plot.select(dict(type=HoverTool))

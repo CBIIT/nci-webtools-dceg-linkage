@@ -1819,9 +1819,18 @@ function populateSNPwarnings(data) {
             position_link: anchorRSposition(value[0], index)
         };
         //console.log(index+" - "+value);
-        if(filtered.comment != 'Variant kept.' && filtered.comment.substring(0, 13) != 'Variant in LD') {
-            // Place message on the warning table.
-            snpclipData.warnings.push(filtered);
+        // if(filtered.comment != 'Variant kept.' && filtered.comment.substring(0, 13) != 'Variant in LD') {
+        if(filtered.comment != undefined) {
+            if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
+                // Place message on the warning table.
+                console.log("Push to warnings: ");
+                console.log(JSON.stringify(filtered));
+                snpclipData.warnings.push(filtered);
+            }
+        } else {
+            console.log("filtered.comment is UNDEFINED ");
+            console.log(JSON.stringify(filtered));
+            // snpclipData.warnings.push(filtered);
         }
     });
 
@@ -1873,9 +1882,15 @@ function loadSNPdetails(data, rs_number) {
                 // return false;
             }
             //console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
-            if(detail.comment == 'Variant kept.' ||
-                detail.comment.indexOf(match)>=0) {
-                snpclipData.details.push(detail);
+            if(detail.comment != undefined) {
+                if(detail.comment == 'Variant kept.' ||
+                    detail.comment.indexOf(match)>=0) {
+                    snpclipData.details.push(detail);
+                }
+            } else {
+                console.log("detail.comment is UNDEFINED ");
+                console.log(JSON.stringify(detail));
+                // snpclipData.warnings.push(filtered);
             }
         }
     });

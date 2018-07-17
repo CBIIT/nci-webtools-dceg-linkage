@@ -1,0 +1,4 @@
+<testsuite name="Mocha Tests" tests="2" failures="0" errors="0" skipped="0" timestamp="Mon, 29 Jan 2018 18:17:14 GMT" time="28.256">
+<testcase classname="ldlink_help_text_assert.js" name="ldlink_help_text_assert" time="13.155"/>
+<testcase classname="ldlink_ldmatrix_test_population_validation.js" name="ldlink_ldmatrix_test_population_validation" time="15.098"/>
+</testsuite>
