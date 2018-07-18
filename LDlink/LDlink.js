@@ -1823,13 +1823,13 @@ function populateSNPwarnings(data) {
         if(filtered.comment != undefined) {
             if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
                 // Place message on the warning table.
-                console.log("Push to warnings: ");
-                console.log(JSON.stringify(filtered));
+                console.log("Push to warnings: " + filtered.rs_number + " " + filterd.comment);
+                // console.log(JSON.stringify(filtered));
                 snpclipData.warnings.push(filtered);
             }
         } else {
-            console.log("filtered.comment is UNDEFINED ");
-            console.log(JSON.stringify(filtered));
+            console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
+            // console.log(JSON.stringify(filtered));
             snpclipData.warnings.push(filtered);
         }
     });
@@ -1886,10 +1886,12 @@ function loadSNPdetails(data, rs_number) {
                 if(detail.comment.includes("Variant kept.") ||
                     detail.comment.includes(match)) {
                     snpclipData.details.push(detail);
+                } else {
+                    snpclipData.warnings.push(detail);
                 }
             } else {
-                console.log("detail.comment is UNDEFINED ");
-                console.log(JSON.stringify(detail));
+                console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
+                // console.log(JSON.stringify(detail));
                 snpclipData.warnings.push(detail);
             }
         }
