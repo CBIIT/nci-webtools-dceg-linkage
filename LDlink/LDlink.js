@@ -1826,6 +1826,13 @@ function populateSNPwarnings(data) {
                 console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
                 // console.log(JSON.stringify(filtered));
                 snpclipData.warnings.push(filtered);
+
+                // Remove rs_numbers with warnings from thinned snp_list
+                var index = data.snp_list.indexOf(filtered.rs_number);
+                if (index > -1) {
+                    data.snp_list.splice(index, 1);
+                }   
+                
             }
         } else {
             console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
@@ -1843,6 +1850,9 @@ function populateSNPwarnings(data) {
         $('#snpclip-warning').show();
     }
     ko.mapping.fromJS(snpclipData, snpclipModel);
+
+    // Populate Thinned SNP List after rs_numbers that triggered warnings are removed
+    populateSNPlist(data);
 
 }
 
@@ -1908,7 +1918,7 @@ function initClip(data) {
     ldClipRaw = data;
 
     populateSNPwarnings(data);
-    populateSNPlist(data);
+    // populateSNPlist(data);
     //loadSNPdetails(data, rs_number);
     if(snpclipData.warnings.length == 0) {
         $('#snpclip-warnings-button').hide();
