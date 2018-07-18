@@ -1823,7 +1823,7 @@ function populateSNPwarnings(data) {
         if(filtered.comment != undefined) {
             if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
                 // Place message on the warning table.
-                console.log("Push to warnings: " + filtered.rs_number + " " + filterd.comment);
+                console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
                 // console.log(JSON.stringify(filtered));
                 snpclipData.warnings.push(filtered);
             }
