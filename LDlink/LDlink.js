@@ -1830,7 +1830,7 @@ function populateSNPwarnings(data) {
         } else {
             console.log("filtered.comment is UNDEFINED ");
             console.log(JSON.stringify(filtered));
-            // snpclipData.warnings.push(filtered);
+            snpclipData.warnings.push(filtered);
         }
     });
 
@@ -1859,7 +1859,7 @@ function loadSNPdetails(data, rs_number) {
     console.dir(data.details[rs_number]);
     */
     var found = false;
-    var match = 'Variant in LD with '+rs_number;
+    var match = 'Variant in LD with ' + rs_number;
 ;
 
     $.each(data.details, function( index, value ){
@@ -1883,14 +1883,14 @@ function loadSNPdetails(data, rs_number) {
             }
             //console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
             if(detail.comment != undefined) {
-                if(detail.comment == 'Variant kept.' ||
-                    detail.comment.indexOf(match)>=0) {
+                if(detail.comment.includes("Variant kept.") ||
+                    detail.comment.includes(match)) {
                     snpclipData.details.push(detail);
                 }
             } else {
                 console.log("detail.comment is UNDEFINED ");
                 console.log(JSON.stringify(detail));
-                // snpclipData.warnings.push(filtered);
+                snpclipData.warnings.push(filtered);
             }
         }
     });
