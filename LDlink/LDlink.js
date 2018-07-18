@@ -1838,6 +1838,13 @@ function populateSNPwarnings(data) {
             console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
             // console.log(JSON.stringify(filtered));
             snpclipData.warnings.push(filtered);
+
+            // Remove rs_numbers with warnings from thinned snp_list
+            var index = data.snp_list.indexOf(filtered.rs_number);
+            if (index > -1) {
+                data.snp_list.splice(index, 1);
+            }   
+            
         }
     });
 
