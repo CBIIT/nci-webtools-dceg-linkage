@@ -1890,7 +1890,7 @@ function loadSNPdetails(data, rs_number) {
             } else {
                 console.log("detail.comment is UNDEFINED ");
                 console.log(JSON.stringify(detail));
-                snpclipData.warnings.push(filtered);
+                snpclipData.warnings.push(detail);
             }
         }
     });
