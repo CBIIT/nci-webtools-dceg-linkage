@@ -1844,7 +1844,7 @@ function populateSNPwarnings(data) {
             if (index > -1) {
                 data.snp_list.splice(index, 1);
             }   
-            
+
         }
     });
 
@@ -1906,11 +1906,12 @@ function loadSNPdetails(data, rs_number) {
                 } else {
                     snpclipData.warnings.push(detail);
                 }
-            } else {
-                console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
-                // console.log(JSON.stringify(detail));
-                snpclipData.warnings.push(detail);
-            }
+            } 
+            // else {
+            //     console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
+            //     // console.log(JSON.stringify(detail));
+            //     // snpclipData.warnings.push(detail);
+            // }
         }
     });
 
