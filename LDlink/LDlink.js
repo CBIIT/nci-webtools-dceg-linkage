@@ -1835,16 +1835,16 @@ function populateSNPwarnings(data) {
                 
             }
         } else {
-            // console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
+            console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
             // console.log(JSON.stringify(filtered));
-            // snpclipData.warnings.push(filtered);
+            snpclipData.warnings.push(filtered);
 
             // Remove rs_numbers with warnings from thinned snp_list
             var index = data.snp_list.indexOf(filtered.rs_number);
             if (index > -1) {
                 data.snp_list.splice(index, 1);
             }   
-
+            
         }
     });
 
@@ -1894,24 +1894,24 @@ function loadSNPdetails(data, rs_number) {
         }
         //if(found == true && detail.rs_number == rs_number) {
         if(found) {
-            if(detail.comment == 'Variant kept.' && detail.rs_number != rs_number){
-                // List is complete, exit loop
-                // return false;
-            }
+            // if(detail.comment == 'Variant kept.' && detail.rs_number != rs_number){
+            //     // List is complete, exit loop
+            //     // return false;
+            // }
             //console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
             if(detail.comment != undefined) {
-                if(detail.comment.includes("Variant kept.") ||
+                if((detail.rs_number == rs_number && detail.comment.includes("Variant kept.")) ||
                     detail.comment.includes(match)) {
                     snpclipData.details.push(detail);
-                } else {
-                    snpclipData.warnings.push(detail);
-                }
-            } 
-            // else {
-            //     console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
-            //     // console.log(JSON.stringify(detail));
-            //     // snpclipData.warnings.push(detail);
-            // }
+                } 
+                // else {
+                //     snpclipData.warnings.push(detail);
+                // }
+            } else {
+                console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
+                // console.log(JSON.stringify(detail));
+                snpclipData.warnings.push(detail);
+            }
         }
     });
 
