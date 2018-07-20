@@ -574,7 +574,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # debug prints for 45 degree rotation
     print "###################################"
     print "START - debug prints for 45 degree rotation"
-    print data
+    for i in data:
+        print (i, data[i])
     print "END   - debug prints for 45 degree rotation"
     print "###################################"
           
