@@ -570,6 +570,13 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             'box_color': box_color,
             'box_trans': box_trans
     }
+
+    # debug prints for 45 degree rotation
+    print "###################################"
+    print "START - debug prints for 45 degree rotation"
+    print data
+    print "END   - debug prints for 45 degree rotation"
+    print "###################################"
           
     source = ColumnDataSource(data)
     # NEW BOKEH VERSION FIX GLYPHS - END
