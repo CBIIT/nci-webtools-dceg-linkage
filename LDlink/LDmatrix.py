@@ -576,16 +576,27 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     threshold = 70
     if len(snps) < threshold:
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
+        #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
+        #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+        #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+
+        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
+                             x_range=xr, y_range=yr,
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
-                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=700, plot_height=700)
 
     else:
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
+        #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
+        #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+        #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+
+        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
+                             x_range=xr, y_range=yr,
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=700, plot_height=700)
+    
 
     # OLD BOKEH VERSION FIX GLYPHS - START
     # matrix_plot.rect('xname_pos', 'yname', 0.95 * spacing, 0.95, source=source,
@@ -594,7 +605,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # NEW BOKEH VERSION FIX GLYPHS - START
     # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=90.0, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None)
-    matrix_plot.square(x='xname_pos', y='yname', size=25, angle=0.785398, source=source,
+    # matrix_plot.square(x='xname_pos', y='yname', size=25, angle=0.785398, source=source,
+    #                 color="box_color", alpha="box_trans", line_color=None) 
+    matrix_plot.square(x='xname_pos', y='yname', size=23, source=source,
                     color="box_color", alpha="box_trans", line_color=None) 
     # NEW BOKEH VERSION FIX GLYPHS - END
 
@@ -606,6 +619,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     if len(snps) < threshold:
         matrix_plot.axis.major_label_text_font_size = "8pt"
         matrix_plot.xaxis.major_label_orientation = "vertical"
+
+    # rotate change angle of y-axis label (45 degrees)
+    # matrix_plot.yaxis.major_label_orientation = 0.785398
 
     matrix_plot.axis.major_label_text_font_style = "normal"
     matrix_plot.xaxis.major_label_standoff = 0
