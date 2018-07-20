@@ -582,8 +582,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
-                             x_range=xr, y_range=yr,
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=700, plot_height=700)
 
     else:
@@ -593,7 +593,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
-                             x_range=xr, y_range=yr,
+                             x_range=xr, y_range=list(reversed(rsnum_lst)),
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=700, plot_height=700)
     
