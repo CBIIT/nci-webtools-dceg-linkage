@@ -603,10 +603,10 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     #                  color="box_color", alpha="box_trans", line_color=None)
     # OLD BOKEH VERSION FIX GLYPHS - END
     # NEW BOKEH VERSION FIX GLYPHS - START
-    # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=90.0, source=source,
-    #                 color="box_color", alpha="box_trans", line_color=None)
-    matrix_plot.square(x='xname_pos', y='yname', size=24, angle=0.785398, source=source,
-                    color="box_color", alpha="box_trans", line_color=None) 
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95 * spacing, angle=0.785398, source=source,
+                    color="box_color", alpha="box_trans", line_color=None)
+    # matrix_plot.square(x='xname_pos', y='yname', size=24, angle=0.785398, source=source,
+    #                 color="box_color", alpha="box_trans", line_color=None) 
     # matrix_plot.square(x='xname_pos', y='yname', size=24, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None) 
     # NEW BOKEH VERSION FIX GLYPHS - END
