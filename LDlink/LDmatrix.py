@@ -656,7 +656,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # Trial glyphs with indices
     # matrix_plot.rect(x='xname_pos', y='yname', width=0.66 * spacing, height=0.70, angle=0.785398, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None)
-    matrix_plot.square(x='xname_pos', y='yname', size=24 * spacing, angle=0.785398, source=source,
+    print "spacing"
+    print spacing
+    matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
                     color="box_color", alpha="box_trans", line_color=None) 
     # NEW BOKEH VERSION FIX GLYPHS - END
 
