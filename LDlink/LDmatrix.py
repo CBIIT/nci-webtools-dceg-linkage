@@ -586,6 +586,30 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             'box_trans': box_trans
     }
 
+    # Delete redundant data
+    len_xnames = len(xnames)
+    len_snplst = len(snplst)
+    for x in range(0, len_xnames - 1):
+        # for y in range(0, len_snplst - 1):
+        if xnames[x] == ynames[x]:
+            continue
+        else:
+            del xindex[x]
+            del yindex[x]
+            del xnames[x]
+            del xname_pos[x]
+            del ynames[x]
+            del xA[x]
+            del yA[x]
+            del xpos[x]
+            del ypos[x]
+            del R[x]
+            del D[x]
+            del corA[x]
+            del box_color[x]
+            del box_trans[x]
+
+
     # debug prints for 45 degree rotation
     print "###################################"
     print "START - debug prints for 45 degree rotation"
@@ -604,9 +628,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR:
-        matrix_plot = figure(outline_line_color="grey", min_border_top=0, min_border_right=5,
-                             x_range=xr, y_range=yindex_range,
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
+        matrix_plot = figure(outline_line_color="black", min_border_top=0, min_border_right=5,
+                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+                             h_symmetry=False, v_symmetry=False, border_fill_color='black', logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
@@ -615,9 +639,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR: 
-        matrix_plot = figure(outline_line_color="grey", min_border_top=0, min_border_right=5,
-                             x_range=xr, y_range=yindex_range,
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
+        matrix_plot = figure(outline_line_color="black", min_border_top=0, min_border_right=5,
+                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+                             h_symmetry=False, v_symmetry=False, border_fill_color='black', logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
     
 
@@ -629,7 +653,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # matrix_plot.rect(x='xname_pos', y='yname', width=0.70 * spacing, height=0.70, angle=0.785398, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None)
     # Trial glyphs with indices
-    matrix_plot.rect(x='xname_pos', y='yindex', width=0.70, height=0.70, angle=0.785398, source=source,
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.70 * spacing, height=0.70, angle=0.785398, source=source,
                     color="box_color", alpha="box_trans", line_color=None)
     # matrix_plot.square(x='xname_pos', y='yname', size=24, angle=0.785398, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None) 
