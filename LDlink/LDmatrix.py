@@ -558,15 +558,16 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # NEW BOKEH VERSION FIX GLYPHS - START
 
     # Create indices for data - source
-    xindex = []
-    yindex = []
+    # xindex = []
+    # yindex = []
     # for i in range(0, (2 * len(xname)) - 1):
     #     xindex.append(i)
     #     yindex.append(i)
-
-    for i in range(0, (len(xnames)) - 1):
-        xindex.append(i)
-        yindex.append(i)
+    # for i in range(0, (len(xnames)) - 1):
+    #     xindex.append(i)
+    #     yindex.append(i)
+    xindex = Range1d(0, len(xname_pos) - 1)
+    yindex = Range1d(0, len(ynames) - 1)
 
     data = {
             'xindex': xindex,
@@ -604,7 +605,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR:
         matrix_plot = figure(outline_line_color="grey", min_border_top=0, min_border_right=5,
-                             x_range=xindex, y_range=yindex,
+                             x_range=xr, y_range=yindex,
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
