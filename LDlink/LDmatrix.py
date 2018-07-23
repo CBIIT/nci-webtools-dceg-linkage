@@ -629,9 +629,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR:
-        matrix_plot = figure(outline_line_color="black", min_border_top=0, min_border_right=5,
+        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='black', logo=None,
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
@@ -640,9 +640,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR: 
-        matrix_plot = figure(outline_line_color="black", min_border_top=0, min_border_right=5,
+        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='black', logo=None,
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
     
 
