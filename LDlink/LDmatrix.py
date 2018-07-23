@@ -574,7 +574,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # len_snplst = len(snplst)
     print "len xnames"
     print len(xnames)
-    for x in xrange(0, len(xnames) - 1):
+    for x in range(0, len(xnames)):
         # for y in range(0, len_snplst - 1):
         if xnames[x] != ynames[x]:
             del xindex[x]
