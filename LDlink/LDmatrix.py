@@ -557,6 +557,29 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # OLD BOKEH VERSION FIX GLYPHS - END
     # NEW BOKEH VERSION FIX GLYPHS - START
 
+    # Delete redundant data
+    # len_xnames = len(xnames)
+    # len_snplst = len(snplst)
+    print "len xnames"
+    print len(xnames)
+    for x in xrange(0, len(xnames) - 1):
+        # for y in range(0, len_snplst - 1):
+        if xnames[x] != ynames[x]:
+            del xindex[x]
+            del yindex[x]
+            del xnames[x]
+            del xname_pos[x]
+            del ynames[x]
+            del xA[x]
+            del yA[x]
+            del xpos[x]
+            del ypos[x]
+            del R[x]
+            del D[x]
+            del corA[x]
+            del box_color[x]
+            del box_trans[x]
+
     # Create indices for data - source
     xindex = []
     yindex = []
@@ -585,28 +608,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             'box_color': box_color,
             'box_trans': box_trans
     }
-
-    # Delete redundant data
-    # len_xnames = len(xnames)
-    # len_snplst = len(snplst)
-    for x in xrange(0, len(xnames) - 1):
-        # for y in range(0, len_snplst - 1):
-        if xnames[x] != ynames[x]:
-            del xindex[x]
-            del yindex[x]
-            del xnames[x]
-            del xname_pos[x]
-            del ynames[x]
-            del xA[x]
-            del yA[x]
-            del xpos[x]
-            del ypos[x]
-            del R[x]
-            del D[x]
-            del corA[x]
-            del box_color[x]
-            del box_trans[x]
-            
 
 
     # debug prints for 45 degree rotation
