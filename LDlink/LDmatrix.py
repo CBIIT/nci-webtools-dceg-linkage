@@ -572,25 +572,25 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # Delete redundant data
     # len_xnames = len(xnames)
     # len_snplst = len(snplst)
-    print "len xnames"
-    print len(xnames)
-    for x in range(0, len(xnames)):
-        # for y in range(0, len_snplst - 1):
-        if xnames[x] != ynames[x]:
-            del xindex[x]
-            del yindex[x]
-            del xnames[x]
-            del xname_pos[x]
-            del ynames[x]
-            del xA[x]
-            del yA[x]
-            del xpos[x]
-            del ypos[x]
-            del R[x]
-            del D[x]
-            del corA[x]
-            del box_color[x]
-            del box_trans[x]
+    # print "len xnames"
+    # print len(xnames)
+    # for x in range(0, len(xnames)):
+    #     # for y in range(0, len_snplst - 1):
+    #     if xnames[x] != ynames[x]:
+    #         del xindex[x]
+    #         del yindex[x]
+    #         del xnames[x]
+    #         del xname_pos[x]
+    #         del ynames[x]
+    #         del xA[x]
+    #         del yA[x]
+    #         del xpos[x]
+    #         del ypos[x]
+    #         del R[x]
+    #         del D[x]
+    #         del corA[x]
+    #         del box_color[x]
+    #         del box_trans[x]
 
 
     data = {
