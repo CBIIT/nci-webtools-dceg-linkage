@@ -557,6 +557,18 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # OLD BOKEH VERSION FIX GLYPHS - END
     # NEW BOKEH VERSION FIX GLYPHS - START
 
+    # Create indices for data - source
+    xindex = []
+    yindex = []
+    # for i in range(0, (2 * len(xname)) - 1):
+    #     xindex.append(i)
+    #     yindex.append(i)
+    for i in range(0, (len(xnames)) - 1):
+        xindex.append(i)
+        yindex.append(i)
+    xindex_range = Range1d(0, len(xname_pos) - 1)
+    yindex_range = Range1d(0, len(ynames) - 1)
+
     # Delete redundant data
     # len_xnames = len(xnames)
     # len_snplst = len(snplst)
@@ -580,17 +592,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             del box_color[x]
             del box_trans[x]
 
-    # Create indices for data - source
-    xindex = []
-    yindex = []
-    # for i in range(0, (2 * len(xname)) - 1):
-    #     xindex.append(i)
-    #     yindex.append(i)
-    for i in range(0, (len(xnames)) - 1):
-        xindex.append(i)
-        yindex.append(i)
-    xindex_range = Range1d(0, len(xname_pos) - 1)
-    yindex_range = Range1d(0, len(ynames) - 1)
 
     data = {
             'xindex': xindex,
