@@ -587,13 +587,11 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     }
 
     # Delete redundant data
-    len_xnames = len(xnames)
-    len_snplst = len(snplst)
-    for x in range(0, len_xnames - 1):
+    # len_xnames = len(xnames)
+    # len_snplst = len(snplst)
+    for x in xrange(0, len(xnames) - 1):
         # for y in range(0, len_snplst - 1):
-        if xnames[x] == ynames[x]:
-            continue
-        else:
+        if xnames[x] != ynames[x]:
             del xindex[x]
             del yindex[x]
             del xnames[x]
@@ -608,6 +606,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             del corA[x]
             del box_color[x]
             del box_trans[x]
+            
 
 
     # debug prints for 45 degree rotation
