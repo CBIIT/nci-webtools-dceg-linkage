@@ -556,7 +556,21 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # )
     # OLD BOKEH VERSION FIX GLYPHS - END
     # NEW BOKEH VERSION FIX GLYPHS - START
+
+    # Create indices for data - source
+    xindex = []
+    yindex = []
+    # for i in range(0, (2 * len(xname)) - 1):
+    #     xindex.append(i)
+    #     yindex.append(i)
+
+    for i in range(0, (len(xname)) - 1):
+        xindex.append(i)
+        yindex.append(i)
+
     data = {
+            'xindex': xindex,
+            'yindex': yindex,
             'xname': xnames,
             'xname_pos': xname_pos,
             'yname': ynames,
@@ -588,10 +602,10 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
         #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+        # CHANGE AXIS LABELS & LINE COLOR:
+        matrix_plot = figure(outline_line_color="grey", min_border_top=0, min_border_right=5,
+                             x_range=xindex, y_range=yindex,
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
@@ -599,10 +613,10 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
         #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+        # CHANGE AXIS LABELS & LINE COLOR: 
+        matrix_plot = figure(outline_line_color="grey", min_border_top=0, min_border_right=5,
+                             x_range=xindex, y_range=yindex,
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
     
 
