@@ -592,10 +592,14 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             if xn == yn and xidx == yidx:
                 # print xidx, xn, yidx, yn
                 startidx.append(xidx)
+    # Flatten list snps
+    flat_snps = [item for sublist in snps for item in sublist]
+    # Reverse flattend snp list
+    rev_snps = list(reversed(flat_snps))
     # get index of every appearance of last snp in snplst
-    recsnp = snps[-1]
-    print "snps", snps
-    print "recsnp", recsnp
+    recsnp = rev_snps[-1]
+    print "snps", rev_snps
+    print "recsnp", recsnps
     print "data[yname]", data['yname']
     recsnp_idx = [i for i, x in enumerate(data['yname']) if x == recsnp]
     print "recsnp_idx", recsnp_idx
