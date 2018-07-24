@@ -558,44 +558,18 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # NEW BOKEH VERSION FIX GLYPHS - START
 
     # Create indices for data - source
-    xindex = []
-    yindex = []
+    # xindex = []
+    # yindex = []
     # for i in range(0, (2 * len(xname)) - 1):
     #     xindex.append(i)
     #     yindex.append(i)
-    for i in range(0, (len(xnames)) - 1):
-        xindex.append(i)
-        yindex.append(i)
-    xindex_range = Range1d(0, len(xname_pos) - 1)
-    yindex_range = Range1d(0, len(ynames) - 1)
-
-    # Delete redundant data
-    # len_xnames = len(xnames)
-    # len_snplst = len(snplst)
-    # print "len xnames"
-    # print len(xnames)
-    # for x in range(0, len(xnames)):
-    #     # for y in range(0, len_snplst - 1):
-    #     if xnames[x] != ynames[x]:
-    #         del xindex[x]
-    #         del yindex[x]
-    #         del xnames[x]
-    #         del xname_pos[x]
-    #         del ynames[x]
-    #         del xA[x]
-    #         del yA[x]
-    #         del xpos[x]
-    #         del ypos[x]
-    #         del R[x]
-    #         del D[x]
-    #         del corA[x]
-    #         del box_color[x]
-    #         del box_trans[x]
-
+    # for i in range(0, len(xnames)):
+    #     xindex.append(i)
+    #     yindex.append(i)
+    # xindex_range = Range1d(0, len(xname_pos) - 1)
+    # yindex_range = Range1d(0, len(ynames) - 1)
 
     data = {
-            'xindex': xindex,
-            'yindex': yindex,
             'xname': xnames,
             'xname_pos': xname_pos,
             'yname': ynames,
@@ -610,16 +584,43 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             'box_trans': box_trans
     }
 
+    # Delete redundant data
+    startidx = []
+    # Isolate indices of elements in y=x
+    for xidx, xn in enumerate(data['xname']):
+        for yidx, yn in enumerate(data['yname']):
+            if xn == yn and xidx == yidx:
+                print xidx, xn, yidx, yn
+                startidx.append(xidx)
+    # Add range of indices between y=x and height of y at x
+    newidx = []
+    for i in startidx:
+        if (i % (len(snplst) - 1)) == 0:
+            newidx.append([i])
+        else:
+            newidx.append(range(i, i + (i % (len(snplst) - 1))))    
+    # Flatten list indices
+    flat_newidx = [item for sublist in newidx for item in sublist]
+    # Add only whitelisted indices to new data dict
+    new_data = {}
+    for key in data:
+        new_data[key] = []
+        for idx, val in enumerate(data[key]):
+            if idx in flat_newidx:
+                new_data[key].append(val)
 
     # debug prints for 45 degree rotation
     print "###################################"
     print "START - debug prints for 45 degree rotation"
     for i in data:
         print (i, data[i])
+    print "###################################"
+    for i in new_data:
+        print (i, new_data[i])
     print "END   - debug prints for 45 degree rotation"
     print "###################################"
           
-    source = ColumnDataSource(data)
+    source = ColumnDataSource(new_data)
     # NEW BOKEH VERSION FIX GLYPHS - END
 
     threshold = 70
@@ -654,12 +655,12 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # matrix_plot.rect(x='xname_pos', y='yname', width=0.70 * spacing, height=0.70, angle=0.785398, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None)
     # Trial glyphs with indices
-    # matrix_plot.rect(x='xname_pos', y='yname', width=0.66 * spacing, height=0.70, angle=0.785398, source=source,
-    #                 color="box_color", alpha="box_trans", line_color=None)
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.66 * spacing, height=0.70, angle=0.785398, source=source,
+                    color="box_color", alpha="box_trans", line_color=None)
     print "spacing"
     print spacing
-    matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
-                    color="box_color", alpha="box_trans", line_color=None) 
+    # matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
+    #                 color="box_color", alpha="box_trans", line_color=None) 
     # NEW BOKEH VERSION FIX GLYPHS - END
 
     
