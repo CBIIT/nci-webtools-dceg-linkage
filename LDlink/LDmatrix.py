@@ -594,6 +594,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                 startidx.append(xidx)
     # get index of every appearance of last snp in snplst
     recsnp = snps[-1]
+    print "snps", snps
+    print "recsnp", recsnp
+    print "data[yname]", data['yname']
     recsnp_idx = [i for i, x in enumerate(data['yname']) if x == recsnp]
     print "recsnp_idx", recsnp_idx
     # Add range of indices between y=x and height of y at x
