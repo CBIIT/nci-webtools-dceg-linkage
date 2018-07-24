@@ -481,6 +481,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         coord_snps_plot.append(xpos[i])
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
+    
+    print "early x", x
 
     # Generate error if less than two SNPs
     if len(x) < 2:
@@ -601,7 +603,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     print "snps", rev_snps
     print "recsnp", recsnp
     print "data[yname]", data['yname']
-    recsnp_idx = [i for i, x in enumerate(data['yname']) if x == recsnp]
+    recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
     print "recsnp_idx", recsnp_idx
     # Add range of indices between y=x and height of y at x
     newidx = []
@@ -741,6 +743,13 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         'snp_id_plot': snp_id_plot,
         'alleles_snp_plot': alleles_snp_plot
     }
+    
+    print "###################################"
+    for i in data_rug:
+        print (i, data_rug[i])
+    print "x", x
+    print "###################################"
+    
 
     source_rug = ColumnDataSource(data_rug)
     # NEW BOKEH VERSION FIX GLYPHS - END
