@@ -647,7 +647,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR: x_axis_type=None, y_axis_type=None,
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
-                            x_range=xr, y_range=xr, 
+                            x_range=xr, y_range=list(rsnum_lst), 
                             h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
@@ -658,7 +658,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR: x_axis_type=None, y_axis_type=None,
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
-                            x_range=xr, y_range=xr, 
+                            x_range=xr, y_range=list(rsnum_lst), 
                             h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
     
@@ -671,7 +671,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None)
     # Trial glyphs with indices
-    matrix_plot.rect(x='xname_pos', y='xname_pos', width=0.66 * spacing, height=0.70, angle=0.785398, source=source,
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.66 * spacing, height=0.70, angle=0.785398, source=source,
                     color="box_color", alpha="box_trans", line_color=None)
     print "spacing"
     print spacing
