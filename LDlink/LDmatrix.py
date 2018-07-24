@@ -592,13 +592,18 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             if xn == yn and xidx == yidx:
                 print xidx, xn, yidx, yn
                 startidx.append(xidx)
+    # get index of every appearance of last snp in snplst
+    recsnp = snps[-1]
+    recsnp_idx = [i for i, x in enumerate(data['yname']) if x == recsnp]
+    print "recsnp_idx", recsnp_idx
     # Add range of indices between y=x and height of y at x
     newidx = []
-    for i in startidx:
-        if (i % (len(snplst) - 1)) == 0:
-            newidx.append([i])
+    for i in range(0, len(startidx)):
+        if startidx[i] != recsnp_idx[i]:
+            newidx.append(range(startidx[i], recsnp_idx[i]))
+            newidx.append([recsnp_idx[i]])
         else:
-            newidx.append(range(i, i + (i % (len(snplst) - 1))))    
+            newidx.append([startidx[i]])
     # Flatten list indices
     flat_newidx = [item for sublist in newidx for item in sublist]
     # Add only whitelisted indices to new data dict
