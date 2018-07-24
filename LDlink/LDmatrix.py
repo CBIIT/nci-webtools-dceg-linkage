@@ -599,7 +599,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # get index of every appearance of last snp in snplst
     recsnp = rev_snps[-1]
     print "snps", rev_snps
-    print "recsnp", recsnps
+    print "recsnp", recsnp
     print "data[yname]", data['yname']
     recsnp_idx = [i for i, x in enumerate(data['yname']) if x == recsnp]
     print "recsnp_idx", recsnp_idx
