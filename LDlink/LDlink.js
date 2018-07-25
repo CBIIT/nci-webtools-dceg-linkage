@@ -1370,7 +1370,7 @@ function updateLDassoc() {
         if (displayError(id, jsonObj) == false) {
             $('#ldassoc-bokeh-graph-svg').empty().append(data);
             $('#ldassoc-results-container-svg').show();
-            // $('#ldassoc-results-container-svg').hide();
+            $('#ldassoc-results-container-svg').hide();
             // $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
@@ -1762,6 +1762,7 @@ function checkAlert(elementId, message, type, displayResults) {
             $('#'+elementId+'-results-container').show();
         } else {
             $('#'+elementId+'-results-container').hide();
+            $('#'+elementId+'-results-container-svg').hide();
         }
     }
 }
