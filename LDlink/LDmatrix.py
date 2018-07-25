@@ -587,80 +587,80 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     }
 
     # Delete redundant data
-    startidx = []
+    # startidx = []
     # Isolate indices of elements in y=x
-    for xidx, xn in enumerate(data['xname']):
-        for yidx, yn in enumerate(data['yname']):
-            if xn == yn and xidx == yidx:
-                # print xidx, xn, yidx, yn
-                startidx.append(xidx)
+    # for xidx, xn in enumerate(data['xname']):
+        # for yidx, yn in enumerate(data['yname']):
+            # if xn == yn and xidx == yidx:
+                # startidx.append(xidx)
     # Flatten list snps
-    flat_snps = [item for sublist in snps for item in sublist]
+    # flat_snps = [item for sublist in snps for item in sublist]
     # Reverse flattend snp list
-    rev_snps = list(reversed(flat_snps))
+    # rev_snps = list(reversed(flat_snps))
     # get index of every appearance of last snp in snplst
-    recsnp = rev_snps[-1]
-    print "snps", rev_snps
-    print "recsnp", recsnp
-    print "data[yname]", data['yname']
-    recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
-    print "recsnp_idx", recsnp_idx
+    # recsnp = rev_snps[-1]
+    # print "snps", rev_snps
+    # print "recsnp", recsnp
+    # print "data[yname]", data['yname']
+    # recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
+    # print "recsnp_idx", recsnp_idx
     # Add range of indices between y=x and height of y at x
-    newidx = []
-    print "startidx", startidx
-    print "recsnp_idx", recsnp_idx
-    for i in range(0, len(startidx)):
-        if startidx[i] != recsnp_idx[i]:
-            newidx.append(range(startidx[i], recsnp_idx[i]))
-            newidx.append([recsnp_idx[i]])
-        else:
-            newidx.append([startidx[i]])
+    # newidx = []
+    # print "startidx", startidx
+    # print "recsnp_idx", recsnp_idx
+    # for i in range(0, len(startidx)):
+    #     if startidx[i] != recsnp_idx[i]:
+    #         newidx.append(range(startidx[i], recsnp_idx[i]))
+    #         newidx.append([recsnp_idx[i]])
+    #     else:
+    #         newidx.append([startidx[i]])
     # Flatten list indices
-    flat_newidx = [item for sublist in newidx for item in sublist]
+    # flat_newidx = [item for sublist in newidx for item in sublist]
     # Add only whitelisted indices to new data dict
-    new_data = {}
-    for key in data:
-        new_data[key] = []
-        for idx, val in enumerate(data[key]):
-            if idx in flat_newidx:
-                new_data[key].append(val)
+    # new_data = {}
+    # for key in data:
+    #     new_data[key] = []
+    #     for idx, val in enumerate(data[key]):
+    #         if idx in flat_newidx:
+    #             new_data[key].append(val)
 
     # debug prints for 45 degree rotation
-    print "###################################"
-    print "START - debug prints for 45 degree rotation"
-    for i in data:
-        print (i, data[i])
-    print "###################################"
-    for i in new_data:
-        print (i, new_data[i])
-    print "END   - debug prints for 45 degree rotation"
-    print "###################################"
+    # print "###################################"
+    # print "START - debug prints for 45 degree rotation"
+    # for i in data:
+    #     print (i, data[i])
+    # print "###################################"
+    # for i in new_data:
+    #     print (i, new_data[i])
+    # print "END   - debug prints for 45 degree rotation"
+    # print "###################################"
           
-    source = ColumnDataSource(new_data)
+    # source = ColumnDataSource(new_data)
+    source = ColumnDataSource(data)
     # NEW BOKEH VERSION FIX GLYPHS - END
 
     threshold = 70
     if len(snps) < threshold:
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-        #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
-        #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
-        #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-        # CHANGE AXIS LABELS & LINE COLOR: x_axis_type=None, y_axis_type=None,
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
-                            x_range=xr, y_range=list(rsnum_lst), 
-                            h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
-                            tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
+                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+        # CHANGE AXIS LABELS & LINE COLOR: 
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
+        #                     x_range=xr, y_range=list(rsnum_lst), 
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-        #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
-        #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', logo=None,
-        #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-        # CHANGE AXIS LABELS & LINE COLOR: x_axis_type=None, y_axis_type=None,
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
-                            x_range=xr, y_range=list(rsnum_lst), 
-                            h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
-                            tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
+                             x_range=xr, y_range=list(reversed(rsnum_lst)),
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+        # CHANGE AXIS LABELS & LINE COLOR:
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
+        #                     x_range=xr, y_range=list(rsnum_lst), 
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
     
 
     # OLD BOKEH VERSION FIX GLYPHS - START
@@ -668,13 +668,13 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     #                  color="box_color", alpha="box_trans", line_color=None)
     # OLD BOKEH VERSION FIX GLYPHS - END
     # NEW BOKEH VERSION FIX GLYPHS - START
-    # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
-    #                 color="box_color", alpha="box_trans", line_color=None)
-    # Trial glyphs with indices
-    matrix_plot.rect(x='xname_pos', y='yname', width=0.66 * spacing, height=0.70, angle=0.785398, source=source,
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
                     color="box_color", alpha="box_trans", line_color=None)
-    print "spacing"
-    print spacing
+    # Rotate LDmatrix 45 degrees
+    # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=0.785398, source=source,
+    #                 color="box_color", alpha="box_trans", line_color=None)
+    # print "spacing"
+    # print spacing
     # matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None) 
     # NEW BOKEH VERSION FIX GLYPHS - END
