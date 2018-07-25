@@ -157,6 +157,7 @@ $(document).ready(function() {
       }else{
         $('#ldassoc-file').prop('disabled', false);
         $('#ldassoc').prop('disabled', true);
+        $('#ldassoc-downloadSVG').prop('disabled', true);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
@@ -269,6 +270,11 @@ $(document).ready(function() {
     $('.ldlinkForm').on('submit', function(e) {
         //alert('Validate');
         calculate(e);
+    });
+
+    // Click Download SVG button
+    $("#ldassoc-downloadSVG").click(function(e) {
+        $(".bk-toolbar-button").eq(17).trigger("click");
     });
 
     setupTabs();
@@ -1076,7 +1082,6 @@ function calculate(e) {
 
 function initCalculate(id) {
     $('#'+id+'-results-container').hide();
-    $('#'+id+'-results-container-svg').hide();
     $('#'+id+'-message').hide();
     $('#'+id+'-message-warning').hide();
 }
@@ -1332,16 +1337,16 @@ function updateLDassoc() {
         //JSON.parse() cleans up this json string.
 
         // create bokeh object with output_backend=canvas from svg
-        // var dataString = data[0];
-        // dataCanvasString = dataString.replace(/svg/g, "canvas");
-        // var dataCanvas = new Object([dataCanvasString, data[1]]);
+        var dataString = data[0];
+        dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvas = new Object([dataCanvasString, data[1]]);
 
-        // var jsonObjCanvas;
-        // if(typeof dataCanvas == 'string') {
-        //     jsonObjCanvas = JSON.parse(dataCanvas);
-        // } else {
-        //     jsonObjCanvas = dataCanvas;
-        // }
+        var jsonObjCanvas;
+        if(typeof dataCanvas == 'string') {
+            jsonObjCanvas = JSON.parse(dataCanvas);
+        } else {
+            jsonObjCanvas = dataCanvas;
+        }
 
         var jsonObj;
         if(typeof data == 'string') {
@@ -1351,19 +1356,19 @@ function updateLDassoc() {
         }
 
         // generate shown canvas graph
-        // if (displayError(id, jsonObjCanvas) == false) {
-        //     $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
-        //     $('#' + id + '-results-container').show(); 
-        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
-        // }
-
-        if (displayError(id, jsonObj) == false) {
-            $('#ldassoc-bokeh-graph').empty().append(data);
-            $('#ldassoc-bokeh-graph-svg').empty().append(data);
+        if (displayError(id, jsonObjCanvas) == false) {
+            $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
             $('#' + id + '-results-container').show();
-            $('#' + id + '-results-container-svg').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         }
+
+        // if (displayError(id, jsonObj) == false) {
+        //     $('#ldassoc-bokeh-graph').empty().append(data);
+        //     $('#ldassoc-bokeh-graph-svg').empty().append(data);
+        //     $('#' + id + '-results-container').show();
+        //     $('#' + id + '-results-container-svg').show();
+        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
+        // }
 
         // generate shown canvas graph
         // if (displayError(id, jsonObj) == false) {s
@@ -1373,12 +1378,12 @@ function updateLDassoc() {
         // }
 
         // generate hidden svg graph
-        // if (displayError(id, jsonObj) == false) {
-        //     $('#ldassoc-bokeh-graph-svg').empty().append(data);
-        //     $('#ldassoc-results-container-svg').show();
-        //     // $('#ldassoc-results-container-svg').hide();
-        //     // $('#ldassoc-downloadSVG').removeAttr('disabled');
-        // }
+        if (displayError(id, jsonObj) == false) {
+            $('#ldassoc-bokeh-graph-svg').empty().append(data);
+            $('#ldassoc-results-container-svg').show();
+            // $('#ldassoc-results-container-svg').hide();
+            $('#ldassoc-downloadSVG').removeAttr('disabled');
+        }
 
         $("#"+id+"-loading").hide();
     });
