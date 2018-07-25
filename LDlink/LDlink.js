@@ -1400,12 +1400,20 @@ function updateLDassoc() {
         }, 100);
 
         setTimeout(function() {
-            var tb = $(".bk-button-bar");
-            $(tb).append('<div class="bk-button-bar-list"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-            $("#ldassoc-downloadSVG").click(function(e) {
-                $(".bk-toolbar-button").eq(17).trigger("click");
+            var tb=$(".bk-root");
+	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+	        $("#ldassoc-downloadSVG").click(function(e) {
+	            $(".bk-toolbar-button").eq(17).trigger("click");
             });
-        }, 100);
+        }, 100);    
+
+        // setTimeout(function() {
+        //     var tb = $(".bk-button-bar");
+        //     $(tb).append('<div class="bk-button-bar-list"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+        //     $("#ldassoc-downloadSVG").click(function(e) {
+        //         $(".bk-toolbar-button").eq(17).trigger("click");
+        //     });
+        // }, 100);
 
     });
 
