@@ -1333,6 +1333,7 @@ function updateLDassoc() {
         // var dataString = data[0];
         // dataCanvasString = dataString.replace(/svg/g, "canvas");
         // var dataCanvas = new Object([dataCanvasString, data[1]]);
+
         // var jsonObjCanvas;
         // if(typeof dataCanvas == 'string') {
         //     jsonObjCanvas = JSON.parse(dataCanvas);
@@ -1360,6 +1361,7 @@ function updateLDassoc() {
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         }
 
+        // generate shown canvas graph
         // if (displayError(id, jsonObj) == false) {
         //     $('#ldassoc-bokeh-graph').empty().append(data);
         //     $('#' + id + '-results-container').show();
@@ -1371,7 +1373,7 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph-svg').empty().append(data);
             $('#ldassoc-results-container-svg').show();
             $('#ldassoc-results-container-svg').hide();
-            // $('#ldassoc-downloadSVG').removeAttr('disabled');
+            $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
         $("#"+id+"-loading").hide();
