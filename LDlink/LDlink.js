@@ -1372,8 +1372,8 @@ function updateLDassoc() {
         if (displayError(id, jsonObj) == false) {
             $('#ldassoc-bokeh-graph-svg').empty().append(data);
             $('#ldassoc-results-container-svg').show();
-            $('#ldassoc-results-container-svg').hide();
-            $('#ldassoc-downloadSVG').removeAttr('disabled');
+            // $('#ldassoc-results-container-svg').hide();
+            // $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
         $("#"+id+"-loading").hide();
@@ -1385,14 +1385,14 @@ function updateLDassoc() {
         $btn.button('reset');
 
         setTimeout(function() {
-            var checkbox=$(".bk-toolbar-inspector").children().first();
+            var checkbox = $(".bk-toolbar-inspector").children().first();
             $(checkbox).attr('id', 'hover');
             $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');
         }, 100);
 
         setTimeout(function() {
-            var tb=$(".bk-root");
-            $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+            var tb = $(".bk-button-bar");
+            $(tb).append('<div class="bk-button-bar-list"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
             $("#ldassoc-downloadSVG").click(function(e) {
                 $(".bk-toolbar-button").eq(17).trigger("click");
             });
