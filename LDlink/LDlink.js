@@ -1130,14 +1130,8 @@ function updateData(id) {
 }
 
 function isBrowseSet(elementId) {
-    // console.log("Check browse: "+elementId);
-
-    // var browse =  $('#'+elementId+'-file').val();
     var query = $('#header-values');
     var isVisible = query.is(':visible');
-    console.log("did it show? " + isVisible.toString());
-    // console.dir("File chosen? " + browse.toString());
-    // if(browse != "") {
     if(isVisible === true) {
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
@@ -1149,10 +1143,7 @@ function isBrowseSet(elementId) {
 }
 
 function isRegionSet(elementId) {
-    // console.log("Check region: "+elementId);
-
     var region =  $('#region-codes-menu1').html().replace(/&nbsp;<span class="caret"><\/span>/, "");
-    // console.log("Anything there? " + region);
     if(region == "Gene" || region == "Region" || region == "Variant") {
         $('#'+elementId+'-region-codes-zero').popover('hide');
         return true;
@@ -1270,11 +1261,7 @@ function areRegionDetailsSet(elementId) {
 }
 
 function isPopulationSet(elementId) {
-    //console.log("Check population: "+elementId);
-
     var population =  $('#'+elementId+'-population-codes').val();
-    console.dir(population);
-    console.log(population);
     if(population == null ) {
         $('#'+elementId+'-population-codes-zero').popover('show');
         setTimeout(function() { $('#'+elementId+'-population-codes-zero').popover('hide'); }, 4000);
@@ -1306,8 +1293,6 @@ function updateLDassoc() {
         useEx: $('#example-gwas').is(':checked')? "True" :"False"
     };
 
-    console.log("Transcript " + ldInputs.transcript.toString());
-    console.log("Annotate " + ldInputs.annotate.toString());
 
     ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
     ldInputs.columns.position = $("#assoc-position > button").val();
@@ -1323,7 +1308,6 @@ function updateLDassoc() {
     //variant
     ldInputs.variant.index = $("#region-variant-index").val();
     ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
-    console.dir(ldInputs);
 
     $('#ldassoc-genome').attr('href',
         'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
@@ -1344,8 +1328,17 @@ function updateLDassoc() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         //JSON.parse() cleans up this json string.
-        console.log("Success!");
-        console.dir(data);
+
+        // create bokeh object with output_backend=canvas from svg
+        // var dataString = data[0];
+        // dataCanvasString = dataString.replace(/svg/g, "canvas");
+        // var dataCanvas = new Object([dataCanvasString, data[1]]);
+        // var jsonObjCanvas;
+        // if(typeof dataCanvas == 'string') {
+        //     jsonObjCanvas = JSON.parse(dataCanvas);
+        // } else {
+        //     jsonObjCanvas = dataCanvas;
+        // }
 
         var jsonObj;
         if(typeof data == 'string') {
@@ -1354,12 +1347,33 @@ function updateLDassoc() {
             jsonObj = data;
         }
 
+        // generate shown canvas graph
+        // if (displayError(id, jsonObjCanvas) == false) {
+        //     $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
+        //     $('#' + id + '-results-container').show(); 
+        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
+        // }
+
         if (displayError(id, jsonObj) == false) {
             $('#ldassoc-bokeh-graph').empty().append(data);
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
-
         }
+
+        // if (displayError(id, jsonObj) == false) {
+        //     $('#ldassoc-bokeh-graph').empty().append(data);
+        //     $('#' + id + '-results-container').show();
+        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
+        // }
+
+        // generate hidden svg graph
+        if (displayError(id, jsonObj) == false) {
+            $('#ldassoc-bokeh-graph-svg').empty().append(data);
+            $('#ldassoc-results-container-svg').show();
+            // $('#ldassoc-results-container-svg').hide();
+            // $('#ldassoc-downloadSVG').removeAttr('disabled');
+        }
+
         $("#"+id+"-loading").hide();
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -1368,9 +1382,20 @@ function updateLDassoc() {
     ajaxRequest.always(function() {
         $btn.button('reset');
 
-    setTimeout(function(){var checkbox=$(".bk-toolbar-inspector").children().first();
-    $(checkbox).attr('id', 'hover');
-    $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');},100);
+        setTimeout(function() {
+            var checkbox=$(".bk-toolbar-inspector").children().first();
+            $(checkbox).attr('id', 'hover');
+            $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');
+        }, 100);
+
+        setTimeout(function() {
+            var tb=$(".bk-root");
+            $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+            $("#ldassoc-downloadSVG").click(function(e) {
+                $(".bk-toolbar-button").eq(17).trigger("click");
+            });
+        }, 100);
+
     });
 
     hideLoadingIcon(ajaxRequest, id);
@@ -1822,7 +1847,7 @@ function populateSNPwarnings(data) {
         if(filtered.comment != undefined) {
             if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
                 // Place message on the warning table.
-                console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
+                // console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
                 snpclipData.warnings.push(filtered);
 
                 // Remove rs_numbers with warnings from thinned snp_list
@@ -1833,7 +1858,7 @@ function populateSNPwarnings(data) {
                 
             }
         } else {
-            console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
+            // console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
             // console.log(JSON.stringify(filtered));
             snpclipData.warnings.push(filtered);
 
@@ -2242,8 +2267,8 @@ function getLDAssocResults(jsonfile) {
     });
     ajaxRequest.success(function(data) {
         //catch error and warning in json
-        console.warn("HERE IS THE ldassoc data");
-        console.dir(data);
+        // console.warn("HERE IS THE ldassoc data");
+        // console.dir(data);
         if (displayError(id, data) == false) {
             RefreshTable('#new-ldassoc', data);
             $("#ldassoc-namespace").empty();
