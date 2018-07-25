@@ -861,6 +861,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
+	from bokeh.io import export_svgs
 
 	reset_output()
 	# OLD BOKEH VERSION FIX GLYPHS - START
@@ -1129,6 +1130,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		gene_plot.toolbar_location = "below"
 
+		assoc_plot.output_backend = "svg"
+		rug.output_backend = "svg"
+		gene_plot.output_backend = "svg"
+
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
 
@@ -1256,6 +1261,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_c_plot.yaxis.major_label_text_color = None
 
 		gene_c_plot.toolbar_location = "below"
+
+		assoc_plot.output_backend = "svg"
+		rug.output_backend = "svg"
+		gene_c_plot.output_backend = "svg"
 
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))

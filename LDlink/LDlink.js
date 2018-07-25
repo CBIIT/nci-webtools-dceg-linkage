@@ -31,7 +31,7 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
-    console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
+    // console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
@@ -105,9 +105,10 @@ $(document).ready(function() {
     });
 
     $('#ldassoc').prop('disabled', true);
+    $('#ldassoc-downloadSVG').prop('disabled', true);
 
     $("#example-gwas").click(function(e){
-      console.log("Use example GWAS data.");
+    //   console.log("Use example GWAS data.");
       var useEx = document.getElementById('example-gwas');
       // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
@@ -145,15 +146,15 @@ $(document).ready(function() {
         $("#region-region-start-coord").val("chr8:128289591");
         $("#region-region-end-coord").val("chr8:128784397");
         $("#region-region-index").val("rs7837688");
-        console.log($("#region-region-start-coord").val());
-        console.log($("#region-region-end-coord").val());
-        console.log($("#region-region-index").val());
+        // console.log($("#region-region-start-coord").val());
+        // console.log($("#region-region-end-coord").val());
+        // console.log($("#region-region-index").val());
 
         $("#ldassoc-population-codes").val('');
         refreshPopulation([],"ldassoc");
         $("#ldassoc-population-codes").val(["CEU"]);
         refreshPopulation(["CEU"],"ldassoc");
-        console.log($("#ldassoc-population-codes").val());
+        // console.log($("#ldassoc-population-codes").val());
       }else{
         $('#ldassoc-file').prop('disabled', false);
         $('#ldassoc').prop('disabled', true);
@@ -169,7 +170,7 @@ $(document).ready(function() {
         populateAssocDropDown([]);
         $("#header-values").hide();
         $('#ldassoc-file').val('');
-        console.log("Don't use example GWAS data.");
+        // console.log("Don't use example GWAS data.");
         $("#region-gene-container").hide();
         $("#region-region-container").hide();
         $("#region-variant-container").hide();
@@ -180,7 +181,7 @@ $(document).ready(function() {
         $("#region-region-index").val('');
         $("#ldassoc-population-codes").val('');
         refreshPopulation([],"ldassoc");
-        console.log($("#ldassoc-population-codes").val());
+        // console.log($("#ldassoc-population-codes").val());
       }
     });
 
@@ -262,7 +263,6 @@ $(document).ready(function() {
     $.each(modules, function(key, id) {
         buildPopulationDropdown(id + "-population-codes");
         $("#"+ id + "-results-container").hide();
-        $("#"+ id + "-results-container-svg").hide();
         $('#'+ id + '-message').hide();
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
@@ -309,7 +309,7 @@ function resetBootstrapSelector(id) {
 }
 
 function createFileSelectTrigger() {
-    console.log("createFileSelectTrigger");
+    // console.log("createFileSelectTrigger");
     var input = $(this), numFiles = input.get(0).files ?
     input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
     input.trigger('fileselect', [numFiles, label]);
@@ -344,7 +344,7 @@ function uploadFile2() {
     restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
     var filename = $("#ldassocFile").val();
-    console.log(filename);
+    // console.log(filename);
 
     var fileInput = document.getElementById('ldassoc-file');
     var file = fileInput.files[0];
@@ -425,16 +425,16 @@ function showCommError(e) {
 function createFileSelectEvent() {
     // Add file select file listener
     $('.btn-snp :file').on('fileselect', function(event, numFiles, label) {
-        console.log(label);
+        // console.log(label);
         $(this).parents('.input-group').find(':text').val(label);
         populateTextArea(event, numFiles, label);
 
     });
     //Customize for ldAssoc
     $('.btn-csv-file :file').on('fileselect', function(event, numFiles, label) {
-        console.log(label);
+        // console.log(label);
         $(this).parents('.input-group').find(':text').val(label);
-        console.log("Event");
+        // console.log("Event");
         populateHeaderValues(event, numFiles, label);
         uploadFile2();
         $("#header-values").show();
@@ -456,12 +456,12 @@ function readSingleFile(evt) {
     if (f) {
       var r = new FileReader();
       r.onload = function(e) {
-        console.log( "Got the file.n"
-              +"name: " + f.name + "n"
-              +"type: " + f.type + "n"
-              +"size: " + f.size + " bytesn"
-              + "starts with: "
-        );
+        // console.log( "Got the file.n"
+        //       +"name: " + f.name + "n"
+        //       +"type: " + f.type + "n"
+        //       +"size: " + f.size + " bytesn"
+        //       + "starts with: "
+        // );
 
         var contents = e.target.result;
         var defaults = {
@@ -1338,7 +1338,7 @@ function updateLDassoc() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data[0];
-        dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvasString = dataString.replace(/svg/g, "canvas");
         var dataCanvas = new Object([dataCanvasString, data[1]]);
 
         var jsonObjCanvas;
@@ -1362,26 +1362,11 @@ function updateLDassoc() {
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         }
 
-        // if (displayError(id, jsonObj) == false) {
-        //     $('#ldassoc-bokeh-graph').empty().append(data);
-        //     $('#ldassoc-bokeh-graph-svg').empty().append(data);
-        //     $('#' + id + '-results-container').show();
-        //     $('#' + id + '-results-container-svg').show();
-        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
-        // }
-
-        // generate shown canvas graph
-        // if (displayError(id, jsonObj) == false) {s
-        //     $('#ldassoc-bokeh-graph').empty().append(data);
-        //     $('#' + id + '-results-container').show();
-        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
-        // }
-
         // generate hidden svg graph
         if (displayError(id, jsonObj) == false) {
             $('#ldassoc-bokeh-graph-svg').empty().append(data);
             $('#ldassoc-results-container-svg').show();
-            // $('#ldassoc-results-container-svg').hide();
+            $('#ldassoc-results-container-svg').hide();
             $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
@@ -1406,14 +1391,6 @@ function updateLDassoc() {
 	            $(".bk-toolbar-button").eq(17).trigger("click");
             });
         }, 100);    
-
-        // setTimeout(function() {
-        //     var tb = $(".bk-button-bar");
-        //     $(tb).append('<div class="bk-button-bar-list"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-        //     $("#ldassoc-downloadSVG").click(function(e) {
-        //         $(".bk-toolbar-button").eq(17).trigger("click");
-        //     });
-        // }, 100);
 
     });
 
@@ -1779,7 +1756,6 @@ function checkAlert(elementId, message, type, displayResults) {
         $('#'+prefix).show();
         if (typeof displayResults !== 'undefined' && displayResults) {
             $('#'+elementId+'-results-container').show();
-            $('#'+elementId+'-results-container-svg').show();
         } else {
             $('#'+elementId+'-results-container').hide();
             $('#'+elementId+'-results-container-svg').hide();
@@ -2353,7 +2329,6 @@ function displayCommFail(id, jqXHR, textStatus) {
     $('#' + id + '-message-content').empty().append(message);
     $('#' + id + '-progress').hide();
     $('#' + id+ '-results-container').hide();
-    $('#' + id+ '-results-container-svg').hide();
     //hide loading icon
     $('#'+id+"-loading").hide();
 
@@ -2478,7 +2453,6 @@ function displayError(id, data) {
         $('#'+id+"-download-links").hide();
 
         $('#'+id+"-results-container").hide();
-        $('#'+id+"-results-container-svg").hide();
 
         error = true;
     }
@@ -2486,7 +2460,7 @@ function displayError(id, data) {
 }
 
 function displayCommFail(id, jqXHR, textStatus) {
-    console.log(textStatus);
+    // console.log(textStatus);
     console.dir(jqXHR);
     console.warn("CommFail\n"+"Status: "+textStatus);
     //$("#calculating-spinner").modal('hide');
@@ -2521,12 +2495,12 @@ function showMessage(id, message, message_type) {
     $("#help").hide();
     $("#icon").css('visibility', 'visible');
 
-    console.log("Show Message");
+    // console.log("Show Message");
 
     var css_class = "";
     var header = "";
     var container_id = id+"-message-container";
-    console.log(container_id);
+    // console.log(container_id);
 
     if(message_type.toUpperCase() == 'ERROR') {
         css_class = 'panel-danger';
@@ -2958,13 +2932,13 @@ $(document).ready(function() {
 function validateGeneName() {
     var errorMsg = "Enter a valid Gene Name";
     var textarea = this;
-    console.log($(textarea).attr('pattern'));
+    // console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
     //Check to see if user selected chr10 thru chr22.
     var currentValue = $(this).val();
     $(this).val(currentValue.toUpperCase());
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     if (hasError) {
@@ -2977,11 +2951,11 @@ function validateGeneName() {
 function validateChr() {
     var errorMsg = "chr(1-22 or X or Y):######";
     var textarea = this;
-    console.log($(textarea).attr('pattern'));
+    // console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
     var currentValue = $(this).val();
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     //textarea.setCustomValidity('Hello');
@@ -2995,11 +2969,11 @@ function validateChr() {
 function validateIndex() {
     var errorMsg = "chr(1-22 or X or Y):###### or rs######";
     var textarea = this;
-    console.log($(textarea).attr('pattern'));
+    // console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
     var currentValue = $(this).val();
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     //textarea.setCustomValidity('Hello');
@@ -3016,7 +2990,7 @@ function validateBasePairWindows() {
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     var currentValue = $(this).val();
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     if (hasError) {
@@ -3089,11 +3063,11 @@ function parseFile(file, callback) {
             callback(evt.target.result); // callback for handling read chunk
             return; //Only call the callback once. return.
         } else {
-            console.log("Read error: " + evt.target.error);
+            // console.log("Read error: " + evt.target.error);
             return;
         }
         if (offset >= fileSize) {
-            console.log("Done reading file");
+            // console.log("Done reading file");
             return;
         }
         // of to the next chunk
