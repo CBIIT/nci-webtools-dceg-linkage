@@ -261,6 +261,7 @@ $(document).ready(function() {
     $.each(modules, function(key, id) {
         buildPopulationDropdown(id + "-population-codes");
         $("#"+ id + "-results-container").hide();
+        $("#"+ id + "-results-container-svg").hide();
         $('#'+ id + '-message').hide();
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
@@ -1075,6 +1076,7 @@ function calculate(e) {
 
 function initCalculate(id) {
     $('#'+id+'-results-container').hide();
+    $('#'+id+'-results-container-svg').hide();
     $('#'+id+'-message').hide();
     $('#'+id+'-message-warning').hide();
 }
@@ -1357,24 +1359,26 @@ function updateLDassoc() {
 
         if (displayError(id, jsonObj) == false) {
             $('#ldassoc-bokeh-graph').empty().append(data);
+            $('#ldassoc-bokeh-graph-svg').empty().append(data);
             $('#' + id + '-results-container').show();
+            $('#' + id + '-results-container-svg').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         }
 
         // generate shown canvas graph
-        // if (displayError(id, jsonObj) == false) {
+        // if (displayError(id, jsonObj) == false) {s
         //     $('#ldassoc-bokeh-graph').empty().append(data);
         //     $('#' + id + '-results-container').show();
         //     getLDAssocResults('assoc'+ldInputs.reference+".json");
         // }
 
         // generate hidden svg graph
-        if (displayError(id, jsonObj) == false) {
-            $('#ldassoc-bokeh-graph-svg').empty().append(data);
-            $('#ldassoc-results-container-svg').show();
-            // $('#ldassoc-results-container-svg').hide();
-            // $('#ldassoc-downloadSVG').removeAttr('disabled');
-        }
+        // if (displayError(id, jsonObj) == false) {
+        //     $('#ldassoc-bokeh-graph-svg').empty().append(data);
+        //     $('#ldassoc-results-container-svg').show();
+        //     // $('#ldassoc-results-container-svg').hide();
+        //     // $('#ldassoc-downloadSVG').removeAttr('disabled');
+        // }
 
         $("#"+id+"-loading").hide();
     });
@@ -1762,6 +1766,7 @@ function checkAlert(elementId, message, type, displayResults) {
         $('#'+prefix).show();
         if (typeof displayResults !== 'undefined' && displayResults) {
             $('#'+elementId+'-results-container').show();
+            $('#'+elementId+'-results-container-svg').show();
         } else {
             $('#'+elementId+'-results-container').hide();
             $('#'+elementId+'-results-container-svg').hide();
@@ -2335,6 +2340,7 @@ function displayCommFail(id, jqXHR, textStatus) {
     $('#' + id + '-message-content').empty().append(message);
     $('#' + id + '-progress').hide();
     $('#' + id+ '-results-container').hide();
+    $('#' + id+ '-results-container-svg').hide();
     //hide loading icon
     $('#'+id+"-loading").hide();
 
@@ -2459,6 +2465,7 @@ function displayError(id, data) {
         $('#'+id+"-download-links").hide();
 
         $('#'+id+"-results-container").hide();
+        $('#'+id+"-results-container-svg").hide();
 
         error = true;
     }
