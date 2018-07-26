@@ -513,6 +513,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     from bokeh.models import HoverTool, LinearAxis, Range1d
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
+    from bokeh.io import export_svgs
 
     reset_output()
 
@@ -802,6 +803,12 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
                    text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 
     gene_plot.toolbar_location = "below"
+
+    proxy_plot.output_backend = "svg"
+    rug.output_backend = "svg"
+    gene_plot.output_backend = "svg"
+    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
 
     # Combine plots into a grid
     out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,

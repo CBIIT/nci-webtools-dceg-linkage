@@ -461,6 +461,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.models import HoverTool, LinearAxis, Range1d
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
+    from bokeh.io import export_svgs
     from math import pi
 
     reset_output()
@@ -918,6 +919,12 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     gene_plot.yaxis.major_label_text_color = None
 
     gene_plot.toolbar_location = "below"
+
+    matrix_plot.output_backend = "svg"
+    rug.output_backend = "svg"
+    gene_plot.output_backend = "svg"
+    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
 
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))

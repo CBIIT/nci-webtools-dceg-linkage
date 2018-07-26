@@ -273,9 +273,9 @@ $(document).ready(function() {
     });
 
     // Click Download SVG button
-    $("#ldassoc-downloadSVG").click(function(e) {
-        $(".bk-toolbar-button").eq(17).trigger("click");
-    });
+    // $("#ldassoc-downloadSVG").click(function(e) {
+    //     $(".bk-toolbar-button").eq(17).trigger("click");
+    // });
 
     setupTabs();
     autoCalculate();
@@ -1348,12 +1348,12 @@ function updateLDassoc() {
             jsonObjCanvas = dataCanvas;
         }
 
-        var jsonObj;
-        if(typeof data == 'string') {
-            jsonObj = JSON.parse(data);
-        } else {
-            jsonObj = data;
-        }
+        // var jsonObj;
+        // if(typeof data == 'string') {
+        //     jsonObj = JSON.parse(data);
+        // } else {
+        //     jsonObj = data;
+        // }
 
         // generate shown canvas graph and hidden svg graph
         if ((displayError(id, jsonObjCanvas) == false) && (displayError(id, jsonObj) == false)) {
@@ -1362,9 +1362,17 @@ function updateLDassoc() {
             console.log("data");
             console.log(data);
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
-            $('#ldassoc-svg-bokeh-graph').empty().append(data);
+            // $('#ldassoc-svg-bokeh-graph').empty().append(data);
 
             $('#ldassoc-downloadSVG').removeAttr('disabled');
+            // place download svg button
+            var tb=$(".bk-root");
+	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+	        $("#ldassoc-downloadSVG").click(function(e) {
+                e.preventDefault();
+                window.open("tmp/assoc_plot_" + ldInputs.reference + ".svg");
+                window.open("tmp/gene_plot_" + ldInputs.reference + ".svg");
+            });
             
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
@@ -1401,13 +1409,15 @@ function updateLDassoc() {
             $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');
         }, 100);
 
-        setTimeout(function() {
-            var tb=$(".bk-root");
-	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-	        $("#ldassoc-downloadSVG").click(function(e) {
-	            $(".bk-toolbar-button").eq(17).trigger("click");
-            });
-        }, 100);    
+        // setTimeout(function() {
+        //     var tb=$(".bk-root");
+	    //     $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+	    //     $("#ldassoc-downloadSVG").click(function(e) {
+        //         e.preventDefault();
+        //         window.open("tmp/assoc_plot_" + ldInputs.reference + ".svg");
+        //         window.open("tmp/gene_plot_" + ldInputs.reference + ".svg");
+        //     });
+        // }, 100);    
 
     });
 
@@ -2064,7 +2074,28 @@ function updateLDmatrix() {
         //console.log(typeof data);
         //console.dir(data);
         if(typeof data == 'string') {
-            $('#ldmatrix-bokeh-graph').empty().append(data);
+            // create bokeh object with output_backend=canvas from svg
+            var dataString = data[0];
+            var dataCanvasString = dataString.replace(/svg/g, "canvas");
+            var dataCanvas = new Object([dataCanvasString, data[1]]);
+
+            var jsonObjCanvas;
+            if(typeof dataCanvas == 'string') {
+                jsonObjCanvas = JSON.parse(dataCanvas);
+            } else {
+                jsonObjCanvas = dataCanvas;
+            }
+
+            $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
+            $('#ldassoc-downloadSVG').removeAttr('disabled');
+            // place download svg button
+            var tb=$(".bk-root");
+	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldmatrix-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldmatrix-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+	        $("#ldmatrix-downloadSVG").click(function(e) {
+                e.preventDefault();
+                window.open("tmp/assoc_plot_" + ldmatrixInputs.reference + ".svg");
+                window.open("tmp/gene_plot_" + ldmatrixInputs.reference + ".svg");
+            });
             $('#' + id + '-progress-container').hide();
             $('#' + id + '-results-container').show();
             getLDmatrixResults(ldmatrixInputs.reference + ".json",
@@ -2072,7 +2103,6 @@ function updateLDmatrix() {
         } else {
             displayError(id, data);
         }
-
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
