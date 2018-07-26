@@ -1358,19 +1358,20 @@ function updateLDassoc() {
         // generate shown canvas graph
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
+            console.log(dataCanvas);
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         }
 
         // generate hidden svg graph
-        if (displayError(id, jsonObj) == false) {
-            console.log(data);
-            data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
-            data[1] = data[1] + '</div>';
-            $('#ldassoc-bokeh-graph').append(data);
-            // $(svg_plot).show();
-            $('#ldassoc-downloadSVG').removeAttr('disabled');
-        }
+        // if (displayError(id, jsonObj) == false) {
+        //     console.log(data);
+        //     data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
+        //     data[1] = data[1] + '</div>';
+        //     $('#ldassoc-bokeh-graph').append(data);
+        //     // $(svg_plot).show();
+        //     $('#ldassoc-downloadSVG').removeAttr('disabled');
+        // }
 
         // hide svg plot
         // var svg_plot = $(".bk-root").children()[2];
