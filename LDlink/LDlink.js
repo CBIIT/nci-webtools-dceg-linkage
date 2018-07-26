@@ -1355,26 +1355,33 @@ function updateLDassoc() {
             jsonObj = data;
         }
 
-        // generate shown canvas graph
-        if (displayError(id, jsonObjCanvas) == false) {
-            $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
+        // generate shown canvas graph and hidden svg graph
+        if ((displayError(id, jsonObjCanvas) == false) && (displayError(id, jsonObj) == false)) {
+            console.log("dataCanvas");
             console.log(dataCanvas);
-            // $('#' + id + '-results-container').show();
-            // getLDAssocResults('assoc'+ldInputs.reference+".json");
-        }
-
-        // generate hidden svg graph
-        if (displayError(id, jsonObj) == false) {
+            console.log("data");
             console.log(data);
-            // data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
-            // data[1] = data[1] + '</div>';
+            $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
             $('#ldassoc-svg-bokeh-graph').empty().append(data);
-            // $(svg_plot).show();
-            $('#ldassoc-downloadSVG').removeAttr('disabled');
 
+            $('#ldassoc-downloadSVG').removeAttr('disabled');
+            
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         }
+
+        // // generate hidden svg graph
+        // if (displayError(id, jsonObj) == false) {
+        //     console.log(data);
+        //     // data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
+        //     // data[1] = data[1] + '</div>';
+        //     
+        //     // $(svg_plot).show();
+        //     $('#ldassoc-downloadSVG').removeAttr('disabled');
+
+        //     $('#' + id + '-results-container').show();
+        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
+        // }
 
         // hide svg plot
         // var svg_plot = $(".bk-root").children()[2];
