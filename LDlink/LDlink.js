@@ -1356,7 +1356,7 @@ function updateLDassoc() {
         // }
 
         // generate shown canvas graph and hidden svg graph
-        if ((displayError(id, jsonObjCanvas) == false) && (displayError(id, jsonObj) == false)) {
+        if (displayError(id, jsonObjCanvas) == false) {
             console.log("dataCanvas");
             console.log(dataCanvas);
             console.log("data");
