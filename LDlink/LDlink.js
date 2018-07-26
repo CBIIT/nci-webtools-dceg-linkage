@@ -1364,9 +1364,11 @@ function updateLDassoc() {
 
         // generate hidden svg graph
         if (displayError(id, jsonObj) == false) {
+            $('#ldassoc-bokeh-graph').empty().append(data);
             var svg_plot = $(".bk-root").children()[2];
             $(svg_plot).show();
-            // $(svg_plot).hide();
+            $(svg_plot).css("visibility", "hidden");
+            // $('#ldassoc-results-container-svg').hide();
             $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
