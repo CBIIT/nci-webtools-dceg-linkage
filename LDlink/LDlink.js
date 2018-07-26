@@ -1357,18 +1357,31 @@ function updateLDassoc() {
 
         // generate shown canvas graph
         if (displayError(id, jsonObjCanvas) == false) {
-            $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
-            console.log(dataCanvas);
-            $('#' + id + '-results-container').show();
-            getLDAssocResults('assoc'+ldInputs.reference+".json");
+            if (displayError(id, jsonObj) == false) {
+                console.log("DATA CANVAS");
+                console.log(dataCanvas);
+                console.log("DATA SVG");
+                console.log(data);
+
+                $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
+                getLDAssocResults('assoc'+ldInputs.reference+".json");
+                
+                // data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
+                // data[1] = data[1] + '</div>s';
+
+                $('#ldassoc-svg-bokeh-graph').empty().append(data);
+                
+                $('#' + id + '-results-container').show();
+                $('#ldassoc-downloadSVG').removeAttr('disabled');
+            }
         }
 
         // generate hidden svg graph
         // if (displayError(id, jsonObj) == false) {
         //     console.log(data);
-        //     data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
-        //     data[1] = data[1] + '</div>';
-        //     $('#ldassoc-bokeh-graph').append(data);
+        //     // data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
+        //     // data[1] = data[1] + '</div>';
+        //     $('#ldassoc-svg-bokeh-graph').empty().append(data);
         //     // $(svg_plot).show();
         //     $('#ldassoc-downloadSVG').removeAttr('disabled');
         // }
