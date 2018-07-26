@@ -105,7 +105,7 @@ $(document).ready(function() {
     });
 
     $('#ldassoc').prop('disabled', true);
-    $('#ldassoc-downloadSVG').prop('disabled', true);
+    // $('#ldassoc-downloadSVG').prop('disabled', true);
 
     $("#example-gwas").click(function(e){
     //   console.log("Use example GWAS data.");
@@ -158,7 +158,7 @@ $(document).ready(function() {
       }else{
         $('#ldassoc-file').prop('disabled', false);
         $('#ldassoc').prop('disabled', true);
-        $('#ldassoc-downloadSVG').prop('disabled', true);
+        // $('#ldassoc-downloadSVG').prop('disabled', true);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
@@ -1362,38 +1362,27 @@ function updateLDassoc() {
             console.log("data");
             console.log(data);
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
-            // $('#ldassoc-svg-bokeh-graph').empty().append(data);
-
-            $('#ldassoc-downloadSVG').removeAttr('disabled');
+ 
             // place download svg button
             var tb=$(".bk-root");
 	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
 	        $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
-                window.open("tmp/assoc_plot_" + ldInputs.reference + ".svg");
-                window.open("tmp/gene_plot_" + ldInputs.reference + ".svg");
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
+                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".svg";
+                // window.open("tmp/assoc_plot_" + ldInputs.reference + ".svg", "_blank");
+                // window.open("tmp/gene_plot_" + ldInputs.reference + ".svg", "_blank");
+                var urls = assoc_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
             });
             
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
+        } else {
+            displayError(id, dataCanvas);
         }
-
-        // // generate hidden svg graph
-        // if (displayError(id, jsonObj) == false) {
-        //     console.log(data);
-        //     // data[0] = '<div id="hidden-svg-plot" style="display: none;">' + data[0];
-        //     // data[1] = data[1] + '</div>';
-        //     
-        //     // $(svg_plot).show();
-        //     $('#ldassoc-downloadSVG').removeAttr('disabled');
-
-        //     $('#' + id + '-results-container').show();
-        //     getLDAssocResults('assoc'+ldInputs.reference+".json");
-        // }
-
-        // hide svg plot
-        // var svg_plot = $(".bk-root").children()[2];
-        // $(svg_plot).css("display", "none");
 
         $("#"+id+"-loading").hide();
     });
@@ -2070,39 +2059,60 @@ function updateLDmatrix() {
     });
 
     ajaxRequest.success(function(data) {
-        //console.log("ldmatrix");
-        //console.log(typeof data);
-        //console.dir(data);
-        if(typeof data == 'string') {
-            // create bokeh object with output_backend=canvas from svg
-            var dataString = data[0];
-            var dataCanvasString = dataString.replace(/svg/g, "canvas");
-            var dataCanvas = new Object([dataCanvasString, data[1]]);
+        console.log("ldmatrix data");
+        console.log(typeof data);
+        console.log(data);
+        // if(typeof data == 'string') {
+        //     $('#ldmatrix-bokeh-graph').empty().append(data);
+        //     $('#' + id + '-progress-container').hide();
+        //     $('#' + id + '-results-container').show();
+        //     getLDmatrixResults(ldmatrixInputs.reference + ".json",
+        //             ldmatrixInputs.reference);
+        // } else {
+        //     displayError(id, data);
+        // }
 
-            var jsonObjCanvas;
-            if(typeof dataCanvas == 'string') {
-                jsonObjCanvas = JSON.parse(dataCanvas);
-            } else {
-                jsonObjCanvas = dataCanvas;
-            }
+        // create bokeh object with output_backend=canvas from svg
+        var dataString = data[0];
+        var dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvas = new Object([dataCanvasString, data[1]]);
 
+        var jsonObjCanvas;
+        if(typeof dataCanvas == 'string') {
+            jsonObjCanvas = JSON.parse(dataCanvas);
+        } else {
+            jsonObjCanvas = dataCanvas;
+        }
+
+        console.log("ldmatrix datacanvas");
+        console.log(typeof data);
+        console.log(dataCanvas);
+        console.log(jsonObjCanvas);
+
+        // generate shown canvas graph and hidden svg graph
+        if (displayError(id, jsonObjCanvas) == false) {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
-            $('#ldassoc-downloadSVG').removeAttr('disabled');
             // place download svg button
             var tb=$(".bk-root");
 	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldmatrix-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldmatrix-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
 	        $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
-                window.open("tmp/assoc_plot_" + ldmatrixInputs.reference + ".svg");
-                window.open("tmp/gene_plot_" + ldmatrixInputs.reference + ".svg");
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".svg";
+                var urls = matrix_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
             });
-            $('#' + id + '-progress-container').hide();
+            
             $('#' + id + '-results-container').show();
-            getLDmatrixResults(ldmatrixInputs.reference + ".json",
-                    ldmatrixInputs.reference);
+            getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
         } else {
-            displayError(id, data);
+            displayError(id, dataCanvas);
         }
+
+        $("#"+id+"-loading").hide();
+
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
