@@ -2073,9 +2073,9 @@ function updateLDmatrix() {
         // }
 
         // create bokeh object with output_backend=canvas from svg
-        var dataString = data[0];
+        var dataString = data;
         var dataCanvasString = dataString.replace(/svg/g, "canvas");
-        var dataCanvas = new Object([dataCanvasString, data[1]]);
+        var dataCanvas = new Object([data]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
