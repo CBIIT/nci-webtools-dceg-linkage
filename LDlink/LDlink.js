@@ -1365,16 +1365,16 @@ function updateLDassoc() {
         // generate hidden svg graph
         if (displayError(id, jsonObj) == false) {
             console.log(data);
-            data.prepend('<div id="hidden-svg-plot" style="display: none;">');
-            data.append('</div>');
+            data.unshift('<div id="hidden-svg-plot" style="display: none;">');
+            data.push('</div>');
             $('#ldassoc-bokeh-graph').append(data);
             $(svg_plot).show();
             $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
         // hide svg plot
-        var svg_plot = $(".bk-root").children()[2];
-        $(svg_plot).css("display", "none");
+        // var svg_plot = $(".bk-root").children()[2];
+        // $(svg_plot).css("display", "none");
 
         $("#"+id+"-loading").hide();
     });
