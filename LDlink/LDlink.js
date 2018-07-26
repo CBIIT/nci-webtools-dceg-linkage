@@ -1366,7 +1366,7 @@ function updateLDassoc() {
         if (displayError(id, jsonObj) == false) {
             var svg_plot = $(".bk-root").children()[2];
             $(svg_plot).show();
-            $(svg_plot).hide();
+            // $(svg_plot).hide();
             $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
 
