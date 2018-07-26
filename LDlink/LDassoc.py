@@ -1134,7 +1134,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		rug.output_backend = "svg"
 		gene_plot.output_backend = "svg"
 		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
-		export_svgs(gene_plot, filename=tmp_dir + "gene_plot" + request + ".svg")
+		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
 		
 
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
@@ -1269,7 +1269,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		rug.output_backend = "svg"
 		gene_c_plot.output_backend = "svg"
 		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
-		export_svgs(gene_plot, filename=tmp_dir + "gene_plot" + request + ".svg")
+		export_svgs(gene_c_plot, filename=tmp_dir + "gene_c_plot_" + request + ".svg")
 
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))
