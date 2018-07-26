@@ -1364,7 +1364,10 @@ function updateLDassoc() {
 
         // generate hidden svg graph
         if (displayError(id, jsonObj) == false) {
-            $('#ldassoc-bokeh-graph').empty().append(data);
+            console.log(data);
+            data.prepend('<div id="hidden-svg-plot" style="display: none;">');
+            data.append('</div>');
+            $('#ldassoc-bokeh-graph').append(data);
             $(svg_plot).show();
             $('#ldassoc-downloadSVG').removeAttr('disabled');
         }
