@@ -1343,7 +1343,7 @@ function updateLDassoc() {
  
             // place Download PDF button
             var tb=$("#row-button");
-	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-download-button').prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
@@ -2051,7 +2051,7 @@ function updateLDmatrix() {
 
             // place Download PDF button
             var tb=$("#row-button");
-	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-download-button').prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
@@ -2239,8 +2239,8 @@ function updateLDproxy() {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            var tb=$("#row-button");
-	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+            // var tb=$("#row-button");
+	        $('#' + id + '-download-button').prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
