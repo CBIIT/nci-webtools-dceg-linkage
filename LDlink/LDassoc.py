@@ -862,6 +862,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
 	from bokeh.io import export_svgs
+	# For converting Bokeh SVGs to PDF
+	from svglib.svglib import svg2rlg
+	from reportlab.graphics import renderPDF
+
 
 	reset_output()
 	# OLD BOKEH VERSION FIX GLYPHS - START
@@ -1135,7 +1139,11 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_plot.output_backend = "svg"
 		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
 		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
-		
+		# Export to PDF as well
+		assoc_plot_svg = svg2rlg(tmp_dir + "assoc_plot_" + request + ".svg")
+		renderPDF.drawToFile(assoc_plot_svg, tmp_dir + "assoc_plot_" + request + ".pdf")
+		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
+		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
 
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
