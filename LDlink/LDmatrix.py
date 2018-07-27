@@ -464,8 +464,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.io import export_svgs
     from math import pi
     # For converting Bokeh SVGs to PDF
-	from svglib.svglib import svg2rlg
-	from reportlab.graphics import renderPDF
+    from svglib.svglib import svg2rlg
+    from reportlab.graphics import renderPDF
 
     reset_output()
 

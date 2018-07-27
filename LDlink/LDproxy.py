@@ -515,8 +515,8 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
     # For converting Bokeh SVGs to PDF
-	from svglib.svglib import svg2rlg
-	from reportlab.graphics import renderPDF
+    from svglib.svglib import svg2rlg
+    from reportlab.graphics import renderPDF
 
     reset_output()
 
