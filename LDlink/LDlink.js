@@ -1342,7 +1342,7 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            var tb=$(".row");
+            var tb=$("#row-button");
 	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
@@ -2050,7 +2050,7 @@ function updateLDmatrix() {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
 
             // place Download PDF button
-            var tb=$(".row");
+            var tb=$("#row-button");
 	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
@@ -2239,7 +2239,7 @@ function updateLDproxy() {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            var tb=$(".row");
+            var tb=$("#row-button");
 	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
