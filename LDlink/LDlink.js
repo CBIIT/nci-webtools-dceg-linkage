@@ -1342,8 +1342,8 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            var tb=$(".bk-root");
-	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><input type="button" id="ldassoc-downloadPDF" value="Download PDF" class="btn btn-default" ></input></div>');
+            var tb=$(".row");
+	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
@@ -2048,10 +2048,10 @@ function updateLDmatrix() {
         // generate shown canvas graph and hidden svg graph
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
-            
+
             // place Download PDF button
-            var tb=$(".bk-root");
-	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><input type="button" id="ldmatrix-downloadPDF" value="Download PDF" class="btn btn-default" ></input></div>');
+            var tb=$(".row");
+	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
@@ -2239,8 +2239,8 @@ function updateLDproxy() {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            var tb=$(".bk-root");
-	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><input type="button" id="ldproxy-downloadPDF" value="Download PDF" class="btn btn-default" ></input></div>');
+            var tb=$(".row");
+	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
 	        $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
