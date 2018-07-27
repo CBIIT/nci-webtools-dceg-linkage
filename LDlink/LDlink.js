@@ -272,11 +272,6 @@ $(document).ready(function() {
         calculate(e);
     });
 
-    // Click Download SVG button
-    // $("#ldassoc-downloadSVG").click(function(e) {
-    //     $(".bk-toolbar-button").eq(17).trigger("click");
-    // });
-
     setupTabs();
     autoCalculate();
     createFileSelectEvent();
@@ -1126,10 +1121,6 @@ function updateData(id) {
             }
             break;
         case 'snpchip':
-            // if(isBrowseSet(id)) {
-            //     $('#'+id+"-loading").show();
-            //     updateSNPchip();
-            // }
             $('#'+id+"-loading").show();
             updateSNPchip();
             break;
@@ -1350,10 +1341,6 @@ function updateLDassoc() {
 
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
-            console.log("dataCanvas");
-            console.log(dataCanvas);
-            console.log("data");
-            console.log(data);
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place download svg button
@@ -2038,9 +2025,6 @@ function updateLDmatrix() {
     });
 
     ajaxRequest.success(function(data) {
-        console.log("ldmatrix data");
-        console.log(typeof data);
-        console.log(data);
         // if(typeof data == 'string') {
         //     $('#ldmatrix-bokeh-graph').empty().append(data);
         //     $('#' + id + '-progress-container').hide();
@@ -2062,11 +2046,6 @@ function updateLDmatrix() {
         } else {
             jsonObjCanvas = dataCanvas;
         }
-
-        console.log("ldmatrix datacanvas");
-        console.log(typeof data);
-        console.log(dataCanvas);
-        console.log(jsonObjCanvas);
 
         // generate shown canvas graph and hidden svg graph
         if (displayError(id, jsonObjCanvas) == false) {
@@ -2258,10 +2237,6 @@ function updateLDproxy() {
         }
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
-            console.log("dataCanvas");
-            console.log(dataCanvas);
-            console.log("data");
-            console.log(data);
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place download svg button
@@ -3081,7 +3056,7 @@ function validateTextarea() {
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text
     $.each($(this).val().split("\n"), function (index, value) {
-        // check if the line matches the pattern
+        // check if the line matches the patterns
         //console.log(value);
         var hasError = !this.match(pattern);
         if(value == "" || value == "\n" || this.length<=2 )
