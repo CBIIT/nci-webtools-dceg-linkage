@@ -105,7 +105,6 @@ $(document).ready(function() {
     });
 
     $('#ldassoc').prop('disabled', true);
-    // $('#ldassoc-downloadSVG').prop('disabled', true);
 
     $("#example-gwas").click(function(e){
     //   console.log("Use example GWAS data.");
@@ -158,7 +157,6 @@ $(document).ready(function() {
       }else{
         $('#ldassoc-file').prop('disabled', false);
         $('#ldassoc').prop('disabled', true);
-        // $('#ldassoc-downloadSVG').prop('disabled', true);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
@@ -1343,13 +1341,13 @@ function updateLDassoc() {
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
-            // place download svg button
+            // place Download PDF button
             var tb=$(".bk-root");
-	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-	        $("#ldassoc-downloadSVG").click(function(e) {
+	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><input type="button" id="ldassoc-downloadPDF" value="Download PDF" class="btn btn-default" ></input></div>');
+	        $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
-                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".svg";
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
+                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".pdf";
                 var urls = assoc_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
@@ -2050,13 +2048,14 @@ function updateLDmatrix() {
         // generate shown canvas graph and hidden svg graph
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
-            // place download svg button
+            
+            // place Download PDF button
             var tb=$(".bk-root");
-	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldmatrix-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldmatrix-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-	        $("#ldmatrix-downloadSVG").click(function(e) {
+	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><input type="button" id="ldmatrix-downloadPDF" value="Download PDF" class="btn btn-default" ></input></div>');
+	        $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
-                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
-                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".svg";
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
+                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".pdf";
                 var urls = matrix_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
@@ -2239,13 +2238,13 @@ function updateLDproxy() {
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
-            // place download svg button
+            // place Download PDF button
             var tb=$(".bk-root");
-	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldproxy-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldproxy-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-	        $("#ldproxy-downloadSVG").click(function(e) {
+	        $(tb).prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><input type="button" id="ldproxy-downloadPDF" value="Download PDF" class="btn btn-default" ></input></div>');
+	        $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
-                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".svg";
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
+                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".pdf";
                 var urls = proxy_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
