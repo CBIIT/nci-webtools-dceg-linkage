@@ -332,7 +332,7 @@ def ldhap():
              content2 = fp.read()
              fp.close()
 
-             return content1 + "\n" + "#####################################################################################" + "\n\n" + content2;
+             return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
     except:
         return sendTraceback()
 
@@ -448,7 +448,7 @@ def snpclip():
              content = fp.read()
              fp.close()
 
-             return content;
+             return content
 
 
     return current_app.response_class(out_json, mimetype=mimetype)
@@ -503,7 +503,7 @@ def snpchip():
              content = fp.read()
              fp.close()
 
-             return content;
+             return content
 
     return current_app.response_class(out_json, mimetype='application/json')
 

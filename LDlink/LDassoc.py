@@ -861,46 +861,22 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
+	from bokeh.io import export_svgs
+	# For converting Bokeh SVGs to PDF
+	from svglib.svglib import svg2rlg
+	from reportlab.graphics import renderPDF
+
 
 	reset_output()
-	# OLD BOKEH VERSION FIX GLYPHS - START
-	# source_p=ColumnDataSource(
-	# 	data=dict(
-	# 		p_plot_pos2=p_plot_pos2,
-	# 		p_plot_pval2=p_plot_pval2,
-	# 		p_plot_dist=p_plot_dist,))
-
-	# source=ColumnDataSource(
-	# 	data=dict(
-	# 		qrs=q_rs,
-	# 		q_alle=q_allele,
-	# 		q_maf=q_maf,
-	# 		prs=p_rs,
-	# 		p_alle=p_allele,
-	# 		p_maf=p_maf,
-	# 		dist=dist,
-	# 		r=r2_round,
-	# 		d=d_prime_round,
-	# 		alleles=corr_alleles,
-	# 		regdb=regdb,
-	# 		funct=funct,
-	# 		p_val=p_val,
-	# 	)
-	# )
-	# OLD BOKEH VERSION FIX GLYPHS - END
-	# NEW BOKEH VERSION FIX GLYPHS - START
 	data_p = {'p_plot_posX': p_plot_pos, 'p_plot_pvalY': p_plot_pval, 'p_plot_pos2': p_plot_pos2, 'p_plot_pval2': p_plot_pval2, 'p_plot_dist': p_plot_dist}
 	source_p = ColumnDataSource(data_p)
-	# NEW BOKEH VERSION FIX GLYPHS - END
 
 	# Assoc Plot
 	x=p_coord
 	y=neg_log_p
 
-	# NEW BOKEH VERSION FIX GLYPHS - START
 	data = {'x': x, 'y': y, 'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
 	source = ColumnDataSource(data)
-	# NEW BOKEH VERSION FIX GLYPHS - END
 
 	whitespace=0.01
 	xr=Range1d(start=coord1/1000000.0-whitespace, end=coord2/1000000.0+whitespace)
@@ -937,16 +913,9 @@ def calculate_assoc(file,region,pop,request,myargs):
 	b = [-log10(0.00000005),-log10(0.00000005)]
 	assoc_plot.line(a, b, color="blue", alpha=0.5)
 
-	# OLD BOKEH VERSION FIX GLYPHS - START
-	# assoc_points_not1000G=assoc_plot.circle(p_plot_pos, p_plot_pval, size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
-	# assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
-	# assoc_points=assoc_plot.circle(x, y, size=size, source=source, color=color, alpha=alpha)
-	# OLD BOKEH VERSION FIX GLYPHS - END
-	# NEW BOKEH VERSION FIX GLYPHS - START
 	assoc_points_not1000G=assoc_plot.circle(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
 	assoc_points=assoc_plot.circle(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
 	assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
-	# NEW BOKEH VERSION FIX GLYPHS - END
 
 	hover=HoverTool(renderers=[assoc_points])
 	hover.tooltips=OrderedDict([
@@ -978,22 +947,15 @@ def calculate_assoc(file,region,pop,request,myargs):
 	y2_ul=[1.03]*len(x)
 	yr_rug=Range1d(start=-0.03, end=1.03)
 
-	# NEW BOKEH VERSION FIX GLYPHS - START
 	data_rug = {'x': x, 'y': y, 'y2_ll': y2_ll, 'y2_ul': y2_ul,'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
 	source_rug = ColumnDataSource(data_rug)
-	# NEW BOKEH VERSION FIX GLYPHS - END
 
 	rug=figure(
 			x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
 			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
 			plot_width=900, plot_height=50, tools="xpan,tap,wheel_zoom", logo=None)
 
-	# OLD BOKEH VERSION FIX GLYPHS - START
-	# rug.segment(x, y2_ll, x, y2_ul, source=source, color=color, alpha=alpha, line_width=1)
-	# OLD BOKEH VERSION FIX GLYPHS - END
-	# NEW BOKEH VERSION FIX GLYPHS - START
 	rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
-	# NEW BOKEH VERSION FIX GLYPHS - END
 	rug.toolbar_location=None
 
 
@@ -1068,20 +1030,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		exons_plot_yn=[n_rows-x+0.5 for x in exons_plot_y]
 		yr2=Range1d(start=0, end=n_rows)
 
-		# OLD BOKEH VERSION FIX GLYPHS - START
-		# source2=ColumnDataSource(
-		# 	data=dict(
-		# 		exons_plot_name=exons_plot_name,
-		# 		exons_plot_id=exons_plot_id,
-		# 		exons_plot_exon=exons_plot_exon,
-		# 		message=message,
-		# 	)
-		# )
-		# OLD BOKEH VERSION FIX GLYPHS - END
-		# NEW BOKEH VERSION FIX GLYPHS - START
 		data_gene_plot = {'exons_plot_x': exons_plot_x, 'exons_plot_yn': exons_plot_yn, 'exons_plot_w': exons_plot_w, 'exons_plot_h': exons_plot_h,'exons_plot_name': exons_plot_name, 'exons_plot_id': exons_plot_id, 'exons_plot_exon': exons_plot_exon}
 		source_gene_plot=ColumnDataSource(data_gene_plot)
-		# NEW BOKEH VERSION FIX GLYPHS - END
 
 		max_genes = 40
 		if len(lines) < 3 or len(genes_raw) > max_genes:
@@ -1097,14 +1047,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		if len(genes_raw) <= max_genes:
 			gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
 							  genes_plot_yn, color="black", alpha=1, line_width=2)
-			# OLD BOKEH VERSION FIX GLYPHS - START
-			# gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
-			# 			   source=source2, fill_color="grey", line_color="grey")
-			# OLD BOKEH VERSION FIX GLYPHS - END
-			# NEW BOKEH VERSION FIX GLYPHS - START
 			gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
 						   source=source_gene_plot, fill_color="grey", line_color="grey")
-			# NEW BOKEH VERSION FIX GLYPHS - END
 			gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
 						   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 			hover = gene_plot.select(dict(type=HoverTool))
@@ -1128,6 +1072,20 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_plot.yaxis.major_label_text_color = None
 
 		gene_plot.toolbar_location = "below"
+
+		assoc_plot.output_backend = "svg"
+		rug.output_backend = "svg"
+		gene_plot.output_backend = "svg"
+		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
+		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+		# Export to PDF as well
+		assoc_plot_svg = svg2rlg(tmp_dir + "assoc_plot_" + request + ".svg")
+		renderPDF.drawToFile(assoc_plot_svg, tmp_dir + "assoc_plot_" + request + ".pdf")
+		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
+		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
+		# Remove SVG files after exported to pdf
+		subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
 
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
@@ -1198,19 +1156,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		exons_c_plot_yn=[n_rows_c-x+0.5 for x in exons_c_plot_y]
 		yr2_c=Range1d(start=0, end=n_rows_c)
 
-		# OLD BOKEH VERSION FIX GLYPHS - START
-		# source2_c=ColumnDataSource(
-		# 	data=dict(
-		# 		exons_c_plot_name=exons_c_plot_name,
-		# 		exons_c_plot_id=exons_c_plot_id,
-		# 		message_c=message_c,
-		# 	)
-		# )
-		# OLD BOKEH VERSION FIX GLYPHS - END
-		# NEW BOKEH VERSION FIX GLYPHS - START
 		data_gene_c_plot = {'exons_c_plot_x': exons_c_plot_x, 'exons_c_plot_yn': exons_c_plot_yn, 'exons_c_plot_w': exons_c_plot_w, 'exons_c_plot_h': exons_c_plot_h, 'exons_c_plot_name': exons_c_plot_name, 'exons_c_plot_id': exons_c_plot_id}
 		source_gene_c_plot=ColumnDataSource(data_gene_c_plot)
-		# NEW BOKEH VERSION FIX GLYPHS - END
 
 		max_genes_c = 40
 		if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
@@ -1226,14 +1173,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		if len(genes_c_raw) <= max_genes_c:
 			gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
 							  genes_c_plot_yn, color="black", alpha=1, line_width=2)
-			# OLD BOKEH VERSION FIX GLYPHS - START
-			# gene_c_plot.rect(exons_c_plot_x, exons_c_plot_yn, exons_c_plot_w, exons_c_plot_h,
-			# 			   source=source2_c, fill_color="grey", line_color="grey")
-			# OLD BOKEH VERSION FIX GLYPHS - END
-			# NEW BOKEH VERSION FIX GLYPHS - START
 			gene_c_plot.rect(x='exons_c_plot_x', y='exons_c_plot_yn', width='exons_c_plot_w', height='exons_c_plot_h',
 						   source=source_gene_c_plot, fill_color="grey", line_color="grey")
-			# NEW BOKEH VERSION FIX GLYPHS - END
 			gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
 						   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
 			hover = gene_c_plot.select(dict(type=HoverTool))
@@ -1257,11 +1198,22 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		gene_c_plot.toolbar_location = "below"
 
+		assoc_plot.output_backend = "svg"
+		rug.output_backend = "svg"
+		gene_c_plot.output_backend = "svg"
+		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
+		export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+		# Export to PDF as well
+		assoc_plot_svg = svg2rlg(tmp_dir + "assoc_plot_" + request + ".svg")
+		renderPDF.drawToFile(assoc_plot_svg, tmp_dir + "assoc_plot_" + request + ".pdf")
+		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
+		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
+		# Remove SVG files after exported to pdf
+		subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))
-
-
-
 
 	###########################
 	# Html output for testing #
@@ -1333,15 +1285,6 @@ def main():
 
 	# Run function
 	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
-
-	# Print script and div output
-	#out_script_line=out_script.split("\n")
-	#for i in range(len(out_script_line)):
-	#	print out_script_line[i]
-	#print ""
-	#
-	#print out_div
-	#print ""
 
 
 	# Print output

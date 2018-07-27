@@ -119,7 +119,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	conn.close()
 	
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS numbers were not found in dbSNP 142: "+" ,".join(warn)
 			
 	
 	if len(rs_nums)==0:
@@ -267,29 +267,31 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			
 			if found=="false":
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+geno[2]+")"
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 				else:
-					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+geno[2]+")"
+					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 				
-				### try catch this index ... ValueError thrown when rs_query not found in snps
-				# print "#####"
-				# print "variable rs_query " + rs_query
-				# print "variable snps " + str(snps)
-				# print "#####"
-				# print
-				# indx=[i[0] for i in snps].index(rs_query)
+				## try catch this index ... ValueError thrown when rs_query not found in snps
+				print "#####"
+				print "variable rs_query " + rs_query
+				print "variable snps " + str(snps)
+				print "#####"
+				print
+				indx=[i[0] for i in snps].index(rs_query)
 				# snps[indx][0]=geno[2]
 				# rsnum=geno[2]
-				try:
-					indx=[i[0] for i in snps].index(rs_query)
-					snps[indx][0]=geno[2]
-					rsnum=geno[2]
-				except ValueError:
-					print("List does not contain value:")
-					print "#####"
-					print "variable rs_query " + rs_query
-					print "variable snps " + str(snps)
-					print "#####"
+				snps[indx][0]=rs_query
+				rsnum=rs_query
+				# try:
+				# 	indx=[i[0] for i in snps].index(rs_query)
+				# 	snps[indx][0]=geno[2]
+				# 	rsnum=geno[2]
+				# except ValueError:
+				# 	print("List does not contain value:")
+				# 	print "#####"
+				# 	print "variable rs_query " + rs_query
+				# 	print "variable snps " + str(snps)
+				# 	print "#####"
 			else:
 				continue
 		
@@ -384,11 +386,11 @@ def main():
 
 	except KeyError:
 		#print ""
-		print "LD Thinned SNP list ("+pop+"):"
-		for snp in thin_list:
-			print snp
+		# print "LD Thinned SNP list ("+pop+"):"
+		# for snp in thin_list:
+		# 	print snp
 		
-		print ""
+		# print ""
 		print "RS Number\tPosition\tAlleles\tDetails"
 		for snp in snps:
 			print snp[0]+"\t"+"\t".join(details[snp[0]])

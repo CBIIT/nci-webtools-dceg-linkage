@@ -32,8 +32,7 @@
 <link rel="stylesheet"
 	href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
 
-<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.2.min.css">
-<!-- <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.css"> -->
+<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
 
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
@@ -512,7 +511,8 @@
 				<!-- ldassoc CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldassoc-results-container">
-						<div class="row overflowy">
+						<div id="row-button" class="row overflowy">
+						<div id="ldassoc-download-button"></div>
 							<div class="col-sm-11 col-sm-offset-1">
 								<div id="ldassoc-bokeh-graph"></div>
 								<br />
@@ -881,7 +881,8 @@
 				<!-- LDMatrix CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldmatrix-results-container">
-						<div class="row">
+						<div id="row-button" class="row">
+							<div id="ldmatrix-download-button"></div>
 							<div class="col-md-11 col-md-offset-1 overflowx">
 								<div id="ldmatrix-bokeh-graph"></div>
 													<br />
@@ -1202,7 +1203,8 @@
 				<div class="jumbotron">
 					<!-- LDProxy CONTAINER -->
 					<div class="container-fluid" id="ldproxy-results-container">
-						<div class="row overflowy">
+						<div id="row-button" class="row overflowy">
+							<div id="ldproxy-download-button"></div>
 							<div class="col-sm-12" style="left:15px">
 								<div id="ldproxy-bokeh-graph"></div>
 								<br />
@@ -1747,11 +1749,7 @@
 </div>
 -->
 
-<!--  Temp during testing
-	<script src="http://cdn.pydata.org/bokeh/release/bokeh-0.12.2.min.js"></script>
--->
-	<script src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.2.min.js"></script>
-	<!-- <script src="https://cdn.pydata.org/bokeh/release/bokeh-0.12.13.min.js"></script> -->
+	<script src="https://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.js"></script>
 
 	<script type="text/javascript"
 		src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.js" type="text/javascript">

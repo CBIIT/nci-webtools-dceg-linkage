@@ -461,7 +461,11 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.models import HoverTool, LinearAxis, Range1d
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
+    from bokeh.io import export_svgs
     from math import pi
+    # For converting Bokeh SVGs to PDF
+    from svglib.svglib import svg2rlg
+    from reportlab.graphics import renderPDF
 
     reset_output()
 
@@ -481,6 +485,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         coord_snps_plot.append(xpos[i])
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
+    
+    print "early x", x
 
     # Generate error if less than two SNPs
     if len(x) < 2:
@@ -490,20 +496,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         out_json.close()
         return("", "")
         raise
-
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # source2 = ColumnDataSource(
-    #     data=dict(
-    #         x=x,
-    #         y=y,
-    #         w=w,
-    #         h=h,
-    #         coord_snps_plot=coord_snps_plot,
-    #         snp_id_plot=snp_id_plot,
-    #         alleles_snp_plot=alleles_snp_plot,
-    #     )
-    # )
-    # OLD BOKEH VERSION FIX GLYPHS - END
 
     buffer = (x[-1] - x[0]) * 0.025
     xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
@@ -536,26 +528,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         for j in range(len(x2)):
             xname_pos.append(i)
 
-    # Matrix Plot
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # source = ColumnDataSource(
-    #     data=dict(
-    #         xname=xnames,
-    #         xname_pos=xname_pos,
-    #         yname=ynames,
-    #         xA=xA,
-    #         yA=yA,
-    #         xpos=xpos,
-    #         ypos=ypos,
-    #         R2=R,
-    #         Dp=D,
-    #         corA=corA,
-    #         box_color=box_color,
-    #         box_trans=box_trans,
-    #     )
-    # )
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
     data = {
             'xname': xnames,
             'xname_pos': xname_pos,
@@ -570,9 +542,58 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             'box_color': box_color,
             'box_trans': box_trans
     }
+
+    # Delete redundant data
+    # startidx = []
+    # Isolate indices of elements in y=x
+    # for xidx, xn in enumerate(data['xname']):
+        # for yidx, yn in enumerate(data['yname']):
+            # if xn == yn and xidx == yidx:
+                # startidx.append(xidx)
+    # Flatten list snps
+    # flat_snps = [item for sublist in snps for item in sublist]
+    # Reverse flattend snp list
+    # rev_snps = list(reversed(flat_snps))
+    # get index of every appearance of last snp in snplst
+    # recsnp = rev_snps[-1]
+    # print "snps", rev_snps
+    # print "recsnp", recsnp
+    # print "data[yname]", data['yname']
+    # recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
+    # print "recsnp_idx", recsnp_idx
+    # Add range of indices between y=x and height of y at x
+    # newidx = []
+    # print "startidx", startidx
+    # print "recsnp_idx", recsnp_idx
+    # for i in range(0, len(startidx)):
+    #     if startidx[i] != recsnp_idx[i]:
+    #         newidx.append(range(startidx[i], recsnp_idx[i]))
+    #         newidx.append([recsnp_idx[i]])
+    #     else:
+    #         newidx.append([startidx[i]])
+    # Flatten list indices
+    # flat_newidx = [item for sublist in newidx for item in sublist]
+    # Add only whitelisted indices to new data dict
+    # new_data = {}
+    # for key in data:
+    #     new_data[key] = []
+    #     for idx, val in enumerate(data[key]):
+    #         if idx in flat_newidx:
+    #             new_data[key].append(val)
+
+    # debug prints for 45 degree rotation
+    # print "###################################"
+    # print "START - debug prints for 45 degree rotation"
+    # for i in data:
+    #     print (i, data[i])
+    # print "###################################"
+    # for i in new_data:
+    #     print (i, new_data[i])
+    # print "END   - debug prints for 45 degree rotation"
+    # print "###################################"
           
+    # source = ColumnDataSource(new_data)
     source = ColumnDataSource(data)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     threshold = 70
     if len(snps) < threshold:
@@ -580,24 +601,34 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+        # CHANGE AXIS LABELS & LINE COLOR: 
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
+        #                     x_range=xr, y_range=list(rsnum_lst), 
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # matrix_plot.rect('xname_pos', 'yname', 0.95 * spacing, 0.95, source=source,
-    #                  color="box_color", alpha="box_trans", line_color=None)
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
-    matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
-                    color="box_color", alpha="box_trans", line_color=None)
-    # NEW BOKEH VERSION FIX GLYPHS - END
-
+        # CHANGE AXIS LABELS & LINE COLOR:
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
+        #                     x_range=xr, y_range=list(rsnum_lst), 
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
     
 
+    matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
+                    color="box_color", alpha="box_trans", line_color=None)
+    # Rotate LDmatrix 45 degrees
+    # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=0.785398, source=source,
+    #                 color="box_color", alpha="box_trans", line_color=None)
+    # print "spacing"
+    # print spacing
+    # matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
+    #                 color="box_color", alpha="box_trans", line_color=None) 
+    
     matrix_plot.grid.grid_line_color = None
     matrix_plot.axis.axis_line_color = None
     matrix_plot.axis.major_tick_line_color = None
@@ -650,7 +681,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     connector.toolbar_location = None
 
-    # NEW BOKEH VERSION FIX GLYPHS - START
     data_rug = {
         'x': x,
         'y': y,
@@ -662,19 +692,12 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     }
 
     source_rug = ColumnDataSource(data_rug)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     # Rug Plot
     rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
                  title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
                  plot_width=800, plot_height=50, tools="hover,xpan,tap")
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # rug.rect(x, y, w, h, source=source2, fill_color="red",
-    #          dilate=True, line_color=None, fill_alpha=0.6)
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
     rug.rect(x='x', y='y', width='w', height='h', fill_color='red', dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     hover = rug.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -755,17 +778,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     exons_plot_yn = [n_rows - w + 0.5 for w in exons_plot_y]
     yr2 = Range1d(start=0, end=n_rows)
 
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # source2 = ColumnDataSource(
-    #     data=dict(
-    #         exons_plot_name=exons_plot_name,
-    #         exons_plot_id=exons_plot_id,
-    #         exons_plot_exon=exons_plot_exon,
-    #         message=message,
-    #     )
-    # )
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
     data_gene_plot = {
         'exons_plot_x': exons_plot_x,
         'exons_plot_yn': exons_plot_yn,
@@ -780,7 +792,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     }
 
     source_gene_plot = ColumnDataSource(data_gene_plot)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     max_genes = 40
     if len(lines) < 3 or len(genes_raw) > max_genes:
@@ -796,14 +807,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                           genes_plot_yn, color="black", alpha=1, line_width=2)
-        # OLD BOKEH VERSION FIX GLYPHS - START
-        # gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
-        #                source=source2, fill_color="grey", line_color="grey")
-        # OLD BOKEH VERSION FIX GLYPHS - END
-        # NEW BOKEH VERSION FIX GLYPHS - START
         gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
                         source=source_gene_plot, fill_color='grey', line_color="grey")
-        # NEW BOKEH VERSION FIX GLYPHS - END
         gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
         hover = gene_plot.select(dict(type=HoverTool))
@@ -828,6 +833,20 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     gene_plot.yaxis.major_label_text_color = None
 
     gene_plot.toolbar_location = "below"
+
+    matrix_plot.output_backend = "svg"
+    rug.output_backend = "svg"
+    gene_plot.output_backend = "svg"
+    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+    # Export to PDF as well
+    matrix_plot_svg = svg2rlg(tmp_dir + "matrix_plot_" + request + ".svg")
+    renderPDF.drawToFile(matrix_plot_svg, tmp_dir + "matrix_plot_" + request + ".pdf")
+    gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
+    renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
+    # Remove SVG files after exported to pdf
+    subprocess.call("rm " + tmp_dir + "matrix_plot_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
 
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))

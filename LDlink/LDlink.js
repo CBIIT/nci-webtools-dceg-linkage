@@ -31,7 +31,7 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
-    console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
+    // console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
@@ -107,7 +107,7 @@ $(document).ready(function() {
     $('#ldassoc').prop('disabled', true);
 
     $("#example-gwas").click(function(e){
-      console.log("Use example GWAS data.");
+    //   console.log("Use example GWAS data.");
       var useEx = document.getElementById('example-gwas');
       // var exampleHeaders = ['A', 'B', 'C'];
       if (useEx.checked){
@@ -145,15 +145,15 @@ $(document).ready(function() {
         $("#region-region-start-coord").val("chr8:128289591");
         $("#region-region-end-coord").val("chr8:128784397");
         $("#region-region-index").val("rs7837688");
-        console.log($("#region-region-start-coord").val());
-        console.log($("#region-region-end-coord").val());
-        console.log($("#region-region-index").val());
+        // console.log($("#region-region-start-coord").val());
+        // console.log($("#region-region-end-coord").val());
+        // console.log($("#region-region-index").val());
 
         $("#ldassoc-population-codes").val('');
         refreshPopulation([],"ldassoc");
         $("#ldassoc-population-codes").val(["CEU"]);
         refreshPopulation(["CEU"],"ldassoc");
-        console.log($("#ldassoc-population-codes").val());
+        // console.log($("#ldassoc-population-codes").val());
       }else{
         $('#ldassoc-file').prop('disabled', false);
         $('#ldassoc').prop('disabled', true);
@@ -168,7 +168,7 @@ $(document).ready(function() {
         populateAssocDropDown([]);
         $("#header-values").hide();
         $('#ldassoc-file').val('');
-        console.log("Don't use example GWAS data.");
+        // console.log("Don't use example GWAS data.");
         $("#region-gene-container").hide();
         $("#region-region-container").hide();
         $("#region-variant-container").hide();
@@ -179,7 +179,7 @@ $(document).ready(function() {
         $("#region-region-index").val('');
         $("#ldassoc-population-codes").val('');
         refreshPopulation([],"ldassoc");
-        console.log($("#ldassoc-population-codes").val());
+        // console.log($("#ldassoc-population-codes").val());
       }
     });
 
@@ -302,7 +302,7 @@ function resetBootstrapSelector(id) {
 }
 
 function createFileSelectTrigger() {
-    console.log("createFileSelectTrigger");
+    // console.log("createFileSelectTrigger");
     var input = $(this), numFiles = input.get(0).files ?
     input.get(0).files.length : 1, label = input.val().replace(/\\/g, '/').replace(/.*\//, '');
     input.trigger('fileselect', [numFiles, label]);
@@ -337,7 +337,7 @@ function uploadFile2() {
     restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
     var filename = $("#ldassocFile").val();
-    console.log(filename);
+    // console.log(filename);
 
     var fileInput = document.getElementById('ldassoc-file');
     var file = fileInput.files[0];
@@ -418,16 +418,16 @@ function showCommError(e) {
 function createFileSelectEvent() {
     // Add file select file listener
     $('.btn-snp :file').on('fileselect', function(event, numFiles, label) {
-        console.log(label);
+        // console.log(label);
         $(this).parents('.input-group').find(':text').val(label);
         populateTextArea(event, numFiles, label);
 
     });
     //Customize for ldAssoc
     $('.btn-csv-file :file').on('fileselect', function(event, numFiles, label) {
-        console.log(label);
+        // console.log(label);
         $(this).parents('.input-group').find(':text').val(label);
-        console.log("Event");
+        // console.log("Event");
         populateHeaderValues(event, numFiles, label);
         uploadFile2();
         $("#header-values").show();
@@ -449,12 +449,12 @@ function readSingleFile(evt) {
     if (f) {
       var r = new FileReader();
       r.onload = function(e) {
-        console.log( "Got the file.n"
-              +"name: " + f.name + "n"
-              +"type: " + f.type + "n"
-              +"size: " + f.size + " bytesn"
-              + "starts with: "
-        );
+        // console.log( "Got the file.n"
+        //       +"name: " + f.name + "n"
+        //       +"type: " + f.type + "n"
+        //       +"size: " + f.size + " bytesn"
+        //       + "starts with: "
+        // );
 
         var contents = e.target.result;
         var defaults = {
@@ -1119,10 +1119,6 @@ function updateData(id) {
             }
             break;
         case 'snpchip':
-            // if(isBrowseSet(id)) {
-            //     $('#'+id+"-loading").show();
-            //     updateSNPchip();
-            // }
             $('#'+id+"-loading").show();
             updateSNPchip();
             break;
@@ -1130,14 +1126,8 @@ function updateData(id) {
 }
 
 function isBrowseSet(elementId) {
-    // console.log("Check browse: "+elementId);
-
-    // var browse =  $('#'+elementId+'-file').val();
     var query = $('#header-values');
     var isVisible = query.is(':visible');
-    console.log("did it show? " + isVisible.toString());
-    // console.dir("File chosen? " + browse.toString());
-    // if(browse != "") {
     if(isVisible === true) {
         $('#'+elementId+'-browse-set-none').popover('hide');
         return true;
@@ -1149,10 +1139,7 @@ function isBrowseSet(elementId) {
 }
 
 function isRegionSet(elementId) {
-    // console.log("Check region: "+elementId);
-
     var region =  $('#region-codes-menu1').html().replace(/&nbsp;<span class="caret"><\/span>/, "");
-    // console.log("Anything there? " + region);
     if(region == "Gene" || region == "Region" || region == "Variant") {
         $('#'+elementId+'-region-codes-zero').popover('hide');
         return true;
@@ -1270,11 +1257,7 @@ function areRegionDetailsSet(elementId) {
 }
 
 function isPopulationSet(elementId) {
-    //console.log("Check population: "+elementId);
-
     var population =  $('#'+elementId+'-population-codes').val();
-    console.dir(population);
-    console.log(population);
     if(population == null ) {
         $('#'+elementId+'-population-codes-zero').popover('show');
         setTimeout(function() { $('#'+elementId+'-population-codes-zero').popover('hide'); }, 4000);
@@ -1306,8 +1289,6 @@ function updateLDassoc() {
         useEx: $('#example-gwas').is(':checked')? "True" :"False"
     };
 
-    console.log("Transcript " + ldInputs.transcript.toString());
-    console.log("Annotate " + ldInputs.annotate.toString());
 
     ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
     ldInputs.columns.position = $("#assoc-position > button").val();
@@ -1323,7 +1304,6 @@ function updateLDassoc() {
     //variant
     ldInputs.variant.index = $("#region-variant-index").val();
     ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
-    console.dir(ldInputs);
 
     $('#ldassoc-genome').attr('href',
         'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
@@ -1344,33 +1324,54 @@ function updateLDassoc() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         //JSON.parse() cleans up this json string.
-        console.log("Success!");
-        console.dir(data);
 
-        var jsonObj;
-        if(typeof data == 'string') {
-            jsonObj = JSON.parse(data);
+        // create bokeh object with output_backend=canvas from svg
+        var dataString = data[0];
+        var dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvas = new Object([dataCanvasString, data[1]]);
+
+        var jsonObjCanvas;
+        if(typeof dataCanvas == 'string') {
+            jsonObjCanvas = JSON.parse(dataCanvas);
         } else {
-            jsonObj = data;
+            jsonObjCanvas = dataCanvas;
         }
 
-        if (displayError(id, jsonObj) == false) {
-            $('#ldassoc-bokeh-graph').empty().append(data);
+        // display graph if no errors
+        if (displayError(id, jsonObjCanvas) == false) {
+            $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
+ 
+            // place Download PDF button
+            var tb=$("#row-button");
+	        $('#' + id + '-download-button').empty().prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $("#ldassoc-downloadPDF").click(function(e) {
+                e.preventDefault();
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
+                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".pdf";
+                var urls = assoc_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
-
+        } else {
+            displayError(id, dataCanvas);
         }
         $("#"+id+"-loading").hide();
+
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
-
-    setTimeout(function(){var checkbox=$(".bk-toolbar-inspector").children().first();
-    $(checkbox).attr('id', 'hover');
-    $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');},100);
+        setTimeout(function() {
+            var checkbox = $(".bk-toolbar-inspector").children().first();
+            $(checkbox).attr('id', 'hover');
+            $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');
+        }, 100);
     });
 
     hideLoadingIcon(ajaxRequest, id);
@@ -1818,19 +1819,31 @@ function populateSNPwarnings(data) {
             rs_number_link: anchorRSnumber(index),
             position_link: anchorRSposition(value[0], index)
         };
-        //console.log(index+" - "+value);
-        // if(filtered.comment != 'Variant kept.' && filtered.comment.substring(0, 13) != 'Variant in LD') {
+
         if(filtered.comment != undefined) {
             if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
                 // Place message on the warning table.
-                console.log("Push to warnings: ");
-                console.log(JSON.stringify(filtered));
+                // console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
                 snpclipData.warnings.push(filtered);
+
+                // Remove rs_numbers with warnings from thinned snp_list
+                var index = data.snp_list.indexOf(filtered.rs_number);
+                if (index > -1) {
+                    data.snp_list.splice(index, 1);
+                }   
+                
             }
         } else {
-            console.log("filtered.comment is UNDEFINED ");
-            console.log(JSON.stringify(filtered));
-            // snpclipData.warnings.push(filtered);
+            // console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
+            // console.log(JSON.stringify(filtered));
+            snpclipData.warnings.push(filtered);
+
+            // Remove rs_numbers with warnings from thinned snp_list
+            var index = data.snp_list.indexOf(filtered.rs_number);
+            if (index > -1) {
+                data.snp_list.splice(index, 1);
+            }   
+            
         }
     });
 
@@ -1843,6 +1856,9 @@ function populateSNPwarnings(data) {
         $('#snpclip-warning').show();
     }
     ko.mapping.fromJS(snpclipData, snpclipModel);
+
+    // Populate Thinned SNP List after rs_numbers that triggered warnings are removed
+    populateSNPlist(data);
 
 }
 
@@ -1859,7 +1875,7 @@ function loadSNPdetails(data, rs_number) {
     console.dir(data.details[rs_number]);
     */
     var found = false;
-    var match = 'Variant in LD with '+rs_number;
+    var match = 'Variant in LD with ' + rs_number;
 ;
 
     $.each(data.details, function( index, value ){
@@ -1871,27 +1887,21 @@ function loadSNPdetails(data, rs_number) {
             rs_number_link: anchorRSnumber(index),
             position_link: anchorRSposition(value[0], index)
         };
-        //console.log(index+" - "+value);
         if(detail.rs_number == rs_number) {
             found = true;
         }
-        //if(found == true && detail.rs_number == rs_number) {
         if(found) {
-            if(detail.comment == 'Variant kept.' && detail.rs_number != rs_number){
-                // List is complete, exit loop
-                // return false;
-            }
-            //console.log("Search: "+detail.comment.indexOf(data.details[rs_number])>0);
             if(detail.comment != undefined) {
-                if(detail.comment == 'Variant kept.' ||
-                    detail.comment.indexOf(match)>=0) {
+                if((detail.rs_number == rs_number && detail.comment.includes("Variant kept.")) ||
+                    detail.comment.includes(match)) {
                     snpclipData.details.push(detail);
-                }
-            } else {
-                console.log("detail.comment is UNDEFINED ");
-                console.log(JSON.stringify(detail));
-                // snpclipData.warnings.push(filtered);
-            }
+                } 
+            } 
+            // else {
+            //     console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
+            //     // console.log(JSON.stringify(detail));
+            //     snpclipData.warnings.push(detail);
+            // }
         }
     });
 
@@ -1906,7 +1916,7 @@ function initClip(data) {
     ldClipRaw = data;
 
     populateSNPwarnings(data);
-    populateSNPlist(data);
+    // populateSNPlist(data);
     //loadSNPdetails(data, rs_number);
     if(snpclipData.warnings.length == 0) {
         $('#snpclip-warnings-button').hide();
@@ -2013,18 +2023,52 @@ function updateLDmatrix() {
     });
 
     ajaxRequest.success(function(data) {
-        //console.log("ldmatrix");
-        //console.log(typeof data);
-        //console.dir(data);
-        if(typeof data == 'string') {
-            $('#ldmatrix-bokeh-graph').empty().append(data);
-            $('#' + id + '-progress-container').hide();
-            $('#' + id + '-results-container').show();
-            getLDmatrixResults(ldmatrixInputs.reference + ".json",
-                    ldmatrixInputs.reference);
+        // if(typeof data == 'string') {
+        //     $('#ldmatrix-bokeh-graph').empty().append(data);
+        //     $('#' + id + '-progress-container').hide();
+        //     $('#' + id + '-results-container').show();
+        //     getLDmatrixResults(ldmatrixInputs.reference + ".json",
+        //             ldmatrixInputs.reference);
+        // } else {
+        //     displayError(id, data);
+        // }
+
+        // create bokeh object with output_backend=canvas from svg
+        var dataString = data;
+        var dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvas = new Object([dataCanvasString]);
+
+        var jsonObjCanvas;
+        if(typeof dataCanvas == 'string') {
+            jsonObjCanvas = JSON.parse(dataCanvas);
         } else {
-            displayError(id, data);
+            jsonObjCanvas = dataCanvas;
         }
+
+        // generate shown canvas graph and hidden svg graph
+        if (displayError(id, jsonObjCanvas) == false) {
+            $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
+
+            // place Download PDF button
+            var tb=$("#row-button");
+	        $('#' + id + '-download-button').empty().prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $("#ldmatrix-downloadPDF").click(function(e) {
+                e.preventDefault();
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
+                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".pdf";
+                var urls = matrix_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+            
+            $('#' + id + '-results-container').show();
+            getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
+        } else {
+            displayError(id, dataCanvas);
+        }
+
+        $("#"+id+"-loading").hide();
 
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -2171,13 +2215,49 @@ function updateLDproxy() {
         data : ldproxyInputs
     });
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
-            $('#' + id + '-progress-container').hide();
-            $('#ldproxy-bokeh-graph').empty().append(data);
+        // if (displayError(id, data) == false) {
+        //     $('#' + id + '-progress-container').hide();
+        //     $('#ldproxy-bokeh-graph').empty().append(data);
+        //     $('#' + id + '-results-container').show();
+        //     getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
+        // }
+        // $("#"+id+"-loading").hide();
+
+        // create bokeh object with output_backend=canvas from svg
+        var dataString = data;
+        var dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvas = new Object([dataCanvasString]);
+
+        var jsonObjCanvas;
+        if(typeof dataCanvas == 'string') {
+            jsonObjCanvas = JSON.parse(dataCanvas);
+        } else {
+            jsonObjCanvas = dataCanvas;
+        }
+        // display graph if no errors
+        if (displayError(id, jsonObjCanvas) == false) {
+            $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
+ 
+            // place Download PDF button
+            // var tb=$("#row-button");
+	        $('#' + id + '-download-button').empty().prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $("#ldproxy-downloadPDF").click(function(e) {
+                e.preventDefault();
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
+                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".pdf";
+                var urls = proxy_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+
             $('#' + id + '-results-container').show();
             getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
+        } else {
+            displayError(id, dataCanvas);
         }
         $("#"+id+"-loading").hide();
+
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
@@ -2233,8 +2313,8 @@ function getLDAssocResults(jsonfile) {
     });
     ajaxRequest.success(function(data) {
         //catch error and warning in json
-        console.warn("HERE IS THE ldassoc data");
-        console.dir(data);
+        // console.warn("HERE IS THE ldassoc data");
+        // console.dir(data);
         if (displayError(id, data) == false) {
             RefreshTable('#new-ldassoc', data);
             $("#ldassoc-namespace").empty();
@@ -2429,7 +2509,7 @@ function displayError(id, data) {
 }
 
 function displayCommFail(id, jqXHR, textStatus) {
-    console.log(textStatus);
+    // console.log(textStatus);
     console.dir(jqXHR);
     console.warn("CommFail\n"+"Status: "+textStatus);
     //$("#calculating-spinner").modal('hide');
@@ -2464,12 +2544,12 @@ function showMessage(id, message, message_type) {
     $("#help").hide();
     $("#icon").css('visibility', 'visible');
 
-    console.log("Show Message");
+    // console.log("Show Message");
 
     var css_class = "";
     var header = "";
     var container_id = id+"-message-container";
-    console.log(container_id);
+    // console.log(container_id);
 
     if(message_type.toUpperCase() == 'ERROR') {
         css_class = 'panel-danger';
@@ -2901,13 +2981,13 @@ $(document).ready(function() {
 function validateGeneName() {
     var errorMsg = "Enter a valid Gene Name";
     var textarea = this;
-    console.log($(textarea).attr('pattern'));
+    // console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
     //Check to see if user selected chr10 thru chr22.
     var currentValue = $(this).val();
     $(this).val(currentValue.toUpperCase());
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     if (hasError) {
@@ -2920,11 +3000,11 @@ function validateGeneName() {
 function validateChr() {
     var errorMsg = "chr(1-22 or X or Y):######";
     var textarea = this;
-    console.log($(textarea).attr('pattern'));
+    // console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
     var currentValue = $(this).val();
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     //textarea.setCustomValidity('Hello');
@@ -2938,11 +3018,11 @@ function validateChr() {
 function validateIndex() {
     var errorMsg = "chr(1-22 or X or Y):###### or rs######";
     var textarea = this;
-    console.log($(textarea).attr('pattern'));
+    // console.log($(textarea).attr('pattern'));
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$', "i");
     var currentValue = $(this).val();
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     //textarea.setCustomValidity('Hello');
@@ -2959,7 +3039,7 @@ function validateBasePairWindows() {
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     var currentValue = $(this).val();
     var hasError = !currentValue.match(pattern);
-    console.log('hasError:'+hasError);
+    // console.log('hasError:'+hasError);
     $(textarea).toggleClass('error', !!hasError);
     $(textarea).toggleClass('ok', !hasError);
     if (hasError) {
@@ -2975,7 +3055,7 @@ function validateTextarea() {
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text
     $.each($(this).val().split("\n"), function (index, value) {
-        // check if the line matches the pattern
+        // check if the line matches the patterns
         //console.log(value);
         var hasError = !this.match(pattern);
         if(value == "" || value == "\n" || this.length<=2 )
@@ -3032,11 +3112,11 @@ function parseFile(file, callback) {
             callback(evt.target.result); // callback for handling read chunk
             return; //Only call the callback once. return.
         } else {
-            console.log("Read error: " + evt.target.error);
+            // console.log("Read error: " + evt.target.error);
             return;
         }
         if (offset >= fileSize) {
-            console.log("Done reading file");
+            // console.log("Done reading file");
             return;
         }
         // of to the next chunk
