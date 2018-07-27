@@ -1337,9 +1337,9 @@ function updateLDassoc() {
         //JSON.parse() cleans up this json string.
 
         // create bokeh object with output_backend=canvas from svg
-        var dataString = data[0];
+        var dataString = data;
         var dataCanvasString = dataString.replace(/svg/g, "canvas");
-        var dataCanvas = new Object([dataCanvasString, data[1]]);
+        var dataCanvas = new Object([dataCanvasString]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
@@ -1347,15 +1347,8 @@ function updateLDassoc() {
         } else {
             jsonObjCanvas = dataCanvas;
         }
-
-        // var jsonObj;
-        // if(typeof data == 'string') {
-        //     jsonObj = JSON.parse(data);
-        // } else {
-        //     jsonObj = data;
-        // }
-
-        // generate shown canvas graph and hidden svg graph
+        
+        // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
             console.log("dataCanvas");
             console.log(dataCanvas);
@@ -1370,44 +1363,30 @@ function updateLDassoc() {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
                 var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".svg";
-                // window.open("tmp/assoc_plot_" + ldInputs.reference + ".svg", "_blank");
-                // window.open("tmp/gene_plot_" + ldInputs.reference + ".svg", "_blank");
                 var urls = assoc_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
                 });
             });
-            
+
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         } else {
             displayError(id, dataCanvas);
         }
-
         $("#"+id+"-loading").hide();
+
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
-
         setTimeout(function() {
             var checkbox = $(".bk-toolbar-inspector").children().first();
             $(checkbox).attr('id', 'hover');
             $(checkbox).append('<label for="hover" class="sr-only">Hover Tool</label>');
         }, 100);
-
-        // setTimeout(function() {
-        //     var tb=$(".bk-root");
-	    //     $(tb).prepend('<div class="svgbutton pull-right"><label for="ldassoc-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldassoc-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
-	    //     $("#ldassoc-downloadSVG").click(function(e) {
-        //         e.preventDefault();
-        //         window.open("tmp/assoc_plot_" + ldInputs.reference + ".svg");
-        //         window.open("tmp/gene_plot_" + ldInputs.reference + ".svg");
-        //     });
-        // }, 100);    
-
     });
 
     hideLoadingIcon(ajaxRequest, id);
@@ -2258,13 +2237,53 @@ function updateLDproxy() {
         data : ldproxyInputs
     });
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
-            $('#' + id + '-progress-container').hide();
-            $('#ldproxy-bokeh-graph').empty().append(data);
+        // if (displayError(id, data) == false) {
+        //     $('#' + id + '-progress-container').hide();
+        //     $('#ldproxy-bokeh-graph').empty().append(data);
+        //     $('#' + id + '-results-container').show();
+        //     getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
+        // }
+        // $("#"+id+"-loading").hide();
+
+        // create bokeh object with output_backend=canvas from svg
+        var dataString = data;
+        var dataCanvasString = dataString.replace(/svg/g, "canvas");
+        var dataCanvas = new Object([dataCanvasString]);
+
+        var jsonObjCanvas;
+        if(typeof dataCanvas == 'string') {
+            jsonObjCanvas = JSON.parse(dataCanvas);
+        } else {
+            jsonObjCanvas = dataCanvas;
+        }
+        // display graph if no errors
+        if (displayError(id, jsonObjCanvas) == false) {
+            console.log("dataCanvas");
+            console.log(dataCanvas);
+            console.log("data");
+            console.log(data);
+            $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
+ 
+            // place download svg button
+            var tb=$(".bk-root");
+	        $(tb).prepend('<div class="svgbutton pull-right"><label for="ldproxy-downloadSVG" class="sr-only">Download SVGs</label><input type="button" id="ldproxy-downloadSVG" value="Download SVG" class="btn btn-default" ></input></div>');
+	        $("#ldproxy-downloadSVG").click(function(e) {
+                e.preventDefault();
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
+                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".svg";
+                var urls = proxy_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+
             $('#' + id + '-results-container').show();
             getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
+        } else {
+            displayError(id, dataCanvas);
         }
         $("#"+id+"-loading").hide();
+
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
