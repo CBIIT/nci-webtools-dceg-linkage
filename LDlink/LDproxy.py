@@ -514,27 +514,11 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
+    # For converting Bokeh SVGs to PDF
+	from svglib.svglib import svg2rlg
+	from reportlab.graphics import renderPDF
 
     reset_output()
-
-    # OLD BOKEH VERSION - START
-    # source = ColumnDataSource(
-    #     data=dict(
-    #         qrs=q_rs,
-    #         q_alle=q_allele,
-    #         q_maf=q_maf,
-    #         prs=p_rs,
-    #         p_alle=p_allele,
-    #         p_maf=p_maf,
-    #         dist=dist,
-    #         r=r2_round,
-    #         d=d_prime_round,
-    #         alleles=corr_alleles,
-    #         regdb=regdb,
-    #         funct=funct,
-    #     )
-    # )
-    # OLD BOKEH VERSION - END
 
     # Proxy Plot
     x = p_coord
@@ -571,7 +555,6 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
         recomb_x.append(int(pos) / 1000000.0)
         recomb_y.append(float(rate) / 100.0)
 
-    # NEW BOKEH VERSION FIX GLYPHS - START
     data = {
          'x': x,
          'y': y,
@@ -590,16 +573,11 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
          'size': size,
          'color': color
     }
-    # NEW BOKEH VERSION FIX GLYPHS - END
     source = ColumnDataSource(data)
 
     proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # proxy_plot.circle(x, y, size=size, source=source, color=color, alpha=0.5)
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
+
     proxy_plot.circle(x='x', y='y', size='size', color='color', alpha=0.5, source=source)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     hover = proxy_plot.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -631,7 +609,6 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     y2_ul = [1.03] * len(x)
     yr_rug = Range1d(start=-0.03, end=1.03)
 
-    # NEW BOKEH VERSION FIX GLYPHS - START
     data_rug = {
           'x': x,
           'y': y,
@@ -653,21 +630,14 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
           'color': color
     }
     source_rug = ColumnDataSource(data_rug)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     rug = figure(
         x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
         title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
         plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
 
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # rug.segment(x, y2_ll, x, y2_ul, source=source,
-    #             color=color, alpha=0.5, line_width=1)
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
     rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug,
                 color='color', alpha=0.5, line_width=1)
-    # NEW BOKEH VERSION FIX GLYPHS - END
     rug.toolbar_location = None
 
     # Gene Plot
@@ -740,16 +710,6 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     exons_plot_yn = [n_rows - x + 0.5 for x in exons_plot_y]
     yr2 = Range1d(start=0, end=n_rows)
 
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # source2 = ColumnDataSource(
-    #     data=dict(
-    #         exons_plot_name=exons_plot_name,
-    #         exons_plot_id=exons_plot_id,
-    #         exons_plot_exon=exons_plot_exon,
-    #     )
-    # )
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
     data_gene_plot = {
           'exons_plot_x': exons_plot_x,
           'exons_plot_yn': exons_plot_yn,
@@ -761,7 +721,6 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     }
 
     source_gene_plot = ColumnDataSource(data_gene_plot)
-    # NEW BOKEH VERSION FIX GLYPHS - END
 
     if len(lines) < 3:
         plot_h_pix = 150
@@ -775,14 +734,9 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
 
     gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                       genes_plot_yn, color="black", alpha=1, line_width=2)
-    # OLD BOKEH VERSION FIX GLYPHS - START
-    # gene_plot.rect(exons_plot_x, exons_plot_yn, exons_plot_w, exons_plot_h,
-    #                source=source2, fill_color="grey", line_color="grey")
-    # OLD BOKEH VERSION FIX GLYPHS - END
-    # NEW BOKEH VERSION FIX GLYPHS - START
+
     gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
                     source=source_gene_plot, fill_color="grey", line_color="grey")
-    # NEW BOKEH VERSION FIX GLYPHS - END
     gene_plot.xaxis.axis_label = "Chromosome " + \
         snp_coord[1] + " Coordinate (Mb)(GRCh37)"
     gene_plot.yaxis.axis_label = "Genes"
@@ -809,6 +763,11 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     gene_plot.output_backend = "svg"
     export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+    # Export to PDF as well
+    proxy_plot_svg = svg2rlg(tmp_dir + "proxy_plot_" + request + ".svg")
+    renderPDF.drawToFile(proxy_plot_svg, tmp_dir + "proxy_plot_" + request + ".pdf")
+    gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
+    renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
 
     # Combine plots into a grid
     out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
