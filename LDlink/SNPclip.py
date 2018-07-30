@@ -1,4 +1,4 @@
-import config
+import yaml
 #!/usr/bin/env python
 
 import collections
@@ -19,10 +19,12 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	# pop_dir=data_dir+"1000G/Phase3/samples/"
 	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 
-	# Set data directories USING CONFIG
-	snp_dir=config.data['snp_dir']
-	pop_dir=config.data['pop_dir']
-	vcf_dir=config.data['vcf_dir']
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
 
 	tmp_dir="./tmp/"
 

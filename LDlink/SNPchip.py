@@ -1,4 +1,4 @@
-import config
+import yaml
 #!/usr/bin/env python
 
 ###########
@@ -59,9 +59,11 @@ def calculate_chip(snplst,platform_query,request):
 	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
 	# array_dir=data_dir+"arrays/snp142_arrays.db"
 
-	# Set data directories USING CONFIG
-	snp_dir=config.data['snp_dir']
-	array_dir=config.data['array_dir']
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	snp_dir=config['data']['snp_dir']
+	array_dir=config['data']['array_dir']
 
 	tmp_dir="./tmp/"
 	

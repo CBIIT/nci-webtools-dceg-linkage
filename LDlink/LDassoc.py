@@ -1,4 +1,4 @@
-import config
+import yaml
 #!/usr/bin/env python
 
 # Create LDproxy function
@@ -17,14 +17,16 @@ def calculate_assoc(file,region,pop,request,myargs):
 	# pop_dir=data_dir+"1000G/Phase3/samples/"
 	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 
-	# Set data directories USING CONFIG
-	gene_dir=config.data['gene_dir']
-	gene_c_dir=config.data['gene_c_dir']
-	gene_dir2=config.data['gene_dir2']
-	recomb_dir=config.data['recomb_dir']
-	snp_dir=config.data['snp_dir']
-	pop_dir=config.data['pop_dir']
-	vcf_dir=config.data['vcf_dir']
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	gene_dir=config['data']['gene_dir']
+	gene_c_dir=config['data']['gene_c_dir']
+	gene_dir2=config['data']['gene_dir2']
+	recomb_dir=config['data']['recomb_dir']
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
 
 	tmp_dir="./tmp/"
 

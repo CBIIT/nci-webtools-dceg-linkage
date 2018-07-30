@@ -1,4 +1,4 @@
-import config
+import yaml
 #!/usr/bin/env python
 
 # Create LDpair function
@@ -13,10 +13,12 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # pop_dir = data_dir + "1000G/Phase3/samples/"
     # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
 
-    # Set data directories USING CONFIG
-    snp_dir=config.data['snp_dir']
-    pop_dir=config.data['pop_dir']
-    vcf_dir=config.data['vcf_dir']
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    snp_dir=config['data']['snp_dir']
+    pop_dir=config['data']['pop_dir']
+    vcf_dir=config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
 

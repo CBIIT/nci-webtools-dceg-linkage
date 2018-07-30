@@ -1,5 +1,5 @@
 import csv,sqlite3,subprocess,sys
-import config
+import yaml
 
 snp=sys.argv[1]
 chr=sys.argv[2]
@@ -15,11 +15,13 @@ process=sys.argv[5]
 # vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 # reg_dir=data_dir+"regulomedb/regulomedb.db"
 
-# Set data directories USING CONFIG
-snp_dir=config.data['snp_dir']
-pop_dir=config.data['pop_dir']
-vcf_dir=config.data['vcf_dir']
-reg_dir=config.data['reg_dir']
+# Set data directories using config.yml
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+snp_dir=config['data']['snp_dir']
+pop_dir=config['data']['pop_dir']
+vcf_dir=config['data']['vcf_dir']
+reg_dir=config['data']['reg_dir']
 
 tmp_dir="./tmp/"
 
