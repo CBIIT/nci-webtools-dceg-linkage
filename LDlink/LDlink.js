@@ -1343,7 +1343,7 @@ function updateLDassoc() {
  
             // place Download PDF button
             var tb=$("#row-button");
-	        $('#' + id + '-download-button').empty().prepend('<div class="download-button pull-right"><button type="button" id="ldassoc-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-download-button').empty().prepend('<div class="download-button pull-right"><button type="button" id="ldassoc-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button> <button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
             $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
@@ -2060,7 +2060,7 @@ function updateLDmatrix() {
 
             // place Download PDF button
             var tb=$("#row-button");
-	        $('#' + id + '-download-button').empty().prepend('<div class="download-button pull-right"><button type="button" id="ldmatrix-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-download-button').empty().prepend('<div class="download-button pull-right"><button type="button" id="ldmatrix-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button> <button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
             $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
@@ -2258,7 +2258,7 @@ function updateLDproxy() {
  
             // place Download PDF button
             // var tb=$("#row-button");
-	        $('#' + id + '-download-button').empty().prepend('<div class="download-button pull-right"><button type="button" id="ldproxy-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-download-button').empty().prepend('<div class="download-button pull-right"><button type="button" id="ldproxy-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button> <button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
             $("#ldproxy-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
