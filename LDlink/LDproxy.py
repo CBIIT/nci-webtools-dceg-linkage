@@ -26,11 +26,11 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
 
     # Set data directories USING CONFIG
-	gene_dir=config.data['gene_dir']
-	recomb_dir=config.data['recomb_dir']
-	snp_dir=config.data['snp_dir']
-	pop_dir=config.data['pop_dir']
-	vcf_dir=config.data['vcf_dir']
+    gene_dir=config.data['gene_dir']
+    recomb_dir=config.data['recomb_dir']
+    snp_dir=config.data['snp_dir']
+    pop_dir=config.data['pop_dir']
+    vcf_dir=config.data['vcf_dir']
 
     tmp_dir = "./tmp/"
 
