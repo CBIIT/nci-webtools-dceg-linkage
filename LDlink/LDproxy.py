@@ -1,3 +1,4 @@
+import config
 #!/usr/bin/env python
 
 # Create LDproxy function
@@ -17,12 +18,20 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     start_time = time.time()
 
     # Set data directories
-    data_dir = "/local/content/ldlink/data/"
-    gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
-    recomb_dir = data_dir + "recomb/genetic_map_autosomes_combined_b37.txt.gz"
-    snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    pop_dir = data_dir + "1000G/Phase3/samples/"
-    vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+    # data_dir = "/local/content/ldlink/data/"
+    # gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
+    # recomb_dir = data_dir + "recomb/genetic_map_autosomes_combined_b37.txt.gz"
+    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
+    # pop_dir = data_dir + "1000G/Phase3/samples/"
+    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+
+    # Set data directories USING CONFIG
+	gene_dir=config.data['gene_dir']
+	recomb_dir=config.data['recomb_dir']
+	snp_dir=config.data['snp_dir']
+	pop_dir=config.data['pop_dir']
+	vcf_dir=config.data['vcf_dir']
+
     tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists

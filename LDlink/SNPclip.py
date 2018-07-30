@@ -1,3 +1,4 @@
+import config
 #!/usr/bin/env python
 
 import collections
@@ -13,10 +14,16 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	max_list=5000
 
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	pop_dir=data_dir+"1000G/Phase3/samples/"
-	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+	# data_dir="/local/content/ldlink/data/"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# pop_dir=data_dir+"1000G/Phase3/samples/"
+	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+	# Set data directories USING CONFIG
+	snp_dir=config.data['snp_dir']
+	pop_dir=config.data['pop_dir']
+	vcf_dir=config.data['vcf_dir']
+
 	tmp_dir="./tmp/"
 
 

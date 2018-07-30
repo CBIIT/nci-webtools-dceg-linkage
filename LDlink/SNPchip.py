@@ -1,3 +1,4 @@
+import config
 #!/usr/bin/env python
 
 ###########
@@ -54,9 +55,14 @@ def convert_codeToPlatforms(platform_query):
 def calculate_chip(snplst,platform_query,request):
 
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	array_dir=data_dir+"arrays/snp142_arrays.db"
+	# data_dir="/local/content/ldlink/data/"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# array_dir=data_dir+"arrays/snp142_arrays.db"
+
+	# Set data directories USING CONFIG
+	snp_dir=config.data['snp_dir']
+	array_dir=config.data['array_dir']
+
 	tmp_dir="./tmp/"
 	
 	# Ensure tmp directory exists
