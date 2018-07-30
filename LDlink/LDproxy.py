@@ -778,8 +778,8 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
     renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
     # Remove SVG files after exported to pdf
-    subprocess.call("rm " + tmp_dir + "proxy_plot_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+    # subprocess.call("rm " + tmp_dir + "proxy_plot_" + request + ".svg", shell=True)
+    # subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
 
     # Combine plots into a grid
     out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,

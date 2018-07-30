@@ -1095,8 +1095,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
 		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
 		# Remove SVG files after exported to pdf
-		subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
-		subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		# subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
+		# subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
 
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
@@ -1220,8 +1220,8 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
 		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
 		# Remove SVG files after exported to pdf
-		subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
-		subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		# subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
+		# subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
 		
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))
