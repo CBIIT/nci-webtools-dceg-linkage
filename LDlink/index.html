@@ -43,6 +43,7 @@
 <link rel="stylesheet" href="LDlink.css">
 
 <!-- Load news text from news.html to news-container div-->
+<script src="https://code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script>
 <script type="text/javascript">
 	$(function () {
 		$.get("news.html", function (data) {
@@ -124,33 +125,34 @@
 
 				<p style="margin-left: 40px;">
 
-					<b>LDassoc</b>: Interactively visualize association p-value results
+					<b><a href="?tab=ldassoc">LDassoc</a></b>: Interactively visualize association p-value results
 						and linkage disequilibrium patterns for a genomic region of interest.
 						Input is a tab or space delimited association output file and a population
 						group.<br>
 
-					<b>LDhap</b>: Calculate population specific haplotype
+					<b><a href="?tab=ldhap">LDhap</a></b>: Calculate population specific haplotype
 						frequencies of all haplotypes observed for a list of query variants.
 						Input is a list of variant RS numbers (one per line) and a population
 						group.<br>
 
-					<b>LDmatrix</b>: Create an interactive heatmap matrix of pairwise
+					<b><a href="?tab=ldmatrix">LDmatrix</a></b>: Create an interactive heatmap matrix of pairwise
 						linkage disequilibrium statistics. Input is a list of variant
 						RS numbers (one per line) and a population group.<br>
 
-					<b>LDpair</b>: Investigate correlated alleles for a pair of variants in
+					<b><a href="?tab=ldpair">LDpair</a></b>: Investigate correlated alleles for a pair of variants in
 						high LD. Input is two RS numbers and a population group.<br>
 
-					<b>LDproxy</b>: Interactively explore proxy and putatively
+					<b><a href="?tab=ldproxy">LDproxy</a></b>: Interactively explore proxy and putatively
 						functional variants for a query variant. Input is an RS number and a
 						population group.<br>
 
-					<b>SNPclip</b>: Prune a list of variants by linkage disequilibrium.
+					<b><a href="?tab=snpchip">SNPchip</a></b>: Find commercial genotyping platforms for variants.
+						Input is a list of variant RS numbers (one per line) and desired arrays.<br>
+
+					<b><a href="?tab=snpclip">SNPclip</a></b>: Prune a list of variants by linkage disequilibrium.
 						Input is a list of variant RS numbers (one per line) and a population
 						group.<br>
 
-					<b>SNPchip</b>: Find commercial genotyping platforms for variants.
-						Input is a list of variant RS numbers (one per line) and desired arrays.<br>
 				</p>
 
 				<!-- Add new notes here.  Surround paragrahs with <p></p> -->
@@ -1738,7 +1740,6 @@
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" ></script>
 -->
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw=" crossorigin="anonymous"></script>
-
 	<script type="text/javascript"
 		src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js">
 	</script>
