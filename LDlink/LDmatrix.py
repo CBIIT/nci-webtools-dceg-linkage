@@ -855,8 +855,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
     # Export to PDF as well
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
     # matrix_plot_svg = svg2rlg(tmp_dir + "matrix_plot_" + request + ".svg")
     # renderPDF.drawToFile(matrix_plot_svg, tmp_dir + "matrix_plot_" + request + ".pdf")
     # gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
