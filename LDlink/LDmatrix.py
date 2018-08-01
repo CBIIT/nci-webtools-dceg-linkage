@@ -599,8 +599,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # print "END   - debug prints for 45 degree rotation"
     # print "###################################"
           
-    # source = ColumnDataSource(new_data)
-    source = ColumnDataSource(data)
+    source = ColumnDataSource(new_data)
+    # source = ColumnDataSource(data)
 
     threshold = 70
     if len(snps) < threshold:
