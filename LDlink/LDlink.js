@@ -1343,7 +1343,7 @@ function updateLDassoc() {
  
             // place Download PDF button
             var tb=$("#row-button");
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="export-dropdown pull-right"><button type="button" id="ldassoc-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button> <button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
@@ -1353,10 +1353,19 @@ function updateLDassoc() {
                     window.open( item, "_blank" )
                 });
             });
-            $("#ldassoc-downloadPDF").click(function(e) {
+            $("#ldassoc-downloadPNG").click(function(e) {
                 e.preventDefault();
-                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".pdf";
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".png";
+                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".png";
+                var urls = assoc_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+            $("#ldassoc-downloadJPEG").click(function(e) {
+                e.preventDefault();
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
+                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".jpeg";
                 var urls = assoc_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
@@ -2060,7 +2069,7 @@ function updateLDmatrix() {
 
             // place Download PDF button
             var tb=$("#row-button");
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot<span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
@@ -2074,6 +2083,15 @@ function updateLDmatrix() {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png";
                 var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".png";
+                var urls = matrix_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+            $("#ldmatrix-downloadJPEG").click(function(e) {
+                e.preventDefault();
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
+                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".jpeg";
                 var urls = matrix_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
@@ -2258,7 +2276,7 @@ function updateLDproxy() {
  
             // place Download PDF button
             // var tb=$("#row-button");
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="export-dropdown pull-right"><button type="button" id="ldproxy-downloadSVG" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download SVG</button> <button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldproxy-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldproxy-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
@@ -2268,10 +2286,19 @@ function updateLDproxy() {
                     window.open( item, "_blank" )
                 });
             });
-            $("#ldproxy-downloadPDF").click(function(e) {
+            $("#ldproxy-downloadPNG").click(function(e) {
                 e.preventDefault();
-                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".pdf";
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".png";
+                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".png";
+                var urls = proxy_plot + "," + gene_plot;
+                $.each( urls.split( "," ), function( index, item ) {
+                    window.open( item, "_blank" )
+                });
+            });
+            $("#ldproxy-downloadJPEG").click(function(e) {
+                e.preventDefault();
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
+                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".jpeg";
                 var urls = proxy_plot + "," + gene_plot;
                 $.each( urls.split( "," ), function( index, item ) {
                     window.open( item, "_blank" )
