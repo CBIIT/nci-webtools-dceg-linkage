@@ -2113,6 +2113,13 @@ function updateLDmatrix() {
                     window.open( item, "_blank" )
                 });
             });
+
+            // ROTATE LDMATRIX PLOT IN PYRAMIND
+            var temp_bkroot = $(".bk-root").children()[0];
+            var temp_child = $(temp_bkroot).children()[0];
+            var temp_secgrandchild = $(temp_child).children()[1];
+            var rotate_target = $(temp_secgrandchild).children()[0]
+            $(rotate_target).css("transform", "rotate(-44.2deg)");
             
             $('#' + id + '-results-container').show();
             getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
