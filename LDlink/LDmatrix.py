@@ -551,42 +551,42 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     }
 
     # Delete redundant data
-    startidx = []
+    # startidx = []
     # Isolate indices of elements in y=x
-    for xidx, xn in enumerate(data['xname']):
-        for yidx, yn in enumerate(data['yname']):
-            if xn == yn and xidx == yidx:
-                startidx.append(xidx)
+    # for xidx, xn in enumerate(data['xname']):
+        # for yidx, yn in enumerate(data['yname']):
+            # if xn == yn and xidx == yidx:
+                # startidx.append(xidx)
     # Flatten list snps
-    flat_snps = [item for sublist in snps for item in sublist]
+    # flat_snps = [item for sublist in snps for item in sublist]
     # Reverse flattend snp list
-    rev_snps = list(reversed(flat_snps))
+    # rev_snps = list(reversed(flat_snps))
     # get index of every appearance of last snp in snplst
-    recsnp = rev_snps[-1]
+    # recsnp = rev_snps[-1]
     # print "snps", rev_snps
     # print "recsnp", recsnp
     # print "data[yname]", data['yname']
-    recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
+    # recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
     # print "recsnp_idx", recsnp_idx
     # Add range of indices between y=x and height of y at x
-    newidx = []
+    # newidx = []
     # print "startidx", startidx
     # print "recsnp_idx", recsnp_idx
-    for i in range(0, len(startidx)):
-        if startidx[i] != recsnp_idx[i]:
-            newidx.append(range(startidx[i], recsnp_idx[i]))
-            newidx.append([recsnp_idx[i]])
-        else:
-            newidx.append([startidx[i]])
+    # for i in range(0, len(startidx)):
+    #     if startidx[i] != recsnp_idx[i]:
+    #         newidx.append(range(startidx[i], recsnp_idx[i]))
+    #         newidx.append([recsnp_idx[i]])
+    #     else:
+    #         newidx.append([startidx[i]])
     # Flatten list indices
-    flat_newidx = [item for sublist in newidx for item in sublist]
+    # flat_newidx = [item for sublist in newidx for item in sublist]
     # Add only whitelisted indices to new data dict
-    new_data = {}
-    for key in data:
-        new_data[key] = []
-        for idx, val in enumerate(data[key]):
-            if idx in flat_newidx:
-                new_data[key].append(val)
+    # new_data = {}
+    # for key in data:
+    #     new_data[key] = []
+    #     for idx, val in enumerate(data[key]):
+    #         if idx in flat_newidx:
+    #             new_data[key].append(val)
 
     # debug prints for 45 degree rotation
     # print "###################################"
@@ -599,26 +599,26 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # print "END   - debug prints for 45 degree rotation"
     # print "###################################"
           
-    source = ColumnDataSource(new_data)
-    # source = ColumnDataSource(data)
+    # source = ColumnDataSource(new_data)
+    source = ColumnDataSource(data)
 
     threshold = 70
     if len(snps) < threshold:
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-        #                      x_range=xr, y_range=list(reversed(rsnum_lst)),
-        #                      h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
-        #                      tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-        # Take off y axis labels
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                             tools="hover,previewsave", title=" ", plot_width=800, plot_height=700)
+                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+        # CHANGE AXIS LABELS & LINE COLOR: 
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
+        #                     x_range=xr, y_range=list(rsnum_lst), 
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                             tools="hover,previewsave", title=" ", plot_width=800, plot_height=700)
+                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR:
         # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
         #                     x_range=xr, y_range=list(rsnum_lst), 
@@ -663,7 +663,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
                            x_range=xr, y_range=yr2, border_fill_color='white',
                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                           plot_width=800, plot_height=90, tools="tap")
+                           plot_width=800, plot_height=90, tools="xpan,tap")
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
@@ -673,7 +673,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
                            x_range=xr, y_range=yr3, border_fill_color='white',
                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                           plot_width=800, plot_height=30, tools="tap")
+                           plot_width=800, plot_height=30, tools="xpan,tap")
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
@@ -809,7 +809,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                        x_range=xr, y_range=yr2, border_fill_color='white',
                        title="", h_symmetry=False, v_symmetry=False, logo=None,
-                       plot_width=800, plot_height=plot_h_pix, tools="hover,tap,previewsave")
+                       plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
     if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
