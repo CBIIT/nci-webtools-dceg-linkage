@@ -670,7 +670,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
-        connector.text(x2, y4, text=snp_id_plot, alpha=1, angle=pi / 2,
+        connector.text(x2, y4, text=snp_id_plot, alpha=1, angle=pi / 2, text_font="times",
                        text_font_size="8pt", text_baseline="middle", text_align="left")
     else:
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
@@ -819,7 +819,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                           genes_plot_yn, color="black", alpha=1, line_width=2)
         gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
                         source=source_gene_plot, fill_color='grey', line_color="grey")
-        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font="times", text_font_size="7pt",
                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
         hover = gene_plot.select(dict(type=HoverTool))
         hover.tooltips = OrderedDict([
@@ -830,7 +830,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     else:
         x_coord_text = x[0] + (x[-1] - x[0]) / 2.0
-        gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
+        gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1, text_font="times",
                        text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
     gene_plot.xaxis.axis_label = "Chromosome " + \
