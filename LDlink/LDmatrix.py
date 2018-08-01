@@ -473,9 +473,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
     from math import pi
-    # For converting Bokeh SVGs to PDF
-    from svglib.svglib import svg2rlg
-    from reportlab.graphics import renderPDF
 
     reset_output()
 
@@ -861,10 +858,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
     
-    # matrix_plot_svg = svg2rlg(tmp_dir + "matrix_plot_" + request + ".svg")
-    # renderPDF.drawToFile(matrix_plot_svg, tmp_dir + "matrix_plot_" + request + ".pdf")
-    # gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
-    # renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
     # Remove SVG files after exported to pdf
     # subprocess.call("rm " + tmp_dir + "matrix_plot_" + request + ".svg", shell=True)
     # subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)

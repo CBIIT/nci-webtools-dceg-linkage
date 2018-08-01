@@ -525,9 +525,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
-    # For converting Bokeh SVGs to PDF
-    from svglib.svglib import svg2rlg
-    from reportlab.graphics import renderPDF
+
 
     reset_output()
 
@@ -769,16 +767,23 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
 
     gene_plot.toolbar_location = "below"
 
+    # Change output backend to SVG temporarily for headless export
+    # Will be changed back to canvas in LDlink.js
     proxy_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
     export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
-    # Export to PDF as well
-    proxy_plot_svg = svg2rlg(tmp_dir + "proxy_plot_" + request + ".svg")
-    renderPDF.drawToFile(proxy_plot_svg, tmp_dir + "proxy_plot_" + request + ".pdf")
-    gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
-    renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
+    # Export to PDF
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".pdf", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
+    # Export to PNG
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
+    # Export to JPEG
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
+    
     # Remove SVG files after exported to pdf
     # subprocess.call("rm " + tmp_dir + "proxy_plot_" + request + ".svg", shell=True)
     # subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
