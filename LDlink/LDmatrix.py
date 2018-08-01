@@ -471,7 +471,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.models import HoverTool, LinearAxis, Range1d
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
-    from bokeh.io import export_svgs
+    from bokeh.io import export_svgs, export_png
     from math import pi
     # For converting Bokeh SVGs to PDF
     from svglib.svglib import svg2rlg
@@ -844,6 +844,11 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     gene_plot.toolbar_location = "below"
 
+    # Export to PNG
+    export_png(matrix_plot, filename=tmp_dir + "matrix_plot_" + request + ".png")
+    export_png(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".png")
+    # Change output backend to SVG temporarily for headless export
+    # Will be changed back to canvas in LDlink.js
     matrix_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
