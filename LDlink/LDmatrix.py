@@ -559,7 +559,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                 startidx.append(xidx)
     # Flatten list snps
     flat_snps = [item for sublist in snps for item in sublist]
-    Reverse flattend snp list
+    # Reverse flattend snp list
     rev_snps = list(reversed(flat_snps))
     # get index of every appearance of last snp in snplst
     recsnp = rev_snps[-1]
