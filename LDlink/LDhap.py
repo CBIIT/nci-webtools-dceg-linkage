@@ -35,7 +35,7 @@ def calculate_hap(snplst,pop,request):
 		raise
 
 	print "PRINT SNP LIST RAW ##########################"
-	print "snps", snps_raw
+	print "snps raw", snps_raw
 
 	# Remove duplicate RS numbers and cast to lower case
 	snps=[]
@@ -79,24 +79,30 @@ def calculate_hap(snplst,pop,request):
 		return cur.fetchone()
 	
 	
-	# Find RS numbers in snp142 database
+	# Find RS numbers and genomic coords in snp142 database
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
 	warn=[]
 	tabix_coords=""
 	for snp_i in snps:
-		if len(snp_i)>0:
-			if len(snp_i[0])>2:
-				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit():
+		if len(snp_i)>0: # Length entire list of snps
+			if len(snp_i[0])>2: # Length of each snp in snps
+				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit(): # Check first two charcters are rs and last charcter of each snp
 					snp_coord=get_coords(snp_i[0])
+					print "SNP_COORD"
+					print snp_coord
 					if snp_coord!=None:
 						rs_nums.append(snp_i[0])
 						snp_pos.append(snp_coord[2])
 						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
+						print "TEMP"
+						print temp
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
+				elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
+					# FIND AND APPEND DATA
 				else:
 					warn.append(snp_i[0])
 			else:
