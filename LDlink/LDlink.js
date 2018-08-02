@@ -942,9 +942,8 @@ function cleanSNP(text) {
 
     $.each(lines, function (key, value) {
         var clean = value.replace(/\t/, " ");
-        var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
+        var line = clean.replace(/[^[A-Z0-9\n \:]/ig, "");
         line = line.split(' ');
-        //console.dir(line);
         variant = "";
         $.each(line, function(key,value){
             if(value != "") {
