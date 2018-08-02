@@ -35,7 +35,7 @@ def calculate_hap(snplst,pop,request):
 		raise
 
 	print "PRINT SNP LIST RAW ##########################"
-	print "snps", snps
+	print "snps", snps_raw
 
 	# Remove duplicate RS numbers and cast to lower case
 	snps=[]
