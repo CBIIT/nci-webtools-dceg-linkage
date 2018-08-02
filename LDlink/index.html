@@ -604,11 +604,11 @@
 							<!-- Broswe RS numbers -->
 							<div class="col-sm-4">
 								<div class="input-group">
-									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
+									<label for="ldhap-file-label" style="display:none;">Upload Input File</label>
 									<input type="text" id="ldhap-file-label" readonly
 										placeholder="Upload file with variants"
 										class="readonly-input-text">
-									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
+									<label for="ldhap-file" style="display:none;">Browse for Input File</label>
 									<span	class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="ldhap-file">
 									</span>
@@ -772,8 +772,8 @@
 								<div class="col-sm-2">
 									<textarea id="ldmatrix-file-snp-numbers"
 										placeholder="RS Numbers" class="form-control"
-										title="Enter list of RS numbers (one per line)"
-										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+										title="Enter list of RS numbers or Coordinates (one per line)"
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
 								</div>
 								<!-- COLUMN2 - sm-3 -->
 								<div class="col-sm-3">
@@ -1266,8 +1266,8 @@
 								<textarea id="snpclip-file-snp-numbers"
 									placeholder="RS Numbers"
 									class="form-control"
-									title="Enter list of RS numbers (one per line)"
-									pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+									title="Enter list of RS numbers or Coordinates (one per line)"
+									pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
 							</div>
 							<div class="col-sm-3">
 								<div class="input-group">
@@ -1452,8 +1452,8 @@
 									<textarea id="snpchip-file-snp-numbers"
 										placeholder="RS Numbers"
 										class="form-control"
-										title="Enter list of RS numbers (one per line)"
-										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+										title="Enter list of RS numbers or Coordinates (one per line)"
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
 								</div>
 							</div>
 							<div class="col-sm-4">
