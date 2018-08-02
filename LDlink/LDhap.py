@@ -33,10 +33,14 @@ def calculate_hap(snplst,pop,request):
 		output["error"]="Maximum variant list is 30 RS numbers or coordinates. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
-	# Remove duplicate RS numbers
+
+	print "PRINT SNP LIST RAW ##########################"
+	print "snps", snps
+
+	# Remove duplicate RS numbers and cast to lower case
 	snps=[]
 	for snp_raw in snps_raw:
-		snp=snp_raw.strip().split()
+		snp =snp_raw.lower().strip().split()
 		if snp not in snps:
 			snps.append(snp)
 
