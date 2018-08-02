@@ -215,8 +215,8 @@ def createOutputFile(request):
 		json_dict=json.load(out_json)
 
 	rs_dict = dict(json_dict)
-	del rs_dict['error'];
-	del rs_dict['warning'];
+	del rs_dict['error']
+	del rs_dict['warning']
 
 	#Header
 	header=["RS Number","Position (GRCh37)","Arrays"]

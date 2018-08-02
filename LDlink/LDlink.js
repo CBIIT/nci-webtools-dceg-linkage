@@ -938,27 +938,27 @@ function cleanSNP(text) {
     //
     var lines = text.split('\n');
     var list = "";
-    var rsnumber = "";
+    var variant = "";
 
     $.each(lines, function (key, value) {
         var clean = value.replace(/\t/, " ");
         var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
         line = line.split(' ');
         //console.dir(line);
-        rsnumber = "";
+        variant = "";
         $.each(line, function(key,value){
             if(value != "") {
-                rsnumber = value;
+                variant = value;
                 return false;
             }
         });
-        //console.log("rsnumber is "+rsnumber);
-        if(rsnumber.length > 2) {
-            //console.log(line[0]);
-            var pos = rsnumber.search(/^[R|r][S|s]\d+$/);
-            //console.log("pos: "+pos);
+
+        if(variant.length > 2) {
+            // var pos = variant.search(/^[R|r][S|s]\d+$/);
+            // add genomic positions too (ex. chr1:123456)
+            var pos = variant.search(/^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/);
             if(pos == 0) {
-                list += rsnumber+'\n';
+                list += variant + '\n';
             }
         }
     });
