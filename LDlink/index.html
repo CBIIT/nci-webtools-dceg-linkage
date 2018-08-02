@@ -598,7 +598,7 @@
 										placeholder="RS Numbers or Coordinates"
 										class="form-control"
 										title="Enter list of RS numbers or Coordinates (one per line)"
-										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R]\d+:\d+([ |\t])*)$" required></textarea>
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
 								</div>
 							</div>
 							<!-- Broswe RS numbers -->
@@ -606,7 +606,7 @@
 								<div class="input-group">
 									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
 									<input type="text" id="ldhap-file-label" readonly
-										placeholder="Upload file with RS numbers"
+										placeholder="Upload file with variants"
 										class="readonly-input-text">
 									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
 									<span	class="btn btn-default btn-file btn-snp">Browse

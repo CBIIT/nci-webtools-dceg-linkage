@@ -5,6 +5,9 @@ import yaml
 def calculate_hap(snplst,pop,request):
 	import json,math,operator,os,sqlite3,subprocess,sys
 	
+	print "PRINT SNP LST ##########################"
+	print snplst
+
 	# Set data directories
 	# data_dir="/local/content/ldlink/data/"
 	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
@@ -103,7 +106,7 @@ def calculate_hap(snplst,pop,request):
 		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input variant list does not contain any valid RS numbers or coordinates that are in dbSNP 142."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
