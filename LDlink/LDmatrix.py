@@ -111,7 +111,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS numbers were not found in dbSNP 142: " + ",".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP 142: " + ",".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP 142."

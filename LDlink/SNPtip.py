@@ -90,7 +90,7 @@ def calculate_tip(snplst,request):
 				warn.append(snp_i[0])
 
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(snp_coords)==0:
 		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."

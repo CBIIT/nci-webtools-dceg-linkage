@@ -132,7 +132,7 @@ def calculate_chip(snplst,platform_query,request):
 	output["warning"]=""
 	output["error"]=""
 	if warn!=[] and len(rs_nums)!=0:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+", ".join(warn)+".\n"
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP 142: "+", ".join(warn)+".\n"
 	elif len(rs_nums)==0:
 		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142.\n"
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -192,7 +192,7 @@ def calculate_chip(snplst,platform_query,request):
 		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 	if(platform_NOT!=[] and len(platform_NOT)!=count):
 		warning=output["warning"]
-		warning=warning+"The following RS numbers did not have any platforms found: "+", ".join(platform_NOT)+". "
+		warning=warning+"The following RS number did not have any platforms found: "+", ".join(platform_NOT)+". "
 		output["warning"]=warning
 	elif (len(platform_NOT)==count):
 		error=output["warning"]

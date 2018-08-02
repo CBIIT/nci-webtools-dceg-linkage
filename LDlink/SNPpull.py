@@ -102,7 +102,7 @@ def calculate_pull(snplst,request):
 	conn.close()
 	
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP 142: "+",".join(warn)
 			
 	
 	if len(rs_nums)==0:

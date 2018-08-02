@@ -4,9 +4,6 @@ import yaml
 # Create LDhap function
 def calculate_hap(snplst,pop,request):
 	import json,math,operator,os,sqlite3,subprocess,sys
-	
-	print "PRINT SNP LST ##########################"
-	print snplst
 
 	# Set data directories
 	# data_dir="/local/content/ldlink/data/"
@@ -33,7 +30,7 @@ def calculate_hap(snplst,pop,request):
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
 	if len(snps_raw)>30:
-		output["error"]="Maximum variant list is 30 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
+		output["error"]="Maximum variant list is 30 RS numbers or coordinates. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	# Remove duplicate RS numbers
@@ -42,6 +39,9 @@ def calculate_hap(snplst,pop,request):
 		snp=snp_raw.strip().split()
 		if snp not in snps:
 			snps.append(snp)
+
+	print "PRINT SNP LIST ##########################"
+	print "snps", snps
 	
 	# Select desired ancestral populations
 	pops=pop.split("+")
@@ -103,7 +103,7 @@ def calculate_hap(snplst,pop,request):
 	conn.close()
 	
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP 142: "+",".join(warn)
 	
 	if len(rs_nums)==0:
 		output["error"]="Input variant list does not contain any valid RS numbers or coordinates that are in dbSNP 142."
