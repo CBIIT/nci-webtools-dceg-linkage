@@ -101,8 +101,8 @@ def calculate_hap(snplst,pop,request):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-				elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
-					# FIND AND APPEND DATA
+				# elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
+				# 	# FIND AND APPEND DATA
 				else:
 					warn.append(snp_i[0])
 			else:
