@@ -29,7 +29,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # Create JSON output
     output = {}
 
-    # Connect to snp142 database
+    # Connect to snp database
     conn = sqlite3.connect(snp_dir)
     conn.text_factory = str
     cur = conn.cursor()
@@ -40,22 +40,22 @@ def calculate_pair(snp1, snp2, pop, request=None):
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
 
-    # Find RS numbers in snp142 database
+    # Find RS numbers in snp database
     # SNP1
     snp1_coord = get_coords(snp1)
     if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build 142."
+        output["error"] = snp1 + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
         return(json.dumps(output, sort_keys=True, indent=2))
         raise
 
     # SNP2
     snp2_coord = get_coords(snp2)
     if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build 142."
+        output["error"] = snp2 + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
         return(json.dumps(output, sort_keys=True, indent=2))
         raise
 
-    # Close snp142 connection
+    # Close snp connection
     cur.close()
     conn.close()
 

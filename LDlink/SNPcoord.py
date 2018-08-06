@@ -54,7 +54,7 @@ def calculate_tip(snplst,request):
 		if snp not in snps:
 			snps.append(snp)
 
-	# Connect to snp142 database
+	# Connect to snp database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
@@ -66,7 +66,7 @@ def calculate_tip(snplst,request):
 		return cur.fetchone()
 
 
-	# Find RS numbers in snp142 database
+	# Find RS numbers in snp database
 	snp_coords=[]
 	warn=[]
 	for snp_i in snps:
@@ -89,15 +89,15 @@ def calculate_tip(snplst,request):
 			else:
 				warn.append(snp_i[0])
 	
-	# Close snp142 connection
+	# Close snp connection
 	cur.close()
 	conn.close()
 	
 	if warn!=[]:
-		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 	
 	if len(snp_coords)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + "."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()

@@ -89,7 +89,7 @@ def calculate_chip(snplst,platform_query,request):
 		if snp not in snps:
 			snps.append(snp)
 	
-	# Connect to snp142 database
+	# Connect to snp database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
@@ -100,7 +100,7 @@ def calculate_chip(snplst,platform_query,request):
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 	
-	# Find RS numbers in snp142 database
+	# Find RS numbers in snp database
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
@@ -132,9 +132,9 @@ def calculate_chip(snplst,platform_query,request):
 	output["warning"]=""
 	output["error"]=""
 	if warn!=[] and len(rs_nums)!=0:
-		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP 142: "+", ".join(warn)+".\n"
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)+".\n"
 	elif len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142.\n"
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + ".\n"
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()

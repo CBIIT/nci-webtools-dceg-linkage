@@ -71,7 +71,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    # Connect to snp142 database
+    # Connect to snp database
     conn = sqlite3.connect(snp_dir)
     conn.text_factory = str
     cur = conn.cursor()
@@ -82,7 +82,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
 
-    # Find RS numbers in snp142 database
+    # Find RS numbers in snp database
     rs_nums = []
     snp_pos = []
     snp_coords = []
@@ -105,16 +105,16 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             else:
                 warn.append(snp_i[0])
 
-    # Close snp142 connection
+    # Close snp connection
     cur.close()
     conn.close()
 
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP 142: " + ",".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP 142."
+        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] +"."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -214,10 +214,10 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"] + ". Genomic position (" + geno[
-                    1] + ") in VCF file does not match db142 search coordinates for query variant"
+                    1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position (" + geno[
-                    1] + ") in VCF file does not match db142 search coordinates for query variant"
+                    1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:

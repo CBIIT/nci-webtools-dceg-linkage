@@ -48,7 +48,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     output = {}
 
     # Find coordinates (GRCh37/hg19) for SNP RS number
-    # Connect to snp142 database
+    # Connect to snp database
     conn = sqlite3.connect(snp_dir)
     conn.text_factory = str
     cur = conn.cursor()
@@ -59,15 +59,15 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
 
-    # Find RS number in snp142 database
+    # Find RS number in snp database
     snp_coord = get_coords(snp)
 
-    # Close snp142 connection
+    # Close snp connection
     cur.close()
     conn.close()
 
     if snp_coord == None:
-        output["error"] = snp + " is not in dbSNP build 142."
+        output["error"] = snp + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()

@@ -129,7 +129,7 @@ def get_regDB(chr,pos):
 		return a[1]
 
 
-# Open Connection to SNP142
+# Open Connection to SNP
 con2=sqlite3.connect(snp_dir)
 con2.row_factory=sqlite3.Row
 con2.text_factory=str

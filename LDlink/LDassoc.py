@@ -57,7 +57,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
-			# Connect to snp142 database
+			# Connect to snp database
 			conn=sqlite3.connect(snp_dir)
 			conn.text_factory=str
 			cur=conn.cursor()
@@ -68,15 +68,15 @@ def calculate_assoc(file,region,pop,request,myargs):
 				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 				return cur.fetchone()
 
-			# Find RS number in snp142 database
+			# Find RS number in snp database
 			var_coord=get_coords(snp)
 
-			# Close snp142 connection
+			# Close snp connection
 			cur.close()
 			conn.close()
 
 			if var_coord==None:
-				output["error"]=snp+" is not in dbSNP build 142."
+				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
@@ -172,10 +172,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 			cur.execute("SELECT * FROM genes WHERE name=?", t)
 			return cur.fetchone()
 
-		# Find RS number in snp142 database
+		# Find RS number in snp database
 		gene_coord=get_coords(myargs.name)
 
-		# Close snp142 connection
+		# Close snp connection
 		cur.close()
 		conn.close()
 
