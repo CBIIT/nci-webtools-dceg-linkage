@@ -474,6 +474,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
+    import svgutils.transform as sg
     from math import pi
 
     reset_output()
@@ -850,9 +851,19 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     gene_plot.output_backend = "svg"
     export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+    # Concatenate svgs
+    fig = sg.SVGFigure("21.59cm", "27.94cm")
+    fig1 = sg.fromfile(tmp_dir + "matrix_plot_" + request + ".svg")
+    fig2 = sg.fromfile(tmp_dir + "gene_plot_" + request + ".svg")
+    plot1 = fig1.getroot()
+    plot2 = fig2.getroot()
+    plot2.moveto(0, 300)
+    fig.append([plot1, plot2])
+    fig.save(tmp_dir + "matrix_plot_final_" + request + ".svg")
+
     # Export to PDF
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_final_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
+    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
     # Export to PNG
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
