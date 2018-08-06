@@ -260,9 +260,9 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0] = geno[2]
-                # rsnum = geno[2]s
+                # rsnum = geno[2]
                 snps[indx][0]=rs_query
-				rsnum=rs_query
+                rsnum=rs_query
             else:
                 continue
 
