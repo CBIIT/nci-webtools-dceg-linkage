@@ -148,7 +148,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
 
     if geno[2] != snp:
         output["warning"] = "Genomic position for query variant (" + snp + \
-            ") does not match RS number at 1000G position (" + geno[2] + ")"
+            ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:

@@ -123,11 +123,10 @@ def calculate_pair(snp1, snp2, pop, request=None):
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 ". Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (" + geno1[
-                2] + ")"
+                ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         else:
             output[
-                "warning"] = "Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (" + geno1[2] + ")"
+                "warning"] = "Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -172,11 +171,10 @@ def calculate_pair(snp1, snp2, pop, request=None):
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 ". Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (" + geno2[
-                2] + ")"
+                ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         else:
             output[
-                "warning"] = "Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (" + geno2[2] + ")"
+                "warning"] = "Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:
