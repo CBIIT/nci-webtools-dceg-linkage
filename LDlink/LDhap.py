@@ -253,8 +253,10 @@ def calculate_hap(snplst,pop,request):
 					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 
 				indx=[i[0] for i in snps].index(rs_query)
-				snps[indx][0]=geno[2]
-				rsnum=geno[2]
+				# snps[indx][0]=geno[2]
+				# rsnum=geno[2]
+				snps[indx][0]=rs_query
+				rsnum=rs_query
 			else:
 				continue
 
