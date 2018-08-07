@@ -2078,40 +2078,43 @@ function updateLDmatrix() {
 	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
-                var matrix_plot = "tmp/matrix_plot_final_" + ldmatrixInputs.reference + ".svg";
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
                 // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".svg";
                 // var urls = matrix_plot + "," + gene_plot;
                 // $.each( urls.split( "," ), function( index, item ) {
                 //     window.open( item, "_blank" )
                 // });
-                window.open( "tmp/matrix_plot_final_" + ldmatrixInputs.reference + ".svg", "_blank" )
+                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg", "_blank" )
             });
             $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".pdf";
-                var urls = matrix_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".pdf";
+                // var urls = matrix_plot + "," + gene_plot;
+                // $.each( urls.split( "," ), function( index, item ) {
+                //     window.open( item, "_blank" )
+                // });
+                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf", "_blank" )
             });
             $("#ldmatrix-downloadPNG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png";
-                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".png";
-                var urls = matrix_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".png";
+                // var urls = matrix_plot + "," + gene_plot;
+                // $.each( urls.split( "," ), function( index, item ) {
+                //     window.open( item, "_blank" )
+                // });
+                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png", "_blank" )
             });
             $("#ldmatrix-downloadJPEG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
-                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".jpeg";
-                var urls = matrix_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".jpeg";
+                // var urls = matrix_plot + "," + gene_plot;
+                // $.each( urls.split( "," ), function( index, item ) {
+                //     window.open( item, "_blank" )
+                // });
+                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg", "_blank" )
             });
             
             $('#' + id + '-results-container').show();
