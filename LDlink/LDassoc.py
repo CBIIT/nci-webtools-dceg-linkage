@@ -1095,8 +1095,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		# Concatenate svgs
 		sg.Figure("24.59cm", "27.94cm",
 			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630),
-			sg.Grid(20, 20)
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
 			).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
 		sg.Figure("122.95cm", "139.70cm",
@@ -1238,8 +1237,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		# Concatenate svgs
 		sg.Figure("24.59cm", "27.94cm",
 			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630),
-			sg.Grid(20, 20)
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
 			).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
 		sg.Figure("122.95cm", "139.70cm",
