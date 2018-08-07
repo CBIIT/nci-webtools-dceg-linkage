@@ -857,23 +857,19 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
         ).save(tmp_dir + "matrix_plot_" + request + ".svg")
 
-    # fig = sg.SVGFigure("21.59cm", "27.94cm")
-    # fig1 = sg.fromfile(tmp_dir + "matrix_plot_1_" + request + ".svg")
-    # fig2 = sg.fromfile(tmp_dir + "gene_plot_1_" + request + ".svg")
-    # plot1 = fig1.getroot()
-    # plot2 = fig2.getroot()
-    # plot2.moveto(0, 650)
-    # fig.append([plot1, plot2])
-    # fig.save(tmp_dir + "matrix_plot_" + request + ".svg")
+    sg.Figure("107.95cm", "139.70cm",
+        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
+        ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
 
     # Export to PDF
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
     # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
     # Export to PNG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
     # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
     # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)
     # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
     
     # Remove individual SVG files after they are combined
