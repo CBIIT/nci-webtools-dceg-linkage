@@ -773,8 +773,8 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     proxy_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_1_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
     
     # Concatenate svgs
     sg.Figure("21.59cm", "27.94cm",
