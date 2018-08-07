@@ -854,8 +854,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # Concatenate svgs
     sg.Figure("21.59cm", "27.94cm",
         sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 680),
-        sg.Grid(20, 20)
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
         ).save(tmp_dir + "matrix_plot_" + request + ".svg")
 
     # fig = sg.SVGFigure("21.59cm", "27.94cm")
