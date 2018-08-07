@@ -777,15 +777,14 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
     
     # Concatenate svgs
-    sg.Figure("21.59cm", "29.94cm",
+    sg.Figure("24.59cm", "27.94cm",
         sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg"),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 660),
-        sg.Grid(20, 20)
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 630)
         ).save(tmp_dir + "proxy_plot_" + request + ".svg")
 
-    sg.Figure("107.95cm", "149.70cm",
+    sg.Figure("122.95cm", "139.70cm",
         sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg").scale(5),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3300)
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3150)
         ).save(tmp_dir + "proxy_plot_scaled_" + request + ".svg")
 
     # Export to PDF
