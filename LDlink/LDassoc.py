@@ -875,6 +875,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
 	from bokeh.io import export_svgs
+	import svgutils.compose as sg
 
 
 	reset_output()
@@ -1090,19 +1091,29 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_plot.output_backend = "svg"
 		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
 		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+		
+		# Concatenate svgs
+		sg.Figure("21.59cm", "27.94cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+			).save(tmp_dir + "assoc_plot_" + request + ".svg")
+
+		sg.Figure("107.95cm", "139.70cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
+			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+
 		# Export to PDF
 		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
 		# Export to PNG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
 		# Export to JPEG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
-    
-		# Remove SVG files after exported to pdf
-		# subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
-		# subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+		# Remove individual SVG files after they are combined
+		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+		# Remove scaled SVG file after it is converted to png and jpeg
+		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
@@ -1222,19 +1233,28 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_c_plot.output_backend = "svg"
 		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
 		export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+		# Concatenate svgs
+		sg.Figure("21.59cm", "27.94cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+			).save(tmp_dir + "assoc_plot_" + request + ".svg")
+
+		sg.Figure("107.95cm", "139.70cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
+			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+
 		# Export to PDF
 		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
 		# Export to PNG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
 		# Export to JPEG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
-		
-		# Remove SVG files after exported to pdf
-		# subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
-		# subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+		# Remove individual SVG files after they are combined
+		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+		# Remove scaled SVG file after it is converted to png and jpeg
+		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 		
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))

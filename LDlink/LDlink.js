@@ -1345,38 +1345,22 @@ function updateLDassoc() {
             $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".svg";
-                var urls = assoc_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( assoc_plot, "_blank" )
             });
             $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".pdf";
-                var urls = assoc_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( assoc_plot, "_blank" )
             });
             $("#ldassoc-downloadPNG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".png";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".png";
-                var urls = assoc_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( assoc_plot, "_blank" )
             });
             $("#ldassoc-downloadJPEG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".jpeg";
-                var urls = assoc_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( assoc_plot, "_blank" )
             });
 
             $('#' + id + '-results-container').show();
@@ -2079,42 +2063,22 @@ function updateLDmatrix() {
             $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
-                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".svg";
-                // var urls = matrix_plot + "," + gene_plot;
-                // $.each( urls.split( "," ), function( index, item ) {
-                //     window.open( item, "_blank" )
-                // });
-                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg", "_blank" )
+                window.open( matrix_plot, "_blank" )
             });
             $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
-                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".pdf";
-                // var urls = matrix_plot + "," + gene_plot;
-                // $.each( urls.split( "," ), function( index, item ) {
-                //     window.open( item, "_blank" )
-                // });
-                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf", "_blank" )
+                window.open( matrix_plot, "_blank" )
             });
             $("#ldmatrix-downloadPNG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png";
-                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".png";
-                // var urls = matrix_plot + "," + gene_plot;
-                // $.each( urls.split( "," ), function( index, item ) {
-                //     window.open( item, "_blank" )
-                // });
-                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png", "_blank" )
+                window.open( matrix_plot, "_blank" )
             });
             $("#ldmatrix-downloadJPEG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
-                // var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".jpeg";
-                // var urls = matrix_plot + "," + gene_plot;
-                // $.each( urls.split( "," ), function( index, item ) {
-                //     window.open( item, "_blank" )
-                // });
-                window.open( "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg", "_blank" )
+                window.open( matrix_plot, "_blank" )
             });
             
             $('#' + id + '-results-container').show();
@@ -2298,38 +2262,22 @@ function updateLDproxy() {
             $("#ldproxy-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".svg";
-                var urls = proxy_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( proxy_plot, "_blank" )
             });
             $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".pdf";
-                var urls = proxy_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( proxy_plot, "_blank" )
             });
             $("#ldproxy-downloadPNG").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".png";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".png";
-                var urls = proxy_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( proxy_plot, "_blank" )
             });
             $("#ldproxy-downloadJPEG").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".jpeg";
-                var urls = proxy_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( proxy_plot, "_blank" )
             });
 
             $('#' + id + '-results-container').show();

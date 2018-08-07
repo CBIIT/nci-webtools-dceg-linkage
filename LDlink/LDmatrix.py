@@ -851,6 +851,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     gene_plot.output_backend = "svg"
     export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_1_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+
     # Concatenate svgs
     sg.Figure("21.59cm", "27.94cm",
         sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
@@ -864,17 +865,15 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     # Export to PDF
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
-    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
     # Export to PNG
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
-    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
     # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)
-    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
-    
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)    
     # Remove individual SVG files after they are combined
     subprocess.call("rm " + tmp_dir + "matrix_plot_1_" + request + ".svg", shell=True)
     subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    # Remove scaled SVG file after it is converted to png and jpeg
+    subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
 
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))

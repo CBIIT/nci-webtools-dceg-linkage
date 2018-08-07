@@ -525,6 +525,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
+    import svgutils.compose as sg
 
 
     reset_output()
@@ -774,19 +775,29 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     gene_plot.output_backend = "svg"
     export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
+    
+    # Concatenate svgs
+    sg.Figure("21.59cm", "27.94cm",
+        sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg"),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+        ).save(tmp_dir + "proxy_plot_" + request + ".svg")
+
+    sg.Figure("107.95cm", "139.70cm",
+        sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg").scale(5),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
+        ).save(tmp_dir + "proxy_plot_scaled_" + request + ".svg")
+
     # Export to PDF
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".pdf", shell=True)
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".pdf", shell=True)
     # Export to PNG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".png", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
     # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "gene_plot_" + request + ".svg " + tmp_dir + "gene_plot_" + request + ".jpeg", shell=True)
-    
-    # Remove SVG files after exported to pdf
-    # subprocess.call("rm " + tmp_dir + "proxy_plot_" + request + ".svg", shell=True)
-    # subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)    
+    # Remove individual SVG files after they are combined
+    subprocess.call("rm " + tmp_dir + "proxy_plot_1_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    # Remove scaled SVG file after it is converted to png and jpeg
+    subprocess.call("rm " + tmp_dir + "proxy_plot_scaled_" + request + ".svg", shell=True)
 
     # Combine plots into a grid
     out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
