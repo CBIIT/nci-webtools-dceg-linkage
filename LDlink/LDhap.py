@@ -78,12 +78,19 @@ def calculate_hap(snplst,pop,request):
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 
-	# def get_rsnum(chr, pos):
-	# 	id=rs.strip("rs")
-	# 	t=(id,)
-	# 	cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-	# 	return cur.fetchone()
-	
+	def get_rsnum(coord):
+		temp_coord=coord.strip("chr").split(":")
+		chro=temp_coord[0]
+		pos=temp_coord[1]
+		t=(chro, pos,)
+		found = None
+		# Loop till found
+		tbl_num = 0
+		while (found is None or tbl_num <= 9):
+			cur.execute("SELECT * FROM tbl_"+id[tbl_num]+" WHERE chromosome=? AND position=?", t)
+			found = cur.fetchone()
+			tbl_num = tbl_num + 1
+		return found
 	
 	# Find RS numbers and genomic coords in snp database
 	rs_nums=[]
@@ -98,7 +105,7 @@ def calculate_hap(snplst,pop,request):
 					snp_coord=get_coords(snp_i[0])
 					print "SNP_COORD"
 					print snp_coord
-					if snp_coord!=None:
+					if snp_coord != None:
 						rs_nums.append(snp_i[0])
 						snp_pos.append(snp_coord[2])
 						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
@@ -107,8 +114,19 @@ def calculate_hap(snplst,pop,request):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-				# elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
-				# 	# FIND AND APPEND DATA
+				elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
+					snp_coord=get_rsnum(snp_i[0])
+					print "SNP_COORD"
+					print snp_coord
+					if snp_coord != None:
+						rs_nums.append("rs" + snp_coord[0])
+						snp_pos.append(snp_coord[2])
+						temp=["rs" + snp_coord[0],snp_coord[1],snp_coord[2]]
+						print "TEMP"
+						print temp
+						snp_coords.append(temp)
+					else:
+						warn.append(snp_i[0])
 				else:
 					warn.append(snp_i[0])
 			else:
