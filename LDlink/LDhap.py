@@ -73,21 +73,33 @@ def calculate_hap(snplst,pop,request):
 	cur=conn.cursor()
 	
 	def get_coords(rs):
+		print "passed in rs to get_coords"
+		print rs
 		id=rs.strip("rs")
+		print "rs processed"
+		print rs
 		t=(id,)
+		print "t tuple"
+		print t
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 
 	def get_rsnum(coord):
+		print "passed in coord to get_rsnum"
+		print coord
 		temp_coord=coord.strip("chr").split(":")
+		print "temp_coord array"
+		print temp_coord
 		chro=temp_coord[0]
 		pos=temp_coord[1]
-		t=(pos,)
+		t=(chro, pos)
+		print "COORD PROCESSED"
+		print t
 		found = None
 		# Loop till found
 		tbl_num = 0
 		while (found is None or tbl_num <= 9):
-			cur.execute("SELECT * FROM tbl_"+id[tbl_num]+" WHERE chromosome=" + chro + " AND position=?", t)
+			cur.execute("SELECT * FROM tbl_"+id[tbl_num]+" WHERE chromosome=? AND position=?", t)
 			found = cur.fetchone()
 			tbl_num = tbl_num + 1
 		return found
