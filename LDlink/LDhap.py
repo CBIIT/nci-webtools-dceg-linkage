@@ -99,7 +99,7 @@ def calculate_hap(snplst,pop,request):
 		# Loop till found
 		tbl_num = 0
 		while (found is None or tbl_num <= 9):
-			cur.execute("SELECT * FROM tbl_"+id[tbl_num]+" WHERE chromosome=? AND position=?", t)
+			cur.execute("SELECT * FROM tbl_"+str(tbl_num)+" WHERE chromosome=? AND position=?", t)
 			found = cur.fetchone()
 			tbl_num = tbl_num + 1
 		return found
