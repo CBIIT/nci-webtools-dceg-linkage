@@ -84,25 +84,26 @@ def calculate_hap(snplst,pop,request):
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 
-	def get_rsnum(coord):
-		print "passed in coord to get_rsnum"
-		print coord
-		temp_coord=coord.strip("chr").split(":")
-		print "temp_coord array"
-		print temp_coord
-		chro=temp_coord[0]
-		pos=temp_coord[1]
-		t=(chro, pos)
-		print "COORD PROCESSED"
-		print t
-		found = None
-		# Loop till found
-		tbl_num = 0
-		while (found is None or tbl_num <= 9):
-			cur.execute("SELECT * FROM tbl_"+str(tbl_num)+" WHERE chromosome=? AND position=?", t)
-			found = cur.fetchone()
-			tbl_num = tbl_num + 1
-		return found
+	# For adding genomic coordinates to query in future
+	# def get_rsnum(coord):
+	# 	print "passed in coord to get_rsnum"
+	# 	print coord
+	# 	temp_coord=coord.strip("chr").split(":")
+	# 	print "temp_coord array"
+	# 	print temp_coord
+	# 	chro=temp_coord[0]
+	# 	pos=temp_coord[1]
+	# 	t=(chro, pos)
+	# 	print "COORD PROCESSED"
+	# 	print t
+	# 	found = None
+	# 	# Loop till found
+	# 	tbl_num = 0
+	# 	while (found is None or tbl_num <= 9):
+	# 		cur.execute("SELECT * FROM tbl_"+str(tbl_num)+" WHERE chromosome=? AND position=?", t)
+	# 		found = cur.fetchone()
+	# 		tbl_num = tbl_num + 1
+	# 	return found
 	
 	# Find RS numbers and genomic coords in snp database
 	rs_nums=[]
@@ -126,19 +127,20 @@ def calculate_hap(snplst,pop,request):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-				elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
-					snp_coord=get_rsnum(snp_i[0])
-					print "SNP_COORD"
-					print snp_coord
-					if snp_coord != None:
-						rs_nums.append("rs" + snp_coord[0])
-						snp_pos.append(snp_coord[2])
-						temp=["rs" + snp_coord[0],snp_coord[1],snp_coord[2]]
-						print "TEMP"
-						print temp
-						snp_coords.append(temp)
-					else:
-						warn.append(snp_i[0])
+				# For adding genomic coordinates to query in the future
+				# elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
+				# 	snp_coord=get_rsnum(snp_i[0])
+				# 	print "SNP_COORD"
+				# 	print snp_coord
+				# 	if snp_coord != None:
+				# 		rs_nums.append("rs" + snp_coord[0])
+				# 		snp_pos.append(snp_coord[2])
+				# 		temp=["rs" + snp_coord[0],snp_coord[1],snp_coord[2]]
+				# 		print "TEMP"
+				# 		print temp
+				# 		snp_coords.append(temp)
+				# 	else:
+				# 		warn.append(snp_i[0])
 				else:
 					warn.append(snp_i[0])
 			else:
@@ -152,7 +154,7 @@ def calculate_hap(snplst,pop,request):
 		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input variant list does not contain any valid RS numbers or coordinates that are in dbSNP " + config['data']['dbsnp_version'] + "."
+		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + "."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	

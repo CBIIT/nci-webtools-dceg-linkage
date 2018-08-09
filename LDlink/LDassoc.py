@@ -1312,7 +1312,7 @@ def main():
 	parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
 	parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
 	parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
-	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number or coordinate (required with --variant)(default is lowest p-value in region)")
+	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number (required with --variant)(default is lowest p-value in region)")
 	parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
 	parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
 	parser.add_argument("-t", "--transcript", help="plot all gene transcripts", action="store_true")
