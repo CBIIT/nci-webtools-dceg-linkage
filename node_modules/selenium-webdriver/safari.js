@@ -21,28 +21,17 @@
 
 'use strict';
 
-const command = require('./lib/command');
-const error = require('./lib/error');
 const http = require('./http');
 const io = require('./io');
-const portprober = require('./net/portprober');
+const {Capabilities, Capability} = require('./lib/capabilities');
+const command = require('./lib/command');
+const error = require('./lib/error');
+const logging = require('./lib/logging');
 const promise = require('./lib/promise');
-const remote = require('./remote');
 const Symbols = require('./lib/symbols');
 const webdriver = require('./lib/webdriver');
-const {Browser, Capabilities, Capability} = require('./lib/capabilities');
-
-
-/**
- * _Synchronously_ attempts to locate the IE driver executable on the current
- * system.
- *
- * @return {?string} the located executable, or `null`.
- */
-function locateSynchronously() {
-  return process.platform === 'darwin'
-      ? io.findInPath('safaridriver', true) : null;
-}
+const portprober = require('./net/portprober');
+const remote = require('./remote');
 
 
 /**
@@ -50,7 +39,7 @@ function locateSynchronously() {
  * @throws {Error}
  */
 function findSafariDriver() {
-  let exe = locateSynchronously();
+  let exe = io.findInPath('safaridriver', true);
   if (!exe) {
     throw Error(
       `The safaridriver executable could not be found on the current PATH.
@@ -84,19 +73,80 @@ const TECHNOLOGY_PREVIEW_OPTIONS_KEY = 'technologyPreview';
 /**
  * Configuration options specific to the {@link Driver SafariDriver}.
  */
-class Options extends Capabilities {
+class Options {
+  constructor() {
+    /** @private {Object<string, *>} */
+    this.options_ = null;
+
+    /** @private {./lib/logging.Preferences} */
+    this.logPrefs_ = null;
+
+    /** @private {?./lib/capabilities.ProxyConfig} */
+    this.proxy_ = null;
+  }
+
   /**
-   * @param {(Capabilities|Map<string, ?>|Object)=} other Another set of
-   *     capabilities to initialize this instance from.
+   * Extracts the SafariDriver specific options from the given capabilities
+   * object.
+   * @param {!Capabilities} capabilities The capabilities object.
+   * @return {!Options} The SafariDriver options.
    */
-  constructor(other = undefined) {
-    super(other);
+  static fromCapabilities(capabilities) {
+    var options = new Options();
+    var o = capabilities.get(OPTIONS_CAPABILITY_KEY);
 
-    /** @private {!Object} */
-    this.options_ = this.get(OPTIONS_CAPABILITY_KEY) || {};
+    if (o instanceof Options) {
+      options = o;
+    } else if (o) {
+      options.setCleanSession(o.cleanSession);
+      options.setTechnologyPreview(o[TECHNOLOGY_PREVIEW_OPTIONS_KEY]);
+    }
 
-    this.set(OPTIONS_CAPABILITY_KEY, this.options_);
-    this.setBrowserName(Browser.SAFARI);
+    if (capabilities.has(Capability.PROXY)) {
+      options.setProxy(capabilities.get(Capability.PROXY));
+    }
+
+    if (capabilities.has(Capability.LOGGING_PREFS)) {
+      options.setLoggingPrefs(capabilities.get(Capability.LOGGING_PREFS));
+    }
+
+    return options;
+  }
+
+  /**
+   * Sets whether to force Safari to start with a clean session. Enabling this
+   * option will cause all global browser data to be deleted.
+   * @param {boolean} clean Whether to make sure the session has no cookies,
+   *     cache entries, local storage, or databases.
+   * @return {!Options} A self reference.
+   */
+  setCleanSession(clean) {
+    if (!this.options_) {
+      this.options_ = {};
+    }
+    this.options_['cleanSession'] = clean;
+    return this;
+  }
+
+  /**
+   * Sets the logging preferences for the new session.
+   * @param {!./lib/logging.Preferences} prefs The logging preferences.
+   * @return {!Options} A self reference.
+   */
+  setLoggingPrefs(prefs) {
+    this.logPrefs_ = prefs;
+    return this;
+  }
+
+  /**
+   * Sets the proxy to use.
+   *
+   * @param {./lib/capabilities.ProxyConfig} proxy The proxy configuration to use.
+   * @return {!Options} A self reference.
+   */
+  setProxy(proxy) {
+    this.proxy_ = proxy;
+    return this;
   }
 
   /**
@@ -107,19 +157,52 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   setTechnologyPreview(useTechnologyPreview) {
+    if (!this.options_) {
+      this.options_ = {};
+    }
+
     this.options_[TECHNOLOGY_PREVIEW_OPTIONS_KEY] = !!useTechnologyPreview;
     return this;
+  }
+
+  /**
+   * Converts this options instance to a {@link Capabilities} object.
+   * @param {Capabilities=} opt_capabilities The capabilities to
+   *     merge these options into, if any.
+   * @return {!Capabilities} The capabilities.
+   */
+  toCapabilities(opt_capabilities) {
+    var caps = opt_capabilities || Capabilities.safari();
+    if (this.logPrefs_) {
+      caps.set(Capability.LOGGING_PREFS, this.logPrefs_);
+    }
+    if (this.proxy_) {
+      caps.set(Capability.PROXY, this.proxy_);
+    }
+    if (this.options_) {
+      caps.set(OPTIONS_CAPABILITY_KEY, this);
+    }
+    return caps;
+  }
+
+  /**
+   * Converts this instance to its JSON wire protocol representation. Note this
+   * function is an implementation detail not intended for general use.
+   * @return {!Object<string, *>} The JSON wire protocol representation of this
+   *     instance.
+   */
+  [Symbols.serialize]() {
+    return this.options_ || {};
   }
 }
 
 /**
- * @param  {(Capabilities|Object<string, *>)=} o The options object
+ * @param  {(Options|Object<string, *>)=} o The options object
  * @return {boolean}
  */
 function useTechnologyPreview(o) {
-  if (o instanceof Capabilities) {
-    let options = o.get(OPTIONS_CAPABILITY_KEY);
-    return !!(options && options[TECHNOLOGY_PREVIEW_OPTIONS_KEY]);
+  if (o instanceof Options) {
+    return !!(o.options_ && o.options_[TECHNOLOGY_PREVIEW_OPTIONS_KEY]);
   }
 
   if (o && typeof o === 'object') {
@@ -129,10 +212,7 @@ function useTechnologyPreview(o) {
   return false;
 }
 
-
-const SAFARIDRIVER_TECHNOLOGY_PREVIEW_EXE =
-    '/Applications/Safari Technology Preview.app/Contents/MacOS/safaridriver';
-
+const SAFARIDRIVER_TECHNOLOGY_PREVIEW_EXE = '/Applications/Safari Technology Preview.app/Contents/MacOS/safaridriver';
 
 /**
  * A WebDriver client for Safari. This class should never be instantiated
@@ -147,13 +227,21 @@ class Driver extends webdriver.WebDriver {
   /**
    * Creates a new Safari session.
    *
-   * @param {(Options|Capabilities)=} options The configuration options.
+   * @param {(Options|Capabilities)=} opt_config The configuration
+   *     options for the new session.
+   * @param {promise.ControlFlow=} opt_flow The control flow to create
+   *     the driver under.
    * @return {!Driver} A new driver instance.
    */
-  static createSession(options) {
-    let caps = options || new Options();
+  static createSession(opt_config, opt_flow) {
+    let caps, exe;
 
-    let exe;
+    if (opt_config instanceof Options) {
+      caps = opt_config.toCapabilities();
+    } else {
+      caps = opt_config || Capabilities.safari();
+    }
+
     if (useTechnologyPreview(caps.get(OPTIONS_CAPABILITY_KEY))) {
       exe = SAFARIDRIVER_TECHNOLOGY_PREVIEW_EXE;
     }
@@ -163,7 +251,7 @@ class Driver extends webdriver.WebDriver {
         service.start().then(url => new http.HttpClient(url)));
 
     return /** @type {!Driver} */(super.createSession(
-        executor, caps, () => service.kill()));
+        executor, caps, opt_flow, () => service.kill()));
   }
 }
 
@@ -174,4 +262,3 @@ class Driver extends webdriver.WebDriver {
 exports.Driver = Driver;
 exports.Options = Options;
 exports.ServiceBuilder = ServiceBuilder;
-exports.locateSynchronously = locateSynchronously;

@@ -17,115 +17,128 @@
 
 'use strict';
 
-const assert = require('assert');
-
-const test = require('../lib/test');
-const {Browser, By} = require('..');
+var Browser = require('..').Browser,
+    By = require('..').By,
+    assert = require('../testing/assert'),
+    test = require('../lib/test');
 
 
 test.suite(function(env) {
   var driver;
 
-  before(async function() { driver = await env.builder().build(); });
-  after(function() { return driver.quit(); });
+  test.before(function*() { driver = yield env.builder().build(); });
+  test.after(function() { return driver.quit(); });
 
-  beforeEach(function() {
+  test.beforeEach(function() {
     return driver.switchTo().defaultContent();
   });
 
-  it('can set size of the current window', async function() {
-    await driver.get(test.Pages.echoPage);
-    await changeSizeBy(-20, -20);
+  test.it('can set size of the current window', function*() {
+    yield driver.get(test.Pages.echoPage);
+    yield changeSizeBy(-20, -20);
   });
 
-  it('can set size of the current window from frame', async function() {
-    await driver.get(test.Pages.framesetPage);
+  test.it('can set size of the current window from frame', function*() {
+    yield driver.get(test.Pages.framesetPage);
 
-    var frame = await driver.findElement({css: 'frame[name="fourth"]'});
-    await driver.switchTo().frame(frame);
-    await changeSizeBy(-20, -20);
+    var frame = yield driver.findElement({css: 'frame[name="fourth"]'});
+    yield driver.switchTo().frame(frame);
+    yield changeSizeBy(-20, -20);
   });
 
-  it('can set size of the current window from iframe', async function() {
-    await driver.get(test.Pages.iframePage);
+  test.it('can set size of the current window from iframe', function*() {
+    yield driver.get(test.Pages.iframePage);
 
-    var frame = await driver.findElement({css: 'iframe[name="iframe1-name"]'});
-    await driver.switchTo().frame(frame);
-    await changeSizeBy(-20, -20);
+    var frame = yield driver.findElement({css: 'iframe[name="iframe1-name"]'});
+    yield driver.switchTo().frame(frame);
+    yield changeSizeBy(-20, -20);
   });
 
-  it('can switch to a new window', async function() {
-    await driver.get(test.Pages.xhtmlTestPage);
+  test.it('can switch to a new window', function*() {
+    yield driver.get(test.Pages.xhtmlTestPage);
 
-    let handle = await driver.getWindowHandle();
-    let originalHandles = await driver.getAllWindowHandles();
+    let handle = yield driver.getWindowHandle();
+    let originalHandles = yield driver.getAllWindowHandles();
 
-    await driver.findElement(By.linkText("Open new window")).click();
-    await driver.wait(forNewWindowToBeOpened(originalHandles), 2000);
-    assert.equal(await driver.getTitle(), "XHTML Test Page");
+    yield driver.findElement(By.linkText("Open new window")).click();
+    yield driver.wait(forNewWindowToBeOpened(originalHandles), 2000);
+    yield assert(driver.getTitle()).equalTo("XHTML Test Page");
 
-    let newHandle = await getNewWindowHandle(originalHandles);
+    let newHandle = yield getNewWindowHandle(originalHandles);
 
-    await driver.switchTo().window(newHandle);
-    assert.equal(await driver.getTitle(), "We Arrive Here");
+    yield driver.switchTo().window(newHandle);
+    yield assert(driver.getTitle()).equalTo("We Arrive Here");
   });
 
-  it('can set the window position of the current window', async function() {
-    let {x, y} = await driver.manage().window().getRect();
-    let newX = x + 10;
-    let newY = y + 10;
+  test.it('can set the window position of the current window', function*() {
+    let position = yield driver.manage().window().getPosition();
 
-    await driver.manage().window().setRect({
-      x: newX,
-      y: newY,
-      width: 640,
-      height: 480
-    });
+    yield driver.manage().window().setSize(640, 480);
+    yield driver.manage().window().setPosition(position.x + 10, position.y + 10);
 
-    return driver.wait(forPositionToBe(newX, newY), 1000);
-  });
-
-  it('can set the window position from a frame', async function() {
-    await driver.get(test.Pages.iframePage);
-
-    let frame = await driver.findElement(By.name('iframe1-name'));
-    await driver.switchTo().frame(frame);
-
-    let {x, y} = await driver.manage().window().getRect();
-    x += 10;
-    y += 10;
-
-    await driver.manage().window().setRect({width: 640, height: 480, x, y});
-    return driver.wait(forPositionToBe(x, y), 1000);
-  });
-
-  async function changeSizeBy(dx, dy) {
-    let {width, height} = await driver.manage().window().getRect();
-    width += dx;
-    height += dy;
-
-    let rect = await driver.manage().window().setRect({width, height});
-    if (rect.width === width && rect.height === height) {
-      return;
+    // For phantomjs, setPosition is a no-op and the "window" stays at (0, 0)
+    if (env.currentBrowser() === Browser.PHANTOM_JS) {
+      position = yield driver.manage().window().getPosition();
+      assert(position.x).equalTo(0);
+      assert(position.y).equalTo(0);
+    } else {
+      var dx = position.x + 10;
+      var dy = position.y + 10;
+      return driver.wait(forPositionToBe(dx, dy), 1000);
     }
-    return driver.wait(forSizeToBe(width, height), 1000);
+  });
+
+  test.it('can set the window position from a frame', function*() {
+    yield driver.get(test.Pages.iframePage);
+
+    let frame = yield driver.findElement(By.name('iframe1-name'));
+    yield driver.switchTo().frame(frame);
+
+    let position = yield driver.manage().window().getPosition();
+    yield driver.manage().window().setSize(640, 480);
+    yield driver.manage().window().setPosition(position.x + 10, position.y + 10);
+
+    // For phantomjs, setPosition is a no-op and the "window" stays at (0, 0)
+    if (env.currentBrowser() === Browser.PHANTOM_JS) {
+      return driver.manage().window().getPosition().then(function(position) {
+        assert(position.x).equalTo(0);
+        assert(position.y).equalTo(0);
+      });
+    } else {
+      var dx = position.x + 10;
+      var dy = position.y + 10;
+      return driver.wait(forPositionToBe(dx, dy), 1000);
+    }
+  });
+
+  function changeSizeBy(dx, dy) {
+    return driver.manage().window().getSize().then(function(size) {
+      return driver.manage().window()
+          .setSize(size.width + dx, size.height + dy)
+          .then(_ => {
+            return driver.wait(
+                forSizeToBe(size.width + dx, size.height + dy), 1000);
+          });
+    });
   }
 
   function forSizeToBe(w, h) {
-    return async function() {
-      let {width, height} = await driver.manage().window().getRect();
-      return width === w && height === h;
+    return function() {
+      return driver.manage().window().getSize().then(function(size) {
+        return size.width === w && size.height === h;
+      });
     };
   }
 
   function forPositionToBe(x, y) {
-    return async function() {
-      let position = await driver.manage().window().getRect();
-      return position.x === x &&
-          // On OSX, the window height may be bumped down 22px for the top
-          // status bar.
-          // On Linux, Opera's window position will be off by 28px.
-         (position.y >= y && position.y <= (y + 28));
+    return function() {
+      return driver.manage().window().getPosition().then(function(position) {
+        return position.x === x &&
+            // On OSX, the window height may be bumped down 22px for the top
+            // status bar.
+            // On Linux, Opera's window position will be off by 28px.
+           (position.y >= y && position.y <= (y + 28));
+      });
     };
   }
 

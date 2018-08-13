@@ -23,27 +23,38 @@ const {By} = require('..');
 const test = require('../lib/test');
 
 test.suite(function(env) {
-  describe('WebElement', function() {
+  describe('rect commands', function() {
     let driver;
+    let el;
 
-    before(async function() {
-      driver = await env.builder().build();
+    test.before(function*() {
+      driver = yield env.builder().build();
+      yield driver.get(
+            'data:text/html,<!DOCTYPE html><style>'
+                + '*{padding:0; margin:0}'
+                + 'div{position: absolute; top: 50px; left: 50px;'
+                + 'height: 50px;width:50px;background: green;}'
+                + '</style><div>Hello</div>');
+      el = yield driver.findElement(By.css('div'));
     });
 
     after(function() {
-      return driver.quit();
+      if (driver) {
+        return driver.quit();
+      }
     });
 
-    it('getRect()', async function() {
-      await driver.get(
-            'data:text/html,<!DOCTYPE html><style>'
-                + '*{padding:0; margin:0}'
-                + 'div{position: absolute; top: 50px; left: 40px;'
-                + 'height: 25px;width:35px;background: green;}'
-                + '</style><div>Hello</div>');
-      const el = await driver.findElement(By.css('div'));
-      const rect = await el.getRect();
-      assert.deepEqual(rect, {width: 35, height: 25, x: 40, y: 50});
+    test.it('WebElement.getLocation()', function*() {
+      let location = yield el.getLocation();
+      assert.equal(location.x, 50);
+      assert.equal(location.y, 50);
     });
+
+    test.it('WebElement.getSize()', function*() {
+      let size = yield el.getSize();
+      assert.equal(size.width, 50);
+      assert.equal(size.height, 50);
+    });
+
   });
 });

@@ -20,171 +20,157 @@
 var assert = require('assert'),
     url = require('url');
 
-var {Pages, ignore, suite} = require('../lib/test'),
+var test = require('../lib/test'),
     fileserver = require('../lib/test/fileserver'),
-    {Browser} = require('..');
+    Browser = require('..').Browser,
+    Pages = test.Pages;
 
 
-suite(function(env) {
+test.suite(function(env) {
   var driver;
 
-  before(async function() {
-    driver = await env.builder().build();
+  test.before(function*() {
+    driver = yield env.builder().build();
   });
 
-  after(function() {
+  test.after(function() {
     return driver.quit();
   });
 
+  // Cookie handling is broken.
+  test.ignore(env.browsers(Browser.PHANTOM_JS, Browser.SAFARI)).
   describe('Cookie Management;', function() {
 
-    beforeEach(async function() {
-      await driver.get(fileserver.Pages.ajaxyPage);
-      await driver.manage().deleteAllCookies();
+    test.beforeEach(function*() {
+      yield driver.get(fileserver.Pages.ajaxyPage);
+      yield driver.manage().deleteAllCookies();
       return assertHasCookies();
     });
 
-    it('can add new cookies', async function() {
+    test.it('can add new cookies', function*() {
       var cookie = createCookieSpec();
 
-      await driver.manage().addCookie(cookie);
-      await driver.manage().getCookie(cookie.name).then(function(actual) {
+      yield driver.manage().addCookie(cookie);
+      yield driver.manage().getCookie(cookie.name).then(function(actual) {
         assert.equal(actual.value, cookie.value);
       });
     });
 
-    it('can get all cookies', async function() {
+    test.it('can get all cookies', function*() {
       var cookie1 = createCookieSpec();
       var cookie2 = createCookieSpec();
 
-      await driver.manage().addCookie(cookie1);
-      await driver.manage().addCookie(cookie2);
+      yield driver.manage().addCookie(cookie1);
+      yield driver.manage().addCookie(cookie2);
 
       return assertHasCookies(cookie1, cookie2);
     });
 
-    ignore(env.browsers(Browser.IE)).
-    it('only returns cookies visible to the current page', async function() {
+    test.ignore(env.browsers(Browser.IE)).
+    it('only returns cookies visible to the current page', function*() {
       var cookie1 = createCookieSpec();
 
-      await driver.manage().addCookie(cookie1);
+      yield driver.manage().addCookie(cookie1);
 
       var pageUrl = fileserver.whereIs('page/1');
       var cookie2 = createCookieSpec({
         path: url.parse(pageUrl).pathname
       });
-      await driver.get(pageUrl);
-      await driver.manage().addCookie(cookie2);
-      await assertHasCookies(cookie1, cookie2);
+      yield driver.get(pageUrl);
+      yield driver.manage().addCookie(cookie2);
+      yield assertHasCookies(cookie1, cookie2);
 
-      await driver.get(fileserver.Pages.ajaxyPage);
-      await assertHasCookies(cookie1);
+      yield driver.get(fileserver.Pages.ajaxyPage);
+      yield assertHasCookies(cookie1);
 
-      await driver.get(pageUrl);
-      await assertHasCookies(cookie1, cookie2);
+      yield driver.get(pageUrl);
+      yield assertHasCookies(cookie1, cookie2);
     });
 
-    it('can delete all cookies', async function() {
+    test.it('can delete all cookies', function*() {
       var cookie1 = createCookieSpec();
       var cookie2 = createCookieSpec();
 
-      await driver.executeScript(
+      yield driver.executeScript(
           'document.cookie = arguments[0] + "=" + arguments[1];' +
           'document.cookie = arguments[2] + "=" + arguments[3];',
           cookie1.name, cookie1.value, cookie2.name, cookie2.value);
-      await assertHasCookies(cookie1, cookie2);
+      yield assertHasCookies(cookie1, cookie2);
 
-      await driver.manage().deleteAllCookies();
-      await assertHasCookies();
+      yield driver.manage().deleteAllCookies();
+      yield assertHasCookies();
     });
 
-    it('can delete cookies by name', async function() {
+    test.it('can delete cookies by name', function*() {
       var cookie1 = createCookieSpec();
       var cookie2 = createCookieSpec();
 
-      await driver.executeScript(
+      yield driver.executeScript(
           'document.cookie = arguments[0] + "=" + arguments[1];' +
           'document.cookie = arguments[2] + "=" + arguments[3];',
           cookie1.name, cookie1.value, cookie2.name, cookie2.value);
-      await assertHasCookies(cookie1, cookie2);
+      yield assertHasCookies(cookie1, cookie2);
 
-      await driver.manage().deleteCookie(cookie1.name);
-      await assertHasCookies(cookie2);
+      yield driver.manage().deleteCookie(cookie1.name);
+      yield assertHasCookies(cookie2);
     });
 
-    it('should only delete cookie with exact name', async function() {
+    test.it('should only delete cookie with exact name', function*() {
       var cookie1 = createCookieSpec();
       var cookie2 = createCookieSpec();
       var cookie3 = {name: cookie1.name + 'xx', value: cookie1.value};
 
-      await driver.executeScript(
+      yield driver.executeScript(
           'document.cookie = arguments[0] + "=" + arguments[1];' +
           'document.cookie = arguments[2] + "=" + arguments[3];' +
           'document.cookie = arguments[4] + "=" + arguments[5];',
           cookie1.name, cookie1.value, cookie2.name, cookie2.value,
           cookie3.name, cookie3.value);
-      await assertHasCookies(cookie1, cookie2, cookie3);
+      yield assertHasCookies(cookie1, cookie2, cookie3);
 
-      await driver.manage().deleteCookie(cookie1.name);
-      await assertHasCookies(cookie2, cookie3);
+      yield driver.manage().deleteCookie(cookie1.name);
+      yield assertHasCookies(cookie2, cookie3);
     });
 
-    it('can delete cookies set higher in the path', async function() {
+    test.it('can delete cookies set higher in the path', function*() {
       var cookie = createCookieSpec();
       var childUrl = fileserver.whereIs('child/childPage.html');
       var grandchildUrl = fileserver.whereIs(
           'child/grandchild/grandchildPage.html');
 
-      await driver.get(childUrl);
-      await driver.manage().addCookie(cookie);
-      await assertHasCookies(cookie);
+      yield driver.get(childUrl);
+      yield driver.manage().addCookie(cookie);
+      yield assertHasCookies(cookie);
 
-      await driver.get(grandchildUrl);
-      await assertHasCookies(cookie);
+      yield driver.get(grandchildUrl);
+      yield assertHasCookies(cookie);
 
-      await driver.manage().deleteCookie(cookie.name);
-      await assertHasCookies();
+      yield driver.manage().deleteCookie(cookie.name);
+      yield assertHasCookies();
 
-      await driver.get(childUrl);
-      await assertHasCookies();
+      yield driver.get(childUrl);
+      yield assertHasCookies();
     });
 
-    ignore(env.browsers(
+    test.ignore(env.browsers(
+        Browser.ANDROID,
         Browser.FIREFOX,
+        'legacy-' + Browser.FIREFOX,
         Browser.IE)).
-    it('should retain cookie expiry', async function() {
+    it('should retain cookie expiry', function*() {
       let expirationDelay = 5 * 1000;
       let expiry = new Date(Date.now() + expirationDelay);
       let cookie = createCookieSpec({expiry});
 
-      await driver.manage().addCookie(cookie);
-      await driver.manage().getCookie(cookie.name).then(function(actual) {
+      yield driver.manage().addCookie(cookie);
+      yield driver.manage().getCookie(cookie.name).then(function(actual) {
         assert.equal(actual.value, cookie.value);
-
-        // expiry times should be in seconds since January 1, 1970 UTC
-        try {
-          assert.equal(actual.expiry, Math.floor(expiry.getTime() / 1000));
-          assert.notEqual(
-              env.browser.name, Browser.SAFARI,
-              'Safari cookie expiry fixed; update test');
-        } catch (ex) {
-          if (env.browser.name !== Browser.SAFARI
-              || !(ex instanceof assert.AssertionError)) {
-            throw ex;
-          }
-
-          // Safari returns milliseconds (and is off by a few seconds...)
-          let diff = Math.abs(actual.expiry - expiry.getTime());
-          if (diff > 2000) {
-            assert.fail(
-                actual.expiry, expiry.getTime(),
-                'Expect Safari to return expiry in millis since epoch ± 2s');
-          }
-        }
+        // expiry times are exchanged in seconds since January 1, 1970 UTC.
+        assert.equal(actual.expiry, Math.floor(expiry.getTime() / 1000));
       });
 
-      await driver.sleep(expirationDelay);
-      await assertHasCookies();
+      yield driver.sleep(expirationDelay);
+      yield assertHasCookies();
     });
   });
 

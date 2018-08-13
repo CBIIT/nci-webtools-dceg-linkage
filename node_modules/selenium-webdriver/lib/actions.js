@@ -70,7 +70,7 @@ function checkModifierKey(key) {
  *
  * Sample usage:
  *
- *     new LegacyActions(driver).
+ *     driver.actions().
  *         keyDown(Key.SHIFT).
  *         click(element1).
  *         click(element2).
@@ -78,14 +78,8 @@ function checkModifierKey(key) {
  *         keyUp(Key.SHIFT).
  *         perform();
  *
- * @deprecated This class is strongly deprecated and will be removed once
- *     [Google's Chrome][Chrome] and [Microsoft's Edge][Edge] browsers
- *     support the new action sequence API.
- *
- * [Chrome]: https://chromium.googlesource.com/chromium/src/+/master/docs/chromedriver_status.md
- * [Edge]: https://docs.microsoft.com/en-us/microsoft-edge/webdriver
  */
-class LegacyActionSequence {
+class ActionSequence {
   /**
    * @param {!./webdriver.WebDriver} driver The driver that should be used to
    *     perform this action sequence.
@@ -116,17 +110,21 @@ class LegacyActionSequence {
   /**
    * Executes this action sequence.
    *
-   * @return {!Promise} A promise that will be resolved once this sequence has
-   *     completed.
+   * @return {!./promise.Thenable} A promise that will be resolved once
+   *     this sequence has completed.
    */
-  async perform() {
+  perform() {
     // Make a protected copy of the scheduled actions. This will protect against
     // users defining additional commands before this sequence is actually
     // executed.
     let actions = this.actions_.concat();
-    for (let action of actions) {
-      await this.driver_.execute(action.command);
-    }
+    let driver = this.driver_;
+    return driver.controlFlow().execute(function() {
+      let results = actions.map(action => {
+        return driver.schedule(action.command, action.description);
+      });
+      return Promise.all(results);
+    }, 'ActionSequence.perform');
   }
 
   /**
@@ -142,10 +140,10 @@ class LegacyActionSequence {
    *     an offset within that element. The offset should be specified in pixels
    *     relative to the top-left corner of the element's bounding box. If
    *     omitted, the element's center will be used as the target offset.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    */
   mouseMove(location, opt_offset) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_MOUSE_MOVE);
+    let cmd = new command.Command(command.Name.MOVE_TO);
 
     if (typeof location.x === 'number') {
       setOffset(/** @type {{x: number, y: number}} */(location));
@@ -178,7 +176,7 @@ class LegacyActionSequence {
    * @param {input.Button=} opt_button The button to use. Defaults to
    *     {@link input.Button.LEFT}. Ignored if the previous argument is
    *     provided as a button.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    * @private
    */
   scheduleMouseAction_(
@@ -221,11 +219,11 @@ class LegacyActionSequence {
    * @param {input.Button=} opt_button The button to use. Defaults to
    *     {@link input.Button.LEFT}. Ignored if a button is provided as the
    *     first argument.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    */
   mouseDown(opt_elementOrButton, opt_button) {
     return this.scheduleMouseAction_('mouseDown',
-        command.Name.LEGACY_ACTION_MOUSE_DOWN, opt_elementOrButton, opt_button);
+        command.Name.MOUSE_DOWN, opt_elementOrButton, opt_button);
   }
 
   /**
@@ -247,11 +245,11 @@ class LegacyActionSequence {
    * @param {input.Button=} opt_button The button to use. Defaults to
    *     {@link input.Button.LEFT}. Ignored if a button is provided as the
    *     first argument.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    */
   mouseUp(opt_elementOrButton, opt_button) {
     return this.scheduleMouseAction_('mouseUp',
-        command.Name.LEGACY_ACTION_MOUSE_UP, opt_elementOrButton, opt_button);
+        command.Name.MOUSE_UP, opt_elementOrButton, opt_button);
   }
 
   /**
@@ -263,7 +261,7 @@ class LegacyActionSequence {
    * @param {(!./webdriver.WebElement|{x: number, y: number})} location The
    *     location to drag to, either as another WebElement or an offset in
    *     pixels.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    */
   dragAndDrop(element, location) {
     return this.mouseDown(element).mouseMove(location).mouseUp();
@@ -284,11 +282,11 @@ class LegacyActionSequence {
    * @param {input.Button=} opt_button The button to use. Defaults to
    *     {@link input.Button.LEFT}. Ignored if a button is provided as the
    *     first argument.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    */
   click(opt_elementOrButton, opt_button) {
     return this.scheduleMouseAction_('click',
-        command.Name.LEGACY_ACTION_CLICK, opt_elementOrButton, opt_button);
+        command.Name.CLICK, opt_elementOrButton, opt_button);
   }
 
   /**
@@ -309,12 +307,11 @@ class LegacyActionSequence {
    * @param {input.Button=} opt_button The button to use. Defaults to
    *     {@link input.Button.LEFT}. Ignored if a button is provided as the
    *     first argument.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    */
   doubleClick(opt_elementOrButton, opt_button) {
     return this.scheduleMouseAction_('doubleClick',
-        command.Name.LEGACY_ACTION_DOUBLE_CLICK, opt_elementOrButton,
-        opt_button);
+        command.Name.DOUBLE_CLICK, opt_elementOrButton, opt_button);
   }
 
   /**
@@ -323,11 +320,11 @@ class LegacyActionSequence {
    * @param {string} description A simple descriptive label for the scheduled
    *     action.
    * @param {!Array<(string|!input.Key)>} keys The keys to send.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    * @private
    */
   scheduleKeyboardAction_(description, keys) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_SEND_KEYS)
+    let cmd = new command.Command(command.Name.SEND_KEYS_TO_ACTIVE_ELEMENT)
         .setParameter('value', keys);
     this.schedule_(description, cmd);
     return this;
@@ -340,7 +337,7 @@ class LegacyActionSequence {
    *
    * @param {!input.Key} key The modifier key to push. Must be one of
    *     {ALT, CONTROL, SHIFT, COMMAND, META}.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    * @throws {error.InvalidArgumentError} If the key is not a valid modifier
    *     key.
    */
@@ -354,7 +351,7 @@ class LegacyActionSequence {
    * focused element.
    * @param {!input.Key} key The modifier key to release. Must be one of
    *     {ALT, CONTROL, SHIFT, COMMAND, META}.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    * @throws {error.InvalidArgumentError} If the key is not a valid modifier
    *     key.
    */
@@ -370,7 +367,7 @@ class LegacyActionSequence {
    *
    * @param {...(string|!input.Key|!Array<(string|!input.Key)>)} var_args
    *     The keys to type.
-   * @return {!LegacyActionSequence} A self reference.
+   * @return {!ActionSequence} A self reference.
    * @throws {Error} If the key is not a valid modifier key.
    */
   sendKeys(var_args) {
@@ -389,20 +386,14 @@ class LegacyActionSequence {
  *
  * Sample usage:
  *
- *     new LegacyActions(driver).
+ *     driver.touchActions().
  *         tapAndHold({x: 0, y: 0}).
  *         move({x: 3, y: 4}).
  *         release({x: 10, y: 10}).
  *         perform();
  *
- * @deprecated This class is strongly deprecated and will be removed once
- *     [Google's Chrome][Chrome] and [Microsoft's Edge][Edge] browsers
- *     support the new action sequence API.
- *
- * [Chrome]: https://chromium.googlesource.com/chromium/src/+/master/docs/chromedriver_status.md
- * [Edge]: https://docs.microsoft.com/en-us/microsoft-edge/webdriver
  */
-class LegacyTouchSequence {
+class TouchSequence {
   /**
    * @param {!./webdriver.WebDriver} driver The driver that should be used to
    *     perform this action sequence.
@@ -431,27 +422,31 @@ class LegacyTouchSequence {
 
   /**
    * Executes this action sequence.
-   * @return {!Promise} A promise that will be resolved once this sequence has
-   *     completed.
+   * @return {!./promise.Thenable} A promise that will be resolved once
+   *     this sequence has completed.
    */
-  async perform() {
+  perform() {
     // Make a protected copy of the scheduled actions. This will protect against
     // users defining additional commands before this sequence is actually
     // executed.
     let actions = this.actions_.concat();
-    for (let action of actions) {
-      await this.driver_.execute(action.command);
-    }
+    let driver = this.driver_;
+    return driver.controlFlow().execute(function() {
+      let results = actions.map(action => {
+        return driver.schedule(action.command, action.description);
+      });
+      return Promise.all(results);
+    }, 'TouchSequence.perform');
   }
 
   /**
    * Taps an element.
    *
    * @param {!./webdriver.WebElement} elem The element to tap.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   tap(elem) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_SINGLE_TAP).
+    let cmd = new command.Command(command.Name.TOUCH_SINGLE_TAP).
         setParameter('element', elem.getId());
 
     this.schedule_('tap', cmd);
@@ -462,10 +457,10 @@ class LegacyTouchSequence {
    * Double taps an element.
    *
    * @param {!./webdriver.WebElement} elem The element to double tap.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   doubleTap(elem) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_DOUBLE_TAP).
+    let cmd = new command.Command(command.Name.TOUCH_DOUBLE_TAP).
         setParameter('element', elem.getId());
 
     this.schedule_('doubleTap', cmd);
@@ -476,10 +471,10 @@ class LegacyTouchSequence {
    * Long press on an element.
    *
    * @param {!./webdriver.WebElement} elem The element to long press.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   longPress(elem) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_LONG_PRESS).
+    let cmd = new command.Command(command.Name.TOUCH_LONG_PRESS).
         setParameter('element', elem.getId());
 
     this.schedule_('longPress', cmd);
@@ -490,10 +485,10 @@ class LegacyTouchSequence {
    * Touch down at the given location.
    *
    * @param {{x: number, y: number}} location The location to touch down at.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   tapAndHold(location) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_DOWN).
+    let cmd = new command.Command(command.Name.TOUCH_DOWN).
         setParameter('x', location.x).
         setParameter('y', location.y);
 
@@ -505,10 +500,10 @@ class LegacyTouchSequence {
    * Move a held {@linkplain #tapAndHold touch} to the specified location.
    *
    * @param {{x: number, y: number}} location The location to move to.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   move(location) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_MOVE).
+    let cmd = new command.Command(command.Name.TOUCH_MOVE).
         setParameter('x', location.x).
         setParameter('y', location.y);
 
@@ -520,10 +515,10 @@ class LegacyTouchSequence {
    * Release a held {@linkplain #tapAndHold touch} at the specified location.
    *
    * @param {{x: number, y: number}} location The location to release at.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   release(location) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_UP).
+    let cmd = new command.Command(command.Name.TOUCH_UP).
         setParameter('x', location.x).
         setParameter('y', location.y);
 
@@ -535,10 +530,10 @@ class LegacyTouchSequence {
    * Scrolls the touch screen by the given offset.
    *
    * @param {{x: number, y: number}} offset The offset to scroll to.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   scroll(offset) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_SCROLL).
+    let cmd = new command.Command(command.Name.TOUCH_SCROLL).
         setParameter('xoffset', offset.x).
         setParameter('yoffset', offset.y);
 
@@ -552,10 +547,10 @@ class LegacyTouchSequence {
    *
    * @param {!./webdriver.WebElement} elem The element where scroll starts.
    * @param {{x: number, y: number}} offset The offset to scroll to.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   scrollFromElement(elem, offset) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_SCROLL).
+    let cmd = new command.Command(command.Name.TOUCH_SCROLL).
         setParameter('element', elem.getId()).
         setParameter('xoffset', offset.x).
         setParameter('yoffset', offset.y);
@@ -569,10 +564,10 @@ class LegacyTouchSequence {
    *
    * @param {{xspeed: number, yspeed: number}} speed The speed to flick in each
          direction, in pixels per second.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   flick(speed) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_FLICK).
+    let cmd = new command.Command(command.Name.TOUCH_FLICK).
         setParameter('xspeed', speed.xspeed).
         setParameter('yspeed', speed.yspeed);
 
@@ -586,10 +581,10 @@ class LegacyTouchSequence {
    * @param {!./webdriver.WebElement} elem The element where flick starts.
    * @param {{x: number, y: number}} offset The offset to flick to.
    * @param {number} speed The speed to flick at in pixels per second.
-   * @return {!LegacyTouchSequence} A self reference.
+   * @return {!TouchSequence} A self reference.
    */
   flickElement(elem, offset, speed) {
-    let cmd = new command.Command(command.Name.LEGACY_ACTION_TOUCH_FLICK).
+    let cmd = new command.Command(command.Name.TOUCH_FLICK).
         setParameter('element', elem.getId()).
         setParameter('xoffset', offset.x).
         setParameter('yoffset', offset.y).
@@ -604,6 +599,6 @@ class LegacyTouchSequence {
 // PUBLIC API
 
 module.exports = {
-  LegacyActionSequence,
-  LegacyTouchSequence,
+  ActionSequence: ActionSequence,
+  TouchSequence: TouchSequence,
 };

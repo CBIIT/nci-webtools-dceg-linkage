@@ -27,16 +27,16 @@
 
 'use strict';
 
-const fs = require('fs');
-const util = require('util');
+const fs = require('fs'),
+    util = require('util');
 
-const http = require('./http');
-const io = require('./io');
-const portprober = require('./net/portprober');
-const promise = require('./lib/promise');
-const remote = require('./remote');
-const webdriver = require('./lib/webdriver');
-const {Browser, Capabilities, Capability} = require('./lib/capabilities');
+const http = require('./http'),
+    io = require('./io'),
+    capabilities = require('./lib/capabilities'),
+    promise = require('./lib/promise'),
+    webdriver = require('./lib/webdriver'),
+    portprober = require('./net/portprober'),
+    remote = require('./remote');
 
 
 const IEDRIVER_EXE = 'IEDriverServer.exe';
@@ -86,14 +86,37 @@ const Key = {
 /**
  * Class for managing IEDriver specific options.
  */
-class Options extends Capabilities {
+class Options {
+  constructor() {
+    /** @private {!Object<(boolean|number|string|!Array<string>)>} */
+    this.options_ = {};
+
+    /** @private {(capabilities.ProxyConfig|null)} */
+    this.proxy_ = null;
+  }
+
   /**
-   * @param {(Capabilities|Map<string, ?>|Object)=} other Another set of
-   *     capabilities to initialize this instance from.
+   * Extracts the IEDriver specific options from the given capabilities
+   * object.
+   * @param {!capabilities.Capabilities} caps The capabilities object.
+   * @return {!Options} The IEDriver options.
    */
-  constructor(other = undefined) {
-    super(other);
-    this.setBrowserName(Browser.IE);
+  static fromCapabilities(caps) {
+    var options = new Options();
+    var map = options.options_;
+
+    Object.keys(Key).forEach(function(key) {
+      key = Key[key];
+      if (caps.has(key)) {
+        map[key] = caps.get(key);
+      }
+    });
+
+    if (caps.has(capabilities.Capability.PROXY)) {
+      options.setProxy(caps.get(capabilities.Capability.PROXY));
+    }
+
+    return options;
   }
 
   /**
@@ -109,7 +132,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   introduceFlakinessByIgnoringProtectedModeSettings(ignoreSettings) {
-    this.set(Key.IGNORE_PROTECTED_MODE_SETTINGS, !!ignoreSettings);
+    this.options_[Key.IGNORE_PROTECTED_MODE_SETTINGS] = !!ignoreSettings;
     return this;
   }
 
@@ -121,7 +144,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   ignoreZoomSetting(ignore) {
-    this.set(Key.IGNORE_ZOOM_SETTING, !!ignore);
+    this.options_[Key.IGNORE_ZOOM_SETTING] = !!ignore;
     return this;
   }
 
@@ -136,7 +159,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   initialBrowserUrl(url) {
-    this.set(Key.INITIAL_BROWSER_URL, url);
+    this.options_[Key.INITIAL_BROWSER_URL] = url;
     return this;
   }
 
@@ -149,7 +172,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   enablePersistentHover(enable) {
-    this.set(Key.ENABLE_PERSISTENT_HOVER, !!enable);
+    this.options_[Key.ENABLE_PERSISTENT_HOVER] = !!enable;
     return this;
   }
 
@@ -163,7 +186,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   enableElementCacheCleanup(enable) {
-    this.set(Key.ENABLE_ELEMENT_CACHE_CLEANUP, !!enable);
+    this.options_[Key.ENABLE_ELEMENT_CACHE_CLEANUP] = !!enable;
     return this;
   }
 
@@ -177,7 +200,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   requireWindowFocus(require) {
-    this.set(Key.REQUIRE_WINDOW_FOCUS, !!require);
+    this.options_[Key.REQUIRE_WINDOW_FOCUS] = !!require;
     return this;
   }
 
@@ -190,7 +213,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   browserAttachTimeout(timeout) {
-    this.set(Key.BROWSER_ATTACH_TIMEOUT, Math.max(timeout, 0));
+    this.options_[Key.BROWSER_ATTACH_TIMEOUT] = Math.max(timeout, 0);
     return this;
   }
 
@@ -204,7 +227,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   forceCreateProcessApi(force) {
-    this.set(Key.FORCE_CREATE_PROCESS, !!force);
+    this.options_[Key.FORCE_CREATE_PROCESS] = !!force;
     return this;
   }
 
@@ -212,14 +235,13 @@ class Options extends Capabilities {
    * Specifies command-line switches to use when launching Internet Explorer.
    * This is only valid when used with {@link #forceCreateProcessApi}.
    *
-   * @param {...(string|!Array.<string>)} args The arguments to add.
+   * @param {...(string|!Array.<string>)} var_args The arguments to add.
    * @return {!Options} A self reference.
    */
-  addArguments(...args) {
-    let current = this.get(Key.BROWSER_COMMAND_LINE_SWITCHES) || [];
-    this.set(
-        Key.BROWSER_COMMAND_LINE_SWITCHES,
-        current.concat.apply(current, args));
+  addArguments(var_args) {
+    var args = this.options_[Key.BROWSER_COMMAND_LINE_SWITCHES] || [];
+    args = args.concat.apply(args, arguments);
+    this.options_[Key.BROWSER_COMMAND_LINE_SWITCHES] = args;
     return this;
   }
 
@@ -232,7 +254,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   usePerProcessProxy(enable) {
-    this.set(Key.USE_PER_PROCESS_PROXY, !!enable);
+    this.options_[Key.USE_PER_PROCESS_PROXY] = !!enable;
     return this;
   }
 
@@ -246,7 +268,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   ensureCleanSession(cleanSession) {
-    this.set(Key.ENSURE_CLEAN_SESSION, !!cleanSession);
+    this.options_[Key.ENSURE_CLEAN_SESSION] = !!cleanSession;
     return this;
   }
 
@@ -256,7 +278,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   setLogFile(file) {
-    this.set(Key.LOG_FILE, file);
+    this.options_[Key.LOG_FILE] = file;
     return this;
   }
 
@@ -266,7 +288,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   setLogLevel(level) {
-    this.set(Key.LOG_LEVEL, level);
+    this.options_[Key.LOG_LEVEL] = level;
     return this;
   }
 
@@ -276,7 +298,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   setHost(host) {
-    this.set(Key.HOST, host);
+    this.options_[Key.HOST] = host;
     return this;
   }
 
@@ -286,7 +308,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   setExtractPath(path) {
-    this.set(Key.EXTRACT_PATH, path);
+    this.options_[Key.EXTRACT_PATH] = path;
     return this;
   }
 
@@ -296,21 +318,37 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   silent(silent) {
-    this.set(Key.SILENT, silent);
+    this.options_[Key.SILENT] = silent;
     return this;
   }
-}
 
+  /**
+   * Sets the proxy settings for the new session.
+   * @param {capabilities.ProxyConfig} proxy The proxy configuration to use.
+   * @return {!Options} A self reference.
+   */
+  setProxy(proxy) {
+    this.proxy_ = proxy;
+    return this;
+  }
 
-/**
- * _Synchronously_ attempts to locate the IE driver executable on the current
- * system.
- *
- * @return {?string} the located executable, or `null`.
- */
-function locateSynchronously() {
-  return process.platform === 'win32'
-      ? io.findInPath(IEDRIVER_EXE, true) : null;
+  /**
+   * Converts this options instance to a {@link capabilities.Capabilities}
+   * object.
+   * @param {capabilities.Capabilities=} opt_capabilities The capabilities to
+   *     merge these options into, if any.
+   * @return {!capabilities.Capabilities} The capabilities.
+   */
+  toCapabilities(opt_capabilities) {
+    var caps = opt_capabilities || capabilities.Capabilities.ie();
+    if (this.proxy_) {
+      caps.set(capabilities.Capability.PROXY, this.proxy_);
+    }
+    Object.keys(this.options_).forEach(function(key) {
+      caps.set(key, this.options_[key]);
+    }, this);
+    return caps;
+  }
 }
 
 
@@ -322,7 +360,7 @@ function createServiceFromCapabilities(capabilities) {
         'WebDriver server?');
   }
 
-  let exe = locateSynchronously();
+  let exe = io.findInPath(IEDRIVER_EXE, true);
   if (!exe || !fs.existsSync(exe)) {
     throw Error(
         `${IEDRIVER_EXE} could not be found on the current PATH. Please ` +
@@ -367,18 +405,23 @@ class Driver extends webdriver.WebDriver {
   /**
    * Creates a new session for Microsoft's Internet Explorer.
    *
-   * @param {(Capabilities|Options)=} options The configuration options.
+   * @param {(capabilities.Capabilities|Options)=} opt_config The configuration
+   *     options.
+   * @param {promise.ControlFlow=} opt_flow The control flow to use,
+   *     or {@code null} to use the currently active flow.
    * @return {!Driver} A new driver instance.
    */
-  static createSession(options) {
-    options = options || new Options();
+  static createSession(opt_config, opt_flow) {
+    var caps = opt_config instanceof Options ?
+        opt_config.toCapabilities() :
+        (opt_config || capabilities.Capabilities.ie());
 
-    let service = createServiceFromCapabilities(options);
-    let client = service.start().then(url => new http.HttpClient(url));
-    let executor = new http.Executor(client);
+    var service = createServiceFromCapabilities(caps);
+    var client = service.start().then(url => new http.HttpClient(url));
+    var executor = new http.Executor(client);
 
     return /** @type {!Driver} */(super.createSession(
-        executor, options, () => service.kill()));
+        executor, caps, opt_flow, () => service.kill()));
   }
 
   /**
@@ -396,5 +439,3 @@ class Driver extends webdriver.WebDriver {
 exports.Driver = Driver;
 exports.Options = Options;
 exports.Level = Level;
-exports.locateSynchronously = locateSynchronously;
-

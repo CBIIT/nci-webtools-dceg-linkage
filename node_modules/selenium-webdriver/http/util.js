@@ -26,7 +26,8 @@ const Executor = require('./index').Executor,
     HttpRequest = require('./index').Request,
     Command = require('../lib/command').Command,
     CommandName = require('../lib/command').Name,
-    error = require('../lib/error');
+    error = require('../lib/error'),
+    promise = require('../lib/promise');
 
 
 
@@ -44,9 +45,6 @@ function getStatus(url) {
 }
 
 
-class CancellationError {}
-
-
 // PUBLIC API
 
 
@@ -59,16 +57,13 @@ class CancellationError {}
 exports.getStatus = getStatus;
 
 
-exports.CancellationError = CancellationError;
-
-
 /**
  * Waits for a WebDriver server to be healthy and accepting requests.
  * @param {string} url Base URL of the server to query.
  * @param {number} timeout How long to wait for the server.
  * @param {Promise=} opt_cancelToken A promise used as a cancellation signal:
  *     if resolved before the server is ready, the wait will be terminated
- *     early with a {@link CancellationError}.
+ *     early with a {@link promise.CancellationError}.
  * @return {!Promise} A promise that will resolve when the server is ready, or
  *     if the wait is cancelled.
  */
@@ -87,7 +82,7 @@ exports.waitForServer = function(url, timeout, opt_cancelToken) {
     };
 
     if (opt_cancelToken) {
-      opt_cancelToken.then(_ => reject(new CancellationError));
+      opt_cancelToken.then(_ => reject(new promise.CancellationError));
     }
 
     checkServerStatus();
@@ -124,7 +119,7 @@ exports.waitForServer = function(url, timeout, opt_cancelToken) {
  * @param {number} timeout How long to wait, in milliseconds.
  * @param {Promise=} opt_cancelToken A promise used as a cancellation signal:
  *     if resolved before the a 2xx response is received, the wait will be
- *     terminated early with a {@link CancellationError}.
+ *     terminated early with a {@link promise.CancellationError}.
  * @return {!Promise} A promise that will resolve when a 2xx is received from
  *     the given URL, or if the wait is cancelled.
  */
@@ -145,7 +140,7 @@ exports.waitForUrl = function(url, timeout, opt_cancelToken) {
     };
 
     if (opt_cancelToken) {
-      opt_cancelToken.then(_ => reject(new CancellationError));
+      opt_cancelToken.then(_ => reject(new promise.CancellationError));
     }
 
     testUrl();

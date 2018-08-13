@@ -17,227 +17,226 @@
 
 'use strict';
 
-const assert = require('assert');
-const {fail} = require('assert');
+var fail = require('assert').fail;
 
-const {Browser, By, WebElement} = require('..');
-const {Pages, ignore, suite} = require('../lib/test');
+var webdriver = require('..'),
+    Browser = webdriver.Browser,
+    By = webdriver.By,
+    assert = require('../testing/assert'),
+    test = require('../lib/test');
 
 
-suite(function(env) {
+test.suite(function(env) {
   var driver;
 
-  before(async function() {
-    driver = await env.builder().build();
+  test.before(function*() {
+    driver = yield env.builder().build();
   });
 
-  after(function() {
+  test.after(function() {
     return driver.quit();
   });
 
-  beforeEach(function() {
-    return driver.get(Pages.echoPage);
+  test.beforeEach(function() {
+    return driver.get(test.Pages.echoPage);
   });
 
   describe('executeScript;', function() {
     var shouldHaveFailed = new Error('Should have failed');
 
-    it('fails if script throws', function() {
+    test.it('fails if script throws', function() {
       return execute('throw new Error("boom")')
           .then(function() { throw shouldHaveFailed; })
           .catch(function(e) {
             // The java WebDriver server adds a bunch of crap to error messages.
             // Error message will just be "JavaScript error" for IE.
-            assert.ok(
-                /.*(JavaScript error|boom).*/.test(e.message),
-                `Unexpected error: ${e.message}`);
+            assert(e.message).matches(/.*(JavaScript error|boom).*/);
           });
     });
 
-    it('fails if script does not parse', function() {
+    test.it('fails if script does not parse', function() {
       return execute('throw function\\*')
           .then(function() { throw shouldHaveFailed; })
           .catch(function(e) {
-            assert.notEqual(e, shouldHaveFailed);
+            assert(e).notEqualTo(shouldHaveFailed);
           });
     });
 
     describe('scripts;', function() {
-      it('do not pollute the global scope', async function() {
-        await execute('var x = 1;');
-        assert.equal(await execute('return typeof x;'), 'undefined');
+      test.it('do not pollute the global scope', function*() {
+        yield execute('var x = 1;');
+        yield assert(execute('return typeof x;')).equalTo('undefined');
       });
 
-      it('can set global variables', async function() {
-        await execute('window.x = 1234;');
-        assert.equal(await execute('return x;'), 1234);
+      test.it('can set global variables', function*() {
+        yield execute('window.x = 1234;');
+        yield assert(execute('return x;')).equalTo(1234);
       });
 
-      it('may be defined as a function expression', async function() {
-        let result = await execute(function() {
+      test.it('may be defined as a function expression', function*() {
+        let result = yield execute(function() {
           return 1234 + 'abc';
         });
-        assert.equal(result, '1234abc');
+        assert(result).equalTo('1234abc');
       });
     });
 
     describe('return values;', function() {
 
-      it('returns undefined as null', async function() {
-        assert.strictEqual(await execute('var x; return x;'), null);
+      test.it('returns undefined as null', function() {
+        return assert(execute('var x; return x;')).isNull();
       });
 
-      it('can return null', async function() {
-        assert.strictEqual(await execute('return null;'), null);
+      test.it('can return null', function() {
+        return assert(execute('return null;')).isNull();
       });
 
-      it('can return numbers', async function() {
-        assert.equal(await execute('return 1234'), 1234);
-        assert.equal(await execute('return 3.1456'), 3.1456);
+      test.it('can return numbers', function*() {
+        yield assert(execute('return 1234')).equalTo(1234);
+        yield assert(execute('return 3.1456')).equalTo(3.1456);
       });
 
-      it('can return strings', async function() {
-        assert.equal(await execute('return "hello"'), 'hello');
+      test.it('can return strings', function() {
+        return assert(execute('return "hello"')).equalTo('hello');
       });
 
-      it('can return booleans', async function() {
-        assert.equal(await execute('return true'), true);
-        assert.equal(await execute('return false'), false);
+      test.it('can return booleans', function*() {
+        yield assert(execute('return true')).equalTo(true);
+        yield assert(execute('return false')).equalTo(false);
       });
 
-      it('can return an array of primitives', function() {
+      test.it('can return an array of primitives', function() {
         return execute('var x; return [1, false, null, 3.14, x]')
             .then(verifyJson([1, false, null, 3.14, null]));
       });
 
-      it('can return nested arrays', function() {
+      test.it('can return nested arrays', function() {
         return execute('return [[1, 2, [3]]]').then(verifyJson([[1, 2, [3]]]));
       });
 
-      ignore(env.browsers(Browser.IE)).
+      test.ignore(env.browsers(Browser.IE)).
       it('can return empty object literal', function() {
         return execute('return {}').then(verifyJson({}));
       });
 
-      it('can return object literals', function() {
+      test.it('can return object literals', function() {
         return execute('return {a: 1, b: false, c: null}').then(result => {
           verifyJson(['a', 'b', 'c'])(Object.keys(result).sort());
-          assert.equal(result.a, 1);
-          assert.equal(result.b, false);
-          assert.strictEqual(result.c, null);
+          assert(result.a).equalTo(1);
+          assert(result.b).equalTo(false);
+          assert(result.c).isNull();
         });
       });
 
-      it('can return complex object literals', function() {
+      test.it('can return complex object literals', function() {
         return execute('return {a:{b: "hello"}}')
             .then(verifyJson({a:{b: 'hello'}}));
       });
 
-      it('can return dom elements as web elements', async function() {
+      test.it('can return dom elements as web elements', function*() {
         let result =
-            await execute('return document.querySelector(".header.host")');
-        assert.ok(result instanceof WebElement);
+            yield execute('return document.querySelector(".header.host")');
+        assert(result).instanceOf(webdriver.WebElement);
 
-        let text = await result.getText();
-        assert.ok(text.startsWith('host: '), `got: ${text}`);
+        return assert(result.getText()).startsWith('host: ');
       });
 
-      it('can return array of dom elements', async function() {
-        let result = await execute(
+      test.it('can return array of dom elements', function*() {
+        let result = yield execute(
             'var nodes = document.querySelectorAll(".request,.host");' +
             'return [nodes[0], nodes[1]];');
-        assert.equal(result.length, 2);
+        assert(result.length).equalTo(2);
 
-        assert.ok(result[0] instanceof WebElement);
-        assert.ok((await result[0].getText()).startsWith('GET '));;
+        assert(result[0]).instanceOf(webdriver.WebElement);
+        yield assert(result[0].getText()).startsWith('GET ');
 
-        assert.ok(result[1] instanceof WebElement);
-        assert.ok((await result[1].getText()).startsWith('host: '));;
+        assert(result[1]).instanceOf(webdriver.WebElement);
+        yield assert(result[1].getText()).startsWith('host: ');
       });
 
-      it('can return a NodeList as an array of web elements', async function() {
+      test.it('can return a NodeList as an array of web elements', function*() {
         let result =
-            await execute('return document.querySelectorAll(".request,.host");')
+            yield execute('return document.querySelectorAll(".request,.host");')
 
-        assert.equal(result.length, 2);
+        assert(result.length).equalTo(2);
 
-        assert.ok(result[0] instanceof WebElement);
-        assert.ok((await result[0].getText()).startsWith('GET '));;
+        assert(result[0]).instanceOf(webdriver.WebElement);
+        yield assert(result[0].getText()).startsWith('GET ');
 
-        assert.ok(result[1] instanceof WebElement);
-        assert.ok((await result[1].getText()).startsWith('host: '));;
+        assert(result[1]).instanceOf(webdriver.WebElement);
+        yield assert(result[1].getText()).startsWith('host: ');
       });
 
-      it('can return object literal with element property', async function() {
-        let result = await execute('return {a: document.body}');
+      test.it('can return object literal with element property', function*() {
+        let result = yield execute('return {a: document.body}');
 
-        assert.ok(result.a instanceof WebElement);
-        assert.equal(await result.a.getTagName(), 'body');
+        assert(result.a).instanceOf(webdriver.WebElement);
+        yield assert(result.a.getTagName()).equalTo('body');
       });
     });
 
     describe('parameters;', function() {
-      it('can pass numeric arguments', async function() {
-        assert.equal(await execute('return arguments[0]', 12), 12);
-        assert.equal(await execute('return arguments[0]', 3.14), 3.14);
+      test.it('can pass numeric arguments', function*() {
+        yield assert(execute('return arguments[0]', 12)).equalTo(12);
+        yield assert(execute('return arguments[0]', 3.14)).equalTo(3.14);
       });
 
-      it('can pass boolean arguments', async function() {
-        assert.equal(await execute('return arguments[0]', true), true);
-        assert.equal(await execute('return arguments[0]', false), false);
+      test.it('can pass boolean arguments', function*() {
+        yield assert(execute('return arguments[0]', true)).equalTo(true);
+        yield assert(execute('return arguments[0]', false)).equalTo(false);
       });
 
-      it('can pass string arguments', async function() {
-        assert.equal(await execute('return arguments[0]', 'hi'), 'hi');
+      test.it('can pass string arguments', function*() {
+        yield assert(execute('return arguments[0]', 'hi')).equalTo('hi');
       });
 
-      it('can pass null arguments', async function() {
-        assert.equal(await execute('return arguments[0] === null', null), true);
-        assert.equal(await execute('return arguments[0]', null), null);
+      test.it('can pass null arguments', function*() {
+        yield assert(execute('return arguments[0] === null', null)).equalTo(true);
+        yield assert(execute('return arguments[0]', null)).equalTo(null);
       });
 
-      it('passes undefined as a null argument', async function() {
+      test.it('passes undefined as a null argument', function*() {
         var x;
-        assert.equal(await execute('return arguments[0] === null', x), true);
-        assert.equal(await execute('return arguments[0]', x), null);
+        yield assert(execute('return arguments[0] === null', x)).equalTo(true);
+        yield assert(execute('return arguments[0]', x)).equalTo(null);
       });
 
-      it('can pass multiple arguments', async function() {
-        assert.equal(await execute('return arguments.length'), 0);
-        assert.equal(await execute('return arguments.length', 1, 'a', false), 3);
+      test.it('can pass multiple arguments', function*() {
+        yield assert(execute('return arguments.length')).equalTo(0);
+        yield assert(execute('return arguments.length', 1, 'a', false)).equalTo(3);
       });
 
-      ignore(env.browsers(Browser.FIREFOX, Browser.SAFARI)).
-      it('can return arguments object as array', async function() {
-        let val = await execute('return arguments', 1, 'a', false);
+      test.ignore(env.browsers(Browser.FIREFOX, Browser.SAFARI)).
+      it('can return arguments object as array', function*() {
+        let val = yield execute('return arguments', 1, 'a', false);
 
-        assert.equal(val.length, 3);
-        assert.equal(val[0], 1);
-        assert.equal(val[1], 'a');
-        assert.equal(val[2], false);
+        assert(val.length).equalTo(3);
+        assert(val[0]).equalTo(1);
+        assert(val[1]).equalTo('a');
+        assert(val[2]).equalTo(false);
       });
 
-      it('can pass object literal', async function() {
-        let result = await execute(
+      test.it('can pass object literal', function*() {
+        let result = yield execute(
             'return [typeof arguments[0], arguments[0].a]', {a: 'hello'})
-        assert.equal(result[0], 'object');
-        assert.equal(result[1], 'hello');
+        assert(result[0]).equalTo('object');
+        assert(result[1]).equalTo('hello');
       });
 
-      it('WebElement arguments are passed as DOM elements', async function() {
-        let el = await driver.findElement(By.tagName('div'));
+      test.it('WebElement arguments are passed as DOM elements', function*() {
+        let el = yield driver.findElement(By.tagName('div'));
         let result =
-            await execute('return arguments[0].tagName.toLowerCase();', el);
-        assert.equal(result, 'div');
+            yield execute('return arguments[0].tagName.toLowerCase();', el);
+        assert(result).equalTo('div');
       });
 
-      it('can pass array containing object literals', async function() {
-        let result = await execute('return arguments[0]', [{color: "red"}]);
-        assert.equal(result.length, 1);
-        assert.equal(result[0].color, 'red');
+      test.it('can pass array containing object literals', function*() {
+        let result = yield execute('return arguments[0]', [{color: "red"}]);
+        assert(result.length).equalTo(1);
+        assert(result[0].color).equalTo('red');
       });
 
-      it('does not modify object literal parameters', function() {
+      test.it('does not modify object literal parameters', function() {
         var input = {color: 'red'};
         return execute('return arguments[0];', input).then(verifyJson(input));
       });
@@ -246,7 +245,7 @@ suite(function(env) {
     // See https://code.google.com/p/selenium/issues/detail?id=8223.
     describe('issue 8223;', function() {
       describe('using for..in loops;', function() {
-        it('can return array built from for-loop index', function() {
+        test.it('can return array built from for-loop index', function() {
           return execute(function() {
             var ret = [];
             for (var i = 0; i < 3; i++) {
@@ -256,7 +255,7 @@ suite(function(env) {
           }).then(verifyJson[0, 1, 2]);
         });
 
-        it('can copy input array contents', function() {
+        test.it('can copy input array contents', function() {
           return execute(function(input) {
             var ret = [];
             for (var i in input) {
@@ -266,7 +265,7 @@ suite(function(env) {
           }, ['fa', 'fe', 'fi']).then(verifyJson(['fa', 'fe', 'fi']));
         });
 
-        it('can iterate over input object keys', function() {
+        test.it('can iterate over input object keys', function() {
           return execute(function(thing) {
             var ret = [];
             for (var w in thing.words) {
@@ -278,7 +277,7 @@ suite(function(env) {
         });
 
         describe('recursive functions;', function() {
-          it('can build array from input', function() {
+          test.it('can build array from input', function() {
             var input = ['fa', 'fe', 'fi'];
             return execute(function(thearray) {
               var ret = [];
@@ -291,7 +290,7 @@ suite(function(env) {
             }, input).then(verifyJson(input));
           });
 
-          it('can build array from elements in object', function() {
+          test.it('can build array from elements in object', function() {
             var input = {words: [{word: 'fa'}, {word: 'fe'}, {word: 'fi'}]};
             return execute(function(thing) {
               var ret = [];
@@ -314,19 +313,19 @@ suite(function(env) {
       var TOO_LONG_WAIT = TIMEOUT_IN_MS * 10;
 
       before(function() {
-        return driver.manage().setTimeouts({script: TIMEOUT_IN_MS});
+        return driver.manage().timeouts().setScriptTimeout(TIMEOUT_IN_MS)
       });
 
-      it('does not fail if script execute in time', function() {
+      test.it('does not fail if script execute in time', function() {
         return executeTimeOutScript(ACCEPTABLE_WAIT);
       });
 
-      it('fails if script took too long', function() {
+      test.it('fails if script took too long', function() {
         return executeTimeOutScript(TOO_LONG_WAIT)
           .then(function() {
             fail('it should have timed out');
           }).catch(function(e) {
-            assert.equal(e.name, 'ScriptTimeoutError');
+            assert(e.name).equalTo('ScriptTimeoutError');
           });
       });
 
@@ -341,7 +340,7 @@ suite(function(env) {
 
   function verifyJson(expected) {
     return function(actual) {
-      assert.equal(JSON.stringify(actual), JSON.stringify(expected));
+      return assert(JSON.stringify(actual)).equalTo(JSON.stringify(expected));
     };
   }
 

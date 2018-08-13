@@ -17,17 +17,17 @@
 
 'use strict';
 
-const assert = require('assert');
-const http = require('http');
-const url = require('url');
+var http = require('http'),
+    url = require('url');
 
-const firefox = require('../firefox');
-const proxy = require('../proxy');
-const test = require('../lib/test');
-const {Browser} = require('..');
-const {Server} = require('../lib/test/httpserver');
-
-const Pages = test.Pages;
+var Browser = require('..').Browser,
+    promise = require('..').promise,
+    firefox = require('../firefox'),
+    proxy = require('../proxy'),
+    assert = require('../testing/assert'),
+    test = require('../lib/test'),
+    Server = require('../lib/test/httpserver').Server,
+    Pages = test.Pages;
 
 test.suite(function(env) {
   function writeResponse(res, body, encoding, contentType) {
@@ -86,64 +86,69 @@ test.suite(function(env) {
     };
   }
 
-  before(mkStartFunc(proxyServer));
-  before(mkStartFunc(helloServer));
-  before(mkStartFunc(goodbyeServer));
+  test.before(mkStartFunc(proxyServer));
+  test.before(mkStartFunc(helloServer));
+  test.before(mkStartFunc(goodbyeServer));
 
-  after(proxyServer.stop.bind(proxyServer));
-  after(helloServer.stop.bind(helloServer));
-  after(goodbyeServer.stop.bind(goodbyeServer));
+  test.after(proxyServer.stop.bind(proxyServer));
+  test.after(helloServer.stop.bind(helloServer));
+  test.after(goodbyeServer.stop.bind(goodbyeServer));
 
   var driver;
-  beforeEach(function() { driver = null; });
-  afterEach(function() { return driver && driver.quit(); });
+  test.beforeEach(function() { driver = null; });
+  test.afterEach(function() { return driver && driver.quit(); });
 
   function createDriver(proxy) {
+    // For Firefox we need to explicitly enable proxies for localhost by
+    // clearing the network.proxy.no_proxies_on preference.
+    let profile = new firefox.Profile();
+    profile.setPreference('network.proxy.no_proxies_on', '');
+
     return driver = env.builder()
-        // For Firefox we need to explicitly enable proxies for localhost by
-        // clearing the network.proxy.no_proxies_on preference.
-        .setFirefoxOptions(
-            new firefox.Options()
-                .setBinary(firefox.Channel.AURORA)
-                .setPreference('network.proxy.no_proxies_on', ''))
+        .setFirefoxOptions(new firefox.Options().setProfile(profile))
         .setProxy(proxy)
         .build();
   }
 
   // Proxy support not implemented.
-  test.ignore(env.browsers(Browser.IE, Browser.SAFARI)).
+  test.ignore(env.browsers(Browser.IE, Browser.OPERA, Browser.SAFARI)).
   describe('manual proxy settings', function() {
-    it('can configure HTTP proxy host', async function() {
-      await createDriver(proxy.manual({
+    // phantomjs 1.9.1 in webdriver mode does not appear to respect proxy
+    // settings.
+    test.ignore(env.browsers(Browser.PHANTOM_JS)).
+    it('can configure HTTP proxy host', function*() {
+      yield createDriver(proxy.manual({
         http: proxyServer.host()
       }));
 
-      await driver.get(helloServer.url());
-      assert.equal(await driver.getTitle(), 'Proxy page');
-      assert.equal(
-          await driver.findElement({tagName: 'h3'}).getText(),
-          'This is the proxy landing page');
+      yield driver.get(helloServer.url());
+      yield assert(driver.getTitle()).equalTo('Proxy page');
+      yield assert(driver.findElement({tagName: 'h3'}).getText()).
+          equalTo('This is the proxy landing page');
     });
 
-    it('can bypass proxy for specific hosts', async function() {
-      await createDriver(proxy.manual({
+    // PhantomJS does not support bypassing the proxy for individual hosts.
+    // geckodriver does not support the bypass option, this must be configured
+    // through profile preferences.
+    test.ignore(env.browsers(
+        Browser.FIREFOX,
+        'legacy-' + Browser.FIREFOX,
+        Browser.PHANTOM_JS)).
+    it('can bypass proxy for specific hosts', function*() {
+      yield createDriver(proxy.manual({
         http: proxyServer.host(),
-        bypass: [helloServer.host()]
+        bypass: helloServer.host()
       }));
 
-      await driver.get(helloServer.url());
-      assert.equal(await driver.getTitle(), 'Hello');
-      assert.equal(
-          await driver.findElement({tagName: 'h3'}).getText(),
-          'Hello, world!');
+      yield driver.get(helloServer.url());
+      yield assert(driver.getTitle()).equalTo('Hello');
+      yield assert(driver.findElement({tagName: 'h3'}).getText()).
+          equalTo('Hello, world!');
 
-      // For firefox the no proxy settings appear to match on hostname only.
-      let url = goodbyeServer.url().replace(/127\.0\.0\.1/, 'localhost');
-      await driver.get(url);
-      assert.equal(await driver.getTitle(), 'Proxy page');
-      assert.equal(
-          await driver.findElement({tagName: 'h3'}).getText(),
-          'This is the proxy landing page');
+      yield driver.get(goodbyeServer.url());
+      yield assert(driver.getTitle()).equalTo('Proxy page');
+      yield assert(driver.findElement({tagName: 'h3'}).getText()).
+          equalTo('This is the proxy landing page');
     });
 
     // TODO: test ftp and https proxies.
@@ -151,22 +156,25 @@ test.suite(function(env) {
 
   // PhantomJS does not support PAC file proxy configuration.
   // Safari does not support proxies.
-  test.ignore(env.browsers(Browser.IE, Browser.SAFARI)).
+  test.ignore(env.browsers(
+      Browser.IE, Browser.OPERA, Browser.PHANTOM_JS, Browser.SAFARI)).
   describe('pac proxy settings', function() {
-    it('can configure proxy through PAC file', async function() {
-      await createDriver(proxy.pac(proxyServer.url('/proxy.pac')));
+    test.it('can configure proxy through PAC file', function*() {
+      yield createDriver(proxy.pac(proxyServer.url('/proxy.pac')));
 
-      await driver.get(helloServer.url());
-      assert.equal(await driver.getTitle(), 'Proxy page');
-      assert.equal(
-          await driver.findElement({tagName: 'h3'}).getText(),
-          'This is the proxy landing page');
+      yield driver.get(helloServer.url());
+      yield assert(driver.getTitle()).equalTo('Proxy page');
+      yield assert(driver.findElement({tagName: 'h3'}).getText()).
+          equalTo('This is the proxy landing page');
 
-      await driver.get(goodbyeServer.url());
-      assert.equal(await driver.getTitle(), 'Goodbye');
-      assert.equal(
-          await driver.findElement({tagName: 'h3'}).getText(),
-          'Goodbye, world!');
+      yield driver.get(goodbyeServer.url());
+      yield assert(driver.getTitle()).equalTo('Goodbye');
+      yield assert(driver.findElement({tagName: 'h3'}).getText()).
+          equalTo('Goodbye, world!');
     });
   });
+
+  // TODO: figure out how to test direct and system proxy settings.
+  describe.skip('direct proxy settings', function() {});
+  describe.skip('system proxy settings', function() {});
 });

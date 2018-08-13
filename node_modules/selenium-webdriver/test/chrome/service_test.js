@@ -17,28 +17,28 @@
 
 'use strict';
 
-const assert = require('assert');
+var webdriver = require('../..'),
+    chrome = require('../../chrome'),
+    assert = require('../../testing/assert');
 
-const chrome = require('../../chrome');
-const test = require('../../lib/test');
-const webdriver = require('../..');
+var test = require('../../lib/test');
 
 
 test.suite(function(env) {
   describe('chromedriver', function() {
     var service;
-    afterEach(function() {
+    test.afterEach(function() {
       if (service) {
         return service.kill();
       }
     });
 
-    it('can be started on a custom path', function() {
+    test.it('can be started on a custom path', function() {
       service = new chrome.ServiceBuilder()
           .setPath('/foo/bar/baz')
           .build();
       return service.start().then(function(url) {
-        assert.ok(url.endsWith('/foo/bar/baz'), 'unexpected url: ' + url);
+        assert(url).endsWith('/foo/bar/baz');
       });
     });
   });

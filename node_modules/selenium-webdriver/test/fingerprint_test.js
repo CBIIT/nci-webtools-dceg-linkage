@@ -17,10 +17,9 @@
 
 'use strict';
 
-const assert = require('assert');
-
-const test = require('../lib/test');
-const Pages = test.Pages;
+var assert = require('../testing/assert'),
+    test = require('../lib/test'),
+    Pages = test.Pages;
 
 
 test.suite(function(env) {
@@ -36,26 +35,26 @@ test.suite(function(env) {
   });
 
   describe('fingerprinting', function() {
-    test.it('it should fingerprint the navigator object', async function() {
-      await driver.get(Pages.simpleTestPage);
+    test.it('it should fingerprint the navigator object', function*() {
+      yield driver.get(Pages.simpleTestPage);
 
-      let wd = await driver.executeScript('return navigator.webdriver');
-      assert.strictEqual(wd, true);
+      let wd = yield driver.executeScript('return navigator.webdriver');
+      assert(wd).equalTo(true);
     });
 
-    test.it('fingerprint must not be writable', async function() {
-      await driver.get(Pages.simpleTestPage);
+    test.it('fingerprint must not be writable', function*() {
+      yield driver.get(Pages.simpleTestPage);
 
-      let wd = await driver.executeScript(
+      let wd = yield driver.executeScript(
           'navigator.webdriver = "ohai"; return navigator.webdriver');
-      assert.strictEqual(wd, true);
+      assert(wd).equalTo(true);
     });
 
-    test.it('leaves fingerprint on svg pages', async function() {
-      await driver.get(Pages.svgPage);
+    test.it('leaves fingerprint on svg pages', function*() {
+      yield driver.get(Pages.svgPage);
 
-      let wd = await driver.executeScript('return navigator.webdriver');
-      assert.strictEqual(wd, true);
+      let wd = yield driver.executeScript('return navigator.webdriver');
+      assert(wd).equalTo(true);
     });
   });
 

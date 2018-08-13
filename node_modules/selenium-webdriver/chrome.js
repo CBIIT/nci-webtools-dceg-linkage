@@ -133,9 +133,8 @@ const util = require('util');
 
 const http = require('./http');
 const io = require('./io');
-const {Browser, Capabilities, Capability} = require('./lib/capabilities');
+const {Capabilities, Capability} = require('./lib/capabilities');
 const command = require('./lib/command');
-const error = require('./lib/error');
 const logging = require('./lib/logging');
 const promise = require('./lib/promise');
 const Symbols = require('./lib/symbols');
@@ -160,8 +159,7 @@ const CHROMEDRIVER_EXE =
 const Command = {
   LAUNCH_APP: 'launchApp',
   GET_NETWORK_CONDITIONS: 'getNetworkConditions',
-  SET_NETWORK_CONDITIONS: 'setNetworkConditions',
-  SEND_DEVTOOLS_COMMAND: 'sendDevToolsCommand',
+  SET_NETWORK_CONDITIONS: 'setNetworkConditions'
 };
 
 
@@ -195,21 +193,6 @@ function configureExecutor(executor) {
       Command.SET_NETWORK_CONDITIONS,
       'POST',
       '/session/:sessionId/chromium/network_conditions');
-  executor.defineCommand(
-      Command.SEND_DEVTOOLS_COMMAND,
-      'POST',
-      '/session/:sessionId/chromium/send_command');
-}
-
-
-/**
- * _Synchronously_ attempts to locate the chromedriver executable on the current
- * system.
- *
- * @return {?string} the located executable, or `null`.
- */
-function locateSynchronously() {
-  return io.findInPath(CHROMEDRIVER_EXE, true);
 }
 
 
@@ -227,7 +210,7 @@ class ServiceBuilder extends remote.DriverService.Builder {
    *     cannot be found on the PATH.
    */
   constructor(opt_exe) {
-    let exe = opt_exe || locateSynchronously();
+    let exe = opt_exe || io.findInPath(CHROMEDRIVER_EXE, true);
     if (!exe) {
       throw Error(
           'The ChromeDriver could not be found on the current PATH. Please ' +
@@ -330,19 +313,58 @@ const OPTIONS_CAPABILITY_KEY = 'chromeOptions';
 /**
  * Class for managing ChromeDriver specific options.
  */
-class Options extends Capabilities {
-  /**
-   * @param {(Capabilities|Map<string, ?>|Object)=} other Another set of
-   *     capabilities to initialize this instance from.
-   */
-  constructor(other = undefined) {
-    super(other);
-
+class Options {
+  constructor() {
     /** @private {!Object} */
-    this.options_ = this.get(OPTIONS_CAPABILITY_KEY) || {};
+    this.options_ = {};
 
-    this.setBrowserName(Browser.CHROME);
-    this.set(OPTIONS_CAPABILITY_KEY, this.options_);
+    /** @private {!Array<(string|!Buffer)>} */
+    this.extensions_ = [];
+
+    /** @private {?logging.Preferences} */
+    this.logPrefs_ = null;
+
+    /** @private {?./lib/capabilities.ProxyConfig} */
+    this.proxy_ = null;
+  }
+
+  /**
+   * Extracts the ChromeDriver specific options from the given capabilities
+   * object.
+   * @param {!Capabilities} caps The capabilities object.
+   * @return {!Options} The ChromeDriver options.
+   */
+  static fromCapabilities(caps) {
+    let options = new Options();
+
+    let o = caps.get(OPTIONS_CAPABILITY_KEY);
+    if (o instanceof Options) {
+      options = o;
+    } else if (o) {
+      options.
+          addArguments(o.args || []).
+          addExtensions(o.extensions || []).
+          detachDriver(o.detach).
+          excludeSwitches(o.excludeSwitches || []).
+          setChromeBinaryPath(o.binary).
+          setChromeLogFile(o.logPath).
+          setChromeMinidumpPath(o.minidumpPath).
+          setLocalState(o.localState).
+          setMobileEmulation(o.mobileEmulation).
+          setUserPreferences(o.prefs).
+          setPerfLoggingPrefs(o.perfLoggingPrefs);
+    }
+
+    if (caps.has(Capability.PROXY)) {
+      options.setProxy(caps.get(Capability.PROXY));
+    }
+
+    if (caps.has(Capability.LOGGING_PREFS)) {
+      options.setLoggingPrefs(
+          caps.get(Capability.LOGGING_PREFS));
+    }
+
+    return options;
   }
 
   /**
@@ -368,12 +390,6 @@ class Options extends Capabilities {
    * > __NOTE:__ Resizing the browser window in headless mode is only supported
    * > in Chrome 60. Users are encouraged to set an initial window size with
    * > the {@link #windowSize windowSize({width, height})} option.
-   *
-   * > __NOTE__: For security, Chrome disables downloads by default when
-   * > in headless mode (to prevent sites from silently downloading files to
-   * > your machine). After creating a session, you may call
-   * > {@link ./chrome.Driver#setDownloadPath setDownloadPath} to re-enable
-   * > downloads, saving files in the specified directory.
    *
    * @return {!Options} A self reference.
    */
@@ -426,8 +442,7 @@ class Options extends Capabilities {
    * @return {!Options} A self reference.
    */
   addExtensions(...args) {
-    let current = this.options_.extensions || [];
-    this.options_.extensions = current.concat(...args);
+    this.extensions_ = this.extensions_.concat(...args);
     return this;
   }
 
@@ -468,6 +483,16 @@ class Options extends Capabilities {
    */
   setUserPreferences(prefs) {
     this.options_.prefs = prefs;
+    return this;
+  }
+
+  /**
+   * Sets the logging preferences for the new session.
+   * @param {!logging.Preferences} prefs The logging preferences.
+   * @return {!Options} A self reference.
+   */
+  setLoggingPrefs(prefs) {
+    this.logPrefs_ = prefs;
     return this;
   }
 
@@ -649,24 +674,53 @@ class Options extends Capabilities {
   }
 
   /**
+   * Sets the proxy settings for the new session.
+   * @param {./lib/capabilities.ProxyConfig} proxy The proxy configuration to
+   *    use.
+   * @return {!Options} A self reference.
+   */
+  setProxy(proxy) {
+    this.proxy_ = proxy;
+    return this;
+  }
+
+  /**
+   * Converts this options instance to a {@link Capabilities} object.
+   * @param {Capabilities=} opt_capabilities The capabilities to merge
+   *     these options into, if any.
+   * @return {!Capabilities} The capabilities.
+   */
+  toCapabilities(opt_capabilities) {
+    let caps = opt_capabilities || Capabilities.chrome();
+    caps.
+        set(Capability.PROXY, this.proxy_).
+        set(Capability.LOGGING_PREFS, this.logPrefs_).
+        set(OPTIONS_CAPABILITY_KEY, this);
+    return caps;
+  }
+
+  /**
    * Converts this instance to its JSON wire protocol representation. Note this
    * function is an implementation not intended for general use.
-   *
    * @return {!Object} The JSON wire protocol representation of this instance.
-   * @suppress {checkTypes} Suppress [] access on a struct.
    */
   [Symbols.serialize]() {
-    if (this.options_.extensions &&  this.options_.extensions.length) {
-      this.options_.extensions =
-          this.options_.extensions.map(function(extension) {
-            if (Buffer.isBuffer(extension)) {
-              return extension.toString('base64');
-            }
-            return io.read(/** @type {string} */(extension))
-                .then(buffer => buffer.toString('base64'));
-          });
+    let json = {};
+    for (let key in this.options_) {
+      if (this.options_[key] != null) {
+        json[key] = this.options_[key];
+      }
     }
-    return super[Symbols.serialize]();
+    if (this.extensions_.length) {
+      json.extensions = this.extensions_.map(function(extension) {
+        if (Buffer.isBuffer(extension)) {
+          return extension.toString('base64');
+        }
+        return io.read(/** @type {string} */(extension))
+            .then(buffer => buffer.toString('base64'));
+      });
+    }
+    return json;
   }
 }
 
@@ -685,9 +739,11 @@ class Driver extends webdriver.WebDriver {
    *     for an externally managed endpoint. If neither is provided, the
    *     {@linkplain ##getDefaultService default service} will be used by
    *     default.
+   * @param {promise.ControlFlow=} opt_flow The control flow to use, or `null`
+   *     to use the currently active flow.
    * @return {!Driver} A new driver instance.
    */
-  static createSession(opt_config, opt_serviceExecutor) {
+  static createSession(opt_config, opt_serviceExecutor, opt_flow) {
     let executor;
     if (opt_serviceExecutor instanceof http.Executor) {
       executor = opt_serviceExecutor;
@@ -697,19 +753,12 @@ class Driver extends webdriver.WebDriver {
       executor = createExecutor(service.start());
     }
 
-    let caps = opt_config || Capabilities.chrome();
+    let caps =
+        opt_config instanceof Options ? opt_config.toCapabilities() :
+        (opt_config || Capabilities.chrome());
 
-    // W3C spec requires noProxy value to be an array of strings, but Chrome
-    // expects a single host as a string.
-    let proxy = caps.get(Capability.PROXY);
-    if (proxy && Array.isArray(proxy.noProxy)) {
-      proxy.noProxy = proxy.noProxy[0];
-      if (!proxy.noProxy) {
-        proxy.noProxy = undefined;
-      }
-    }
-
-    return /** @type {!Driver} */(super.createSession(executor, caps));
+    return /** @type {!Driver} */(
+        super.createSession(executor, caps, opt_flow));
   }
 
   /**
@@ -722,21 +771,24 @@ class Driver extends webdriver.WebDriver {
   /**
    * Schedules a command to launch Chrome App with given ID.
    * @param {string} id ID of the App to launch.
-   * @return {!Promise<void>} A promise that will be resolved
+   * @return {!promise.Thenable<void>} A promise that will be resolved
    *     when app is launched.
    */
   launchApp(id) {
-    return this.execute(
-        new command.Command(Command.LAUNCH_APP).setParameter('id', id));
+    return this.schedule(
+        new command.Command(Command.LAUNCH_APP).setParameter('id', id),
+        'Driver.launchApp()');
   }
 
   /**
    * Schedules a command to get Chrome network emulation settings.
-   * @return {!Promise} A promise that will be resolved when network
-   *     emulation settings are retrievied.
+   * @return {!promise.Thenable<T>} A promise that will be resolved
+   *     when network emulation settings are retrievied.
    */
   getNetworkConditions() {
-    return this.execute(new command.Command(Command.GET_NETWORK_CONDITIONS));
+    return this.schedule(
+        new command.Command(Command.GET_NETWORK_CONDITIONS),
+        'Driver.getNetworkConditions()');
   }
 
   /**
@@ -752,54 +804,17 @@ class Driver extends webdriver.WebDriver {
    * });
    *
    * @param {Object} spec Defines the network conditions to set
-   * @return {!Promise<void>} A promise that will be resolved when network
-   *     emulation settings are set.
+   * @return {!promise.Thenable<void>} A promise that will be resolved
+   *     when network emulation settings are set.
    */
   setNetworkConditions(spec) {
     if (!spec || typeof spec !== 'object') {
       throw TypeError('setNetworkConditions called with non-network-conditions parameter');
     }
-    return this.execute(
-        new command.Command(Command.SET_NETWORK_CONDITIONS)
-            .setParameter('network_conditions', spec));
-  }
 
-  /**
-   * Sends an arbitrary devtools command to the browser.
-   *
-   * @param {string} cmd The name of the command to send.
-   * @param {Object=} params The command parameters.
-   * @return {!Promise<void>} A promise that will be resolved when the command
-   *     has finished.
-   * @see <https://chromedevtools.github.io/devtools-protocol/>
-   */
-  sendDevToolsCommand(cmd, params = {}) {
-    return this.execute(
-        new command.Command(Command.SEND_DEVTOOLS_COMMAND)
-            .setParameter('cmd', cmd)
-            .setParameter('params', params));
-  }
-
-  /**
-   * Sends a DevTools command to change Chrome's download directory.
-   *
-   * @param {string} path The desired download directory.
-   * @return {!Promise<void>} A promise that will be resolved when the command
-   *     has finished.
-   * @see #sendDevToolsCommand
-   */
-  async setDownloadPath(path) {
-    if (!path || typeof path !== 'string') {
-      throw new error.InvalidArgumentError('invalid download path');
-    }
-    const stat = await io.stat(path);
-    if (!stat.isDirectory()) {
-      throw new error.InvalidArgumentError('not a directory: ' + path);
-    }
-    return this.sendDevToolsCommand('Page.setDownloadBehavior', {
-      'behavior': 'allow',
-      'downloadPath': path
-    });
+    return this.schedule(
+        new command.Command(Command.SET_NETWORK_CONDITIONS).setParameter('network_conditions', spec),
+        'Driver.setNetworkConditions(' + JSON.stringify(spec) + ')');
   }
 }
 
@@ -812,4 +827,3 @@ exports.Options = Options;
 exports.ServiceBuilder = ServiceBuilder;
 exports.getDefaultService = getDefaultService;
 exports.setDefaultService = setDefaultService;
-exports.locateSynchronously = locateSynchronously;
