@@ -1,0 +1,26 @@
+{
+  "name": "nci-webtools-dceg-linkage",
+  "version": "3.2.0",
+  "description": "Provider: National Institutes of Health (NIH), National Cancer Institute (hereinafter \"NCI\")",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha test/end-to-end/scripts/ --reporter xunit --reporter-options output=test/end-to-end/scripts/e2e_results.xml"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CBIIT/nci-webtools-dceg-linkage.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CBIIT/nci-webtools-dceg-linkage/issues"
+  },
+  "homepage": "https://github.com/CBIIT/nci-webtools-dceg-linkage#readme",
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "selenium-webdriver": "^4.0.0-alpha.1"
+  }
+}
