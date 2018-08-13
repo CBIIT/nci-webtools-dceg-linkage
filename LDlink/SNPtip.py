@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 # SNPtip
@@ -8,11 +9,20 @@ def calculate_tip(snplst,request):
 	import json,math,operator,os,sqlite3,subprocess,sys
 
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	pop_dir=data_dir+"1000G/Phase3/samples/"
-	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+	# data_dir="/local/content/ldlink/data/"
+	# gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# pop_dir=data_dir+"1000G/Phase3/samples/"
+	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	gene_dir=config['data']['gene_dir']
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
+
 	tmp_dir="./tmp/"
 
 
@@ -44,7 +54,7 @@ def calculate_tip(snplst,request):
 		if snp not in snps:
 			snps.append(snp)
 
-	# Connect to snp142 database
+	# Connect to snp database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
@@ -56,7 +66,7 @@ def calculate_tip(snplst,request):
 		return cur.fetchone()
 
 
-	# Find RS numbers in snp142 database
+	# Find RS numbers in snp database
 	snp_coords=[]
 	warn=[]
 	for snp_i in snps:
@@ -80,10 +90,10 @@ def calculate_tip(snplst,request):
 				warn.append(snp_i[0])
 
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 	
 	if len(snp_coords)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + "."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()

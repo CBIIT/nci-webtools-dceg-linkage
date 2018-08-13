@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 ###########
@@ -54,9 +55,16 @@ def convert_codeToPlatforms(platform_query):
 def calculate_chip(snplst,platform_query,request):
 
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	array_dir=data_dir+"arrays/snp142_arrays.db"
+	# data_dir="/local/content/ldlink/data/"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# array_dir=data_dir+"arrays/snp142_arrays.db"
+
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	snp_dir=config['data']['snp_dir']
+	array_dir=config['data']['array_dir']
+
 	tmp_dir="./tmp/"
 	
 	# Ensure tmp directory exists
@@ -81,7 +89,7 @@ def calculate_chip(snplst,platform_query,request):
 		if snp not in snps:
 			snps.append(snp)
 	
-	# Connect to snp142 database
+	# Connect to snp database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
@@ -92,7 +100,7 @@ def calculate_chip(snplst,platform_query,request):
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
 	
-	# Find RS numbers in snp142 database
+	# Find RS numbers in snp database
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
@@ -124,9 +132,9 @@ def calculate_chip(snplst,platform_query,request):
 	output["warning"]=""
 	output["error"]=""
 	if warn!=[] and len(rs_nums)!=0:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+", ".join(warn)+".\n"
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)+".\n"
 	elif len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142.\n"
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + ".\n"
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -184,7 +192,7 @@ def calculate_chip(snplst,platform_query,request):
 		output[str(k)]=[str(snp_coords_sort[k][0]),snp_coords_sort[k][1]+":"+str(snp_coords_sort[k][2]),','.join(platforms)]
 	if(platform_NOT!=[] and len(platform_NOT)!=count):
 		warning=output["warning"]
-		warning=warning+"The following RS numbers did not have any platforms found: "+", ".join(platform_NOT)+". "
+		warning=warning+"The following RS number did not have any platforms found: "+", ".join(platform_NOT)+". "
 		output["warning"]=warning
 	elif (len(platform_NOT)==count):
 		error=output["warning"]
@@ -207,8 +215,8 @@ def createOutputFile(request):
 		json_dict=json.load(out_json)
 
 	rs_dict = dict(json_dict)
-	del rs_dict['error'];
-	del rs_dict['warning'];
+	del rs_dict['error']
+	del rs_dict['warning']
 
 	#Header
 	header=["RS Number","Position (GRCh37)","Arrays"]

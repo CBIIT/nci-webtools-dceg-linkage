@@ -938,27 +938,26 @@ function cleanSNP(text) {
     //
     var lines = text.split('\n');
     var list = "";
-    var rsnumber = "";
+    var variant = "";
 
     $.each(lines, function (key, value) {
         var clean = value.replace(/\t/, " ");
-        var line = clean.replace(/[^[A-Z0-9\n ]/ig, "");
+        var line = clean.replace(/[^[A-Z0-9\n \:]/ig, "");
         line = line.split(' ');
-        //console.dir(line);
-        rsnumber = "";
+        variant = "";
         $.each(line, function(key,value){
             if(value != "") {
-                rsnumber = value;
+                variant = value;
                 return false;
             }
         });
-        //console.log("rsnumber is "+rsnumber);
-        if(rsnumber.length > 2) {
-            //console.log(line[0]);
-            var pos = rsnumber.search(/^[R|r][S|s]\d+$/);
-            //console.log("pos: "+pos);
+
+        if(variant.length > 2) {
+            var pos = variant.search(/^[R|r][S|s]\d+$/);
+            // add genomic positions too (ex. chr1:123456) in the future
+            // var pos = variant.search(/^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/);
             if(pos == 0) {
-                list += rsnumber+'\n';
+                list += variant + '\n';
             }
         }
     });
@@ -1342,16 +1341,26 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            var tb=$("#row-button");
-	        $('#' + id + '-download-button').empty().prepend('<div class="pdfbutton pull-right"><label for="ldassoc-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldassoc-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
-	        $("#ldassoc-downloadPDF").click(function(e) {
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+            $("#ldassoc-downloadSVG").click(function(e) {
+                e.preventDefault();
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
+                window.open( assoc_plot, "_blank" )
+            });
+            $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldInputs.reference + ".pdf";
-                var urls = assoc_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( assoc_plot, "_blank" )
+            });
+            $("#ldassoc-downloadPNG").click(function(e) {
+                e.preventDefault();
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".png";
+                window.open( assoc_plot, "_blank" )
+            });
+            $("#ldassoc-downloadJPEG").click(function(e) {
+                e.preventDefault();
+                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
+                window.open( assoc_plot, "_blank" )
             });
 
             $('#' + id + '-results-container').show();
@@ -2050,16 +2059,26 @@ function updateLDmatrix() {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
 
             // place Download PDF button
-            var tb=$("#row-button");
-	        $('#' + id + '-download-button').empty().prepend('<div class="pdfbutton pull-right"><label for="ldmatrix-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldmatrix-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
-	        $("#ldmatrix-downloadPDF").click(function(e) {
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+            $("#ldmatrix-downloadSVG").click(function(e) {
+                e.preventDefault();
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+                window.open( matrix_plot, "_blank" )
+            });
+            $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldmatrixInputs.reference + ".pdf";
-                var urls = matrix_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( matrix_plot, "_blank" )
+            });
+            $("#ldmatrix-downloadPNG").click(function(e) {
+                e.preventDefault();
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png";
+                window.open( matrix_plot, "_blank" )
+            });
+            $("#ldmatrix-downloadJPEG").click(function(e) {
+                e.preventDefault();
+                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
+                window.open( matrix_plot, "_blank" )
             });
             
             $('#' + id + '-results-container').show();
@@ -2239,16 +2258,26 @@ function updateLDproxy() {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-            // var tb=$("#row-button");
-	        $('#' + id + '-download-button').empty().prepend('<div class="pdfbutton pull-right"><label for="ldproxy-downloadPDF" class="sr-only">Download PDF</label><button type="button" id="ldproxy-downloadPDF" class="btn btn-default"><span class="glyphicon glyphicon-download-alt"></span> Download PDF</button></div>');
-	        $("#ldproxy-downloadPDF").click(function(e) {
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldproxy-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+            $("#ldproxy-downloadSVG").click(function(e) {
+                e.preventDefault();
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
+                window.open( proxy_plot, "_blank" )
+            });
+            $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
-                var gene_plot = "tmp/gene_plot_" + ldproxyInputs.reference + ".pdf";
-                var urls = proxy_plot + "," + gene_plot;
-                $.each( urls.split( "," ), function( index, item ) {
-                    window.open( item, "_blank" )
-                });
+                window.open( proxy_plot, "_blank" )
+            });
+            $("#ldproxy-downloadPNG").click(function(e) {
+                e.preventDefault();
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".png";
+                window.open( proxy_plot, "_blank" )
+            });
+            $("#ldproxy-downloadJPEG").click(function(e) {
+                e.preventDefault();
+                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
+                window.open( proxy_plot, "_blank" )
             });
 
             $('#' + id + '-results-container').show();
@@ -3050,7 +3079,7 @@ function validateBasePairWindows() {
 }
 
 function validateTextarea() {
-    var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted";
+    var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, x, y):##### (ex: chr1:12345)";
     var textarea = this;
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text

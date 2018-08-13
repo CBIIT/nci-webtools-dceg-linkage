@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 # Create LDproxy function
@@ -17,12 +18,22 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     start_time = time.time()
 
     # Set data directories
-    data_dir = "/local/content/ldlink/data/"
-    gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
-    recomb_dir = data_dir + "recomb/genetic_map_autosomes_combined_b37.txt.gz"
-    snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    pop_dir = data_dir + "1000G/Phase3/samples/"
-    vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+    # data_dir = "/local/content/ldlink/data/"
+    # gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
+    # recomb_dir = data_dir + "recomb/genetic_map_autosomes_combined_b37.txt.gz"
+    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
+    # pop_dir = data_dir + "1000G/Phase3/samples/"
+    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    gene_dir=config['data']['gene_dir']
+    recomb_dir=config['data']['recomb_dir']
+    snp_dir=config['data']['snp_dir']
+    pop_dir=config['data']['pop_dir']
+    vcf_dir=config['data']['vcf_dir']
+
     tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
@@ -37,7 +48,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     output = {}
 
     # Find coordinates (GRCh37/hg19) for SNP RS number
-    # Connect to snp142 database
+    # Connect to snp database
     conn = sqlite3.connect(snp_dir)
     conn.text_factory = str
     cur = conn.cursor()
@@ -48,15 +59,15 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
 
-    # Find RS number in snp142 database
+    # Find RS number in snp database
     snp_coord = get_coords(snp)
 
-    # Close snp142 connection
+    # Close snp connection
     cur.close()
     conn.close()
 
     if snp_coord == None:
-        output["error"] = snp + " is not in dbSNP build 142."
+        output["error"] = snp + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -137,7 +148,7 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
 
     if geno[2] != snp:
         output["warning"] = "Genomic position for query variant (" + snp + \
-            ") does not match RS number at 1000G position (" + geno[2] + ")"
+            ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
@@ -514,9 +525,8 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
-    # For converting Bokeh SVGs to PDF
-    from svglib.svglib import svg2rlg
-    from reportlab.graphics import renderPDF
+    import svgutils.compose as sg
+
 
     reset_output()
 
@@ -758,19 +768,36 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
 
     gene_plot.toolbar_location = "below"
 
+    # Change output backend to SVG temporarily for headless export
+    # Will be changed back to canvas in LDlink.js
     proxy_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
-    # Export to PDF as well
-    proxy_plot_svg = svg2rlg(tmp_dir + "proxy_plot_" + request + ".svg")
-    renderPDF.drawToFile(proxy_plot_svg, tmp_dir + "proxy_plot_" + request + ".pdf")
-    gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
-    renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
-    # Remove SVG files after exported to pdf
-    subprocess.call("rm " + tmp_dir + "proxy_plot_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_1_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+    
+    # Concatenate svgs
+    sg.Figure("24.59cm", "27.94cm",
+        sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg"),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 630)
+        ).save(tmp_dir + "proxy_plot_" + request + ".svg")
+
+    sg.Figure("122.95cm", "139.70cm",
+        sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg").scale(5),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3150)
+        ).save(tmp_dir + "proxy_plot_scaled_" + request + ".svg")
+
+    # Export to PDF
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".pdf", shell=True)
+    # Export to PNG
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
+    # Export to JPEG
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)    
+    # Remove individual SVG files after they are combined
+    subprocess.call("rm " + tmp_dir + "proxy_plot_1_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    # Remove scaled SVG file after it is converted to png and jpeg
+    subprocess.call("rm " + tmp_dir + "proxy_plot_scaled_" + request + ".svg", shell=True)
 
     # Combine plots into a grid
     out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,

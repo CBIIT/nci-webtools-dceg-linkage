@@ -18,9 +18,9 @@
 <meta name="description"
 	content="LDlink is a suite of web-based applications designed to
 					easily and efficiently interrogate linkage disequilibrium in
-					population groups.">
-<meta name="keywords" content="linkage, disequilibrium, LD, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDproxy, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD">
-<meta name="author" content="NCI, CBIIT, DCEG, Machiela">
+					population groups." />
+<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDproxy, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
+<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 
 <title>LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups</title>
 <link rel="/LDlink/shortcut icon" href="LD.ico" >
@@ -42,8 +42,20 @@
 <link rel="stylesheet" href="/common/css/social.css">
 <link rel="stylesheet" href="LDlink.css">
 
+<!-- Load news text from news.html to news-container div-->
+<script src="https://code.jquery.com/jquery-1.11.3.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function () {
+		$.get("news.html", function (data) {
+			$("#news-container").append(data);
+		});
+	});
+</script>
 </head>
 <body role="document">
+	<div class="sr-only">
+		<a href="#content" data-skip-link>Skip to content</a>
+	</div>
 	<div class="header">
 		<div class="container">
 			<a href="http://dceg.cancer.gov/" target="_blank">
@@ -102,7 +114,7 @@
 	</ul>
 
 		<!-- Tab Content -->
-		<div class="tab-content">
+		<div id="content" class="tab-content">
 			<div class="tab-pane fade" id="home-tab">
 
 				<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
@@ -110,74 +122,47 @@
 					easily and efficiently interrogate linkage disequilibrium in
 					population groups. All population genotype data originates from
 					Phase 3 (Version 5) of the 1000 Genomes Project and variant RS numbers are indexed
-					based on dbSNP build 142. Where coordinates are specified, GRCh37/hg19 is used.
+					based on dbSNP. Where coordinates are specified, GRCh37/hg19 is used.
 					Only bi-allelic variants are permitted as input. LDlink includes the following
 					modules:<br></p>
 
 				<p style="margin-left: 40px;">
 
-					<b>LDassoc</b>: Interactively visualize association p-value results
+					<b><a href="?tab=ldassoc">LDassoc</a></b>: Interactively visualize association p-value results
 						and linkage disequilibrium patterns for a genomic region of interest.
 						Input is a tab or space delimited association output file and a population
 						group.<br>
 
-					<b>LDhap</b>: Calculate population specific haplotype
+					<b><a href="?tab=ldhap">LDhap</a></b>: Calculate population specific haplotype
 						frequencies of all haplotypes observed for a list of query variants.
 						Input is a list of variant RS numbers (one per line) and a population
 						group.<br>
 
-					<b>LDmatrix</b>: Create an interactive heatmap matrix of pairwise
+					<b><a href="?tab=ldmatrix">LDmatrix</a></b>: Create an interactive heatmap matrix of pairwise
 						linkage disequilibrium statistics. Input is a list of variant
 						RS numbers (one per line) and a population group.<br>
 
-					<b>LDpair</b>: Investigate correlated alleles for a pair of variants in
+					<b><a href="?tab=ldpair">LDpair</a></b>: Investigate correlated alleles for a pair of variants in
 						high LD. Input is two RS numbers and a population group.<br>
 
-					<b>LDproxy</b>: Interactively explore proxy and putatively
+					<b><a href="?tab=ldproxy">LDproxy</a></b>: Interactively explore proxy and putatively
 						functional variants for a query variant. Input is an RS number and a
 						population group.<br>
 
-					<b>SNPclip</b>: Prune a list of variants by linkage disequilibrium.
+					<b><a href="?tab=snpchip">SNPchip</a></b>: Find commercial genotyping platforms for variants.
+						Input is a list of variant RS numbers (one per line) and desired arrays.<br>
+
+					<b><a href="?tab=snpclip">SNPclip</a></b>: Prune a list of variants by linkage disequilibrium.
 						Input is a list of variant RS numbers (one per line) and a population
 						group.<br>
 
-					<b>SNPchip</b>: Find commercial genotyping platforms for variants.
-						Input is a list of variant RS numbers (one per line) and desired arrays.<br>
 				</p>
 
 				<!-- Add new notes here.  Surround paragrahs with <p></p> -->
 
 				<div class="row">
 					<h4 class="col-sm-offset-1" >News and Updates</h4>
-					<div class="well col-sm-10 col-sm-offset-1 whats_new" >
-						<p><b>04/01/2017</b> -- New features in <b>LDlink 3.0</b>.</p>
-						 <ul>
-						 <li><b>LDassoc</b> released for visualizing association results.</li>
-						 <li><b>Programatic Access</b> of LDlink via terminal commands.</li>
-						 <li>Update Bokeh interactive plotting library to release 0.12.2.</li>
-						 <li>Improve performance of allele matching algorithm.</li>
-						 <li>Better table sorting on absolute value of distance.</li>
-						 <li>Refine exported UCSC data tracks (link at bottom of interactive plots).</li>
-						</ul>
-						<br>
-						<p><b>03/10/2016</b> -- New features in <b>LDlink 2.0</b>.</p>
-						 <ul>
-						 <li><b>SNPclip</b> released for LD pruning a list of variants.</li>
-						 <li><b>SNPchip</b> released for finding variants on commercial genotyping arrays.</li>
-						 <li>Minor tweaks to improve visualization of indel output.</li>
-						 <li>Correct p-value rounding to zero in <b>LDpair</b>.</li>
-						 <li>Fix errors when variants map to the same position in 1000G VCF file</li>
-						</ul>
-						<br>
-						<p><b>09/30/2015</b> -- New features in <b>LDlink 1.1</b>.</p>
-						 <ul>
-						  <li>Indels are now accepted as input in all <b>LDlink</b> modules.</li>
-						  <li><b>LDproxy</b> output table now returns all data with options to sort by columns and search output.</li>
-						  <li><b>LDhap</b> haplotypes are now color coded by alleles for easier viewing.</li>
-						  <li><b>LDmatrix</b> now includes a R<sup>2</sup>/D' toggle for plotting R<sup>2</sup> or D' matrices.</li>
-						  <li>Minor tweaks to improve visualization on a variety of device screen sizes.</li>
-						</ul>
-					</div>
+					<div id="news-container" class="well col-sm-10 col-sm-offset-1 whats_new" ></div>
 				</div>
 				<p> <b>Citations</b>:<br />
 					Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
@@ -512,7 +497,7 @@
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldassoc-results-container">
 						<div id="row-button" class="row overflowy">
-						<div id="ldassoc-download-button"></div>
+						<div id="ldassoc-export-dropdown"></div>
 							<div class="col-sm-11 col-sm-offset-1">
 								<div id="ldassoc-bokeh-graph"></div>
 								<br />
@@ -616,17 +601,19 @@
 										placeholder="RS Numbers"
 										class="form-control"
 										title="Enter list of RS numbers (one per line)"
-										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea>
+										<!-- For adding genomoic coordinates to query in the future -->
+										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea> -->
 								</div>
 							</div>
 							<!-- Broswe RS numbers -->
 							<div class="col-sm-4">
 								<div class="input-group">
-									<label for="ldhap-file-label" style="display:none;">Uplaod RS File</label>
+									<label for="ldhap-file-label" style="display:none;">Upload Input File</label>
 									<input type="text" id="ldhap-file-label" readonly
-										placeholder="Upload file with RS numbers"
+										placeholder="Upload file with variants"
 										class="readonly-input-text">
-									<label for="ldhap-file" style="display:none;">Browse for RS File</label>
+									<label for="ldhap-file" style="display:none;">Browse for Input File</label>
 									<span	class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="ldhap-file">
 									</span>
@@ -791,7 +778,9 @@
 									<textarea id="ldmatrix-file-snp-numbers"
 										placeholder="RS Numbers" class="form-control"
 										title="Enter list of RS numbers (one per line)"
-										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea>
+										<!-- For adding genomoic coordinates to query in the future -->
+										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea> -->
 								</div>
 								<!-- COLUMN2 - sm-3 -->
 								<div class="col-sm-3">
@@ -882,7 +871,7 @@
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldmatrix-results-container">
 						<div id="row-button" class="row">
-							<div id="ldmatrix-download-button"></div>
+							<div id="ldmatrix-export-dropdown"></div>
 							<div class="col-md-11 col-md-offset-1 overflowx">
 								<div id="ldmatrix-bokeh-graph"></div>
 													<br />
@@ -1204,7 +1193,7 @@
 					<!-- LDProxy CONTAINER -->
 					<div class="container-fluid" id="ldproxy-results-container">
 						<div id="row-button" class="row overflowy">
-							<div id="ldproxy-download-button"></div>
+							<div id="ldproxy-export-dropdown"></div>
 							<div class="col-sm-12" style="left:15px">
 								<div id="ldproxy-bokeh-graph"></div>
 								<br />
@@ -1285,7 +1274,9 @@
 									placeholder="RS Numbers"
 									class="form-control"
 									title="Enter list of RS numbers (one per line)"
-									pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+									pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea>
+										<!-- For adding genomoic coordinates to query in the future -->
+										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea> -->
 							</div>
 							<div class="col-sm-3">
 								<div class="input-group">
@@ -1471,7 +1462,9 @@
 										placeholder="RS Numbers"
 										class="form-control"
 										title="Enter list of RS numbers (one per line)"
-										pattern="([ |\t])*[r|R][s|S]\d+([ |\t])*" required></textarea>
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea>
+										<!-- For adding genomoic coordinates to query in the future -->
+										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea> -->
 								</div>
 							</div>
 							<div class="col-sm-4">
@@ -1758,7 +1751,6 @@
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js" ></script>
 -->
 	<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js" integrity="sha256-xNjb53/rY+WmG+4L6tTl9m6PpqknWZvRt0rO1SRnJzw=" crossorigin="anonymous"></script>
-
 	<script type="text/javascript"
 		src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js">
 	</script>

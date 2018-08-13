@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 import collections
@@ -13,10 +14,18 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	max_list=5000
 
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	pop_dir=data_dir+"1000G/Phase3/samples/"
-	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+	# data_dir="/local/content/ldlink/data/"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# pop_dir=data_dir+"1000G/Phase3/samples/"
+	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
+
 	tmp_dir="./tmp/"
 
 
@@ -68,7 +77,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 	pop_ids=list(set(ids))
 
 
-	# Connect to snp142 database
+	# Connect to snp database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
@@ -80,7 +89,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		return cur.fetchone()
 
 
-	# Find RS numbers in snp142 database
+	# Find RS numbers in snp database
 	details=collections.OrderedDict()
 	rs_nums=[]
 	snp_pos=[]
@@ -99,7 +108,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
-						details[snp_i[0]]=["NA","NA","Variant not found in dbSNP142, variant removed."]
+						details[snp_i[0]]=["NA","NA","Variant not found in dbSNP" + config['data']['dbsnp_version'] + ", variant removed."]
 				else:
 					warn.append(snp_i[0])
 					details[snp_i[0]]=["NA","NA","Not an RS number, query removed."]
@@ -114,16 +123,16 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			return("","","")
 			raise
 	
-	# Close snp142 connection
+	# Close snp connection
 	cur.close()
 	conn.close()
 	
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+" ,".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 			
 	
 	if len(rs_nums)==0:
-		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input SNP list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + "."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print >> out_json, json_output
 		out_json.close()
@@ -230,9 +239,9 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		geno=vcf[g].strip().split()
 		if geno[1] not in snp_pos:
 			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+				output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
 			else:
-				output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+				output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
 			continue
 		
 		if snp_pos.count(geno[1])==1:

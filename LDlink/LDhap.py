@@ -1,14 +1,23 @@
+import yaml
 #!/usr/bin/env python
 
 # Create LDhap function
 def calculate_hap(snplst,pop,request):
 	import json,math,operator,os,sqlite3,subprocess,sys
-	
+
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	pop_dir=data_dir+"1000G/Phase3/samples/"
-	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+	# data_dir="/local/content/ldlink/data/"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# pop_dir=data_dir+"1000G/Phase3/samples/"
+	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
+
 	tmp_dir="./tmp/"
 
 	# Ensure tmp directory exists
@@ -21,15 +30,22 @@ def calculate_hap(snplst,pop,request):
 	# Open SNP list file
 	snps_raw=open(snplst).readlines()
 	if len(snps_raw)>30:
-		output["error"]="Maximum variant list is 30 RS numbers. Your list contains "+str(len(snps_raw))+" entries."
+		output["error"]="Maximum variant list is 30 RS numbers or coordinates. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
-	# Remove duplicate RS numbers
+
+	print "PRINT SNP LIST RAW ##########################"
+	print "snps raw", snps_raw
+
+	# Remove duplicate RS numbers and cast to lower case
 	snps=[]
 	for snp_raw in snps_raw:
-		snp=snp_raw.strip().split()
+		snp =snp_raw.lower().strip().split()
 		if snp not in snps:
 			snps.append(snp)
+
+	print "PRINT SNP LIST ##########################"
+	print "snps", snps
 	
 	# Select desired ancestral populations
 	pops=pop.split("+")
@@ -51,50 +67,94 @@ def calculate_hap(snplst,pop,request):
 	
 	
 	
-	# Connect to snp142 database
+	# Connect to snp database
 	conn=sqlite3.connect(snp_dir)
 	conn.text_factory=str
 	cur=conn.cursor()
 	
 	def get_coords(rs):
+		print "passed in rs to get_coords"
+		print rs
 		id=rs.strip("rs")
+		print "rs processed"
+		print rs
 		t=(id,)
+		print "t tuple"
+		print t
 		cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 		return cur.fetchone()
+
+	# For adding genomic coordinates to query in future
+	# def get_rsnum(coord):
+	# 	print "passed in coord to get_rsnum"
+	# 	print coord
+	# 	temp_coord=coord.strip("chr").split(":")
+	# 	print "temp_coord array"
+	# 	print temp_coord
+	# 	chro=temp_coord[0]
+	# 	pos=temp_coord[1]
+	# 	t=(chro, pos)
+	# 	print "COORD PROCESSED"
+	# 	print t
+	# 	found = None
+	# 	# Loop till found
+	# 	tbl_num = 0
+	# 	while (found is None or tbl_num <= 9):
+	# 		cur.execute("SELECT * FROM tbl_"+str(tbl_num)+" WHERE chromosome=? AND position=?", t)
+	# 		found = cur.fetchone()
+	# 		tbl_num = tbl_num + 1
+	# 	return found
 	
-	
-	# Find RS numbers in snp142 database
+	# Find RS numbers and genomic coords in snp database
 	rs_nums=[]
 	snp_pos=[]
 	snp_coords=[]
 	warn=[]
 	tabix_coords=""
 	for snp_i in snps:
-		if len(snp_i)>0:
-			if len(snp_i[0])>2:
-				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit():
+		if len(snp_i)>0: # Length entire list of snps
+			if len(snp_i[0])>2: # Length of each snp in snps
+				if snp_i[0][0:2]=="rs" and snp_i[0][-1].isdigit(): # Check first two charcters are rs and last charcter of each snp
 					snp_coord=get_coords(snp_i[0])
-					if snp_coord!=None:
+					print "SNP_COORD"
+					print snp_coord
+					if snp_coord != None:
 						rs_nums.append(snp_i[0])
 						snp_pos.append(snp_coord[2])
 						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
+						print "TEMP"
+						print temp
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
+				# For adding genomic coordinates to query in the future
+				# elif snp_i[0][0:3]=="chr" and snp_i[0][-1].isdigit(): # Same as previous check but for genomic coordinates
+				# 	snp_coord=get_rsnum(snp_i[0])
+				# 	print "SNP_COORD"
+				# 	print snp_coord
+				# 	if snp_coord != None:
+				# 		rs_nums.append("rs" + snp_coord[0])
+				# 		snp_pos.append(snp_coord[2])
+				# 		temp=["rs" + snp_coord[0],snp_coord[1],snp_coord[2]]
+				# 		print "TEMP"
+				# 		print temp
+				# 		snp_coords.append(temp)
+				# 	else:
+				# 		warn.append(snp_i[0])
 				else:
 					warn.append(snp_i[0])
 			else:
 				warn.append(snp_i[0])
 	
-	# Close snp142 connection
+	# Close snp connection
 	cur.close()
 	conn.close()
 	
 	if warn!=[]:
-		output["warning"]="The following RS numbers were not found in dbSNP 142: "+",".join(warn)
+		output["warning"]="The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 	
 	if len(rs_nums)==0:
-		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP 142."
+		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + "."
 		return(json.dumps(output, sort_keys=True, indent=2))
 		raise
 	
@@ -183,9 +243,9 @@ def calculate_hap(snplst,pop,request):
 		geno=vcf[g].strip().split()
 		if geno[1] not in snp_pos:
 			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+				output["warning"]=output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
 			else:
-				output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db142 search coordinates for query variant"
+				output["warning"]="Genomic position ("+geno[1]+") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
 			continue
 		
 		if snp_pos.count(geno[1])==1:
@@ -220,13 +280,15 @@ def calculate_hap(snplst,pop,request):
 			
 			if found=="false":
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 				else:
-					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position ("+rs_1000g+")"
+					output["warning"]="Genomic position for query variant ("+rs_query+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 
 				indx=[i[0] for i in snps].index(rs_query)
-				snps[indx][0]=geno[2]
-				rsnum=geno[2]
+				# snps[indx][0]=geno[2]
+				# rsnum=geno[2]
+				snps[indx][0]=rs_query
+				rsnum=rs_query
 			else:
 				continue
 

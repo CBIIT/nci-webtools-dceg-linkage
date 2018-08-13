@@ -153,11 +153,9 @@ def restAdd():
     data = str(request.args)
     json_dumps = json.dumps(data)
 
-    print "HI"
     first = request.args.get('first', False)
     second = request.form.get('second')
     test = request.form.get('test')
-    print "Hi"
     print first
     print json_dumps
     return jsonify(success=True, data=json_dumps)

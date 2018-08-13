@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 # Create LDmatrix function
@@ -7,11 +8,20 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     import json,math,operator,os,sqlite3,subprocess,sys
 
     # Set data directories
-    data_dir = "/local/content/ldlink/data/"
-    gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
-    snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    pop_dir = data_dir + "1000G/Phase3/samples/"
-    vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+    # data_dir = "/local/content/ldlink/data/"
+    # gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
+    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
+    # pop_dir = data_dir + "1000G/Phase3/samples/"
+    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    gene_dir=config['data']['gene_dir']
+    snp_dir=config['data']['snp_dir']
+    pop_dir=config['data']['pop_dir']
+    vcf_dir=config['data']['vcf_dir']
+
     tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
@@ -61,7 +71,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    # Connect to snp142 database
+    # Connect to snp database
     conn = sqlite3.connect(snp_dir)
     conn.text_factory = str
     cur = conn.cursor()
@@ -72,7 +82,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
 
-    # Find RS numbers in snp142 database
+    # Find RS numbers in snp database
     rs_nums = []
     snp_pos = []
     snp_coords = []
@@ -95,16 +105,16 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             else:
                 warn.append(snp_i[0])
 
-    # Close snp142 connection
+    # Close snp connection
     cur.close()
     conn.close()
 
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS numbers were not found in dbSNP 142: " + ",".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP 142."
+        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] +"."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -204,10 +214,10 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"] + ". Genomic position (" + geno[
-                    1] + ") in VCF file does not match db142 search coordinates for query variant"
+                    1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position (" + geno[
-                    1] + ") in VCF file does not match db142 search coordinates for query variant"
+                    1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
@@ -243,14 +253,16 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             if found == "false":
                 if "warning" in output:
                     output["warning"] = output[
-                        "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (" + rs_1000g + ")"
+                        "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
                 else:
                     output[
-                        "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (" + rs_1000g + ")"
+                        "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 
                 indx = [i[0] for i in snps].index(rs_query)
-                snps[indx][0] = geno[2]
-                rsnum = geno[2]
+                # snps[indx][0] = geno[2]
+                # rsnum = geno[2]
+                snps[indx][0]=rs_query
+                rsnum=rs_query
             else:
                 continue
 
@@ -462,10 +474,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
     from bokeh.io import export_svgs
+    import svgutils.compose as sg
     from math import pi
-    # For converting Bokeh SVGs to PDF
-    from svglib.svglib import svg2rlg
-    from reportlab.graphics import renderPDF
 
     reset_output()
 
@@ -834,19 +844,36 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     gene_plot.toolbar_location = "below"
 
+    # Change output backend to SVG temporarily for headless export
+    # Will be changed back to canvas in LDlink.js
     matrix_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
-    # Export to PDF as well
-    matrix_plot_svg = svg2rlg(tmp_dir + "matrix_plot_" + request + ".svg")
-    renderPDF.drawToFile(matrix_plot_svg, tmp_dir + "matrix_plot_" + request + ".pdf")
-    gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
-    renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
-    # Remove SVG files after exported to pdf
-    subprocess.call("rm " + tmp_dir + "matrix_plot_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_1_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+
+    # Concatenate svgs
+    sg.Figure("21.59cm", "27.94cm",
+        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+        ).save(tmp_dir + "matrix_plot_" + request + ".svg")
+
+    sg.Figure("107.95cm", "139.70cm",
+        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
+        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
+        ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
+
+    # Export to PDF
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
+    # Export to PNG
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
+    # Export to JPEG
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)    
+    # Remove individual SVG files after they are combined
+    subprocess.call("rm " + tmp_dir + "matrix_plot_1_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    # Remove scaled SVG file after it is converted to png and jpeg
+    subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
 
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))

@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 # Create LDpair function
@@ -7,10 +8,18 @@ def calculate_pair(snp1, snp2, pop, request=None):
     import json,math,os,sqlite3,subprocess,sys
 
     # Set data directories
-    data_dir = "/local/content/ldlink/data/"
-    snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    pop_dir = data_dir + "1000G/Phase3/samples/"
-    vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+    # data_dir = "/local/content/ldlink/data/"
+    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
+    # pop_dir = data_dir + "1000G/Phase3/samples/"
+    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    snp_dir=config['data']['snp_dir']
+    pop_dir=config['data']['pop_dir']
+    vcf_dir=config['data']['vcf_dir']
+
     tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
@@ -20,7 +29,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # Create JSON output
     output = {}
 
-    # Connect to snp142 database
+    # Connect to snp database
     conn = sqlite3.connect(snp_dir)
     conn.text_factory = str
     cur = conn.cursor()
@@ -31,22 +40,22 @@ def calculate_pair(snp1, snp2, pop, request=None):
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
 
-    # Find RS numbers in snp142 database
+    # Find RS numbers in snp database
     # SNP1
     snp1_coord = get_coords(snp1)
     if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build 142."
+        output["error"] = snp1 + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
         return(json.dumps(output, sort_keys=True, indent=2))
         raise
 
     # SNP2
     snp2_coord = get_coords(snp2)
     if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build 142."
+        output["error"] = snp2 + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
         return(json.dumps(output, sort_keys=True, indent=2))
         raise
 
-    # Close snp142 connection
+    # Close snp connection
     cur.close()
     conn.close()
 
@@ -114,11 +123,10 @@ def calculate_pair(snp1, snp2, pop, request=None):
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 ". Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (" + geno1[
-                2] + ")"
+                ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         else:
             output[
-                "warning"] = "Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (" + geno1[2] + ")"
+                "warning"] = "Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -163,11 +171,10 @@ def calculate_pair(snp1, snp2, pop, request=None):
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 ". Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (" + geno2[
-                2] + ")"
+                ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         else:
             output[
-                "warning"] = "Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (" + geno2[2] + ")"
+                "warning"] = "Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:

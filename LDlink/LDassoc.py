@@ -1,3 +1,4 @@
+import yaml
 #!/usr/bin/env python
 
 # Create LDproxy function
@@ -7,14 +8,26 @@ def calculate_assoc(file,region,pop,request,myargs):
 	start_time=time.time()
 
 	# Set data directories
-	data_dir="/local/content/ldlink/data/"
-	gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
-	gene_c_dir=data_dir+"refGene/sorted_refGene_collapsed.txt.gz"
-	gene_dir2=data_dir+"refGene/gene_names_coords.db"
-	recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
-	snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	pop_dir=data_dir+"1000G/Phase3/samples/"
-	vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+	# data_dir="/local/content/ldlink/data/"
+	# gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
+	# gene_c_dir=data_dir+"refGene/sorted_refGene_collapsed.txt.gz"
+	# gene_dir2=data_dir+"refGene/gene_names_coords.db"
+	# recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
+	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+	# pop_dir=data_dir+"1000G/Phase3/samples/"
+	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	gene_dir=config['data']['gene_dir']
+	gene_c_dir=config['data']['gene_c_dir']
+	gene_dir2=config['data']['gene_dir2']
+	recomb_dir=config['data']['recomb_dir']
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
+
 	tmp_dir="./tmp/"
 
 
@@ -44,7 +57,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
-			# Connect to snp142 database
+			# Connect to snp database
 			conn=sqlite3.connect(snp_dir)
 			conn.text_factory=str
 			cur=conn.cursor()
@@ -55,15 +68,15 @@ def calculate_assoc(file,region,pop,request,myargs):
 				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 				return cur.fetchone()
 
-			# Find RS number in snp142 database
+			# Find RS number in snp database
 			var_coord=get_coords(snp)
 
-			# Close snp142 connection
+			# Close snp connection
 			cur.close()
 			conn.close()
 
 			if var_coord==None:
-				output["error"]=snp+" is not in dbSNP build 142."
+				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
@@ -159,10 +172,10 @@ def calculate_assoc(file,region,pop,request,myargs):
 			cur.execute("SELECT * FROM genes WHERE name=?", t)
 			return cur.fetchone()
 
-		# Find RS number in snp142 database
+		# Find RS number in snp database
 		gene_coord=get_coords(myargs.name)
 
-		# Close snp142 connection
+		# Close snp connection
 		cur.close()
 		conn.close()
 
@@ -486,9 +499,9 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		if geno[2]!=snp and snp[0:2]=="rs":
 			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 			else:
-				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position ("+geno[2]+")"
+				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 			snp=geno[2]
 
 		if "," in geno[3] or "," in geno[4]:
@@ -862,9 +875,7 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
 	from bokeh.io import export_svgs
-	# For converting Bokeh SVGs to PDF
-	from svglib.svglib import svg2rlg
-	from reportlab.graphics import renderPDF
+	import svgutils.compose as sg
 
 
 	reset_output()
@@ -1073,19 +1084,36 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		gene_plot.toolbar_location = "below"
 
+		# Change output backend to SVG temporarily for headless export
+		# Will be changed back to canvas in LDlink.js
 		assoc_plot.output_backend = "svg"
 		rug.output_backend = "svg"
 		gene_plot.output_backend = "svg"
-		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
-		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
-		# Export to PDF as well
-		assoc_plot_svg = svg2rlg(tmp_dir + "assoc_plot_" + request + ".svg")
-		renderPDF.drawToFile(assoc_plot_svg, tmp_dir + "assoc_plot_" + request + ".pdf")
-		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
-		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
-		# Remove SVG files after exported to pdf
-		subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
-		subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
+		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+		
+		# Concatenate svgs
+		sg.Figure("24.59cm", "27.94cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+			).save(tmp_dir + "assoc_plot_" + request + ".svg")
+
+		sg.Figure("122.95cm", "139.70cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
+			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+
+		# Export to PDF
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+		# Export to PNG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+		# Export to JPEG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+		# Remove individual SVG files after they are combined
+		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+		# Remove scaled SVG file after it is converted to png and jpeg
+		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
@@ -1198,19 +1226,36 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		gene_c_plot.toolbar_location = "below"
 
+		# Change output backend to SVG temporarily for headless export
+		# Will be changed back to canvas in LDlink.js
 		assoc_plot.output_backend = "svg"
 		rug.output_backend = "svg"
 		gene_c_plot.output_backend = "svg"
-		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_" + request + ".svg")
-		export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_" + request + ".svg")
-		# Export to PDF as well
-		assoc_plot_svg = svg2rlg(tmp_dir + "assoc_plot_" + request + ".svg")
-		renderPDF.drawToFile(assoc_plot_svg, tmp_dir + "assoc_plot_" + request + ".pdf")
-		gene_plot_svg = svg2rlg(tmp_dir + "gene_plot_" + request + ".svg")
-		renderPDF.drawToFile(gene_plot_svg, tmp_dir + "gene_plot_" + request + ".pdf")
-		# Remove SVG files after exported to pdf
-		subprocess.call("rm " + tmp_dir + "assoc_plot_" + request + ".svg", shell=True)
-		subprocess.call("rm " + tmp_dir + "gene_plot_" + request + ".svg", shell=True)
+		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
+		export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+
+		# Concatenate svgs
+		sg.Figure("24.59cm", "27.94cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+			).save(tmp_dir + "assoc_plot_" + request + ".svg")
+
+		sg.Figure("122.95cm", "139.70cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
+			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+
+		# Export to PDF
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+		# Export to PNG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+		# Export to JPEG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+		# Remove individual SVG files after they are combined
+		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+		# Remove scaled SVG file after it is converted to png and jpeg
+		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 		
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))
@@ -1267,7 +1312,7 @@ def main():
 	parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
 	parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
 	parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
-	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number or coordinate (required with --variant)(default is lowest p-value in region)")
+	parser.add_argument("-o", "--origin", type=str, help="reference variant RS number (required with --variant)(default is lowest p-value in region)")
 	parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
 	parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
 	parser.add_argument("-t", "--transcript", help="plot all gene transcripts", action="store_true")

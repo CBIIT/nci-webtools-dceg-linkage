@@ -1,3 +1,4 @@
+import yaml
 import csv,sqlite3,subprocess,sys
 
 snp=sys.argv[1]
@@ -9,11 +10,20 @@ process=sys.argv[6]
 
 
 # Set data directories
-data_dir="/local/content/ldlink/data/"
-snp_dir=data_dir+"snp142/snp142_annot_2.db"
-pop_dir=data_dir+"1000G/Phase3/samples/"
-vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
-reg_dir=data_dir+"regulomedb/regulomedb.db"
+# data_dir="/local/content/ldlink/data/"
+# snp_dir=data_dir+"snp142/snp142_annot_2.db"
+# pop_dir=data_dir+"1000G/Phase3/samples/"
+# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
+# reg_dir=data_dir+"regulomedb/regulomedb.db"
+
+# Set data directories using config.yml
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+snp_dir=config['data']['snp_dir']
+pop_dir=config['data']['pop_dir']
+vcf_dir=config['data']['vcf_dir']
+reg_dir=config['data']['reg_dir']
+
 tmp_dir="./tmp/"
 
 
@@ -125,7 +135,7 @@ def get_regDB(chr,pos):
 		return a[1]
 
 
-# Open Connection to SNP142
+# Open Connection to SNP
 con2=sqlite3.connect(snp_dir)
 con2.row_factory=sqlite3.Row
 con2.text_factory=str
