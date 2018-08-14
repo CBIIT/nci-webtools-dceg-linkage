@@ -2046,7 +2046,7 @@ function updateLDmatrix() {
         var dataString = data;
         // var dataCanvasString = dataString.replace(/svg/g, "canvas");
         var dataCanvas = new Object([dataString]);
-        var dataCanvas = new Object([dataCanvasString]);
+        // var dataCanvas = new Object([dataCanvasString]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
