@@ -20,20 +20,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
-    # Create JSON output
-    # out_json = open(tmp_dir + "matrix" + request + ".json", "w")
-    output = {}
-
     # Open SNP list file
     snps_raw = open(snplst).readlines()
-    # if len(snps_raw) > 300:
-    #     output["error"] = "Maximum variant list is 300 RS numbers. Your list contains " + \
-    #         str(len(snps_raw)) + " entries."
-    #     json_output = json.dumps(output, sort_keys=True, indent=2)
-    #     print >> out_json, json_output
-    #     out_json.close()
-    #     return("", "")
-    #     raise
 
     # Remove duplicate RS numbers
     snps = []
@@ -48,13 +36,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     for pop_i in pops:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
             pop_dirs.append(pop_dir + pop_i + ".txt")
-        # else:
-        #     output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-        #     json_output = json.dumps(output, sort_keys=True, indent=2)
-        #     print >> out_json, json_output
-        #     out_json.close()
-        #     return("", "")
-        #     raise
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -78,7 +59,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     rs_nums = []
     snp_pos = []
     snp_coords = []
-    warn = []
     tabix_coords = ""
     for snp_i in snps:
         if len(snp_i) > 0:
@@ -90,50 +70,16 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                         snp_pos.append(snp_coord[2])
                         temp = [snp_i[0], snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
-            #         else:
-            #             warn.append(snp_i[0])
-            #     else:
-            #         warn.append(snp_i[0])
-            # else:
-            #     warn.append(snp_i[0])
 
     # Close snp connection
     cur.close()
     conn.close()
 
-    # Check RS numbers were found
-    # if warn != []:
-    #     output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
-
-    # if len(rs_nums) == 0:
-    #     output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] +"."
-    #     json_output = json.dumps(output, sort_keys=True, indent=2)
-    #     print >> out_json, json_output
-    #     out_json.close()
-    #     return("", "")
-    #     raise
-
-    # Check SNPs are all on the same chromosome
-    # for i in range(len(snp_coords)):
-    #     if snp_coords[0][1] != snp_coords[i][1]:
-    #         output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
-    #         json_output = json.dumps(output, sort_keys=True, indent=2)
-    #         print >> out_json, json_output
-    #         out_json.close()
-    #         return("", "")
-    #         raise
 
     # Check max distance between SNPs
     distance_bp = []
     for i in range(len(snp_coords)):
         distance_bp.append(int(snp_coords[i][2]))
-    # distance_max = max(distance_bp) - min(distance_bp)
-    # if distance_max > 1000000:
-    #     if "warning" in output:
-    #         output["warning"] = output["warning"] + ". Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
-    #     else:
-    #         output[
-    #             "warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
 
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
@@ -169,15 +115,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # Import SNP VCF files
     vcf = proc.stdout.readlines()
 
-    # Make sure there are genotype data in VCF file
-    # if vcf[-1][0:6] == "#CHROM":
-    #     output["error"] = "No query variants were found in 1000G VCF file"
-    #     json_output = json.dumps(output, sort_keys=True, indent=2)
-    #     print >> out_json, json_output
-    #     out_json.close()
-    #     return("", "")
-    #     raise
-
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
@@ -204,12 +141,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
         if geno[1] not in snp_pos:
-            # if "warning" in output:
-            #     output["warning"] = output["warning"] + ". Genomic position (" + geno[
-            #         1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
-            # else:
-            #     output["warning"] = "Genomic position (" + geno[
-            #         1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
@@ -243,13 +174,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
                 count += 1
 
             if found == "false":
-                # if "warning" in output:
-                #     output["warning"] = output[
-                #         "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
-                # else:
-                #     output[
-                #         "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
-
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0] = geno[2]
                 # rsnum = geno[2]
@@ -393,23 +317,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
             ld_matrix[j][i] = [snp2, snp1, allele2,
                                allele1, corr_f, pos2, pos1, D_prime, r2]
 
-    # Generate D' and R2 output matrices
-    # d_out = open(tmp_dir + "d_prime_" + request + ".txt", "w")
-    # r_out = open(tmp_dir + "r2_" + request + ".txt", "w")
-
-    # print >> d_out, "RS_number" + "\t" + "\t".join(rsnum_lst)
-    # print >> r_out, "RS_number" + "\t" + "\t".join(rsnum_lst)
-
-    # dim = len(ld_matrix)
-    # for i in range(dim):
-    #     temp_d = [rsnum_lst[i]]
-    #     temp_r = [rsnum_lst[i]]
-    #     for j in range(dim):
-    #         temp_d.append(str(ld_matrix[i][j][7]))
-    #         temp_r.append(str(ld_matrix[i][j][8]))
-    #     print >> d_out, "\t".join(temp_d)
-    #     print >> r_out, "\t".join(temp_r)
-
     # Generate Plot Variables
     out = [j for i in ld_matrix for j in i]
     xnames = []
@@ -425,12 +332,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     box_trans = []
 
     if r2_d not in ["r2", "d"]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + ". " + r2_d + \
-                " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-        else:
-            output["warning"] = r2_d + \
-                " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
         r2_d = "r2"
 
     for i in range(len(out)):
@@ -488,16 +389,6 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
     
-    # print "early x", x
-
-    # Generate error if less than two SNPs
-    # if len(x) < 2:
-    #     output["error"] = "Less than two variants to plot."
-    #     json_output = json.dumps(output, sort_keys=True, indent=2)
-    #     print >> out_json, json_output
-    #     out_json.close()
-    #     return("", "")
-    #     raise
 
     buffer = (x[-1] - x[0]) * 0.025
     xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
@@ -800,24 +691,8 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     # Remove scaled SVG file after it is converted to png and jpeg
     subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
 
-    # out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
-    #                     ncols=1, toolbar_options=dict(logo=None))
+    reset_output()
 
-    ###########################
-    # Html output for testing #
-    ###########################
-    # html=file_html(out_grid, CDN, "Test Plot")
-    # out_html=open("LDmatrix.html","w")
-    # print >> out_html, html
-    # out_html.close()
-
-    # out_script, out_div = components(out_grid, CDN)
-    # reset_output()
-
-    # Return output
-    # json_output = json.dumps(output, sort_keys=True, indent=2)
-    # print >> out_json, json_output
-    # out_json.close()
     return None
 
 def main():
@@ -837,7 +712,6 @@ def main():
         print "Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)"
         sys.exit()
     # Run function
-    # out_script, out_div = calculate_matrix(snplst, pop, request, r2_d)
     calculate_matrix(snplst, pop, request, r2_d)
 
 if __name__ == "__main__":

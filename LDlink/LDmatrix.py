@@ -893,7 +893,7 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
 
 	# processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
-    command = "python LDplot_sub.py " + snplst + " " + pop + " " + request + " " + r2_d
+    command = "python LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + r2_d
     subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
