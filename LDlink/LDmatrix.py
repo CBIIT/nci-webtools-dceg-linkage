@@ -846,37 +846,55 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
 
     # Change output backend to SVG temporarily for headless export
     # Will be changed back to canvas in LDlink.js
-    matrix_plot.output_backend = "svg"
-    rug.output_backend = "svg"
-    gene_plot.output_backend = "svg"
-    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_1_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+    # matrix_plot.output_backend = "svg"
+    # rug.output_backend = "svg"
+    # gene_plot.output_backend = "svg"
+    # export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_1_" + request + ".svg")
+    # export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
-    # Concatenate svgs
-    sg.Figure("21.59cm", "27.94cm",
-        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
-        ).save(tmp_dir + "matrix_plot_" + request + ".svg")
+    # # Concatenate svgs
+    # sg.Figure("21.59cm", "27.94cm",
+    #     sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
+    #     sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+    #     ).save(tmp_dir + "matrix_plot_" + request + ".svg")
 
-    sg.Figure("107.95cm", "139.70cm",
-        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
-        ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
+    # sg.Figure("107.95cm", "139.70cm",
+    #     sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
+    #     sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
+    #     ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
 
-    # Export to PDF
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
-    # Export to PNG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
-    # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)    
-    # Remove individual SVG files after they are combined
-    subprocess.call("rm " + tmp_dir + "matrix_plot_1_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
-    # Remove scaled SVG file after it is converted to png and jpeg
-    subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
+    # # Export to PDF
+    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
+    # # Export to PNG
+    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
+    # # Export to JPEG
+    # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)    
+    # # Remove individual SVG files after they are combined
+    # subprocess.call("rm " + tmp_dir + "matrix_plot_1_" + request + ".svg", shell=True)
+    # subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    # # Remove scaled SVG file after it is converted to png and jpeg
+    # subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
 
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))
+
+    # Open thread for high quality image exports
+    # commands=[]
+	# for i in range(threads):
+	# 	if i==min(range(threads)) and i==max(range(threads)):
+			# command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
+	# 	elif i==min(range(threads)):
+	# 		command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
+	# 	elif i==max(range(threads)):
+	# 		command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
+	# 	else:
+	# 		command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
+	# 	commands.append(command)
+
+
+	# processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+    command = "python LDplot_sub.py " + snplst + " " + pop + " " + request + " " + r2_d
+    subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
     # Html output for testing #
