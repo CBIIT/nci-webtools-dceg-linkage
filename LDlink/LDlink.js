@@ -289,7 +289,7 @@ function checkFile(id, fileURL)
         url: fileURL,
         data: {'id':'999'},
         error : function(){
-            setTimeout(function(){ checkFile(); }, 3000);
+            setTimeout(function(){ checkFile(id, fileURL); }, 3000);
         },
         success : function(data) {
             $('#' + id + "-menu1").prop('disabled', false);
@@ -2099,7 +2099,7 @@ function updateLDmatrix() {
             });
             
             // enable button once .svg file is generated from subprocess
-            var fileURL = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
