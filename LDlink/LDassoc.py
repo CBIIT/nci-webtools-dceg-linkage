@@ -1190,8 +1190,14 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))
 
+
+		# Convert out_p_sort to string to be passed into subprocess
+		out_p_sort_string = ','.join(out_p_sort)
+		# Replace spaces with underscores
+		out_p_sort_string = out_p_sort_string.replace(' ', '_')
+
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + myargs
+		command = "python LDassoc_plot_sub.py " + out_p_sort_string
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
