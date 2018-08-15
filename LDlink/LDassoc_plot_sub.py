@@ -509,7 +509,10 @@ def main():
 	else:
 		sys.exit()
 	out_p_sort_string = out_p_sort_string.replace('_', " ")
-	out_p_sort = out_p_sort_string.split(",")
+	out_p_sort_outer = out_p_sort_string.split(",")
+	out_p_sort = []
+	for i in range(len(out_p_sort_outer)):
+		out_p_sort.append(out_p_sort_outer[i].split('$'))
 
 	# Run function
     plot_assoc(out_p_sort)
