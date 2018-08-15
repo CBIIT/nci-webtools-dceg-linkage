@@ -6,7 +6,7 @@ from math import log10
 import sys
 
 # Create LDproxy function
-def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscript, a_pos):
+def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscript, a_pos, snp, pop):
 
 	print "out_p_sort: "
 	print out_p_sort
@@ -521,29 +521,31 @@ def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscri
 def main():
 
 	# Import LDassoc options
-	if len(sys.argv) == 6:
+	if len(sys.argv) == 8:
 		filename = sys.argv[1]
 		request = sys.argv[2]
 		myargsDPrime = sys.argv[3]
 		myargsAnnotate = sys.argv[4]
 		myargsTranscript = sys.argv[5]
+		snp = sys.argv[6]
+		pop = sys.argv[7]
 	else:
 		sys.exit()
 
 	out_p_sort_raw=open(filename).readlines()
 	out_p_sort = []
-	for line in out_p_sort_raw[:-1]:
+	for line in out_p_sort_raw[1:]:
 		line = line.strip()
 		out_p_sort.append(line.split('$'))
 
 	out_p_sort_string = out_p_sort_raw[0].strip()
 
-	a_pos_raw = out_p_sort_raw[-1]
+	a_pos_raw = out_p_sort_raw[0]
 	a_pos_raw = a_pos_raw.strip()
 	a_pos = a_pos_raw.split('$')
 
 	# Run function
-	plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscript, a_pos)
+	plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscript, a_pos, snp, pop)
 
 if __name__ == "__main__":
 	main()

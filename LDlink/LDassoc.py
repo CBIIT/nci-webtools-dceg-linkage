@@ -332,8 +332,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 	out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
 	print >> out_plot_sub, '$'.join(a_pos)
-	out_plot_sub.close()
-
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
@@ -1080,7 +1078,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 			ncols=1, toolbar_options=dict(logo=None))
 
 		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
-		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
 		inner = []
 		for i in range(len(out_p_sort)):
 			if isinstance(out_p_sort[i], list):
@@ -1095,7 +1092,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_plot_sub.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate)
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate) + " " + str(myargs.transcript) + " " + snp + " " + pop
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1211,7 +1208,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 
 		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
-		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
 		inner = []
 		for i in range(len(out_p_sort)):
 			if isinstance(out_p_sort[i], list):
@@ -1226,7 +1222,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_plot_sub.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate) + " " + str(myargs.transcript)
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate) + " " + str(myargs.transcript) + " " + snp + " " + pop
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
