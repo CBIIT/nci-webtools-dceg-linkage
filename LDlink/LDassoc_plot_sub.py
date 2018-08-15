@@ -6,7 +6,7 @@ from math import log10
 import sys
 
 # Create LDproxy function
-def plot_assoc(out_p_sort, request):
+def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate):
 
 	print "out_p_sort: "
 	print out_p_sort
