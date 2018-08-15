@@ -330,6 +330,10 @@ def calculate_assoc(file, region, pop, request, myargs):
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
 
+	out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
+	print >> out_plot_sub, '$'.join(a_pos)
+	out_plot_sub.close()
+
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
