@@ -6,7 +6,7 @@ from math import log10
 import sys
 
 # Create LDproxy function
-def plot_assoc(out_p_sort):
+def plot_assoc(out_p_sort, request):
 
 	print "out_p_sort: "
 	print out_p_sort
@@ -521,13 +521,17 @@ def plot_assoc(out_p_sort):
 def main():
 
 	# Import LDassoc options
-	if len(sys.argv) == 2:
-		out_p_sort_string = sys.argv[1]
+	if len(sys.argv) == 3:
+		filename = sys.argv[1]
+		request = sys.argv[2]
 	else:
 		sys.exit()
 
+	out_p_sort_string=open(filename).readlines()
+	out_p_sort_string = out_p_sort_string.strip()
+
 	# Reconstruct out_p_sort 2d array from passed string
-	out_p_sort_string = out_p_sort_string.replace('_', ' ')
+	# out_p_sort_string = out_p_sort_string.replace('_', ' ')
 	out_p_sort_outer = out_p_sort_string.split('&')
 	out_p_sort = []
 	for i in range(len(out_p_sort_outer)):
@@ -546,7 +550,7 @@ def main():
 	print out_p_sort
 
 	# Run function
-	plot_assoc(out_p_sort)
+	plot_assoc(out_p_sort, request)
 
 if __name__ == "__main__":
 	main()

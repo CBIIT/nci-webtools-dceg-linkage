@@ -1108,8 +1108,12 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# print "out_p_sort2: "
 		# print out_p_sort2
 
+		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
+		print >> out_plot_sub, out_p_sort_string
+		out_plot_sub.close()
+
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + out_p_sort_string
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1235,7 +1239,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 				inner.append(str(out_p_sort[i]))
 		out_p_sort_string = '&'.join(inner)
 		# Replace spaces with underscores
-		out_p_sort_string = out_p_sort_string.replace(' ', '_')
+		# out_p_sort_string = out_p_sort_string.replace(' ', '_')
 		# print "out_p_sort_string"
 		# print out_p_sort_string
 
@@ -1257,8 +1261,12 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# print "out_p_sort2: "
 		# print out_p_sort2
 
+		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
+		print >> out_plot_sub, out_p_sort_string
+		out_plot_sub.close()
+
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + out_p_sort_string
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
