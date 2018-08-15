@@ -528,18 +528,19 @@ def main():
 
 	# Reconstruct out_p_sort 2d array from passed string
 	out_p_sort_string = out_p_sort_string.replace('_', ' ')
-	out_p_sort_outer = out_p_sort_string.split(",")
+	out_p_sort_outer = out_p_sort_string.split('&')
 	out_p_sort = []
 	for i in range(len(out_p_sort_outer)):
-		if isinstance(out_p_sort_outer[i], list):
-			for j in range(len(out_p_sort_outer[i])):
-				if out_p_sort_outer[i][j].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][j][1:].isdigit()):
-					out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
-			out_p_sort.append(out_p_sort_outer[i].split('$'))
-		elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
-			out_p_sort.append(int(out_p_sort_outer[i]))
-		else:
-			out_p_sort.append(str(out_p_sort_outer[i]))
+		out_p_sort2.append(out_p_sort_outer[i].split('$'))
+		# if isinstance(out_p_sort_outer[i], list):
+		# 	for j in range(len(out_p_sort_outer[i])):
+		# 		if out_p_sort_outer[i][j].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][j][1:].isdigit()):
+		# 			out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
+		# 	out_p_sort.append(out_p_sort_outer[i].split('$'))
+		# elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
+		# 	out_p_sort.append(int(out_p_sort_outer[i]))
+		# else:
+		# 	out_p_sort.append(str(out_p_sort_outer[i]))
 
 	print "out_p_sort: "
 	print out_p_sort
