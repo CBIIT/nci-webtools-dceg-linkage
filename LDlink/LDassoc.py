@@ -1090,7 +1090,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# print "out_p_sort_string"
 		# print out_p_sort_string
 
-		out_p_sort_string2 = out_p_sort_string2.replace('_', ' ')
+		out_p_sort_string2 = out_p_sort_string.replace('_', ' ')
 		out_p_sort_outer = out_p_sort_string2.split(",")
 		out_p_sort2 = []
 		for i in range(len(out_p_sort_outer)):
@@ -1238,7 +1238,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# print "out_p_sort_string"
 		# print out_p_sort_string
 
-		out_p_sort_string2 = out_p_sort_string2.replace('_', ' ')
+		out_p_sort_string2 = out_p_sort_string.replace('_', ' ')
 		out_p_sort_outer = out_p_sort_string2.split(",")
 		out_p_sort2 = []
 		for i in range(len(out_p_sort_outer)):
