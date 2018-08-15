@@ -1087,8 +1087,8 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_p_sort_string = ','.join(inner)
 		# Replace spaces with underscores
 		out_p_sort_string = out_p_sort_string.replace(' ', '_')
-		print "out_p_sort_string"
-		print out_p_sort_string
+		# print "out_p_sort_string"
+		# print out_p_sort_string
 
 		# Open thread for high quality image exports
 		command = "python LDassoc_plot_sub.py " + out_p_sort_string

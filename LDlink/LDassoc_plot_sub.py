@@ -538,6 +538,9 @@ def main():
 		else:
 			out_p_sort.append(str(out_p_sort_outer[i]))
 
+	print "out_p_sort: "
+	print out_p_sort
+
 	# Run function
 	plot_assoc(out_p_sort)
 
