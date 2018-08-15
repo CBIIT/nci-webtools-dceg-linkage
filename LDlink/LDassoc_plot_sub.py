@@ -3,6 +3,7 @@ import csv, json, operator, os, sqlite3, subprocess, time
 from multiprocessing.dummy import Pool
 import argparse
 from math import log10
+import sys
 
 # Create LDproxy function
 def plot_assoc(out_p_sort):
