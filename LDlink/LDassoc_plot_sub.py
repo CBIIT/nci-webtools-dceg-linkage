@@ -61,7 +61,7 @@ def plot_assoc(out_p_sort, request):
 		p_coord.append(float(p_coord_i.split(":")[1])/1000000)
 		p_pos.append(p_coord_i.split(":")[1])
 		p_maf.append(str(round(float(p_maf_i),4)))
-		dist.append(str(round(dist_i/1000000.0,4)))
+		dist.append(str(round(float(dist_i)/1000000.0,4)))
 		d_prime.append(float(d_prime_i))
 		d_prime_round.append(str(round(float(d_prime_i),4)))
 		r2.append(float(r2_i))
