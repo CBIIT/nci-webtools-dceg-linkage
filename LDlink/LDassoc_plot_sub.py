@@ -8,6 +8,9 @@ import sys
 # Create LDproxy function
 def plot_assoc(out_p_sort):
 
+	print "out_p_sort: "
+	print out_p_sort
+
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
