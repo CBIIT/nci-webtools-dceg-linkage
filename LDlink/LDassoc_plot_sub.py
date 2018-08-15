@@ -1,10 +1,12 @@
 import yaml
-#!/usr/bin/env python
+import csv, json, operator, os, sqlite3, subprocess, time
+from multiprocessing.dummy import Pool
+import argparse
+from math import log10
 
 # Create LDproxy function
-def calculate_assoc(file, region, pop, request, myargs):
-	import csv,json,operator,os,sqlite3,subprocess,time
-	from multiprocessing.dummy import Pool
+def calculate_assoc(file,region,pop,request,myargs):
+	
 	start_time=time.time()
 
 	# Set data directories using config.yml
@@ -26,21 +28,17 @@ def calculate_assoc(file, region, pop, request, myargs):
 		os.makedirs(tmp_dir)
 
 
-	# Create JSON output
-	out_json=open(tmp_dir+'assoc'+request+".json","w")
-	output={}
-
 	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
-	# Define parameters for --variant option
+	# # Define parameters for --variant option
 	if region=="variant":
 		if myargs.origin==None:
-			output["error"]="--origin required when --variant is specified."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
+			# output["error"]="--origin required when --variant is specified."
+			# json_output=json.dumps(output, sort_keys=True, indent=2)
+			# print >> out_json, json_output
+			# out_json.close()
+			return None
+			# raise
 
 	if myargs.origin!=None:
 		# Find coordinates (GRCh37/hg19) for SNP RS number
@@ -65,25 +63,25 @@ def calculate_assoc(file, region, pop, request, myargs):
 			cur.close()
 			conn.close()
 
-			if var_coord==None:
-				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print >> out_json, json_output
-				out_json.close()
-				return("","")
-				raise
+			# if var_coord==None:
+			# 	output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
+			# 	json_output=json.dumps(output, sort_keys=True, indent=2)
+			# 	print >> out_json, json_output
+			# 	out_json.close()
+			# 	return("","")
+			# 	raise
 
 		elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
 			snp=myargs.origin
 			var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
 
 		else:
-			output["error"]="--origin ("+myargs.origin+") is not an RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
+			# output["error"]="--origin ("+myargs.origin+") is not an RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
+			# json_output=json.dumps(output, sort_keys=True, indent=2)
+			# print >> out_json, json_output
+			# out_json.close()
+			return None
+			# raise
 
 		chromosome=var_coord[1]
 		org_coord=var_coord[2]
@@ -99,24 +97,24 @@ def calculate_assoc(file, region, pop, request, myargs):
 	assoc_data=open(file).readlines()
 	header=assoc_data[0].strip().split()
 	first=assoc_data[1].strip().split()
-	if len(header)!=len(first):
-		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print json_output
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
-		raise
+	# if len(header)!=len(first):
+	# 	output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
+	# 	json_output=json.dumps(output, sort_keys=True, indent=2)
+	# 	print json_output
+	# 	print >> out_json, json_output
+	# 	out_json.close()
+	# 	return("","")
+	# 	raise
 
 	# Check header
-	for item in header_list:
-		if item not in header:
-			output["error"]="Variables mapping is not listed in the in the association file header."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
+	# for item in header_list:
+	# 	if item not in header:
+	# 		output["error"]="Variables mapping is not listed in the in the association file header."
+	# 		json_output=json.dumps(output, sort_keys=True, indent=2)
+	# 		print >> out_json, json_output
+	# 		out_json.close()
+	# 		return("","")
+	# 		raise
 
 	len_head=len(header)
 
@@ -143,13 +141,13 @@ def calculate_assoc(file, region, pop, request, myargs):
 		coord2=int(org_coord)+window
 
 	elif region=="gene":
-		if myargs.name==None:
-			output["error"]="Gene name (--name) is needed when --gene option is used."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
+	# 	if myargs.name==None:
+	# 		output["error"]="Gene name (--name) is needed when --gene option is used."
+	# 		json_output=json.dumps(output, sort_keys=True, indent=2)
+	# 		print >> out_json, json_output
+	# 		out_json.close()
+	# 		return("","")
+	# 		raise
 
 		# Connect to gene database
 		conn=sqlite3.connect(gene_dir2)
@@ -169,13 +167,13 @@ def calculate_assoc(file, region, pop, request, myargs):
 		cur.close()
 		conn.close()
 
-		if gene_coord==None:
-			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
-			raise
+		# if gene_coord==None:
+		# 	output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
+		# 	json_output=json.dumps(output, sort_keys=True, indent=2)
+		# 	print >> out_json, json_output
+		# 	out_json.close()
+		# 	return("","")
+		# 	raise
 
 		# Define search coordinates
 		coord1=int(gene_coord[2])-window
@@ -186,52 +184,28 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# Run with --origin option
 		if myargs.origin!=None:
 			if gene_coord[1]!=chromosome:
-				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as "+myargs.gene+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print >> out_json, json_output
-				out_json.close()
-				return("","")
+				return None
 				raise
 			if coord1>int(org_coord) or int(org_coord)>coord2:
-				output["error"]="Origin variant "+myargs.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print >> out_json, json_output
-				out_json.close()
-				return("","")
+				return None
 				raise
 		else:
 			chromosome=gene_coord[1]
 
 	elif region=="region":
 		if myargs.start==None:
-			output["error"]="Start coordinate is needed when --region option is used."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 		if myargs.end==None:
-			output["error"]="End coordinate is needed when --region option is used."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 
 		# Parse out chr and positions for --region option
 		if len(myargs.start.split(":"))!=2:
-			output["error"]="Start coordinate is not in correct format (ex: chr22:25855459)."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 		if len(myargs.end.split(":"))!=2:
-			output["error"]="End coordinate is not in correct format (ex: chr22:25855459)."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 
 		chr_s=myargs.start.strip("chr").split(":")[0]
@@ -240,32 +214,16 @@ def calculate_assoc(file, region, pop, request, myargs):
 		coord_e=myargs.end.split(":")[1]
 
 		if chr_s not in chrs:
-			output["error"]="Start chromosome (chr"+chr_s+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chrY)."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 		if chr_e not in chrs:
-			output["error"]="End chromosome (chr"+chr_e+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chr Y)."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 		if chr_s!=chr_e:
-			output["error"]="Start and end chromosome must be the same (chr"+chr_s+" is not equal to chr"+chr_e+")."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 		if coord_s>=coord_e:
-			output["error"]="End coordinate ("+myargs.end+") must be greater than start coordinate("+myargs.start+")."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 
 		coord1=int(coord_s)-window
@@ -276,18 +234,10 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# Run with --origin option
 		if myargs.origin!=None:
 			if chr_s!=chromosome:
-				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as start and stop coordinates (chr"+chromosome+" is not equal to chr"+chr_e+")."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print >> out_json, json_output
-				out_json.close()
-				return("","")
+				return None
 				raise
 			if coord1>int(org_coord) or int(org_coord)>coord2:
-				output["error"]="Origin variant "+myargs.origin+" is not in the coordinate range "+myargs.start+" to "+myargs.end+" -/+ a "+str(window)+" bp window."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print >> out_json, json_output
-				out_json.close()
-				return("","")
+				return None
 				raise
 		else:
 			chromosome=chr_s
@@ -295,11 +245,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 	# Generate coordinate list and P-value dictionary
 	max_window=3000000
 	if coord2-coord1>max_window:
-			output["error"]="Queried regioin is "+str(coord2-coord1)+" base pairs. Max size is "+str(max_window)+" base pairs."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 
 	assoc_coords=[]
@@ -327,17 +273,10 @@ def calculate_assoc(file, region, pop, request, myargs):
 							assoc_dict[coord_i]=[col[p_index]]
 							assoc_list.append([coord_i,float(col[p_index])])
 
-		else:
-			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
-
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
-		output["error"]="There are no variants in the association file with genomic coordinates inside the plotting window."
-		json_output=json.dumps(output, sort_keys=True, indent=2)
-		print >> out_json, json_output
-		out_json.close()
-		return("","")
+		return None
 		raise
 
 
@@ -348,11 +287,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
 			pop_dirs.append(pop_dir+pop_i+".txt")
 		else:
-			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 
 	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
@@ -390,26 +325,14 @@ def calculate_assoc(file, region, pop, request, myargs):
 			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
 			if len(vcf)==0:
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
-				else:
-					output["warning"]="Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
 				continue
 			elif len(vcf)>1:
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
-				else:
-					output["warning"]="Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
 				geno=vcf[0].strip().split()
 
 			else:
 				geno=vcf[0].strip().split()
 
 			if "," in geno[3] or "," in geno[4]:
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not a biallelic variant, using next lowest P-value variant"
-				else:
-					output["warning"]="Lowest P-value variant ("+snp+" is not a biallelic variant, using next lowest P-value variant"
 				continue
 
 			index=[]
@@ -427,11 +350,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 						genotypes[j]=1
 
 			if genotypes["0"]==0 or genotypes["1"]==0:
-				output["error"]=snp+" is monoallelic in the "+pop+" population."
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
-				else:
-					output["warning"]="Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
 				continue
 
 			org_coord=var_p[0].split("-")[1]
@@ -440,11 +358,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 	else:
 		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
-			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
-			return("","")
+			return None
 			raise
 
 		# Extract query SNP phased genotypes
@@ -462,13 +376,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 		vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
 		if len(vcf)==0:
-			output["error"]=snp+" is not in 1000G reference panel."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
+			return None
 			raise
 		elif len(vcf)>1:
 			geno=[]
@@ -476,32 +386,20 @@ def calculate_assoc(file, region, pop, request, myargs):
 				if vcf[i].strip().split()[2]==snp:
 					geno=vcf[i].strip().split()
 			if geno==[]:
-				output["error"]=snp+" is not in 1000G reference panel."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print >> out_json, json_output
-				out_json.close()
 				subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 				subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-				return("","")
+				return None
 				raise
 		else:
 			geno=vcf[0].strip().split()
 
 		if geno[2]!=snp and snp[0:2]=="rs":
-			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
-			else:
-				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 			snp=geno[2]
 
 		if "," in geno[3] or "," in geno[4]:
-			output["error"]=snp+" is not a biallelic variant."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
+			return None
 			raise
 
 
@@ -520,18 +418,13 @@ def calculate_assoc(file, region, pop, request, myargs):
 					genotypes[j]=1
 
 		if genotypes["0"]==0 or genotypes["1"]==0:
-			output["error"]=snp+" is monoallelic in the "+pop+" population."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print >> out_json, json_output
-			out_json.close()
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
+			return None
 			raise
 
 
 	# Calculate proxy LD statistics in parallel
-	print ""
 	if len(assoc_coords)<60:
 		threads=1
 	else:
@@ -581,187 +474,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
 	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=False)
-
-
-	# Populate JSON and text output
-	from math import log10
-
-	outfile=open(tmp_dir+"assoc"+request+".txt","w")
-	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","P-value","RegulomeDB","Function"]
-	print >> outfile, "\t".join(header)
-
-	ucsc_track={}
-	ucsc_track["header"]=["chr","pos","rsid","-log10_p-value"]
-
-	query_snp={}
-	query_snp["RS"]=out_p_sort[0][3]
-	query_snp["Alleles"]=out_p_sort[0][1]
-	query_snp["Coord"]=out_p_sort[0][2]
-	query_snp["Dist"]=out_p_sort[0][6]
-	query_snp["Dprime"]=str(round(float(out_p_sort[0][7]),4))
-	query_snp["R2"]=str(round(float(out_p_sort[0][8]),4))
-	query_snp["Corr_Alleles"]=out_p_sort[0][9]
-	query_snp["RegulomeDB"]=out_p_sort[0][10]
-	query_snp["MAF"]=str(round(float(out_p_sort[0][11]),4))
-	query_snp["Function"]=out_p_sort[0][13]
-	query_snp["P-value"]=out_p_sort[0][15]
-
-	output["query_snp"]=query_snp
-
-	rows=[]
-	row=[]
-	row.append(query_snp["RS"])
-	chr,pos=query_snp["Coord"].split(':')
-	row.append(chr)
-	row.append(pos)
-	row.append(query_snp["Alleles"])
-	row.append(str(round(float(query_snp["MAF"]),4)))
-	row.append(abs(query_snp["Dist"]))
-	row.append(str(round(float(query_snp["Dprime"]),4)))
-	row.append(str(round(float(query_snp["R2"]),4)))
-	row.append(query_snp["Corr_Alleles"])
-	row.append(query_snp["P-value"])
-	row.append(query_snp["RegulomeDB"])
-	row.append("HaploReg link")
-	row.append(query_snp["Function"])
-	rows.append(row)
-
-	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["RegulomeDB"],query_snp["Function"]]
-	print >> outfile, "\t".join(temp)
-
-	temp2=[chr,pos,query_snp["RS"],-log10(query_snp["P-value"])]
-	ucsc_track["lowest_p"]=temp2
-
-	ucsc_track["gwas_sig"]=[]
-	ucsc_track["marg_sig"]=[]
-	ucsc_track["sugg_sig"]=[]
-	ucsc_track["not_sig"]=[]
-
-	proxies={}
-	digits=len(str(len(out_p_sort)))
-
-	for i in range(1,len(out_p_sort)):
-		if out_p_sort[i][3]!=snp:
-			proxy_info={}
-			row=[]
-			proxy_info["RS"]=out_p_sort[i][3]
-			proxy_info["Alleles"]=out_p_sort[i][4]
-			proxy_info["Coord"]=out_p_sort[i][5]
-			proxy_info["Dist"]=out_p_sort[i][6]
-			proxy_info["Dprime"]=str(round(float(out_p_sort[i][7]),4))
-			proxy_info["R2"]=str(round(float(out_p_sort[i][8]),4))
-			proxy_info["Corr_Alleles"]=out_p_sort[i][9]
-			proxy_info["RegulomeDB"]=out_p_sort[i][10]
-			proxy_info["MAF"]=str(round(float(out_p_sort[i][12]),4))
-			proxy_info["Function"]=out_p_sort[i][13]
-			proxy_info["P-value"]=out_p_sort[i][15]
-			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
-			chr,pos=proxy_info["Coord"].split(':')
-
-			# Adding a row for the Data Table
-			row.append(proxy_info["RS"])
-			row.append(chr)
-			row.append(pos)
-			row.append(proxy_info["Alleles"])
-			row.append(str(round(float(proxy_info["MAF"]),4)))
-			row.append(abs(proxy_info["Dist"]))
-			row.append(str(round(float(proxy_info["Dprime"]),4)))
-			row.append(str(round(float(proxy_info["R2"]),4)))
-			row.append(proxy_info["Corr_Alleles"])
-			row.append(proxy_info["P-value"])
-			row.append(proxy_info["RegulomeDB"])
-			row.append("HaploReg link")
-			row.append(proxy_info["Function"])
-			rows.append(row)
-
-			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["RegulomeDB"],proxy_info["Function"]]
-			print >> outfile, "\t".join(temp)
-
-			chr,pos=proxy_info["Coord"].split(':')
-			p_val=-log10(proxy_info["P-value"])
-			temp2=[chr,pos,proxy_info["RS"],p_val]
-
-			if p_val>-log10(5e-8):
-				ucsc_track["gwas_sig"].append(temp2)
-			elif -log10(5e-8)>=p_val>5:
-				ucsc_track["marg_sig"].append(temp2)
-			elif 5>=p_val>3:
-				ucsc_track["sugg_sig"].append(temp2)
-			else:
-				ucsc_track["not_sig"].append(temp2)
-
-	track=open(tmp_dir+"track"+request+".txt","w")
-	print >> track, "browser position chr"+str(chromosome)+":"+str(coord1)+"-"+str(coord2)
-	print >> track, ""
-
-	print >> track, "track type=bedGraph name=\"Manhattan Plot\" description=\"Plot of -log10 association p-values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar yLineMark=7.301029995663981 yLineOnOff=on maxHeightPixels=60"
-	print >> track, "\t".join([str(ucsc_track["lowest_p"][i]) for i in [0,1,1,3]])
-	if len(ucsc_track["gwas_sig"])>0:
-		for var in ucsc_track["gwas_sig"]:
-			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	if len(ucsc_track["marg_sig"])>0:
-		for var in ucsc_track["marg_sig"]:
-			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	if len(ucsc_track["sugg_sig"])>0:
-		for var in ucsc_track["sugg_sig"]:
-			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	if len(ucsc_track["not_sig"])>0:
-		for var in ucsc_track["not_sig"]:
-			print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	print >> track, ""
-
-	print >> track, "track type=bed name=\""+snp+"\" description=\"Variant with lowest association p-value: "+snp+"\" color=108,108,255"
-	print >> track, "\t".join([ucsc_track["lowest_p"][i] for i in [0,1,1,2]])
-	print >> track, ""
-
-	if len(ucsc_track["gwas_sig"])>0:
-		print >> track, "track type=bed name=\"P<5e-8\" description=\"Variants with association p-values <5e-8\" color=198,129,0"
-		for var in ucsc_track["gwas_sig"]:
-			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-		print >> track, ""
-
-	if len(ucsc_track["marg_sig"])>0:
-		print >> track, "track type=bed name=\"5e-8<=P<1e-5\" description=\"Variants with association p-values >=5e-8 and <1e-5\" color=198,129,0"
-		for var in ucsc_track["marg_sig"]:
-			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-		print >> track, ""
-
-	if len(ucsc_track["sugg_sig"])>0:
-		print >> track, "track type=bed name=\"1e-5<=P<1e-3\" description=\"Variants with association p-values >=1e-5 and <1e-3\" color=198,129,0"
-		for var in ucsc_track["sugg_sig"]:
-			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-		print >> track, ""
-
-	if len(ucsc_track["not_sig"])>0:
-		print >> track, "track type=bed name=\"1e-3<=P<=1\" description=\"Variants with association p-values >=1e-3 and <=1\" color=198,129,0"
-		for var in ucsc_track["not_sig"]:
-			print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-
-
-	duration=time.time() - start_time
-
-	statsistics={}
-	statsistics["individuals"] = str(len(pop_list))
-	statsistics["in_region"] = str(len(out_prox))
-	statsistics["runtime"] = str(duration)
-
-	output["aaData"]=rows
-	output["proxy_snps"]=proxies
-	output["report"]={}
-	output["report"]["namespace"]={}
-	output["report"]["namespace"].update(vars(myargs))
-	output["report"]["region"] = region
-	output["report"]["statistics"] = statsistics
-
-	# Output JSON and text file
-	json_output=json.dumps(output, sort_keys=False, indent=2)
-	print >> out_json, json_output
-	out_json.close()
-
-	outfile.close()
-	track.close()
-
-
 
 	# Organize scatter plot data
 	q_rs=[]
@@ -864,6 +576,8 @@ def calculate_assoc(file, region, pop, request, myargs):
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
+	from bokeh.io import export_svgs
+	import svgutils.compose as sg
 
 
 	reset_output()
@@ -1072,12 +786,36 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 		gene_plot.toolbar_location = "below"
 
-		out_grid = gridplot(assoc_plot, rug, gene_plot,
-			ncols=1, toolbar_options=dict(logo=None))
+		# Change output backend to SVG temporarily for headless export
+		# Will be changed back to canvas in LDlink.js
+		assoc_plot.output_backend = "svg"
+		rug.output_backend = "svg"
+		gene_plot.output_backend = "svg"
+		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
+		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+		
+		# Concatenate svgs
+		sg.Figure("24.59cm", "27.94cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+			).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
-		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + myargs
-		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+		sg.Figure("122.95cm", "139.70cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
+			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+
+		# Export to PDF
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+		# Export to PNG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+		# Export to JPEG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+		# Remove individual SVG files after they are combined
+		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+		# Remove scaled SVG file after it is converted to png and jpeg
+		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
 
 
@@ -1186,34 +924,39 @@ def calculate_assoc(file, region, pop, request, myargs):
 		gene_c_plot.yaxis.major_label_text_color = None
 
 		gene_c_plot.toolbar_location = "below"
+
+		# Change output backend to SVG temporarily for headless export
+		# Will be changed back to canvas in LDlink.js
+		assoc_plot.output_backend = "svg"
+		rug.output_backend = "svg"
+		gene_c_plot.output_backend = "svg"
+		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
+		export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+
+		# Concatenate svgs
+		sg.Figure("24.59cm", "27.94cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+			).save(tmp_dir + "assoc_plot_" + request + ".svg")
+
+		sg.Figure("122.95cm", "139.70cm",
+			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
+			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+
+		# Export to PDF
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+		# Export to PNG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+		# Export to JPEG
+		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+		# Remove individual SVG files after they are combined
+		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+		# Remove scaled SVG file after it is converted to png and jpeg
+		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 		
-		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
-					ncols=1, toolbar_options=dict(logo=None))
-
-		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + myargs
-		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-
-	###########################
-	# Html output for testing #
-	###########################
-	#html=file_html(out_grid, CDN, "Test Plot")
-	#out_html=open("LDassoc.html","w")
-	#print >> out_html, html
-	#out_html.close()
-
-
-	out_script,out_div=components(out_grid, CDN)
 	reset_output()
-
-
-
-	# Print run time statistics
-	print "Number of Individuals: "+str(len(pop_list))
-	print "SNPs in Region: "+str(len(out_prox))
-	duration=round(time.time() - start_time,2)
-	print "Run time: "+str(duration)+" seconds\n"
-
 
 	# Remove temporary files
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
@@ -1223,13 +966,21 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 
 	# Return plot output
-	return(out_script,out_div)
+	return None
 
 
 def main():
-	import argparse,json
-	tmp_dir="./tmp/"
 
+	# # Import LDassoc options
+	# if len(sys.argv) == 6:
+	# 	filename = sys.argv[1]
+	# 	region = sys.argv[2]
+	# 	pop = sys.argv[3]
+	# 	request = sys.argv[4]
+	# 	myargs = sys.argv[5]
+	# else:
+	# 	sys.exit()
+	
 	# Import LDassoc options
 	parser=argparse.ArgumentParser()
 	parser.add_argument("file", type=str, help="association file containing p-values")
@@ -1261,40 +1012,8 @@ def main():
 	elif args.variant:
 		region="variant"
 
-
 	# Run function
-	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
-
-
-	# Print output
-	with open(tmp_dir+"assoc"+args.request+".json") as f:
-		json_dict=json.load(f)
-
-	try:
-		json_dict["error"]
-
-	except KeyError:
-		head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
-		print "\t".join(head)
-		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
-		print "\t".join(temp)
-		for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
-			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
-			print "\t".join(temp)
-
-	else:
-		print ""
-		print json_dict["error"]
-		print ""
-
-	try:
-		json_dict["warning"]
-	except KeyError:
-		print ""
-	else:
-		print "WARNING: "+json_dict["warning"]+"!"
-		print ""
-
+    calculate_assoc(args.file, region, args.pop, args.request, args)
 
 if __name__ == "__main__":
 	main()

@@ -1343,8 +1343,7 @@ function updateLDassoc() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data[0];
-        var dataCanvasString = dataString.replace(/svg/g, "canvas");
-        var dataCanvas = new Object([dataCanvasString, data[1]]);
+        var dataCanvas = new Object([dataString, data[1]]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
@@ -1358,7 +1357,7 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldassoc-menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldassoc-menu1" data-toggle="dropdown" disabled>Loading <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
@@ -2061,9 +2060,7 @@ function updateLDmatrix() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data;
-        // var dataCanvasString = dataString.replace(/svg/g, "canvas");
         var dataCanvas = new Object([dataString]);
-        // var dataCanvas = new Object([dataCanvasString]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
@@ -2266,7 +2263,6 @@ function updateLDproxy() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data;
-        // var dataCanvasString = dataString.replace(/svg/g, "canvas");
         var dataCanvas = new Object([dataString]);
 
         var jsonObjCanvas;
