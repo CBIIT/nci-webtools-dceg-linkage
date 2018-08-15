@@ -70,7 +70,7 @@ def plot_assoc(out_p_sort, request):
 
 		# P-value
 		p_val.append(float(p_val_i))
-		neg_log_p.append(float(-log10(float(p_val_i)))
+		neg_log_p.append(float(-log10(float(p_val_i))))
 
 		# Correct Missing Annotations
 		if str(regdb_i) == '.':
@@ -534,9 +534,6 @@ def main():
 		out_p_sort.append(line.split('$'))
 
 	out_p_sort_string = out_p_sort_raw[0].strip()
-
-	print "out_p_sort: "
-	print out_p_sort
 
 	# Run function
 	plot_assoc(out_p_sort, request)
