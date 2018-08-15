@@ -73,9 +73,9 @@ def plot_assoc(out_p_sort, request):
 		neg_log_p.append(float(-log10(float(p_val_i)))
 
 		# Correct Missing Annotations
-		if regdb_i==".":
-			regdb_i=""
-		regdb.append(regdb_i)
+		if str(regdb_i) == '.':
+			regdb_i = ''
+		regdb.append(str(regdb_i))
 		if funct_i==".":
 			funct_i=""
 		if funct_i=="NA":
