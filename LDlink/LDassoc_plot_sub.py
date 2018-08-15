@@ -7,6 +7,19 @@ from math import log10
 # Create LDproxy function
 def plot_assoc(out_p_sort):
 
+	# Set data directories using config.yml
+	with open('config.yml', 'r') as f:
+		config = yaml.load(f)
+	gene_dir=config['data']['gene_dir']
+	gene_c_dir=config['data']['gene_c_dir']
+	gene_dir2=config['data']['gene_dir2']
+	recomb_dir=config['data']['recomb_dir']
+	snp_dir=config['data']['snp_dir']
+	pop_dir=config['data']['pop_dir']
+	vcf_dir=config['data']['vcf_dir']
+
+	tmp_dir="./tmp/"
+
 	# Organize scatter plot data
 	q_rs=[]
 	q_allele=[]
@@ -508,11 +521,18 @@ def main():
 		out_p_sort_string = sys.argv[1]
 	else:
 		sys.exit()
-	out_p_sort_string = out_p_sort_string.replace('_', " ")
+
+	# Reconstruct out_p_sort 2d array from passed string
+	out_p_sort_string = out_p_sort_string.replace('_', ' ')
 	out_p_sort_outer = out_p_sort_string.split(",")
 	out_p_sort = []
 	for i in range(len(out_p_sort_outer)):
-		out_p_sort.append(out_p_sort_outer[i].split('$'))
+		if isinstance(out_p_sort_outer[i], list):
+			out_p_sort.append(out_p_sort_outer[i].split('$'))
+		elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
+			out_p_sort.append(int(out_p_sort_outer[i]))
+		else:
+			out_p_sort.append(str(out_p_sort_outer[i]))
 
 	# Run function
     plot_assoc(out_p_sort)

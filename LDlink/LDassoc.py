@@ -1078,7 +1078,10 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# Convert 2d array out_p_sort to string to be passed into subprocess
 		inner = []
 		for i in range(len(out_p_sort)):
-			inner.append('$'.join(out_p_sort[i]))
+			if isinstance(out_p_sort[i], list):
+				inner.append('$'.join(out_p_sort[i]))
+			else:
+				inner.append(str(out_p_sort[i]))
 		out_p_sort_string = ','.join(inner)
 		# Replace spaces with underscores
 		out_p_sort_string = out_p_sort_string.replace(' ', '_')
@@ -1204,7 +1207,10 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# Convert 2d array out_p_sort to string to be passed into subprocess
 		inner = []
 		for i in range(len(out_p_sort)):
-			inner.append('$'.join(out_p_sort[i]))
+			if isinstance(out_p_sort[i], list):
+				inner.append('$'.join(out_p_sort[i]))
+			else:
+				inner.append(str(out_p_sort[i]))
 		out_p_sort_string = ','.join(inner)
 		# Replace spaces with underscores
 		out_p_sort_string = out_p_sort_string.replace(' ', '_')
