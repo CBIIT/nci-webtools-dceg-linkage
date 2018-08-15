@@ -528,6 +528,9 @@ def main():
 	out_p_sort = []
 	for i in range(len(out_p_sort_outer)):
 		if isinstance(out_p_sort_outer[i], list):
+			for j in range(len(out_p_sort_outer[i])):
+				if out_p_sort_outer[i][j].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][j][1:].isdigit()):
+					out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
 			out_p_sort.append(out_p_sort_outer[i].split('$'))
 		elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
 			out_p_sort.append(int(out_p_sort_outer[i]))

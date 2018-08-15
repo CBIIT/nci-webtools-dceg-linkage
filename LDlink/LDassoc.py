@@ -1079,6 +1079,8 @@ def calculate_assoc(file, region, pop, request, myargs):
 		inner = []
 		for i in range(len(out_p_sort)):
 			if isinstance(out_p_sort[i], list):
+				for j in range(len(out_p_sort[i])):
+					out_p_sort[i][j] = str(out_p_sort[i][j])
 				inner.append('$'.join(out_p_sort[i]))
 			else:
 				inner.append(str(out_p_sort[i]))
@@ -1208,6 +1210,8 @@ def calculate_assoc(file, region, pop, request, myargs):
 		inner = []
 		for i in range(len(out_p_sort)):
 			if isinstance(out_p_sort[i], list):
+				for j in range(len(out_p_sort[i])):
+					out_p_sort[i][j] = str(out_p_sort[i][j])
 				inner.append('$'.join(out_p_sort[i]))
 			else:
 				inner.append(str(out_p_sort[i]))
