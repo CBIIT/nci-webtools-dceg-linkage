@@ -1075,7 +1075,8 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
 
-		# Convert 2d array out_p_sort to string to be passed into subprocess
+		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
+		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
 		inner = []
 		for i in range(len(out_p_sort)):
 			if isinstance(out_p_sort[i], list):
@@ -1084,32 +1085,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 				inner.append('$'.join(out_p_sort[i]))
 			else:
 				inner.append(str(out_p_sort[i]))
-		out_p_sort_string = '&'.join(inner)
-		# Replace spaces with underscores
-		out_p_sort_string = out_p_sort_string.replace(' ', '_')
-		# print "out_p_sort_string"
-		# print out_p_sort_string
+		for i in range(len(inner)):
+			print >> out_plot_sub, inner[i]
 
-		# out_p_sort_string2 = out_p_sort_string.replace('_', ' ')
-		# out_p_sort_outer = out_p_sort_string2.split('&')
-		# out_p_sort2 = []
-		# for i in range(len(out_p_sort_outer)):
-		# 	out_p_sort2.append(out_p_sort_outer[i].split('$'))
-		# 	# if isinstance(out_p_sort_outer[i], list):
-		# 	# 	for j in range(len(out_p_sort_outer[i])):
-		# 	# 		if out_p_sort_outer[i][j].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][j][1:].isdigit()):
-		# 	# 			out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
-		# 	# 	out_p_sort2.append(out_p_sort_outer[i].split('$'))
-		# 	# elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
-		# 	# 	out_p_sort2.append(int(out_p_sort_outer[i].split('$')))
-		# 	# else:
-				
-
-		# print "out_p_sort2: "
-		# print out_p_sort2
-
-		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
-		print >> out_plot_sub, out_p_sort_string
 		out_plot_sub.close()
 
 		# Open thread for high quality image exports
@@ -1228,7 +1206,8 @@ def calculate_assoc(file, region, pop, request, myargs):
 					ncols=1, toolbar_options=dict(logo=None))
 
 
-		# Convert 2d array out_p_sort to string to be passed into subprocess
+		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
+		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
 		inner = []
 		for i in range(len(out_p_sort)):
 			if isinstance(out_p_sort[i], list):
@@ -1237,32 +1216,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 				inner.append('$'.join(out_p_sort[i]))
 			else:
 				inner.append(str(out_p_sort[i]))
-		out_p_sort_string = '&'.join(inner)
-		# Replace spaces with underscores
-		# out_p_sort_string = out_p_sort_string.replace(' ', '_')
-		# print "out_p_sort_string"
-		# print out_p_sort_string
+		for i in range(len(inner)):
+			print >> out_plot_sub, inner[i]
 
-		# out_p_sort_string2 = out_p_sort_string.replace('_', ' ')
-		# out_p_sort_outer = out_p_sort_string2.split('&')
-		# out_p_sort2 = []
-		# for i in range(len(out_p_sort_outer)):
-		# 	out_p_sort2.append(out_p_sort_outer[i].split('$'))
-		# 	# if isinstance(out_p_sort_outer[i], list):
-		# 	# 	for j in range(len(out_p_sort_outer[i])):
-		# 	# 		if out_p_sort_outer[i][j].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][j][1:].isdigit()):
-		# 	# 			out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
-		# 	# 	out_p_sort2.append(out_p_sort_outer[i].split('$'))
-		# 	# elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
-		# 	# 	out_p_sort2.append(out_p_sort_outer[i].split('$'))
-		# 	# else:
-			
-
-		# print "out_p_sort2: "
-		# print out_p_sort2
-
-		out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
-		print >> out_plot_sub, out_p_sort_string
 		out_plot_sub.close()
 
 		# Open thread for high quality image exports
