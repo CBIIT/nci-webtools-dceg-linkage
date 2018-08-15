@@ -527,7 +527,8 @@ def main():
 	else:
 		sys.exit()
 
-	out_p_sort_string=open(filename).readlines()
+	out_p_sort_raw=open(filename).readlines()
+	out_p_sort_string = out_p_sort_raw[0].strip()
 
 	# Reconstruct out_p_sort 2d array from passed string
 	# out_p_sort_string = out_p_sort_string.replace('_', ' ')
