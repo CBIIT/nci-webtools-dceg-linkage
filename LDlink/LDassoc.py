@@ -1084,14 +1084,14 @@ def calculate_assoc(file, region, pop, request, myargs):
 				inner.append('$'.join(out_p_sort[i]))
 			else:
 				inner.append(str(out_p_sort[i]))
-		out_p_sort_string = ','.join(inner)
+		out_p_sort_string = '&'.join(inner)
 		# Replace spaces with underscores
 		out_p_sort_string = out_p_sort_string.replace(' ', '_')
 		# print "out_p_sort_string"
 		# print out_p_sort_string
 
 		out_p_sort_string2 = out_p_sort_string.replace('_', ' ')
-		out_p_sort_outer = out_p_sort_string2.split(",")
+		out_p_sort_outer = out_p_sort_string2.split("&")
 		out_p_sort2 = []
 		for i in range(len(out_p_sort_outer)):
 			if isinstance(out_p_sort_outer[i], list):
@@ -1100,9 +1100,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 						out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
 				out_p_sort2.append(out_p_sort_outer[i].split('$'))
 			elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
-				out_p_sort2.append(int(out_p_sort_outer[i]))
+				out_p_sort2.append(int(out_p_sort_outer[i].split('$')))
 			else:
-				out_p_sort2.append(str(out_p_sort_outer[i]))
+				out_p_sort2.append(str(out_p_sort_outer[i].split('$')))
 
 		print "out_p_sort2: "
 		print out_p_sort2
@@ -1232,14 +1232,14 @@ def calculate_assoc(file, region, pop, request, myargs):
 				inner.append('$'.join(out_p_sort[i]))
 			else:
 				inner.append(str(out_p_sort[i]))
-		out_p_sort_string = ','.join(inner)
+		out_p_sort_string = '&'.join(inner)
 		# Replace spaces with underscores
 		out_p_sort_string = out_p_sort_string.replace(' ', '_')
 		# print "out_p_sort_string"
 		# print out_p_sort_string
 
 		out_p_sort_string2 = out_p_sort_string.replace('_', ' ')
-		out_p_sort_outer = out_p_sort_string2.split(",")
+		out_p_sort_outer = out_p_sort_string2.split("&")
 		out_p_sort2 = []
 		for i in range(len(out_p_sort_outer)):
 			if isinstance(out_p_sort_outer[i], list):
@@ -1248,9 +1248,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 						out_p_sort_outer[i][j] = int(out_p_sort_outer[i][j])
 				out_p_sort2.append(out_p_sort_outer[i].split('$'))
 			elif out_p_sort_outer[i].isdigit() or (out_p_sort_outer[i].startswith('-') and out_p_sort_outer[i][1:].isdigit()):
-				out_p_sort2.append(int(out_p_sort_outer[i]))
+				out_p_sort2.append(int(out_p_sort_outer[i].split('$')))
 			else:
-				out_p_sort2.append(str(out_p_sort_outer[i]))
+				out_p_sort2.append(str(out_p_sort_outer[i].split('$')))
 
 		print "out_p_sort2: "
 		print out_p_sort2
