@@ -538,7 +538,7 @@ def main():
 			out_p_sort.append(str(out_p_sort_outer[i]))
 
 	# Run function
-    plot_assoc(out_p_sort)
+	plot_assoc(out_p_sort)
 
 if __name__ == "__main__":
 	main()
