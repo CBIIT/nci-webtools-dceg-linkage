@@ -812,9 +812,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 		neg_log_p.append(-log10(p_val_i))
 
 		# Correct Missing Annotations
-		if regdb_i==".":
-			regdb_i=""
-		regdb.append(regdb_i)
+		if str(regdb_i) == '.':
+			regdb_i = ''
+		regdb.append(str(regdb_i))
 		if funct_i==".":
 			funct_i=""
 		if funct_i=="NA":
