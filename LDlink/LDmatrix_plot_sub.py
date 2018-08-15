@@ -709,8 +709,8 @@ def main():
         request = sys.argv[3]
         r2_d = sys.argv[4]
     else:
-        print "Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)"
         sys.exit()
+
     # Run function
     calculate_matrix(snplst, pop, request, r2_d)
 
