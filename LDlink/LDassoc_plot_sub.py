@@ -69,8 +69,8 @@ def plot_assoc(out_p_sort, request):
 		corr_alleles.append(corr_alleles_i)
 
 		# P-value
-		p_val.append(p_val_i)
-		neg_log_p.append(-log10(p_val_i))
+		p_val.append(float(p_val_i))
+		neg_log_p.append(float(-log10(float(p_val_i)))
 
 		# Correct Missing Annotations
 		if regdb_i==".":
@@ -89,10 +89,10 @@ def plot_assoc(out_p_sort, request):
 			alpha_i=0.7
 		else:
 			if myargs.dprime==True:
-				color_i=reds[int(d_prime_i*100.0)]
+				color_i=reds[int(float(d_prime_i)*100.0)]
 				alpha_i=0.7
 			elif myargs.dprime==False:
-				color_i=reds[int(r2_i*100.0)]
+				color_i=reds[int(float(r2_i)*100.0)]
 				alpha_i=0.7
 		color.append(color_i)
 		alpha.append(alpha_i)
