@@ -6,7 +6,7 @@ from math import log10
 import sys
 
 # Create LDproxy function
-def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate):
+def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscript):
 
 	print "out_p_sort: "
 	print out_p_sort
@@ -88,10 +88,10 @@ def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate):
 			color_i="#0000FF"
 			alpha_i=0.7
 		else:
-			if myargsDPrime==True:
+			if myargsDPrime == 'True':
 				color_i=reds[int(float(d_prime_i)*100.0)]
 				alpha_i=0.7
-			elif myargsDPrime==False:
+			elif myargsDPrime == 'False':
 				color_i=reds[int(float(r2_i)*100.0)]
 				alpha_i=0.7
 		color.append(color_i)
@@ -195,7 +195,7 @@ def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate):
 	assoc_plot.add_tools(hover)
 
 	# Annotate RebulomeDB scores
-	if myargsAnnotate==True:
+	if myargsAnnotate == 'True':
 		assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 
 	assoc_plot.yaxis.axis_label="-log10 P-value"
@@ -222,7 +222,7 @@ def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate):
 
 
 	# Gene Plot (All Transcripts)
-	if myargs.transcript==True:
+	if myargsTranscript == 'True':
 		tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 		subprocess.call(tabix_gene, shell=True)
 		filename=tmp_dir+"genes_"+request+".txt"
@@ -521,11 +521,12 @@ def plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate):
 def main():
 
 	# Import LDassoc options
-	if len(sys.argv) == 5:
+	if len(sys.argv) == 6:
 		filename = sys.argv[1]
 		request = sys.argv[2]
 		myargsDPrime = sys.argv[3]
 		myargsAnnotate = sys.argv[4]
+		myargsTranscript = sys.argv[5]
 	else:
 		sys.exit()
 
@@ -538,7 +539,7 @@ def main():
 	out_p_sort_string = out_p_sort_raw[0].strip()
 
 	# Run function
-	plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate)
+	plot_assoc(out_p_sort, request, myargsDPrime, myargsAnnotate, myargsTranscript)
 
 if __name__ == "__main__":
 	main()

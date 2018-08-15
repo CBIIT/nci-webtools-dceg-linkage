@@ -1091,7 +1091,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_plot_sub.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + myargs.dprime + " " + myargs.annotate
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate)
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1222,7 +1222,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_plot_sub.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + myargs.dprime + " " + myargs.annotate
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate) + " " + str(myargs.transcript)
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
