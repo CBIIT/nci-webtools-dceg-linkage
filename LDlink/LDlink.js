@@ -1379,6 +1379,10 @@ function updateLDassoc() {
                 window.open( assoc_plot, "_blank" )
             });
 
+            // enable button once .svg file is generated from subprocess
+            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".svg";
+            checkFile(id, fileURL);
+
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
         } else {
