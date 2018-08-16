@@ -1086,9 +1086,9 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# for i in range(len(inner)):
 		# 	print >> out_plot_sub, inner[i]
 
-		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
-			json.dump(vars(myargs), out_args)
-		out_args.close()
+		# with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+		# 	json.dump(vars(myargs), out_args)
+		# out_args.close()
 
 		# Open thread for high quality image exports
 		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + request
@@ -1219,11 +1219,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# 	print >> out_plot_sub, inner[i]
 
 		# out_plot_sub.close()
-		
-
-		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
-			json.dump(vars(myargs), out_args)
-		out_args.close()
 
 		# Open thread for high quality image exports
 		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + request
@@ -1288,6 +1283,10 @@ def main():
 	parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 
 	args=parser.parse_args()
+
+	with open(tmp_dir + 'assoc_args' + args.request + ".json", "w") as out_args:
+		json.dump(vars(args), out_args)
+	out_args.close()
 
 	if args.gene:
 		region="gene"
