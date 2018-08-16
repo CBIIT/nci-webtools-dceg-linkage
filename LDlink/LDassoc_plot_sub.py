@@ -966,112 +966,112 @@ def plot_assoc(file, region, pop, request, myargs):
         # Remove scaled SVG file after it is converted to png and jpeg
         subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
-	# Gene Plot (Collapsed)
+    # Gene Plot (Collapsed)
     else:
-		tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
-		subprocess.call(tabix_gene_c, shell=True)
-		filename_c=tmp_dir+"genes_c_"+request+".txt"
-		genes_c_raw=open(filename_c).readlines()
+        tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
+        subprocess.call(tabix_gene_c, shell=True)
+        filename_c=tmp_dir+"genes_c_"+request+".txt"
+        genes_c_raw=open(filename_c).readlines()
 
-		genes_c_plot_start=[]
-		genes_c_plot_end=[]
-		genes_c_plot_y=[]
-		genes_c_plot_name=[]
-		exons_c_plot_x=[]
-		exons_c_plot_y=[]
-		exons_c_plot_w=[]
-		exons_c_plot_h=[]
-		exons_c_plot_name=[]
-		exons_c_plot_id=[]
-		message_c = ["Too many genes to plot."]
-		lines_c=[0]
-		gap=80000
-		tall=0.75
-		if genes_c_raw!=None:
-			for i in range(len(genes_c_raw)):
-				chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
-				e_start=exonStarts.split(",")
-				e_end=exonEnds.split(",")
-				e_transcripts=transcripts.split(",")
+        genes_c_plot_start=[]
+        genes_c_plot_end=[]
+        genes_c_plot_y=[]
+        genes_c_plot_name=[]
+        exons_c_plot_x=[]
+        exons_c_plot_y=[]
+        exons_c_plot_w=[]
+        exons_c_plot_h=[]
+        exons_c_plot_name=[]
+        exons_c_plot_id=[]
+        message_c = ["Too many genes to plot."]
+        lines_c=[0]
+        gap=80000
+        tall=0.75
+        if genes_c_raw!=None:
+            for i in range(len(genes_c_raw)):
+                chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
+                e_start=exonStarts.split(",")
+                e_end=exonEnds.split(",")
+                e_transcripts=transcripts.split(",")
 
-				# Determine Y Coordinate
-				i=0
-				y_coord=None
-				while y_coord==None:
-					if i>len(lines_c)-1:
-						y_coord=i+1
-						lines_c.append(int(txEnd))
-					elif int(txStart)>(gap+lines_c[i]):
-						y_coord=i+1
-						lines_c[i]=int(txEnd)
-					else:
-						i+=1
+                # Determine Y Coordinate
+                i=0
+                y_coord=None
+                while y_coord==None:
+                    if i>len(lines_c)-1:
+                        y_coord=i+1
+                        lines_c.append(int(txEnd))
+                    elif int(txStart)>(gap+lines_c[i]):
+                        y_coord=i+1
+                        lines_c[i]=int(txEnd)
+                    else:
+                        i+=1
 
-				genes_c_plot_start.append(int(txStart)/1000000.0)
-				genes_c_plot_end.append(int(txEnd)/1000000.0)
-				genes_c_plot_y.append(y_coord)
-				genes_c_plot_name.append(name+"  ")
+                genes_c_plot_start.append(int(txStart)/1000000.0)
+                genes_c_plot_end.append(int(txEnd)/1000000.0)
+                genes_c_plot_y.append(y_coord)
+                genes_c_plot_name.append(name+"  ")
 
-				for i in range(len(e_start)):
+                for i in range(len(e_start)):
 
-					width=(int(e_end[i])-int(e_start[i]))/1000000.0
-					x_coord=int(e_start[i])/1000000.0+(width/2)
+                    width=(int(e_end[i])-int(e_start[i]))/1000000.0
+                    x_coord=int(e_start[i])/1000000.0+(width/2)
 
-					exons_c_plot_x.append(x_coord)
-					exons_c_plot_y.append(y_coord)
-					exons_c_plot_w.append(width)
-					exons_c_plot_h.append(tall)
-					exons_c_plot_name.append(name)
-					exons_c_plot_id.append(e_transcripts[i].replace("-",","))
+                    exons_c_plot_x.append(x_coord)
+                    exons_c_plot_y.append(y_coord)
+                    exons_c_plot_w.append(width)
+                    exons_c_plot_h.append(tall)
+                    exons_c_plot_name.append(name)
+                    exons_c_plot_id.append(e_transcripts[i].replace("-",","))
 
 
-		n_rows_c=len(lines_c)
-		genes_c_plot_yn=[n_rows_c-x+0.5 for x in genes_c_plot_y]
-		exons_c_plot_yn=[n_rows_c-x+0.5 for x in exons_c_plot_y]
-		yr2_c=Range1d(start=0, end=n_rows_c)
+        n_rows_c=len(lines_c)
+        genes_c_plot_yn=[n_rows_c-x+0.5 for x in genes_c_plot_y]
+        exons_c_plot_yn=[n_rows_c-x+0.5 for x in exons_c_plot_y]
+        yr2_c=Range1d(start=0, end=n_rows_c)
 
-		data_gene_c_plot = {'exons_c_plot_x': exons_c_plot_x, 'exons_c_plot_yn': exons_c_plot_yn, 'exons_c_plot_w': exons_c_plot_w, 'exons_c_plot_h': exons_c_plot_h, 'exons_c_plot_name': exons_c_plot_name, 'exons_c_plot_id': exons_c_plot_id}
-		source_gene_c_plot=ColumnDataSource(data_gene_c_plot)
+        data_gene_c_plot = {'exons_c_plot_x': exons_c_plot_x, 'exons_c_plot_yn': exons_c_plot_yn, 'exons_c_plot_w': exons_c_plot_w, 'exons_c_plot_h': exons_c_plot_h, 'exons_c_plot_name': exons_c_plot_name, 'exons_c_plot_id': exons_c_plot_id}
+        source_gene_c_plot=ColumnDataSource(data_gene_c_plot)
 
-		max_genes_c = 40
-		if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
-			plot_c_h_pix = 150
-		else:
-			plot_c_h_pix = 150 + (len(lines_c) - 2) * 50
+        max_genes_c = 40
+        if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
+            plot_c_h_pix = 150
+        else:
+            plot_c_h_pix = 150 + (len(lines_c) - 2) * 50
 
-		gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
-						   x_range=xr, y_range=yr2_c, border_fill_color='white',
-						   title="", h_symmetry=False, v_symmetry=False, logo=None,
-						   plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+        gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+                            x_range=xr, y_range=yr2_c, border_fill_color='white',
+                            title="", h_symmetry=False, v_symmetry=False, logo=None,
+                            plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-		if len(genes_c_raw) <= max_genes_c:
-			gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
-							  genes_c_plot_yn, color="black", alpha=1, line_width=2)
-			gene_c_plot.rect(x='exons_c_plot_x', y='exons_c_plot_yn', width='exons_c_plot_w', height='exons_c_plot_h',
-						   source=source_gene_c_plot, fill_color="grey", line_color="grey")
-			gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
-						   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-			hover = gene_c_plot.select(dict(type=HoverTool))
-			hover.tooltips = OrderedDict([
-				("Gene", "@exons_c_plot_name"),
-				("Transcript IDs", "@exons_c_plot_id"),
-			])
+        if len(genes_c_raw) <= max_genes_c:
+            gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
+                                genes_c_plot_yn, color="black", alpha=1, line_width=2)
+            gene_c_plot.rect(x='exons_c_plot_x', y='exons_c_plot_yn', width='exons_c_plot_w', height='exons_c_plot_h',
+                            source=source_gene_c_plot, fill_color="grey", line_color="grey")
+            gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
+                            text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+            hover = gene_c_plot.select(dict(type=HoverTool))
+            hover.tooltips = OrderedDict([
+                ("Gene", "@exons_c_plot_name"),
+                ("Transcript IDs", "@exons_c_plot_id"),
+            ])
 
-		else:
-			x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
-			gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
-						   text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+        else:
+            x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+            gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
+                            text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
-		gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
-		gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
-		gene_c_plot.ygrid.grid_line_color = None
-		gene_c_plot.yaxis.axis_line_color = None
-		gene_c_plot.yaxis.minor_tick_line_color = None
-		gene_c_plot.yaxis.major_tick_line_color = None
-		gene_c_plot.yaxis.major_label_text_color = None
+        gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+        gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
+        gene_c_plot.ygrid.grid_line_color = None
+        gene_c_plot.yaxis.axis_line_color = None
+        gene_c_plot.yaxis.minor_tick_line_color = None
+        gene_c_plot.yaxis.major_tick_line_color = None
+        gene_c_plot.yaxis.major_label_text_color = None
 
-		gene_c_plot.toolbar_location = "below"
-		
+        gene_c_plot.toolbar_location = "below"
+        
         # Change output backend to SVG temporarily for headless export
         assoc_plot.output_backend = "svg"
         rug.output_backend = "svg"
@@ -1102,45 +1102,45 @@ def plot_assoc(file, region, pop, request, myargs):
         # Remove scaled SVG file after it is converted to png and jpeg
         subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
-	reset_output()
+    reset_output()
 
-	# Remove temporary files
-	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
-	subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
+    # Remove temporary files
+    subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
 
 
-	# Return plot output
-	return None
+    # Return plot output
+    return None
 
 
 def main():
-	# tmp_dir="./tmp/"
+    # tmp_dir="./tmp/"
 
-	# Import LDassoc options
-	# parser=argparse.ArgumentParser()
-	# parser.add_argument("file", type=str, help="association file containing p-values")
-	# region=parser.add_mutually_exclusive_group(required=True)
-	# region.add_argument("-g", "--gene", help="run LDassoc in gene mode (--name required)", action="store_true")
-	# region.add_argument("-r", "--region", help="run LDassoc in region mode (--start and --stop required)", action="store_true")
-	# region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
-	# parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
-	# parser.add_argument("request", type=str, help="id for submitted command")
-	# parser.add_argument("-a", "--annotate", help="annotate plot with RegulomeDB scores", action="store_true")
-	# parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
-	# parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
-	# parser.add_argument("-d", "--dprime", help="plot D prime rather than R2", action="store_true")
-	# parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
-	# parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
-	# parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
-	# parser.add_argument("-o", "--origin", type=str, help="reference variant RS number (required with --variant)(default is lowest p-value in region)")
-	# parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
-	# parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
-	# parser.add_argument("-t", "--transcript", help="plot all gene transcripts", action="store_true")
-	# parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
+    # Import LDassoc options
+    # parser=argparse.ArgumentParser()
+    # parser.add_argument("file", type=str, help="association file containing p-values")
+    # region=parser.add_mutually_exclusive_group(required=True)
+    # region.add_argument("-g", "--gene", help="run LDassoc in gene mode (--name required)", action="store_true")
+    # region.add_argument("-r", "--region", help="run LDassoc in region mode (--start and --stop required)", action="store_true")
+    # region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
+    # parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
+    # parser.add_argument("request", type=str, help="id for submitted command")
+    # parser.add_argument("-a", "--annotate", help="annotate plot with RegulomeDB scores", action="store_true")
+    # parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
+    # parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
+    # parser.add_argument("-d", "--dprime", help="plot D prime rather than R2", action="store_true")
+    # parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
+    # parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
+    # parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
+    # parser.add_argument("-o", "--origin", type=str, help="reference variant RS number (required with --variant)(default is lowest p-value in region)")
+    # parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
+    # parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
+    # parser.add_argument("-t", "--transcript", help="plot all gene transcripts", action="store_true")
+    # parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
 
-	# args=parser.parse_args()
+    # args=parser.parse_args()
 
     # Import LDassoc options
     if len(sys.argv) == 3:
@@ -1152,47 +1152,47 @@ def main():
     args_raw=open(filename).readlines()
     args = json.parse(args_raw[0])
 
-	if args.gene:
-		region="gene"
-	elif args.region:
-		region="region"
-	elif args.variant:
-		region="variant"
+    if args.gene:
+        region="gene"
+    elif args.region:
+        region="region"
+    elif args.variant:
+        region="variant"
 
 
-	# Run function
-	plot_assoc(args.file,region,args.pop,args.request,args)
+    # Run function
+    plot_assoc(args.file,region,args.pop,args.request,args)
 
 
-	# Print output
-	# with open(tmp_dir+"assoc"+args.request+".json") as f:
-	# 	json_dict=json.load(f)
+    # Print output
+    # with open(tmp_dir+"assoc"+args.request+".json") as f:
+    # 	json_dict=json.load(f)
 
-	# try:
-	# 	json_dict["error"]
+    # try:
+    # 	json_dict["error"]
 
-	# except KeyError:
-	# 	head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
-	# 	print "\t".join(head)
-	# 	temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
-	# 	print "\t".join(temp)
-	# 	for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
-	# 		temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
-	# 		print "\t".join(temp)
+    # except KeyError:
+    # 	head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
+    # 	print "\t".join(head)
+    # 	temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
+    # 	print "\t".join(temp)
+    # 	for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
+    # 		temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+    # 		print "\t".join(temp)
 
-	# else:
-	# 	print ""
-	# 	print json_dict["error"]
-	# 	print ""
+    # else:
+    # 	print ""
+    # 	print json_dict["error"]
+    # 	print ""
 
-	# try:
-	# 	json_dict["warning"]
-	# except KeyError:
-	# 	print ""
-	# else:
-	# 	print "WARNING: "+json_dict["warning"]+"!"
-	# 	print ""
+    # try:
+    # 	json_dict["warning"]
+    # except KeyError:
+    # 	print ""
+    # else:
+    # 	print "WARNING: "+json_dict["warning"]+"!"
+    # 	print ""
 
 
 if __name__ == "__main__":
-	main()
+    main()
