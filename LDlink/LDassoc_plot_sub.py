@@ -10,7 +10,7 @@ from math import log10
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_assoc(file, region, pop, request, myargs):
+def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin):
     start_time=time.time()
 
     # Set data directories using config.yml
@@ -36,14 +36,14 @@ def calculate_assoc(file, region, pop, request, myargs):
 
     # Define parameters for --variant option
     if region=="variant":
-        if myargs.origin==None:
+        if myargsOrigin==None:
             return None
             raise
 
-    if myargs.origin!=None:
+    if myargsOrigin!=None:
         # Find coordinates (GRCh37/hg19) for SNP RS number
-        if myargs.origin[0:2]=="rs":
-            snp=myargs.origin
+        if myargsOrigin[0:2]=="rs":
+            snp=myargsOrigin
 
             # Connect to snp database
             conn=sqlite3.connect(snp_dir)
@@ -67,9 +67,9 @@ def calculate_assoc(file, region, pop, request, myargs):
                 return None
                 raise
 
-        elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
-            snp=myargs.origin
-            var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
+        elif myargsOrigin.split(":")[0].strip("chr") in chrs and len(myargsOrigin.split(":"))==2:
+            snp=myargsOrigin
+            var_coord=[None,myargsOrigin.split(":")[0].strip("chr"),myargsOrigin.split(":")[1]]
 
         else:
             return None
@@ -124,7 +124,7 @@ def calculate_assoc(file, region, pop, request, myargs):
         coord2=int(org_coord)+window
 
     elif region=="gene":
-        if myargs.name==None:
+        if myargsName==None:
             return None
             raise
 
@@ -140,7 +140,7 @@ def calculate_assoc(file, region, pop, request, myargs):
             return cur.fetchone()
 
         # Find RS number in snp database
-        gene_coord=get_coords(myargs.name)
+        gene_coord=get_coords(myargsName)
 
         # Close snp connection
         cur.close()
@@ -157,7 +157,7 @@ def calculate_assoc(file, region, pop, request, myargs):
         coord2=int(gene_coord[3])+window
 
         # Run with --origin option
-        if myargs.origin!=None:
+        if myargsOrigin!=None:
             if gene_coord[1]!=chromosome:
                 return None
                 raise
@@ -207,7 +207,7 @@ def calculate_assoc(file, region, pop, request, myargs):
         coord2=int(coord_e)+window
 
         # Run with --origin option
-        if myargs.origin!=None:
+        if myargsOrigin!=None:
             if chr_s!=chromosome:
                 return None
                 raise
@@ -1147,12 +1147,14 @@ def main():
     # args=parser.parse_args()
 
     # Import LDassoc options
-    if len(sys.argv) == 6:
+    if len(sys.argv) == 9:
         filename = sys.argv[1]
         file = sys.argv[2]
         region = sys.argv[3]
         pop = sys.argv[4]
         request = sys.argv[5]
+        myargsName = sys.argv[6]
+        myargsOrigin = sys.argv[7]
     else:
         sys.exit()
 
@@ -1171,7 +1173,7 @@ def main():
 
 
     # Run function
-    calculate_assoc(file, region, pop, request, args)
+    calculate_assoc(file, region, pop, request, args, myargsName, myargsOrigin)
 
 
     # Print output
