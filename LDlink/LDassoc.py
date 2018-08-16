@@ -1087,7 +1087,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		# 	print >> out_plot_sub, inner[i]
 
 		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
-		json.dump(vars(myargs), out_args)
+			json.dump(vars(myargs), out_args)
 		out_args.close()
 
 		# Open thread for high quality image exports
@@ -1222,7 +1222,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		
 
 		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
-		json.dump(vars(myargs), out_args)
+			json.dump(vars(myargs), out_args)
 		out_args.close()
 
 		# Open thread for high quality image exports

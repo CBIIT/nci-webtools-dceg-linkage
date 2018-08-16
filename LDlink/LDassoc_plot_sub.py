@@ -10,7 +10,7 @@ from math import log10
 #!/usr/bin/env python
 
 # Create LDproxy function
-def plot_assoc(file, region, pop, request, myargs):
+def calculate_assoc(file, region, pop, request, myargs):
     start_time=time.time()
 
     # Set data directories using config.yml
@@ -1167,7 +1167,7 @@ def main():
 
 
     # Run function
-    plot_assoc(args.file, region, args.pop, args.request, args)
+    calculate_assoc(args.file, region, args.pop, args.request, args)
 
 
     # Print output
