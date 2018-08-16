@@ -733,7 +733,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
     import svgutils.compose as sg
 
     reset_output()
-    
+
     data_p = {'p_plot_posX': p_plot_pos, 'p_plot_pvalY': p_plot_pval, 'p_plot_pos2': p_plot_pos2, 'p_plot_pval2': p_plot_pval2, 'p_plot_dist': p_plot_dist}
     source_p = ColumnDataSource(data_p)
 
@@ -1114,7 +1114,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
     subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
-    # subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
+    subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
 
     # Return plot output
