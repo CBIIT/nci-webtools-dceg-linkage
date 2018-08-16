@@ -81,9 +81,9 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
 
     # Open Association Data
     header_list=[]
-    header_list.append(myargs.chr)
-    header_list.append(myargs.bp)
-    header_list.append(myargs.pval)
+    header_list.append(myargs['chr'])
+    header_list.append(myargs['bp'])
+    header_list.append(myargs['pval'])
 
     # Load input file
     assoc_data=open(file).readlines()
@@ -101,13 +101,13 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
 
     len_head=len(header)
 
-    chr_index=header.index(myargs.chr)
-    pos_index=header.index(myargs.bp)
-    p_index=header.index(myargs.pval)
+    chr_index=header.index(myargs['chr'])
+    pos_index=header.index(myargs['bp'])
+    p_index=header.index(myargs['pval'])
 
 
     # Define window of interest around query SNP
-    if myargs.window==None:
+    if myargs['window']==None:
         if region=="variant":
             window=500000
         elif region=="gene":
@@ -115,7 +115,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
         else:
             window=0
     else:
-        window=myargs.window
+        window=myargs['window']
 
     if region=="variant":
         coord1=int(org_coord)-window
@@ -168,25 +168,25 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
             chromosome=gene_coord[1]
 
     elif region=="region":
-        if myargs.start==None:
+        if myargs['start']==None:
             return None
             raise
-        if myargs.end==None:
+        if myargs['end']==None:
             return None
             raise
 
         # Parse out chr and positions for --region option
-        if len(myargs.start.split(":"))!=2:
+        if len(myargs['start'].split(":"))!=2:
             return None
             raise
-        if len(myargs.end.split(":"))!=2:
+        if len(myargs['end'].split(":"))!=2:
             return None
             raise
 
-        chr_s=myargs.start.strip("chr").split(":")[0]
-        coord_s=myargs.start.split(":")[1]
-        chr_e=myargs.end.strip("chr").split(":")[0]
-        coord_e=myargs.end.split(":")[1]
+        chr_s=myargs['start'].strip("chr").split(":")[0]
+        coord_s=myargs['start'].split(":")[1]
+        chr_e=myargs['end'].strip("chr").split(":")[0]
+        coord_e=myargs['end'].split(":")[1]
 
         if chr_s not in chrs:
             return None
@@ -692,10 +692,10 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
             color_i="#0000FF"
             alpha_i=0.7
         else:
-            if myargs.dprime==True:
+            if myargs['dprime']==True:
                 color_i=reds[int(d_prime_i*100.0)]
                 alpha_i=0.7
-            elif myargs.dprime==False:
+            elif myargs['dprime']==False:
                 color_i=reds[int(r2_i*100.0)]
                 alpha_i=0.7
         color.append(color_i)
@@ -797,7 +797,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
     assoc_plot.add_tools(hover)
 
     # Annotate RebulomeDB scores
-    if myargs.annotate==True:
+    if myargs['annotate']==True:
         assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 
     assoc_plot.yaxis.axis_label="-log10 P-value"
@@ -824,7 +824,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
 
 
     # Gene Plot (All Transcripts)
-    if myargs.transcript==True:
+    if myargs['transcript']==True:
         tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
         subprocess.call(tabix_gene, shell=True)
         filename=tmp_dir+"genes_"+request+".txt"
