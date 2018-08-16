@@ -967,7 +967,7 @@ def plot_assoc(file, region, pop, request, myargs):
         subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
 	# Gene Plot (Collapsed)
-	else:
+    else:
 		tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
 		subprocess.call(tabix_gene_c, shell=True)
 		filename_c=tmp_dir+"genes_c_"+request+".txt"
