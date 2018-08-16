@@ -1152,8 +1152,11 @@ def main():
     else:
         sys.exit()
 
-    args_raw=open(filename).readlines()
-    args = json.parse(args_raw[0])
+    with open(filename) as f:
+    args = json.load(f)
+
+    # args_raw=open(filename).readlines()
+    # args = json.parse(args_raw[0])
 
     if args.gene:
         region="gene"
@@ -1164,7 +1167,7 @@ def main():
 
 
     # Run function
-    plot_assoc(args.file,region,args.pop,args.request,args)
+    plot_assoc(args.file, region, args.pop, args.request, args)
 
 
     # Print output
