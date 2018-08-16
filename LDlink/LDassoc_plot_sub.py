@@ -729,9 +729,11 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
     from bokeh.models import HoverTool,LinearAxis,Range1d
     from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
     from bokeh.resources import CDN
-
+    from bokeh.io import export_svgs
+    import svgutils.compose as sg
 
     reset_output()
+    
     data_p = {'p_plot_posX': p_plot_pos, 'p_plot_pvalY': p_plot_pval, 'p_plot_pos2': p_plot_pos2, 'p_plot_pval2': p_plot_pval2, 'p_plot_dist': p_plot_dist}
     source_p = ColumnDataSource(data_p)
 
