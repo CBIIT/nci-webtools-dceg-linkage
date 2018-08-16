@@ -36,11 +36,11 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
 
     # Define parameters for --variant option
     if region=="variant":
-        if myargsOrigin==None:
+        if myargsOrigin=="None":
             return None
             raise
 
-    if myargsOrigin!=None:
+    if myargsOrigin!="None":
         # Find coordinates (GRCh37/hg19) for SNP RS number
         if myargsOrigin[0:2]=="rs":
             snp=myargsOrigin
@@ -124,7 +124,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
         coord2=int(org_coord)+window
 
     elif region=="gene":
-        if myargsName==None:
+        if myargsName=="None":
             return None
             raise
 
@@ -157,7 +157,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
         coord2=int(gene_coord[3])+window
 
         # Run with --origin option
-        if myargsOrigin!=None:
+        if myargsOrigin!="None":
             if gene_coord[1]!=chromosome:
                 return None
                 raise
@@ -207,7 +207,7 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
         coord2=int(coord_e)+window
 
         # Run with --origin option
-        if myargsOrigin!=None:
+        if myargsOrigin!="None":
             if chr_s!=chromosome:
                 return None
                 raise
@@ -1147,7 +1147,7 @@ def main():
     # args=parser.parse_args()
 
     # Import LDassoc options
-    if len(sys.argv) == 9:
+    if len(sys.argv) == 8:
         filename = sys.argv[1]
         file = sys.argv[2]
         region = sys.argv[3]

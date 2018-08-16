@@ -1078,8 +1078,21 @@ def calculate_assoc(file, region, pop, request, myargs):
 			json.dump(vars(myargs), out_args)
 		out_args.close()
 
+		myargsName = "None"
+		if myargs.name==None:
+			myargsName = "None"
+		else:
+			myargsName = myargs.name
+
+		myargsOrigin = "None"
+		if myargs.origin==None:
+			myargsOrigin = "None"
+		else:
+			myargsOrigin = myargs.origin
+		
+
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargs.name + " " + myargs.origin
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1198,8 +1211,20 @@ def calculate_assoc(file, region, pop, request, myargs):
 			json.dump(vars(myargs), out_args)
 		out_args.close()
 
+		myargsName = "None"
+		if myargs.name==None:
+			myargsName = "None"
+		else:
+			myargsName = myargs.name
+
+		myargsOrigin = "None"
+		if myargs.origin==None:
+			myargsOrigin = "None"
+		else:
+			myargsOrigin = myargs.origin
+
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargs.name + " " + myargs.origin
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
