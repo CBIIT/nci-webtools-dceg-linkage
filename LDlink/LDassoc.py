@@ -1091,7 +1091,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_args.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".txt" + " " + request
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1226,7 +1226,7 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_args.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".txt" + " " + request
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
