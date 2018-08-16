@@ -330,9 +330,6 @@ def calculate_assoc(file, region, pop, request, myargs):
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
 
-	out_plot_sub = open(tmp_dir + 'assoc_plot_sub' + request + ".txt", "w")
-	print >> out_plot_sub, '$'.join(a_pos)
-
 	# Coordinate list checks
 	if len(assoc_coords)==0:
 		output["error"]="There are no variants in the association file with genomic coordinates inside the plotting window."
@@ -1078,21 +1075,23 @@ def calculate_assoc(file, region, pop, request, myargs):
 			ncols=1, toolbar_options=dict(logo=None))
 
 		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
-		inner = []
-		for i in range(len(out_p_sort)):
-			if isinstance(out_p_sort[i], list):
-				for j in range(len(out_p_sort[i])):
-					out_p_sort[i][j] = str(out_p_sort[i][j])
-				inner.append('$'.join(out_p_sort[i]))
-			else:
-				inner.append(str(out_p_sort[i]))
-		for i in range(len(inner)):
-			print >> out_plot_sub, inner[i]
+		# inner = []
+		# for i in range(len(out_p_sort)):
+		# 	if isinstance(out_p_sort[i], list):
+		# 		for j in range(len(out_p_sort[i])):
+		# 			out_p_sort[i][j] = str(out_p_sort[i][j])
+		# 		inner.append('$'.join(out_p_sort[i]))
+		# 	else:
+		# 		inner.append(str(out_p_sort[i]))
+		# for i in range(len(inner)):
+		# 	print >> out_plot_sub, inner[i]
 
-		out_plot_sub.close()
+		out_args = open(tmp_dir + 'assoc_args' + request + ".txt", "w")
+		print >> out_args, json.dump(myargs)
+		out_args.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate) + " " + str(myargs.transcript) + " " + snp + " " + pop
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".txt" + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1208,21 +1207,26 @@ def calculate_assoc(file, region, pop, request, myargs):
 
 
 		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
-		inner = []
-		for i in range(len(out_p_sort)):
-			if isinstance(out_p_sort[i], list):
-				for j in range(len(out_p_sort[i])):
-					out_p_sort[i][j] = str(out_p_sort[i][j])
-				inner.append('$'.join(out_p_sort[i]))
-			else:
-				inner.append(str(out_p_sort[i]))
-		for i in range(len(inner)):
-			print >> out_plot_sub, inner[i]
+		# inner = []
+		# for i in range(len(out_p_sort)):
+		# 	if isinstance(out_p_sort[i], list):
+		# 		for j in range(len(out_p_sort[i])):
+		# 			out_p_sort[i][j] = str(out_p_sort[i][j])
+		# 		inner.append('$'.join(out_p_sort[i]))
+		# 	else:
+		# 		inner.append(str(out_p_sort[i]))
+		# for i in range(len(inner)):
+		# 	print >> out_plot_sub, inner[i]
 
-		out_plot_sub.close()
+		# out_plot_sub.close()
+		
+
+		out_args = open(tmp_dir + 'assoc_args' + request + ".txt", "w")
+		print >> out_args, json.dump(myargs)
+		out_args.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_plot_sub' + request + ".txt" + " " + request + " " + str(myargs.dprime) + " " + str(myargs.annotate) + " " + str(myargs.transcript) + " " + snp + " " + pop
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".txt" + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
