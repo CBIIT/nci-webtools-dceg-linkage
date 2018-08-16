@@ -1147,9 +1147,12 @@ def main():
     # args=parser.parse_args()
 
     # Import LDassoc options
-    if len(sys.argv) == 3:
+    if len(sys.argv) == 6:
         filename = sys.argv[1]
-        request = sys.argv[2]
+        file = sys.argv[2]
+        region = sys.argv[3]
+        pop = sys.argv[4]
+        request = sys.argv[5]
     else:
         sys.exit()
 
@@ -1159,16 +1162,16 @@ def main():
     # args_raw=open(filename).readlines()
     # args = json.parse(args_raw[0])
 
-    if args.gene:
-        region="gene"
-    elif args.region:
-        region="region"
-    elif args.variant:
-        region="variant"
+    # if args.gene:
+    #     region="gene"
+    # elif args.region:
+    #     region="region"
+    # elif args.variant:
+    #     region="variant"
 
 
     # Run function
-    calculate_assoc(args.file, region, args.pop, args.request, args)
+    calculate_assoc(file, region, pop, request, args)
 
 
     # Print output

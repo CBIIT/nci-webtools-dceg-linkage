@@ -1074,24 +1074,12 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
 
-		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
-		# inner = []
-		# for i in range(len(out_p_sort)):
-		# 	if isinstance(out_p_sort[i], list):
-		# 		for j in range(len(out_p_sort[i])):
-		# 			out_p_sort[i][j] = str(out_p_sort[i][j])
-		# 		inner.append('$'.join(out_p_sort[i]))
-		# 	else:
-		# 		inner.append(str(out_p_sort[i]))
-		# for i in range(len(inner)):
-		# 	print >> out_plot_sub, inner[i]
-
-		# with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
-		# 	json.dump(vars(myargs), out_args)
-		# out_args.close()
+		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+			json.dump(vars(myargs), out_args)
+		out_args.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + request
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1206,22 +1194,12 @@ def calculate_assoc(file, region, pop, request, myargs):
 					ncols=1, toolbar_options=dict(logo=None))
 
 
-		# Convert 2d array out_p_sort to string to be passed into subprocess via temporary txt file
-		# inner = []
-		# for i in range(len(out_p_sort)):
-		# 	if isinstance(out_p_sort[i], list):
-		# 		for j in range(len(out_p_sort[i])):
-		# 			out_p_sort[i][j] = str(out_p_sort[i][j])
-		# 		inner.append('$'.join(out_p_sort[i]))
-		# 	else:
-		# 		inner.append(str(out_p_sort[i]))
-		# for i in range(len(inner)):
-		# 	print >> out_plot_sub, inner[i]
-
-		# out_plot_sub.close()
+		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+			json.dump(vars(myargs), out_args)
+		out_args.close()
 
 		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + request
+		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request
 		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
@@ -1284,9 +1262,9 @@ def main():
 
 	args=parser.parse_args()
 
-	with open(tmp_dir + 'assoc_args' + args.request + ".json", "w") as out_args:
-		json.dump(vars(args), out_args)
-	out_args.close()
+	# with open(tmp_dir + 'assoc_args' + args.request + ".json", "w") as out_args:
+	# 	json.dump(vars(args), out_args)
+	# out_args.close()
 
 	if args.gene:
 		region="gene"
@@ -1301,8 +1279,8 @@ def main():
 
 
 	# Print output
-	with open(tmp_dir+"assoc"+args.request+".json") as f:
-		json_dict=json.load(f)
+	# with open(tmp_dir+"assoc"+args.request+".json") as f:
+	# 	json_dict=json.load(f)
 
 	try:
 		json_dict["error"]
