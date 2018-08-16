@@ -1153,7 +1153,7 @@ def main():
         sys.exit()
 
     with open(filename) as f:
-    args = json.load(f)
+        args = json.load(f)
 
     # args_raw=open(filename).readlines()
     # args = json.parse(args_raw[0])
