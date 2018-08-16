@@ -1079,16 +1079,23 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_args.close()
 
 		myargsName = "None"
-		if myargs.name==None:
-			myargsName = "None"
-		else:
-			myargsName = myargs.name
+		try:
+			if myargs.name==None:
+				myargsName = "None"
+			else:
+				myargsName = myargs.name
+		except:
+			pass
+		
 
 		myargsOrigin = "None"
-		if myargs.origin==None:
-			myargsOrigin = "None"
-		else:
-			myargsOrigin = myargs.origin
+		try:
+			if myargs.origin==None:
+				myargsOrigin = "None"
+			else:
+				myargsOrigin = myargs.origin
+		except:
+			pass
 		
 
 		# Open thread for high quality image exports
@@ -1212,16 +1219,22 @@ def calculate_assoc(file, region, pop, request, myargs):
 		out_args.close()
 
 		myargsName = "None"
-		if myargs.name==None:
-			myargsName = "None"
-		else:
-			myargsName = myargs.name
+		try:
+			if myargs.name==None:
+				myargsName = "None"
+			else:
+				myargsName = myargs.name
+		except:
+			pass
 
 		myargsOrigin = "None"
-		if myargs.origin==None:
-			myargsOrigin = "None"
-		else:
-			myargsOrigin = myargs.origin
+		try:
+			if myargs.origin==None:
+				myargsOrigin = "None"
+			else:
+				myargsOrigin = myargs.origin
+		except:
+			pass
 
 		# Open thread for high quality image exports
 		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
