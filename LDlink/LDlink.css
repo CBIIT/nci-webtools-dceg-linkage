@@ -12,26 +12,26 @@
 
 /*AuthorArranger Ad*/
 .authorarranger_ad{
-	font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 500;
   font-size: medium;
-	border:1px solid #BEE5EB;
-	background: #D1ECF1;
-	border-radius:4px;
-	padding: 15px 0px 5px 20px;
-	margin-bottom:25px;
-	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-	text-align: center;
+  border:1px solid #BEE5EB;
+  background: #D1ECF1;
+  border-radius:4px;
+  padding: 15px 0px 15px 0px;
+  margin-bottom:25px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  text-align: center;
 }
 
 .close {
-padding: 5px 0px 0px 0px;
+  padding: 5px 0px 0px 0px;
 }
 
 
 /*disable bk logo */
 .bk-logo-small {
-   display:none;
+  display:none;
 }
 
 .nav-tabs {
