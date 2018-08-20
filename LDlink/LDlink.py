@@ -224,7 +224,13 @@ def ldproxy():
         isProgrammatic = True
 
     try:
-        out_script, out_div = calculate_proxy(var, pop, reference, r2_d)
+        # pass flag to LDproxy to allow svg generation only for web instance
+        web = False
+        if 'LDlinkRestWeb' in request.path:
+            web = True
+        else:
+            web = False
+        out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
         if isProgrammatic:
                 fp = open('./tmp/proxy'+reference+'.txt', "r")
                 content = fp.read()
@@ -637,7 +643,13 @@ def ldassoc():
     print "annotate: " + str(myargs.annotate)
 
     try:
-        out_json = calculate_assoc(filename, region, pop, reference, myargs)
+        # pass flag to LDproxy to allow svg generation only for web instance
+        web = False
+        if 'LDlinkRestWeb' in request.path:
+            web = True
+        else:
+            web = False
+        out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
     except:
         return sendTraceback()
 

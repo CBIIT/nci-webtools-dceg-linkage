@@ -2,7 +2,7 @@ import yaml
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_assoc(file, region, pop, request, myargs):
+def calculate_assoc(file, region, pop, request, web, myargs):
 	import csv,json,operator,os,sqlite3,subprocess,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
@@ -1098,9 +1098,11 @@ def calculate_assoc(file, region, pop, request, myargs):
 			pass
 		
 
-		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
-		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+		# Generate high quality images only if accessed via web instance
+		if web:
+			# Open thread for high quality image exports
+			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
 
@@ -1236,9 +1238,11 @@ def calculate_assoc(file, region, pop, request, myargs):
 		except:
 			pass
 
-		# Open thread for high quality image exports
-		command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
-		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+		# Generate high quality images only if accessed via web instance
+		if web:
+			# Open thread for high quality image exports
+			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
 	# Html output for testing #
@@ -1311,9 +1315,11 @@ def main():
 	elif args.variant:
 		region="variant"
 
+	# initialize web instance as True if run via main
+	web = True
 
 	# Run function
-	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
+	out_script,out_div=calculate_assoc(args.file, region, args.pop, args.request, web, args)
 
 
 	# Print output

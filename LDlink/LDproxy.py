@@ -2,7 +2,7 @@ import yaml
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, r2_d="r2"):
+def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     import csv
     import json
     import operator
@@ -770,9 +770,11 @@ def calculate_proxy(snp, pop, request, r2_d="r2"):
     out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
                         toolbar_options=dict(logo=None))
 
-    # Open thread for high quality image exports
-    command = "python LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
-    subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    # Generate high quality images only if accessed via web instance
+    if web:
+        # Open thread for high quality image exports
+        command = "python LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
+        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
     ###########################
@@ -811,22 +813,24 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import LDproxy options
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = False
+        web =sys.argv[4]
         r2_d = "r2"
-    elif len(sys.argv) == 5:
+    elif len(sys.argv) == 6:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
-        r2_d = sys.argv[4]
+        web = sys.argv [4]
+        r2_d = sys.argv[5]
     else:
         print "Correct useage is: LDproxy.py snp populations request (optional: r2_d)"
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_proxy(snp, pop, request, r2_d)
+    out_script, out_div = calculate_proxy(snp, pop, request, web, r2_d)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:
