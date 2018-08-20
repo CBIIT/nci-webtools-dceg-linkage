@@ -104,7 +104,7 @@ $(document).ready(function() {
         }
     });
 
-    $('#ldassoc').prop('disabled', true);
+    $('#ldassoc').prop('disabled', True);
 
     $("#example-gwas").click(function(e){
     //   console.log("Use example GWAS data.");
@@ -127,7 +127,7 @@ $(document).ready(function() {
           $("#assoc-position > button").text("Position: pos column");
           $("#assoc-p-value > button").val("p");
           $("#assoc-p-value > button").text("P-Value: p column");
-          $('#ldassoc-file').prop('disabled', true);
+          $('#ldassoc-file').prop('disabled', True);
           $('#ldassoc').removeAttr('disabled');
         });
 
@@ -155,8 +155,8 @@ $(document).ready(function() {
         refreshPopulation(["CEU"],"ldassoc");
         // console.log($("#ldassoc-population-codes").val());
       }else{
-        $('#ldassoc-file').prop('disabled', false);
-        $('#ldassoc').prop('disabled', true);
+        $('#ldassoc-file').prop('disabled', False);
+        $('#ldassoc').prop('disabled', True);
         $("#assoc-chromosome > button").val('');
         $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
         $("#assoc-position > button").val('');
@@ -284,7 +284,7 @@ $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL, isError) {
-    if (isError == false) {
+    if (isError == False) {
         $.ajax({
             type: 'POST',
             url: fileURL,
@@ -295,7 +295,7 @@ function checkFile(id, fileURL, isError) {
             },
             success : function(data) {
                 $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-                $('#' + id + "-menu1").prop('disabled', false);
+                $('#' + id + "-menu1").prop('disabled', False);
             }
         });
     }
@@ -377,7 +377,7 @@ function uploadFile2() {
         xhr: function() {  // Custom XMLHttpRequest
             var myXhr = $.ajaxSettings.xhr();
             if(myXhr.upload){ // Check if upload property exists
-                myXhr.upload.addEventListener('progress',progressHandlingFunction, false); // For handling the progress of the upload
+                myXhr.upload.addEventListener('progress',progressHandlingFunction, False); // For handling the progress of the upload
             }
             return myXhr;
         },
@@ -388,9 +388,9 @@ function uploadFile2() {
         // Form data
         data: formData,
         //Options to tell jQuery not to process data or worry about content-type.
-        cache: false,
-        contentType: false,
-        processData: false
+        cache: False,
+        contentType: False,
+        processData: False
     });
 }
 
@@ -480,7 +480,7 @@ function readSingleFile(evt) {
         var defaults = {
             separator:' ',
             delimiter:' ',
-            headers:true
+            headers:True
         };
         var data = $.csv.toObjects(contents, defaults);
         console.dir(data);
@@ -518,15 +518,15 @@ function loadCSVFile(event) {
 function createAssocTable() {
 
     var ldassocTable = $('#new-ldassoc').DataTable( {
-        "bPaginate": true,
-        "bJQueryUI": false,  // ThemeRoller
-        "bLengthChange": true,
-        "bFilter": true,
-        "bSort": true,
-        "bInfo": true,
-        "bAutoWidth": true,
-        "bProcessing": false,
-        "deferRender": false,
+        "bPaginate": True,
+        "bJQueryUI": False,  // ThemeRoller
+        "bLengthChange": True,
+        "bFilter": True,
+        "bSort": True,
+        "bInfo": True,
+        "bAutoWidth": True,
+        "bProcessing": False,
+        "deferRender": False,
         "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
         "columnDefs": [
             {
@@ -569,15 +569,15 @@ function createAssocTable() {
 function createProxyTable() {
 
     var ldproxyTable = $('#new-ldproxy').DataTable( {
-        "bPaginate": true,
-        "bJQueryUI": false,  // ThemeRoller
-        "bLengthChange": true,
-        "bFilter": true,
-        "bSort": true,
-        "bInfo": true,
-        "bAutoWidth": true,
-        "bProcessing": false,
-        "deferRender": false,
+        "bPaginate": True,
+        "bJQueryUI": False,  // ThemeRoller
+        "bLengthChange": True,
+        "bFilter": True,
+        "bSort": True,
+        "bInfo": True,
+        "bAutoWidth": True,
+        "bProcessing": False,
+        "deferRender": False,
         "order": [[ 7, "desc" ], [ 5, "desc"]], //Order desc on DPrime
         "columnDefs": [
             {
@@ -658,7 +658,7 @@ function setupTabs() {
 function refreshPopulation(pop, id) {
 
     $.each(pop, function(key, value){
-        $('option[value="'+value+'"]', $('#'+id+'-population-codes')).prop('selected', true);
+        $('option[value="'+value+'"]', $('#'+id+'-population-codes')).prop('selected', True);
     });
     $('#'+id+'-population-codes').multiselect('refresh');
 
@@ -707,15 +707,15 @@ function setupSNPchipControls() {
     $('#selectAllChipTypes').click(function(e) {
         if($(".illumina:checked").length == $("input.illumina").length &&
             $(".affymetrix:checked").length == $("input.affymetrix").length) {
-            $(".illumina").prop("checked", false);
-            $(".affymetrix").prop("checked", false);
-            $("#selectAllIllumina").prop("checked", false);
-            $("#selectAllAffymetrix").prop("checked", false);
+            $(".illumina").prop("checked", False);
+            $(".affymetrix").prop("checked", False);
+            $("#selectAllIllumina").prop("checked", False);
+            $("#selectAllAffymetrix").prop("checked", False);
         } else {
-            $(".illumina").prop("checked", true);
-            $(".affymetrix").prop("checked", true);
-            $("#selectAllIllumina").prop("checked", true);
-            $("#selectAllAffymetrix").prop("checked", true);
+            $(".illumina").prop("checked", True);
+            $(".affymetrix").prop("checked", True);
+            $("#selectAllIllumina").prop("checked", True);
+            $("#selectAllAffymetrix").prop("checked", True);
         }
         checkSelectAllCheckbox();
         calculateChipTotals();
@@ -726,20 +726,20 @@ function setupSNPchipControls() {
         //console.log("Look for state");
         //console.dir(e);
         //console.log($("#"+id).prop('checked'));
-        if($("#"+id).prop('checked') == true) {
-            $(".illumina").prop("checked", true);
+        if($("#"+id).prop('checked') == True) {
+            $(".illumina").prop("checked", True);
         } else {
-            $(".illumina").prop("checked", false);
+            $(".illumina").prop("checked", False);
         }
         checkSelectAllCheckbox();
         calculateChipTotals();
     });
     $('#selectAllAffymetrix').click(function(e) {
         var id = e.target.id;
-        if($("#"+id).prop('checked') == true) {
-            $(".affymetrix").prop("checked", true);
+        if($("#"+id).prop('checked') == True) {
+            $(".affymetrix").prop("checked", True);
         } else {
-            $(".affymetrix").prop("checked", false);
+            $(".affymetrix").prop("checked", False);
         }
         checkSelectAllCheckbox();
         calculateChipTotals();
@@ -759,14 +759,14 @@ function checkSelectAllCheckbox() {
     var total_affymetrix = $("input.affymetrix").length;
 
     if(illumina == total_illumina) {
-        $('#selectAllIllumina').prop('checked', true);
+        $('#selectAllIllumina').prop('checked', True);
     } else {
-        $('#selectAllIllumina').prop('checked', false);
+        $('#selectAllIllumina').prop('checked', False);
     }
     if(affymetrix == total_affymetrix) {
-        $('#selectAllAffymetrix').prop('checked', true);
+        $('#selectAllAffymetrix').prop('checked', True);
     } else {
-        $('#selectAllAffymetrix').prop('checked', false);
+        $('#selectAllAffymetrix').prop('checked', False);
     }
 
     if(illumina == total_illumina && affymetrix == total_affymetrix) {
@@ -785,9 +785,9 @@ function calculateChipTotals() {
     $('#illumina-count').text(illumina);
     $('#affymetrix-count').text(affymetrix);
     if(illumina == 0 && affymetrix == 0) {
-        $("#snpchip").prop('disabled', true);
+        $("#snpchip").prop('disabled', True);
     } else {
-        $("#snpchip").prop('disabled', false);
+        $("#snpchip").prop('disabled', False);
     }
 
 }
@@ -968,7 +968,7 @@ function cleanSNP(text) {
         $.each(line, function(key,value){
             if(value != "") {
                 variant = value;
-                return false;
+                return False;
             }
         });
 
@@ -1147,13 +1147,13 @@ function updateData(id) {
 function isBrowseSet(elementId) {
     var query = $('#header-values');
     var isVisible = query.is(':visible');
-    if(isVisible === true) {
+    if(isVisible === True) {
         $('#'+elementId+'-browse-set-none').popover('hide');
-        return true;
+        return True;
     } else {
         $('#'+elementId+'-browse-set-none').popover('show');
         setTimeout(function() { $('#'+elementId+'-browse-set-none').popover('hide'); }, 4000);
-        return false;
+        return False;
     }
 }
 
@@ -1161,83 +1161,83 @@ function isRegionSet(elementId) {
     var region =  $('#region-codes-menu1').html().replace(/&nbsp;<span class="caret"><\/span>/, "");
     if(region == "Gene" || region == "Region" || region == "Variant") {
         $('#'+elementId+'-region-codes-zero').popover('hide');
-        return true;
+        return True;
     } else {
         $('#'+elementId+'-region-codes-zero').popover('show');
         setTimeout(function() { $('#'+elementId+'-region-codes-zero').popover('hide'); }, 4000);
-        return false;
+        return False;
     }
 }
 
 function isGeneNameSet(elementId) {
   if ($('#region-gene-name').val().toString().length > 0) {
     $('#'+elementId+'-region-gene-name').popover('hide');
-    return true;
+    return True;
   }
   else {
     $('#'+elementId+'-region-gene-name').popover('show');
     setTimeout(function() { $('#'+elementId+'-region-gene-name').popover('hide'); }, 4000);
-    return false;
+    return False;
   }
 }
 
 function isGeneBPSet(elementId) {
   if ($('#region-gene-base-pair-window').val().toString().length > 0) {
     $('#'+elementId+'-region-gene-bp').popover('hide');
-    return true;
+    return True;
   }
   else {
     $('#'+elementId+'-region-gene-bp').popover('show');
     setTimeout(function() { $('#'+elementId+'-region-gene-bp').popover('hide'); }, 4000);
-    return false;
+    return False;
   }
 }
 
 function isRegionStartSet(elementId) {
   if ($('#region-region-start-coord').val().toString().length > 0) {
     $('#'+elementId+'-region-region-start').popover('hide');
-    return true;
+    return True;
   }
   else {
     $('#'+elementId+'-region-region-start').popover('show');
     setTimeout(function() { $('#'+elementId+'-region-region-start').popover('hide'); }, 4000);
-    return false;
+    return False;
   }
 }
 
 function isRegionEndSet(elementId) {
   if ($('#region-region-end-coord').val().toString().length > 0) {
     $('#'+elementId+'-region-region-end').popover('hide');
-    return true;
+    return True;
   }
   else {
     $('#'+elementId+'-region-region-end').popover('show');
     setTimeout(function() { $('#'+elementId+'-region-region-end').popover('hide'); }, 4000);
-    return false;
+    return False;
   }
 }
 
 function isVariantIndexSet(elementId) {
   if ($('#region-variant-index').val().toString().length > 0) {
     $('#'+elementId+'-variant-index-pop').popover('hide');
-    return true;
+    return True;
   }
   else {
     $('#'+elementId+'-variant-index-pop').popover('show');
     setTimeout(function() { $('#'+elementId+'-variant-index-pop').popover('hide'); }, 4000);
-    return false;
+    return False;
   }
 }
 
 function isVariantBPSet(elementId) {
   if ($('#region-variant-base-pair-window').val().toString().length > 0) {
     $('#'+elementId+'-variant-bp-pop').popover('hide');
-    return true;
+    return True;
   }
   else {
     $('#'+elementId+'-variant-bp-pop').popover('show');
     setTimeout(function() { $('#'+elementId+'-variant-bp-pop').popover('hide'); }, 4000);
-    return false;
+    return False;
   }
 }
 
@@ -1247,30 +1247,30 @@ function areRegionDetailsSet(elementId) {
       // gene name
       // bp window
       if (isGeneNameSet(elementId) && isGeneBPSet(elementId)) {
-        return true;
+        return True;
       }
       else {
-        return false;
+        return False;
       }
     }
     if (region == "Region") {
       // region start
       // region end
       if (isRegionStartSet(elementId) && isRegionEndSet(elementId)) {
-        return true;
+        return True;
       }
       else {
-        return false;
+        return False;
       }
     }
     if (region == "Variant") {
       // index variant
       // bp window
       if (isVariantIndexSet(elementId) && isVariantBPSet(elementId)) {
-        return true;
+        return True;
       }
       else {
-        return false;
+        return False;
       }
     }
 }
@@ -1280,10 +1280,10 @@ function isPopulationSet(elementId) {
     if(population == null ) {
         $('#'+elementId+'-population-codes-zero').popover('show');
         setTimeout(function() { $('#'+elementId+'-population-codes-zero').popover('hide'); }, 4000);
-        return false;
+        return False;
     } else {
         $('#'+elementId+'-population-codes-zero').popover('hide');
-        return true;
+        return True;
     }
 }
 
@@ -1358,7 +1358,7 @@ function updateLDassoc() {
         var isError = displayError(id, jsonObjCanvas);
 
         // display graph if no errors
-        if (displayError(id, jsonObjCanvas) == false) {
+        if (displayError(id, jsonObjCanvas) == False) {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
@@ -1442,7 +1442,7 @@ function updateLDhap() {
             jsonObj = data;
         }
 
-        if (displayError(id, jsonObj) == false) {
+        if (displayError(id, jsonObj) == False) {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             var ldhapTable = formatLDhapData($.parseJSON(data));
@@ -1524,7 +1524,7 @@ function updateSNPclip() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
-        if (displayError(id, jsonObj) == false) {
+        if (displayError(id, jsonObj) == False) {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -1576,7 +1576,7 @@ function updateSNPchip() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
-        if (displayError(id, jsonObj) == false) {
+        if (displayError(id, jsonObj) == False) {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -1605,7 +1605,7 @@ function initChip() {
     });
 
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
+        if (displayError(id, data) == False) {
             //buildPopulationDropdownSNPchip(data);
             buildPlatformSNPchip(data);
         }
@@ -1746,8 +1746,8 @@ function loadSNPChip(data) {
     ko.mapping.fromJS(snpchipData, snpchipModel);
 
     $('#snpchip-message-warning-content').empty();
-    checkAlert("snpchip", snpchipData.warning, "warning", true);
-    checkAlert("snpchip", snpchipData.error, "error", false);
+    checkAlert("snpchip", snpchipData.warning, "warning", True);
+    checkAlert("snpchip", snpchipData.error, "error", False);
     //Display warning if an rs has no platform arrays
     if(total_platform_count == 0) {
         //Hide table and display an error.
@@ -1908,7 +1908,7 @@ function loadSNPdetails(data, rs_number) {
     console.log("Found one::::");
     console.dir(data.details[rs_number]);
     */
-    var found = false;
+    var found = False;
     var match = 'Variant in LD with ' + rs_number;
 ;
 
@@ -1922,7 +1922,7 @@ function loadSNPdetails(data, rs_number) {
             position_link: anchorRSposition(value[0], index)
         };
         if(detail.rs_number == rs_number) {
-            found = true;
+            found = True;
         }
         if(found) {
             if(detail.comment != undefined) {
@@ -2081,7 +2081,7 @@ function updateLDmatrix() {
         var isError = displayError(id, jsonObjCanvas);
 
         // generate shown canvas graph and hidden svg graph
-        if (displayError(id, jsonObjCanvas) == false) {
+        if (displayError(id, jsonObjCanvas) == False) {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
 
             // place Download PDF button
@@ -2286,7 +2286,7 @@ function updateLDproxy() {
         var isError = displayError(id, jsonObjCanvas);
 
         // display graph if no errors
-        if (displayError(id, jsonObjCanvas) == false) {
+        if (displayError(id, jsonObjCanvas) == False) {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
@@ -2354,7 +2354,7 @@ function getLDProxyResults(jsonfile) {
     });
     ajaxRequest.success(function(data) {
         //catch error and warning in json
-        if (displayError(id, data) == false) {
+        if (displayError(id, data) == False) {
             RefreshTable('#new-ldproxy', data);
             //ko.mapping.fromJS(data, ldproxyModel);
         }
@@ -2380,7 +2380,7 @@ function getLDAssocResults(jsonfile) {
         //catch error and warning in json
         // console.warn("HERE IS THE ldassoc data");
         // console.dir(data);
-        if (displayError(id, data) == false) {
+        if (displayError(id, data) == False) {
             RefreshTable('#new-ldassoc', data);
             $("#ldassoc-namespace").empty();
             $("#ldassoc-namespace").append(
@@ -2459,7 +2459,7 @@ function getLDmatrixResults(jsonfile, request) {
 
     ajaxRequest.success(function(data) {
         //catch error and warning in json
-        if (displayError(id, data) == false) {
+        if (displayError(id, data) == False) {
             addLDMatrixHyperLinks(request);
             $('#'+id+"-download-links").show();
         }
@@ -2524,7 +2524,7 @@ function updateLDpair() {
     });
 
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
+        if (displayError(id, data) == False) {
             ko.mapping.fromJS(data, ldpairModel);
             $('#' + id + '-results-container').show();
             addLDpairHyperLinks(data);
@@ -2544,7 +2544,7 @@ function updateLDpair() {
 
 function displayError(id, data) {
     // Display error or warning if available.
-    var error = false;
+    var error = False;
     if (data.traceback) {
         console.warn("traceback");
         console.warn(data.traceback);
@@ -2568,7 +2568,7 @@ function displayError(id, data) {
 
         $('#'+id+"-results-container").hide();
 
-        error = true;
+        error = True;
     }
     return error;
 }
@@ -2757,7 +2757,7 @@ function addCheckBox(code, description, elementId, platform_class) {
                 $("<input>").attr('type','checkbox')
                     .attr('id',code)
                     .attr('value', code)
-                    .prop('checked', true)
+                    .prop('checked', True)
                     .addClass(platform_class)
                 )
             ).append(
@@ -2790,8 +2790,8 @@ function buildPlatformSNPchip(data) {
         }
         snpchipReverseLookup[description] = code;
     });
-    $("#selectAllIllumina").prop('checked', true);
-    $("#selectAllAffymetrix").prop('checked', true);
+    $("#selectAllIllumina").prop('checked', True);
+    $("#selectAllAffymetrix").prop('checked', True);
     calculateChipTotals();
 }
 
@@ -2816,12 +2816,12 @@ function buildPopulationDropdown(elementId) {
     $('#' + elementId).html(htmlText);
     //alert(elemtnId);
     $('#' + elementId).multiselect({
-        enableClickableOptGroups : true,
+        enableClickableOptGroups : True,
         buttonWidth : '180px',
         maxHeight : 500,
         buttonClass : 'btn btn-default btn-ldlink-multiselect',
-        includeSelectAllOption : true,
-        dropRight : false,
+        includeSelectAllOption : True,
+        dropRight : False,
         allSelectedText : 'All Populations',
         nonSelectedText : 'Select Population',
         numberDisplayed : 4,
@@ -2829,17 +2829,17 @@ function buildPopulationDropdown(elementId) {
         previousOptionLength: 0,
         maxPopulationWarn: 2,
         maxPopulationWarnTimeout: 5000,
-        maxPopulationWarnVisible: false,
+        maxPopulationWarnVisible: False,
 
         // buttonClass: 'btn btn-link',
         buttonText : function(options, select) {
             //console.log("elementId: "+elementId);
             if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
                 $('#'+elementId+'-popover').popover('show');
-                this.maxPopulatinWarnVisible=true;
+                this.maxPopulatinWarnVisible=True;
                 setTimeout(function(){
                     $('#'+elementId+'-popover').popover('destroy');
-                    this.maxPopulatinWarnVisible=false;
+                    this.maxPopulatinWarnVisible=False;
                 }, this.maxPopulationWarnTimeout);
             } else {
                 //Destory popover if it is currently being displayed.
@@ -2957,7 +2957,7 @@ function replaceSubGroups(population) {
                 currentSubPopulations.push(pop);
                 //console.log("pop found: "+pop);
             } else {
-                missingPop = true;
+                missingPop = True;
                 //console.log("pop missing: "+pop);
             }
         });
@@ -3124,7 +3124,7 @@ function validateTextarea() {
         //console.log(value);
         var hasError = !this.match(pattern);
         if(value == "" || value == "\n" || this.length<=2 )
-            hasError = false;
+            hasError = False;
         //console.log("hasError: "+hasError);
         if (typeof textarea.setCustomValidity === 'function') {
             textarea.setCustomValidity(hasError ? errorMsg : '');
@@ -3149,9 +3149,9 @@ function toggleChevron(e) {
 
 Array.prototype.contains = function(v) {
     for(var i = 0; i < this.length; i++) {
-        if(this[i] === v) return true;
+        if(this[i] === v) return True;
     }
-    return false;
+    return False;
 };
 
 Array.prototype.unique = function() {
