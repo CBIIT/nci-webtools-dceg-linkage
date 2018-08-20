@@ -273,7 +273,7 @@ def ldmatrix():
             web = True
         else:
             web = False
-        out_script, out_div = calculate_matrix(snplst, pop, reference, r2_d, web)
+        out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
         if isProgrammatic:
              resultFile = ""
              if r2_d == "d":

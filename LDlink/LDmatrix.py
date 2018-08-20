@@ -4,7 +4,7 @@ import yaml
 # Create LDmatrix function
 
 
-def calculate_matrix(snplst, pop, request, r2_d="r2", web):
+def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     import json,math,operator,os,sqlite3,subprocess,sys
 
     # Set data directories
@@ -875,22 +875,24 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import LDmatrix options
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
+        web = sys.argv[4]
         r2_d = "r2"
-    elif len(sys.argv) == 5:
+    elif len(sys.argv) == 6:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
-        r2_d = sys.argv[4]
+        web =sys.argv[4]
+        r2_d = sys.argv[5]
     else:
         print "Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)"
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_matrix(snplst, pop, request, r2_d)
+    out_script, out_div = calculate_matrix(snplst, pop, request, web, r2_d)
 
     # Print output
     with open(tmp_dir + "matrix" + request + ".json") as f:
