@@ -283,22 +283,20 @@ $(document).on('change','.btn-snp :file', createFileSelectTrigger);
 $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
-function checkFile(id, fileURL, isError) {
-    if (isError == false) {
-        $.ajax({
-            type: 'POST',
-            url: fileURL,
-            error : function() {
-                setTimeout(function() { 
-                    checkFile(id, fileURL, isError); 
-                }, 6000);
-            },
-            success : function(data) {
-                $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-                $('#' + id + "-menu1").prop('disabled', false);
-            }
-        });
-    }
+function checkFile(id, fileURL) {
+    $.ajax({
+        type: 'POST',
+        url: fileURL,
+        error : function() {
+            setTimeout(function() { 
+                checkFile(id, fileURL); 
+            }, 5000);
+        },
+        success : function(data) {
+            $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+            $('#' + id + "-menu1").prop('disabled', false);
+        }
+    });
 }
 
 
@@ -1355,8 +1353,6 @@ function updateLDassoc() {
             jsonObjCanvas = dataCanvas;
         }
 
-        var isError = displayError(id, jsonObjCanvas);
-
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
@@ -1386,7 +1382,7 @@ function updateLDassoc() {
 
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".svg";
-            checkFile(id, fileURL, isError);
+            checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
@@ -2078,8 +2074,6 @@ function updateLDmatrix() {
             jsonObjCanvas = dataCanvas;
         }
 
-        var isError = displayError(id, jsonObjCanvas);
-
         // generate shown canvas graph and hidden svg graph
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
@@ -2109,7 +2103,7 @@ function updateLDmatrix() {
             
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
-            checkFile(id, fileURL, isError);
+            checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
             getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
@@ -2283,8 +2277,6 @@ function updateLDproxy() {
             jsonObjCanvas = dataCanvas;
         }
 
-        var isError = displayError(id, jsonObjCanvas);
-
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
@@ -2314,7 +2306,7 @@ function updateLDproxy() {
 
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
-            checkFile(id, fileURL, isError);
+            checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
             getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
