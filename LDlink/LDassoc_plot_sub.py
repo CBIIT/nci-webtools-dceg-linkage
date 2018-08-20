@@ -7,10 +7,10 @@ from multiprocessing.dummy import Pool
 from math import log10
 
 
-#!/usr/bin/env python
+# LDassoc subprocess to export bokeh to high quality images in the background
 
 # Create LDproxy function
-def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin):
+def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
     start_time=time.time()
 
     # Set data directories using config.yml
@@ -449,184 +449,6 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
 
     out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
     out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=False)
-
-
-	# outfile=open(tmp_dir+"assoc"+request+".txt","w")
-	# header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","P-value","RegulomeDB","Function"]
-	# print >> outfile, "\t".join(header)
-
-	# ucsc_track={}
-	# ucsc_track["header"]=["chr","pos","rsid","-log10_p-value"]
-
-	# query_snp={}
-	# query_snp["RS"]=out_p_sort[0][3]
-	# query_snp["Alleles"]=out_p_sort[0][1]
-	# query_snp["Coord"]=out_p_sort[0][2]
-	# query_snp["Dist"]=out_p_sort[0][6]
-	# query_snp["Dprime"]=str(round(float(out_p_sort[0][7]),4))
-	# query_snp["R2"]=str(round(float(out_p_sort[0][8]),4))
-	# query_snp["Corr_Alleles"]=out_p_sort[0][9]
-	# query_snp["RegulomeDB"]=out_p_sort[0][10]
-	# query_snp["MAF"]=str(round(float(out_p_sort[0][11]),4))
-	# query_snp["Function"]=out_p_sort[0][13]
-	# query_snp["P-value"]=out_p_sort[0][15]
-
-	# output["query_snp"]=query_snp
-
-	# rows=[]
-	# row=[]
-	# row.append(query_snp["RS"])
-	# chr,pos=query_snp["Coord"].split(':')
-	# row.append(chr)
-	# row.append(pos)
-	# row.append(query_snp["Alleles"])
-	# row.append(str(round(float(query_snp["MAF"]),4)))
-	# row.append(abs(query_snp["Dist"]))
-	# row.append(str(round(float(query_snp["Dprime"]),4)))
-	# row.append(str(round(float(query_snp["R2"]),4)))
-	# row.append(query_snp["Corr_Alleles"])
-	# row.append(query_snp["P-value"])
-	# row.append(query_snp["RegulomeDB"])
-	# row.append("HaploReg link")
-	# row.append(query_snp["Function"])
-	# rows.append(row)
-
-	# temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["RegulomeDB"],query_snp["Function"]]
-	# print >> outfile, "\t".join(temp)
-
-	# temp2=[chr,pos,query_snp["RS"],-log10(query_snp["P-value"])]
-	# ucsc_track["lowest_p"]=temp2
-
-	# ucsc_track["gwas_sig"]=[]
-	# ucsc_track["marg_sig"]=[]
-	# ucsc_track["sugg_sig"]=[]
-	# ucsc_track["not_sig"]=[]
-
-	# proxies={}
-	# digits=len(str(len(out_p_sort)))
-
-	# for i in range(1,len(out_p_sort)):
-	# 	if out_p_sort[i][3]!=snp:
-	# 		proxy_info={}
-	# 		row=[]
-	# 		proxy_info["RS"]=out_p_sort[i][3]
-	# 		proxy_info["Alleles"]=out_p_sort[i][4]
-	# 		proxy_info["Coord"]=out_p_sort[i][5]
-	# 		proxy_info["Dist"]=out_p_sort[i][6]
-	# 		proxy_info["Dprime"]=str(round(float(out_p_sort[i][7]),4))
-	# 		proxy_info["R2"]=str(round(float(out_p_sort[i][8]),4))
-	# 		proxy_info["Corr_Alleles"]=out_p_sort[i][9]
-	# 		proxy_info["RegulomeDB"]=out_p_sort[i][10]
-	# 		proxy_info["MAF"]=str(round(float(out_p_sort[i][12]),4))
-	# 		proxy_info["Function"]=out_p_sort[i][13]
-	# 		proxy_info["P-value"]=out_p_sort[i][15]
-	# 		proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
-	# 		chr,pos=proxy_info["Coord"].split(':')
-
-			# Adding a row for the Data Table
-			# row.append(proxy_info["RS"])
-			# row.append(chr)
-			# row.append(pos)
-			# row.append(proxy_info["Alleles"])
-			# row.append(str(round(float(proxy_info["MAF"]),4)))
-			# row.append(abs(proxy_info["Dist"]))
-			# row.append(str(round(float(proxy_info["Dprime"]),4)))
-			# row.append(str(round(float(proxy_info["R2"]),4)))
-			# row.append(proxy_info["Corr_Alleles"])
-			# row.append(proxy_info["P-value"])
-			# row.append(proxy_info["RegulomeDB"])
-			# row.append("HaploReg link")
-			# row.append(proxy_info["Function"])
-			# rows.append(row)
-
-			# temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["RegulomeDB"],proxy_info["Function"]]
-			# print >> outfile, "\t".join(temp)
-
-			# chr,pos=proxy_info["Coord"].split(':')
-			# p_val=-log10(proxy_info["P-value"])
-			# temp2=[chr,pos,proxy_info["RS"],p_val]
-
-			# if p_val>-log10(5e-8):
-			# 	ucsc_track["gwas_sig"].append(temp2)
-			# elif -log10(5e-8)>=p_val>5:
-			# 	ucsc_track["marg_sig"].append(temp2)
-			# elif 5>=p_val>3:
-			# 	ucsc_track["sugg_sig"].append(temp2)
-			# else:
-			# 	ucsc_track["not_sig"].append(temp2)
-
-	# track=open(tmp_dir+"track"+request+".txt","w")
-	# print >> track, "browser position chr"+str(chromosome)+":"+str(coord1)+"-"+str(coord2)
-	# print >> track, ""
-
-	# print >> track, "track type=bedGraph name=\"Manhattan Plot\" description=\"Plot of -log10 association p-values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar yLineMark=7.301029995663981 yLineOnOff=on maxHeightPixels=60"
-	# print >> track, "\t".join([str(ucsc_track["lowest_p"][i]) for i in [0,1,1,3]])
-	# if len(ucsc_track["gwas_sig"])>0:
-	# 	for var in ucsc_track["gwas_sig"]:
-	# 		print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	# if len(ucsc_track["marg_sig"])>0:
-	# 	for var in ucsc_track["marg_sig"]:
-	# 		print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	# if len(ucsc_track["sugg_sig"])>0:
-	# 	for var in ucsc_track["sugg_sig"]:
-	# 		print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	# if len(ucsc_track["not_sig"])>0:
-	# 	for var in ucsc_track["not_sig"]:
-	# 		print >> track, "\t".join([str(var[i]) for i in [0,1,1,3]])
-	# print >> track, ""
-
-	# print >> track, "track type=bed name=\""+snp+"\" description=\"Variant with lowest association p-value: "+snp+"\" color=108,108,255"
-	# print >> track, "\t".join([ucsc_track["lowest_p"][i] for i in [0,1,1,2]])
-	# print >> track, ""
-
-	# if len(ucsc_track["gwas_sig"])>0:
-	# 	print >> track, "track type=bed name=\"P<5e-8\" description=\"Variants with association p-values <5e-8\" color=198,129,0"
-	# 	for var in ucsc_track["gwas_sig"]:
-	# 		print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-	# 	print >> track, ""
-
-	# if len(ucsc_track["marg_sig"])>0:
-	# 	print >> track, "track type=bed name=\"5e-8<=P<1e-5\" description=\"Variants with association p-values >=5e-8 and <1e-5\" color=198,129,0"
-	# 	for var in ucsc_track["marg_sig"]:
-	# 		print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-	# 	print >> track, ""
-
-	# if len(ucsc_track["sugg_sig"])>0:
-	# 	print >> track, "track type=bed name=\"1e-5<=P<1e-3\" description=\"Variants with association p-values >=1e-5 and <1e-3\" color=198,129,0"
-	# 	for var in ucsc_track["sugg_sig"]:
-	# 		print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-	# 	print >> track, ""
-
-	# if len(ucsc_track["not_sig"])>0:
-	# 	print >> track, "track type=bed name=\"1e-3<=P<=1\" description=\"Variants with association p-values >=1e-3 and <=1\" color=198,129,0"
-	# 	for var in ucsc_track["not_sig"]:
-	# 		print >> track, "\t".join([var[i] for i in [0,1,1,2]])
-
-
-	# duration=time.time() - start_time
-
-	# statsistics={}
-	# statsistics["individuals"] = str(len(pop_list))
-	# statsistics["in_region"] = str(len(out_prox))
-	# statsistics["runtime"] = str(duration)
-
-	# output["aaData"]=rows
-	# output["proxy_snps"]=proxies
-	# output["report"]={}
-	# output["report"]["namespace"]={}
-	# output["report"]["namespace"].update(vars(myargs))
-	# output["report"]["region"] = region
-	# output["report"]["statistics"] = statsistics
-
-	# # Output JSON and text file
-	# json_output=json.dumps(output, sort_keys=False, indent=2)
-	# print >> out_json, json_output
-	# out_json.close()
-
-	# outfile.close()
-	# track.close()
-
-
 
     # Organize scatter plot data
     q_rs=[]
@@ -1122,31 +944,6 @@ def calculate_assoc(file, region, pop, request, myargs, myargsName, myargsOrigin
 
 
 def main():
-    # tmp_dir="./tmp/"
-
-    # Import LDassoc options
-    # parser=argparse.ArgumentParser()
-    # parser.add_argument("file", type=str, help="association file containing p-values")
-    # region=parser.add_mutually_exclusive_group(required=True)
-    # region.add_argument("-g", "--gene", help="run LDassoc in gene mode (--name required)", action="store_true")
-    # region.add_argument("-r", "--region", help="run LDassoc in region mode (--start and --stop required)", action="store_true")
-    # region.add_argument("-v", "--variant", help="run LDassoc in variant mode (--origin required)", action="store_true")
-    # parser.add_argument("pop", type=str, help="1000G population to use for LD calculations")
-    # parser.add_argument("request", type=str, help="id for submitted command")
-    # parser.add_argument("-a", "--annotate", help="annotate plot with RegulomeDB scores", action="store_true")
-    # parser.add_argument("-b", "--bp", type=str, help="header name for base pair coordinate (default is \"BP\")", default="BP")
-    # parser.add_argument("-c", "--chr", type=str, help="header name for chromosome (default is \"CHR\")", default="CHR")
-    # parser.add_argument("-d", "--dprime", help="plot D prime rather than R2", action="store_true")
-    # parser.add_argument("-e", "--end", type=str, help="ending coordinate (ex: chr22:25855459), chr must be same as in --start (required with --region)")
-    # parser.add_argument("-i", "--id", type=str, help="header name for variant RS number (default is \"SNP\")", default="SNP")
-    # parser.add_argument("-n", "--name", type=str, help="gene name (required with --gene)")
-    # parser.add_argument("-o", "--origin", type=str, help="reference variant RS number (required with --variant)(default is lowest p-value in region)")
-    # parser.add_argument("-p", "--pval", type=str, help="header name for p-value (default is \"P\")", default="P")
-    # parser.add_argument("-s", "--start", type=str, help="starting coordinate (ex: chr22:25855459), chr must be same as in --end (required with --region)")
-    # parser.add_argument("-t", "--transcript", help="plot all gene transcripts", action="store_true")
-    # parser.add_argument("-w", "--window", type=int, help="flanking region (+/- bp) around gene, region, or variant of interest (default is 500 for --gene and --variant and 0 for --region)")
-
-    # args=parser.parse_args()
 
     # Import LDassoc options
     if len(sys.argv) == 8:
@@ -1159,53 +956,12 @@ def main():
         myargsOrigin = sys.argv[7]
     else:
         sys.exit()
-
+    # Load args parameters passed from LDassoc.py
     with open(filename) as f:
         args = json.load(f)
 
-    # args_raw=open(filename).readlines()
-    # args = json.parse(args_raw[0])
-
-    # if args.gene:
-    #     region="gene"
-    # elif args.region:
-    #     region="region"
-    # elif args.variant:
-    #     region="variant"
-
-
     # Run function
-    calculate_assoc(file, region, pop, request, args, myargsName, myargsOrigin)
-
-
-    # Print output
-    # with open(tmp_dir+"assoc"+args.request+".json") as f:
-    # 	json_dict=json.load(f)
-
-    # try:
-    # 	json_dict["error"]
-
-    # except KeyError:
-    # 	head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
-    # 	print "\t".join(head)
-    # 	temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
-    # 	print "\t".join(temp)
-    # 	for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
-    # 		temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
-    # 		print "\t".join(temp)
-
-    # else:
-    # 	print ""
-    # 	print json_dict["error"]
-    # 	print ""
-
-    # try:
-    # 	json_dict["warning"]
-    # except KeyError:
-    # 	print ""
-    # else:
-    # 	print "WARNING: "+json_dict["warning"]+"!"
-    # 	print ""
+    calculate_assoc_svg(file, region, pop, request, args, myargsName, myargsOrigin)
 
 
 if __name__ == "__main__":

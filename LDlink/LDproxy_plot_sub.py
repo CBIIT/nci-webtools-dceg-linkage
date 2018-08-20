@@ -12,8 +12,9 @@ import weakref
 import time
 from multiprocessing.dummy import Pool
 
+# LDproxy subprocess to export bokeh to high quality images in the background
 
-def calculate_proxy(snp, pop, request, r2_d="r2"):
+def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     start_time = time.time()
 
@@ -581,7 +582,7 @@ def main():
         sys.exit()
 
     # Run function
-    calculate_proxy(snp, pop, request, r2_d)
+    calculate_proxy_svg(snp, pop, request, r2_d)
 
 if __name__ == "__main__":
     main()

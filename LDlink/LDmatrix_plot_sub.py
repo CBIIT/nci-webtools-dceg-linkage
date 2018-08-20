@@ -3,8 +3,9 @@ import json
 import sys
 import json, math, operator, os, sqlite3, subprocess
 
+# LDmatrix subprocess to export bokeh to high quality images in the background
 
-def calculate_matrix(snplst, pop, request, r2_d="r2"):
+def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -712,7 +713,7 @@ def main():
         sys.exit()
 
     # Run function
-    calculate_matrix(snplst, pop, request, r2_d)
+    calculate_matrix_svg(snplst, pop, request, r2_d)
 
 if __name__ == "__main__":
     main()

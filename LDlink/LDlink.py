@@ -28,6 +28,9 @@ from SNPclip import calculate_clip
 from SNPchip import *
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
+from LDassoc_plot_sub import calculate_assoc_svg
+from LDmatrix_plot_sub import calculate_matrix_svg
+from LDproxy_plot_sub import calculate_proxy_svg
 
 tmp_dir = "./tmp/"
 # Ensure tmp directory exists

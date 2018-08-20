@@ -9,6 +9,14 @@
   line-height:30px;
   padding:0px 15px;
 }
+
+/*AuthorArranger Ad*/
+.ad {
+	height:75px;
+	border:1px solid #566473;
+	margin-bottom:25px;
+}
+
 .close {
 padding: 5px 0px 0px 0px;
 }
@@ -407,6 +415,13 @@ img.graph-legend {
 	text-align:right;
 }
 .whats_new {
+	height:200px;
+	border:1px solid #566473;
+	overflow-y:auto;
+	margin-bottom:25px;
+}
+
+.ad {
 	height:200px;
 	border:1px solid #566473;
 	overflow-y:auto;
