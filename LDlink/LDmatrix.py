@@ -4,7 +4,7 @@ import yaml
 # Create LDmatrix function
 
 
-def calculate_matrix(snplst, pop, request, r2_d="r2"):
+def calculate_matrix(snplst, pop, request, r2_d="r2", web):
     import json,math,operator,os,sqlite3,subprocess,sys
 
     # Set data directories
@@ -845,9 +845,11 @@ def calculate_matrix(snplst, pop, request, r2_d="r2"):
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))
 
-    # Open thread for high quality image exports
-    command = "python LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + r2_d
-    subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    # Generate high quality images only if accessed via web instance
+    if web:
+        # Open thread for high quality image exports
+        command = "python LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + r2_d
+        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
     # Html output for testing #

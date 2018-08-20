@@ -28,9 +28,9 @@ from SNPclip import calculate_clip
 from SNPchip import *
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
-from LDassoc_plot_sub import calculate_assoc_svg
-from LDmatrix_plot_sub import calculate_matrix_svg
-from LDproxy_plot_sub import calculate_proxy_svg
+# from LDassoc_plot_sub import calculate_assoc_svg
+# from LDmatrix_plot_sub import calculate_matrix_svg
+# from LDproxy_plot_sub import calculate_proxy_svg
 
 tmp_dir = "./tmp/"
 # Ensure tmp directory exists
@@ -267,7 +267,13 @@ def ldmatrix():
     f.close()
 
     try:
-        out_script, out_div = calculate_matrix(snplst, pop, reference, r2_d)
+        # pass flag to LDmatrix to allow svg generation only for web instance
+        web = False
+        if 'LDlinkRestWeb' in request.path:
+            web = True
+        else:
+            web = False
+        out_script, out_div = calculate_matrix(snplst, pop, reference, r2_d, web)
         if isProgrammatic:
              resultFile = ""
              if r2_d == "d":
