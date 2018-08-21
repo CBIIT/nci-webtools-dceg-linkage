@@ -2,20 +2,10 @@ import yaml
 #!/usr/bin/env python
 
 # Create LDproxy function
-def calculate_assoc(file,region,pop,request,myargs):
+def calculate_assoc(file, region, pop, request, web, myargs):
 	import csv,json,operator,os,sqlite3,subprocess,time
 	from multiprocessing.dummy import Pool
 	start_time=time.time()
-
-	# Set data directories
-	# data_dir="/local/content/ldlink/data/"
-	# gene_dir=data_dir+"refGene/sorted_refGene.txt.gz"
-	# gene_c_dir=data_dir+"refGene/sorted_refGene_collapsed.txt.gz"
-	# gene_dir2=data_dir+"refGene/gene_names_coords.db"
-	# recomb_dir=data_dir+"recomb/genetic_map_autosomes_combined_b37.txt.gz"
-	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	# pop_dir=data_dir+"1000G/Phase3/samples/"
-	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
@@ -339,7 +329,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		else:
 			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
-
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
@@ -874,8 +863,6 @@ def calculate_assoc(file,region,pop,request,myargs):
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
 	from bokeh.resources import CDN
-	from bokeh.io import export_svgs
-	import svgutils.compose as sg
 
 
 	reset_output()
@@ -1084,39 +1071,38 @@ def calculate_assoc(file,region,pop,request,myargs):
 
 		gene_plot.toolbar_location = "below"
 
-		# Change output backend to SVG temporarily for headless export
-		# Will be changed back to canvas in LDlink.js
-		assoc_plot.output_backend = "svg"
-		rug.output_backend = "svg"
-		gene_plot.output_backend = "svg"
-		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
-		export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
-		
-		# Concatenate svgs
-		sg.Figure("24.59cm", "27.94cm",
-			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
-			).save(tmp_dir + "assoc_plot_" + request + ".svg")
-
-		sg.Figure("122.95cm", "139.70cm",
-			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
-			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
-			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
-
-		# Export to PDF
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
-		# Export to PNG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
-		# Export to JPEG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
-		# Remove individual SVG files after they are combined
-		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
-		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
-		# Remove scaled SVG file after it is converted to png and jpeg
-		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
-
 		out_grid = gridplot(assoc_plot, rug, gene_plot,
 			ncols=1, toolbar_options=dict(logo=None))
+
+		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+			json.dump(vars(myargs), out_args)
+		out_args.close()
+
+		myargsName = "None"
+		try:
+			if myargs.name==None:
+				myargsName = "None"
+			else:
+				myargsName = myargs.name
+		except:
+			pass
+		
+
+		myargsOrigin = "None"
+		try:
+			if myargs.origin==None:
+				myargsOrigin = "None"
+			else:
+				myargsOrigin = myargs.origin
+		except:
+			pass
+		
+
+		# Generate high quality images only if accessed via web instance
+		if web:
+			# Open thread for high quality image exports
+			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
 
@@ -1225,40 +1211,38 @@ def calculate_assoc(file,region,pop,request,myargs):
 		gene_c_plot.yaxis.major_label_text_color = None
 
 		gene_c_plot.toolbar_location = "below"
-
-		# Change output backend to SVG temporarily for headless export
-		# Will be changed back to canvas in LDlink.js
-		assoc_plot.output_backend = "svg"
-		rug.output_backend = "svg"
-		gene_c_plot.output_backend = "svg"
-		export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
-		export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
-
-		# Concatenate svgs
-		sg.Figure("24.59cm", "27.94cm",
-			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
-			).save(tmp_dir + "assoc_plot_" + request + ".svg")
-
-		sg.Figure("122.95cm", "139.70cm",
-			sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
-			sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
-			).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
-
-		# Export to PDF
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
-		# Export to PNG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
-		# Export to JPEG
-		subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
-		# Remove individual SVG files after they are combined
-		subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
-		subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
-		# Remove scaled SVG file after it is converted to png and jpeg
-		subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 		
 		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
 					ncols=1, toolbar_options=dict(logo=None))
+
+
+		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
+			json.dump(vars(myargs), out_args)
+		out_args.close()
+
+		myargsName = "None"
+		try:
+			if myargs.name==None:
+				myargsName = "None"
+			else:
+				myargsName = myargs.name
+		except:
+			pass
+
+		myargsOrigin = "None"
+		try:
+			if myargs.origin==None:
+				myargsOrigin = "None"
+			else:
+				myargsOrigin = myargs.origin
+		except:
+			pass
+
+		# Generate high quality images only if accessed via web instance
+		if web:
+			# Open thread for high quality image exports
+			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
 	# Html output for testing #
@@ -1320,6 +1304,10 @@ def main():
 
 	args=parser.parse_args()
 
+	# with open(tmp_dir + 'assoc_args' + args.request + ".json", "w") as out_args:
+	# 	json.dump(vars(args), out_args)
+	# out_args.close()
+
 	if args.gene:
 		region="gene"
 	elif args.region:
@@ -1327,14 +1315,16 @@ def main():
 	elif args.variant:
 		region="variant"
 
+	# initialize web instance as True if run via main
+	web = True
 
 	# Run function
-	out_script,out_div=calculate_assoc(args.file,region,args.pop,args.request,args)
+	out_script,out_div=calculate_assoc(args.file, region, args.pop, args.request, web, args)
 
 
 	# Print output
-	with open(tmp_dir+"assoc"+args.request+".json") as f:
-		json_dict=json.load(f)
+	# with open(tmp_dir+"assoc"+args.request+".json") as f:
+	# 	json_dict=json.load(f)
 
 	try:
 		json_dict["error"]

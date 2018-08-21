@@ -279,8 +279,26 @@ $(document).ready(function() {
 
 // Set file support trigger
 $(document).on('change','.btn-snp :file', createFileSelectTrigger);
-//ldAssoc File Change
+// ldAssoc File Change
 $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
+
+// wait for svg genreation subprocess complete before enabling plot export menu button
+function checkFile(id, fileURL) {
+    $.ajax({
+        type: 'POST',
+        url: fileURL,
+        error : function() {
+            setTimeout(function() { 
+                checkFile(id, fileURL); 
+            }, 5000);
+        },
+        success : function(data) {
+            $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+            $('#' + id + "-menu1").prop('disabled', false);
+        }
+    });
+}
+
 
 function setBootstrapSelector(id, value) {
     var str = id.substr(6);
@@ -1326,8 +1344,7 @@ function updateLDassoc() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data[0];
-        var dataCanvasString = dataString.replace(/svg/g, "canvas");
-        var dataCanvas = new Object([dataCanvasString, data[1]]);
+        var dataCanvas = new Object([dataString, data[1]]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
@@ -1341,7 +1358,7 @@ function updateLDassoc() {
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldassoc-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
@@ -1362,6 +1379,10 @@ function updateLDassoc() {
                 var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
                 window.open( assoc_plot, "_blank" )
             });
+
+            // enable button once .svg file is generated from subprocess
+            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".svg";
+            checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
@@ -2044,8 +2065,7 @@ function updateLDmatrix() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data;
-        var dataCanvasString = dataString.replace(/svg/g, "canvas");
-        var dataCanvas = new Object([dataCanvasString]);
+        var dataCanvas = new Object([dataString]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
@@ -2059,7 +2079,7 @@ function updateLDmatrix() {
             $('#ldmatrix-bokeh-graph').empty().append(dataCanvas);
 
             // place Download PDF button
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldmatrix-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
@@ -2081,6 +2101,10 @@ function updateLDmatrix() {
                 window.open( matrix_plot, "_blank" )
             });
             
+            // enable button once .svg file is generated from subprocess
+            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+            checkFile(id, fileURL);
+
             $('#' + id + '-results-container').show();
             getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
         } else {
@@ -2244,8 +2268,7 @@ function updateLDproxy() {
 
         // create bokeh object with output_backend=canvas from svg
         var dataString = data;
-        var dataCanvasString = dataString.replace(/svg/g, "canvas");
-        var dataCanvas = new Object([dataCanvasString]);
+        var dataCanvas = new Object([dataString]);
 
         var jsonObjCanvas;
         if(typeof dataCanvas == 'string') {
@@ -2253,12 +2276,13 @@ function updateLDproxy() {
         } else {
             jsonObjCanvas = dataCanvas;
         }
+
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
-	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">Export Plot <span class="caret"></span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldproxy-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
+	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldproxy-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldproxy-downloadSVG" class="text-center" tabindex="-1" href="#">SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPDF" class="text-center" tabindex="-1" href="#">PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a></li></ul></div>');
             $("#ldproxy-downloadSVG").click(function(e) {
                 e.preventDefault();
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
@@ -2279,6 +2303,10 @@ function updateLDproxy() {
                 var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
                 window.open( proxy_plot, "_blank" )
             });
+
+            // enable button once .svg file is generated from subprocess
+            var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
+            checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
             getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
