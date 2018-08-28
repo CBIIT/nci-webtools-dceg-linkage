@@ -297,17 +297,14 @@ function checkFile(id, fileURL) {
     //         $('#' + id + "-menu1").prop('disabled', false);
     //     }
     // });
-    var http = new XMLHttpRequest();
-    http.open('HEAD', fileURL, false);
-    http.send();
-    if (http.status!=404) {
-        setTimeout(function() { 
-            checkFile(id, fileURL); 
-        }, 3000);
-    }
-    else {
+    var imgFrame = $('<iframe><img src="' + fileURL + '" /></iframe>');
+    if ($(imgFrame).find('img').attr('width') > 0) {
         $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
         $('#' + id + "-menu1").prop('disabled', false);
+    } else {
+        setTimeout(function() { 
+            checkFile(id, fileURL); 
+        }, 5000);
     }
 }
 
