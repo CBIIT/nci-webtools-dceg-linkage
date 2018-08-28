@@ -284,19 +284,31 @@ $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL) {
-    $.ajax({
-        type: 'POST',
-        url: fileURL,
-        error : function() {
-            setTimeout(function() { 
-                checkFile(id, fileURL); 
-            }, 5000);
-        },
-        success : function(data) {
-            $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-            $('#' + id + "-menu1").prop('disabled', false);
-        }
-    });
+    // $.ajax({
+    //     type: 'POST',
+    //     url: fileURL,
+    //     error : function() {
+    //         setTimeout(function() { 
+    //             checkFile(id, fileURL); 
+    //         }, 5000);
+    //     },
+    //     success : function(data) {
+    //         $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+    //         $('#' + id + "-menu1").prop('disabled', false);
+    //     }
+    // });
+    var http = new XMLHttpRequest();
+    http.open('HEAD', fileURL, false);
+    http.send();
+    if (http.status!=404) {
+        setTimeout(function() { 
+            checkFile(id, fileURL); 
+        }, 3000);
+    }
+    else {
+        $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+        $('#' + id + "-menu1").prop('disabled', false);
+    }
 }
 
 
