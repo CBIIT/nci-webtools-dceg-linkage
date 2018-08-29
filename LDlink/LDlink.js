@@ -285,17 +285,18 @@ $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL) {
     $.ajax({
-        type: 'POST',
-        url: fileURL,
-        error : function() {
-            setTimeout(function() { 
-                checkFile(id, fileURL); 
-            }, 5000);
-        },
-        success : function(data) {
+        type : 'GET',
+        url : 'status' + fileURL,
+        contentType : 'application/json' // JSON
+    }).done(function(response) {
+        if (response) {
             $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
             $('#' + id + "-menu1").prop('disabled', false);
-        }
+        } else {
+            setTimeout(function() { 
+                checkFile(id, fileURL); 
+            }, 1000);
+        } 
     });
 }
 
@@ -1381,7 +1382,7 @@ function updateLDassoc() {
             });
 
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".svg";
+            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
@@ -2102,7 +2103,7 @@ function updateLDmatrix() {
             });
             
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
@@ -2305,7 +2306,7 @@ function updateLDproxy() {
             });
 
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
+            var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();

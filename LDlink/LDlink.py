@@ -669,6 +669,10 @@ def ping():
         traceback.print_exc(1)
         return str(e), 400
 
+@app.route('/status/<path:filename>', strict_slashes=False)
+def status(filename):
+    return jsonify(os.path.isfile(filename))
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", dest="port_number",
