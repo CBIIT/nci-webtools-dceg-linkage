@@ -297,14 +297,19 @@ function checkFile(id, fileURL) {
     //         $('#' + id + "-menu1").prop('disabled', false);
     //     }
     // });
-    var imgFrame = $('<iframe><img src="' + fileURL + '" /></iframe>');
-    if ($(imgFrame).find('img').attr('width') > 0) {
+    var ifrm = document.createElement("iframe");
+    var img = document.createElement("img");
+    img.setAttribute("src", fileURL);
+    ifrm.appendChild(img);
+    // ifrm.setAttribute("src", "tmp/assoc_plot_80201.jpeg");
+    // var imgFrame = $('<iframe><img src="' + fileURL + '" /></iframe>');
+    if ($(ifrm).find('img')[0].width > 0) {
         $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
         $('#' + id + "-menu1").prop('disabled', false);
     } else {
         setTimeout(function() { 
             checkFile(id, fileURL); 
-        }, 5000);
+        }, 3000);
     }
 }
 
@@ -1390,7 +1395,7 @@ function updateLDassoc() {
             });
 
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".svg";
+            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
@@ -2111,7 +2116,7 @@ function updateLDmatrix() {
             });
             
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
@@ -2314,7 +2319,7 @@ function updateLDproxy() {
             });
 
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
+            var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
             checkFile(id, fileURL);
 
             $('#' + id + '-results-container').show();
