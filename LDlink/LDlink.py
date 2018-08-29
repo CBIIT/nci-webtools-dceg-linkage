@@ -669,7 +669,7 @@ def ping():
         traceback.print_exc(1)
         return str(e), 400
 
-@app.route('/status/<filename>', strict_slashes=False)
+@app.route('/status/tmp/<path:filename>', strict_slashes=False)
 def status(filename):
     return jsonify(os.path.isfile(filename))
 
