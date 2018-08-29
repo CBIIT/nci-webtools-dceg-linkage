@@ -297,22 +297,22 @@ function checkFile(id, fileURL) {
     //         $('#' + id + "-menu1").prop('disabled', false);
     //     }
     // });
-    try {
-        var ifrm = document.createElement("iframe");
-        var img = document.createElement("img");
-        img.setAttribute("src", fileURL);
-        ifrm.appendChild(img);
-        if ($(ifrm).find('img')[0].width > 0) {
-            $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-            $('#' + id + "-menu1").prop('disabled', false);
-        } else {
-            setTimeout(function() { 
-                checkFile(id, fileURL); 
-            }, 3000);
-        } 
-    } catch (err) {
-        
-    }
+
+    // var ifrm = document.createElement("iframe");
+    // var img = document.createElement("img");
+    // img.setAttribute("src", fileURL);
+    var imgf = $('<img src="' + fileURL + '" />');
+    // ifrm.appendChild(img);
+    // if ($(ifrm).find('img')[0].width > 0) {
+    if ($(imgf)[0].width > 0) {
+        $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+        $('#' + id + "-menu1").prop('disabled', false);
+    } else {
+        setTimeout(function() { 
+            checkFile(id, fileURL); 
+        }, 3000);
+    } 
+
     // var ifrm = document.createElement("iframe");
     // var img = document.createElement("img");
     // img.setAttribute("src", fileURL);
