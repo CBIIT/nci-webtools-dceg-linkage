@@ -284,47 +284,20 @@ $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL) {
-    // $.ajax({
-    //     type: 'POST',
-    //     url: fileURL,
-    //     error : function() {
-    //         setTimeout(function() { 
-    //             checkFile(id, fileURL); 
-    //         }, 5000);
-    //     },
-    //     success : function(data) {
-    //         $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-    //         $('#' + id + "-menu1").prop('disabled', false);
-    //     }
-    // });
-
-    // var ifrm = document.createElement("iframe");
-    // var img = document.createElement("img");
-    // img.setAttribute("src", fileURL);
-    var imgf = $('<img src="' + fileURL + '" />');
-    // ifrm.appendChild(img);
-    // if ($(ifrm).find('img')[0].width > 0) {
-    if ($(imgf)[0].width > 0) {
-        $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-        $('#' + id + "-menu1").prop('disabled', false);
-    } else {
-        setTimeout(function() { 
-            checkFile(id, fileURL); 
-        }, 3000);
-    } 
-
-    // var ifrm = document.createElement("iframe");
-    // var img = document.createElement("img");
-    // img.setAttribute("src", fileURL);
-    // ifrm.appendChild(img);
-    // if ($(ifrm).find('img')[0].width > 0) {
-    //     $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-    //     $('#' + id + "-menu1").prop('disabled', false);
-    // } else {
-    //     setTimeout(function() { 
-    //         checkFile(id, fileURL); 
-    //     }, 3000);
-    // }
+    $.ajax({
+        type : 'GET',
+        url : 'status' + fileURL,
+        contentType : 'application/json' // JSON
+    }).done(function(response) {
+        if (response) {
+            $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+            $('#' + id + "-menu1").prop('disabled', false);
+        } else {
+            setTimeout(function() { 
+                checkFile(id, fileURL); 
+            }, 3000);
+        } 
+    });
 }
 
 
