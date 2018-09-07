@@ -285,9 +285,10 @@ $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL) {
     $.ajax({
-        type : 'GET',
-        url : 'status' + fileURL,
-        contentType : 'application/json' // JSON
+        // type : 'GET',
+        url : 'status' + fileURL + '?_=' + new Date().getTime(),
+        contentType : 'application/json', // JSON
+        cache: false
     }).done(function(response) {
         if (response) {
             $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
