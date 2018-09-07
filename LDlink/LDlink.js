@@ -295,7 +295,7 @@ function checkFile(id, fileURL) {
         } else {
             setTimeout(function() { 
                 checkFile(id, fileURL); 
-            }, 1000);
+            }, 3000);
         } 
     });
 }
