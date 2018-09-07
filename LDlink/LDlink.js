@@ -286,7 +286,7 @@ $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 function checkFile(id, fileURL) {
     $.ajax({
         // type : 'GET',
-        url : 'status' + fileURL,
+        url : 'status' + fileURL + '?_=' + new Date().getTime(),
         contentType : 'application/json', // JSON
         cache: false
     }).done(function(response) {
