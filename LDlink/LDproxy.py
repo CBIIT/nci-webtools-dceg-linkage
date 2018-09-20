@@ -804,7 +804,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
     # Return plot output
-    return(out_script, out_div)
+    return(out_script, out_div, output["error"])
 
 
 def main():
@@ -830,7 +830,7 @@ def main():
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_proxy(snp, pop, request, web, r2_d)
+    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:
