@@ -804,7 +804,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
     # Return plot output
-    return(out_script, out_div, output["error"])
+    if "error" in output:
+        return(out_script, out_div, output["error"])
+    else:
+        return(out_script, out_div, "")
 
 
 def main():
