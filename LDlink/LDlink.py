@@ -81,7 +81,7 @@ def jsonp(func):
     return decorated_function
 
 
-def sendTraceback(error=None):
+def sendTraceback(error):
     custom = {}
 
     if (error is None):
@@ -91,7 +91,7 @@ def sendTraceback(error=None):
 
     print "Unexpected error:", sys.exc_info()[0]
     traceback.print_exc()
-    custom["error"] = "Raised when a generated error does not fall into any category."
+    # custom["error"] = "Raised when a generated error does not fall into any category."
     custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
     return current_app.response_class(out_json, mimetype='application/json')
@@ -178,6 +178,8 @@ def ldpair():
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
 
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
@@ -191,14 +193,18 @@ def ldpair():
 
     try:
         out_json = calculate_pair(var1, var2, pop, reference)
+        # if API call has error, retrieve error message from json returned from calculation
+        try:
+            if isProgrammatic:
+                fp = open('./tmp/LDpair_'+reference+'.txt', "r")
+                content = fp.read()
+                fp.close()
+                return content
+        except:
+            output = json.loads(out_json)
+            return sendTraceback(output["error"])
     except:
-        return sendTraceback()
-
-    if isProgrammatic:
-        fp = open('./tmp/LDpair_'+reference+'.txt', "r")
-        content = fp.read()
-        fp.close()
-        return content
+        return sendTraceback(None)
 
     return current_app.response_class(out_json, mimetype='application/json')
 
@@ -217,6 +223,8 @@ def ldproxy():
     print 'pop: ' + pop
     print 'r2_d: ' + r2_d
 
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
@@ -231,13 +239,16 @@ def ldproxy():
         else:
             web = False
         out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
-        if isProgrammatic:
+        try:
+            if isProgrammatic:
                 fp = open('./tmp/proxy'+reference+'.txt', "r")
                 content = fp.read()
                 fp.close()
                 return content
+        except:
+            sendTraceback(None)
     except:
-        return sendTraceback()
+        return sendTraceback(None)
 
     return out_script + "\n " + out_div
 
@@ -253,6 +264,8 @@ def ldmatrix():
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
 
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
@@ -310,6 +323,8 @@ def ldhap():
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
 
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
     if request.args.get('reference', False):
         reference = request.args.get('reference', False)
     else:
@@ -332,22 +347,27 @@ def ldhap():
 
     try:
         out_json = calculate_hap(snplst, pop, reference)
-        if isProgrammatic:
-             resultFile = ""
-             resultFile1 = "./tmp/snps_"+reference+".txt"
-             resultFile2 = "./tmp/haplotypes_"+reference+".txt"
+        # if API call has error, retrieve error message from json returned from calculation
+        try:
+            if isProgrammatic:
+                resultFile = ""
+                resultFile1 = "./tmp/snps_"+reference+".txt"
+                resultFile2 = "./tmp/haplotypes_"+reference+".txt"
 
-             fp = open(resultFile1, "r")
-             content1 = fp.read()
-             fp.close()
+                fp = open(resultFile1, "r")
+                content1 = fp.read()
+                fp.close()
 
-             fp = open(resultFile2, "r")
-             content2 = fp.read()
-             fp.close()
+                fp = open(resultFile2, "r")
+                content2 = fp.read()
+                fp.close()
 
-             return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+        except:
+            output = json.loads(out_json)
+            return sendTraceback(output["error"])
     except:
-        return sendTraceback()
+        return sendTraceback(None)
 
     return sendJSON(out_json)
 
@@ -367,6 +387,8 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
 
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
     if 'reference' in data.keys():
         reference = str(data['reference'])
     else:
@@ -479,6 +501,8 @@ def snpchip():
     snps = data['snps']
     platforms = data['platforms']
 
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
     if 'reference' in data.keys():
         reference = str(data['reference'])
     else:
