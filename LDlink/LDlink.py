@@ -249,7 +249,7 @@ def ldproxy():
             with open(tmp_dir + "proxy" + reference + ".json") as f:
                 json_dict = json.load(f)
                 print "error: " + json_dict["error"]
-                sendTraceback(json_dict["error"])
+                return sendTraceback(json_dict["error"])
     except:
         return sendTraceback(None)
 
