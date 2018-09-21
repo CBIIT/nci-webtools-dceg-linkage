@@ -248,7 +248,6 @@ def ldproxy():
         except:
             with open(tmp_dir + "proxy" + reference + ".json") as f:
                 json_dict = json.load(f)
-                print "error: " + json_dict["error"]
                 return sendTraceback(json_dict["error"])
     except:
         return sendTraceback(None)
@@ -296,19 +295,24 @@ def ldmatrix():
         else:
             web = False
         out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
-        if isProgrammatic:
-             resultFile = ""
-             if r2_d == "d":
-                resultFile = "./tmp/d_prime_"+reference+".txt"
-             else:
-                resultFile = "./tmp/r2_"+reference+".txt"
+        try:
+            if isProgrammatic:
+                resultFile = ""
+                if r2_d == "d":
+                    resultFile = "./tmp/d_prime_"+reference+".txt"
+                else:
+                    resultFile = "./tmp/r2_"+reference+".txt"
 
-             fp = open(resultFile, "r")
-             content = fp.read()
-             fp.close()
-             return content
+                fp = open(resultFile, "r")
+                content = fp.read()
+                fp.close()
+                return content
+        except:
+            with open(tmp_dir + "matrix" + reference + ".json") as f:
+                json_dict = json.load(f)
+                return sendTraceback(json_dict["error"])
     except:
-        return sendTraceback()
+        return sendTraceback(None)
 
     # copy_output_files(reference)
     return out_script + "\n " + out_div
@@ -678,7 +682,7 @@ def ldassoc():
             web = False
         out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
     except:
-        return sendTraceback()
+        return sendTraceback(None)
 
     # copy_output_files(reference)
     print "out_json:"
