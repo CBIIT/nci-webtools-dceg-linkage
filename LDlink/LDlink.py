@@ -490,11 +490,14 @@ def snpclip():
             content = fp.read()
             fp.close()
 
+            with open(tmp_dir + "clip" + reference + ".json") as f:
+                json_dict = json.load(f)
+                if "error" in json_dict:
+                    return sendTraceback(json_dict["error"])
+
             return content
     except:
-        with open(tmp_dir + "clip" + reference + ".json") as f:
-            json_dict = json.load(f)
-            return sendTraceback(json_dict["error"])
+        return sendTraceback(None)
 
     return current_app.response_class(out_json, mimetype=mimetype)
 
