@@ -238,7 +238,7 @@ def ldproxy():
             web = True
         else:
             web = False
-        out_script, out_div, error_msg = calculate_proxy(var, pop, reference, web, r2_d)
+        out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
         try:
             if isProgrammatic:
                 fp = open('./tmp/proxy'+reference+'.txt', "r")
@@ -246,7 +246,12 @@ def ldproxy():
                 fp.close()
                 return content
         except:
-            sendTraceback(error_msg)
+            with open(tmp_dir + "proxy" + reference + ".json") as f:
+                json_dict = json.load(f)
+            try:
+                sendTraceback(json_dict["error"])
+            except:
+                sendTraceback(None)
     except:
         return sendTraceback(None)
 

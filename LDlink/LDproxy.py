@@ -71,7 +71,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
-        return("", "", output["error"])
+        return("", "")
         raise
 
     # Select desired ancestral populations
@@ -85,7 +85,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print >> out_json, json_output
             out_json.close()
-            return("", "", output["error"])
+            return("", "")
             raise
 
     get_pops = "cat " + " ".join(pop_dirs) + " > " + \
@@ -125,7 +125,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return("", "", output["error"])
+        return("", "")
         raise
     elif len(vcf) > 1:
         geno = []
@@ -141,7 +141,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                             request + ".txt", shell=True)
             subprocess.call("rm " + tmp_dir + "*" +
                             request + "*.vcf", shell=True)
-            return("", "", output["error"])
+            return("", "")
             raise
     else:
         geno = vcf[0].strip().split()
@@ -159,7 +159,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return("", "", output["error"])
+        return("", "")
         raise
 
     index = []
@@ -185,7 +185,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return("", "", output["error"])
+        return("", "")
         raise
 
     # Define window of interest around query SNP
@@ -804,11 +804,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
     # Return plot output
-    if "error" in output:
-        print output["error"]
-        return out_script, out_div, output["error"]
-    else:
-        return out_script, out_div, None
+    return(out_script, out_div)
 
 
 def main():
