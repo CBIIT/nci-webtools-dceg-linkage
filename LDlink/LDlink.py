@@ -419,7 +419,7 @@ def snpclip():
         (snps, snp_list, details) = calculate_clip(snpfile, pop,
                                                    reference, float(r2_threshold), float(maf_threshold))
     except:
-        return sendTraceback()
+        return sendTraceback(None)
 
     clip["snp_list"] = snp_list
     clip["details"] = details
@@ -533,7 +533,7 @@ def snpchip():
     try:
         snp_chip = calculate_chip(snplst, platforms, reference)
     except:
-        return sendTraceback()
+        return sendTraceback(None)
 
     chip = {}
     chip["snp_chip"] = snp_chip
