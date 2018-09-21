@@ -482,16 +482,19 @@ def snpclip():
     f.close()
     # copy_output_files(reference)
     out_json = json.dumps(clip, sort_keys=False)
+    try:
+        if isProgrammatic:
+            resultFile = "./tmp/details"+reference+".txt"
 
-    if isProgrammatic:
-             resultFile = "./tmp/details"+reference+".txt"
+            fp = open(resultFile, "r")
+            content = fp.read()
+            fp.close()
 
-             fp = open(resultFile, "r")
-             content = fp.read()
-             fp.close()
-
-             return content
-
+            return content
+    except:
+        with open(tmp_dir + "clip" + reference + ".json") as f:
+            json_dict = json.load(f)
+            return sendTraceback(json_dict["error"])
 
     return current_app.response_class(out_json, mimetype=mimetype)
 
