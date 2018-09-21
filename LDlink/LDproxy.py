@@ -806,9 +806,9 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Return plot output
     if "error" in output:
         print output["error"]
-        return(out_script, out_div, output["error"])
+        return [out_script, out_div, output["error"]]
     else:
-        return(out_script, out_div, None)
+        return [out_script, out_div, None]
 
 
 def main():
