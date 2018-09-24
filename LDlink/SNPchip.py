@@ -63,7 +63,7 @@ def calculate_chip(snplst,platform_query,request):
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
 	snp_dir=config['data']['snp_dir']
-	array_dir=config['data']['array_dir']
+	# array_dir=config['data']['array_dir']
 
 	tmp_dir="./tmp/"
 	
