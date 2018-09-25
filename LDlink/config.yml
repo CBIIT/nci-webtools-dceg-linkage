@@ -1,6 +1,5 @@
 data:
   snp_dir: '/local/content/ldlink/data/snp142/snp142_annot_2.db'
-  array_dir: '/local/content/ldlink/data/arrays/snp142_arrays.db'
   dbsnp_version: '142'
   pop_dir: '/local/content/ldlink/data/1000G/Phase3/samples/'
   vcf_dir: '/local/content/ldlink/data/1000G/Phase3/genotypes/ALL.chr'

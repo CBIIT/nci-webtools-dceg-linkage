@@ -16,7 +16,7 @@ username=contents[0].split('=')[1]
 password=contents[1].split('=')[1]
 port=int(contents[2].split('=')[1])
 #print "username:"+username
-#rint "password:"+password
+#print "password:"+password
 #print "port:"+str(port)
 
 def get_platform_request():
