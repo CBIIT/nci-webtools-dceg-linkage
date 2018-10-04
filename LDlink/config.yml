@@ -1,6 +1,6 @@
 data:
-  snp_dir: '/local/content/ldlink/data/snp142/snp142_annot_2.db'
-  dbsnp_version: '142'
+  snp_dir: '/local/content/ldlink/data/snp151/dbsnp.rs.151.db'
+  dbsnp_version: '151'
   pop_dir: '/local/content/ldlink/data/1000G/Phase3/samples/'
   vcf_dir: '/local/content/ldlink/data/1000G/Phase3/genotypes/ALL.chr'
   reg_dir: '/local/content/ldlink/data/regulomedb/regulomedb.db'
