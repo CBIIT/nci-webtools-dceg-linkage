@@ -86,7 +86,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			raise
 
 		chromosome=var_coord[1]
-		org_coord=var_coord[2]
+		org_coord=var_coord[2] - 1 # new dbSNP151 position is 1 off
 
 
 	# Open Association Data
