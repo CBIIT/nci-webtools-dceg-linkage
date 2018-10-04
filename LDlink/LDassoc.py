@@ -40,7 +40,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 	if myargs.origin!=None:
 		# Find coordinates (GRCh37/hg19) for SNP RS number
@@ -71,7 +70,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
-				raise
 
 		elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
 			snp=myargs.origin
@@ -83,7 +81,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 		chromosome=var_coord[1]
 		org_coord=str(int(var_coord[2]) - 1) # new dbSNP151 position is 1 off
@@ -106,7 +103,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		print >> out_json, json_output
 		out_json.close()
 		return("","")
-		raise
 
 	# Check header
 	for item in header_list:
@@ -116,7 +112,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 	len_head=len(header)
 
@@ -149,7 +144,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 		# Connect to gene database
 		conn=sqlite3.connect(gene_dir2)
@@ -175,7 +169,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 		# Define search coordinates
 		coord1=int(gene_coord[2])-window
@@ -191,14 +184,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
-				raise
+
 			if coord1>int(org_coord) or int(org_coord)>coord2:
 				output["error"]="Origin variant "+myargs.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
-				raise
+				
 		else:
 			chromosome=gene_coord[1]
 
@@ -209,14 +202,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+		
 		if myargs.end==None:
 			output["error"]="End coordinate is needed when --region option is used."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 		# Parse out chr and positions for --region option
 		if len(myargs.start.split(":"))!=2:
@@ -225,14 +217,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+			
 		if len(myargs.end.split(":"))!=2:
 			output["error"]="End coordinate is not in correct format (ex: chr22:25855459)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 		chr_s=myargs.start.strip("chr").split(":")[0]
 		coord_s=myargs.start.split(":")[1]
@@ -245,28 +236,28 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+			
 		if chr_e not in chrs:
 			output["error"]="End chromosome (chr"+chr_e+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chr Y)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+			
 		if chr_s!=chr_e:
 			output["error"]="Start and end chromosome must be the same (chr"+chr_s+" is not equal to chr"+chr_e+")."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+			
 		if coord_s>=coord_e:
 			output["error"]="End coordinate ("+myargs.end+") must be greater than start coordinate("+myargs.start+")."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+			
 
 		coord1=int(coord_s)-window
 		if coord1<0:
@@ -281,14 +272,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
-				raise
+				
 			if coord1>int(org_coord) or int(org_coord)>coord2:
 				output["error"]="Origin variant "+myargs.origin+" is not in the coordinate range "+myargs.start+" to "+myargs.end+" -/+ a "+str(window)+" bp window."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
 				return("","")
-				raise
+				
 		else:
 			chromosome=chr_s
 
@@ -300,7 +291,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
+			
 
 	assoc_coords=[]
 	a_pos=[]
@@ -337,8 +328,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		print >> out_json, json_output
 		out_json.close()
 		return("","")
-		raise
-
 
 	# Select desired ancestral populations
 	pops=pop.split("+")
@@ -352,7 +341,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
 	subprocess.call(get_pops, shell=True)
@@ -439,12 +427,15 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	else:
 		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
+			print "##########"
+			print "FAIL HERE"
+			print chromosome+":"+org_coord+"-"+org_coord
+			print assoc_coords
 			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-			raise
 
 		# Extract query SNP phased genotypes
 		vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
@@ -468,7 +459,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
-			raise
+			
 		elif len(vcf)>1:
 			geno=[]
 			for i in range(len(vcf)):
@@ -482,7 +473,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 				subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 				return("","")
-				raise
+				
 		else:
 			geno=vcf[0].strip().split()
 
@@ -501,7 +492,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
-			raise
 
 
 		index=[]
@@ -526,7 +516,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
-			raise
 
 
 	# Calculate proxy LD statistics in parallel
@@ -1323,33 +1312,33 @@ def main():
 
 
 	# Print output
-	# with open(tmp_dir+"assoc"+args.request+".json") as f:
-	# 	json_dict=json.load(f)
+	with open(tmp_dir+"assoc"+args.request+".json") as f:
+		json_dict=json.load(f)
 
-	try:
-		json_dict["error"]
+		try:
+			json_dict["error"]
 
-	except KeyError:
-		head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
-		print "\t".join(head)
-		temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
-		print "\t".join(temp)
-		for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
-			temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+		except KeyError:
+			head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
+			print "\t".join(head)
+			temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 			print "\t".join(temp)
+			for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
+				temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+				print "\t".join(temp)
 
-	else:
-		print ""
-		print json_dict["error"]
-		print ""
+		else:
+			print ""
+			print json_dict["error"]
+			print ""
 
-	try:
-		json_dict["warning"]
-	except KeyError:
-		print ""
-	else:
-		print "WARNING: "+json_dict["warning"]+"!"
-		print ""
+		try:
+			json_dict["warning"]
+		except KeyError:
+			print ""
+		else:
+			print "WARNING: "+json_dict["warning"]+"!"
+			print ""
 
 
 if __name__ == "__main__":
