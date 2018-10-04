@@ -76,7 +76,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             raise
 
         chromosome=var_coord[1]
-        org_coord=var_coord[2]
+        org_coord=org_coord=str(int(var_coord[2]) + 1) # new dbSNP151 position is 1 off
 
 
     # Open Association Data

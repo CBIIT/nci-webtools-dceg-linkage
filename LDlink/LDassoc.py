@@ -427,10 +427,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	else:
 		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
-			print "##########"
-			print "FAIL HERE"
-			print chromosome+":"+org_coord+"-"+org_coord
-			print assoc_coords
 			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
