@@ -13,13 +13,6 @@ import sys
 
 def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
 
-    # Set data directories
-    # data_dir = "/local/content/ldlink/data/"
-    # gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
-    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    # pop_dir = data_dir + "1000G/Phase3/samples/"
-    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
-
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)

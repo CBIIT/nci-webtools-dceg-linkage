@@ -86,7 +86,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     head = proc_h.stdout.readlines()[0].strip().split()
 
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord[1], str(int(snp_coord[2]) + 1), tmp_dir + "snp_no_dups_" + request + ".vcf") # new dbSNP151 position is 1 off
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -143,10 +143,10 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = int(snp_coord[2]) - window
+    coord1 = int(snp_coord[2]) + 1 - window # new dbSNP151 position is 1 off
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord[2]) + window
+    coord2 = int(snp_coord[2]) + 1 + window # new dbSNP151 position is 1 off
 
     # Calculate proxy LD statistics in parallel
     threads = 4

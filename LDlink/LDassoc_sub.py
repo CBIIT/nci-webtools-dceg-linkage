@@ -7,14 +7,6 @@ coords=sys.argv[3]
 request=sys.argv[4]
 process=sys.argv[5]
 
-
-# Set data directories
-# data_dir="/local/content/ldlink/data/"
-# snp_dir=data_dir+"snp142/snp142_annot_2.db"
-# pop_dir=data_dir+"1000G/Phase3/samples/"
-# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
-# reg_dir=data_dir+"regulomedb/regulomedb.db"
-
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)

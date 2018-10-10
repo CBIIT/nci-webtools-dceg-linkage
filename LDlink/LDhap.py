@@ -5,12 +5,6 @@ import json,math,operator,os,sqlite3,subprocess,sys
 # Create LDhap function
 def calculate_hap(snplst,pop,request):
 
-	# Set data directories
-	# data_dir="/local/content/ldlink/data/"
-	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	# pop_dir=data_dir+"1000G/Phase3/samples/"
-	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
-
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
