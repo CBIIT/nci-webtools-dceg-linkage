@@ -1,6 +1,6 @@
-import yaml
 #!/usr/bin/env python
-
+import yaml
+import json,math,operator,os,sqlite3,subprocess,sys
 import collections
 
 ###########
@@ -9,15 +9,8 @@ import collections
 
 # Create SNPtip function
 def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
-	import json,math,operator,os,sqlite3,subprocess,sys
 
 	max_list=5000
-
-	# Set data directories
-	# data_dir="/local/content/ldlink/data/"
-	# snp_dir=data_dir+"snp142/snp142_annot_2.db"
-	# pop_dir=data_dir+"1000G/Phase3/samples/"
-	# vcf_dir=data_dir+"1000G/Phase3/genotypes/ALL.chr"
 
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
@@ -45,7 +38,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		print >> out_json, json_output
 		out_json.close()
 		return("","","")
-		raise
+		
 	
 	# Remove duplicate RS numbers
 	snps=[]
@@ -67,7 +60,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			print >> out_json, json_output
 			out_json.close()
 			return("","","")
-			raise
+			
 	
 	get_pops="cat "+ " ".join(pop_dirs)
 	proc=subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -103,8 +96,8 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 					snp_coord=get_coords(snp_i[0])
 					if snp_coord!=None:
 						rs_nums.append(snp_i[0])
-						snp_pos.append(snp_coord[2])
-						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
+						snp_pos.append(str(int(snp_coord[2]) + 1)) # new dbSNP151 position is 1 off
+						temp=[snp_i[0],snp_coord[1],str(int(snp_coord[2]) + 1)] # new dbSNP151 position is 1 off
 						snp_coords.append(temp)
 					else:
 						warn.append(snp_i[0])
@@ -121,7 +114,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			print >> out_json, json_output
 			out_json.close()
 			return("","","")
-			raise
+			
 	
 	# Close snp connection
 	cur.close()
@@ -137,7 +130,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 		print >> out_json, json_output
 		out_json.close()
 		return("","","")
-		raise		
+				
 	
 	# Check SNPs are all on the same chromosome
 	for i in range(len(snp_coords)):
@@ -147,7 +140,7 @@ def calculate_clip(snplst,pop,request,r2_threshold=0.1,maf_threshold=0.01):
 			print >> out_json, json_output
 			out_json.close()
 			return("","","")
-			raise		
+					
 	
 	# Make tabix formatted coordinates
 	snp_coord_str=[snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
