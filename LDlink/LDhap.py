@@ -1,9 +1,10 @@
 import yaml
+import json,math,operator,os,sqlite3,subprocess,sys
+
 #!/usr/bin/env python
 
 # Create LDhap function
 def calculate_hap(snplst,pop,request):
-	import json,math,operator,os,sqlite3,subprocess,sys
 
 	# Set data directories
 	# data_dir="/local/content/ldlink/data/"
@@ -32,7 +33,7 @@ def calculate_hap(snplst,pop,request):
 	if len(snps_raw)>30:
 		output["error"]="Maximum variant list is 30 RS numbers or coordinates. Your list contains "+str(len(snps_raw))+" entries."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		raise
+		
 
 	print "PRINT SNP LIST RAW ##########################"
 	print "snps raw", snps_raw
@@ -56,7 +57,7 @@ def calculate_hap(snplst,pop,request):
 		else:
 			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
 			return(json.dumps(output, sort_keys=True, indent=2))
-			raise
+			
 	
 	get_pops="cat "+ " ".join(pop_dirs)
 	proc=subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -120,8 +121,8 @@ def calculate_hap(snplst,pop,request):
 					print snp_coord
 					if snp_coord != None:
 						rs_nums.append(snp_i[0])
-						snp_pos.append(snp_coord[2])
-						temp=[snp_i[0],snp_coord[1],snp_coord[2]]
+						snp_pos.append(str(int(snp_coord[2]) + 1)) # new dbSNP151 position is 1 off
+						temp=[snp_i[0],snp_coord[1],str(int(snp_coord[2]) + 1)] # new dbSNP151 position is 1 off
 						print "TEMP"
 						print temp
 						snp_coords.append(temp)
@@ -156,7 +157,7 @@ def calculate_hap(snplst,pop,request):
 	if len(rs_nums)==0:
 		output["error"]="Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] + "."
 		return(json.dumps(output, sort_keys=True, indent=2))
-		raise
+		
 	
 	
 	# Check SNPs are all on the same chromosome
@@ -164,7 +165,7 @@ def calculate_hap(snplst,pop,request):
 		if snp_coords[0][1]!=snp_coords[i][1]:
 			output["error"]="Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr"+str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0]+"=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
 			return(json.dumps(output, sort_keys=True, indent=2))
-			raise
+			
 	
 	
 	# Check max distance between SNPs
@@ -214,7 +215,7 @@ def calculate_hap(snplst,pop,request):
 	if vcf[-1][0:6]=="#CHROM":
 		output["error"]="No query variants were found in 1000G VCF file"
 		return(json.dumps(output, sort_keys=True, indent=2))
-		raise
+		
 	
 	h=0
 	while vcf[h][0:2]=="##":
