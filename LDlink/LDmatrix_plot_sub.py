@@ -1,19 +1,25 @@
 import yaml
 import json
 import sys
-import json, math, operator, os, sqlite3, subprocess
+import json
+import math
+import operator
+import os
+import sqlite3
+import subprocess
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
+
 
 def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    gene_dir=config['data']['gene_dir']
-    snp_dir=config['data']['snp_dir']
-    pop_dir=config['data']['pop_dir']
-    vcf_dir=config['data']['vcf_dir']
+    gene_dir = config['data']['gene_dir']
+    snp_dir = config['data']['snp_dir']
+    pop_dir = config['data']['pop_dir']
+    vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
 
@@ -68,14 +74,16 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                     snp_coord = get_coords(snp_i[0])
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[2])
-                        temp = [snp_i[0], snp_coord[1], snp_coord[2]]
+                        # new dbSNP151 position is 1 off
+                        snp_pos.append(str(int(snp_coord[2]) + 1))
+                        # new dbSNP151 position is 1 off
+                        temp = [snp_i[0], snp_coord[1],
+                                str(int(snp_coord[2]) + 1)]
                         snp_coords.append(temp)
 
     # Close snp connection
     cur.close()
     conn.close()
-
 
     # Check max distance between SNPs
     distance_bp = []
@@ -178,8 +186,8 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0] = geno[2]
                 # rsnum = geno[2]
-                snps[indx][0]=rs_query
-                rsnum=rs_query
+                snps[indx][0] = rs_query
+                rsnum = rs_query
             else:
                 continue
 
@@ -389,7 +397,6 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         coord_snps_plot.append(xpos[i])
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
-    
 
     buffer = (x[-1] - x[0]) * 0.025
     xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
@@ -423,18 +430,18 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
             xname_pos.append(i)
 
     data = {
-            'xname': xnames,
-            'xname_pos': xname_pos,
-            'yname': ynames,
-            'xA': xA,
-            'yA': yA,
-            'xpos': xpos,
-            'ypos': ypos,
-            'R2': R,
-            'Dp': D,
-            'corA': corA,
-            'box_color': box_color,
-            'box_trans': box_trans
+        'xname': xnames,
+        'xname_pos': xname_pos,
+        'yname': ynames,
+        'xA': xA,
+        'yA': yA,
+        'xpos': xpos,
+        'ypos': ypos,
+        'R2': R,
+        'Dp': D,
+        'corA': corA,
+        'box_color': box_color,
+        'box_trans': box_trans
     }
 
     source = ColumnDataSource(data)
@@ -451,11 +458,10 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-    
 
     matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
-                    color="box_color", alpha="box_trans", line_color=None)
-    
+                     color="box_color", alpha="box_trans", line_color=None)
+
     matrix_plot.grid.grid_line_color = None
     matrix_plot.axis.axis_line_color = None
     matrix_plot.axis.major_tick_line_color = None
@@ -524,7 +530,8 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
                  title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
                  plot_width=800, plot_height=50, tools="hover,xpan,tap")
-    rug.rect(x='x', y='y', width='w', height='h', fill_color='red', dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
+    rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
+             dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
 
     hover = rug.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -635,7 +642,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                           genes_plot_yn, color="black", alpha=1, line_width=2)
         gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                        source=source_gene_plot, fill_color='grey', line_color="grey")
+                       source=source_gene_plot, fill_color='grey', line_color="grey")
         gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
         hover = gene_plot.select(dict(type=HoverTool))
@@ -666,38 +673,48 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     matrix_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_1_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+    export_svgs(matrix_plot, filename=tmp_dir +
+                "matrix_plot_1_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir +
+                "gene_plot_1_" + request + ".svg")
 
     # Concatenate svgs
     sg.Figure("21.59cm", "27.94cm",
-        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
-        ).save(tmp_dir + "matrix_plot_" + request + ".svg")
+              sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
+              sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+              ).save(tmp_dir + "matrix_plot_" + request + ".svg")
 
     sg.Figure("107.95cm", "139.70cm",
-        sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3600)
-        ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
+              sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
+              sg.SVG(tmp_dir + "gene_plot_1_" + request +
+                     ".svg").scale(5).move(0, 3600)
+              ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
 
     # Export to PDF
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" +
+                    request + ".svg " + tmp_dir + "matrix_plot_" + request + ".pdf", shell=True)
     # Export to PNG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" +
+                    request + ".svg " + tmp_dir + "matrix_plot_" + request + ".png", shell=True)
     # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" + request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)    
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_scaled_" +
+                    request + ".svg " + tmp_dir + "matrix_plot_" + request + ".jpeg", shell=True)
     # Remove individual SVG files after they are combined
-    subprocess.call("rm " + tmp_dir + "matrix_plot_1_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "matrix_plot_1_" +
+                    request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "gene_plot_1_" +
+                    request + ".svg", shell=True)
     # Remove scaled SVG file after it is converted to png and jpeg
-    subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" +
+                    request + ".svg", shell=True)
 
     reset_output()
 
     return None
 
+
 def main():
-    
+
     # Import LDmatrix options
     if len(sys.argv) == 4:
         snplst = sys.argv[1]
@@ -714,6 +731,7 @@ def main():
 
     # Run function
     calculate_matrix_svg(snplst, pop, request, r2_d)
+
 
 if __name__ == "__main__":
     main()

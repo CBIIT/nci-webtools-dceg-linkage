@@ -1,7 +1,6 @@
+#!/usr/bin/env python
 import yaml
 import json,math,operator,os,sqlite3,subprocess,sys
-
-#!/usr/bin/env python
 
 # Create LDhap function
 def calculate_hap(snplst,pop,request):

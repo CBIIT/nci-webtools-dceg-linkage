@@ -1,10 +1,11 @@
-import yaml
 #!/usr/bin/env python
+import yaml
+import csv,json,operator,os,sqlite3,subprocess,time
+from multiprocessing.dummy import Pool
+
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, web, myargs):
-	import csv,json,operator,os,sqlite3,subprocess,time
-	from multiprocessing.dummy import Pool
 	start_time=time.time()
 
 	# Set data directories using config.yml
@@ -51,14 +52,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			conn.text_factory=str
 			cur=conn.cursor()
 
-			def get_coords(rs):
+			def get_coords_var(rs):
 				id=rs.strip("rs")
 				t=(id,)
 				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
 				return cur.fetchone()
 
 			# Find RS number in snp database
-			var_coord=get_coords(snp)
+			var_coord=get_coords_var(snp)
 
 			# Close snp connection
 			cur.close()
@@ -150,14 +151,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		conn.text_factory=str
 		cur=conn.cursor()
 
-		def get_coords(gene_raw):
+		def get_coords_gene(gene_raw):
 			gene=gene_raw.upper()
 			t=(gene,)
 			cur.execute("SELECT * FROM genes WHERE name=?", t)
 			return cur.fetchone()
 
 		# Find RS number in snp database
-		gene_coord=get_coords(myargs.name)
+		gene_coord=get_coords_gene(myargs.name)
 
 		# Close snp connection
 		cur.close()
