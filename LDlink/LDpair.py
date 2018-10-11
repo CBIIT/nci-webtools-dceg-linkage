@@ -473,28 +473,28 @@ def calculate_pair(snp1, snp2, pop, request=None):
     print >> ldpair_out, " " * 13 + "-" * 17
     print >> ldpair_out, " " * 11 + output["snp1"]["allele_1"]["allele"] + " | " + output["two_by_two"]["cells"]["c11"] + " " * (5 - len(output["two_by_two"]["cells"]["c11"])) + " | " + output["two_by_two"]["cells"]["c12"] + " " * (
         5 - len(output["two_by_two"]["cells"]["c12"])) + " | " + output["snp1"]["allele_1"]["count"] + " " * (5 - len(output["snp1"]["allele_1"]["count"])) + " (" + output["snp1"]["allele_1"]["frequency"] + ")"
-    print >> ldpair_out, output["snp1"]["rsnum"] + " " *
+    print >> ldpair_out, output["snp1"]["rsnum"] + " " * \
         (10 - len(output["snp1"]["rsnum"])) + " " * 3 + "-" * 17
     print >> ldpair_out, " " * 11 + output["snp1"]["allele_2"]["allele"] + " | " + output["two_by_two"]["cells"]["c21"] + " " * (5 - len(output["two_by_two"]["cells"]["c21"])) + " | " + output["two_by_two"]["cells"]["c22"] + " " * (
         5 - len(output["two_by_two"]["cells"]["c22"])) + " | " + output["snp1"]["allele_2"]["count"] + " " * (5 - len(output["snp1"]["allele_2"]["count"])) + " (" + output["snp1"]["allele_2"]["frequency"] + ")"
     print >> ldpair_out, " " * 13 + "-" * 17
     print >> ldpair_out, " " * 15 + output["snp2"]["allele_1"]["count"] + " " * (5 - len(output["snp2"]["allele_1"]["count"])) + " " * 3 + output["snp2"]["allele_2"]["count"] + " " * (
         5 - len(output["snp2"]["allele_2"]["count"])) + " " * 3 + output["two_by_two"]["total"]
-    print >> ldpair_out, " " * 14 + "(" + output["snp2"]["allele_1"]["frequency"] + ")" + " " * (5 - len(output["snp2"]["allele_1"]["frequency"])) +
-        " (" + output["snp2"]["allele_2"]["frequency"] + ")" +
+    print >> ldpair_out, " " * 14 + "(" + output["snp2"]["allele_1"]["frequency"] + ")" + " " * (5 - len(output["snp2"]["allele_1"]["frequency"])) + \
+        " (" + output["snp2"]["allele_2"]["frequency"] + ")" + \
         " " * (5 - len(output["snp2"]["allele_2"]["frequency"]))
     print >> ldpair_out, ""
-    print >> ldpair_out, "          " + output["haplotypes"]["hap1"]["alleles"] + ": " +
-        output["haplotypes"]["hap1"]["count"] +
+    print >> ldpair_out, "          " + output["haplotypes"]["hap1"]["alleles"] + ": " + \
+        output["haplotypes"]["hap1"]["count"] + \
         " (" + output["haplotypes"]["hap1"]["frequency"] + ")"
-    print >> ldpair_out, "          " + output["haplotypes"]["hap2"]["alleles"] + ": " +
-        output["haplotypes"]["hap2"]["count"] +
+    print >> ldpair_out, "          " + output["haplotypes"]["hap2"]["alleles"] + ": " + \
+        output["haplotypes"]["hap2"]["count"] + \
         " (" + output["haplotypes"]["hap2"]["frequency"] + ")"
-    print >> ldpair_out, "          " + output["haplotypes"]["hap3"]["alleles"] + ": " +
-        output["haplotypes"]["hap3"]["count"] +
+    print >> ldpair_out, "          " + output["haplotypes"]["hap3"]["alleles"] + ": " + \
+        output["haplotypes"]["hap3"]["count"] + \
         " (" + output["haplotypes"]["hap3"]["frequency"] + ")"
-    print >> ldpair_out, "          " + output["haplotypes"]["hap4"]["alleles"] + ": " +
-        output["haplotypes"]["hap4"]["count"] +
+    print >> ldpair_out, "          " + output["haplotypes"]["hap4"]["alleles"] + ": " + \
+        output["haplotypes"]["hap4"]["count"] + \
         " (" + output["haplotypes"]["hap4"]["frequency"] + ")"
     print >> ldpair_out, ""
     print >> ldpair_out, "          D': " + output["statistics"]["d_prime"]
@@ -562,28 +562,28 @@ def main():
         print " " * 13 + "-" * 17
         print " " * 11 + json_dict["snp1"]["allele_1"]["allele"] + " | " + json_dict["two_by_two"]["cells"]["c11"] + " " * (5 - len(json_dict["two_by_two"]["cells"]["c11"])) + " | " + json_dict["two_by_two"]["cells"]["c12"] + " " * (
             5 - len(json_dict["two_by_two"]["cells"]["c12"])) + " | " + json_dict["snp1"]["allele_1"]["count"] + " " * (5 - len(json_dict["snp1"]["allele_1"]["count"])) + " (" + json_dict["snp1"]["allele_1"]["frequency"] + ")"
-        print json_dict["snp1"]["rsnum"] + " " *
+        print json_dict["snp1"]["rsnum"] + " " * \
             (10 - len(json_dict["snp1"]["rsnum"])) + " " * 3 + "-" * 17
         print " " * 11 + json_dict["snp1"]["allele_2"]["allele"] + " | " + json_dict["two_by_two"]["cells"]["c21"] + " " * (5 - len(json_dict["two_by_two"]["cells"]["c21"])) + " | " + json_dict["two_by_two"]["cells"]["c22"] + " " * (
             5 - len(json_dict["two_by_two"]["cells"]["c22"])) + " | " + json_dict["snp1"]["allele_2"]["count"] + " " * (5 - len(json_dict["snp1"]["allele_2"]["count"])) + " (" + json_dict["snp1"]["allele_2"]["frequency"] + ")"
         print " " * 13 + "-" * 17
         print " " * 15 + json_dict["snp2"]["allele_1"]["count"] + " " * (5 - len(json_dict["snp2"]["allele_1"]["count"])) + " " * 3 + json_dict["snp2"]["allele_2"]["count"] + " " * (
             5 - len(json_dict["snp2"]["allele_2"]["count"])) + " " * 3 + json_dict["two_by_two"]["total"]
-        print " " * 14 + "(" + json_dict["snp2"]["allele_1"]["frequency"] + ")" + " " * (5 - len(json_dict["snp2"]["allele_1"]["frequency"])) +
-            " (" + json_dict["snp2"]["allele_2"]["frequency"] + ")" +
+        print " " * 14 + "(" + json_dict["snp2"]["allele_1"]["frequency"] + ")" + " " * (5 - len(json_dict["snp2"]["allele_1"]["frequency"])) + \
+            " (" + json_dict["snp2"]["allele_2"]["frequency"] + ")" + \
             " " * (5 - len(json_dict["snp2"]["allele_2"]["frequency"]))
         print ""
-        print "          " + json_dict["haplotypes"]["hap1"]["alleles"] + ": " +
-            json_dict["haplotypes"]["hap1"]["count"] +
+        print "          " + json_dict["haplotypes"]["hap1"]["alleles"] + ": " + \
+            json_dict["haplotypes"]["hap1"]["count"] + \
             " (" + json_dict["haplotypes"]["hap1"]["frequency"] + ")"
-        print "          " + json_dict["haplotypes"]["hap2"]["alleles"] + ": " +
-            json_dict["haplotypes"]["hap2"]["count"] +
+        print "          " + json_dict["haplotypes"]["hap2"]["alleles"] + ": " + \
+            json_dict["haplotypes"]["hap2"]["count"] + \
             " (" + json_dict["haplotypes"]["hap2"]["frequency"] + ")"
-        print "          " + json_dict["haplotypes"]["hap3"]["alleles"] + ": " +
-            json_dict["haplotypes"]["hap3"]["count"] +
+        print "          " + json_dict["haplotypes"]["hap3"]["alleles"] + ": " + \
+            json_dict["haplotypes"]["hap3"]["count"] + \
             " (" + json_dict["haplotypes"]["hap3"]["frequency"] + ")"
-        print "          " + json_dict["haplotypes"]["hap4"]["alleles"] + ": " +
-            json_dict["haplotypes"]["hap4"]["count"] +
+        print "          " + json_dict["haplotypes"]["hap4"]["alleles"] + ": " + \
+            json_dict["haplotypes"]["hap4"]["count"] + \
             " (" + json_dict["haplotypes"]["hap4"]["frequency"] + ")"
         print ""
         print "          D': " + json_dict["statistics"]["d_prime"]
