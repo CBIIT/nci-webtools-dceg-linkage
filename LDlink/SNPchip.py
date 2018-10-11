@@ -121,18 +121,22 @@ def calculate_chip(snplst, platform_query, request):
                 if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(snp_i[0])
                     if snp_coord != None:
+                        # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
-                        # new dbSNP151 position is 1 off
                         snp_pos.append(str(int(snp_coord[2]) + 1))
+                        temp2 = [snp_i[0], chr, int(snp_coord[2]) + 1]
+                        snp_coords.append(temp2)
+                        # if new dbSNP151 position is the same
+                        rs_nums.append(snp_i[0])
+                        snp_pos.append(snp_coord[2])
+                        temp = [snp_i[0], chr, int(snp_coord[2])]
+                        snp_coords.append(temp)
                         if snp_coord[1] == "X":
                             chr = 23
                         elif snp_coord[1] == "Y":
                             chr = 24
                         else:
                             chr = int(snp_coord[1])
-                        # new dbSNP151 position is 1 off
-                        temp = [snp_i[0], chr, int(snp_coord[2]) + 1]
-                        snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
                 else:
