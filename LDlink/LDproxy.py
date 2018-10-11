@@ -118,7 +118,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
 
     elif len(vcf) > 1:
@@ -133,8 +133,8 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
             out_json.close()
             subprocess.call("rm " + tmp_dir + "pops_" +
                             request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" +
-                            request + "*.vcf", shell=True)
+            # subprocess.call("rm " + tmp_dir + "*" +
+            #                 request + "*.vcf", shell=True)
             return("", "")
 
     else:
@@ -153,7 +153,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
 
     index = []
@@ -178,7 +178,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
 
     # Define window of interest around query SNP
@@ -792,7 +792,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Remove temporary files
     subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-    subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+    # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
     subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
