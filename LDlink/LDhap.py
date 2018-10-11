@@ -122,6 +122,7 @@ def calculate_hap(snplst, pop, request):
                         rs_nums.append(snp_i[0])
                         # new dbSNP151 position is 1 off
                         snp_pos.append(str(int(snp_coord[2]) + 1))
+                        snp_pos.append(snp_coord[2])
                         # new dbSNP151 position is 1 off
                         temp = [snp_i[0], snp_coord[1],
                                 str(int(snp_coord[2]) + 1)]
@@ -248,7 +249,7 @@ def calculate_hap(snplst, pop, request):
 
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
-        if ((geno[1] not in snp_pos) and ((str(int(geno[1]) - 1) not in snp_pos) and (geno[2] not in rs_nums))): # some rsnums don't have 1-off positions(add condition)
+        if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
                     config['data']['dbsnp_version'] + \
