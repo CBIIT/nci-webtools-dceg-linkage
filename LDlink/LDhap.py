@@ -119,15 +119,15 @@ def calculate_hap(snplst, pop, request):
                     print "SNP_COORD"
                     print snp_coord
                     if snp_coord != None:
-                        rs_nums.append(snp_i[0])
                         # if new dbSNP151 position is 1 off
+                        rs_nums.append(snp_i[0])
                         snp_pos.append(str(int(snp_coord[2]) + 1))
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[2])
-                        # if new dbSNP151 position is 1 off
                         temp2 = [snp_i[0], snp_coord[1],
                                  str(int(snp_coord[2]) + 1)]
                         snp_coords.append(temp2)
+                        # if new dbSNP151 position is the same
+                        rs_nums.append(snp_i[0])
+                        snp_pos.append(snp_coord[2])
                         temp = [snp_i[0], snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
                     else:
