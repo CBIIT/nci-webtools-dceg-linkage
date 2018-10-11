@@ -103,25 +103,13 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = proc_h.stdout.readlines()[0].strip().split()
 
-    # if new dbSNP151 position is 1 off
-    tabix_snp_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], str(int(snp_coord[2]) + 1), tmp_dir + "snp_no_dups_offset_" + request + ".vcf")
-    subprocess.call(tabix_snp_offset, shell=True)
-    # if new dbSNP151 position is the same
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord[1], str(int(snp_coord[2]) + 1), tmp_dir + "snp_no_dups_" + request + ".vcf")  # new dbSNP151 position is 1 off
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
     # monoallelic
-    vcf_offset = open(tmp_dir + "snp_no_dups_offset_" +
-                      request + ".vcf").readlines()
     vcf = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-    # check to see which one to use
-    snp_coord_offset = int(snp_coord[2])
-    if len(vcf) == 0 and len(vcf_offset) != 0:
-        vcf = vcf_offset
-        snp_coord_offset = int(snp_coord[2]) + 1
 
     if len(vcf) == 0:
         output["error"] = snp + " is not in 1000G reference panel."
@@ -195,10 +183,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = snp_coord_offset - window  # new dbSNP151 position is 1 off
+    coord1 = int(snp_coord[2]) + 1 - window  # new dbSNP151 position is 1 off
     if coord1 < 0:
         coord1 = 0
-    coord2 = snp_coord_offset + 1 + window  # new dbSNP151 position is 1 off
+    coord2 = int(snp_coord[2]) + 1 + window  # new dbSNP151 position is 1 off
     print ""
 
     # Calculate proxy LD statistics in parallel
