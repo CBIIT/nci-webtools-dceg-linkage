@@ -103,8 +103,9 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = proc_h.stdout.readlines()[0].strip().split()
 
+    # if new dbSNP151 position is 1 off
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], str(int(snp_coord[2]) + 1), tmp_dir + "snp_no_dups_" + request + ".vcf")  # new dbSNP151 position is 1 off
+        vcf_file, snp_coord[1], str(int(snp_coord[2]) + 1), tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -118,7 +119,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
 
     elif len(vcf) > 1:
@@ -133,8 +134,8 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
             out_json.close()
             subprocess.call("rm " + tmp_dir + "pops_" +
                             request + ".txt", shell=True)
-            # subprocess.call("rm " + tmp_dir + "*" +
-            #                 request + "*.vcf", shell=True)
+            subprocess.call("rm " + tmp_dir + "*" +
+                            request + "*.vcf", shell=True)
             return("", "")
 
     else:
@@ -153,7 +154,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
 
     index = []
@@ -178,7 +179,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
 
     # Define window of interest around query SNP
@@ -792,7 +793,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Remove temporary files
     subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-    # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+    subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
     subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
