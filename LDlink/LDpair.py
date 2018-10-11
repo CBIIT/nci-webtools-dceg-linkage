@@ -387,7 +387,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     snp_2 = {}
     snp_2["rsnum"] = snp2
     snp_2["coord"] = "chr" + snp2_coord[1] + ":" + \
-        vcf2_pos)
+        vcf2_pos
 
     snp_2_allele_1={}
     snp_2_allele_1["allele"]=sorted(hap)[0].split("_")[1]
