@@ -122,6 +122,7 @@ def calculate_hap(snplst, pop, request):
                         rs_nums.append(snp_i[0])
                         # new dbSNP151 position is 1 off
                         snp_pos.append(str(int(snp_coord[2]) + 1))
+                        rs_nums.append(snp_i[0]) # duplicate
                         snp_pos.append(snp_coord[2])
                         # new dbSNP151 position is 1 off
                         temp = [snp_i[0], snp_coord[1],
