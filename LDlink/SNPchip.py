@@ -63,16 +63,10 @@ def convert_codeToPlatforms(platform_query):
 
 def calculate_chip(snplst, platform_query, request):
 
-    # Set data directories
-    # data_dir="/local/content/ldlink/data/"
-    # snp_dir=data_dir+"snp142/snp142_annot_2.db"
-    # array_dir=data_dir+"arrays/snp142_arrays.db"
-
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     snp_dir = config['data']['snp_dir']
-    # array_dir=config['data']['array_dir']
 
     tmp_dir = "./tmp/"
 
@@ -129,8 +123,8 @@ def calculate_chip(snplst, platform_query, request):
                             chr = int(snp_coord[1])
                         # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(str(int(snp_coord[2]) + 1))
-                        temp = [snp_i[0], chr, int(snp_coord[2]) + 1]
+                        snp_pos.append(snp_coord[2])
+                        temp = [snp_i[0], chr, int(snp_coord[2])]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
