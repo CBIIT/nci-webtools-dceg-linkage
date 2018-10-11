@@ -96,7 +96,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     if len(vcf) == 0:
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return None
     elif len(vcf) > 1:
         geno = []
@@ -106,8 +106,8 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
         if geno == []:
             subprocess.call("rm " + tmp_dir + "pops_" +
                             request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" +
-                            request + "*.vcf", shell=True)
+            # subprocess.call("rm " + tmp_dir + "*" +
+            #                 request + "*.vcf", shell=True)
             return None
     else:
         geno = vcf[0].strip().split()
@@ -118,7 +118,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     if "," in geno[3] or "," in geno[4]:
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return None
 
     index = []
@@ -138,7 +138,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     if genotypes["0"] == 0 or genotypes["1"] == 0:
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return None
 
     # Define window of interest around query SNP
@@ -557,7 +557,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     # Remove temporary files
     subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-    subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+    # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
     subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
