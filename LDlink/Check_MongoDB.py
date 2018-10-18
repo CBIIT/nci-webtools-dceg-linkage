@@ -1,4 +1,4 @@
-from pymongo import *
+from pymongo import MongoClient
 
 def test_mongo(filename):
 
@@ -12,7 +12,7 @@ def test_mongo(filename):
     except ValueError, e:
             return "Error reading" + filename, e
 
-    except pymongo.errors.ConnectionFailure:
+    except client.errors.ConnectionFailure:
             print "MongoDB is down on port", port
             print "syntax: mongod --dbpath /local/content/ldlink/mongo/data/db/ --auth"
             return "Failed to connect to server. Please verify the contents of " + filename
