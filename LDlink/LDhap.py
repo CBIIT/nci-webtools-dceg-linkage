@@ -17,7 +17,7 @@ def calculate_hap(snplst, pop, request):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     snp_dir = config['data']['snp_dir']
-    snp_chr_dir = config['data']['snp_chr_dir']
+    # snp_chr_dir = config['data']['snp_chr_dir']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
