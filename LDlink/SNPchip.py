@@ -7,7 +7,7 @@
 import yaml
 
 #from pymongo import MongoClient
-from pymongo import MongoClient
+from pymongo import *
 import os
 import bson.regex
 import operator
@@ -29,7 +29,7 @@ def get_platform_request():
     try:
         client = MongoClient()
         client = MongoClient('localhost', port)
-    except client.errors.ConnectionFailure:
+    except pymongo.errors.ConnectionFailure:
         print "MongoDB is down"
         print "syntax: mongod --dbpath /local/content/ldlink/mongo/data/db/ --auth"
         return "Failed to connect to server."
