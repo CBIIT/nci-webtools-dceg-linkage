@@ -973,9 +973,9 @@ function cleanSNP(text) {
         });
 
         if(variant.length > 2) {
-            var pos = variant.search(/^[R|r][S|s]\d+$/);
+            // var pos = variant.search(/^[R|r][S|s]\d+$/);
             // add genomic positions too (ex. chr1:123456) in the future
-            // var pos = variant.search(/^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/);
+            var pos = variant.search(/^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/);
             if(pos == 0) {
                 list += variant + '\n';
             }
