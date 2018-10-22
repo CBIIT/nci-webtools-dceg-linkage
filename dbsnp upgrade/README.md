@@ -17,7 +17,7 @@ Each row contains the attributes: id, chromosome, position, and function. Data w
 
 Create folder named `json_refsnp` in script's directory and place all compressed json `json.gz` files in folder.
 
-Current refsnp data files are pulled from here: (ftp://ftp.ncbi.nlm.nih.gov/snp/.redesign/latest_release/JSON)
+Current refsnp data files are pulled from here: ftp://ftp.ncbi.nlm.nih.gov/snp/.redesign/latest_release/JSON
 
 Run `python rsjson_dbSNP.py` to execute the script to build SQLite database indexed by RS number.
 
