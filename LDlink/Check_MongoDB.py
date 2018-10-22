@@ -15,7 +15,7 @@ def test_mongo(filename):
 
     except ConnectionFailure:
             print "MongoDB is down on port", port
-            print "syntax: mongod --dbpath /local/content/ldlink/mongo/data/db/ --auth"
+            print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
             return "Failed to connect to server. Please verify the contents of " + filename
 
 

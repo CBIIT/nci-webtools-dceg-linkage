@@ -567,7 +567,7 @@ def snpchip_platforms():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    example_filepath = '/local/content/ldlink/data/example/prostate_example.txt'
+    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
 
     example = {
         'filename': os.path.basename(example_filepath),
@@ -630,10 +630,9 @@ def ldassoc():
     # columns = json.loads(request.args.get('columns'))
 
     if bool(request.args.get("useEx") == "True"):
-        filename = '/local/content/ldlink/data/example/prostate_example.txt'
+        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
-    # filename = "/local/content/ldlink/data/assoc/meta_assoc.meta"
 
     print 'filename: ' + filename
     print 'region: ' + region

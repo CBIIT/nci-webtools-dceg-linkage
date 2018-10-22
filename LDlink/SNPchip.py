@@ -31,7 +31,7 @@ def get_platform_request():
         client = MongoClient('localhost', port)
     except ConnectionFailure:
         print "MongoDB is down"
-        print "syntax: mongod --dbpath /local/content/ldlink/mongo/data/db/ --auth"
+        print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
         return "Failed to connect to server."
 
     client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
