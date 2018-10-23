@@ -87,7 +87,7 @@ def calculate_hap(snplst, pop, request):
     def get_rsnum(coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
-        pos = temp_coord[1]
+        pos = str(int(temp_coord[1] - 1))
         t = (pos,)
         cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
         return cur_chr.fetchone()
@@ -137,14 +137,16 @@ def calculate_hap(snplst, pop, request):
                         #
                         # if new dbSNP151 position is 1 off
                         rs_nums.append("rs" + str(snp_coord[0]))
+                        snps.append("rs" + str(snp_coord[0]))
                         snp_pos.append(str(int(snp_coord[2]) + 1))
-                        temp2 = [snp_i[0], snp_coord[1],
+                        temp2 = ["rs" + snp_coord[0], snp_coord[1],
                                     str(int(snp_coord[2]) + 1)]
                         snp_coords.append(temp2)
                         # if new dbSNP151 position is the same
                         rs_nums.append("rs" + str(snp_coord[0]))
+                        snps.append("rs" + str(snp_coord[0]))
                         snp_pos.append(snp_coord[2])
-                        temp = [snp_i[0], snp_coord[1], snp_coord[2]]
+                        temp = ["rs" + snp_coord[0], snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
