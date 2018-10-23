@@ -87,7 +87,7 @@ def calculate_hap(snplst, pop, request):
     def get_rsnum(coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
-        pos = str(int(temp_coord[1] - 1))
+        pos = str(int(temp_coord[1]) - 1)
         t = (pos,)
         cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
         return cur_chr.fetchone()
