@@ -3,11 +3,11 @@ For constructing dbSNP build (151). Can be modified for future dbSNP updates.
 
 Built off Lon Phan's `rsjson_test.py` (lonphan@ncbi.nlm.nih.gov)
 
-Includes script `rsjson_dbsnp.py` to parse dbSNP RS JSON object and create SQLite database indexed by ID.
+Includes script `rsjson_dbsnp.py` to parse gzipped JSON files and create SQLite database indexed by (RS)ID.
 
 - Outputs SQLITE database: `dbsnp.rs.151.db`
 
-Includes script `chrjson_dbsnp.py` to parse dbSNP RS JSON object and create SQLITE database indexed by CHROMOSOME. 
+Includes script `chrjson_dbsnp.py` to parse gzipped JSON files and create SQLITE database indexed by CHROMOSOME. 
 
 - Outputs SQLITE database: `dbsnp.chr.151.db`
   
