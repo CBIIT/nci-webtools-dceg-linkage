@@ -17,7 +17,7 @@ def calculate_hap(snplst, pop, request):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     snp_dir = config['data']['snp_dir']
-    # snp_chr_dir = config['data']['snp_chr_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -73,9 +73,9 @@ def calculate_hap(snplst, pop, request):
     cur = conn.cursor()
 
     # Connect to snp chr database for genomic coordinates queries
-    # conn_chr = sqlite3.connect(snp_chr_dir)
-    # conn_chr.text_factory = str
-    # cur_chr = conn_chr.cursor()
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
 
     def get_coords(rs):
         id = rs.strip("rs")
@@ -84,13 +84,13 @@ def calculate_hap(snplst, pop, request):
         return cur.fetchone()
 
     # Query genomic coordinates
-    # def get_rsnum(coord):
-    #     temp_coord = coord.strip("chr").split(":")
-    #     chro = temp_coord[0]
-    #     pos = temp_coord[1]
-    #     t = (pos,)
-    #     cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
-    #     return cur_chr.fetchone()
+    def get_rsnum(coord):
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = temp_coord[1]
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
 
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
@@ -122,22 +122,22 @@ def calculate_hap(snplst, pop, request):
                         warn.append(snp_i[0])
                 # For adding genomic coordinates to query in the future
                 # Same as previous check but for genomic coordinates
-                # elif snp_i[0][0:3] == "chr" and snp_i[0][-1].isdigit():
-                #     snp_coord = get_rsnum(snp_i[0])
-                #     print "SNP_COORD"
-                #     print snp_coord
-                #     if snp_coord != None:
-                #         rs_nums.append("rs" + snp_coord[0])
-                #         snp_pos.append(snp_coord[2])
-                #         temp = ["rs" + snp_coord[0],
-                #                 snp_coord[1], snp_coord[2]]
-                #         print "TEMP"
-                #         print temp
-                #         snp_coords.append(temp)
-                #     else:
-                #         warn.append(snp_i[0])
-                # else:
-                #     warn.append(snp_i[0])
+                elif snp_i[0][0:3] == "chr" and snp_i[0][-1].isdigit():
+                    snp_coord = get_rsnum(snp_i[0])
+                    print "SNP_COORD"
+                    print snp_coord
+                    if snp_coord != None:
+                        rs_nums.append("rs" + snp_coord[0])
+                        snp_pos.append(snp_coord[2])
+                        temp = ["rs" + snp_coord[0],
+                                snp_coord[1], snp_coord[2]]
+                        print "TEMP"
+                        print temp
+                        snp_coords.append(temp)
+                    else:
+                        warn.append(snp_i[0])
+                else:
+                    warn.append(snp_i[0])
             else:
                 warn.append(snp_i[0])
 
@@ -146,8 +146,8 @@ def calculate_hap(snplst, pop, request):
     conn.close()
 
     # Close snp chr connection
-    # cur_chr.close()
-    # conn_chr.close()
+    cur_chr.close()
+    conn_chr.close()
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
