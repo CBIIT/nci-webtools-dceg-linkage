@@ -6,8 +6,8 @@
 
 import yaml
 
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
+from pymongo import *
+# from pymongo.errors import ConnectionFailure
 import os
 import bson.regex
 import operator
@@ -19,9 +19,9 @@ contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
-# print "username:"+username
-# print "password:"+password
-# print "port:"+str(port)
+print "username:"+username
+print "password:"+password
+print "port:"+str(port)
 
 
 def get_platform_request():
@@ -29,16 +29,14 @@ def get_platform_request():
     try:
         client = MongoClient()
         client = MongoClient('localhost', port)
-    except ConnectionFailure:
+    except pymongo.errors.ConnectionFailure:
         print "MongoDB is down"
         print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
         return "Failed to connect to server."
 
-    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
-    db.authenticate(username, password)
-    cursor = db.platforms.find(
-        {"platform": {'$regex': '.*'}}).sort("platform", -1)
+    cursor = db.platforms.find({"platform": {'$regex': '.*'}}).sort("platform", -1)
     platforms = {}
     for document in cursor:
         platforms[document["code"]] = document["platform"]
