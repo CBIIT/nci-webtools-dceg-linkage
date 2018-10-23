@@ -127,12 +127,24 @@ def calculate_hap(snplst, pop, request):
                     print "SNP_COORD"
                     print snp_coord
                     if snp_coord != None:
-                        rs_nums.append("rs" + snp_coord[0])
+                        # rs_nums.append("rs" + snp_coord[0])
+                        # snp_pos.append(snp_coord[2])
+                        # temp = ["rs" + snp_coord[0],
+                        #         snp_coord[1], snp_coord[2]]
+                        # print "TEMP"
+                        # print temp
+                        # snp_coords.append(temp)
+                        #
+                        # if new dbSNP151 position is 1 off
+                        rs_nums.append("rs" + str(snp_coord[0]))
+                        snp_pos.append(str(int(snp_coord[2]) + 1))
+                        temp2 = [snp_i[0], snp_coord[1],
+                                    str(int(snp_coord[2]) + 1)]
+                        snp_coords.append(temp2)
+                        # if new dbSNP151 position is the same
+                        rs_nums.append("rs" + str(snp_coord[0]))
                         snp_pos.append(snp_coord[2])
-                        temp = ["rs" + snp_coord[0],
-                                snp_coord[1], snp_coord[2]]
-                        print "TEMP"
-                        print temp
+                        temp = [snp_i[0], snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
