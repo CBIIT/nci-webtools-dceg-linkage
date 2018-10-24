@@ -119,7 +119,7 @@ def calculate_hap(snplst, pop, request):
                         temp = [snp_i[0], snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
                     else:
-                        warn.append(snp_i[0])
+                        warn.append(snp_i[0] + "A")
                 # For adding genomic coordinates to query in the future
                 # Same as previous check but for genomic coordinates
                 elif snp_i[0][0:3] == "chr" and snp_i[0][-1].isdigit():
@@ -140,20 +140,21 @@ def calculate_hap(snplst, pop, request):
                         snps.append("rs" + str(snp_coord[0]))
                         snp_pos.append(str(int(snp_coord[2]) + 1))
                         temp2 = ["rs" + str(snp_coord[0]), snp_coord[1],
-                                    str(int(snp_coord[2]) + 1)]
+                                 str(int(snp_coord[2]) + 1)]
                         snp_coords.append(temp2)
                         # if new dbSNP151 position is the same
                         rs_nums.append("rs" + str(snp_coord[0]))
                         snps.append("rs" + str(snp_coord[0]))
                         snp_pos.append(snp_coord[2])
-                        temp = ["rs" + str(snp_coord[0]), snp_coord[1], snp_coord[2]]
+                        temp = ["rs" + str(snp_coord[0]),
+                                snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
                     else:
-                        warn.append(snp_i[0])
+                        warn.append(snp_i[0] + "B")
                 else:
-                    warn.append(snp_i[0])
+                    warn.append(snp_i[0] + "C")
             else:
-                warn.append(snp_i[0])
+                warn.append(snp_i[0] + "D")
 
     # Close snp connection
     cur.close()
