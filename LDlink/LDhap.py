@@ -99,6 +99,7 @@ def calculate_hap(snplst, pop, request):
     warn = []
     tabix_coords = ""
     for snp_i in snps:
+        print "snp_i", snp_i
         if len(snp_i) > 0:  # Length entire list of snps
             print "len(snp_i[0]): ", str(len(snp_i[0]))
             if len(snp_i[0]) > 2:  # Length of each snp in snps
