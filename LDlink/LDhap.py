@@ -92,6 +92,22 @@ def calculate_hap(snplst, pop, request):
         cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
         return cur_chr.fetchone()
 
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_id(snp_lst):
+        new_snp_lst = []
+        for snp_raw_i in snp_lst:
+            if snp_raw_i[0][0:2] == "rs":
+                new_snp_lst.append(snp_raw_i)
+            else:
+                snp_info = get_rsnum(snp_raw_i[0])
+                if snp_info != None:
+                    var_id = snp_info[0]
+                    new_snp_lst.append([var_id])
+                else:
+                    new_snp_lst.append(snp_raw_i)
+        return new_snp_lst
+
+    snps = replace_coord_id(snps)
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
     snp_pos = []
@@ -99,9 +115,7 @@ def calculate_hap(snplst, pop, request):
     warn = []
     tabix_coords = ""
     for snp_i in snps:
-        print "snp_i", snp_i
         if len(snp_i) > 0:  # Length entire list of snps
-            print "len(snp_i[0]): ", str(len(snp_i[0]))
             if len(snp_i[0]) > 2:  # Length of each snp in snps
                 # Check first two charcters are rs and last charcter of each snp
                 if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
@@ -121,42 +135,34 @@ def calculate_hap(snplst, pop, request):
                         temp = [snp_i[0], snp_coord[1], snp_coord[2]]
                         snp_coords.append(temp)
                     else:
-                        warn.append(snp_i[0] + "A")
+                        warn.append(snp_i[0])
                 # For adding genomic coordinates to query in the future
                 # Same as previous check but for genomic coordinates
-                elif snp_i[0][0:3] == "chr" and snp_i[0][-1].isdigit():
-                    snp_coord = get_rsnum(snp_i[0])
-                    print "SNP_COORD"
-                    print snp_coord
-                    if snp_coord != None:
-                        # rs_nums.append("rs" + snp_coord[0])
-                        # snp_pos.append(snp_coord[2])
-                        # temp = ["rs" + snp_coord[0],
-                        #         snp_coord[1], snp_coord[2]]
-                        # print "TEMP"
-                        # print temp
-                        # snp_coords.append(temp)
-                        #
-                        # if new dbSNP151 position is 1 off
-                        rs_nums.append("rs" + str(snp_coord[0]))
-                        snps.append(["rs" + str(snp_coord[0])])
-                        snp_pos.append(str(int(snp_coord[2]) + 1))
-                        temp2 = ["rs" + str(snp_coord[0]), snp_coord[1],
-                                 str(int(snp_coord[2]) + 1)]
-                        snp_coords.append(temp2)
-                        # if new dbSNP151 position is the same
-                        rs_nums.append("rs" + str(snp_coord[0]))
-                        snps.append(["rs" + str(snp_coord[0])])
-                        snp_pos.append(snp_coord[2])
-                        temp = ["rs" + str(snp_coord[0]),
-                                snp_coord[1], snp_coord[2]]
-                        snp_coords.append(temp)
-                    else:
-                        warn.append(snp_i[0] + "B")
+                # elif snp_i[0][0:3] == "chr" and snp_i[0][-1].isdigit():
+                #     snp_coord = get_rsnum(snp_i[0])
+                #     print "SNP_COORD"
+                #     print snp_coord
+                #     if snp_coord != None:
+                #         # if new dbSNP151 position is 1 off
+                #         rs_nums.append("rs" + str(snp_coord[0]))
+                #         snps.append(["rs" + str(snp_coord[0])])
+                #         snp_pos.append(str(int(snp_coord[2]) + 1))
+                #         temp2 = ["rs" + str(snp_coord[0]), snp_coord[1],
+                #                  str(int(snp_coord[2]) + 1)]
+                #         snp_coords.append(temp2)
+                #         # if new dbSNP151 position is the same
+                #         rs_nums.append("rs" + str(snp_coord[0]))
+                #         snps.append(["rs" + str(snp_coord[0])])
+                #         snp_pos.append(snp_coord[2])
+                #         temp = ["rs" + str(snp_coord[0]),
+                #                 snp_coord[1], snp_coord[2]]
+                #         snp_coords.append(temp)
+                #     else:
+                #         warn.append(snp_i[0])
                 else:
-                    warn.append(snp_i[0] + "C")
+                    warn.append(snp_i[0])
             else:
-                warn.append(snp_i[0] + "D")
+                warn.append(snp_i[0])
 
     # Close snp connection
     cur.close()
