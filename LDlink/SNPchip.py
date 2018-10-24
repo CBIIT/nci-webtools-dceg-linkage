@@ -18,8 +18,7 @@ import sys
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
-# port = int(contents[2].split('=')[1])
-port = 974
+port = int(contents[2].split('=')[1])
 print "username:"+username
 print "password:"+password
 print "port:"+str(port)
