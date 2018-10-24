@@ -100,6 +100,7 @@ def calculate_hap(snplst, pop, request):
     tabix_coords = ""
     for snp_i in snps:
         if len(snp_i) > 0:  # Length entire list of snps
+            print "len(snp_i[0]): ", str(len(snp_i[0]))
             if len(snp_i[0]) > 2:  # Length of each snp in snps
                 # Check first two charcters are rs and last charcter of each snp
                 if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
