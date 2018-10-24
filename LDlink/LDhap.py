@@ -101,7 +101,7 @@ def calculate_hap(snplst, pop, request):
             else:
                 snp_info = get_rsnum(snp_raw_i[0])
                 if snp_info != None:
-                    var_id = snp_info[0]
+                    var_id = "rs" + str(snp_info[0])
                     new_snp_lst.append([var_id])
                 else:
                     new_snp_lst.append(snp_raw_i)
