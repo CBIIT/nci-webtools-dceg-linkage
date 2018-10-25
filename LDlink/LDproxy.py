@@ -50,11 +50,41 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     conn.text_factory = str
     cur = conn.cursor()
 
+    # Connect to snp chr database for genomic coordinates queries
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
+
     def get_coords(rs):
         id = rs.strip("rs")
         t = (id,)
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
+
+    # Query genomic coordinates
+    def get_rsnum(coord):
+        coord = coord.lower()
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = str(int(temp_coord[1]) - 1)
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
+
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_rsid(coord):
+        rsid = coord.lower()
+        if rsid[0:2] == "rs":
+            return rsid
+        else:
+            snp_info = get_rsnum(rsid)
+            if snp_info != None:
+                rsid = "rs" + str(snp_info[0])
+            else:
+                return rsid
+        return rsid
+
+    snp = replace_coord_rsid(snp)
 
     # Find RS number in snp database
     snp_coord = get_coords(snp)
@@ -62,6 +92,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Close snp connection
     cur.close()
     conn.close()
+
+    # Close snp chr connection
+    cur_chr.close()
+    conn_chr.close()
 
     if snp_coord == None:
         output["error"] = snp + " is not in dbSNP build " + \

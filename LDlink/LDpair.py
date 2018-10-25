@@ -72,12 +72,8 @@ def calculate_pair(snp1, snp2, pop, request=None):
                 return rsid
         return rsid
 
-    print "OLD SNP1: ", snp1
-    print "OLD SNP2: ", snp2
     snp1 = replace_coord_rsid(snp1)
     snp2 = replace_coord_rsid(snp2)
-    print "NEW SNP1: ", snp1
-    print "NEW SNP2: ", snp2
 
     # Find RS numbers in snp database
     # SNP1
