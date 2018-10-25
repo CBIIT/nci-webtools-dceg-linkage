@@ -119,7 +119,7 @@ def calculate_hap(snplst, pop, request):
         if len(snp_i) > 0:  # Length entire list of snps
             if len(snp_i[0]) > 2:  # Length of each snp in snps
                 # Check first two charcters are rs and last charcter of each snp
-                if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
+                if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(snp_i[0])
                     print "SNP_COORD"
                     print snp_coord

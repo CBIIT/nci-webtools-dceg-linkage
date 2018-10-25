@@ -284,7 +284,7 @@ def ldmatrix():
     print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
-    f.write(snps)
+    f.write(snps.lower())
     f.close()
 
     try:
@@ -349,7 +349,7 @@ def ldhap():
     print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
-    f.write(snps)
+    f.write(snps.lower())
     f.close()
 
     try:
@@ -533,7 +533,7 @@ def snpchip():
     print 'snplst: ' + snplst
 
     f = open(snplst, 'w')
-    f.write(snps)
+    f.write(snps.lower())
     f.close()
 
     try:

@@ -103,7 +103,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     for snp_i in snps:
         if len(snp_i) > 0:
             if len(snp_i[0]) > 2:
-                if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
+                if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(snp_i[0])
                     if snp_coord != None:
                         # if new dbSNP151 position is 1 off

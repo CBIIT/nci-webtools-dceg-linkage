@@ -117,9 +117,8 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    print "OLD SNPS", snps
     snps = replace_coord_rsid(snps)
-    print "NEW SNPS", snps
+
     # Find RS numbers in snp database
     details = collections.OrderedDict()
     rs_nums = []

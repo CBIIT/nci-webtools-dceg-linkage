@@ -59,11 +59,42 @@ def calculate_tip(snplst, request):
     conn.text_factory = str
     cur = conn.cursor()
 
+    # Connect to snp chr database for genomic coordinates queries
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
+
     def get_coords(rs):
         id = rs.strip("rs")
         t = (id,)
         cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
         return cur.fetchone()
+
+    # Query genomic coordinates
+    def get_rsnum(coord):
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = str(int(temp_coord[1]) - 1)
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
+
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_rsid(snp_lst):
+        new_snp_lst = []
+        for snp_raw_i in snp_lst:
+            if snp_raw_i[0][0:2] == "rs":
+                new_snp_lst.append(snp_raw_i)
+            else:
+                snp_info = get_rsnum(snp_raw_i[0])
+                if snp_info != None:
+                    var_id = "rs" + str(snp_info[0])
+                    new_snp_lst.append([var_id])
+                else:
+                    new_snp_lst.append(snp_raw_i)
+        return new_snp_lst
+
+    snps = replace_coord_rsid(snps)
 
     # Find RS numbers in snp database
     snp_coords = []
@@ -71,7 +102,7 @@ def calculate_tip(snplst, request):
     for snp_i in snps:
         if len(snp_i) > 0:
             if len(snp_i[0]) > 2:
-                if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
+                if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(snp_i[0])
                     if snp_coord != None:
                         chr = snp_coord[1]
@@ -80,7 +111,8 @@ def calculate_tip(snplst, request):
                         if chr == "Y":
                             chr = "24"
                         # if new dbSNP151 position is 1 off
-                        temp = [snp_i[0], int(chr), int(snp_coord[2]) + snp_pos_offset]
+                        temp = [snp_i[0], int(chr), int(
+                            snp_coord[2]) + snp_pos_offset]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -92,6 +124,10 @@ def calculate_tip(snplst, request):
     # Close snp connection
     cur.close()
     conn.close()
+
+    # Close snp chr connection
+    cur_chr.close()
+    conn_chr.close()
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
