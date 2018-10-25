@@ -37,11 +37,47 @@ def calculate_pair(snp1, snp2, pop, request=None):
     conn.text_factory = str
     cur = conn.cursor()
 
+    # Connect to snp chr database for genomic coordinates queries
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
+
     def get_coords(rs):
+        rs = rs.lower()
         id = rs.strip("rs")
         t = (id,)
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
+
+    # Query genomic coordinates
+    def get_rsnum(coord):
+        coord = coord.lower()
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = str(int(temp_coord[1]) - 1)
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
+
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_rsid(coord):
+        rsid = coord.lower()
+        if rsid[0:2] == "rs":
+            return rsid
+        else:
+            snp_info = get_rsnum(rsid)
+            if snp_info != None:
+                rsid = "rs" + str(snp_info[0])
+            else:
+                return rsid
+        return rsid
+
+    print "OLD SNP1: ", snp1
+    print "OLD SNP2: ", snp2
+    snp1 = replace_coord_rsid(snp1)
+    snp2 = replace_coord_rsid(snp2)
+    print "NEW SNP1: ", snp1
+    print "NEW SNP2: ", snp2
 
     # Find RS numbers in snp database
     # SNP1
@@ -61,6 +97,10 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # Close snp connection
     cur.close()
     conn.close()
+
+    # Close snp chr connection
+    cur_chr.close()
+    conn_chr.close()
 
     # Check if SNPs are on the same chromosome
     if snp1_coord[1] != snp2_coord[1]:

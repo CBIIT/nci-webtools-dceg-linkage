@@ -112,12 +112,6 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                         temp2 = [snp_i[0], snp_coord[1],
                                  str(int(snp_coord[2]) + snp_pos_offset)]
                         snp_coords.append(temp2)
-                        # if new dbSNP151 position is the same
-                        # rs_nums.append(snp_i[0])
-                        # snp_pos.append(snp_coord[2])
-                        # temp = [snp_i[0], snp_coord[1],
-                        #         snp_coord[2]]
-                        # snp_coords.append(temp)
 
     # Close snp connection
     cur.close()
