@@ -116,8 +116,8 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # proc2 = subprocess.Popen(tabix_snp2, shell=True, stdout=subprocess.PIPE)
     # vcf2 = proc2.stdout.readlines()
 
-    vcf1_pos = snp1_coord[2] + snp_pos_offset
-    vcf2_pos = snp2_coord[2] + snp_pos_offset
+    vcf1_pos = str(int(snp1_coord[2]) + snp_pos_offset)
+    vcf2_pos = str(int(snp2_coord[2]) + snp_pos_offset)
     vcf1 = vcf1_offset
     vcf2 = vcf2_offset
     # decide which VCF results to use
