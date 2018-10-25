@@ -24,6 +24,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     gene_dir=config['data']['gene_dir']
     recomb_dir=config['data']['recomb_dir']
     snp_dir=config['data']['snp_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
     snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir=config['data']['pop_dir']
     vcf_dir=config['data']['vcf_dir']

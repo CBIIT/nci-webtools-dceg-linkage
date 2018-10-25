@@ -18,6 +18,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     snp_dir = config['data']['snp_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
     snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
@@ -392,76 +393,76 @@ def calculate_pair(snp1, snp2, pop, request=None):
     snp_2["coord"] = "chr" + snp2_coord[1] + ":" + \
         vcf2_pos
 
-    snp_2_allele_1={}
-    snp_2_allele_1["allele"]=sorted(hap)[0].split("_")[1]
-    snp_2_allele_1["count"]=str(A + C)
-    snp_2_allele_1["frequency"]=str(round(float(A + C) / N, 3))
-    snp_2["allele_1"]=snp_2_allele_1
+    snp_2_allele_1 = {}
+    snp_2_allele_1["allele"] = sorted(hap)[0].split("_")[1]
+    snp_2_allele_1["count"] = str(A + C)
+    snp_2_allele_1["frequency"] = str(round(float(A + C) / N, 3))
+    snp_2["allele_1"] = snp_2_allele_1
 
-    snp_2_allele_2={}
-    snp_2_allele_2["allele"]=sorted(hap)[1].split("_")[1]
-    snp_2_allele_2["count"]=str(B + D)
-    snp_2_allele_2["frequency"]=str(round(float(B + D) / N, 3))
-    snp_2["allele_2"]=snp_2_allele_2
-    output["snp2"]=snp_2
+    snp_2_allele_2 = {}
+    snp_2_allele_2["allele"] = sorted(hap)[1].split("_")[1]
+    snp_2_allele_2["count"] = str(B + D)
+    snp_2_allele_2["frequency"] = str(round(float(B + D) / N, 3))
+    snp_2["allele_2"] = snp_2_allele_2
+    output["snp2"] = snp_2
 
-    two_by_two={}
-    cells={}
-    cells["c11"]=str(A)
-    cells["c12"]=str(B)
-    cells["c21"]=str(C)
-    cells["c22"]=str(D)
-    two_by_two["cells"]=cells
-    two_by_two["total"]=str(N)
-    output["two_by_two"]=two_by_two
+    two_by_two = {}
+    cells = {}
+    cells["c11"] = str(A)
+    cells["c12"] = str(B)
+    cells["c21"] = str(C)
+    cells["c22"] = str(D)
+    two_by_two["cells"] = cells
+    two_by_two["total"] = str(N)
+    output["two_by_two"] = two_by_two
 
-    haplotypes={}
-    hap_1={}
-    hap_1["alleles"]=hap1
-    hap_1["count"]=str(hap[hap1])
-    hap_1["frequency"]=str(round(float(hap[hap1]) / N, 3))
-    haplotypes["hap1"]=hap_1
+    haplotypes = {}
+    hap_1 = {}
+    hap_1["alleles"] = hap1
+    hap_1["count"] = str(hap[hap1])
+    hap_1["frequency"] = str(round(float(hap[hap1]) / N, 3))
+    haplotypes["hap1"] = hap_1
 
-    hap_2={}
-    hap_2["alleles"]=hap2
-    hap_2["count"]=str(hap[hap2])
-    hap_2["frequency"]=str(round(float(hap[hap2]) / N, 3))
-    haplotypes["hap2"]=hap_2
+    hap_2 = {}
+    hap_2["alleles"] = hap2
+    hap_2["count"] = str(hap[hap2])
+    hap_2["frequency"] = str(round(float(hap[hap2]) / N, 3))
+    haplotypes["hap2"] = hap_2
 
-    hap_3={}
-    hap_3["alleles"]=hap3
-    hap_3["count"]=str(hap[hap3])
-    hap_3["frequency"]=str(round(float(hap[hap3]) / N, 3))
-    haplotypes["hap3"]=hap_3
+    hap_3 = {}
+    hap_3["alleles"] = hap3
+    hap_3["count"] = str(hap[hap3])
+    hap_3["frequency"] = str(round(float(hap[hap3]) / N, 3))
+    haplotypes["hap3"] = hap_3
 
-    hap_4={}
-    hap_4["alleles"]=hap4
-    hap_4["count"]=str(hap[hap4])
-    hap_4["frequency"]=str(round(float(hap[hap4]) / N, 3))
-    haplotypes["hap4"]=hap_4
-    output["haplotypes"]=haplotypes
+    hap_4 = {}
+    hap_4["alleles"] = hap4
+    hap_4["count"] = str(hap[hap4])
+    hap_4["frequency"] = str(round(float(hap[hap4]) / N, 3))
+    haplotypes["hap4"] = hap_4
+    output["haplotypes"] = haplotypes
 
-    statistics={}
+    statistics = {}
     if Ms != 0:
-        statistics["d_prime"]=str(round(D_prime, 4))
-        statistics["r2"]=str(round(r2, 4))
-        statistics["chisq"]=str(round(chisq, 4))
+        statistics["d_prime"] = str(round(D_prime, 4))
+        statistics["r2"] = str(round(r2, 4))
+        statistics["chisq"] = str(round(chisq, 4))
         if p >= 0.0001:
-            statistics["p"]=str(round(p, 4))
+            statistics["p"] = str(round(p, 4))
         else:
-            statistics["p"]="<0.0001"
+            statistics["p"] = "<0.0001"
     else:
-        statistics["d_prime"]=D_prime
-        statistics["r2"]=r2
-        statistics["chisq"]=chisq
-        statistics["p"]=p
+        statistics["d_prime"] = D_prime
+        statistics["r2"] = r2
+        statistics["chisq"] = chisq
+        statistics["p"] = p
 
-    output["statistics"]=statistics
+    output["statistics"] = statistics
 
-    output["corr_alleles"]=corr_alleles
+    output["corr_alleles"] = corr_alleles
 
     # Generate output file
-    ldpair_out=open(tmp_dir + "LDpair_" + request + ".txt", "w")
+    ldpair_out = open(tmp_dir + "LDpair_" + request + ".txt", "w")
     print >> ldpair_out, "Query SNPs:"
     print >> ldpair_out, output["snp1"]["rsnum"] + \
         " (" + output["snp1"]["coord"] + ")"
@@ -514,7 +515,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     try:
         output["warning"]
     except KeyError:
-        www="do nothing"
+        www = "do nothing"
     else:
         print >> ldpair_out, "WARNING: " + output["warning"] + "!"
     ldpair_out.close()
@@ -529,24 +530,24 @@ def main():
 
     # Import LDpair options
     if len(sys.argv) == 5:
-        snp1=sys.argv[1]
-        snp2=sys.argv[2]
-        pop=sys.argv[3]
-        request=sys.argv[4]
+        snp1 = sys.argv[1]
+        snp2 = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
     elif sys.argv[4] is False:
-        snp1=sys.argv[1]
-        snp2=sys.argv[2]
-        pop=sys.argv[3]
-        request=str(time.strftime("%I%M%S"))
+        snp1 = sys.argv[1]
+        snp2 = sys.argv[2]
+        pop = sys.argv[3]
+        request = str(time.strftime("%I%M%S"))
     else:
         print "Correct useage is: LDpair.py snp1 snp2 populations request"
         sys.exit()
 
     # Run function
-    out_json=calculate_pair(snp1, snp2, pop, request)
+    out_json = calculate_pair(snp1, snp2, pop, request)
 
     # Print output
-    json_dict=json.loads(out_json)
+    json_dict = json.loads(out_json)
     try:
         json_dict["error"]
 

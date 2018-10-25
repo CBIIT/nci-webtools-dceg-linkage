@@ -26,6 +26,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     gene_dir = config['data']['gene_dir']
     recomb_dir = config['data']['recomb_dir']
     snp_dir = config['data']['snp_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
     snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
@@ -185,10 +186,12 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = int(snp_coord[2]) + snp_pos_offset - window  # if new dbSNP151 position is 1 off
+    coord1 = int(snp_coord[2]) + snp_pos_offset - \
+        window  # if new dbSNP151 position is 1 off
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord[2]) + snp_pos_offset + window  # if new dbSNP151 position is 1 off
+    coord2 = int(snp_coord[2]) + snp_pos_offset + \
+        window  # if new dbSNP151 position is 1 off
     print ""
 
     # Calculate proxy LD statistics in parallel
