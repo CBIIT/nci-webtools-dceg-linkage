@@ -408,7 +408,7 @@ def snpclip():
     f = open(snpfile, 'w')
     for s in snplist:
         s = s.lstrip()
-        if(s[:2].lower() == 'rs'):
+        if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
             f.write(s.lower() + '\n')
 
     f.close()
