@@ -11,15 +11,16 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
-	gene_dir=config['data']['gene_dir']
-	gene_c_dir=config['data']['gene_c_dir']
-	gene_dir2=config['data']['gene_dir2']
-	recomb_dir=config['data']['recomb_dir']
-	snp_dir=config['data']['snp_dir']
-	pop_dir=config['data']['pop_dir']
-	vcf_dir=config['data']['vcf_dir']
+	gene_dir = config['data']['gene_dir']
+	gene_c_dir = config['data']['gene_c_dir']
+	gene_dir2 = config['data']['gene_dir2']
+	recomb_dir = config['data']['recomb_dir']
+	snp_dir = config['data']['snp_dir']
+	snp_pos_offset = config['data']['snp_pos_offset']
+	pop_dir = config['data']['pop_dir']
+	vcf_dir = config['data']['vcf_dir']
 
-	tmp_dir="./tmp/"
+	tmp_dir = "./tmp/"
 
 
 	# Ensure tmp directory exists
@@ -84,7 +85,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 
 		chromosome=var_coord[1]
-		org_coord=str(int(var_coord[2]) + 1) # new dbSNP151 position is 1 off
+		org_coord=str(int(var_coord[2]) + snp_pos_offset) # new dbSNP151 position is 1 off
 
 
 	# Open Association Data

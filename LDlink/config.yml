@@ -1,6 +1,7 @@
 data:
   snp_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.rs.151.db'
   snp_chr_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.chr.151.db'
+  snp_pos_offset: 1
   dbsnp_version: '151'
   pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
   vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'

@@ -26,6 +26,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     gene_dir = config['data']['gene_dir']
     recomb_dir = config['data']['recomb_dir']
     snp_dir = config['data']['snp_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -105,7 +106,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # if new dbSNP151 position is 1 off
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], str(int(snp_coord[2]) + 1), tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord[1], str(int(snp_coord[2]) + snp_pos_offset), tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -184,10 +185,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = int(snp_coord[2]) + 1 - window  # new dbSNP151 position is 1 off
+    coord1 = int(snp_coord[2]) + snp_pos_offset - window  # if new dbSNP151 position is 1 off
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord[2]) + 1 + window  # new dbSNP151 position is 1 off
+    coord2 = int(snp_coord[2]) + snp_pos_offset + window  # if new dbSNP151 position is 1 off
     print ""
 
     # Calculate proxy LD statistics in parallel

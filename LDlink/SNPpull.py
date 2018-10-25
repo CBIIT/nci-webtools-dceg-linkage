@@ -21,6 +21,7 @@ def calculate_pull(snplst, request):
         config = yaml.load(f)
     gene_dir = config['data']['gene_dir']
     snp_dir = config['data']['snp_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -78,11 +79,10 @@ def calculate_pull(snplst, request):
                     snp_coord = get_coords(snp_i[0])
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        # new dbSNP151 position is 1 off
-                        snp_pos.append(str(int(snp_coord[2]) + 1))
-                        # new dbSNP151 position is 1 off
+                        # if new dbSNP151 position is 1 off
+                        snp_pos.append(str(int(snp_coord[2]) + snp_pos_offset))
                         temp = [snp_i[0], snp_coord[1],
-                                str(int(snp_coord[2]) + 1)]
+                                str(int(snp_coord[2]) + snp_pos_offset)]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])

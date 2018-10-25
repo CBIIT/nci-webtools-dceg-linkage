@@ -19,9 +19,9 @@ contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
-print "username:"+username
-print "password:"+password
-print "port:"+str(port)
+# print "username:"+username
+# print "password:"+password
+# print "port:"+str(port)
 
 
 def get_platform_request():
@@ -66,6 +66,7 @@ def calculate_chip(snplst, platform_query, request):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     snp_dir = config['data']['snp_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
 
     tmp_dir = "./tmp/"
 
@@ -122,8 +123,8 @@ def calculate_chip(snplst, platform_query, request):
                             chr = int(snp_coord[1])
                         # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(str(int(snp_coord[2]) + 1))
-                        temp = [snp_i[0], chr, int(snp_coord[2]) + 1]
+                        snp_pos.append(str(int(snp_coord[2]) + snp_pos_offset))
+                        temp = [snp_i[0], chr, int(snp_coord[2]) + snp_pos_offset]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])

@@ -18,6 +18,7 @@ def calculate_hap(snplst, pop, request):
         config = yaml.load(f)
     snp_dir = config['data']['snp_dir']
     snp_chr_dir = config['data']['snp_chr_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -93,7 +94,7 @@ def calculate_hap(snplst, pop, request):
         return cur_chr.fetchone()
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_id(snp_lst):
+    def replace_coord_rsid(snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -107,7 +108,7 @@ def calculate_hap(snplst, pop, request):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_id(snps)
+    snps = replace_coord_rsid(snps)
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
     snp_pos = []
@@ -125,40 +126,17 @@ def calculate_hap(snplst, pop, request):
                     if snp_coord != None:
                         # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(str(int(snp_coord[2]) + 1))
+                        snp_pos.append(str(int(snp_coord[2]) + snp_pos_offset))
                         temp2 = [snp_i[0], snp_coord[1],
-                                 str(int(snp_coord[2]) + 1)]
+                                 str(int(snp_coord[2]) + snp_pos_offset)]
                         snp_coords.append(temp2)
                         # if new dbSNP151 position is the same
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[2])
-                        temp = [snp_i[0], snp_coord[1], snp_coord[2]]
-                        snp_coords.append(temp)
+                        # rs_nums.append(snp_i[0])
+                        # snp_pos.append(snp_coord[2])
+                        # temp = [snp_i[0], snp_coord[1], snp_coord[2]]
+                        # snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
-                # For adding genomic coordinates to query in the future
-                # Same as previous check but for genomic coordinates
-                # elif snp_i[0][0:3] == "chr" and snp_i[0][-1].isdigit():
-                #     snp_coord = get_rsnum(snp_i[0])
-                #     print "SNP_COORD"
-                #     print snp_coord
-                #     if snp_coord != None:
-                #         # if new dbSNP151 position is 1 off
-                #         rs_nums.append("rs" + str(snp_coord[0]))
-                #         snps.append(["rs" + str(snp_coord[0])])
-                #         snp_pos.append(str(int(snp_coord[2]) + 1))
-                #         temp2 = ["rs" + str(snp_coord[0]), snp_coord[1],
-                #                  str(int(snp_coord[2]) + 1)]
-                #         snp_coords.append(temp2)
-                #         # if new dbSNP151 position is the same
-                #         rs_nums.append("rs" + str(snp_coord[0]))
-                #         snps.append(["rs" + str(snp_coord[0])])
-                #         snp_pos.append(snp_coord[2])
-                #         temp = ["rs" + str(snp_coord[0]),
-                #                 snp_coord[1], snp_coord[2]]
-                #         snp_coords.append(temp)
-                #     else:
-                #         warn.append(snp_i[0])
                 else:
                     warn.append(snp_i[0])
             else:
