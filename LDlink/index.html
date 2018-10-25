@@ -611,7 +611,6 @@
 										class="form-control"
 										title="Enter list of RS numbers or Genomic Coordinates (one per line)"
 										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
-										<!-- For adding genomoic coordinates to query in the future -->
 								</div>
 							</div>
 							<!-- Broswe RS numbers -->
@@ -788,7 +787,6 @@
 										class="form-control" 
 										title="Enter list of RS Numbers or Genomic Coordinates (one per line)" 
 										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
-										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea> -->
 								</div>
 								<!-- COLUMN2 - sm-3 -->
 								<div class="col-sm-3">
@@ -796,7 +794,7 @@
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
 
 										<input type="text" id="ldmatrix-file-label" readonly
-											placeholder="Upload file with RS numbers" class="readonly-input-text">
+											placeholder="Upload file with variants" class="readonly-input-text">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
 										<span	class="btn btn-default btn-file btn-snp">Browse
 											<input type="file" id="ldmatrix-file">
@@ -911,19 +909,21 @@
 						<form id="ldpairForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpair-snp1" name="snp1" type="text"
-										class="form-control" placeholder="Variant1 RS Number"
-										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
-										pattern="^rs\d+$" />
+									<input id="ldpair-snp1" name="snp1" type="text" 
+										class="form-control" 
+										placeholder="Variant1 RS Number or Coordinate" 
+										title="Enter a RS number or Genomic Coordinate" 
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-3">
 									<input id="ldpair-snp2" name="snp2" type="text"
-										class="form-control" placeholder="Variant2 RS Number"
-										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
-										pattern="^rs\d+$" />
+										class="form-control" 
+										placeholder="Variant2 RS Number or Coordinate" 
+										title="Enter a RS number or Genomic Coordinate" 
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required />
 								</div>
 							</div>
 							<div class="form-group">
@@ -1121,9 +1121,10 @@
 							<div class="form-group">
 								<div class="col-sm-3">
 									<input id="ldproxy-snp" name="snp" type="text"
-										class="form-control" placeholder="Variant RS Number"
-										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" required
-										pattern="^rs\d+$" />
+										class="form-control" placeholder="Variant RS Number or Coordinate"
+										title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" 
+										style="width:215px;" 
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required />
 								</div>
 							</div>
 							<div class="form-group">
@@ -1279,18 +1280,16 @@
 						<form id="snpclipForm" class="ldlinkForm">
 							<div class="form-group col-sm-2">
 								<textarea id="snpclip-file-snp-numbers"
-									placeholder="RS Numbers"
+									placeholder="RS Numbers or Genomic Coordinates"
 									class="form-control"
-									title="Enter list of RS numbers (one per line)"
-									pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea>
-										<!-- For adding genomoic coordinates to query in the future -->
-										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea> -->
+									title="Enter list of RS numbers or Genomic Coordinates (one per line)"
+									pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
 							</div>
 							<div class="col-sm-3">
 								<div class="input-group">
 									<label for="snpclip-file-label" style="display:none;">Uplaod RS File</label>
 									<input type="text" id="snpclip-file-label" readonly
-										placeholder="Upload file with RS numbers"
+										placeholder="Upload file with variants"
 										class="readonly-input-text">
 									<label for="snpclip-file" style="display:none;">Browse for RS File</label>
 									<span	class="btn btn-default btn-file btn-snp">Browse
@@ -1467,19 +1466,17 @@
 							<div class="form-group">
 								<div class="col-sm-2">
 									<textarea id="snpchip-file-snp-numbers"
-										placeholder="RS Numbers"
+										placeholder="RS Numbers or Genomic Coordinates"
 										class="form-control"
-										title="Enter list of RS numbers (one per line)"
-										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*)$" required></textarea>
-										<!-- For adding genomoic coordinates to query in the future -->
-										<!-- pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea> -->
+										title="Enter list of RS numbers or Genomic Coordinates (one per line)"
+										pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$" required></textarea>
 								</div>
 							</div>
 							<div class="col-sm-4">
 								<div class="input-group">
 									<label for="snpchip-file-label" style="display:none;">Uplaod RS File</label>
 									<input type="text" id="snpchip-file-label" readonly
-										placeholder="Upload file with RS numbers"
+										placeholder="Upload file with variants"
 										class="readonly-input-text">
 									<label for="snpchip-file" style="display:none;">Browse for RS File</label>
 									<span class="btn btn-default btn-file btn-snp">Browse
