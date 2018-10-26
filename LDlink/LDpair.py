@@ -131,11 +131,6 @@ def calculate_pair(snp1, snp2, pop, request=None):
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = proc1_offset.stdout.readlines()
-    # if new dbSNP151 position is the same
-    # tabix_snp1 = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-    #     vcf_file1, snp1_coord[1], snp1_coord[2])
-    # proc1 = subprocess.Popen(tabix_snp1, shell=True, stdout=subprocess.PIPE)
-    # vcf1 = proc1.stdout.readlines()
 
     # SNP2
     vcf_file2 = vcf_dir + \
@@ -147,23 +142,11 @@ def calculate_pair(snp1, snp2, pop, request=None):
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = proc2_offset.stdout.readlines()
-    # if new dbSNP151 position is the same
-    # tabix_snp2 = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-    #     vcf_file2, snp2_coord[1], snp2_coord[2])
-    # proc2 = subprocess.Popen(tabix_snp2, shell=True, stdout=subprocess.PIPE)
-    # vcf2 = proc2.stdout.readlines()
 
     vcf1_pos = str(int(snp1_coord[2]) + snp_pos_offset)
     vcf2_pos = str(int(snp2_coord[2]) + snp_pos_offset)
     vcf1 = vcf1_offset
     vcf2 = vcf2_offset
-    # decide which VCF results to use
-    # if len(vcf1) == 0 and len(vcf1_offset) != 0:
-    #     vcf1 = vcf1_offset
-    #     vcf1_pos = str(int(snp1_coord[2]) + 1)
-    # if len(vcf2) == 0 and len(vcf2_offset) != 0:
-    #     vcf2 = vcf2_offset
-    #     vcf2_pos = str(int(snp2_coord[2]) + 1)
 
     # Import SNP VCF files
     # SNP1

@@ -135,15 +135,9 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
                         # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
                         snp_pos.append(str(int(snp_coord[2]) + snp_pos_offset))
-                        temp2 = [snp_i[0], snp_coord[1],
+                        temp = [snp_i[0], snp_coord[1],
                                  str(int(snp_coord[2]) + snp_pos_offset)]
-                        snp_coords.append(temp2)
-                        # if new dbSNP151 position is the same
-                        # rs_nums.append(snp_i[0])
-                        # snp_pos.append(snp_coord[2])
-                        # temp = [snp_i[0], snp_coord[1],
-                        #         snp_coord[2]]
-                        # snp_coords.append(temp)
+                        snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
                         details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" +
