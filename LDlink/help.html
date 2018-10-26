@@ -501,6 +501,10 @@ who are interested in performing batch queries. The syntax is similar to the web
 for queries on the webpage. Below are some command line arguments to be used as example syntax.
 Generally text output is returned that is the same as the file a user would download from the online site. </p>
 
+<div id="api-alert" class="alert alert-api" role="alert">
+	Warning: Please only make sequential API calls to avoid disrupting the API server.
+</div>
+
 <p><a href="#LDhap">LDhap</a><br>
 curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL'</p>
 <p><a href="#LDmatrix">LDmatrix</a><br>

@@ -10,6 +10,14 @@
   padding:0px 15px;
 }
 
+/* Help page programatic access warning */
+.alert-api {
+    color: black;
+    font-weight: bold;
+    background-color: #ffd351; 
+    border-radius: 0 !important;
+  }
+
 /*AuthorArranger Ad*/
 .authorarranger_ad{
   font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
