@@ -244,7 +244,6 @@ $(document).ready(function() {
     RefreshTable('#new-ldproxy', new_proxy_data);
 
     $('[data-toggle="popover"]').popover();
-    loadApiPage();
     loadHelp();
     // Apply Bindings
     ko.applyBindings(ldpairModel, document
@@ -1077,10 +1076,6 @@ function populateHeaderValues(event, numFiles, label) {
         return;
     }
     */
-}
-
-function loadApiPage() {
-    $('#api-tab').load('api.html');
 }
 
 function loadHelp() {
