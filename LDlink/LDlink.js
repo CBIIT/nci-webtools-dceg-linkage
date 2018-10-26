@@ -625,6 +625,7 @@ function setupTabs() {
     });
     $("#home-tab-anchor").removeClass('active');
     $("#help-tab-anchor").removeClass('active');
+    $("#api-tab-anchor").removeClass('active');
     //Look for a tab variable on the url
     var url = "{tab:''}";
     var search = location.search.substring(1);
