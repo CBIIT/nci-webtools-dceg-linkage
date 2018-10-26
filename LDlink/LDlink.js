@@ -1080,7 +1080,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadApiPage() {
-    $('#api-access-tab').load('api.html');
+    $('#api-tab').load('api.html');
 }
 
 function loadHelp() {
