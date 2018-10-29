@@ -5,6 +5,12 @@ import json
 
 
 def register_user(firstname, lastname, email, institution, reference):
+    print firstname
+    print lastname
+    print email
+    print institution
+    print reference
+    
     out_json = {
         firstname: firstname,
         lastname: lastname,

@@ -268,6 +268,7 @@ $(document).ready(function() {
     $('.ldlinkForm').on('submit', function(e) {
         //alert('Validate');
         calculate(e);
+        console.log("hit calculate");
     });
 
     setupTabs();
@@ -645,6 +646,7 @@ function setupTabs() {
     if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
+    if(currentTab.search('access')>=0) currentTab = 'apiaccess';
 
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
@@ -1089,6 +1091,8 @@ function calculate(e) {
     // strip out "Form" from id
     var id = formId.slice(0, formId.length - 4);
 
+    console.log(id);
+
     initCalculate(id);
     updateData(id);
 
@@ -1143,7 +1147,7 @@ function updateData(id) {
             $('#'+id+"-loading").show();
             updateSNPchip();
             break;
-        case 'APIaccess':
+        case 'apiaccess':
             $('#'+id+"-loading").show();
             updateAPIaccess();
             break;
