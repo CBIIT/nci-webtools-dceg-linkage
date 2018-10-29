@@ -13,35 +13,45 @@ def createTable(api_users_dir):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute("CREATE TABLE `users` (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
+    cur.execute(
+        "CREATE TABLE `users` (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
     con.close()
 
 # check if user email record exists
-def getEmailRecord(cur, email):
+
+
+def getEmailRecord(curr, email):
     temp = (email,)
-    cur.execute("SELECT * FROM users WHERE email=?", temp)
-    return cur.fetchone()
+    curr.execute("SELECT * FROM users WHERE email=?", temp)
+    return curr.fetchone()
 
 # check if user email record exists
-def insertRecord(cur, first_name, lastname, email, institution, token):
+
+
+def insertRecord(curr, first_name, lastname, email, institution, token):
     temp = (first_name, lastname, email, institution, token)
-    cur.execute("INSERT INTO users VALUES (?,?,?,?,?)", temp)
+    curr.execute("INSERT INTO users VALUES (?,?,?,?,?)", temp)
 
 # check if token is already in db
-def checkUniqueToken(cur, token):
+
+
+def checkUniqueToken(curr, token):
     temp = (token,)
-    cur.execute("SELECT * FROM users WHERE token=?", temp)
-    if cur.fetchone() is None:
+    curr.execute("SELECT * FROM users WHERE token=?", temp)
+    if curr.fetchone() is None:
         return False
     else:
         return True
 
 # generate unique access token for each user
-def generateToken(cur):
+
+
+def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
-    while(checkUniqueToken(cur, token)):
+    while(checkUniqueToken(curr, token)):
         token = binascii.b2a_hex(os.urandom(6))
     return token
+
 
 def register_user(firstname, lastname, email, institution, reference):
     # Set data directories using config.yml
@@ -60,23 +70,12 @@ def register_user(firstname, lastname, email, institution, reference):
     # Connect to snp database
     conn = sqlite3.connect(api_users_dir + 'api_users.db')
     conn.text_factory = str
-    cur = conn.cursor()
+    curr = conn.cursor()
 
-    record = getEmailRecord(cur, email)
-    # if email record does not exists in db, add to table
-    if record is None:
-        token = generateToken(cur)
-        insertRecord(cur, firstname, lastname, email, institution, token)
-        out_json = {
-            "message": "Congratulations! You have registered to use LDlink's API.",
-            "firstname": firstname,
-            "lastname": lastname,
-            "email": email,
-            "institution": institution,
-            "token": token
-        }
-    else:
-        # if email record exists, do not insert to db
+    record = getEmailRecord(curr, email)
+    print record
+    # if email record exists, do not insert to db
+    if record != None:
         out_json = {
             "message": "Email already registered.",
             "firstname": record[0],
@@ -85,6 +84,20 @@ def register_user(firstname, lastname, email, institution, reference):
             "institution": record[3],
             "token": record[4]
         }
+    else:
+        # if email record does not exists in db, add to table
+        token = generateToken(curr)
+        insertRecord(curr, firstname, lastname, email, institution, token)
+        out_json = {
+            "message": "Congratulations! You have registered to use LDlink's API.",
+            "firstname": firstname,
+            "lastname": lastname,
+            "email": email,
+            "institution": institution,
+            "token": token
+        }
+
+    conn.close()
 
     with open(tmp_dir + 'register_' + reference + '.json', 'w') as fp:
         json.dump(out_json, fp)
