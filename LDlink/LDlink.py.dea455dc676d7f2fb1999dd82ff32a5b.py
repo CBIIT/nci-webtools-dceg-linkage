@@ -719,20 +719,27 @@ def status(filename):
 @app.route('/LDlinkRest/apiaccess', methods=['GET'])
 @app.route('/LDlinkRestWeb/apiaccess', methods=['GET'])
 def apiaccess():
-    firstname = request.args.get('firstname', False)
-    lastname = request.args.get('lastname', False)
-    email = request.args.get('email', False)
-    institution = request.args.get('institution', False)
-    reference = request.args.get('reference', False)
+    var1 = request.args.get('var1', False)
+    var2 = request.args.get('var2', False)
+    pop = request.args.get('pop', False)
 
-    print 'firstname: ' + firstname
-    print 'lastname: ' + lastname
-    print 'email: ' + email
-    print 'instution: ' + institution
+    print 'var1: ' + var1
+    print 'var2: ' + var2
+    print 'pop: ' + pop
     print 'request: ' + str(reference)
 
     try:
-        out_json = register_user(firstname, lastname, email, institution, reference)
+        out_json = calculate_pair(var1, var2, pop, reference)
+        # if API call has error, retrieve error message from json returned from calculation
+        try:
+            if isProgrammatic:
+                fp = open('./tmp/LDpair_'+reference+'.txt', "r")
+                content = fp.read()
+                fp.close()
+                return content
+        except:
+            output = json.loads(out_json)
+            return sendTraceback(output["error"])
     except:
         return sendTraceback(None)
 

@@ -108,7 +108,7 @@
 		</li>
 		<!-- API ACCESS -->
 		<li>
-			<a id="api-tab-anchor" href="#api-tab" data-toggle="tab">API Access</a>
+			<a id="apiaccess-tab-anchor" href="#apiaccess-tab" data-toggle="tab">API Access</a>
 		</li>
 		<!-- HELP -->
 		<li>
@@ -1659,7 +1659,7 @@
 			<!--  END OF snpchip -->
 
 			<!-- API Access -->
-			<div class="tab-pane fade" id="api-tab">
+			<div class="tab-pane fade" id="apiaccess-tab">
 				<div class="container-fluid">
 					<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programatic Access!</h3>
 
@@ -1667,31 +1667,46 @@
 				
 					<br>
 					<hr>
-				
-					<form>
-						<!-- First name,  Last name -->
-						<div class="form-group">
-							<label for="inputFirstname">First name<span style="color:red">*</span></label>
-							<input type="text" class="form-control" id="inputFirstname" placeholder="First name" required>
-						</div>
-						<div class="form-group">
-							<label for="inputLastname">Last name<span style="color:red">*</span></label>
-							<input type="text" class="form-control" if="inputLastname" placeholder="Last name" required>
-						</div>
-						<!-- Email -->
-						<div class="form-group">
-							<label for="inputEmail">Email<span style="color:red">*</span></label>
-							<input type="email" class="form-control" id="inputEmail" placeholder="Email" required>
-						</div>
-						<!-- Institution -->
-						<div class="form-group">
-							<label for="inputInstitution">Institution</label>
-							<input type="text" class="form-control" id="inputInstitution" placeholder="Institution (optional)">
-						</div>
-						<!-- Submit Information -->
-						<button type="submit" class="btn btn-primary">Register</button>
-					</form>
 
+					<div id="apiaccess-form">
+						<form id="api-access-register-user" class="userForm">
+							<!-- First name,  Last name -->
+							<div class="form-group">
+								<label for="apiaccess-firstname">First name<span style="color:red">*</span></label>
+								<input type="text" class="form-control" id="inputFirstname" placeholder="First name" required>
+							</div>
+							<div class="form-group">
+								<label for="apiaccess-lastname">Last name<span style="color:red">*</span></label>
+								<input type="text" class="form-control" if="inputLastname" placeholder="Last name" required>
+							</div>
+							<!-- Email -->
+							<div class="form-group">
+								<label for="apiaccess-email">Email<span style="color:red">*</span></label>
+								<input type="email" class="form-control" id="inputEmail" placeholder="Email" required>
+							</div>
+							<!-- Institution -->
+							<div class="form-group">
+								<label for="apiaccess-institution">Institution</label>
+								<input type="text" class="form-control" id="inputInstitution" placeholder="Institution (optional)">
+							</div>
+							<!-- Submit Information -->
+							<input type="submit" id="APIaccess" value="Register" class="btn btn-primary" />
+						</form>
+					</div>
+
+					<hr>
+					
+					<div id="apiaccess-loading">
+						<img src="calculating_LD.gif" alt="loading icon"
+							class="loading">
+					</div>
+
+					<!-- ldhap CONTAINER -->
+					<div class="jumbotron">
+						<div class="container-fluid" id="apiaccess-results-container">
+							Show results message here.
+						</div>
+					</div>
 				</div>
 			</div>
 

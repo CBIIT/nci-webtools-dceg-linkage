@@ -624,7 +624,7 @@ function setupTabs() {
     });
     $("#home-tab-anchor").removeClass('active');
     $("#help-tab-anchor").removeClass('active');
-    $("#api-tab-anchor").removeClass('active');
+    $("#apiaccess-tab-anchor").removeClass('active');
     //Look for a tab variable on the url
     var url = "{tab:''}";
     var search = location.search.substring(1);
@@ -1142,6 +1142,10 @@ function updateData(id) {
         case 'snpchip':
             $('#'+id+"-loading").show();
             updateSNPchip();
+            break;
+        case 'APIaccess':
+            $('#'+id+"-loading").show();
+            updateAPIaccess();
             break;
     }
 }
@@ -2528,6 +2532,49 @@ function updateLDpair() {
         $("#ldpair_results").text("Download Results");
             $('#ldpair_results').css("text-decoration", "underline");
             $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+    hideLoadingIcon(ajaxRequest, id);
+}
+
+function updateAPIaccess() {
+    var id = 'apiaccess';
+    var $btn = $('#' + id).button('loading');
+
+    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var apiaccessInputs = {
+        firstname: $('#apiaccess-firstname').val(),
+        lastname: $('#apiaccess-lastname').val(),
+        email: $('#apiaccess-email').val(),
+        institution: $('#apiaccess-institution').val(),
+        reference: reference
+    };
+
+    // updateHistoryURL(id, apiaccessInputs);
+
+    var url = restServerUrl + "/apiaccess";
+
+    var ajaxRequest = $.ajax({
+        type : "GET",
+        url : url,
+        data : apiaccessInputs,
+        contentType : 'application/json' // JSON
+    });
+
+    ajaxRequest.success(function(data) {
+        if (displayError(id, data) == false) {
+            // ko.mapping.fromJS(data, ldpairModel);
+            $('#' + id + '-results-container').show();
+            // addLDpairHyperLinks(data);
+        }
+        // $("#ldpair_results").text("Download Results");
+        //     $('#ldpair_results').css("text-decoration", "underline");
+        //     $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
