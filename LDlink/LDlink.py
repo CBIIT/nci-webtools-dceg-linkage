@@ -733,7 +733,7 @@ def apiaccess():
 
     out_json = register_user(firstname, lastname, email, institution, reference)
 
-    return out_json
+    return sendJSON(out_json)
 
 
 if __name__ == '__main__':

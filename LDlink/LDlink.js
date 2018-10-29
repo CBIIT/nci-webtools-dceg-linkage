@@ -268,7 +268,6 @@ $(document).ready(function() {
     $('.ldlinkForm').on('submit', function(e) {
         //alert('Validate');
         calculate(e);
-        console.log("hit calculate");
     });
 
     setupTabs();
@@ -1090,8 +1089,6 @@ function calculate(e) {
 
     // strip out "Form" from id
     var id = formId.slice(0, formId.length - 4);
-
-    console.log(id);
 
     initCalculate(id);
     updateData(id);
@@ -2576,7 +2573,7 @@ function updateAPIaccess() {
     });
 
     ajaxRequest.success(function(data) {
-        $('#' + id + '-results-container').empty().append
+        $('#' + id + '-results-container').empty().append(data);
         $('#' + id + '-results-container').show();
 
         $("#"+id+"-loading").hide();
