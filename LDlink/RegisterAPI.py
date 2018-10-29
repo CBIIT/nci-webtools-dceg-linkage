@@ -4,7 +4,7 @@
 import json
 
 
-def register_user(firstnameInput, lastnameInput, emailInput, institutionInput, referenceInput):
+def register_user(firstname, lastname, email, institution, reference):
     print firstname
     print lastname
     print email
@@ -12,11 +12,11 @@ def register_user(firstnameInput, lastnameInput, emailInput, institutionInput, r
     print reference
     
     out_json = {
-        firstname: firstnameInput,
-        lastname: lastnameInput,
-        email: emailInput,
-        institution: institutionInput,
-        reference: referenceInput
+        "firstname": firstname,
+        "lastname": lastname,
+        "email": email,
+        "institution": institution,
+        "reference": reference
     }
 
     tmp_dir = "./tmp/"
