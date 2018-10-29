@@ -3,7 +3,7 @@ data:
   snp_chr_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.chr.151.db'
   snp_pos_offset: 1
   dbsnp_version: '151'
-  api_users_dir: ''/local/content/analysistools/public_html/apps/LDlink/data/sqlite/apiaccess/'
+  api_users_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/apiaccess/'
   pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
   vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
   reg_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/regulomedb/regulomedb.db'
