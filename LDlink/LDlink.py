@@ -725,10 +725,10 @@ def apiaccess():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
 
-    print 'firstname: ' + firstname
-    print 'lastname: ' + lastname
-    print 'email: ' + email
-    print 'instution: ' + institution
+    print 'firstname: ' + str(firstname)
+    print 'lastname: ' + str(lastname)
+    print 'email: ' + str(email)
+    print 'instution: ' + str(institution)
     print 'request: ' + str(reference)
 
     try:
