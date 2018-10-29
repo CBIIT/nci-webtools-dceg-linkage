@@ -2573,7 +2573,9 @@ function updateAPIaccess() {
     });
 
     ajaxRequest.success(function(data) {
-        $('#' + id + '-results-container').empty().append(data);
+        console.log("python output reached frontend!");
+        console.log(data);
+        $('#' + id + '-results-container').empty().append(JSON.stringify(data));
         $('#' + id + '-results-container').show();
 
         $("#"+id+"-loading").hide();
