@@ -2576,18 +2576,14 @@ function updateAPIaccess() {
     });
 
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
-            // ko.mapping.fromJS(data, ldpairModel);
-            $('#' + id + '-results-container').show();
-            // addLDpairHyperLinks(data);
-        }
-        // $("#ldpair_results").text("Download Results");
-        //     $('#ldpair_results').css("text-decoration", "underline");
-        //     $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+        $('#' + id + '-results-container').empty().append
+        $('#' + id + '-results-container').show();
+
+        $("#"+id+"-loading").hide();
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
-    });
+    // ajaxRequest.fail(function(jqXHR, textStatus) {
+    //     displayCommFail(id, jqXHR, textStatus);
+    // });
     ajaxRequest.always(function() {
         $btn.button('reset');
     });

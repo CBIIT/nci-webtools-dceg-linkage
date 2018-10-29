@@ -725,18 +725,15 @@ def apiaccess():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
 
-    print 'firstname: ' + str(firstname)
-    print 'lastname: ' + str(lastname)
-    print 'email: ' + str(email)
-    print 'instution: ' + str(institution)
-    print 'request: ' + str(reference)
+    # print 'firstname: ' + str(firstname)
+    # print 'lastname: ' + str(lastname)
+    # print 'email: ' + str(email)
+    # print 'instution: ' + str(institution)
+    # print 'request: ' + str(reference)
 
-    try:
-        out_json = register_user(firstname, lastname, email, institution, reference)
-    except:
-        return sendTraceback(None)
+    out_json = register_user(firstname, lastname, email, institution, reference)
 
-    return current_app.response_class(out_json, mimetype='application/json')
+    return out_json
 
 
 if __name__ == '__main__':
