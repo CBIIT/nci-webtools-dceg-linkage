@@ -14,7 +14,7 @@ def createTable(api_users_dir):
     con.text_factory = str
     cur = con.cursor()
     cur.execute(
-        "CREATE TABLE `users` (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
+        "CREATE TABLE users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
     con.close()
 
 # check if user email record exists
