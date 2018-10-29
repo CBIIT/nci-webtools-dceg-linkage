@@ -26,7 +26,7 @@ def getEmailRecord(curr, email):
 # check if user email record exists
 def insertRecord(curr, first_name, lastname, email, institution, token):
     temp = (first_name, lastname, email, institution, token)
-    curr.execute("INSERT INTO users (firstname, lastname, email, institution, token) VALUES (?,?,?,?,?)", temp)
+    curr.execute("INSERT INTO users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
     print "record inserted."
 
 # check if token is already in db
