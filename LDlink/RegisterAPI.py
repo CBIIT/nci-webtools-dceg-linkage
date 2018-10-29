@@ -14,25 +14,25 @@ def createTable(api_users_dir):
     con.text_factory = str
     cur = con.cursor()
     cur.execute(
-        "CREATE TABLE users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
+        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
     con.close()
 
 # check if user email record exists
 def getEmailRecord(curr, email):
     temp = (email,)
-    curr.execute("SELECT * FROM users WHERE email=?", temp)
+    curr.execute("SELECT * FROM api_users WHERE email=?", temp)
     return curr.fetchone()
 
 # check if user email record exists
 def insertRecord(curr, first_name, lastname, email, institution, token):
     temp = (first_name, lastname, email, institution, token)
-    curr.execute("INSERT INTO users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
+    curr.execute("INSERT INTO api_users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
     print "record inserted."
 
 # check if token is already in db
 def checkUniqueToken(curr, token):
     temp = (token,)
-    curr.execute("SELECT * FROM users WHERE token=?", temp)
+    curr.execute("SELECT * FROM api_users WHERE token=?", temp)
     if curr.fetchone() is None:
         return False
     else:
