@@ -2550,12 +2550,17 @@ function updateAPIaccess() {
     var id = 'apiaccess';
     var $btn = $('#' + id).button('loading');
 
-    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var reference = "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var institution_opt = $('#apiaccess-institution').val();
+    if (institution_opt.length == 0) {
+        institution_opt = "NA"
+    }
+
     var apiaccessInputs = {
         firstname: $('#apiaccess-firstname').val(),
         lastname: $('#apiaccess-lastname').val(),
         email: $('#apiaccess-email').val(),
-        institution: $('#apiaccess-institution').val(),
+        institution: institution_opt,
         reference: reference
     };
 
