@@ -18,23 +18,18 @@ def createTable(api_users_dir):
     con.close()
 
 # check if user email record exists
-
-
 def getEmailRecord(curr, email):
     temp = (email,)
     curr.execute("SELECT * FROM users WHERE email=?", temp)
     return curr.fetchone()
 
 # check if user email record exists
-
-
 def insertRecord(curr, first_name, lastname, email, institution, token):
     temp = (first_name, lastname, email, institution, token)
-    curr.execute("INSERT INTO users VALUES (?,?,?,?,?)", temp)
+    curr.execute("INSERT INTO users (firstname, lastname, email, institution, token) VALUES (?,?,?,?,?)", temp)
+    print "record inserted."
 
 # check if token is already in db
-
-
 def checkUniqueToken(curr, token):
     temp = (token,)
     curr.execute("SELECT * FROM users WHERE token=?", temp)
@@ -44,8 +39,6 @@ def checkUniqueToken(curr, token):
         return True
 
 # generate unique access token for each user
-
-
 def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
     while(checkUniqueToken(curr, token)):
@@ -65,6 +58,7 @@ def register_user(firstname, lastname, email, institution, reference):
 
     # create database and table if it does not exist already
     if not os.path.exists(api_users_dir + 'api_users.db'):
+        print "api_usrs.db created."
         createTable(api_users_dir)
 
     # Connect to snp database
