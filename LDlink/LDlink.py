@@ -30,7 +30,6 @@ from RegisterAPI import register_user
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
-
 tmp_dir = "./tmp/"
 # Ensure tmp directory exists
 if not os.path.exists(tmp_dir):
@@ -100,7 +99,17 @@ def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
 
+# def requires_token():
+#     def wrapper(f):
+#         @wraps(f)
+#         def wrapped(*args, **kwargs):
+#             if request.args.get('token') not in get_tokens():
+#                 return error_response()
+#             return f(*args, **kwargs)
+#         return wrapped
+#     return wrapper
 
+# @requires_token()
 @app.route('/LDlinkRest/upload', methods=['POST'])
 @app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():

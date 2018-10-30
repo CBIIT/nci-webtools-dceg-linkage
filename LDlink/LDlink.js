@@ -106,6 +106,13 @@ $(document).ready(function() {
 
     $('#ldassoc').prop('disabled', true);
 
+    // reset apiaccess form
+    $("#apiaccess-done").click(function(e) {
+        $("#apiaccess-reset").click();
+        $("#apiaccess-form").show();
+        $("#apiaccess-results-container").hide();
+    });
+
     $("#example-gwas").click(function(e){
     //   console.log("Use example GWAS data.");
       var useEx = document.getElementById('example-gwas');
@@ -2578,10 +2585,13 @@ function updateAPIaccess() {
         if (data.message.substring(0, 5) == "Thank") {
             // new user
             $('#' + id + '-existing-user').hide();
+            $('#' + id + '-new-user').show();
             $('.panel-title').empty().append(data.message);
             $('.' + id + '-panel-content').empty().append(data.token);
-        } else { // existing user
+        } else { 
+            // existing user
             $('#' + id + '-new-user').hide();
+            $('#' + id + '-existing-user').show();
             $('.panel-title').empty().append(data.message);
             $('.' + id + '-panel-content').empty().append(data.email);
         }
