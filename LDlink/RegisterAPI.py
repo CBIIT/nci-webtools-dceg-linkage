@@ -6,42 +6,46 @@ import os.path
 import binascii
 import yaml
 
+con = sqlite3.connect(api_users_dir + 'api_users.db')
+con.text_factory = str
+cur = con.cursor()
+
 
 # creates table in database if database did not exist before
-def createTable(api_users_dir):
-    # create database
-    con = sqlite3.connect(api_users_dir + 'api_users.db')
-    con.text_factory = str
-    cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
-    con.close()
+# def createTable(api_users_dir):
+#     # create database
+#     con = sqlite3.connect(api_users_dir + 'api_users.db')
+#     con.text_factory = str
+#     cur = con.cursor()
+#     cur.execute(
+#         "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
+#     con.close()
 
 # check if user email record exists
-def getEmailRecord(curr, email):
+def getEmailRecord(email):
     temp = (email,)
-    curr.execute("SELECT * FROM api_users WHERE email=?", temp)
+    cur.execute("SELECT * FROM api_users WHERE email=?", temp)
     return curr.fetchone()
 
 # check if user email record exists
-def insertRecord(curr, first_name, lastname, email, institution, token):
+def insertRecord(first_name, lastname, email, institution, token):
     temp = (first_name, lastname, email, institution, token)
-    curr.execute("INSERT INTO api_users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
+    cur.execute("INSERT INTO api_users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
     print "record inserted."
 
 # check if token is already in db
-def checkUniqueToken(curr, token):
+def checkUniqueToken(token):
     temp = (token,)
-    curr.execute("SELECT * FROM api_users WHERE token=?", temp)
-    if curr.fetchone() is None:
+    cur.execute("SELECT * FROM api_users WHERE token=?", temp)
+    if cur.fetchone() is None:
         return False
     else:
         return True
 
 # generate unique access token for each user
-def generateToken(curr):
+def generateToken():
     token = binascii.b2a_hex(os.urandom(6))
-    while(checkUniqueToken(curr, token)):
+    while(checkUniqueToken(token)):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
@@ -57,16 +61,16 @@ def register_user(firstname, lastname, email, institution, reference):
     out_json = {}
 
     # create database and table if it does not exist already
-    if not os.path.exists(api_users_dir + 'api_users.db'):
-        print "api_usrs.db created."
-        createTable(api_users_dir)
+    # if not os.path.exists(api_users_dir + 'api_users.db'):
+    #     print "api_usrs.db created."
+        # createTable(api_users_dir)
 
     # Connect to snp database
-    conn = sqlite3.connect(api_users_dir + 'api_users.db')
-    conn.text_factory = str
-    curr = conn.cursor()
+    # conn = sqlite3.connect(api_users_dir + 'api_users.db')
+    # conn.text_factory = str
+    # curr = conn.cursor()
 
-    record = getEmailRecord(curr, email)
+    record = getEmailRecord(email)
     print record
     # if email record exists, do not insert to db
     if record != None:
@@ -80,8 +84,8 @@ def register_user(firstname, lastname, email, institution, reference):
         }
     else:
         # if email record does not exists in db, add to table
-        token = generateToken(curr)
-        insertRecord(curr, firstname, lastname, email, institution, token)
+        token = generateToken()
+        insertRecord(firstname, lastname, email, institution, token)
         out_json = {
             "message": "Congratulations! You have registered to use LDlink's API.",
             "firstname": firstname,
@@ -91,7 +95,7 @@ def register_user(firstname, lastname, email, institution, reference):
             "token": token
         }
 
-    conn.close()
+    con.close()
 
     with open(tmp_dir + 'register_' + reference + '.json', 'w') as fp:
         json.dump(out_json, fp)
