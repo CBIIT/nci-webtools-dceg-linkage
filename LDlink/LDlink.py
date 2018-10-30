@@ -114,6 +114,7 @@ def requires_token(f):
             if checkToken(token) is False or token is None:
                 return sendTraceback("Invalid API token. Please register for API access.")
             return f(*args, **kwargs)
+        return f(*args, **kwargs)
     return decorated_function
 
 
