@@ -56,8 +56,9 @@ def checkToken(token):
     cur = con.cursor()
     temp = (token,)
     cur.execute("SELECT * FROM api_users WHERE token=?", temp)
+    record = cur.fetchone()
     con.close()
-    if cur.fetchone() is None:
+    if record is None:
         return False
     else:
         return True
