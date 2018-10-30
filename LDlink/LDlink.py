@@ -102,11 +102,8 @@ def sendJSON(inputString):
 
 
 def requires_token(f):
-    print "reached decorator"
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        print "reached wrapper"
-        print request.full_path
         if "LDlinkRestWeb" not in request.full_path:
             if 'token' not in request.args:
                 return sendTraceback("API token missing. Please register for API access.")
