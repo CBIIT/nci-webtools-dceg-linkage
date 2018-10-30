@@ -27,6 +27,7 @@ from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
 from RegisterAPI import register_user
+from RegisterAPI import checkToken
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -99,15 +100,16 @@ def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
 
-# def requires_token():
-#     def wrapper(f):
-#         @wraps(f)
-#         def wrapped(*args, **kwargs):
-#             if request.args.get('token') not in get_tokens():
-#                 return error_response()
-#             return f(*args, **kwargs)
-#         return wrapped
-#     return wrapper
+def requires_token():
+    def wrapper(f):
+        @wraps(f)
+        def wrapped(*args, **kwargs):
+            token = request.args.get('token')
+            if checkToken(token) is False or token is None:
+                return sendTraceback("Invalid API token. Please register for API access.")
+            return f(*args, **kwargs)
+        return wrapped
+    return wrapper
 
 # @requires_token()
 @app.route('/LDlinkRest/upload', methods=['POST'])
@@ -172,6 +174,7 @@ def restAdd():
     return jsonify(success=True, data=json_dumps)
 
 
+@requires_token()
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 def ldpair():
@@ -217,6 +220,7 @@ def ldpair():
     return current_app.response_class(out_json, mimetype='application/json')
 
 
+@requires_token()
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 def ldproxy():
@@ -263,6 +267,7 @@ def ldproxy():
     return out_script + "\n " + out_div
 
 
+@requires_token()
 @app.route('/LDlinkRest/ldmatrix', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 def ldmatrix():
@@ -327,6 +332,7 @@ def ldmatrix():
     return out_script + "\n " + out_div
 
 
+@requires_token()
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 def ldhap():
@@ -387,6 +393,7 @@ def ldhap():
     return sendJSON(out_json)
 
 
+@requires_token()
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 def snpclip():
@@ -510,6 +517,7 @@ def snpclip():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 
+@requires_token()
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 def snpchip():

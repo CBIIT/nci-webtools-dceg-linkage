@@ -50,6 +50,18 @@ def checkUniqueToken(curr, token):
     else:
         return True
 
+def checkToken(token):
+    con = sqlite3.connect(api_users_dir + 'api_users.db')
+    con.text_factory = str
+    cur = con.cursor()
+    temp = (token,)
+    curr.execute("SELECT * FROM api_users WHERE token=?", temp)
+    con.close()
+    if curr.fetchone() is None:
+        return False
+    else:
+        return True
+
 # generate unique access token for each user
 def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
