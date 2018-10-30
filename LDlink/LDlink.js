@@ -107,7 +107,7 @@ $(document).ready(function() {
     $('#ldassoc').prop('disabled', true);
 
     // reset apiaccess form
-    $("#apiaccess-done").click(function(e) {
+    $(".apiaccess-done").click(function(e) {
         $("#apiaccess-reset").click();
         $("#apiaccess-form").show();
         $("#apiaccess-results-container").hide();
@@ -2582,18 +2582,17 @@ function updateAPIaccess() {
     ajaxRequest.success(function(data) {
         console.log("python output reached frontend!");
         console.log(data);
+        $('.panel-title').empty().append(data.message);
+        $('.' + id + '-user-email').empty().append(data.email);
         if (data.message.substring(0, 5) == "Thank") {
             // new user
             $('#' + id + '-existing-user').hide();
             $('#' + id + '-new-user').show();
-            $('.panel-title').empty().append(data.message);
             $('.' + id + '-panel-content').empty().append(data.token);
         } else { 
             // existing user
             $('#' + id + '-new-user').hide();
             $('#' + id + '-existing-user').show();
-            $('.panel-title').empty().append(data.message);
-            $('.' + id + '-panel-content').empty().append(data.email);
         }
         // $('#' + id + '-results-container').empty().append(JSON.stringify(data));
         $('#' + id + '-results-container').show();
