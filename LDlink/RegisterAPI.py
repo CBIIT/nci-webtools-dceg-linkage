@@ -6,51 +6,54 @@ import os.path
 import binascii
 import yaml
 
+
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
 api_users_dir = config['data']['api_users_dir']
 
-con = sqlite3.connect(api_users_dir + 'api_users.db')
-con.text_factory = str
-cur = con.cursor()
-
-
 # creates table in database if database did not exist before
-# def createTable(api_users_dir):
-#     # create database
-#     con = sqlite3.connect(api_users_dir + 'api_users.db')
-#     con.text_factory = str
-#     cur = con.cursor()
-#     cur.execute(
-#         "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
-#     con.close()
+def createTable(api_users_dir):
+    # create database
+    con = sqlite3.connect(api_users_dir + 'api_users.db')
+    con.text_factory = str
+    cur = con.cursor()
+    cur.execute(
+        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
+    con.commit()
+    con.close()
 
 # check if user email record exists
-def getEmailRecord(email):
+def getEmailRecord(curr, email):
     temp = (email,)
-    cur.execute("SELECT * FROM api_users WHERE email=?", temp)
-    return cur.fetchone()
+    curr.execute("SELECT * FROM api_users WHERE email=?", temp)
+    return curr.fetchone()
 
 # check if user email record exists
-def insertRecord(first_name, lastname, email, institution, token):
+def insertRecord(curr, first_name, lastname, email, institution, token):
+    con = sqlite3.connect(api_users_dir + 'api_users.db')
+    con.text_factory = str
+    cur = con.cursor()
     temp = (first_name, lastname, email, institution, token)
-    cur.execute("INSERT INTO api_users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
+    cur.execute(
+        "INSERT INTO api_users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
+    con.commit()
+    con.close()
     print "record inserted."
 
 # check if token is already in db
-def checkUniqueToken(token):
+def checkUniqueToken(curr, token):
     temp = (token,)
-    cur.execute("SELECT * FROM api_users WHERE token=?", temp)
-    if cur.fetchone() is None:
+    curr.execute("SELECT * FROM api_users WHERE token=?", temp)
+    if curr.fetchone() is None:
         return False
     else:
         return True
 
 # generate unique access token for each user
-def generateToken():
+def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
-    while(checkUniqueToken(token)):
+    while(checkUniqueToken(curr, token)):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
@@ -61,16 +64,16 @@ def register_user(firstname, lastname, email, institution, reference):
     out_json = {}
 
     # create database and table if it does not exist already
-    # if not os.path.exists(api_users_dir + 'api_users.db'):
-    #     print "api_usrs.db created."
-        # createTable(api_users_dir)
+    if not os.path.exists(api_users_dir + 'api_users.db'):
+        print "api_usrs.db created."
+        createTable(api_users_dir)
 
     # Connect to snp database
-    # conn = sqlite3.connect(api_users_dir + 'api_users.db')
-    # conn.text_factory = str
-    # curr = conn.cursor()
+    conn = sqlite3.connect(api_users_dir + 'api_users.db')
+    conn.text_factory = str
+    curr = conn.cursor()
 
-    record = getEmailRecord(email)
+    record = getEmailRecord(curr, email)
     print record
     # if email record exists, do not insert to db
     if record != None:
@@ -84,8 +87,8 @@ def register_user(firstname, lastname, email, institution, reference):
         }
     else:
         # if email record does not exists in db, add to table
-        token = generateToken()
-        insertRecord(firstname, lastname, email, institution, token)
+        token = generateToken(curr)
+        insertRecord(curr, firstname, lastname, email, institution, token)
         out_json = {
             "message": "Congratulations! You have registered to use LDlink's API.",
             "firstname": firstname,
@@ -95,7 +98,7 @@ def register_user(firstname, lastname, email, institution, reference):
             "token": token
         }
 
-    con.close()
+    conn.close()
 
     with open(tmp_dir + 'register_' + reference + '.json', 'w') as fp:
         json.dump(out_json, fp)
