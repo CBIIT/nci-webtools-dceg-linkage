@@ -2575,10 +2575,20 @@ function updateAPIaccess() {
     ajaxRequest.success(function(data) {
         console.log("python output reached frontend!");
         console.log(data);
-        $('#' + id + '-results-container').empty().append(JSON.stringify(data));
+        if (data.message.substring(0, 16) == "Congratulations!") {
+            // new user
+            $('#' + id + '-existing-user').hide();
+            $('#' + id + '-panel-title').empty().append(data.message);
+            $('#' + id + '-panel-content').empty().append(data.token);
+        } else { // existing user
+            $('#' + id + '-new-user').hide();
+            $('#' + id + '-panel-title').empty().append(data.message);
+            $('#' + id + '-panel-content').empty().append(data.email);
+        }
+        // $('#' + id + '-results-container').empty().append(JSON.stringify(data));
         $('#' + id + '-results-container').show();
-
-        $("#"+id+"-loading").hide();
+        $('#' + id + '-form').hide();
+        $('#' + id + '-loading').hide();
     });
     // ajaxRequest.fail(function(jqXHR, textStatus) {
     //     displayCommFail(id, jqXHR, textStatus);

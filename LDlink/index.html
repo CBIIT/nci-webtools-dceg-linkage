@@ -1668,7 +1668,7 @@
 					<br>
 					<hr>
 
-					<div>
+					<div id="apiaccess-form">
 						<form id="apiaccessForm" class="ldlinkForm">
 							<!-- First name,  Last name -->
 							<div class="form-group">
@@ -1692,10 +1692,10 @@
 							<!-- Submit Information -->
 							<input type="submit" id="apiaccess" value="Register" class="btn btn-default calculate" />
 						</form>
+						<hr>
 					</div>
-
-					<hr>
 					
+					<!-- loading animation -->
 					<div id="apiaccess-loading">
 						<img src="calculating_LD.gif" alt="loading icon"
 							class="loading">
@@ -1704,7 +1704,26 @@
 					<!-- ldhap CONTAINER -->
 					<div class="jumbotron">
 						<div class="container-fluid" id="apiaccess-results-container">
-							Show results message here.
+							<div id="apiaccess-new-user" class="panel panel-success">
+								<div class="panel-heading">
+									<h3 class="apiaccess-panel-title">Panel title</h3>
+								</div>
+								<div class="panel-body">
+									<pre id="apiaccess-panel-content">
+										Panel content
+									</pre>
+								</div>
+							</div>
+							<div id="apiaccess-existing-user" class="panel panel-warning">
+								<div class="panel-heading">
+									<h3 class="apiaccess-panel-title">Panel title</h3>
+								</div>
+								<div class="panel-body">
+									<pre id="apiaccess-panel-content">
+										Panel content
+									</pre>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

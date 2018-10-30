@@ -90,7 +90,7 @@ def register_user(firstname, lastname, email, institution, reference):
         token = generateToken(curr)
         insertRecord(curr, firstname, lastname, email, institution, token)
         out_json = {
-            "message": "Congratulations! You have registered to use LDlink's API.",
+            "message": "Thank you for registering to use LDlink's API.",
             "firstname": firstname,
             "lastname": lastname,
             "email": email,
