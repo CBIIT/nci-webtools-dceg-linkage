@@ -6,6 +6,11 @@ import os.path
 import binascii
 import yaml
 
+# Set data directories using config.yml
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+api_users_dir = config['data']['api_users_dir']
+
 con = sqlite3.connect(api_users_dir + 'api_users.db')
 con.text_factory = str
 cur = con.cursor()
@@ -25,7 +30,7 @@ cur = con.cursor()
 def getEmailRecord(email):
     temp = (email,)
     cur.execute("SELECT * FROM api_users WHERE email=?", temp)
-    return curr.fetchone()
+    return cur.fetchone()
 
 # check if user email record exists
 def insertRecord(first_name, lastname, email, institution, token):
@@ -51,11 +56,6 @@ def generateToken():
 
 
 def register_user(firstname, lastname, email, institution, reference):
-    # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
-    api_users_dir = config['data']['api_users_dir']
-
     tmp_dir = "./tmp/"
 
     out_json = {}
