@@ -101,20 +101,19 @@ def sendJSON(inputString):
     return current_app.response_class(out_json, mimetype='application/json')
 
 
-def requires_token():
+def requires_token(f):
     print "reached decorator"
-    def wrapper(f):
-        @wraps(f)
-        def wrapped(*args, **kwargs):
-            print "reached wrapper"
-            if 'token' not in request.args:
-                return sendTraceback("API token missing. Please register for API access.")
-            token = request.args['token']
-            if checkToken(token) is False or token is None:
-                return sendTraceback("Invalid API token. Please register for API access.")
-            return f(*args, **kwargs)
-        return wrapped
-    return wrapper
+
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        print "reached wrapper"
+        if 'token' not in request.args:
+            return sendTraceback("API token missing. Please register for API access.")
+        token = request.args['token']
+        if checkToken(token) is False or token is None:
+            return sendTraceback("Invalid API token. Please register for API access.")
+        return f(*args, **kwargs)
+    return decorated_function
 
 
 @app.route('/LDlinkRest/upload', methods=['POST'])
@@ -179,9 +178,9 @@ def restAdd():
     return jsonify(success=True, data=json_dumps)
 
 
-@requires_token()
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
+@requires_token
 def ldpair():
     # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
     # python LDpair.py rs2720460 rs11733615 EUR 38
@@ -225,9 +224,9 @@ def ldpair():
     return current_app.response_class(out_json, mimetype='application/json')
 
 
-@requires_token()
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
+@requires_token
 def ldproxy():
     isProgrammatic = False
     print 'Execute ldproxy'
@@ -272,9 +271,9 @@ def ldproxy():
     return out_script + "\n " + out_div
 
 
-@requires_token()
 @app.route('/LDlinkRest/ldmatrix', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
+@requires_token
 def ldmatrix():
 
     isProgrammatic = False
@@ -337,9 +336,9 @@ def ldmatrix():
     return out_script + "\n " + out_div
 
 
-@requires_token()
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
+@requires_token
 def ldhap():
     isProgrammatic = False
     print 'Execute ldhap'
@@ -398,9 +397,9 @@ def ldhap():
     return sendJSON(out_json)
 
 
-@requires_token()
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
+@requires_token
 def snpclip():
 
     isProgrammatic = False
@@ -522,9 +521,9 @@ def snpclip():
     return current_app.response_class(out_json, mimetype=mimetype)
 
 
-@requires_token()
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
+@requires_token
 def snpchip():
 
     # Command line example
