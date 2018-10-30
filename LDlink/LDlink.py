@@ -100,18 +100,23 @@ def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
 
+
 def requires_token():
+    print "reached decorator"
     def wrapper(f):
         @wraps(f)
         def wrapped(*args, **kwargs):
-            token = request.args.get('token')
+            print "reached wrapper"
+            if 'token' not in request.args:
+                return sendTraceback("API token missing. Please register for API access.")
+            token = request.args['token']
             if checkToken(token) is False or token is None:
                 return sendTraceback("Invalid API token. Please register for API access.")
             return f(*args, **kwargs)
         return wrapped
     return wrapper
 
-# @requires_token()
+
 @app.route('/LDlinkRest/upload', methods=['POST'])
 @app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():
@@ -748,7 +753,8 @@ def apiaccess():
     # print 'instution: ' + str(institution)
     # print 'request: ' + str(reference)
 
-    out_json = register_user(firstname, lastname, email, institution, reference)
+    out_json = register_user(
+        firstname, lastname, email, institution, reference)
 
     return sendJSON(out_json)
 

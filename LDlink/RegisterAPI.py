@@ -55,9 +55,9 @@ def checkToken(token):
     con.text_factory = str
     cur = con.cursor()
     temp = (token,)
-    curr.execute("SELECT * FROM api_users WHERE token=?", temp)
+    cur.execute("SELECT * FROM api_users WHERE token=?", temp)
     con.close()
-    if curr.fetchone() is None:
+    if cur.fetchone() is None:
         return False
     else:
         return True
