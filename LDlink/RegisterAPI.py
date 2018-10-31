@@ -22,11 +22,13 @@ def emailUser(email, token):
     print "sending message"
 
     packet = MIMEMultipart()
-    packet['Subject'] = "LDlink API Access"
+    packet['Subject'] = "API Access Token"
     packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
     packet['To'] = email
 
-    packet.attach(MIMEText("Test!", 'html'))
+    message = "Token: " + token
+
+    packet.attach(MIMEText(message, 'html'))
 
     # print self.MAIL_HOST
     smtp = smtplib.SMTP("localhost")
