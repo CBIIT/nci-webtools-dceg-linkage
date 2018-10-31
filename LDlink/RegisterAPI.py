@@ -88,7 +88,8 @@ def checkToken(token):
 # generate unique access token for each user
 def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
-    while(checkUniqueToken(curr, token)):
+    # if true, generate another token - make sure example token is not generated
+    while(checkUniqueToken(curr, token) or token == "exampletoken"):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
