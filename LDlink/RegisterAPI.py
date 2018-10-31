@@ -6,11 +6,36 @@ import os.path
 import binascii
 import yaml
 
+import smtplib
+from email.message import EmailMessage
+
 
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
 api_users_dir = config['data']['api_users_dir']
+
+# email user token
+def emailUser(email, token):
+    # Open the plain text file whose name is in textfile for reading.
+    textfile = "EmailTemplate.txt"
+    with open(textfile) as fp:
+        # Create a text/plain message
+        msg = EmailMessage()
+        msg.set_content(fp.read())
+
+    # me == the sender's email address
+    # you == the recipient's email address
+    me = "NCILDlinkWebAdmin@mail.nih.gov"
+    you = email
+    msg['Subject'] = 'The contents of %s' % textfile
+    msg['From'] = me
+    msg['To'] = you
+
+    # Send the message via our own SMTP server.
+    s = smtplib.SMTP('localhost')
+    s.send_message(msg)
+    s.quit()
 
 # creates table in database if database did not exist before
 def createTable(api_users_dir):
@@ -98,6 +123,7 @@ def register_user(firstname, lastname, email, institution, reference):
             "institution": record[3],
             "token": record[4]
         }
+        emailUser(record[2], record[4])
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
@@ -110,6 +136,7 @@ def register_user(firstname, lastname, email, institution, reference):
             "institution": institution,
             "token": token
         }
+        emailUser(email, token)
 
     conn.close()
 
