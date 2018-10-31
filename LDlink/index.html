@@ -1662,10 +1662,15 @@
 			<div class="tab-pane fade" id="apiaccess-tab">
 				<div class="container-fluid">
 					<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programatic Access!</h3>
+					<p>
+						LDlink modules are also accessible via command line from a terminal. This facilitates researchers
+						who are interested in performing batch queries. The syntax is similar to the web address link created
+						for queries on the webpage. Generally text output is returned that is the same as the file a user would 
+						download from the online site. Please register below for an access token required for your API call. 
+						Examples of command line arguments are also listed below for each module. Please replace the example token 
+						<code>&token=123456abcdef</code> with your own registered token.
+					</p>
 
-					API Token &mdash; Registration &mdash; <i>work in progress</i>
-				
-					<br>
 					<hr>
 
 					<div id="apiaccess-form">
@@ -1741,6 +1746,29 @@
 							</div>
 						</div>
 					</div>
+
+					<br>
+					<br>
+							
+					<b>Warning: Please only make sequential calls to the API to avoid disrupting the service.</b>
+
+					<br>
+					<br>
+							
+					<p><a href="/?tab=help#LDhap">LDhap</a><br>
+					<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL<code>&token=123456abcdef</code>'</kbd></p>
+					<p><a href="/?tab=help#LDmatrix">LDmatrix</a><br>
+					<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d<code>&token=123456abcdef</code>'</kbd></p>
+					<p><a href="/?tab=help#LDpair">LDpair</a><br>
+					<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB<code>&token=123456abcdef</code>'</kbd></p>
+					<p><a href="/?tab=help#LDproxy">LDproxy</a><br>
+					<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2<code>&token=123456abcdef</code>'</kbd></p>
+					<p><a href="/?tab=help#SNPchip">SNPchip</a><br>
+					<kbd>curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpchip?<code>&token=123456abcdef</code>'</kbd></p>
+					<p><a href="/?tab=help#SNPclip">SNPclip</a><br>
+					<kbd>curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpclip?<code>&token=123456abcdef</code>'</kbd></p>
+					<p><strong>Note</strong>: <a href="/?tab=help#LDassoc">LDassoc</a> is not currently accessible via programatic access.</p>
+
 				</div>
 			</div>
 
