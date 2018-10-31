@@ -89,7 +89,7 @@ def checkToken(token):
 def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
     # if true, generate another token - make sure example token is not generated
-    while(checkUniqueToken(curr, token) or token == "exampletoken"):
+    while(checkUniqueToken(curr, token) or token == "faketoken123"):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
