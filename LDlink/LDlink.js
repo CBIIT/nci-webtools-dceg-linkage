@@ -2588,7 +2588,7 @@ function updateAPIaccess() {
             // new user
             $('#' + id + '-existing-user').hide();
             $('#' + id + '-new-user').show();
-            $('.' + id + '-panel-content').empty().append(data.token);
+            // $('.' + id + '-panel-content').empty().append(data.token);
         } else { 
             // existing user
             $('#' + id + '-new-user').hide();

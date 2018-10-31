@@ -1666,41 +1666,38 @@
 						LDlink modules are also accessible via command line from a terminal. This facilitates researchers
 						who are interested in performing batch queries. The syntax is similar to the web address link created
 						for queries on the webpage. Generally text output is returned that is the same as the file a user would 
-						download from the online site. Please register below for an access token required for your API call. 
-						Examples of command line arguments are also listed below for each module. Please replace the example token 
-						<code>&token=123456abcdef</code> with your own registered token.
+						download from the online site. 
+						<br>
+						Please register below for an access token required for your API call. 
 					</p>
 
 					<hr>
 
-					<div id="apiaccess-form">
-						<div style="margin-left: auto; margin-right: auto; width: 50%;">
-							<form id="apiaccessForm" class="ldlinkForm">
-								<!-- First name,  Last name -->
-								<div class="form-group" style="width:49%; float: left;">
-									<label for="apiaccess-firstname">First name<span style="color:red">*</span></label>
-									<input type="text" class="form-control" id="apiaccess-firstname" placeholder="First name" required>
-								</div>
-								<div class="form-group" style="width:49%; float: right;">
-									<label for="apiaccess-lastname">Last name<span style="color:red">*</span></label>
-									<input type="text" class="form-control" id="apiaccess-lastname" placeholder="Last name" required>
-								</div>
-								<!-- Email -->
-								<div class="form-group">
-									<label for="apiaccess-email">Email<span style="color:red">*</span></label>
-									<input type="email" class="form-control" id="apiaccess-email" placeholder="Email" required>
-								</div>
-								<!-- Institution -->
-								<div class="form-group">
-									<label for="apiaccess-institution">Institution</label>
-									<input type="text" class="form-control" id="apiaccess-institution" placeholder="Institution (optional)">
-								</div>
-								<!-- Submit Information -->
-								<input type="submit" id="apiaccess" value="Register" class="btn btn-default calculate" />
-								<input type="reset" id="apiaccess-reset" value="Reset" class="btn btn-default" />
-							</form>
-						</div>
-						<hr>
+					<div id="apiaccess-form" style="margin-left: auto; margin-right: auto; width: 50%;">
+						<form id="apiaccessForm" class="ldlinkForm">
+							<!-- First name,  Last name -->
+							<div class="form-group" style="width:49%; float: left;">
+								<label for="apiaccess-firstname">First name<span style="color:red">*</span></label>
+								<input type="text" class="form-control" id="apiaccess-firstname" placeholder="First name" required>
+							</div>
+							<div class="form-group" style="width:49%; float: right;">
+								<label for="apiaccess-lastname">Last name<span style="color:red">*</span></label>
+								<input type="text" class="form-control" id="apiaccess-lastname" placeholder="Last name" required>
+							</div>
+							<!-- Email -->
+							<div class="form-group">
+								<label for="apiaccess-email">Email<span style="color:red">*</span></label>
+								<input type="email" class="form-control" id="apiaccess-email" placeholder="Email" required>
+							</div>
+							<!-- Institution -->
+							<div class="form-group">
+								<label for="apiaccess-institution">Institution</label>
+								<input type="text" class="form-control" id="apiaccess-institution" placeholder="Institution (optional)">
+							</div>
+							<!-- Submit Information -->
+							<input type="submit" id="apiaccess" value="Register" class="btn btn-default calculate" />
+							<input type="reset" id="apiaccess-reset" value="Reset" class="btn btn-default" />
+						</form>
 					</div>
 					
 					<!-- loading animation -->
@@ -1719,11 +1716,11 @@
 								<div class="panel-body" style="text-align: center;">
 									Your API token has been sent to the email: <span class="apiaccess-user-email" style="font-weight: bold;">email</span>
 									<br>
-									<br>
+									<!-- <br>
 									Token:
 									<pre class="apiaccess-panel-content" style="margin-left: auto; margin-right: auto; width: 25%; font-weight: bold;">
 										Panel content
-									</pre>
+									</pre> -->
 									<br>
 									<!-- reset button -->
 									<input type="button" id="apiaccess-done" value="Done" class="btn btn-default apiaccess-done" />
@@ -1747,10 +1744,14 @@
 						</div>
 					</div>
 
-					<br>
-					<br>
+					<hr>
+
+					<p>
+						Examples of command line arguments are listed below for each module. Replace the example token 
+						<code>&token=123456abcdef</code> with your own registered token.
+					</p>
 							
-					<b>Warning: Please only make sequential calls to the API to avoid disrupting the service.</b>
+					<b>Warning: Only make sequential calls to the API to avoid disrupting the service.</b>
 
 					<br>
 					<br>
