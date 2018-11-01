@@ -11,6 +11,8 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from time import gmtime, strftime
+
 
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
@@ -41,7 +43,7 @@ def createTable(api_users_dir):
     con.text_factory = str
     cur = con.cursor()
     cur.execute(
-        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT);")
+        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME);")
     con.commit()
     con.close()
 
@@ -52,13 +54,13 @@ def getEmailRecord(curr, email):
     return curr.fetchone()
 
 # check if user email record exists
-def insertRecord(curr, first_name, lastname, email, institution, token):
+def insertRecord(curr, firstname, lastname, email, institution, token, registered):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
-    temp = (first_name, lastname, email, institution, token)
+    temp = (firstname, lastname, email, institution, token, registered)
     cur.execute(
-        "INSERT INTO api_users (first_name, last_name, email, institution, token) VALUES (?,?,?,?,?)", temp)
+        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered) VALUES (?,?,?,?,?,?)", temp)
     con.commit()
     con.close()
     print "record inserted."
@@ -93,6 +95,9 @@ def generateToken(curr):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
+def getDatetime():
+    return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
 
 def register_user(firstname, lastname, email, institution, reference):
     tmp_dir = "./tmp/"
@@ -119,20 +124,23 @@ def register_user(firstname, lastname, email, institution, reference):
             "lastname": record[1],
             "email": record[2],
             "institution": record[3],
-            "token": record[4]
+            "token": record[4],
+            "registered": record[5]
         }
         emailUser(record[2], record[4])
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
-        insertRecord(curr, firstname, lastname, email, institution, token)
+        registered = getDatetime()
+        insertRecord(curr, firstname, lastname, email, institution, token, registered)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
             "lastname": lastname,
             "email": email,
             "institution": institution,
-            "token": token
+            "token": token,
+            "registered": registered
         }
         emailUser(email, token)
 
