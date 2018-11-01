@@ -93,17 +93,17 @@ def checkToken(token):
     cur.execute("SELECT * FROM api_users WHERE token=?", temp)
     record = cur.fetchone()
     con.close()
-    # present = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
-    # expiration = datetime.datetime.strptime(record[6], "%Y-%m-%d %H:%M:%S")
     if record is None:
         return False
     else:
-        return True
-        # if (present < expiration):
-        #     return True
-        # else:
-        #     deleteRecord(record[2])
-        #     return False
+        # return True
+        present = getDatetime()
+        expiration = datetime.datetime.strptime(record[6], "%Y-%m-%d %H:%M:%S")
+        if (present < expiration):
+            return True
+        else:
+            # deleteRecord(record[2])
+            return False
 
 # generate unique access token for each user
 def generateToken(curr):

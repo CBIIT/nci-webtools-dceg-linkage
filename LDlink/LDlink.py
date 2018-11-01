@@ -748,9 +748,7 @@ def apiaccess_web():
     out_json = register_user_web(
         firstname, lastname, email, institution, reference)
 
-    # payload = {'firstname':firstname, 'lastname':lastname,'email':email,'institution':institution,'reference':reference}
-    r = requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
-    print(r.url)
+    requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
 
     return sendJSON(out_json)
 
