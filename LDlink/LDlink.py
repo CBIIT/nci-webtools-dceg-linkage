@@ -14,7 +14,7 @@ import argparse
 import json
 import time
 import random
-from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify
+from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
 from socket import gethostname
@@ -737,14 +737,15 @@ def status(filename):
     return jsonify(os.path.isfile(filename))
 
 
-@app.route('/LDlinkRest/apiaccess', methods=['GET'])
 @app.route('/LDlinkRestWeb/apiaccess', methods=['GET'])
-def apiaccess():
+def apiaccess_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
+
+    redirect(url_for('LDlinkRest/apiaccess', firstname=firstname, lastname=lastname, email=email, institution=institution, reference=reference))
 
     # print 'firstname: ' + str(firstname)
     # print 'lastname: ' + str(lastname)
@@ -754,6 +755,25 @@ def apiaccess():
 
     out_json = register_user(
         firstname, lastname, email, institution, reference)
+
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRest/apiaccess', methods=['GET'])
+def apiaccess_api(firstname, lastname, email, institution, reference):
+    # firstname = request.args.get('firstname', False)
+    # lastname = request.args.get('lastname', False)
+    # email = request.args.get('email', False)
+    # institution = request.args.get('institution', False)
+    # reference = request.args.get('reference', False)
+
+    # print 'firstname: ' + str(firstname)
+    # print 'lastname: ' + str(lastname)
+    # print 'email: ' + str(email)
+    # print 'instution: ' + str(institution)
+    # print 'request: ' + str(reference)
+
+    out_json = register_user(
+    firstname, lastname, email, institution, reference)
 
     return sendJSON(out_json)
 
