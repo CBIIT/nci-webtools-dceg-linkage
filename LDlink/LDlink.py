@@ -100,7 +100,8 @@ def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
 
-
+# Flask decorator
+# Requires API route to include valid token in argument or will throw error
 def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):

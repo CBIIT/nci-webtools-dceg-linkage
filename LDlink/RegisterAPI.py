@@ -22,7 +22,6 @@ api_users_dir = config['data']['api_users_dir']
 # email user token
 def emailUser(email, token):
     print "sending message"
-
     packet = MIMEMultipart()
     packet['Subject'] = "API Access Token"
     packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
@@ -33,6 +32,7 @@ def emailUser(email, token):
     packet.attach(MIMEText(message, 'html'))
 
     # print self.MAIL_HOST
+    # temp use localhost, use official NIH mailfwd account in future (put in config file)
     smtp = smtplib.SMTP("localhost")
     smtp.sendmail("do.not.reply@nih.gov", email, packet.as_string())
 
@@ -74,6 +74,7 @@ def checkUniqueToken(curr, token):
     else:
         return True
 
+# check if token is valid when hitting API route
 def checkToken(token):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
@@ -95,10 +96,11 @@ def generateToken(curr):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
+# get current date and time
 def getDatetime():
     return strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-
+# registers new users and emails generated token
 def register_user(firstname, lastname, email, institution, reference):
     tmp_dir = "./tmp/"
 
@@ -143,10 +145,8 @@ def register_user(firstname, lastname, email, institution, reference):
             "registered": registered
         }
         emailUser(email, token)
-
+        
     conn.close()
-
-    with open(tmp_dir + 'register_' + reference + '.json', 'w') as fp:
-        json.dump(out_json, fp)
-
+    # with open(tmp_dir + 'register_' + reference + '.json', 'w') as fp:
+    #     json.dump(out_json, fp)
     return out_json

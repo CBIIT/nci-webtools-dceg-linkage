@@ -2582,7 +2582,7 @@ function updateAPIaccess() {
     ajaxRequest.success(function(data) {
         console.log("python output reached frontend!");
         console.log(data);
-        $('.panel-title').empty().append(data.message);
+        $('.panel-title.apiaccess').empty().append(data.message);
         $('.' + id + '-user-email').empty().append(data.email);
         if (data.message.substring(0, 5) == "Thank") {
             // new user
