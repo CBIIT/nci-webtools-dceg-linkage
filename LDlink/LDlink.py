@@ -14,6 +14,7 @@ import argparse
 import json
 import time
 import random
+import requests
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
@@ -745,32 +746,22 @@ def apiaccess_web():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
 
-    redirect(url_for('LDlinkRest/apiaccess_api', firstname=firstname, lastname=lastname, email=email, institution=institution, reference=reference))
-
-    # print 'firstname: ' + str(firstname)
-    # print 'lastname: ' + str(lastname)
-    # print 'email: ' + str(email)
-    # print 'instution: ' + str(institution)
-    # print 'request: ' + str(reference)
-
+    # redirect(url_for('LDlinkRest/apiaccess_api', firstname=firstname, lastname=lastname, email=email, institution=institution, reference=reference))
+    payload = {'firstname':firstname, 'lastname':lastname,'email':email,'institution':institution,'reference':reference}
+    r = requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=payload)
+    print(r.url)
     out_json = register_user(
         firstname, lastname, email, institution, reference)
 
     return sendJSON(out_json)
 
 @app.route('/LDlinkRest/apiaccess_api', methods=['GET'])
-def apiaccess_api(firstname, lastname, email, institution, reference):
-    # firstname = request.args.get('firstname', False)
-    # lastname = request.args.get('lastname', False)
-    # email = request.args.get('email', False)
-    # institution = request.args.get('institution', False)
-    # reference = request.args.get('reference', False)
-
-    # print 'firstname: ' + str(firstname)
-    # print 'lastname: ' + str(lastname)
-    # print 'email: ' + str(email)
-    # print 'instution: ' + str(institution)
-    # print 'request: ' + str(reference)
+def apiaccess_api():
+    firstname = request.args.get('firstname', False)
+    lastname = request.args.get('lastname', False)
+    email = request.args.get('email', False)
+    institution = request.args.get('institution', False)
+    reference = request.args.get('reference', False)
 
     out_json = register_user(
     firstname, lastname, email, institution, reference)

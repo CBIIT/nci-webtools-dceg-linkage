@@ -2570,7 +2570,7 @@ function updateAPIaccess() {
 
     // updateHistoryURL(id, apiaccessInputs);
 
-    var url = restServerUrl + "/apiaccess";
+    var url = restServerUrl + "/apiaccess_web";
 
     var ajaxRequest = $.ajax({
         type : "GET",
