@@ -11,7 +11,7 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from time import gmtime, strftime
+import datetime
 
 
 # Set data directories using config.yml
@@ -20,14 +20,14 @@ with open('config.yml', 'r') as f:
 api_users_dir = config['data']['api_users_dir']
 
 # email user token
-def emailUser(email, token):
+def emailUser(email, token, expiration):
     print "sending message"
     packet = MIMEMultipart()
     packet['Subject'] = "API Access Token"
     packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
     packet['To'] = email
 
-    message = "Token: " + token
+    message = 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration
 
     packet.attach(MIMEText(message, 'html'))
 
@@ -43,7 +43,7 @@ def createTable(api_users_dir):
     con.text_factory = str
     cur = con.cursor()
     cur.execute(
-        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME);")
+        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `expiration` DATETIME);")
     con.commit()
     con.close()
 
@@ -53,17 +53,27 @@ def getEmailRecord(curr, email):
     curr.execute("SELECT * FROM api_users WHERE email=?", temp)
     return curr.fetchone()
 
-# check if user email record exists
-def insertRecord(curr, firstname, lastname, email, institution, token, registered):
+
+def insertRecord(firstname, lastname, email, institution, token, registered, expiration):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
-    temp = (firstname, lastname, email, institution, token, registered)
+    temp = (firstname, lastname, email, institution, token, registered, expiration)
     cur.execute(
-        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered) VALUES (?,?,?,?,?,?)", temp)
+        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, expiration) VALUES (?,?,?,?,?,?,?)", temp)
     con.commit()
     con.close()
-    print "record inserted."
+
+# delete record only if api token is hit and expired
+def deleteRecord(email):
+    con = sqlite3.connect(api_users_dir + 'api_users.db')
+    con.text_factory = str
+    cur = con.cursor()
+    temp = (email,)
+    cur.execute(
+        "DELETE FROM api_users WHERE email=?", temp)
+    con.commit()
+    con.close()
 
 # check if token is already in db
 def checkUniqueToken(curr, token):
@@ -74,7 +84,7 @@ def checkUniqueToken(curr, token):
     else:
         return True
 
-# check if token is valid when hitting API route
+# check if token is valid when hitting API route and not expired
 def checkToken(token):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
@@ -83,10 +93,16 @@ def checkToken(token):
     cur.execute("SELECT * FROM api_users WHERE token=?", temp)
     record = cur.fetchone()
     con.close()
+    present = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
+    expiration = datetime.datetime.strptime(record[6], "%Y-%m-%d %H:%M:%S")
     if record is None:
         return False
     else:
-        return True
+        if (present < expiration):
+            return True
+        else:
+            deleteRecord(record[2])
+            return False
 
 # generate unique access token for each user
 def generateToken(curr):
@@ -98,7 +114,11 @@ def generateToken(curr):
 
 # get current date and time
 def getDatetime():
-    return strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    return datetime.datetime.now()
+
+# get current date and time
+def getExpiration(registered):
+    return registered + datetime.timedelta(minutes=5)
 
 # registers new users and emails generated token
 def register_user(firstname, lastname, email, institution, reference):
@@ -127,14 +147,18 @@ def register_user(firstname, lastname, email, institution, reference):
             "email": record[2],
             "institution": record[3],
             "token": record[4],
-            "registered": record[5]
+            "registered": record[5],
+            "expiration": record[6]
         }
-        emailUser(record[2], record[4])
+        emailUser(record[2], record[4], record[6])
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
         registered = getDatetime()
-        insertRecord(curr, firstname, lastname, email, institution, token, registered)
+        expiration = getExpiration(registered)
+        format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+        format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
+        insertRecord(firstname, lastname, email, institution, token, format_registered, format_expiration)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
@@ -142,10 +166,11 @@ def register_user(firstname, lastname, email, institution, reference):
             "email": email,
             "institution": institution,
             "token": token,
-            "registered": registered
+            "registered": format_registered,
+            "expiration": format_expiration
         }
-        emailUser(email, token)
-        
+        emailUser(email, token, format_expiration)
+
     conn.close()
     # with open(tmp_dir + 'register_' + reference + '.json', 'w') as fp:
     #     json.dump(out_json, fp)
