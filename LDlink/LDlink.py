@@ -27,8 +27,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user
-from RegisterAPI import checkToken
+from RegisterAPI import register_user_web, register_user_api, checkToken
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -746,12 +745,12 @@ def apiaccess_web():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
 
-    # redirect(url_for('LDlinkRest/apiaccess_api', firstname=firstname, lastname=lastname, email=email, institution=institution, reference=reference))
-    payload = {'firstname':firstname, 'lastname':lastname,'email':email,'institution':institution,'reference':reference}
-    r = requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=payload)
-    print(r.url)
-    out_json = register_user(
+    out_json = register_user_web(
         firstname, lastname, email, institution, reference)
+
+    # payload = {'firstname':firstname, 'lastname':lastname,'email':email,'institution':institution,'reference':reference}
+    r = requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
+    print(r.url)
 
     return sendJSON(out_json)
 
@@ -761,10 +760,12 @@ def apiaccess_api():
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
-    reference = request.args.get('reference', False)
+    token = request.args.get('token', False)
+    registered = request.args.get('registered', False)
+    expiration = request.args.get('expiration', False)
 
-    out_json = register_user(
-    firstname, lastname, email, institution, reference)
+    out_json = register_user_api(
+    firstname, lastname, email, institution, token, registered, expiration)
 
     return sendJSON(out_json)
 
