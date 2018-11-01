@@ -737,7 +737,7 @@ def status(filename):
     return jsonify(os.path.isfile(filename))
 
 
-@app.route('/LDlinkRestWeb/apiaccess', methods=['GET'])
+@app.route('/LDlinkRestWeb/apiaccess_web', methods=['GET'])
 def apiaccess_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
@@ -745,7 +745,7 @@ def apiaccess_web():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
 
-    redirect(url_for('LDlinkRest/apiaccess', firstname=firstname, lastname=lastname, email=email, institution=institution, reference=reference))
+    redirect(url_for('LDlinkRest/apiaccess_api', firstname=firstname, lastname=lastname, email=email, institution=institution, reference=reference))
 
     # print 'firstname: ' + str(firstname)
     # print 'lastname: ' + str(lastname)
@@ -758,7 +758,7 @@ def apiaccess_web():
 
     return sendJSON(out_json)
 
-@app.route('/LDlinkRest/apiaccess', methods=['GET'])
+@app.route('/LDlinkRest/apiaccess_api', methods=['GET'])
 def apiaccess_api(firstname, lastname, email, institution, reference):
     # firstname = request.args.get('firstname', False)
     # lastname = request.args.get('lastname', False)
