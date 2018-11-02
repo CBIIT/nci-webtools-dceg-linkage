@@ -130,7 +130,8 @@ def getDatetime():
 
 # get current date and time
 def getExpiration(registered):
-    return registered + datetime.timedelta(days=token_expiration_days)
+    return registered + datetime.timedelta(minutes=5)
+    # return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
 def register_user_web(firstname, lastname, email, institution, reference):
@@ -150,17 +151,38 @@ def register_user_web(firstname, lastname, email, institution, reference):
     print record
     # if email record exists, do not insert to db
     if record != None:
-        out_json = {
-            "message": "Email already registered.",
-            "firstname": record[0],
-            "lastname": record[1],
-            "email": record[2],
-            "institution": record[3],
-            "token": record[4],
-            "registered": record[5],
-            "expiration": record[6]
-        }
-        emailUser(record[2], record[4], record[6])
+        present = getDatetime()
+        expiration = datetime.datetime.strptime(record[6], "%Y-%m-%d %H:%M:%S")
+        if (present < expiration):
+            out_json = {
+                "message": "Email already registered.",
+                "firstname": record[0],
+                "lastname": record[1],
+                "email": record[2],
+                "institution": record[3],
+                "token": record[4],
+                "registered": record[5],
+                "expiration": record[6]
+            }
+            emailUser(record[2], record[4], record[6])
+        else:
+            token = generateToken(curr)
+            registered = getDatetime()
+            expiration = getExpiration(registered)
+            format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+            format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
+            updateRecord(firstname, lastname, email, institution, token, format_registered, format_expiration)
+            out_json = {
+                "message": "Thank you for registering to use the LDlink API.",
+                "firstname": firstname,
+                "lastname": lastname,
+                "email": email,
+                "institution": institution,
+                "token": token,
+                "registered": format_registered,
+                "expiration": format_expiration
+            }
+            emailUser(email, token, format_expiration)
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
@@ -202,16 +224,29 @@ def register_user_api(firstname, lastname, email, institution, token, registered
 
     # if email record exists, do not insert to db
     if record != None:
-        out_json = {
-            "message": "Email already registered.",
-            "firstname": record[0],
-            "lastname": record[1],
-            "email": record[2],
-            "institution": record[3],
-            "token": record[4],
-            "registered": record[5],
-            "expiration": record[6]
-        }
+        if (record[2] == email and record[4] != token):
+            updateRecord(firstname, lastname, email, institution, token, registered, expiration)
+            out_json = {
+                "message": "Thank you for registering to use the LDlink API.",
+                "firstname": firstname,
+                "lastname": lastname,
+                "email": email,
+                "institution": institution,
+                "token": token,
+                "registered": registered,
+                "expiration": expiration
+            }
+        else:
+            out_json = {
+                "message": "Email already registered.",
+                "firstname": record[0],
+                "lastname": record[1],
+                "email": record[2],
+                "institution": record[3],
+                "token": record[4],
+                "registered": record[5],
+                "expiration": record[6]
+            }
     else:
         # if email record does not exists in db, add to table
         # token = generateToken(curr)
