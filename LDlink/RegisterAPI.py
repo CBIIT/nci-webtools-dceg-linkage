@@ -17,7 +17,8 @@ import datetime
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
-api_users_dir = config['data']['api_users_dir']
+api_users_dir = config['api']['api_users_dir']
+token_expiration_days = config['api']['token_expiration_days']
 
 # email user token
 def emailUser(email, token, expiration):
@@ -61,6 +62,16 @@ def insertRecord(firstname, lastname, email, institution, token, registered, exp
     temp = (firstname, lastname, email, institution, token, registered, expiration)
     cur.execute(
         "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, expiration) VALUES (?,?,?,?,?,?,?)", temp)
+    con.commit()
+    con.close()
+
+def updateRecord(firstname, lastname, email, institution, token, registered, expiration):
+    con = sqlite3.connect(api_users_dir + 'api_users.db')
+    con.text_factory = str
+    cur = con.cursor()
+    temp = (firstname, lastname, institution, token, registered, expiration, email)
+    cur.execute(
+        "UPDATE api_users SET first_name=?, last_name=?, institution=?, token=?, registered=?, expiration=? WHERE email=?", temp)
     con.commit()
     con.close()
 
@@ -119,7 +130,7 @@ def getDatetime():
 
 # get current date and time
 def getExpiration(registered):
-    return registered + datetime.timedelta(minutes=5)
+    return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
 def register_user_web(firstname, lastname, email, institution, reference):
