@@ -1708,40 +1708,40 @@
 
 					<!-- ldhap CONTAINER -->
 					<div class="jumbotron">
-						<div class="container-fluid" id="apiaccess-results-container">
-							<div id="apiaccess-new-user" class="panel panel-success" style="margin-left: auto; margin-right: auto; width: 65%;">
-								<div class="panel-heading">
-									<h3 class="panel-title apiaccess">Panel title</h3>
-								</div>
-								<div class="panel-body" style="text-align: center;">
-									Your API token has been sent to the email: <span class="apiaccess-user-email" style="font-weight: bold;">email</span>
-									<br>
-									<!-- <br>
-									Token:
-									<pre class="apiaccess-panel-content" style="margin-left: auto; margin-right: auto; width: 25%; font-weight: bold;">
-										Panel content
-									</pre> -->
-									<br>
-									<!-- reset button -->
-									<input type="button" id="apiaccess-done" value="Done" class="btn btn-default apiaccess-done" />
-								</div>
-							</div>
-							<div id="apiaccess-existing-user" class="panel panel-warning" style="margin-left: auto; margin-right: auto; width: 65%;">
-								<div class="panel-heading">
-									<h3 class="panel-title apiaccess">Panel title</h3>
-								</div>
-								<div class="panel-body" style="text-align: center;">
-									Your API token has been sent to the email: <span class="apiaccess-user-email" style="font-weight: bold;">email</span>
-									<!-- <pre class="apiaccess-panel-content">
-										Panel content
-									</pre> -->
-									<br>
-									<br>
-									<!-- reset button -->
-									<input type="button" id="apiaccess-done" value="Done" class="btn btn-default apiaccess-done" />
+						<!-- <div class="container-fluid" id="apiaccess-results-container"> -->
+							<div id="apiaccess-new-user" class="modal fade" data-backdrop="static">
+								<div class="modal-dialog">		
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title apiaccess">Modal title</h3>
+										</div>
+										<div class="modal-body" style="text-align: center;">
+											Your API token has been sent to the email: <span class="apiaccess-user-email" style="font-weight: bold;">email</span>
+										</div>
+										<div class="modal-footer">
+											<!-- reset button -->
+											<input type="button" id="apiaccess-done" value="Done" class="btn btn-default apiaccess-done" />
+										</div>
+									</div>
 								</div>
 							</div>
-						</div>
+							<div id="apiaccess-existing-user" class="modal fade" data-backdrop="static">
+								<div class="modal-dialog">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h3 class="modal-title apiaccess">Modal title</h3>
+										</div>
+										<div class="modal-body" style="text-align: center;">
+											Your API token has been sent to the email: <span class="apiaccess-user-email" style="font-weight: bold;">email</span>
+										</div>
+										<div class="modal-footer">
+											<!-- reset button -->
+											<input type="button" id="apiaccess-done" value="Done" class="btn btn-default apiaccess-done" />
+										</div>
+									</div>
+								</div>
+							</div>
+						<!-- </div> -->
 					</div>
 
 					<hr>
