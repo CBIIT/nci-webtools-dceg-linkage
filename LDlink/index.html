@@ -1697,7 +1697,7 @@
 							<div class="form-group">
 								<label for="apiaccess-usage">Describe usage<span style="color:red">*</span></label>
 								<textarea maxlength="250" id="apiaccess-usage"
-									placeholder="Please describe intended purpose and include estimated # of API calls (max. 250 characters)"
+									placeholder="Please describe intended purpose and include estimated # of API calls &#10;(max. 250 characters)"
 									class="form-control"
 									title="Please describe your intended use and give estimated number of API calls." required></textarea>
 							</div>
@@ -1753,17 +1753,14 @@
 
 					<hr>
 
-					<p>
-						Examples of command line arguments are listed below for each module. Replace the example token in 
-						<code>token=faketoken123</code> with your own registered token.
-					</p>
-							
 					<div id="api-alert" class="alert alert-api" role="alert">
 						Warning: Please only make sequential API calls to avoid disrupting the API server. Abuse of API access may result in a warning or temporary ban.
 					</div>
 
-					<br>
-					<br>
+					<p>
+						Examples of command line arguments are listed below for each module. Replace the example token in 
+						<code>token=faketoken123</code> with your own registered token.
+					</p>
 							
 					<p><a href="/?tab=help#LDhap">LDhap</a><br>
 					<kbd>curl -k -X GET</kbd> 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&<code>token=faketoken123</code>'</p>
