@@ -744,9 +744,10 @@ def apiaccess_web():
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
+    usage = request.args.get('usage', False)
 
     out_json = register_user_web(
-        firstname, lastname, email, institution, reference)
+        firstname, lastname, email, institution, reference, usage)
 
     requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
 
@@ -761,9 +762,10 @@ def apiaccess_api():
     token = request.args.get('token', False)
     registered = request.args.get('registered', False)
     expiration = request.args.get('expiration', False)
+    usage = request.args.get('usage', False)
 
     out_json = register_user_api(
-    firstname, lastname, email, institution, token, registered, expiration)
+        firstname, lastname, email, institution, token, registered, expiration, usage)
 
     return sendJSON(out_json)
 
