@@ -1152,8 +1152,10 @@ function updateData(id) {
             updateSNPchip();
             break;
         case 'apiaccess':
-            $('#'+id+"-loading").show();
-            updateAPIaccess();
+            if(checkTextAreaLength(id)) {
+                $('#'+id+"-loading").show();
+                updateAPIaccess();
+            }
             break;
     }
 }
@@ -1297,6 +1299,18 @@ function isPopulationSet(elementId) {
         return false;
     } else {
         $('#'+elementId+'-population-codes-zero').popover('hide');
+        return true;
+    }
+}
+
+function checkTextAreaLength(elementId) {
+    var description =  $('#'+elementId+'-usage').val();
+    if(description.length > 250 ) {
+        $('#'+elementId+'-usage-warning').popover('show');
+        setTimeout(function() { $('#'+elementId+'-usage-warning').popover('hide'); }, 4000);
+        return false;
+    } else {
+        $('#'+elementId+'-usage-warning').popover('hide');
         return true;
     }
 }
