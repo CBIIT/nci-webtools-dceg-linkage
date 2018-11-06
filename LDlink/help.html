@@ -1,645 +1,661 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html><head>
-<script src="//assets.adobedtm.com/f1bfa9f7170c81b1a9a9ecdcc6c5215ee0b03c84/satelliteLib-4b219b82c4737db0e1797b6c511cf10c802c95cb.js"></script>
+<html>
+
+<head>
+	<script src="//assets.adobedtm.com/f1bfa9f7170c81b1a9a9ecdcc6c5215ee0b03c84/satelliteLib-4b219b82c4737db0e1797b6c511cf10c802c95cb.js"></script>
 </head>
+
 <body>
-<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Documentation!</h3>
-<p>LDlink is designed to be an intuitive and simple tool for
-investigating patterns of linkage disequilibrium across a variety of
-ancestral population groups. This help documentation page gives
-detailed description of the metrics calculated by LDlink modules and
-aids users in understanding all aspects of the required input and
-returned output. The documentation is divided into the following
-sections:</p>
-<p style="margin-left: 40px;"><a href="#Understanding_Linkage_Disequilibrium"><strong>Understanding
-Linkage Disequilibrium</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#linkage_equilibrium"><strong> Linkage
-Equilibrium</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#linkage_disequilibrium"><strong> Linkage
-Disequilibrium</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#haplotype"><strong>Haplotype</strong></a></p>
-<p style="margin-left: 40px;"> <a href="#Data_Sources"><strong>Data
-Sources</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#dbSNP"><strong>dbSNP</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#1000_Genomes_Project"><strong>1000 Genomes
-Project</strong></a></p>
-<p style="margin-left: 40px;"> <a href="#Calculations"><strong>Calculations</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#D_prime"><strong>D
-prime</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#R_squared"><strong>R
-squared</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#Goodness_of_Fit"><strong>Goodness
-of
-Fit</strong></a></p>
-<p style="margin-left: 40px;"> <a href="#Modules"><strong>Modules</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#LDassoc"><strong>LDassoc</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#LDhap"><strong>LDhap</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#LDmatrix"><strong>LDmatrix</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#LDpair"><strong>LDpair</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#LDproxy"><strong>LDproxy</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#SNPchip"><strong>SNPchip</strong></a></p>
-<p style="margin-left: 80px;"> <a href="#SNPclip"><strong>SNPclip</strong></a></p>
-<!-- <p style="margin-left: 40px;"> <a href="#Programatic Access"><strong>Programatic Access</strong></a></p> -->
-<p style="margin-left: 40px;"> <a href="#FAQ"><strong>Frequently
-Asked Questions</strong></a></p>
-<p style="margin-left: 40px;"> <a href="#Citation"><strong>Citation</strong></a></p>
-<p style="margin-left: 40px;"> <a href="#Contact"><strong>Contact</strong></a></p>
-<br>
-<p> <strong><a name="Understanding_Linkage_Disequilibrium"></a>Understanding
-Linkage Disequilibrium</strong></p>
-<p><a name="linkage_equilibrium"></a>What is
-linkage disequilibrium? Perhaps it is best to start
-with linkage equilibrium. Linkage equilibrium exists when alleles from
-two different genetic variants occur independently of each
-other. The inheritance of such variants follows
-probabilistic patterns governed by population allele frequencies. The
-vast majority of genetic variants on a chromosome are in linkage
-equilibrium. Variants in linkage equilibrium are not considered
-linked.</p>
-<p><a name="linkage_disequilibrium"></a>Linkage
-disequilibrium is present when alleles from two nearby
-genetic variants commonly occur together in a non-random, linked fashion. This
-linked mode of inheritance results from genetic variants in close
-proximity being less likely to be separated by a recombination event
-and thus alleles of the variants are more commonly inherited together
-than expected. Alleles of variants in linkage disequilibrium are
-correlated; with the degree of correlation generally greater in
-magnitude the closer the variants are in physical distance. Measures of
-linkage disequilibrium include <a href="#D_prime">D prime
-(D')</a> and <a href="#R_squared">R squared (R<sup>2</sup>)</a>.</p>
-<p><a name="haplotype"></a>A haplotype is a
-cluster of genetic variants that are
-inherited together. Humans are diploid; having maternal and paternal
-copies of each autosomal chromosome. Each chromosomal copy is organized
-into segments of high linkage disequilibrium, called haplotype
-"blocks". Due to unique population histories and differences in variant
-allele frequencies, haplotype structure tends to be population
-specific. Although haplotypes are essential for calculating measures of
-linkage disequilibrium, haplotypes are seldom directly observed.
-Statistical chromosome phasing techniques are often necessary to infer
-individual haplotypes.<strong> </strong>
-</p>
-<br>
-<p> <strong><a name="Data_Sources"></a>Data
-Sources</strong>
-</p>
-<p><a name="dbSNP"></a>To investigate patterns
-of linkage disequilibrium, LDlink
-focuses on two main class of genetic variation: single
-nucleotide polymorphisms (SNPs) and insertions/deletions (indels). Every module of LDlink requires the
-entry of at least one variant as identified by a RefSNP number (RS
-number). RS numbers have been assigned by <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-and
-are well-curated
-identifiers that follow the format "rs" followed by 1 to 8 numbers. The
-current implementation of LDlink references dbSNP and only
-accepts input for bi-allelic variants.</p>
-<p><a name="1000_Genomes_Project"></a>Publicly
-available reference haplotypes from Phase 3 (<a href="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/" target="_blank">Version 5</a>) of the
-<a href="http://www.1000genomes.org/" target="_blank">1000
-Genomes Project</a>
-are used by LDlink to calculate
-population-specific measures of linkage disequilibrium. Haplotypes are
-available for continental populations (ex: European, African, and
-Admixed American) and sub-populations (ex: Finnish, Gambian, and
-Peruvian). All LDlink modules require the selection of at least one
-1000 Genomes Project sub-population, but several sub-populations can be
-selected simultaneously. Available haplotypes vary by sub-population
-based on sample size.</p>
-<br>
-<p> <strong><a name="Calculations"></a>Calculations</strong>
-</p>
-<p>LDlink modules report the following measures of linkage
-disequilibrium: <a href="#D_prime">D prime</a>, <a href="#R_squared">R squared</a>, and <a href="#Goodness_of_Fit">goodness-of-fit</a>
-statistics.
-Below is a brief description of each measure.</p>
-<p> <strong><a name="D_prime"></a>D
-prime (D')</strong> - an indicator of
-allelic segregation for two genetic variants. D' values range from 0 to
-1 with higher values indicating tight linkage of alleles. A D' value of
-0 indicates no linkage of alleles. A D' value of 1 indicates at least
-one expected haplotype combination is not observed.
-</p>
-<p> <strong><a name="R_squared"></a>R
-squared (R<sup>2</sup>) </strong>
-- a measure of correlation of alleles for two genetic variants. R<sup>2</sup>
-values range from 0 to 1 with higher values indicating a higher degree
-of correlation. An R<sup>2</sup> value of 0 indicates
-alleles are independent, whereas an R<sup>2</sup> value of
-1 indicates an allele of one variant perfectly predicts an allele of
-another variant. R<sup>2</sup> is sensitive to allele
-frequency.
-</p>
-<p> <strong><a name="Goodness_of_Fit"></a>Goodness
-of Fit (&#935;<sup>2</sup> and
-p-value) </strong> - statistical test testing whether observed
-haplotype counts follow frequencies expected from variant allele
-frequencies. High chi-square statistics and low p-values are evidence
-that haplotype counts deviate from expected values and suggest linkage
-disequilibrium may be present.
-</p>
-<br>
-<p> <strong><a name="Modules"></a>Modules</strong>
-</p>
-<p>LDlink consists of seven modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
-<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>,
-<a href="#LDproxy">LDproxy</a>, <a href="#SNPchip">SNPchip</a>,
-and <a href="#SNPclip">SNPclip</a>. Each module can be
-accessed by clicking on the desired tab at
-the top of all LDlink pages. Below is a description of each module, the
-required user input, and an explanation of the returned output.</p>
-<br>
+	<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Documentation!</h3>
+	<p>LDlink is designed to be an intuitive and simple tool for
+		investigating patterns of linkage disequilibrium across a variety of
+		ancestral population groups. This help documentation page gives
+		detailed description of the metrics calculated by LDlink modules and
+		aids users in understanding all aspects of the required input and
+		returned output. The documentation is divided into the following
+		sections:</p>
+	<p style="margin-left: 40px;"><a href="#Understanding_Linkage_Disequilibrium"><strong>Understanding
+				Linkage Disequilibrium</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#linkage_equilibrium"><strong> Linkage
+				Equilibrium</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#linkage_disequilibrium"><strong> Linkage
+				Disequilibrium</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#haplotype"><strong>Haplotype</strong></a></p>
+	<p style="margin-left: 40px;"> <a href="#Data_Sources"><strong>Data
+				Sources</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#dbSNP"><strong>dbSNP</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#1000_Genomes_Project"><strong>1000 Genomes
+				Project</strong></a></p>
+	<p style="margin-left: 40px;"> <a href="#Calculations"><strong>Calculations</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#D_prime"><strong>D
+				prime</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#R_squared"><strong>R
+				squared</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#Goodness_of_Fit"><strong>Goodness
+				of
+				Fit</strong></a></p>
+	<p style="margin-left: 40px;"> <a href="#Modules"><strong>Modules</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDassoc"><strong>LDassoc</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDhap"><strong>LDhap</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDmatrix"><strong>LDmatrix</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDpair"><strong>LDpair</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDproxy"><strong>LDproxy</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#SNPchip"><strong>SNPchip</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#SNPclip"><strong>SNPclip</strong></a></p>
+	<!-- <p style="margin-left: 40px;"> <a href="#Programatic Access"><strong>Programatic Access</strong></a></p> -->
+	<p style="margin-left: 40px;"> <a href="#FAQ"><strong>Frequently
+				Asked Questions</strong></a></p>
+	<p style="margin-left: 40px;"> <a href="#Citation"><strong>Citation</strong></a></p>
+	<p style="margin-left: 40px;"> <a href="#Contact"><strong>Contact</strong></a></p>
+	<br>
+	<p> <strong><a name="Understanding_Linkage_Disequilibrium"></a>Understanding
+			Linkage Disequilibrium</strong></p>
+	<p><a name="linkage_equilibrium"></a>What is
+		linkage disequilibrium? Perhaps it is best to start
+		with linkage equilibrium. Linkage equilibrium exists when alleles from
+		two different genetic variants occur independently of each
+		other. The inheritance of such variants follows
+		probabilistic patterns governed by population allele frequencies. The
+		vast majority of genetic variants on a chromosome are in linkage
+		equilibrium. Variants in linkage equilibrium are not considered
+		linked.</p>
+	<p><a name="linkage_disequilibrium"></a>Linkage
+		disequilibrium is present when alleles from two nearby
+		genetic variants commonly occur together in a non-random, linked fashion. This
+		linked mode of inheritance results from genetic variants in close
+		proximity being less likely to be separated by a recombination event
+		and thus alleles of the variants are more commonly inherited together
+		than expected. Alleles of variants in linkage disequilibrium are
+		correlated; with the degree of correlation generally greater in
+		magnitude the closer the variants are in physical distance. Measures of
+		linkage disequilibrium include <a href="#D_prime">D prime
+			(D')</a> and <a href="#R_squared">R squared (R<sup>2</sup>)</a>.</p>
+	<p><a name="haplotype"></a>A haplotype is a
+		cluster of genetic variants that are
+		inherited together. Humans are diploid; having maternal and paternal
+		copies of each autosomal chromosome. Each chromosomal copy is organized
+		into segments of high linkage disequilibrium, called haplotype
+		"blocks". Due to unique population histories and differences in variant
+		allele frequencies, haplotype structure tends to be population
+		specific. Although haplotypes are essential for calculating measures of
+		linkage disequilibrium, haplotypes are seldom directly observed.
+		Statistical chromosome phasing techniques are often necessary to infer
+		individual haplotypes.<strong> </strong>
+	</p>
+	<br>
+	<p> <strong><a name="Data_Sources"></a>Data
+			Sources</strong>
+	</p>
+	<p><a name="dbSNP"></a>To investigate patterns
+		of linkage disequilibrium, LDlink
+		focuses on two main class of genetic variation: single
+		nucleotide polymorphisms (SNPs) and insertions/deletions (indels). Every module of LDlink requires the
+		entry of at least one variant as identified by a RefSNP number (RS
+		number). RS numbers have been assigned by <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		and
+		are well-curated
+		identifiers that follow the format "rs" followed by 1 to 8 numbers. The
+		current implementation of LDlink references dbSNP and only
+		accepts input for bi-allelic variants.</p>
+	<p><a name="1000_Genomes_Project"></a>Publicly
+		available reference haplotypes from Phase 3 (<a href="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/"
+		 target="_blank">Version 5</a>) of the
+		<a href="http://www.1000genomes.org/" target="_blank">1000
+			Genomes Project</a>
+		are used by LDlink to calculate
+		population-specific measures of linkage disequilibrium. Haplotypes are
+		available for continental populations (ex: European, African, and
+		Admixed American) and sub-populations (ex: Finnish, Gambian, and
+		Peruvian). All LDlink modules require the selection of at least one
+		1000 Genomes Project sub-population, but several sub-populations can be
+		selected simultaneously. Available haplotypes vary by sub-population
+		based on sample size.</p>
+	<br>
+	<p> <strong><a name="Calculations"></a>Calculations</strong>
+	</p>
+	<p>LDlink modules report the following measures of linkage
+		disequilibrium: <a href="#D_prime">D prime</a>, <a href="#R_squared">R squared</a>, and <a href="#Goodness_of_Fit">goodness-of-fit</a>
+		statistics.
+		Below is a brief description of each measure.</p>
+	<p> <strong><a name="D_prime"></a>D
+			prime (D')</strong> - an indicator of
+		allelic segregation for two genetic variants. D' values range from 0 to
+		1 with higher values indicating tight linkage of alleles. A D' value of
+		0 indicates no linkage of alleles. A D' value of 1 indicates at least
+		one expected haplotype combination is not observed.
+	</p>
+	<p> <strong><a name="R_squared"></a>R
+			squared (R<sup>2</sup>) </strong>
+		- a measure of correlation of alleles for two genetic variants. R<sup>2</sup>
+		values range from 0 to 1 with higher values indicating a higher degree
+		of correlation. An R<sup>2</sup> value of 0 indicates
+		alleles are independent, whereas an R<sup>2</sup> value of
+		1 indicates an allele of one variant perfectly predicts an allele of
+		another variant. R<sup>2</sup> is sensitive to allele
+		frequency.
+	</p>
+	<p> <strong><a name="Goodness_of_Fit"></a>Goodness
+			of Fit (&#935;<sup>2</sup> and
+			p-value) </strong> - statistical test testing whether observed
+		haplotype counts follow frequencies expected from variant allele
+		frequencies. High chi-square statistics and low p-values are evidence
+		that haplotype counts deviate from expected values and suggest linkage
+		disequilibrium may be present.
+	</p>
+	<br>
+	<p> <strong><a name="Modules"></a>Modules</strong>
+	</p>
+	<p>LDlink consists of seven modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
+		<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>,
+		<a href="#LDproxy">LDproxy</a>, <a href="#SNPchip">SNPchip</a>,
+		and <a href="#SNPclip">SNPclip</a>. Each module can be
+		accessed by clicking on the desired tab at
+		the top of all LDlink pages. Below is a description of each module, the
+		required user input, and an explanation of the returned output.</p>
+	<br>
 
 
-<p style="margin-left: 40px;"> <strong><a name="LDassoc"></a><span style="text-decoration: underline;">LDassoc</span></strong>
-- Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.
- Based on the file size, number of variants and selected query populations, this module may take some time to run.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Association data file</u>
-- upload a space or tab delimited file containing chromosome, position and p-value for each variant.
-A file header, while not required, will be useful when selecting input columns. Once the file is uploaded
-the user needs to specify which columns are the respective chromosome, position, and association p-values.
-Uploaded files will be stored on our secure server for use during LDassoc sessions and will be deleted after
-4 hours.
-</p>
-<p style="margin-left: 120px;"><u>Select region</u>
-- choices are <i>Gene</i>, <i>Region</i>, or <i>Variant</i>. <i>Gene</i>
-requires a RefSeq gene name and base pair window and allows for an optional index variant. <i>Region</i> requires genomic
-start and end coordinates and allows for an optional index variant. <i>Variant</i> requires an index variant and allows for an optional
-base pair window (500,000bp is the default). The index variant will be plotted in blue and is used to calculate all pairwise
-LD statistics. If not required, LDassoc will designate the variant with the lowest p-value as the index variant, unless otherwise
-specified.
-</p>
-<p style="margin-left: 120px;"><u>Reference population(s)</u> - selected
-from the drop down menu. At least one 1000 Genomes Project
-sub-population is required, but more than one may be selected.
-</p>
-<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
- - select if desired output is based on estimated R<sup>2</sup> or D'.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Interactive plot</u>
-- interactive plot
-of index variant and p-values of all bi-allelic variants in the specified
-plotting region. X axis is the chromosomal coordinates and the Y axis
-is the -log10 p-value as well as the combined recombination rate from HapMap.
-Each point represents a variant and is colored based on D' or R<sup>2</sup>,
-sized based on minor allele frequency, and labeled based on regulatory
-potential. Hovering over the point will display detailed information on
-the index and proxy variants.
-</p>
-<p style="margin-left: 120px;"><u>UCSC link</u>
-- external link to the
-plotted region in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>. This
-is useful for exploring nearby genes and regulatory elements in the
-region.
-</p>
-<p style="margin-left: 120px;"><u>Table of Association Results</u> - by default, the ten
-variants with the lowest p-values and closest
-distance to the index variant are displayed. External links lead to the variant
-RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>, and
-regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
-</p>
-<p style="margin-left: 120px;"><u>Download association data for all
-variants</u> - download a
-file with information on all variants within the plotting region.
-</p>
-<br>
+	<p style="margin-left: 40px;"> <strong><a name="LDassoc"></a><span style="text-decoration: underline;">LDassoc</span></strong>
+		- Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of
+		interest.
+		Based on the file size, number of variants and selected query populations, this module may take some time to run.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Association data file</u>
+		- upload a space or tab delimited file containing chromosome, position and p-value for each variant.
+		A file header, while not required, will be useful when selecting input columns. Once the file is uploaded
+		the user needs to specify which columns are the respective chromosome, position, and association p-values.
+		Uploaded files will be stored on our secure server for use during LDassoc sessions and will be deleted after
+		4 hours.
+	</p>
+	<p style="margin-left: 120px;"><u>Select region</u>
+		- choices are <i>Gene</i>, <i>Region</i>, or <i>Variant</i>. <i>Gene</i>
+		requires a RefSeq gene name and base pair window and allows for an optional index variant. <i>Region</i> requires
+		genomic
+		start and end coordinates and allows for an optional index variant. <i>Variant</i> requires an index variant and
+		allows for an optional
+		base pair window (500,000bp is the default). The index variant will be plotted in blue and is used to calculate all
+		pairwise
+		LD statistics. If not required, LDassoc will designate the variant with the lowest p-value as the index variant,
+		unless otherwise
+		specified.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+		- select if desired output is based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Interactive plot</u>
+		- interactive plot
+		of index variant and p-values of all bi-allelic variants in the specified
+		plotting region. X axis is the chromosomal coordinates and the Y axis
+		is the -log10 p-value as well as the combined recombination rate from HapMap.
+		Each point represents a variant and is colored based on D' or R<sup>2</sup>,
+		sized based on minor allele frequency, and labeled based on regulatory
+		potential. Hovering over the point will display detailed information on
+		the index and proxy variants.
+	</p>
+	<p style="margin-left: 120px;"><u>UCSC link</u>
+		- external link to the
+		plotted region in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+			Genome Browser</a>. This
+		is useful for exploring nearby genes and regulatory elements in the
+		region.
+	</p>
+	<p style="margin-left: 120px;"><u>Table of Association Results</u> - by default, the ten
+		variants with the lowest p-values and closest
+		distance to the index variant are displayed. External links lead to the variant
+		RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway"
+		 target="_blank">UCSC
+			Genome Browser</a>, and
+		regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Download association data for all
+			variants</u> - download a
+		file with information on all variants within the plotting region.
+	</p>
+	<br>
 
 
 
-<p style="margin-left: 40px;"> <strong><u><a name="LDhap"></a>LDhap</u></strong>
-- Calculate population-specific haplotype frequencies of all haplotypes observed for a list of query variants.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>List of RS numbers</u>
-- this can either
-be entered one per line in the text entry box or uploaded as a file
-that contains a list of RS numbers in the first column. A maximum of 30
-variant RS numbers are permitted. All input variants must be on the same
-chromosome and match a bi-allelic variant. The text entry field
-is automatically filled with the contents of the uploaded file.
-</p>
-<p style="margin-left: 120px;"><u>Reference
-population(s)</u> - selected
-from the drop down menu. At least one 1000 Genomes Project
-sub-population is required, but more than one may be selected.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Table of observed
-haplotypes</u> -
-haplotypes with frequencies greater than 1 percent are displayed vertically and ordered by observed frequency
-in the selected query sub-population. Variant genotypes are reported in rows
-and and are sorted by genomic position. Queries should be limited to nearby variants, since haplotype switch rate errors
-become more common as genomic distance increases. Links are
-available to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a> RS numbers and coordinates
-in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC Genome
-Browser</a>.
-</p>
-<p style="margin-left: 120px;"><u>Variant file download</u>
-- download a file
-listing the order of the queried variants. Variants are ordered by
-genomic location. This file is used as a key for the
-order of genotypes in the haplotype file. Only bi-allelic variants with
-matching dbSNP RS numbers are included. All others are filtered out.
-</p>
-<p style="margin-left: 120px;"><u>Haplotype file
-download</u> - download a
-file of all observed haplotypes. Haplotype genotypes are in the order
-of the above variant file.
-</p>
-<br>
+	<p style="margin-left: 40px;"> <strong><u><a name="LDhap"></a>LDhap</u></strong>
+		- Calculate population-specific haplotype frequencies of all haplotypes observed for a list of query variants.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>List of RS numbers</u>
+		- this can either
+		be entered one per line in the text entry box or uploaded as a file
+		that contains a list of RS numbers in the first column. A maximum of 30
+		variant RS numbers are permitted. All input variants must be on the same
+		chromosome and match a bi-allelic variant. The text entry field
+		is automatically filled with the contents of the uploaded file.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference
+			population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Table of observed
+			haplotypes</u> -
+		haplotypes with frequencies greater than 1 percent are displayed vertically and ordered by observed frequency
+		in the selected query sub-population. Variant genotypes are reported in rows
+		and and are sorted by genomic position. Queries should be limited to nearby variants, since haplotype switch rate
+		errors
+		become more common as genomic distance increases. Links are
+		available to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a> RS numbers and coordinates
+		in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC Genome
+			Browser</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Variant file download</u>
+		- download a file
+		listing the order of the queried variants. Variants are ordered by
+		genomic location. This file is used as a key for the
+		order of genotypes in the haplotype file. Only bi-allelic variants with
+		matching dbSNP RS numbers are included. All others are filtered out.
+	</p>
+	<p style="margin-left: 120px;"><u>Haplotype file
+			download</u> - download a
+		file of all observed haplotypes. Haplotype genotypes are in the order
+		of the above variant file.
+	</p>
+	<br>
 
 
-<p style="margin-left: 40px;"> <strong><a name="LDmatrix"></a><span style="text-decoration: underline;">LDmatrix</span></strong>
-- Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>List of RS numbers</u>
-- this can either
-be entered one per line in the text entry box or uploaded as a file
-that contains a list of RS numbers in the first column. A maximum of
-300 variant RS numbers are permitted. All input variants must be on the same
-chromosome and match a bi-allelic variant. The text
-entry field is automatically filled with the contents of the uploaded
-file.
-</p>
-<p style="margin-left: 120px;"><u>Reference
-population(s)</u> - selected
-from the drop down menu. At least one 1000 Genomes Project
-sub-population is required, but more than one may be selected.
-</p>
-<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
- - select if desired output is based on estimated R<sup>2</sup> or D'.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Interactive heat
-map</u>
-- a square plot
-with dimensions equal to the number of query variants that match a dbSNP RS
-number. Hovering over the plot with the mouse will display pairwise LD
-metrics for the respective row and column variants. Variants are ordered by
-genomic coordinates.
-</p>
-<p style="margin-left: 120px;"><u>D prime download</u>
-- download a file of
-all pairwise D' statistics.
-</p>
-<p style="margin-left: 120px;"><u>R square download</u>
-- download a file
-of all pairwise R<sup>2</sup> statistics.
-</p>
-<br>
+	<p style="margin-left: 40px;"> <strong><a name="LDmatrix"></a><span style="text-decoration: underline;">LDmatrix</span></strong>
+		- Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>List of RS numbers</u>
+		- this can either
+		be entered one per line in the text entry box or uploaded as a file
+		that contains a list of RS numbers in the first column. A maximum of
+		300 variant RS numbers are permitted. All input variants must be on the same
+		chromosome and match a bi-allelic variant. The text
+		entry field is automatically filled with the contents of the uploaded
+		file.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference
+			population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+		- select if desired output is based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Interactive heat
+			map</u>
+		- a square plot
+		with dimensions equal to the number of query variants that match a dbSNP RS
+		number. Hovering over the plot with the mouse will display pairwise LD
+		metrics for the respective row and column variants. Variants are ordered by
+		genomic coordinates.
+	</p>
+	<p style="margin-left: 120px;"><u>D prime download</u>
+		- download a file of
+		all pairwise D' statistics.
+	</p>
+	<p style="margin-left: 120px;"><u>R square download</u>
+		- download a file
+		of all pairwise R<sup>2</sup> statistics.
+	</p>
+	<br>
 
 
-<p style="margin-left: 40px;"> <strong><a name="LDpair"></a><span style="text-decoration: underline;">LDpair</span></strong>
-- Investigate correlated alleles for a pair of variants in high LD.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Variant1 RS number</u>
-- RS number for query
-variant 1. RS number must match a bi-allelic variant.
-</p>
-<p style="margin-left: 120px;"><u>Variant2 RS number</u>
-- RS number for query
-variant 2. RS number must match a bi-allelic variant.
-</p>
-<p style="margin-left: 120px;"><u>Reference
-population(s)</u> - selected
-from the drop down menu. At least one 1000 Genomes Project
-sub-population is required, but more than one may be selected.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Two-by-two table</u>
-- contingency table
-displaying haplotype counts and allele frequencies for the two query
-variants. External links are available to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-RS numbers and coordinates
-in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC Genome Browser</a>.
-</p>
-<p style="margin-left: 120px;"><u>Haplotypes</u>
-- haplotype genotypes,
-counts, and frequencies.
-</p>
-<p style="margin-left: 120px;"><u>Statistics</u>
-- calculated metrics of
-linkage disequilibrium including: D prime (D'), R square (R<sup>2</sup>),
-and goodness-of-fit (Chi-square and p-value). Goodness-of-fit tests for
-deviations of expected haplotype frequencies based on allele
-frequencies.
-</p>
-<p style="margin-left: 120px;"><u>Correlated Alleles</u>
-- alleles that are
-correlated if linkage disequilibrium is present (R<sup>2</sup>
-&gt; 0.1). If linkage equilibrium, no alleles are reported.
-</p>
-<br>
+	<p style="margin-left: 40px;"> <strong><a name="LDpair"></a><span style="text-decoration: underline;">LDpair</span></strong>
+		- Investigate correlated alleles for a pair of variants in high LD.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Variant1 RS number</u>
+		- RS number for query
+		variant 1. RS number must match a bi-allelic variant.
+	</p>
+	<p style="margin-left: 120px;"><u>Variant2 RS number</u>
+		- RS number for query
+		variant 2. RS number must match a bi-allelic variant.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference
+			population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Two-by-two table</u>
+		- contingency table
+		displaying haplotype counts and allele frequencies for the two query
+		variants. External links are available to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		RS numbers and coordinates
+		in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC Genome Browser</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Haplotypes</u>
+		- haplotype genotypes,
+		counts, and frequencies.
+	</p>
+	<p style="margin-left: 120px;"><u>Statistics</u>
+		- calculated metrics of
+		linkage disequilibrium including: D prime (D'), R square (R<sup>2</sup>),
+		and goodness-of-fit (Chi-square and p-value). Goodness-of-fit tests for
+		deviations of expected haplotype frequencies based on allele
+		frequencies.
+	</p>
+	<p style="margin-left: 120px;"><u>Correlated Alleles</u>
+		- alleles that are
+		correlated if linkage disequilibrium is present (R<sup>2</sup>
+		&gt; 0.1). If linkage equilibrium, no alleles are reported.
+	</p>
+	<br>
 
 
-<p style="margin-left: 40px;"> <strong><a name="LDproxy"></a><span style="text-decoration: underline;">LDproxy</span></strong>
-- Interactively explore proxy and putatively functional variants for a query variant. Based on the
-selected query populations, this module may take some time to run.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Variant RS number</u>
-- RS number for query
-variant. RS number must match a bi-allelic variant.
-</p>
-<p style="margin-left: 120px;"><u>Reference
-population(s)</u> - selected
-from the drop down menu. At least one 1000 Genomes Project
-sub-population is required, but more than one may be selected.
-</p>
-<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
- - select if desired output is based on estimated R<sup>2</sup> or D'.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Interactive plot</u>
-- interactive plot
-of query variant and all bi-allelic dbSNP variants plus or minus 500 kilobases(Kb)
-of the query variant. X axis is the chromosomal coordinates and the Y axis
-is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from HapMap.
-Each point represents a proxy variant and is colored based on function,
-sized based on minor allele frequency, and labeled based on regulatory
-potential. Hovering over the point will display detailed information on
-the query and proxy variants.
-</p>
-<p style="margin-left: 120px;"><u>UCSC link</u>
-- external link to the
-plotted region (query variant -/+ 500 Kb) in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>. This
-is useful for exploring nearby genes and regulatory elements in the
-region.
-</p>
-<p style="margin-left: 120px;"><u>Table of proxy variants</u> - by default, the ten
-variants with the highest R<sup>2</sup> values and closest
-distance to the query variant are displayed. External links lead to the variant
-RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>, and
-regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
-</p>
-<p style="margin-left: 120px;"><u>Download all proxy
-variants</u> - download a
-file with information on all variants -/+ 500 Kb of the query variant with a
-pairwise R<sup>2</sup> value greater than 0.01.
-</p>
-<br>
+	<p style="margin-left: 40px;"> <strong><a name="LDproxy"></a><span style="text-decoration: underline;">LDproxy</span></strong>
+		- Interactively explore proxy and putatively functional variants for a query variant. Based on the
+		selected query populations, this module may take some time to run.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Variant RS number</u>
+		- RS number for query
+		variant. RS number must match a bi-allelic variant.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference
+			population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+		- select if desired output is based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Interactive plot</u>
+		- interactive plot
+		of query variant and all bi-allelic dbSNP variants plus or minus 500 kilobases(Kb)
+		of the query variant. X axis is the chromosomal coordinates and the Y axis
+		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from HapMap.
+		Each point represents a proxy variant and is colored based on function,
+		sized based on minor allele frequency, and labeled based on regulatory
+		potential. Hovering over the point will display detailed information on
+		the query and proxy variants.
+	</p>
+	<p style="margin-left: 120px;"><u>UCSC link</u>
+		- external link to the
+		plotted region (query variant -/+ 500 Kb) in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+			Genome Browser</a>. This
+		is useful for exploring nearby genes and regulatory elements in the
+		region.
+	</p>
+	<p style="margin-left: 120px;"><u>Table of proxy variants</u> - by default, the ten
+		variants with the highest R<sup>2</sup> values and closest
+		distance to the query variant are displayed. External links lead to the variant
+		RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway"
+		 target="_blank">UCSC
+			Genome Browser</a>, and
+		regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Download all proxy
+			variants</u> - download a
+		file with information on all variants -/+ 500 Kb of the query variant with a
+		pairwise R<sup>2</sup> value greater than 0.01.
+	</p>
+	<br>
 
 
-<p style="margin-left: 40px;"> <strong><a name="SNPchip"></a><span style="text-decoration: underline;">SNPchip</span></strong>
-- Find commercial genotyping platforms for variants.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>List of RS numbers</u>
-- this can either
-be entered one per line in the text entry box or uploaded as a file
-that contains a list of RS numbers in the first column. A maximum of
-5,000 variant RS numbers are permitted. All input variants do not need
-to be on the same chromosome. The text entry field is automatically
-filled with the contents of the uploaded file.
-</p>
-<p style="margin-left: 120px;"><u>Genotyping Arrays</u>
-- selected commercial genotyping arrays from the drop down list. At least one
-array must be selected, but more than one may be selected as input.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>Array Table</u>
-- output table of variant rows and array columns. The presence of an "X" designates
-the variant is present on the respective commercial genotyping aray. Variants are ordered
-by genomic location. External links lead to the variant RS number in
-<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>.
-</p>
-<p style="margin-left: 120px;"><u>Download Chip Detials</u>
-- download a
-file with information on all variants and commercial genotyping array membership.
-</p>
-<br>
+	<p style="margin-left: 40px;"> <strong><a name="SNPchip"></a><span style="text-decoration: underline;">SNPchip</span></strong>
+		- Find commercial genotyping platforms for variants.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>List of RS numbers</u>
+		- this can either
+		be entered one per line in the text entry box or uploaded as a file
+		that contains a list of RS numbers in the first column. A maximum of
+		5,000 variant RS numbers are permitted. All input variants do not need
+		to be on the same chromosome. The text entry field is automatically
+		filled with the contents of the uploaded file.
+	</p>
+	<p style="margin-left: 120px;"><u>Genotyping Arrays</u>
+		- selected commercial genotyping arrays from the drop down list. At least one
+		array must be selected, but more than one may be selected as input.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Array Table</u>
+		- output table of variant rows and array columns. The presence of an "X" designates
+		the variant is present on the respective commercial genotyping aray. Variants are ordered
+		by genomic location. External links lead to the variant RS number in
+		<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+			Genome Browser</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Download Chip Detials</u>
+		- download a
+		file with information on all variants and commercial genotyping array membership.
+	</p>
+	<br>
 
 
-<p style="margin-left: 40px;"> <strong><a name="SNPclip"></a><span style="text-decoration: underline;">SNPclip</span></strong>
-- Prune a list of variants for linkage disequilibirum.
-</p>
-<p style="margin-left: 80px;"> <strong>Input:</strong>
-</p>
-<p style="margin-left: 120px;"><u>List of RS numbers</u>
-- this can either
-be entered one per line in the text entry box or uploaded as a file
-that contains a list of RS numbers in the first column. A maximum of
-5,000 variant RS numbers are permitted. All input variants must be on the same
-chromosome and match a bi-allelic variant. The text
-entry field is automatically filled with the contents of the uploaded
-file.
-</p>
-<p style="margin-left: 120px;"><u>Reference population(s)</u>
-- selected from the drop down menu. At least one 1000 Genomes Project
-sub-population is required, but more than one may be selected.
-</p>
-<p style="margin-left: 120px;"><u>R<sup>2</sup> threshold</u>
-- set R<sup>2</sup> threshold for LD pruning. One of each pair of variants with a
-R<sup>2</sup> greater than the threshold is removed. Value needs to be in the
-range 0 to 1. Default value is 0.1.
-</p>
-<p style="margin-left: 120px;"><u>MAF threshold</u>
-- set MAF threshold for LD pruning. Variants with a MAF less than or equal to the
-threshold are removed. Value needs to be in the range 0 to 1. Default value is 0.01.
-</p>
-<p style="margin-left: 80px;"> <strong>Output:</strong>
-</p>
-<p style="margin-left: 120px;"><u>LD Thinned Variant List</u>
-- a list of LD pruned variants based on the specified SNPclip parameters. Each variant in the
-list is a clickable link that brings up a detailed table showing other variants that
-are in linkage disequilibirum with the variant. Variants are ordered by input order, so
-to force a variant to be in the LD thinned list it should be at the top of the input list.
-</p>
-<p style="margin-left: 120px;"><u>Details Tables</u>
-- output table that appears when a variant in the thinned variant list is clicked.
-Details are provided on genomic position, alleles, and why the variant was included
-or excluded from the thinned variant list. External links lead to the variant RS number in
-<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>.
-</p>
-<p style="margin-left: 120px;"><u>Variants with Warnings</u>
-- output table that appears when a variant produces a warning in SNPclip. Common reasons
-for a variant to be on the warning list include a varinat with an MAF below the MAF threshold,
-a query that is not an RS number, and an RS number not found in the 1000G reference VCF file.
-Details are provided on genomic position, alleles, and why the variant was included
-or excluded from the thinned variant list. External links lead to the variant RS number in
-<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
-Genome Browser</a>.
-</p>
-<p style="margin-left: 120px;"><u>Download Thinned Variant List</u>
-- download a text file that lists all thinned variant RS numbers, one per line.
-</p>
-<p style="margin-left: 120px;"><u>Download Thinned Variant List with Details</u>
-- download a text file that lists all query variant RS numbers, genomic locations,
-alleles and details of whether the variant was kept or removed.
-</p>
-<br>
-<!-- <p> <strong><a name="Programatic Access"></a>Programatic Access</strong>
-</p>
-<p>LDlink modules are also accessible via command line from a terminal. This facilitates researchers
-who are interested in performing batch queries. The syntax is similar to the web address link created
-for queries on the webpage. Below are some command line arguments to be used as example syntax.
-Generally text output is returned that is the same as the file a user would download from the online site. </p>
+	<p style="margin-left: 40px;"> <strong><a name="SNPclip"></a><span style="text-decoration: underline;">SNPclip</span></strong>
+		- Prune a list of variants for linkage disequilibirum.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>List of RS numbers</u>
+		- this can either
+		be entered one per line in the text entry box or uploaded as a file
+		that contains a list of RS numbers in the first column. A maximum of
+		5,000 variant RS numbers are permitted. All input variants must be on the same
+		chromosome and match a bi-allelic variant. The text
+		entry field is automatically filled with the contents of the uploaded
+		file.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference population(s)</u>
+		- selected from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup> threshold</u>
+		- set R<sup>2</sup> threshold for LD pruning. One of each pair of variants with a
+		R<sup>2</sup> greater than the threshold is removed. Value needs to be in the
+		range 0 to 1. Default value is 0.1.
+	</p>
+	<p style="margin-left: 120px;"><u>MAF threshold</u>
+		- set MAF threshold for LD pruning. Variants with a MAF less than or equal to the
+		threshold are removed. Value needs to be in the range 0 to 1. Default value is 0.01.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>LD Thinned Variant List</u>
+		- a list of LD pruned variants based on the specified SNPclip parameters. Each variant in the
+		list is a clickable link that brings up a detailed table showing other variants that
+		are in linkage disequilibirum with the variant. Variants are ordered by input order, so
+		to force a variant to be in the LD thinned list it should be at the top of the input list.
+	</p>
+	<p style="margin-left: 120px;"><u>Details Tables</u>
+		- output table that appears when a variant in the thinned variant list is clicked.
+		Details are provided on genomic position, alleles, and why the variant was included
+		or excluded from the thinned variant list. External links lead to the variant RS number in
+		<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+			Genome Browser</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Variants with Warnings</u>
+		- output table that appears when a variant produces a warning in SNPclip. Common reasons
+		for a variant to be on the warning list include a varinat with an MAF below the MAF threshold,
+		a query that is not an RS number, and an RS number not found in the 1000G reference VCF file.
+		Details are provided on genomic position, alleles, and why the variant was included
+		or excluded from the thinned variant list. External links lead to the variant RS number in
+		<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
+			Genome Browser</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Download Thinned Variant List</u>
+		- download a text file that lists all thinned variant RS numbers, one per line.
+	</p>
+	<p style="margin-left: 120px;"><u>Download Thinned Variant List with Details</u>
+		- download a text file that lists all query variant RS numbers, genomic locations,
+		alleles and details of whether the variant was kept or removed.
+	</p>
+	<br>
+	<!-- <p> <strong><a name="Programatic Access"></a>Programatic Access</strong>
+	</p>
+	<p>LDlink modules are also accessible via command line from a terminal. This facilitates researchers
+	who are interested in performing batch queries. The syntax is similar to the web address link created
+	for queries on the webpage. Below are some command line arguments to be used as example syntax.
+	Generally text output is returned that is the same as the file a user would download from the online site. </p>
 
-<div id="api-alert" class="alert alert-api" role="alert">
-	Warning: Please only make sequential calls to the API to avoid disrupting the service.
-</div>
+	<div id="api-alert" class="alert alert-api" role="alert">
+		Warning: Please only make sequential calls to the API to avoid disrupting the service.
+	</div>
 
-<p><a href="#LDhap">LDhap</a><br>
-curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL'</p>
-<p><a href="#LDmatrix">LDmatrix</a><br>
-curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d'</p>
-<p><a href="#LDpair">LDpair</a><br>
-curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB'</p>
-<p><a href="#LDproxy">LDproxy</a><br>
-curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2'</p>
-<p><a href="#SNPchip">SNPchip</a><br>
-curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1"}' 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/snpchip'</p>
-<p><a href="#SNPclip">SNPclip</a><br>
-curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01"}' 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/snpclip'</p>
-<p><strong>Note</strong>: <a href="#LDassoc">LDassoc</a> is not currently accessible via programatic access.<p/>
-<br> -->
+	<p><a href="#LDhap">LDhap</a><br>
+	curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL'</p>
+	<p><a href="#LDmatrix">LDmatrix</a><br>
+	curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d'</p>
+	<p><a href="#LDpair">LDpair</a><br>
+	curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB'</p>
+	<p><a href="#LDproxy">LDproxy</a><br>
+	curl -k -X GET 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2'</p>
+	<p><a href="#SNPchip">SNPchip</a><br>
+	curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1"}' 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/snpchip'</p>
+	<p><a href="#SNPclip">SNPclip</a><br>
+	curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01"}' 'https://analysistools.nci.nih.gov/LDlink/LDlinkRest/snpclip'</p>
+	<p><strong>Note</strong>: <a href="#LDassoc">LDassoc</a> is not currently accessible via programatic access.<p/>
+	<br> -->
 
-<p> <strong><a name="FAQ"></a>Frequently Asked Questions</strong>
-</p>
-<p style="margin-left: 40px;"> <strong>Why is my variant RS number bringing up an error?</strong>
-</p>
-<p style="margin-left: 80px;">LDlink modules only accepts
-input for variant RS numbers that are
-bi-allelic. Ensure your query SNP has A/C, A/G, A/T, C/G,
-C/T, or G/T alleles. RS numbers for insertions or deletions (i.e.
-"indels") are also now accepted as input. If a variant you believe is
-bi-allelic is not accepted, check dbSNP to ensure there are only two
-alleles for the variant. Even if there is only one reports of a
-variant being tri- or multi-allelic in dbSNP, the variant is not considered
-valid input
-under the current implementation of LDlink.</p>
+	<p> <strong><a name="FAQ"></a>Frequently Asked Questions</strong>
+	</p>
+	<p style="margin-left: 40px;"> <strong>Why is my variant RS number bringing up an error?</strong>
+	</p>
+	<p style="margin-left: 80px;">LDlink modules only accepts
+		input for variant RS numbers that are
+		bi-allelic. Ensure your query SNP has A/C, A/G, A/T, C/G,
+		C/T, or G/T alleles. RS numbers for insertions or deletions (i.e.
+		"indels") are also now accepted as input. If a variant you believe is
+		bi-allelic is not accepted, check dbSNP to ensure there are only two
+		alleles for the variant. Even if there is only one reports of a
+		variant being tri- or multi-allelic in dbSNP, the variant is not considered
+		valid input
+		under the current implementation of LDlink.</p>
 
-<p style="margin-left: 40px;"> <strong>What 1000 Genomes population should I select for my LDlink query?</strong>
-</p>
-<p style="margin-left: 80px;">Choosing the correct
-reference 1000 Genomes Project population
-is essential for comparability of results from LDlink to your
-population of interest. In general, try to select the sub-population
-that best matches the ancestry of your study population. While LDlink
-allows for multiple 1000 Genomes sub-populations to be selected
-simultaneously, it is recommended to first investigate the patterns of
-linkage disequilibrium in the query region of each sub-population
-before considering whether to combine sub-populations in a query.</p>
+	<p style="margin-left: 40px;"> <strong>What 1000 Genomes population should I select for my LDlink query?</strong>
+	</p>
+	<p style="margin-left: 80px;">Choosing the correct
+		reference 1000 Genomes Project population
+		is essential for comparability of results from LDlink to your
+		population of interest. In general, try to select the sub-population
+		that best matches the ancestry of your study population. While LDlink
+		allows for multiple 1000 Genomes sub-populations to be selected
+		simultaneously, it is recommended to first investigate the patterns of
+		linkage disequilibrium in the query region of each sub-population
+		before considering whether to combine sub-populations in a query.</p>
 
-<p style="margin-left: 40px;"> <strong>What is the estimated running time for an LDproxy query?</strong>
-</p>
-<p style="margin-left: 80px;">Running time varies greatly
-for LDproxy ranging from a few
-seconds to approximately one minute. For each query, LDproxy actively
-calculates all LD metrics based on user input. A variety of factors
-affect overall running time including: (1) the number of haplotypes
-available for the sub-population(s), (2) the number of dbSNP variants in
-the region queried, (3) the current utilization of the LDlink server,
-and (4) the download speed of your internet connection. In general, the
-best way to speed up an LDlink query is to only select one
-sub-population per query. Queries that include multiple sub-populations
-or ancestral groups take much longer to complete than single
-sub-population queries and tie up limited system resources.</p>
+	<p style="margin-left: 40px;"> <strong>What is the estimated running time for an LDproxy query?</strong>
+	</p>
+	<p style="margin-left: 80px;">Running time varies greatly
+		for LDproxy ranging from a few
+		seconds to approximately one minute. For each query, LDproxy actively
+		calculates all LD metrics based on user input. A variety of factors
+		affect overall running time including: (1) the number of haplotypes
+		available for the sub-population(s), (2) the number of dbSNP variants in
+		the region queried, (3) the current utilization of the LDlink server,
+		and (4) the download speed of your internet connection. In general, the
+		best way to speed up an LDlink query is to only select one
+		sub-population per query. Queries that include multiple sub-populations
+		or ancestral groups take much longer to complete than single
+		sub-population queries and tie up limited system resources.</p>
 
-<p style="margin-left: 40px;"> <strong>How do I save output files?</strong>
-</p>
-<p style="margin-left: 80px;">Output from a variety of
-LDlink modules (LDhap, LDmatrix, and
-LDproxy) is available for download. To save output either (1) right
-click or long press on the link and select the "Save Link As&#8230;" option
-or (2) open the link in a new browser window and copy and paste the
-contents to
-a new file.</p>
+	<p style="margin-left: 40px;"> <strong>How do I save output files?</strong>
+	</p>
+	<p style="margin-left: 80px;">Output from a variety of
+		LDlink modules (LDhap, LDmatrix, and
+		LDproxy) is available for download. To save output either (1) right
+		click or long press on the link and select the "Save Link As&#8230;" option
+		or (2) open the link in a new browser window and copy and paste the
+		contents to
+		a new file.</p>
 
-<p style="margin-left: 40px;"> <strong>Can I save the plots generated in LDmatrix or LDproxy?</strong>
-</p>
-<p style="margin-left: 80px;">Yes. Click the Save icon on
-the top right of the plot. A
-preview window will appear. Right click or long press on the preview
-image, select "Save As&#8230;", and choose a filename for the plot image.</p>
+	<p style="margin-left: 40px;"> <strong>Can I save the plots generated in LDmatrix or LDproxy?</strong>
+	</p>
+	<p style="margin-left: 80px;">Yes. Click the Save icon on
+		the top right of the plot. A
+		preview window will appear. Right click or long press on the preview
+		image, select "Save As&#8230;", and choose a filename for the plot image.</p>
 
-<p style="margin-left: 40px;"> <strong>Does LDproxy display all variants in the window around the query variant?</strong>
-</p>
-<p style="margin-left: 80px;">For plotting and performance issues, LDproxy plots only include variants with R<sup>2</sup> values greater than 0.01.
-Additionally, the LDproxy download also only includes variants with R<sup>2</sup> values greater than 0.01.</p>
+	<p style="margin-left: 40px;"> <strong>Does LDproxy display all variants in the window around the query variant?</strong>
+	</p>
+	<p style="margin-left: 80px;">For plotting and performance issues, LDproxy plots only include variants with R<sup>2</sup>
+		values greater than 0.01.
+		Additionally, the LDproxy download also only includes variants with R<sup>2</sup> values greater than 0.01.</p>
 
-<p style="margin-left: 40px;"> <strong>What is the maximum number of variants LDhap and LDmatrix can accept as input?</strong>
-</p>
-<p style="margin-left: 80px;">LDhap has a limit of 30 variantss
-and LDmatirx has a limit of 100
-variants. These limits were selected to optimize query speed and
-visualization of results.</p>
+	<p style="margin-left: 40px;"> <strong>What is the maximum number of variants LDhap and LDmatrix can accept as input?</strong>
+	</p>
+	<p style="margin-left: 80px;">LDhap has a limit of 30 variantss
+		and LDmatirx has a limit of 100
+		variants. These limits were selected to optimize query speed and
+		visualization of results.</p>
 
-<p style="margin-left: 40px;"> <strong>Why are the variants in LDhap and LDmatrix output not in the same order as the RS number input?</strong>
-</p>
-<p style="margin-left: 80px;">Variants in LDhap and LDmatrix
-output are not ordered based on user
-input. Rather, results are ordered based on chromosomal order.</p>
+	<p style="margin-left: 40px;"> <strong>Why are the variants in LDhap and LDmatrix output not in the same order as the
+			RS number input?</strong>
+	</p>
+	<p style="margin-left: 80px;">Variants in LDhap and LDmatrix
+		output are not ordered based on user
+		input. Rather, results are ordered based on chromosomal order.</p>
 
-<p style="margin-left: 40px;"> <strong>Why does my computer seem slow when using LDlink?</strong>
-</p>
-<p style="margin-left: 80px;">The interactive plots
-produced by LDmatrix and LDproxy require
-a sizeable amount of data and java script to be loaded into the web
-browser. On some computers this results in a notable lag in
-performance. To improve performance, simply
-refresh the LDlink webpage to clear the temporary data from memory.
-Refreshing the LDlink webpage will remove all interactive plots.</p>
+	<p style="margin-left: 40px;"> <strong>Why does my computer seem slow when using LDlink?</strong>
+	</p>
+	<p style="margin-left: 80px;">The interactive plots
+		produced by LDmatrix and LDproxy require
+		a sizeable amount of data and java script to be loaded into the web
+		browser. On some computers this results in a notable lag in
+		performance. To improve performance, simply
+		refresh the LDlink webpage to clear the temporary data from memory.
+		Refreshing the LDlink webpage will remove all interactive plots.</p>
 
-<p style="margin-left: 40px;"> <strong>What genome build does LDlink use for genomic coordinates?</strong>
-</p>
-<p style="margin-left: 80px;">All coordinates in LDlink are based on
-GRCh37/hg19. For help with converting coordinates from one genome build to another, please
-refer to <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.</p>
+	<p style="margin-left: 40px;"> <strong>What genome build does LDlink use for genomic coordinates?</strong>
+	</p>
+	<p style="margin-left: 80px;">All coordinates in LDlink are based on
+		GRCh37/hg19. For help with converting coordinates from one genome build to another, please
+		refer to <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.</p>
 
-<p style="margin-left: 40px;"> <strong>Why do variant coordinates not always match dbSNP or UCSC coordinates?</strong>
-</p>
-<p style="margin-left: 80px;">All coordinates in LDlink are based on
-variant positions in the 1000 Genomes VCF files. Slight difference in
-positions may be observed due to updates in mapping and alignment. Please
-refer to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-for the most up-to-date information on variant coordinates.</p>
+	<p style="margin-left: 40px;"> <strong>Why do variant coordinates not always match dbSNP or UCSC coordinates?</strong>
+	</p>
+	<p style="margin-left: 80px;">All coordinates in LDlink are based on
+		variant positions in the 1000 Genomes VCF files. Slight difference in
+		positions may be observed due to updates in mapping and alignment. Please
+		refer to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		for the most up-to-date information on variant coordinates.</p>
 
-<p style="margin-left: 40px;"> <strong>What browsers are supported by LDlink?</strong>
-</p>
-<p style="margin-left: 80px;">LDlink has been tested to
-work with Internet Explorer 10+, Chrome, Firefox 36+ and Safari. LDlink
-will not display correctly with Internet Explorer 9 and below or Firefox 35 and below.</p>
-<br>
+	<p style="margin-left: 40px;"> <strong>What browsers are supported by LDlink?</strong>
+	</p>
+	<p style="margin-left: 80px;">LDlink has been tested to
+		work with Internet Explorer 10+, Chrome, Firefox 36+ and Safari. LDlink
+		will not display correctly with Internet Explorer 9 and below or Firefox 35 and below.</p>
+	<br>
 
-<p> <strong><a name="Citation"></a>Citation</strong>
-</p>
-<p> Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
-	haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>.
-	2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed">26139635</a>.
-</p>
-<br>
-<p> <strong><a name="Contact"></a>Contact</strong>
-</p>
-<p> Still have unanswered LDlink questions or would like to report an issue? <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink">Email
-us</a>.
-</p>
-<br>
-<script type="text/javascript">_satellite.pageBottom();</script>
-</body></html>
+	<p> <strong><a name="Citation"></a>Citation</strong>
+	</p>
+	<p> Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
+		haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>.
+		2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed">26139635</a>.
+	</p>
+	<br>
+	<p> <strong><a name="Contact"></a>Contact</strong>
+	</p>
+	<p> Still have unanswered LDlink questions or would like to report an issue? <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink">Email
+			us</a>.
+	</p>
+	<br>
+	<script type="text/javascript">_satellite.pageBottom();</script>
+</body>
+
+</html>

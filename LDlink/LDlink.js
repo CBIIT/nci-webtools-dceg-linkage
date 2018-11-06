@@ -37,6 +37,11 @@ $(document).ready(function() {
     $("#url-alert").delay(5000).slideUp(600, function() {
         $(this).alert('close');
     });
+
+    // Load news text from news.html to news-container div
+    $.get("news.html", function (data) {
+        $("#news-container").append(data);
+    });
     
     $('#progressbar').progressbar();
     //$('#progressbar').progressbar('setPosition', 85);
