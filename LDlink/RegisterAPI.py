@@ -29,11 +29,7 @@ def emailUser(email, token, expiration, firstname):
     packet['From'] = "NCILDlinkWebAdmin@mail.nih.gov"
     packet['To'] = email
 
-    message = 'Dear ' + firstname + ', ' + '<br><br>' +
-        'Thank you for registering to use the LDlink API. <br><br>' +
-        'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' +
-        'Please include this token as an argument in your request. Examples are listed in the API Access tab. <br><br>' +
-        'LDlink Web Admin'
+    message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the API Access tab. <br><br>' + 'LDlink Web Admin'
 
     packet.attach(MIMEText(message, 'html'))
 
