@@ -11,7 +11,7 @@
 	<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 
 	<title>LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups</title>
-	<link rel="/LDlink/shortcut icon" href="/assets/images/LD.ico">
+	<link rel="/LDlink/shortcut icon" href="LD.ico">
 
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
@@ -37,7 +37,7 @@
 	<div class="header" style="background-color: #2A71A5;">
 		<div class="container">
 			<a href="http://dceg.cancer.gov/" target="_blank">
-				<img class="mw-100" height="90" src="/assets/images/dceg-logo-inverted.svg" alt="Division of Cancer Epidemiology &amp; Genetics"><span
+				<img class="mw-100" height="90" src="dceg-logo-inverted.svg" alt="Division of Cancer Epidemiology &amp; Genetics"><span
 				 class="sr-only">NCI National Cancer Institute</span>
 			</a>
 		</div>
@@ -52,18 +52,18 @@
 	</div>
 
 	<!-- Banner -->
-	<div class="bg-primary text-light">
+	<!-- <div class="bg-primary text-light">
 		<div class="container" style="padding-top: 3px; padding-bottom: 3px;">
 			<span style="font-size: 1.6rem; font-weight: 600">LDlink</span>
 		</div>
-	</div>
+	</div> -->
 
 	<!-- Nav bar -->
-	<nav class="navbar navbar-inverse navbar-static-top">
+	<nav class="navbar navbar-static-top">
 		<div class="container">
 			<ul id="ldlink-tabs" class="nav navbar-nav">
 					<!-- HOME -->
-					<li>
+					<li class="nav nav-item mr-4">
 						<a id="home-tab-anchor" href="#home-tab" data-toggle="tab">Home</a>
 					</li>
 					<!-- ASSOC -->
@@ -1498,16 +1498,14 @@
 			<div class="tab-pane fade" id="apiaccess-tab">
 				<div class="container-fluid">
 					<div class="text-center">
-						<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programatic Access!</h3>
+						<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programmatic Access!</h3>
 					</div>
 					<p>
-						LDlink modules are also accessible via command line from a terminal. This facilitates researchers
-						who are interested in performing batch queries. The syntax is similar to the web address link created
-						for queries on the webpage. Generally text output is returned that is the same as the file a user would
-						download from the online site.
-						<br>
-						Please register below for an access token required for your API call. Once registered, your access token will be
-						emailed to you.
+						LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers 
+						who are interested in performing batch queries. <br>
+						The syntax is similar to the web address link created 
+						for queries on the webpage. Generally text output is returned that is the same as the file a user would 
+						download from the online site. Please register below for an access token required for your API call. Once registered, your access token will be emailed to you.
 					</p>
 
 					<hr>
@@ -1532,14 +1530,6 @@
 							<div class="form-group">
 								<label for="apiaccess-institution">Institution<span style="color:red">*</span></label>
 								<input type="text" class="form-control" id="apiaccess-institution" placeholder="Institution" required>
-							</div>
-							<div class="form-group">
-								<label for="apiaccess-usage">Describe usage<span style="color:red">*</span></label>
-								<a id="apiaccess-usage-warning" style="position:relative; left:250px; top:60px;" href="#" data-toggle="popover"
-								 trigger="manual" data-placement="bottom" data-content="Please keep response under 250 characters."></a>
-								<textarea id="apiaccess-usage" placeholder="Please describe intended purpose and include estimated # of API calls &#10;(max. 250 characters)"
-								 class="form-control" title="Please describe your intended use and give estimated number of API calls."
-								 required></textarea>
 							</div>
 							<!-- Submit Information -->
 							<input type="submit" id="apiaccess" value="Register" class="btn btn-default calculate" />
@@ -1593,8 +1583,7 @@
 					<hr>
 
 					<div id="api-alert" class="alert alert-api" role="alert">
-						Warning: Please only make sequential API calls to avoid disrupting the API server. Abuse of API access may result
-						in a warning or temporary ban.
+						Warning: Please only make sequential (not parallel) API calls to avoid disrupting the API server. Abuse of API access will result in a warning or potential termination of API access.
 					</div>
 
 					<p>
@@ -1603,22 +1592,21 @@
 					</p>
 
 					<p><a href="/?tab=help#LDhap">LDhap</a><br>
-						<kbd>curl -k -X GET</kbd> 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&<code>token=faketoken123</code>'</p>
+						<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&token=faketoken123'</kbd></p>
 					<p><a href="/?tab=help#LDmatrix">LDmatrix</a><br>
-						<kbd>curl -k -X GET</kbd>
-						'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&<code>token=faketoken123</code>'</p>
+						<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'</kbd></p>
 					<p><a href="/?tab=help#LDpair">LDpair</a><br>
-						<kbd>curl -k -X GET</kbd> 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&<code>token=faketoken123</code>'</p>
+						<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&token=faketoken123'</kbd></p>
 					<p><a href="/?tab=help#LDproxy">LDproxy</a><br>
-						<kbd>curl -k -X GET</kbd> 'https://ldlink.nci.nih.gov/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&<code>token=faketoken123</code>'</p>
+						<kbd>curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&token=faketoken123'</kbd></p>
 					<p><a href="/?tab=help#SNPchip">SNPchip</a><br>
-						<kbd>curl -k -H</kbd> "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4",
+						<kbd>curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4",
 						"platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1"}'
-						'https://ldlink.nci.nih.gov/LDlinkRest/snpchip?&<code>token=faketoken123</code>'</p>
+						'https://ldlink.nci.nih.gov/LDlinkRest/snpchip?&token=faketoken123'</kbd></p>
 					<p><a href="/?tab=help#SNPclip">SNPclip</a><br>
-						<kbd>curl -k -H</kbd> "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI",
-						"r2_threshold": "0.1", "maf_threshold": "0.01"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpclip?&<code>token=faketoken123</code>'</p>
-					<p><strong>Note</strong>: <a href="/?tab=help#LDassoc">LDassoc</a> is not currently accessible via programatic
+						<kbd>curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI",
+						"r2_threshold": "0.1", "maf_threshold": "0.01"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpclip?&token=faketoken123'</kbd></p>
+					<p><strong>Note</strong>: <a href="/?tab=help#LDassoc">LDassoc</a> is not currently accessible via programmatic
 						access.</p>
 
 				</div>

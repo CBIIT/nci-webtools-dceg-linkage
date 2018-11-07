@@ -12,7 +12,7 @@
   border-radius: 0 !important;
 }
 
-/* Help page programatic access warning */
+/* Help page programmatic access warning */
 .alert-api {
   color: black;
   font-weight: bold;
@@ -48,62 +48,37 @@ body {
 }
 
 .navbar {
-  font-size: 1em; 
-  font-weight: 600;
+  font-size: 16px;
+  font-weight: 300;
   padding-bottom: 0;
   padding-top: 0;
-  margin-bottom: 0%;
-}
-
-/** Remove border for responsive menu button */
-.navbar-inverse {
-  background: #444444 !important;
+  background: #337AB7 !important;
 }
 
 .navbar-nav li a{
   color: #FFFFFF !important;
 }
 
+.navbar-nav li a{
+  color: #FFFFFF !important;
+}
+
+.navbar-nav li a:focus{
+  background: transparent;
+}
+
 /* Create yellow bar on active nav button */
 .navbar-nav li.active {
-  border-bottom: 5px solid #337AB7;
-  /* color: ##444444 !important; */
+  border-bottom: 4px solid #F5AB35;
 }
 
 .navbar-nav li.active a {
-  /* padding-bottom: 10px;
-  padding-top: 10px; */
-  background: #FFFFFF !important;
-  color: #444444 !important;
+  background: #337AB7 !important;
 }
 
-/* .nav-tabs {
-	width: 100%;
-	float: left;
-	border-bottom-color: #d9d9d9;
+.navbar-nav>li a:hover {
+  background: #337AB7 !important;
 }
-
-.nav-tabs>li a {
-	text-align: center;
-	border-width: 1px 1px 0 1px;
-	border-style: solid;
-	border-color: #e0e0e0;
-	background: #f2f2f2;
-	color: #444444;
-}
-
-.nav-tabs>li a:hover {
-	background: #F9F9F9;
-	border-color: #d9d9d9;
-}
-
-.nav-tabs>li.active a, .nav-tabs>li.active:hover a {
-	background: white;
-	border-color: #d9d9d9;
-	border-bottom-color: transparent;
-	font-weight: bold;
-	color: #444444;
-} */
 
 .instructions {
 	text-align: center;
@@ -129,12 +104,12 @@ body {
 	width: 100%;
   min-height: 100vh;
   height: auto !important;
-  /* height: 100%; */
 	-webkit-overflow-scrolling: touch;
 	background: white;
 	border-width: 0 1px 1px 1px;
 	border-style: solid;
-	border-color: #d9d9d9;
+  border-color: #d9d9d9;
+  border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
@@ -549,19 +524,10 @@ img.graph-legend {
 table#snpchip-thinned-list > tbody > tr > td {
 	padding: 0 5px;
 }
-/* Header and Footer */
-/* .header img {
-	
-    width: 60%;
-    
-} */
+
 .header h4 {
     color: #fff;
     line-height: 0.5em;
-}
-
-.footer {
-  margin-top: 0%;
 }
 
 hr.header {

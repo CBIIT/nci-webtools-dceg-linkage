@@ -1308,17 +1308,17 @@ function isPopulationSet(elementId) {
     }
 }
 
-function checkTextAreaLength(elementId) {
-    var description =  $('#'+elementId+'-usage').val();
-    if(description.length > 250 ) {
-        $('#'+elementId+'-usage-warning').popover('show');
-        setTimeout(function() { $('#'+elementId+'-usage-warning').popover('hide'); }, 4000);
-        return false;
-    } else {
-        $('#'+elementId+'-usage-warning').popover('hide');
-        return true;
-    }
-}
+// function checkTextAreaLength(elementId) {
+//     var description =  $('#'+elementId+'-usage').val();
+//     if(description.length > 250 ) {
+//         $('#'+elementId+'-usage-warning').popover('show');
+//         setTimeout(function() { $('#'+elementId+'-usage-warning').popover('hide'); }, 4000);
+//         return false;
+//     } else {
+//         $('#'+elementId+'-usage-warning').popover('hide');
+//         return true;
+//     }
+// }
 
 function updateLDassoc() {
 
@@ -2585,7 +2585,6 @@ function updateAPIaccess() {
         lastname: $('#apiaccess-lastname').val(),
         email: $('#apiaccess-email').val(),
         institution: $('#apiaccess-institution').val(),
-        usage: $('#apiaccess-usage').val(),
         reference: reference
     };
 
