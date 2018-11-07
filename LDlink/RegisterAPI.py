@@ -21,14 +21,19 @@ api_users_dir = config['api']['api_users_dir']
 token_expiration_days = config['api']['token_expiration_days']
 
 # email user token
-def emailUser(email, token, expiration):
+def emailUser(email, token, expiration, firstname):
     print "sending message"
     packet = MIMEMultipart()
-    packet['Subject'] = "API Access Token"
-    packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
+    packet['Subject'] = "LDLink API Access Token"
+    # packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
+    packet['From'] = "NCILDlinkWebAdmin@mail.nih.gov"
     packet['To'] = email
 
-    message = 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration
+    message = 'Dear ' + firstname + ', ' + '<br><br>' +
+        'Thank you for registering to use the LDlink API. <br><br>' +
+        'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' +
+        'Please include this token as an argument in your request. Examples are listed in the API Access tab. <br><br>' +
+        'LDlink Web Admin'
 
     packet.attach(MIMEText(message, 'html'))
 
@@ -165,7 +170,7 @@ def register_user_web(firstname, lastname, email, institution, reference, usage)
                 "expiration": record[6],
                 "usage": record[7]
             }
-            emailUser(record[2], record[4], record[6])
+            emailUser(record[2], record[4], record[6], record[0])
         else:
             token = generateToken(curr)
             registered = getDatetime()
@@ -184,7 +189,7 @@ def register_user_web(firstname, lastname, email, institution, reference, usage)
                 "expiration": format_expiration,
                 "usage": usage
             }
-            emailUser(email, token, format_expiration)
+            emailUser(email, token, format_expiration, firstname)
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
@@ -204,7 +209,7 @@ def register_user_web(firstname, lastname, email, institution, reference, usage)
             "expiration": format_expiration,
             "usage": usage
         }
-        emailUser(email, token, format_expiration)
+        emailUser(email, token, format_expiration, firstname)
 
     conn.close()
     return out_json
