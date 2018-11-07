@@ -4,19 +4,21 @@
   background-color: #ffd351; 
   font-weight: 500; 
   border: none;
-  margin-bottom: 1px;
+  margin-top: 0px;
+  margin-bottom: 0px;
   height: 30px;
   line-height:30px;
   padding:0px 15px;
+  border-radius: 0 !important;
 }
 
 /* Help page programatic access warning */
 .alert-api {
-    color: black;
-    font-weight: bold;
-    background-color: #ffd351; 
-    border-radius: 0 !important;
-  }
+  color: black;
+  font-weight: bold;
+  background-color: #ffd351; 
+  border-radius: 0 !important;
+}
 
 /*AuthorArranger Ad*/
 .authorarranger_ad{
@@ -36,13 +38,42 @@
   padding: 5px 0px 0px 0px;
 }
 
-
 /*disable bk logo */
 .bk-logo-small {
   display:none;
 }
 
-.nav-tabs {
+.navbar {
+  font-size: 1em; 
+  font-weight: 600;
+  padding-bottom: 0;
+  padding-top: 0;
+  margin-bottom: 0%;
+}
+
+/** Remove border for responsive menu button */
+.navbar-inverse {
+  background: #444444 !important;
+}
+
+.navbar-nav li a{
+  color: #FFFFFF !important;
+}
+
+/* Create yellow bar on active nav button */
+.navbar-nav li.active {
+  border-bottom: 5px solid #337AB7;
+  /* color: ##444444 !important; */
+}
+
+.navbar-nav li.active a {
+  /* padding-bottom: 10px;
+  padding-top: 10px; */
+  background: #FFFFFF !important;
+  color: #444444 !important;
+}
+
+/* .nav-tabs {
 	width: 100%;
 	float: left;
 	border-bottom-color: #d9d9d9;
@@ -68,7 +99,7 @@
 	border-bottom-color: transparent;
 	font-weight: bold;
 	color: #444444;
-}
+} */
 
 .instructions {
 	text-align: center;
@@ -84,24 +115,31 @@
 	background: #f2f2f2;
 }
 
+/* Sticky footer */
+#push {
+  height: 100%;
+}
+
 .tab-content {
 	padding: 10px;
 	width: 100%;
-	min-height: 600px;
+  min-height: 100vh;
+  height: auto !important;
+  /* height: 100%; */
 	-webkit-overflow-scrolling: touch;
 	background: white;
 	border-width: 0 1px 1px 1px;
 	border-style: solid;
 	border-color: #d9d9d9;
-	border-radius: 0 0 4px 4px;
-	overflow: hidden;
+  overflow: hidden;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .tab-content .tab-pane {
 	color: #566473;
 }
 
-@media ( max-width : 480px) {
+/* @media ( max-width : 480px) {
 	.nav-tabs>li {
 		float: none;
 		border: 1px solid #dddddd;
@@ -114,7 +152,7 @@
 		background: none;
 		border: none;
 	}
-}
+} */
 
 /* Reset bootstrap table*/
 .table > thead > tr > th,
@@ -212,9 +250,7 @@ table.ldhap,table.ldhap tr, table.ldhap th {
   background-color: white !important;
 }
 */
-.container {
-  background-color: white;
-}
+
 .two-by-two {
   margin-bottom:0px;
   width:100%;
@@ -519,17 +555,11 @@ table#snpchip-thinned-list > tbody > tr > td {
     color: #fff;
     line-height: 0.5em;
 }
+
 .footer {
-    bottom: 0;
-    color: #444;
-    padding: 25px 0;
+  margin-top: 0%;
 }
-.footer ul {
-    text-align: center;
-}
-.footer ul li a {
-    color: #444;
-}
+
 hr.header {
     border-top: 0.5em solid #bb0e3d;
     margin: 0;
