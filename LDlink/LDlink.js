@@ -1157,10 +1157,8 @@ function updateData(id) {
             updateSNPchip();
             break;
         case 'apiaccess':
-            if(checkTextAreaLength(id)) {
-                $('#'+id+"-loading").show();
-                updateAPIaccess();
-            }
+            $('#'+id+"-loading").show();
+            updateAPIaccess();
             break;
     }
 }
