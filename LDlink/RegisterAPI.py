@@ -14,15 +14,8 @@ from email.mime.text import MIMEText
 import datetime
 
 
-# Set data directories using config.yml
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
-api_users_dir = config['api']['api_users_dir']
-token_expiration = bool(config['api']['token_expiration'])
-token_expiration_days = config['api']['token_expiration_days']
-
 # email user token
-def emailUser(email, token, expiration, firstname):
+def emailUser(email, token, expiration, firstname, token_expiration):
     print "sending message"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
@@ -60,7 +53,7 @@ def getEmailRecord(curr, email):
     curr.execute("SELECT * FROM api_users WHERE email=?", temp)
     return curr.fetchone()
 
-def insertRecord(firstname, lastname, email, institution, token, registered):
+def insertRecord(firstname, lastname, email, institution, token, registered, api_users_dir):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
@@ -74,7 +67,7 @@ def insertRecord(firstname, lastname, email, institution, token, registered):
     con.close()
 
 # update record only if email's token is expired and user re-registers
-def updateRecord(firstname, lastname, email, institution, token, registered):
+def updateRecord(firstname, lastname, email, institution, token, registered, api_users_dir):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
@@ -94,7 +87,7 @@ def checkUniqueToken(curr, token):
         return True
 
 # check if token is valid when hitting API route and not expired
-def checkToken(token):
+def checkToken(token, api_users_dir, token_expiration, token_expiration_days):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
@@ -111,7 +104,7 @@ def checkToken(token):
         # return True
         present = getDatetime()
         registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
-        expiration = getExpiration(registered)
+        expiration = getExpiration(registered, token_expiration_days)
         if ((present < expiration) or not token_expiration):
             return True
         else:
@@ -130,12 +123,19 @@ def getDatetime():
     return datetime.datetime.now()
 
 # get current date and time
-def getExpiration(registered):
+def getExpiration(registered, token_expiration_days):
     return registered + datetime.timedelta(minutes=5)
     # return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
 def register_user_web(firstname, lastname, email, institution, reference):
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    api_users_dir = config['api']['api_users_dir']
+    token_expiration = bool(config['api']['token_expiration'])
+    token_expiration_days = config['api']['token_expiration_days']
+
     out_json = {}
 
     # create database and table if it does not exist already
@@ -154,7 +154,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
     if record != None:
         present = getDatetime()
         registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
-        expiration = getExpiration(registered)
+        expiration = getExpiration(registered, token_expiration_days)
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
         if ((present < expiration) or not token_expiration):
             out_json = {
@@ -166,14 +166,14 @@ def register_user_web(firstname, lastname, email, institution, reference):
                 "token": record[4],
                 "registered": record[5]
             }
-            emailUser(record[2], record[4], format_expiration, record[0])
+            emailUser(record[2], record[4], format_expiration, record[0], token_expiration)
         else:
             token = generateToken(curr)
             registered = getDatetime()
-            expiration = getExpiration(registered)
+            expiration = getExpiration(registered, token_expiration_days)
             format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
             format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-            updateRecord(firstname, lastname, email, institution, token, format_registered)
+            updateRecord(firstname, lastname, email, institution, token, format_registered, api_users_dir)
             out_json = {
                 "message": "Thank you for registering to use the LDlink API.",
                 "firstname": firstname,
@@ -183,15 +183,15 @@ def register_user_web(firstname, lastname, email, institution, reference):
                 "token": token,
                 "registered": format_registered
             }
-            emailUser(email, token, format_expiration, firstname)
+            emailUser(email, token, format_expiration, firstname, token_expiration)
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
         registered = getDatetime()
-        expiration = getExpiration(registered)
+        expiration = getExpiration(registered, token_expiration_days)
         format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        insertRecord(firstname, lastname, email, institution, token, format_registered)
+        insertRecord(firstname, lastname, email, institution, token, format_registered, api_users_dir)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
@@ -201,13 +201,18 @@ def register_user_web(firstname, lastname, email, institution, reference):
             "token": token,
             "registered": format_registered
         }
-        emailUser(email, token, format_expiration, firstname)
+        emailUser(email, token, format_expiration, firstname, token_expiration)
 
     conn.close()
     return out_json
 
 # registers new users and emails generated token for API
 def register_user_api(firstname, lastname, email, institution, token, registered):
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    api_users_dir = config['api']['api_users_dir']
+
     out_json = {}
 
     # create database and table if it does not exist already
@@ -226,7 +231,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
     if record != None:
         # if email record in api database does not have new token, update it
         if (record[2] == email and record[4] != token):
-            updateRecord(firstname, lastname, email, institution, token, registered)
+            updateRecord(firstname, lastname, email, institution, token, registered, api_users_dir)
             out_json = {
                 "message": "Thank you for registering to use the LDlink API.",
                 "firstname": firstname,
@@ -248,7 +253,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
             }
     else:
         # if email record does not exists in db, add to table
-        insertRecord(firstname, lastname, email, institution, token, registered)
+        insertRecord(firstname, lastname, email, institution, token, registered, api_users_dir)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
