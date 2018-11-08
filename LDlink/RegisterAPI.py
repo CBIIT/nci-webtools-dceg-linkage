@@ -62,7 +62,7 @@ def insertRecord(firstname, lastname, email, institution, token, registered, exp
     cur = con.cursor()
     temp = (firstname, lastname, email, institution, token, registered, expiration)
     cur.execute(
-        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, expiration) VALUES (?,?,?,?,?,?,?,?)", temp)
+        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, expiration) VALUES (?,?,?,?,?,?,?)", temp)
     con.commit()
     con.close()
 
