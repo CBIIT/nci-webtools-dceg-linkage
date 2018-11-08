@@ -27,7 +27,7 @@ def emailUser(email, token, expiration, firstname):
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
     # packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
-    packet['From'] = "NCI LDlink Web Admin"
+    packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = email
     message = ''
     if token_expiration:
@@ -60,7 +60,6 @@ def getEmailRecord(curr, email):
     curr.execute("SELECT * FROM api_users WHERE email=?", temp)
     return curr.fetchone()
 
-
 def insertRecord(firstname, lastname, email, institution, token, registered):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
@@ -71,6 +70,7 @@ def insertRecord(firstname, lastname, email, institution, token, registered):
     con.commit()
     con.close()
 
+# update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
@@ -78,17 +78,6 @@ def updateRecord(firstname, lastname, email, institution, token, registered):
     temp = (firstname, lastname, institution, token, registered, email)
     cur.execute(
         "UPDATE api_users SET first_name=?, last_name=?, institution=?, token=?, registered=? WHERE email=?", temp)
-    con.commit()
-    con.close()
-
-# delete record only if api token is hit and expired
-def deleteRecord(email):
-    con = sqlite3.connect(api_users_dir + 'api_users.db')
-    con.text_factory = str
-    cur = con.cursor()
-    temp = (email,)
-    cur.execute(
-        "DELETE FROM api_users WHERE email=?", temp)
     con.commit()
     con.close()
 
@@ -117,7 +106,7 @@ def checkToken(token):
         present = getDatetime()
         registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
         expiration = getExpiration(registered)
-        if (present < expiration):
+        if ((present < expiration) or not token_expiration):
             return True
         else:
             # deleteRecord(record[2])
@@ -137,7 +126,8 @@ def getDatetime():
 
 # get current date and time
 def getExpiration(registered):
-    return registered + datetime.timedelta(days=token_expiration_days)
+    return registered + datetime.timedelta(minutes=5)
+    # return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
 def register_user_web(firstname, lastname, email, institution, reference):
@@ -161,7 +151,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
         registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
         expiration = getExpiration(registered)
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        if (present < expiration):
+        if ((present < expiration) or not token_expiration):
             out_json = {
                 "message": "Email already registered.",
                 "firstname": record[0],
@@ -229,6 +219,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
 
     # if email record exists, do not insert to db
     if record != None:
+        # if email record in api database does not have new token, update it
         if (record[2] == email and record[4] != token):
             updateRecord(firstname, lastname, email, institution, token, registered)
             out_json = {
@@ -252,11 +243,6 @@ def register_user_api(firstname, lastname, email, institution, token, registered
             }
     else:
         # if email record does not exists in db, add to table
-        # token = generateToken(curr)
-        # registered = getDatetime()
-        # expiration = getExpiration(registered)
-        # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
-        # format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
         insertRecord(firstname, lastname, email, institution, token, registered)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
