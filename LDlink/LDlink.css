@@ -95,15 +95,25 @@ body {
 }
 
 /* Sticky footer */
-#push {
-  height: 100%;
+html {
+  min-height: 100%;
+  position: relative;
+}
+
+html body .footer {
+  bottom: 0;
+  width: 100%;
+  position: absolute;
 }
 
 .tab-content {
-  padding: 20px;
+  margin-bottom: 200px;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  padding-left: 25px;
+  padding-right: 25px;
   width: 100%;
-  min-height: 100vh;
-  height: auto !important;
+  min-height: 100%;
 	-webkit-overflow-scrolling: touch;
 	background: white;
 	border-width: 0 1px 1px 1px;
@@ -112,6 +122,10 @@ body {
   border-radius: 6px;
   overflow: hidden;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.tab-content p {
+  font-size: 16px;
 }
 
 .tab-content .tab-pane {

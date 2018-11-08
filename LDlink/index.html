@@ -26,7 +26,8 @@
 	<link rel="stylesheet" href="LDlink.css">
 </head>
 
-<body class="d-flex flex-column vh-100" role="document">
+<!-- <body class="d-flex flex-column vh-100" role="document"> -->
+<body role="document">
 	<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
 	<h1 class="sr-only sr-only-focusable">L D link Webtool</h1>
 
@@ -111,7 +112,7 @@
 			<div class="tab-pane fade" id="home-tab">
 
 				<div class="text-center">
-					<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h3>
+					<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h2>
 				</div>
 				
 				<p>LDlink is a suite of web-based applications designed to
@@ -730,7 +731,7 @@
 									<div class="input-group">
 										<label for="ldmatrix-file-label" style="display:none;">Uplaod RS File</label>
 
-										<input type="text" id="ldmatrix-file-label" readonly placeholder="Upload file with variants" class="readonly-input-text">
+										<input type="text" id="ldmatrix-file-label" readonly placeholder="Upload file with variants" class="readonly-input-text" style="width: 150px;">
 										<label for="ldmatrix-file" style="display:none;">Browse for RS File</label>
 										<span class="btn btn-default btn-file btn-snp">Browse
 											<input type="file" id="ldmatrix-file">
@@ -1495,12 +1496,11 @@
 			<div class="tab-pane fade" id="apiaccess-tab">
 				<div class="container-fluid">
 					<div class="text-center">
-						<h3>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programmatic Access!</h3>
+						<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programmatic Access!</h2>
 					</div>
 					<p>
 						LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers 
-						who are interested in performing batch queries. <br>
-						The syntax is similar to the web address link created 
+						who are interested in performing batch queries. The syntax is similar to the web address link created 
 						for queries on the webpage. Generally text output is returned that is the same as the file a user would 
 						download from the online site. Please register below for an access token required for your API call. Once registered, your access token will be emailed to you.
 					</p>
@@ -1612,11 +1612,10 @@
 			<!-- Help -->
 			<div class="tab-pane fade" id="help-tab">
 			</div>
-			<div id="push"></div>
 		</div>
 	</div>
 
-	<!-- Footer -->
+	<!-- Sticky Footer -->
 	<div class="footer text-left text-md-center pt-4 pb-4 text-light flex-none">
 		<div class="container">
 			<ul class="list-inline  text-light">
