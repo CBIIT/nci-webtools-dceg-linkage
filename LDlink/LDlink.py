@@ -115,10 +115,10 @@ def requires_token(f):
         if require_token:
             if ("LDlinkRestWeb" not in request.full_path):
                 if 'token' not in request.args:
-                    return sendTraceback('API token missing. Please register using the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess">API Access</a> tab.')
+                    return sendTraceback('API token missing. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
                 token = request.args['token']
                 if checkToken(token, api_users_dir, token_expiration, token_expiration_days) is False or token is None:
-                    return sendTraceback('Invalid or expired API token. Please register using the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess">API Access</a> tab.')
+                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
                 return f(*args, **kwargs)
             return f(*args, **kwargs)
         return f(*args, **kwargs)
