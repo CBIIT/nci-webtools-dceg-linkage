@@ -27,13 +27,13 @@ def emailUser(email, token, expiration, firstname):
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
     # packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
-    packet['From'] = "NCILDlinkWebAdmin@mail.nih.gov"
+    packet['From'] = "NCI LDlink Web Admin"
     packet['To'] = email
     message = ''
     if token_expiration:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
     else:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
 
     packet.attach(MIMEText(message, 'html'))
 
@@ -137,8 +137,7 @@ def getDatetime():
 
 # get current date and time
 def getExpiration(registered):
-    return registered + datetime.timedelta(minutes=5)
-    # return registered + datetime.timedelta(days=token_expiration_days)
+    return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
 def register_user_web(firstname, lastname, email, institution, reference):

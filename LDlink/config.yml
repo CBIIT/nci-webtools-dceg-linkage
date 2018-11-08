@@ -13,4 +13,4 @@ data:
 api:
   api_users_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/apiaccess/'
   token_expiration: True
-  token_expiration_days: 14
+  token_expiration_days: 365
