@@ -18,7 +18,7 @@ import datetime
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
 api_users_dir = config['api']['api_users_dir']
-token_expiration = config['api']['token_expiration']
+token_expiration = bool(config['api']['token_expiration'])
 token_expiration_days = config['api']['token_expiration_days']
 
 # email user token

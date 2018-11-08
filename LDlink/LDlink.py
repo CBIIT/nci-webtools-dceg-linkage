@@ -15,6 +15,7 @@ import json
 import time
 import random
 import requests
+import yaml
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
@@ -40,6 +41,11 @@ app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
+
+# Set data directories using config.yml
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+require_token = bool(config['api']['require_token'])
 
 
 @app.route('/')
@@ -105,7 +111,7 @@ def sendJSON(inputString):
 def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if "LDlinkRestWeb" not in request.full_path:
+        if (("LDlinkRestWeb" not in request.full_path) or not require_token):
             if 'token' not in request.args:
                 return sendTraceback("API token missing. Please register for API access.")
             token = request.args['token']
