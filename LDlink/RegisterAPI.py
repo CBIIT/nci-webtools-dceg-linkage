@@ -64,6 +64,9 @@ def insertRecord(firstname, lastname, email, institution, token, registered):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME);")
+    con.commit()
     temp = (firstname, lastname, email, institution, token, registered)
     cur.execute(
         "INSERT INTO api_users (first_name, last_name, email, institution, token, registered) VALUES (?,?,?,?,?,?)", temp)
@@ -95,6 +98,9 @@ def checkToken(token):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME);")
+    con.commit()
     temp = (token,)
     cur.execute("SELECT * FROM api_users WHERE token=?", temp)
     record = cur.fetchone()
@@ -109,7 +115,6 @@ def checkToken(token):
         if ((present < expiration) or not token_expiration):
             return True
         else:
-            # deleteRecord(record[2])
             return False
 
 # generate unique access token for each user

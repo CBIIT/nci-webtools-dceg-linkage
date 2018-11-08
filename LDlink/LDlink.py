@@ -357,7 +357,7 @@ def ldhap():
         isProgrammatic = True
 
     print 'snps: ' + snps
-    print 'pop: ' + pop
+    # print 'pop: ' + pop
     print 'request: ' + str(reference)
 
     if reference is False:
