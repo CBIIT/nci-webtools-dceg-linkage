@@ -18,6 +18,7 @@ import datetime
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
 api_users_dir = config['api']['api_users_dir']
+token_expiration = config['api']['token_expiration']
 token_expiration_days = config['api']['token_expiration_days']
 
 # email user token
@@ -28,15 +29,19 @@ def emailUser(email, token, expiration, firstname):
     # packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
     packet['From'] = "NCILDlinkWebAdmin@mail.nih.gov"
     packet['To'] = email
-
-    message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the API Access tab. <br><br>' + 'LDlink Web Admin'
+    message = ''
+    if token_expiration:
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
+    else:
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
 
     packet.attach(MIMEText(message, 'html'))
 
     # print self.MAIL_HOST
     # temp use localhost, use official NIH mailfwd account in future (put in config file)
     smtp = smtplib.SMTP("localhost")
-    smtp.sendmail("do.not.reply@nih.gov", email, packet.as_string())
+    # smtp.sendmail("do.not.reply@nih.gov", email, packet.as_string())
+    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # creates table in database if database did not exist before
 def createTable(api_users_dir):
@@ -45,7 +50,7 @@ def createTable(api_users_dir):
     con.text_factory = str
     cur = con.cursor()
     cur.execute(
-        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `expiration` DATETIME);")
+        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME);")
     con.commit()
     con.close()
 
@@ -56,23 +61,23 @@ def getEmailRecord(curr, email):
     return curr.fetchone()
 
 
-def insertRecord(firstname, lastname, email, institution, token, registered, expiration):
+def insertRecord(firstname, lastname, email, institution, token, registered):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
-    temp = (firstname, lastname, email, institution, token, registered, expiration)
+    temp = (firstname, lastname, email, institution, token, registered)
     cur.execute(
-        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, expiration) VALUES (?,?,?,?,?,?,?)", temp)
+        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered) VALUES (?,?,?,?,?,?)", temp)
     con.commit()
     con.close()
 
-def updateRecord(firstname, lastname, email, institution, token, registered, expiration):
+def updateRecord(firstname, lastname, email, institution, token, registered):
     con = sqlite3.connect(api_users_dir + 'api_users.db')
     con.text_factory = str
     cur = con.cursor()
-    temp = (firstname, lastname, institution, token, registered, expiration, email)
+    temp = (firstname, lastname, institution, token, registered, email)
     cur.execute(
-        "UPDATE api_users SET first_name=?, last_name=?, institution=?, token=?, registered=?, expiration=? WHERE email=?", temp)
+        "UPDATE api_users SET first_name=?, last_name=?, institution=?, token=?, registered=? WHERE email=?", temp)
     con.commit()
     con.close()
 
@@ -110,7 +115,8 @@ def checkToken(token):
     else:
         # return True
         present = getDatetime()
-        expiration = datetime.datetime.strptime(record[6], "%Y-%m-%d %H:%M:%S")
+        registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
+        expiration = getExpiration(registered)
         if (present < expiration):
             return True
         else:
@@ -153,7 +159,9 @@ def register_user_web(firstname, lastname, email, institution, reference):
     # if email record exists, do not insert to db
     if record != None:
         present = getDatetime()
-        expiration = datetime.datetime.strptime(record[6], "%Y-%m-%d %H:%M:%S")
+        registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
+        expiration = getExpiration(registered)
+        format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
         if (present < expiration):
             out_json = {
                 "message": "Email already registered.",
@@ -162,17 +170,16 @@ def register_user_web(firstname, lastname, email, institution, reference):
                 "email": record[2],
                 "institution": record[3],
                 "token": record[4],
-                "registered": record[5],
-                "expiration": record[6]
+                "registered": record[5]
             }
-            emailUser(record[2], record[4], record[6], record[0])
+            emailUser(record[2], record[4], format_expiration, record[0])
         else:
             token = generateToken(curr)
             registered = getDatetime()
             expiration = getExpiration(registered)
             format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
             format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-            updateRecord(firstname, lastname, email, institution, token, format_registered, format_expiration)
+            updateRecord(firstname, lastname, email, institution, token, format_registered)
             out_json = {
                 "message": "Thank you for registering to use the LDlink API.",
                 "firstname": firstname,
@@ -180,8 +187,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
                 "email": email,
                 "institution": institution,
                 "token": token,
-                "registered": format_registered,
-                "expiration": format_expiration
+                "registered": format_registered
             }
             emailUser(email, token, format_expiration, firstname)
     else:
@@ -191,7 +197,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
         expiration = getExpiration(registered)
         format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        insertRecord(firstname, lastname, email, institution, token, format_registered, format_expiration)
+        insertRecord(firstname, lastname, email, institution, token, format_registered)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
@@ -199,8 +205,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
             "email": email,
             "institution": institution,
             "token": token,
-            "registered": format_registered,
-            "expiration": format_expiration
+            "registered": format_registered
         }
         emailUser(email, token, format_expiration, firstname)
 
@@ -208,7 +213,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
     return out_json
 
 # registers new users and emails generated token for API
-def register_user_api(firstname, lastname, email, institution, token, registered, expiration):
+def register_user_api(firstname, lastname, email, institution, token, registered):
     out_json = {}
 
     # create database and table if it does not exist already
@@ -226,7 +231,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
     # if email record exists, do not insert to db
     if record != None:
         if (record[2] == email and record[4] != token):
-            updateRecord(firstname, lastname, email, institution, token, registered, expiration)
+            updateRecord(firstname, lastname, email, institution, token, registered)
             out_json = {
                 "message": "Thank you for registering to use the LDlink API.",
                 "firstname": firstname,
@@ -234,8 +239,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
                 "email": email,
                 "institution": institution,
                 "token": token,
-                "registered": registered,
-                "expiration": expiration
+                "registered": registered
             }
         else:
             out_json = {
@@ -245,8 +249,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
                 "email": record[2],
                 "institution": record[3],
                 "token": record[4],
-                "registered": record[5],
-                "expiration": record[6]
+                "registered": record[5]
             }
     else:
         # if email record does not exists in db, add to table
@@ -255,7 +258,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
         # expiration = getExpiration(registered)
         # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
         # format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        insertRecord(firstname, lastname, email, institution, token, registered, expiration)
+        insertRecord(firstname, lastname, email, institution, token, registered)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
@@ -263,8 +266,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
             "email": email,
             "institution": institution,
             "token": token,
-            "registered": registered,
-            "expiration": expiration
+            "registered": registered
         }
 
     conn.close()

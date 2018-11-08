@@ -12,4 +12,5 @@ data:
   recomb_dir: '/local/content/analysistools/public_html/apps/LDlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
 api:
   api_users_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/apiaccess/'
+  token_expiration: True
   token_expiration_days: 14

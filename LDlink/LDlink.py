@@ -760,10 +760,9 @@ def apiaccess_api():
     institution = request.args.get('institution', False)
     token = request.args.get('token', False)
     registered = request.args.get('registered', False)
-    expiration = request.args.get('expiration', False)
 
     out_json = register_user_api(
-        firstname, lastname, email, institution, token, registered, expiration)
+        firstname, lastname, email, institution, token, registered)
 
     return sendJSON(out_json)
 

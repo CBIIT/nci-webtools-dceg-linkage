@@ -100,8 +100,8 @@ body {
 }
 
 .tab-content {
-	padding: 10px;
-	width: 100%;
+  padding: 20px;
+  width: 100%;
   min-height: 100vh;
   height: auto !important;
 	-webkit-overflow-scrolling: touch;
