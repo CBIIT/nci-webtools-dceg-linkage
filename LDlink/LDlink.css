@@ -113,11 +113,12 @@ html body .footer {
   padding-left: 25px;
   padding-right: 25px;
   width: 100%;
-  min-height: 100%;
-	-webkit-overflow-scrolling: touch;
-	background: white;
-	border-width: 0 1px 1px 1px;
-	border-style: solid;
+  min-height: 50vh;
+  /* height: 100%; */
+  -webkit-overflow-scrolling: touch;
+  background: white;
+  border-width: 0 1px 1px 1px;
+  border-style: solid;
   border-color: #d9d9d9;
   border-radius: 6px;
   overflow: hidden;
