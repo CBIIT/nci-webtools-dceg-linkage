@@ -106,8 +106,8 @@ def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Set data directories using config.yml
-        with open('config.yml', 'r') as f:
-            config = yaml.load(f)
+        with open('config.yml', 'r') as c:
+            config = yaml.load(c)
         require_token = bool(config['api']['require_token'])
         api_users_dir = config['api']['api_users_dir']
         token_expiration = bool(config['api']['token_expiration'])
