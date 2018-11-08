@@ -103,15 +103,15 @@ def sendJSON(inputString):
 # Flask decorator
 # Requires API route to include valid token in argument or will throw error
 def requires_token(f):
-    # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
-    require_token = bool(config['api']['require_token'])
-    api_users_dir = config['api']['api_users_dir']
-    token_expiration = bool(config['api']['token_expiration'])
-    token_expiration_days = config['api']['token_expiration_days']
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Set data directories using config.yml
+        with open('config.yml', 'r') as f:
+            config = yaml.load(f)
+        require_token = bool(config['api']['require_token'])
+        api_users_dir = config['api']['api_users_dir']
+        token_expiration = bool(config['api']['token_expiration'])
+        token_expiration_days = config['api']['token_expiration_days']
         if require_token:
             if ("LDlinkRestWeb" not in request.full_path):
                 if 'token' not in request.args:
