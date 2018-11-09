@@ -38,6 +38,12 @@
   padding: 5px 0px 0px 0px;
 }
 
+.apiaccess-examples{
+  white-space: normal; 
+  word-break: break-word;
+  border-color: #337AB7 !important;
+}
+
 /*disable bk logo */
 .bk-logo-small {
   display:none;

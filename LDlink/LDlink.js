@@ -1,4 +1,4 @@
-var ldlink_version = "Version 3.0";
+var ldlink_version = "Version 3.3.0";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -31,7 +31,6 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
-    // console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
@@ -191,37 +190,9 @@ $(document).ready(function() {
         $("#region-region-index").val('');
         $("#ldassoc-population-codes").val('');
         refreshPopulation([],"ldassoc");
-        // console.log($("#ldassoc-population-codes").val());
       }
     });
 
-    /*
-    $("#ldassoc-region").multiselect({
-       multiple: false,
-       header: "Select a Region",
-       noneSelectedText: "Region",
-       selectedList: 1
-    });
-    */
-    /*
-    console.dir(ldassocData);
-    $(".draggable").draggable();
-    $(".dropzone").droppable({
-        accept: "li",
-        hoverClass: "highlight",
-        tolerance: "fit",
-        activate: function(evt, ui) {
-            $(this).find("h3").css("background-color", "cornsilk");
-        },
-        deactivate: function(evt, ui) {
-            $(this).find("h3").css("background-color", "");
-        },
-        drop: function(evt, ui) {
-            $(this).find("h3").text("Dropped");
-            //ui.draggable.find("h3").text("Dropped");
-        }
-    });
-    */
     updateVersion(ldlink_version);
     //addValidators();
     $('#ldlink-tabs').on('click', 'a', function(e) {
@@ -277,9 +248,17 @@ $(document).ready(function() {
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
     });
+
     $('.ldlinkForm').on('submit', function(e) {
-        //alert('Validate');
         calculate(e);
+    });
+
+    $(".help-anchor-link").on('click', function(e) { 
+        var tab = e.target.hash;
+        $('#help-tab-anchor').click();
+        setTimeout(function() {
+            window.location = tab;
+        }, 500);
     });
 
     setupTabs();
