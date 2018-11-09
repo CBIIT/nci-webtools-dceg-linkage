@@ -155,9 +155,6 @@ def requires_token(f):
             module = getModule(request.full_path)
             logAccess(token, module)
             return f(*args, **kwargs)
-        token = "NA"
-        module = getModule(request.full_path)
-        logAccess(token, module)
         return f(*args, **kwargs)
     return decorated_function
 
