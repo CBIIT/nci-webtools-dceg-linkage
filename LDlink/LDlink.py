@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked
+from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -107,6 +107,22 @@ def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
 
+def getModule(fullPath):
+    if "ldhap" in fullPath:
+        return "LDhap"
+    elif "ldmatrix" in fullPath:
+        return "LDmatrix"
+    elif "ldpair" in fullPath:
+        return "LDpair"
+    elif "ldproxy" in fullPath:
+        return "LDproxy"
+    elif "snpchip" in fullPath:
+        return "SNPchip"
+    elif "snpclip" in fullPath:
+        return "SNPclip"
+    else:
+        return "NA"
+
 # Flask decorator
 # Requires API route to include valid token in argument or will throw error
 def requires_token(f):
@@ -119,9 +135,9 @@ def requires_token(f):
         api_access_dir = config['api']['api_access_dir']
         token_expiration = bool(config['api']['token_expiration'])
         token_expiration_days = config['api']['token_expiration_days']
-        if require_token:
+        if ("LDlinkRestWeb" not in request.full_path):
             # Web server access does not require token
-            if ("LDlinkRestWeb" not in request.full_path):
+            if require_token:
                 # Check if token argument is missing in api call
                 if 'token' not in request.args:
                     return sendTraceback('API token missing. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
@@ -132,8 +148,16 @@ def requires_token(f):
                 # Check if token is blocked
                 if checkBlocked(token, api_access_dir):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
+                module = getModule(request.full_path)
+                logAccess(token, module)
                 return f(*args, **kwargs)
+            token = "NA"
+            module = getModule(request.full_path)
+            logAccess(token, module)
             return f(*args, **kwargs)
+        token = "NA"
+        module = getModule(request.full_path)
+        logAccess(token, module)
         return f(*args, **kwargs)
     return decorated_function
 

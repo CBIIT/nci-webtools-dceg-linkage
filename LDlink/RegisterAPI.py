@@ -36,13 +36,15 @@ def emailUser(email, token, expiration, firstname, token_expiration):
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # creates table in database if database did not exist before
-def createTable(api_access_dir):
+def createTables(api_access_dir):
     # create database
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
     cur.execute(
         "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    cur.execute(
+        "CREATE TABLE api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
     con.commit()
     con.close()
 
@@ -62,6 +64,25 @@ def insertRecord(firstname, lastname, email, institution, token, registered, blo
     temp = (firstname, lastname, email, institution, token, registered, blocked)
     cur.execute(
         "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, blocked) VALUES (?,?,?,?,?,?,?)", temp)
+    con.commit()
+    con.close()
+
+# log token's api call to api_log table
+def logAccess(token, module):
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    api_access_dir = config['api']['api_access_dir']
+    con = sqlite3.connect(api_access_dir + 'api_access.db')
+    con.text_factory = str
+    cur = con.cursor()
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
+    con.commit()
+    access_date = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
+    temp = (token, module, access_date)
+    cur.execute(
+        "INSERT INTO api_users (token, module, accessed) VALUES (?,?,?)", temp)
     con.commit()
     con.close()
 
@@ -159,7 +180,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
     # create database and table if it does not exist already
     if not os.path.exists(api_access_dir + 'api_access.db'):
         print "api_usrs.db created."
-        createTable(api_access_dir)
+        createTables(api_access_dir)
 
     # by default, users are not blocked
     blocked = 0
@@ -242,7 +263,7 @@ def register_user_api(firstname, lastname, email, institution, token, registered
     # create database and table if it does not exist already
     if not os.path.exists(api_access_dir + 'api_access.db'):
         print "api_usrs.db created."
-        createTable(api_access_dir)
+        createTables(api_access_dir)
 
     # by default, users are not blocked
     blocked = 0
