@@ -82,7 +82,7 @@ def logAccess(token, module):
     access_date = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
     temp = (token, module, access_date)
     cur.execute(
-        "INSERT INTO api_users (token, module, accessed) VALUES (?,?,?)", temp)
+        "INSERT INTO api_log (token, module, accessed) VALUES (?,?,?)", temp)
     con.commit()
     con.close()
 
