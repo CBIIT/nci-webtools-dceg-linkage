@@ -261,6 +261,11 @@ $(document).ready(function() {
         }, 500);
     });
 
+    $(".anchor-link").on('click', function(e) { 
+        var tab = $(this).attr('dest');
+        $('#' + tab + '-tab-anchor').click();
+    });
+
     setupTabs();
     autoCalculate();
     createFileSelectEvent();

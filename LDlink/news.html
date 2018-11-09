@@ -1,6 +1,6 @@
 <p><b>11/16/2018</b> -- New features in <b>LDlink 3.3.0</b>.</p>
 <ul>
-    <li>LDlink API access now requires registration. Please register using the <a href="?tab=apiaccess"><u>API Access</u></a> tab</li>
+    <li>LDlink API access now requires registration. Please register using the <a class="anchor-link" dest="apiaccess"><u>API Access</u></a> tab</li>
     <li>dbSNP build updated from version 142 to 151.</li>
     <li>Genomic coordinates can now be used to query variants for each module.</li>
     <li>Improvements have been made to error messages from programmatic access.</li>
@@ -42,3 +42,10 @@
     <li><b>LDmatrix</b> now includes a R<sup>2</sup>/D' toggle for plotting R<sup>2</sup> or D' matrices.</li>
     <li>Minor tweaks to improve visualization on a variety of device screen sizes.</li>
 </ul>
+
+<script>
+    $(".anchor-link").on('click', function(e) { 
+        var tab = $(this).attr('dest');
+        $('#' + tab + '-tab-anchor').click();
+    });
+</script>
