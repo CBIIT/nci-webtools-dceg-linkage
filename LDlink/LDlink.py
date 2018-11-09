@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user_web, register_user_api, checkToken
+from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -36,6 +36,13 @@ tmp_dir = "./tmp/"
 # Ensure tmp directory exists
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
+
+# Ensure apiaccess directory exists
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+api_access_dir = config['api']['api_access_dir']
+if not os.path.exists(api_access_dir):
+    os.makedirs(api_access_dir)
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
@@ -109,16 +116,22 @@ def requires_token(f):
         with open('config.yml', 'r') as c:
             config = yaml.load(c)
         require_token = bool(config['api']['require_token'])
-        api_users_dir = config['api']['api_users_dir']
+        api_access_dir = config['api']['api_access_dir']
         token_expiration = bool(config['api']['token_expiration'])
         token_expiration_days = config['api']['token_expiration_days']
         if require_token:
+            # Web server access does not require token
             if ("LDlinkRestWeb" not in request.full_path):
+                # Check if token argument is missing in api call
                 if 'token' not in request.args:
                     return sendTraceback('API token missing. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
                 token = request.args['token']
-                if checkToken(token, api_users_dir, token_expiration, token_expiration_days) is False or token is None:
+                # Check if token is valid
+                if checkToken(token, api_access_dir, token_expiration, token_expiration_days) is False or token is None:
                     return sendTraceback('Invalid or expired API token. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
+                # Check if token is blocked
+                if checkBlocked(token, api_access_dir):
+                    return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 return f(*args, **kwargs)
             return f(*args, **kwargs)
         return f(*args, **kwargs)
@@ -769,9 +782,10 @@ def apiaccess_api():
     institution = request.args.get('institution', False)
     token = request.args.get('token', False)
     registered = request.args.get('registered', False)
+    blocked = request.args.get('blocked', False)
 
     out_json = register_user_api(
-        firstname, lastname, email, institution, token, registered)
+        firstname, lastname, email, institution, token, registered, blocked)
 
     return sendJSON(out_json)
 
