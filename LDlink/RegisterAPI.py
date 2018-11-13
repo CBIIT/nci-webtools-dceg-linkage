@@ -23,9 +23,9 @@ def emailUser(email, token, expiration, firstname, token_expiration):
     packet['To'] = email
     message = ''
     if token_expiration:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
     else:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API. <br><br>' + 'Token: ' + token + '<br><br>' + 'Please include this token as an argument in your request. Examples are listed in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. <br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
 
     packet.attach(MIMEText(message, 'html'))
 
