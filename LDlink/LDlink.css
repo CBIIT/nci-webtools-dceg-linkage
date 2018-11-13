@@ -124,7 +124,7 @@ html body .footer {
   padding-left: 25px;
   padding-right: 25px;
   width: 100%;
-  min-height: 50vh;
+  min-height: 600px;
   /* height: 100%; */
   -webkit-overflow-scrolling: touch;
   background: white;
@@ -369,6 +369,10 @@ img.graph-legend {
 
 .btn-ldlink-multiselect {
   text-align:left;
+}
+
+.multiselect-container {
+  overflow: visible;
 }
 .multiselect-container > li {
     padding-left: 50px;
