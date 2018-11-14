@@ -162,16 +162,13 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Web server access does not require token
-        if require_token:
-            # Check if token argument is missing in api call
-            if 'token' not in request.args:
-                return sendTraceback('Admin API token missing.')
-            token = request.args['token']
-            # Check if token is valid
-            if token != "admintoken123" or token is None:
-                return sendTraceback('Invalid Admin API token.')
-            return f(*args, **kwargs)
+        # Check if token argument is missing in api call
+        if 'token' not in request.args:
+            return sendTraceback('Admin API token missing.')
+        token = request.args['token']
+        # Check if token is valid
+        if token != "admintoken123" or token is None:
+            return sendTraceback('Invalid Admin API token.')
         return f(*args, **kwargs)
     return decorated_function
 
