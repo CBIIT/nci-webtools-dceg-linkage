@@ -41,10 +41,15 @@ def emailJustification(email, justification):
     packet['Subject'] = "[Unblock Request] LDLink API Access User"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = 'kevin.jiang2@nih.gov, kvvnjng@gmail.com' # change to NCILDlinkWebAdmin email or a list of emails later
-    message = 'Email user: ' + email + '<br><br>Justification: ' + justification + '<br><br><u>Click here to unblock user.</u>'
+    message = 'Email user: ' + str(email) + '<br><br>Justification: ' + str(justification) + '<br><br><u>Click here to unblock user.</u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP("localhost")
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+    out_json = {
+        "email": email,
+        "justification": justification
+    }
+    return out_json
 
 # creates table in database if database did not exist before
 def createTables(api_access_dir):

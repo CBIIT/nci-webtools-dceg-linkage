@@ -1300,8 +1300,17 @@ function isPopulationSet(elementId) {
 
 function checkTextAreaLength(elementId) {
     var description =  $('#'+elementId+'-justification').val();
-    if(description.length > 250 ) {
+    var count = description.length;
+    if(count > 500 ) {
         $('#'+elementId+'-justification-warning').popover('show');
+        var message = "Please keep response under 500 characters. Current: " + count.toString() + " characters."
+        $('#'+elementId+'-justification-warning').attr('data-content', message);
+        setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
+        return false;
+    } else if(count < 50) {
+        $('#'+elementId+'-justification-warning').popover('show');
+        var message = "Please respond with at least 50 characters. Current: " + count.toString() + " characters."
+        $('#'+elementId+'-justification-warning').attr('data-content', message);
         setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
         return false;
     } else {
@@ -2617,7 +2626,7 @@ function updateAPIblocked() {
 
     var apiblockedInputs = {
         email: $('#apiblocked-email').val(),
-        institution: $('#apiblocked-justification').val(),
+        justification: $('#apiblocked-justification').val(),
         reference: reference
     };
 
