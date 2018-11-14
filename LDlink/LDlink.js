@@ -113,9 +113,15 @@ $(document).ready(function() {
     // reset apiaccess form
     $(".apiaccess-done").click(function(e) {
         $("#apiaccess-reset").click();
-        $("#apiaccess-blocked-reset").click();
         $("#apiaccess-new-user").modal('hide');
         $("#apiaccess-existing-user").modal('hide');
+
+        $('#apiblocked-form').show();
+        $('#apiblocked').show();
+        $('#apiblocked-message').hide();
+        $('#apiblocked-done').val("Cancel");
+
+        $("#apiaccess-blocked-reset").click();
         $("#apiaccess-blocked-user").modal('hide');
     });
 
