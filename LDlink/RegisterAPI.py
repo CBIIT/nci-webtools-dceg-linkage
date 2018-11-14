@@ -42,10 +42,11 @@ def emailJustification(firstname, lastname, email, institution, token, registere
         bool_blocked = "True"
     else:
         bool_blocked = "False"
+    emailList = ['kevin.jiang2@nih.gov', 'kvvnjng@gmail.com'] # change to NCILDlinkWebAdmin email or a list of emails later
     packet = MIMEMultipart()
     packet['Subject'] = "[Unblock Request] LDLink API Access User"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
-    packet['To'] = ['kevin.jiang2@nih.gov', 'kvvnjng@gmail.com'] # change to NCILDlinkWebAdmin email or a list of emails later
+    packet['To'] = ", ".join(emailList)
     message = "First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
     message += "<br><br>Email:" + str(email)
@@ -56,7 +57,7 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     message += '<br><br><u>Click here to unblock user.</u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP("localhost")
-    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", emailList, packet.as_string())
     out_json = {
         "email": email,
         "justification": justification
