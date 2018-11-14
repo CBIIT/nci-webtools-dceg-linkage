@@ -115,6 +115,44 @@ def logAccess(token, module):
     con.commit()
     con.close()
 
+# sets blocked attribute of user to 1=true
+def blockUser(email):
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    api_access_dir = config['api']['api_access_dir']
+    con = sqlite3.connect(api_access_dir + 'api_access.db')
+    con.text_factory = str
+    cur = con.cursor()
+    temp = (email,)
+    cur.execute(
+        "UPDATE api_users SET blocked=1 WHERE email=?", temp)
+    con.commit()
+    con.close()
+    out_json = {
+        "message": "Email user (" + email + ")'s API token access has been blocked."
+    }
+    return out_json
+
+# sets blocked attribute of user to 0=false
+def unblockUser(email):
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    api_access_dir = config['api']['api_access_dir']
+    con = sqlite3.connect(api_access_dir + 'api_access.db')
+    con.text_factory = str
+    cur = con.cursor()
+    temp = (email,)
+    cur.execute(
+        "UPDATE api_users SET blocked=0 WHERE email=?", temp)
+    con.commit()
+    con.close()
+    out_json = {
+        "message": "Email user (" + email + ")'s API token access has been unblocked."
+    }
+    return out_json
+
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
@@ -203,7 +241,7 @@ def checkBlockedEmail(email, api_access_dir):
 def generateToken(curr):
     token = binascii.b2a_hex(os.urandom(6))
     # if true, generate another token - make sure example token is not generated
-    while(checkUniqueToken(curr, token) or token == "faketoken123"):
+    while(checkUniqueToken(curr, token) or token == "faketoken123" or token == "admintoken123"):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 

@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification
+from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -154,6 +154,23 @@ def requires_token(f):
             token = "NA"
             module = getModule(request.full_path)
             logAccess(token, module)
+            return f(*args, **kwargs)
+        return f(*args, **kwargs)
+    return decorated_function
+
+# Requires API route to include valid token in argument or will throw error
+def requires_admin_token(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        # Web server access does not require token
+        if require_token:
+            # Check if token argument is missing in api call
+            if 'token' not in request.args:
+                return sendTraceback('Admin API token missing.')
+            token = request.args['token']
+            # Check if token is valid
+            if token != "admintoken123" or token is None:
+                return sendTraceback('Invalid Admin API token.')
             return f(*args, **kwargs)
         return f(*args, **kwargs)
     return decorated_function
@@ -794,7 +811,6 @@ def apiblocked_web():
     # requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
     return sendJSON(out_json)
 
-
 @app.route('/LDlinkRestWeb/apiaccess_web', methods=['GET'])
 def apiaccess_web():
     firstname = request.args.get('firstname', False)
@@ -819,6 +835,46 @@ def apiaccess_api():
     blocked = request.args.get('blocked', False)
     out_json = register_user_api(
         firstname, lastname, email, institution, token, registered, blocked)
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
+@requires_admin_token
+def block_api_user_web():
+    email = request.args.get('email', False)
+    token = request.args.get('token', False)
+    in_json = {
+        "token": token,
+        "email": email
+    }
+    out_json = blockUser(email)
+    requests.get(request.url_root + 'LDlinkRest/apiaccess/block_user', params=in_json)
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
+@requires_admin_token
+def block_api_user_api():
+    email = request.args.get('email', False)
+    out_json = blockUser(email)
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
+@requires_admin_token
+def unblock_api_user_web():
+    email = request.args.get('email', False)
+    token = request.args.get('token', False)
+    in_json = {
+        "token": token,
+        "email": email
+    }
+    out_json = unblockUser(email)
+    requests.get(request.url_root + 'LDlinkRest/apiaccess/unblock_user', params=in_json)
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
+@requires_admin_token
+def unblock_api_user_api():
+    email = request.args.get('email', False)
+    out_json = unblockUser(email)
     return sendJSON(out_json)
 
 
