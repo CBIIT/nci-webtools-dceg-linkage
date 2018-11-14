@@ -176,10 +176,10 @@ def checkBlockedEmail(email, api_access_dir):
     if record is None:
         return False
     else:
-    if int(record[6]) == 1:
-        return True
-    else:
-        return False
+        if int(record[6]) == 1:
+            return True
+        else:
+            return False
 
 # generate unique access token for each user
 def generateToken(curr):
