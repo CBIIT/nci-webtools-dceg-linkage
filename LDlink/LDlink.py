@@ -781,10 +781,16 @@ def status(filename):
 
 @app.route('/LDlinkRestWeb/apiblocked_web', methods=['GET'])
 def apiblocked_web():
+    firstname = request.args.get('firstname', False)
+    lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
+    institution = request.args.get('institution', False)
+    token = request.args.get('token', False)
+    registered = request.args.get('registered', False)
+    blocked = request.args.get('blocked', False)
     justification = request.args.get('justification', False)
 
-    out_json = emailJustification(email, justification)
+    out_json = emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification)
     # requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
     return sendJSON(out_json)
 

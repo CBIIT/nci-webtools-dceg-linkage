@@ -250,6 +250,8 @@ $(document).ready(function() {
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
     });
+    
+    $('#apiblocked-loading').hide();
 
     $('.ldlinkForm').on('submit', function(e) {
         calculate(e);
@@ -2599,7 +2601,13 @@ function updateAPIaccess() {
     ajaxRequest.success(function(data) {
         $('.modal-title.apiaccess').empty().append(data.message);
         $('.' + id + '-user-email').empty().append(data.email);
+        $('#apiblocked-firstname').val(data.firstname);
+        $('#apiblocked-lastname').val(data.lastname);
+        $('#apiblocked-institution').val(data.institution);
         $('#apiblocked-email').val(data.email);
+        $('#apiblocked-token').val(data.token);
+        $('#apiblocked-registered').val(data.registered);
+        $('#apiblocked-blocked').val(data.blocked);
         if (data.message.substring(0, 5) == "Thank") {
             // new user
             $('#' + id + '-new-user').modal('show');
@@ -2640,19 +2648,16 @@ function updateAPIblocked() {
     });
 
     ajaxRequest.success(function(data) {
-        // $('.modal-title.apiaccess').empty().append(data.message);
-        // $('.' + id + '-user-email').empty().append(data.email);
-        // if (data.message.substring(0, 5) == "Thank") {
-        //     // new user
-        //     $('#' + id + '-new-user').modal('show');
-        // } else if (data.message.substring(0, 5) == "Email") { 
-        //     // existing user
-        //     $('#' + id + '-existing-user').modal('show');
-        // } else {
-        //     // blocked user
-        //     $('#' + id + '-blocked-user').modal('show');
-        // }
+        // hide loading animation
         $('#' + id + '-loading').hide();
+        // hide form
+        $('#apiblocked-form').hide();
+        // hide submit button
+        $('#apiblocked').hide();
+        // show form submission message
+        $('#apiblocked').show();
+        // change cancel to done button
+        $('#apiblocked-done').val("Done");
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
