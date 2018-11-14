@@ -1539,7 +1539,7 @@
 						<img src="calculating_LD.gif" alt="loading icon" class="loading">
 					</div>
 
-					<!-- ldhap CONTAINER -->
+					<!-- apiaccess CONTAINER -->
 					<div class="jumbotron">
 						<!-- <div class="container-fluid" id="apiaccess-results-container"> -->
 						<div id="apiaccess-new-user" class="modal fade" data-backdrop="static">
@@ -1560,8 +1560,8 @@
 						</div>
 						<div id="apiaccess-existing-user" class="modal fade" data-backdrop="static">
 							<div class="modal-dialog">
-								<div class="modal-content" style="border-style: solid; border-width: 3px; border-color: #EBCCD1;">
-									<div class="modal-header" style="color: #A94442; background-color: #F2DEDE;">
+								<div class="modal-content" style="border-style: solid; border-width: 3px; border-color: #FFEEBA;">
+									<div class="modal-header" style="color: #856404; background-color: #FFF3CD;">
 										<h3 class="modal-title apiaccess">Modal title</h3>
 									</div>
 									<div class="modal-body" style="text-align: center;">
@@ -1570,6 +1570,46 @@
 									<div class="modal-footer">
 										<!-- reset button -->
 										<input type="button" id="apiaccess-done" value="Done" class="btn btn-default apiaccess-done" />
+									</div>
+								</div>
+							</div>
+						</div>
+						<div id="apiaccess-blocked-user" class="modal fade" data-backdrop="static">
+							<div class="modal-dialog">
+								<div class="modal-content" style="border-style: solid; border-width: 3px; border-color: #EBCCD1;">
+									<div class="modal-header" style="color: #A94442; background-color: #F2DEDE;">
+										<h3 class="modal-title apiaccess">Modal title</h3>
+									</div>
+									<div id="apiblocked-form" style="margin-left: auto; margin-right: auto;">
+										<form id="apiblockedForm" class="ldlinkForm">
+											<div class="modal-body">
+												<!-- Email -->
+												<div class="form-group">
+													<label for="apiblocked-email">Email<span style="color:red">*</span></label>
+													<input type="email" class="form-control" id="apiblocked-email" placeholder="Email" value="" required disabled>
+												</div>
+												<div class="form-group">
+													<!-- <span class="apiaccess-user-email" style="font-weight: bold;">email</span> -->
+													<label for="apiblocked-justification">To unblock your API access token, please provide a justification below:<span style="color:red">*</span></label>
+													<a id="apiblocked-justification-warning" style="position:relative; left:250px; top:60px;" href="#" data-toggle="popover"
+														trigger="manual" data-placement="bottom" data-content="Please keep response under 250 characters."></a>
+													<textarea id="apiblocked-justification" placeholder="Please describe intended purpose and include estimated # of API calls. &#10;(max. 250 characters)"
+														class="form-control" title="Please describe your intended use and give estimated number of API calls."
+														required></textarea>
+												</div>
+												<!-- loading animation -->
+												<div id="apiaccess-loading">
+													<img src="calculating_LD.gif" alt="loading icon" class="loading">
+												</div>
+											</div>
+											<div class="modal-footer">
+												<!-- submit justification -->
+												<input type="submit" id="apiblocked" value="Submit" class="btn btn-default calculate" />
+												<!-- reset button -->
+												<input type="reset" id="apiaccess-blocked-reset" value="Reset" class="btn btn-default" hidden />
+												<input type="button" id="apiaccess-done" value="Cancel" class="btn btn-default apiaccess-done" />
+											</div>
+										</form>
 									</div>
 								</div>
 							</div>

@@ -113,8 +113,10 @@ $(document).ready(function() {
     // reset apiaccess form
     $(".apiaccess-done").click(function(e) {
         $("#apiaccess-reset").click();
+        $("#apiaccess-blocked-reset").click();
         $("#apiaccess-new-user").modal('hide');
         $("#apiaccess-existing-user").modal('hide');
+        $("#apiaccess-blocked-user").modal('hide');
     });
 
     $("#example-gwas").click(function(e){
@@ -1144,6 +1146,12 @@ function updateData(id) {
             $('#'+id+"-loading").show();
             updateAPIaccess();
             break;
+        case 'apiblocked':
+            if(checkTextAreaLength(id)) {
+                $('#'+id+"-loading").show();
+                updateAPIblocked();
+                break;
+            }
     }
 }
 
@@ -1290,17 +1298,17 @@ function isPopulationSet(elementId) {
     }
 }
 
-// function checkTextAreaLength(elementId) {
-//     var description =  $('#'+elementId+'-usage').val();
-//     if(description.length > 250 ) {
-//         $('#'+elementId+'-usage-warning').popover('show');
-//         setTimeout(function() { $('#'+elementId+'-usage-warning').popover('hide'); }, 4000);
-//         return false;
-//     } else {
-//         $('#'+elementId+'-usage-warning').popover('hide');
-//         return true;
-//     }
-// }
+function checkTextAreaLength(elementId) {
+    var description =  $('#'+elementId+'-justification').val();
+    if(description.length > 250 ) {
+        $('#'+elementId+'-justification-warning').popover('show');
+        setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
+        return false;
+    } else {
+        $('#'+elementId+'-justification-warning').popover('hide');
+        return true;
+    }
+}
 
 function updateLDassoc() {
 
@@ -2582,13 +2590,59 @@ function updateAPIaccess() {
     ajaxRequest.success(function(data) {
         $('.modal-title.apiaccess').empty().append(data.message);
         $('.' + id + '-user-email').empty().append(data.email);
+        $('#apiblocked-email').val(data.email);
         if (data.message.substring(0, 5) == "Thank") {
             // new user
             $('#' + id + '-new-user').modal('show');
-        } else { 
+        } else if (data.message.substring(0, 5) == "Email") { 
             // existing user
             $('#' + id + '-existing-user').modal('show');
+        } else {
+            // blocked user
+            $('#' + id + '-blocked-user').modal('show');
         }
+        $('#' + id + '-loading').hide();
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+    hideLoadingIcon(ajaxRequest, id);
+}
+
+function updateAPIblocked() {
+    var id = 'apiblocked';
+    var $btn = $('#' + id).button('loading');
+
+    var reference = "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+
+    var apiblockedInputs = {
+        email: $('#apiblocked-email').val(),
+        institution: $('#apiblocked-justification').val(),
+        reference: reference
+    };
+
+    var url = restServerUrl + "/apiblocked_web";
+
+    var ajaxRequest = $.ajax({
+        type : "GET",
+        url : url,
+        data : apiblockedInputs,
+        contentType : 'application/json' // JSON
+    });
+
+    ajaxRequest.success(function(data) {
+        // $('.modal-title.apiaccess').empty().append(data.message);
+        // $('.' + id + '-user-email').empty().append(data.email);
+        // if (data.message.substring(0, 5) == "Thank") {
+        //     // new user
+        //     $('#' + id + '-new-user').modal('show');
+        // } else if (data.message.substring(0, 5) == "Email") { 
+        //     // existing user
+        //     $('#' + id + '-existing-user').modal('show');
+        // } else {
+        //     // blocked user
+        //     $('#' + id + '-blocked-user').modal('show');
+        // }
         $('#' + id + '-loading').hide();
     });
     ajaxRequest.always(function() {

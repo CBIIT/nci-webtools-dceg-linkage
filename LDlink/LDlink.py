@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess
+from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -779,6 +779,15 @@ def ping():
 def status(filename):
     return jsonify(os.path.isfile(filename))
 
+@app.route('/LDlinkRestWeb/apiblocked_web', methods=['GET'])
+def apiblocked_web():
+    email = request.args.get('email', False)
+    justification = request.args.get('justification', False)
+
+    out_json = emailJustification(email, justification)
+    # requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
+    return sendJSON(out_json)
+
 
 @app.route('/LDlinkRestWeb/apiaccess_web', methods=['GET'])
 def apiaccess_web():
@@ -790,9 +799,7 @@ def apiaccess_web():
 
     out_json = register_user_web(
         firstname, lastname, email, institution, reference)
-
     requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
-
     return sendJSON(out_json)
 
 @app.route('/LDlinkRest/apiaccess_api', methods=['GET'])
@@ -804,10 +811,8 @@ def apiaccess_api():
     token = request.args.get('token', False)
     registered = request.args.get('registered', False)
     blocked = request.args.get('blocked', False)
-
     out_json = register_user_api(
         firstname, lastname, email, institution, token, registered, blocked)
-
     return sendJSON(out_json)
 
 
