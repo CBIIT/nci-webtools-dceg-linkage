@@ -121,7 +121,7 @@ $(document).ready(function() {
         $('#apiblocked-message').hide();
         $('#apiblocked-done').val("Cancel");
 
-        $("#apiaccess-blocked-reset").click();
+        $("#apiblocked-reset").click();
         $("#apiaccess-blocked-user").modal('hide');
     });
 
