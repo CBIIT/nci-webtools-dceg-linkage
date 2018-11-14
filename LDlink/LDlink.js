@@ -2633,7 +2633,13 @@ function updateAPIblocked() {
     var reference = "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
 
     var apiblockedInputs = {
+        firstname: $('#apiblocked-firstname').val(),
+        lastname: $('#apiblocked-lastname').val(),
+        institution: $('#apiblocked-institution').val(),
         email: $('#apiblocked-email').val(),
+        token: $('#apiblocked-token').val(),
+        registered: $('#apiblocked-registered').val(),
+        blocked: $('#apiblocked-blocked').val(),
         justification: $('#apiblocked-justification').val(),
         reference: reference
     };
@@ -2655,7 +2661,7 @@ function updateAPIblocked() {
         // hide submit button
         $('#apiblocked').hide();
         // show form submission message
-        $('#apiblocked').show();
+        $('#apiblocked-message').show();
         // change cancel to done button
         $('#apiblocked-done').val("Done");
     });
