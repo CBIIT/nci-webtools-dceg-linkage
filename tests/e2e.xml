@@ -1,0 +1,7 @@
+<testsuite name="Mocha Tests" tests="2" failures="1" errors="1" skipped="0" timestamp="Thu, 15 Nov 2018 22:43:51 GMT" time="3.852">
+<testcase classname="Environmental Variables" name="should specify the website in the TEST_WEBSITE environmental variable" time="0"><failure>expected undefined to exist
+AssertionError: expected undefined to exist
+    at Object.should.exist (node_modules\chai\lib\chai\interface\should.js:143:34)
+    at Context.&#x3C;anonymous&#x3E; (tests\end-to-end\scripts\environment_test.js:6:16)</failure></testcase>
+<testcase classname="LDlink Smoke Test" name="should specify the correct website" time="1.499"/>
+</testsuite>

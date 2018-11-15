@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Provider: National Institutes of Health (NIH), National Cancer Institute (hereinafter \"NCI\")",
   "main": "index.js",
-  "directories": {
-    "test": "mocha test/end-to-end/scripts/ --reporter xunit --reporter-options output=test/end-to-end/scripts/e2e_results.xml"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:e2e": "mocha -R xunit -O output=tests/e2e.xml tests/end-to-end/scripts/*test.js",
+    "test:integration": "echo TODO: Implement integration tests",
+    "test:unit": "echo TODO: Implement integration tests"
   },
   "repository": {
     "type": "git",
@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/CBIIT/nci-webtools-dceg-linkage#readme",
   "devDependencies": {
+    "chai": "^4.2.0",
     "mocha": "^5.2.0",
-    "selenium-webdriver": "^3.6.0"
+    "request": "^2.88.0",
+    "selenium-webdriver": "^4.0.0-alpha.1"
   }
 }
