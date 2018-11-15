@@ -2660,6 +2660,8 @@ function updateAPIblocked() {
     });
 
     ajaxRequest.success(function(data) {
+        // reset form
+        $("#apiblocked-reset").click();
         // hide loading animation
         $('#' + id + '-loading').hide();
         // hide form
