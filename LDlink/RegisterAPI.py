@@ -54,7 +54,7 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     message += "<br>Registered: " + str(registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
-    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/block_user?email=' + email + '&token=admintoken123">Click here to unblock user.</a></u>'
+    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=admintoken123">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP("localhost")
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", emailList, packet.as_string())
