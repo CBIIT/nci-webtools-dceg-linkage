@@ -13,8 +13,8 @@ describe('LDlink Smoke Test', function() {
             .forBrowser('firefox')
             .setFirefoxOptions(new firefox.Options().headless())
             .build();
-        // this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
-        this.website = 'https://ldlink-dev.nci.nih.gov/';
+        this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
+        // this.website = 'https://ldlink-dev.nci.nih.gov/';
     });
 
     it('should specify the correct website', async function() {
