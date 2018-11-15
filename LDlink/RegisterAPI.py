@@ -18,7 +18,6 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
     print "sending message"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
-    # packet['From'] = "LDlink" + " <do.not.reply@nih.gov>"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = email
     message = ''
@@ -29,12 +28,49 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
 
     packet.attach(MIMEText(message, 'html'))
 
-    # print self.MAIL_HOST
     # temp use localhost, use official NIH mailfwd account in future (put in config file)
     smtp = smtplib.SMTP(email_account)
-    # smtp.sendmail("do.not.reply@nih.gov", email, packet.as_string())
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
+# email user when their token is blocked
+def emailUserBlocked(email, email_account):
+    print "sending message"
+    packet = MIMEMultipart()
+    packet['Subject'] = "LDLink API Access Token Blocked"
+    packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
+    packet['To'] = email
+    message = "Dear " + str(email) + ", " + "<br><br>"
+    message += "Your LDlink API access token has been blocked.<br><br>"
+    message += "To unblock, resubmit a request in LDlink's <a href=\"https://ldlink.nci.nih.gov/?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
+    message += "Please contact the LDlink Web Admin (NCILDlinkWebAdmin@mail.nih.gov) for any questions or concerns.<br><br>"
+    message += "LDlink Web Admin"
+
+    packet.attach(MIMEText(message, 'html'))
+
+    # temp use localhost, use official NIH mailfwd account in future (put in config file)
+    smtp = smtplib.SMTP(email_account)
+    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+
+# email user when their token is unblocked
+def emailUserUnblocked(email, email_account):
+    print "sending message"
+    packet = MIMEMultipart()
+    packet['Subject'] = "LDLink API Access Token Unblocked"
+    packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
+    packet['To'] = email
+    
+    message = "Dear " + str(email) + ", " + "<br><br>"
+    message += "Your LDlink API access token has been unblocked.<br><br>"
+    message += "Please contact the LDlink Web Admin (NCILDlinkWebAdmin@mail.nih.gov) for any questions or concerns.<br><br>"
+    message += "LDlink Web Admin"
+
+    packet.attach(MIMEText(message, 'html'))
+
+    # temp use localhost, use official NIH mailfwd account in future (put in config file)
+    smtp = smtplib.SMTP(email_account)
+    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+
+# email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
@@ -126,6 +162,7 @@ def blockUser(email):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     api_access_dir = config['api']['api_access_dir']
+    email_account = config['api']['email_account']
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
@@ -135,8 +172,9 @@ def blockUser(email):
     con.commit()
     con.close()
     out_json = {
-        "message": "Email user (" + email + ")'s API token access has been blocked."
+        "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
+    emailUserBlocked(email, email_account)
     return out_json
 
 # sets blocked attribute of user to 0=false
@@ -145,6 +183,7 @@ def unblockUser(email):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     api_access_dir = config['api']['api_access_dir']
+    email_account = config['api']['email_account']
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
@@ -154,8 +193,9 @@ def unblockUser(email):
     con.commit()
     con.close()
     out_json = {
-        "message": "Email user (" + email + ")'s API token access has been unblocked."
+        "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
+    emailUserUnblocked(email, email_account)
     return out_json
 
 # update record only if email's token is expired and user re-registers
