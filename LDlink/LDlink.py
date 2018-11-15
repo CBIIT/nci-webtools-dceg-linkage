@@ -162,12 +162,15 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        with open('config.yml', 'r') as c:
+            config = yaml.load(c)
+        admin_token = config['api']['admin_token']
         # Check if token argument is missing in api call
         if 'token' not in request.args:
             return sendTraceback('Admin API token missing.')
         token = request.args['token']
         # Check if token is valid
-        if token != "admintoken123" or token is None:
+        if token != admin_token or token is None:
             return sendTraceback('Invalid Admin API token.')
         return f(*args, **kwargs)
     return decorated_function

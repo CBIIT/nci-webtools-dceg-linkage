@@ -14,7 +14,7 @@ import datetime
 # blocked users attribute: 0=false, 1=true
 
 # email user token
-def emailUser(email, token, expiration, firstname, token_expiration):
+def emailUser(email, token, expiration, firstname, token_expiration, email_account):
     print "sending message"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
@@ -31,18 +31,23 @@ def emailUser(email, token, expiration, firstname, token_expiration):
 
     # print self.MAIL_HOST
     # temp use localhost, use official NIH mailfwd account in future (put in config file)
-    smtp = smtplib.SMTP("localhost")
+    smtp = smtplib.SMTP(email_account)
     # smtp.sendmail("do.not.reply@nih.gov", email, packet.as_string())
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 def emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    admin_token = config['api']['admin_token']
+    email_account = config['api']['email_account']
+    admin_email_list = config['api']['admin_email_list']
     print "sending message justification"
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
     else:
         bool_blocked = "False"
-    emailList = ['kevin.jiang2@nih.gov', 'kvvnjng@gmail.com'] # change to NCILDlinkWebAdmin email or a list of emails later
+    emailList = admin_email_list.split(', ') # change to NCILDlinkWebAdmin email or a list of emails later
     packet = MIMEMultipart()
     packet['Subject'] = "[Unblock Request] LDLink API Access User"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
@@ -54,9 +59,9 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     message += "<br>Registered: " + str(registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
-    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=admintoken123">Click here to unblock user.</a></u>'
+    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + admin_token + '">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
-    smtp = smtplib.SMTP("localhost")
+    smtp = smtplib.SMTP(email_account)
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", emailList, packet.as_string())
     out_json = {
         "email": email,
@@ -239,9 +244,12 @@ def checkBlockedEmail(email, api_access_dir):
 
 # generate unique access token for each user
 def generateToken(curr):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    admin_token = bool(config['api']['admin_token'])
     token = binascii.b2a_hex(os.urandom(6))
     # if true, generate another token - make sure example token is not generated
-    while(checkUniqueToken(curr, token) or token == "faketoken123" or token == "admintoken123"):
+    while(checkUniqueToken(curr, token) or token == "faketoken123" or token == admin_token):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
@@ -261,6 +269,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
     api_access_dir = config['api']['api_access_dir']
     token_expiration = bool(config['api']['token_expiration'])
     token_expiration_days = config['api']['token_expiration_days']
+    email_account = config['api']['email_account']
 
     out_json = {}
 
@@ -308,7 +317,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
                     "registered": record[5],
                     "blocked": record[6]
                 }
-                emailUser(record[2], record[4], format_expiration, record[0], token_expiration)
+                emailUser(record[2], record[4], format_expiration, record[0], token_expiration, email_account)
             else:
                 token = generateToken(curr)
                 registered = getDatetime()
@@ -326,7 +335,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
                     "registered": format_registered,
                     "blocked": blocked
                 }
-                emailUser(email, token, format_expiration, firstname, token_expiration)
+                emailUser(email, token, format_expiration, firstname, token_expiration, email_account)
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
@@ -345,7 +354,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
             "registered": format_registered,
             "blocked": blocked
         }
-        emailUser(email, token, format_expiration, firstname, token_expiration)
+        emailUser(email, token, format_expiration, firstname, token_expiration, email_account)
 
     conn.close()
     return out_json
