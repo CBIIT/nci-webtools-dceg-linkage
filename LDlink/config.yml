@@ -15,6 +15,6 @@ api:
   api_access_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/apiaccess/'
   token_expiration: False
   token_expiration_days: 365
-  admin_token: 'admintoken123'
-  email_account: 'localhost'
-  admin_email_list: 'kevin.jiang2@nih.gov, kvvnjng@gmail.com'
+  admin_token: TOKEN_ADMIN
+  email_account: ACCOUNT_EMAIL
+  admin_email_list: LIST_EMAIL_ADMIN
