@@ -28,8 +28,8 @@ describe('LDlink Smoke Test', function() {
         title.should.equal('LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups');
     });
 
-    it('should display LDassoc example GWAS data', async function() {
-        console.log('test -> should display LDassoc example GWAS data');
+    it('should display LDassoc results from example GWAS data', async function() {
+        console.log('test -> should display LDassoc results from example GWAS data');
         const driver = this.driver;
         // switch to LDassoc tab
         console.log('[switch to LDassoc tab]');
@@ -60,11 +60,11 @@ describe('LDlink Smoke Test', function() {
         await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
         // assert if Association Results table is present
         console.log('[assert if Association Results table is present]');
-        const associationResultsTable = By.css('[id="new-ldassoc"]');
-        await driver.wait(until.elementLocated(associationResultsTable));
-        const associationResultsTableElement = driver.findElement(associationResultsTable);
-        const associationResultsTableClass = await associationResultsTableElement.getAttribute('class');
-        associationResultsTableClass.should.contain('dataTable');
+        const associationResultsRSQuery = By.xpath('//*[@id="new-ldassoc"]/tbody/tr[1]/td[1]/a');
+        await driver.wait(until.elementLocated(associationResultsRSQuery));
+        const associationResultsRSQueryElement = driver.findElement(associationResultsRSQuery);
+        const associationResultsRSQueryElementText = await associationResultsRSQueryElement.getText();
+        associationResultsRSQueryElementText.should.contain('rs7837688');
     });
 
     it('should display LDhap results from sample file with RS and genomic coordinate queries', async function() {
@@ -85,7 +85,7 @@ describe('LDlink Smoke Test', function() {
         console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
         const populationDropdown = By.xpath('//*[@id="ldhapForm"]/div[3]/div/div/button');
         await driver.findElement(populationDropdown).click();
-        const populationYRICheckbox = By.xpath('//*[@id="ldhapForm"]/div[3]/div/div/ul/li[3]/a/label/input');
+        const populationYRICheckbox = By.xpath('//*[@id="ldhapForm"]/div[3]/div/div/ul/li[3]/a');
         await driver.findElement(populationYRICheckbox).click();
 		// click calculate button
         console.log('[click calculate button]');
@@ -100,6 +100,50 @@ describe('LDlink Smoke Test', function() {
         const haplotypeFrequencyElement = driver.findElement(haplotypeFrequency);
         const haplotypeFrequencyResults = await haplotypeFrequencyElement.getText();
         haplotypeFrequencyResults.should.contain('0.8565');
+    });
+
+    it('should display LDmatrix results from sample file', async function() {
+        console.log('test -> should display LDmatrix results from sample file');
+        const driver = this.driver;
+        // switch to LDmatrix tab
+        console.log('[switch to LDmatrix tab]');
+        const tabLDmatrix = By.css('[id="ldmatrix-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabLDmatrix));
+        await driver.findElement(tabLDmatrix).click();
+        // input LDmatrix sample file with RS queries
+        console.log('[input LDmatrix sample file with RS queries]');
+        const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_LDmatrix.txt');
+        const fileInput = By.css('[id="ldmatrix-file"]');
+        await driver.wait(until.elementLocated(fileInput));
+        await driver.findElement(fileInput).sendKeys(sampleFilePath);
+        // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
+        console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
+        const populationDropdown = By.xpath('//*[@id="ldmatrixForm"]/div[2]/div/div/button');
+        await driver.findElement(populationDropdown).click();
+        const populationYRICheckbox = By.xpath('//*[@id="ldmatrixForm"]/div[2]/div/div/ul/li[3]/a');
+        await driver.findElement(populationYRICheckbox).click();
+        // click calculate button
+        console.log('[click calculate button]');
+        const calculateButton = By.css('[id="ldmatrix"]');
+        await driver.findElement(calculateButton).click();
+        // wait until Bokeh plot is visible
+        console.log('[wait until Bokeh plot is visible]');
+        const bokehPlot = By.css('[id="ldmatrix-bokeh-graph"]');
+        const bokehPlotElement = driver.findElement(bokehPlot);
+        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        // wait until Bokeh Export plot button is enabled
+        console.log('[wait until Bokeh Export plot button is enabled]');
+        const exportPlotButton = By.css('[id="ldmatrix-menu1"]');
+        await driver.wait(until.elementLocated(exportPlotButton));
+        const exportPlotButtonElement = driver.findElement(exportPlotButton);
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
+        // assert if LDmatrix R2 legend is present
+        console.log('[assert if LDmatrix R2 legend is present]');
+        const legend = By.css('[id="ldmatrix-legend"]');
+        await driver.wait(until.elementLocated(legend));
+        const legendElement = driver.findElement(legend);
+        const legendSrc = await legendElement.getAttribute('src');
+        legendSrc.should.contain('LDmatrix_legend_R2.png');
     });
 
     after(async function() {
