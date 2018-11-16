@@ -67,6 +67,41 @@ describe('LDlink Smoke Test', function() {
         associationResultsTableClass.should.contain('dataTable');
     });
 
+    it('should display LDhap results from sample file with RS and genomic coordinate queries', async function() {
+        console.log('test -> should display LDhap results from sample file with RS and genomic coordinate queries');
+        const driver = this.driver;
+        // switch to LDhap tab
+        console.log('[switch to LDhap tab]');
+        const tabLDhap = By.css('[id="ldhap-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabLDhap));
+        await driver.findElement(tabLDhap).click();
+        // input LDhap sample file with RS and genomic coordinate queries
+        console.log('[input LDhap sample file with RS and genomic coordinate queries]');
+        const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_LDhap.txt');
+        const fileInput = By.css('[id="ldhap-file"]');
+        await driver.wait(until.elementLocated(fileInput));
+        await driver.findElement(fileInput).sendKeys(sampleFilePath);
+        // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
+        console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
+        const populationDropdown = By.xpath('//*[@id="ldhapForm"]/div[3]/div/div/button');
+        await driver.findElement(populationDropdown).click();
+        const populationYRICheckbox = By.xpath('//*[@id="ldhapForm"]/div[3]/div/div/ul/li[3]/a/label/input');
+        await driver.findElement(populationYRICheckbox).click();
+		// click calculate button
+        console.log('[click calculate button]');
+        const calculateButton = By.css('[id="ldhap"]');
+        await driver.findElement(calculateButton).click();
+        // assert if Association Results table is present
+        console.log('[assert if Association Results table is present]');
+        const resultsTable = By.xpath('//*[@id="ldhap-results-container"]/div');
+        const resultsTableElement = driver.findElement(resultsTable);
+        await driver.wait(until.elementIsVisible(resultsTableElement));
+        const haplotypeFrequency = By.xpath('//*[@id="ldhap-table-right"]/tfoot/tr[2]/td[1]');
+        const haplotypeFrequencyElement = driver.findElement(haplotypeFrequency);
+        const haplotypeFrequencyResults = await haplotypeFrequencyElement.getText();
+        haplotypeFrequencyResults.should.contain('0.8565');
+    });
+
     after(async function() {
         this.driver.quit();
     })
