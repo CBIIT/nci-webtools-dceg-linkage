@@ -188,11 +188,56 @@ describe('LDlink Smoke Test', function() {
         const resultsLinkageEquilibrium = By.xpath('//*[@id="ldpair-results-container"]/div/div');
         const resultsLinkageEquilibriumElement = driver.findElement(resultsLinkageEquilibrium);
         const resultsLinkageEquilibriumElementText = await resultsLinkageEquilibriumElement.getText();
-        console.log(resultsLinkageEquilibriumElementText);
         resultsLinkageEquilibriumElementText.should.contain('rs2280548 and rs6984900 are in linkage equilibrium');
     });
 
-    after(async function() {
-        this.driver.quit();
-    })
+    it('should display LDproxy results from a sample genomic query', async function() {
+        console.log('test -> should display LDproxy results from a sample genomic query');
+        const driver = this.driver;
+        // switch to LDproxy tab
+        console.log('[switch to LDproxy tab]');
+        const tabLDproxy = By.css('[id="ldproxy-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabLDproxy));
+        await driver.findElement(tabLDproxy).click();
+        // input RS# rs2280548 into variant 1
+        console.log('[input genomic coordinate chr22:25855459 into variant]');
+        const variantInput = By.css('[id="ldproxy-snp"]');
+        await driver.wait(until.elementLocated(variantInput));
+        await driver.findElement(variantInput).sendKeys('chr22:25855459');
+        // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
+        console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
+        const populationDropdown = By.xpath('//*[@id="ldproxyForm"]/div[2]/div/div/button');
+        await driver.findElement(populationDropdown).click();
+        const populationYRICheckbox = By.xpath('//*[@id="ldproxyForm"]/div[2]/div/div/ul/li[3]/a');
+        await driver.findElement(populationYRICheckbox).click();
+        // click calculate button once enabled
+        console.log('[click calculate button once enabled]');
+        const calculateButton = By.css('[id="ldproxy"]');
+        const calculateButtonElement = driver.findElement(calculateButton);
+        await driver.wait(until.elementIsEnabled(calculateButtonElement));
+        await driver.findElement(calculateButton).click();
+        // wait until Bokeh plot is visible
+        console.log('[wait until Bokeh plot is visible]');
+        const bokehPlot = By.css('[id="ldproxy-bokeh-graph"]');
+        const bokehPlotElement = driver.findElement(bokehPlot);
+        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        // wait until Bokeh Export plot button is enabled
+        console.log('[wait until Bokeh Export plot button is enabled]');
+        const exportPlotButton = By.css('[id="ldproxy-menu1"]');
+        await driver.wait(until.elementLocated(exportPlotButton));
+        const exportPlotButtonElement = driver.findElement(exportPlotButton);
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
+        // assert if Proxy Results table is present
+        console.log('[assert if Proxy Results table is present]');
+        const proxyResultsRSQuery = By.xpath('//*[@id="new-ldproxy"]/tbody/tr[1]/td[1]/a');
+        await driver.wait(until.elementLocated(proxyResultsRSQuery));
+        const proxyResultsRSQueryElement = driver.findElement(proxyResultsRSQuery);
+        const proxyResultsRSQueryElementText = await proxyResultsRSQueryElement.getText();
+        console.log(proxyResultsRSQueryElementText);
+        proxyResultsRSQueryElementText.should.contain('rs58892524');
+    });
+
+    // after(async function() {
+    //     this.driver.quit();
+    // })
 });
