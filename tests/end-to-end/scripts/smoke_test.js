@@ -46,6 +46,7 @@ describe('LDlink Smoke Test', function() {
         // await driver.wait(until.elementIsVisible(bokehPlotElement));
         // wait until Bokeh Export plot button is enabled
         const exportPlotButton = By.css('[id="ldassoc-menu1"]');
+        await driver.wait(until.elementLocated(exportPlotButton));
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
         await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
         // assert if Association Results table is present
