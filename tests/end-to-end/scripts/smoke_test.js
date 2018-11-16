@@ -237,7 +237,7 @@ describe('LDlink Smoke Test', function() {
         proxyResultsRSQueryElementText.should.contain('rs58892524');
     });
 
-    // after(async function() {
-    //     this.driver.quit();
-    // })
+    after(async function() {
+        this.driver.quit();
+    })
 });
