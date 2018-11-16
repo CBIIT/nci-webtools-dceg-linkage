@@ -41,9 +41,9 @@ describe('LDlink Smoke Test', function() {
         await driver.wait(until.elementIsEnabled(calculateButtonElement));
         await driver.findElement(calculateButton).click();
         // wait until Bokeh plot is visible
-        const bokehPlot = By.css('[id="ldassoc-bokeh-graph"]');
-        const bokehPlotElement = driver.findElement(bokehPlot);
-        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        // const bokehPlot = By.css('[id="ldassoc-bokeh-graph"]');
+        // const bokehPlotElement = driver.findElement(bokehPlot);
+        // await driver.wait(until.elementIsVisible(bokehPlotElement));
         // wait until Bokeh Export plot button is enabled
         const exportPlotButton = By.css('[id="ldassoc-menu1"]');
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
