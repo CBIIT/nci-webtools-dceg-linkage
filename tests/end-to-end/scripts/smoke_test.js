@@ -13,8 +13,8 @@ describe('LDlink Smoke Test', function() {
             .forBrowser('firefox')
             .setFirefoxOptions(new firefox.Options().headless())
             .build();
-        this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
-        // this.website = 'https://ldlink-dev.nci.nih.gov/';
+        // this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
+        this.website = 'https://ldlink-dev.nci.nih.gov/';
     });
 
     it('should specify the correct website', async function() {
@@ -28,14 +28,17 @@ describe('LDlink Smoke Test', function() {
     it('should display LDassoc example GWAS data', async function() {
         const driver = this.driver;
         // switch to LDassoc tab
+        console.log('[switch to LDassoc tab]');
         const tabLDassoc = By.css('[id="ldassoc-tab-anchor"]');
         await driver.wait(until.elementLocated(tabLDassoc));
         await driver.findElement(tabLDassoc).click();
         // click Use example GWAS data
+        console.log('[click Use example GWAS data]')
         const useExampleGWASbutton = By.xpath('//*[@id="ldassoc-sample"]/label/span');
         await driver.wait(until.elementLocated(useExampleGWASbutton));
         await driver.findElement(useExampleGWASbutton).click();
         // click calculate button once enabled
+        console.log('[click calculate button once enabled]');
         const calculateButton = By.css('[id="ldassoc"]');
         const calculateButtonElement = driver.findElement(calculateButton);
         await driver.wait(until.elementIsEnabled(calculateButtonElement));
@@ -50,6 +53,7 @@ describe('LDlink Smoke Test', function() {
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
         await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
         // assert if Association Results table is present
+        console.log('[assert if Association Results table is present]');
         const associationResultsTable = By.css('[id="new-ldassoc"]');
         await driver.wait(until.elementLocated(associationResultsTable));
         const associationResultsTableElement = driver.findElement(associationResultsTable);
