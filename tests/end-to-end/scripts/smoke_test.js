@@ -146,6 +146,52 @@ describe('LDlink Smoke Test', function() {
         legendSrc.should.contain('LDmatrix_legend_R2.png');
     });
 
+    it('should display LDpair results from a sample RS and genomic coordinate query', async function() {
+        console.log('test -> should display LDpair results from a sample RS and genomic coordinate query');
+        const driver = this.driver;
+        // switch to LDpair tab
+        console.log('[switch to LDpair tab]');
+        const tabLDpair = By.css('[id="ldpair-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabLDpair));
+        await driver.findElement(tabLDpair).click();
+        // input RS# rs2280548 into variant 1
+        console.log('[input RS# rs2280548 into variant 1]');
+        const variant1Input = By.css('[id="ldpair-snp1"]');
+        await driver.wait(until.elementLocated(variant1Input));
+        await driver.findElement(variant1Input).sendKeys('rs2280548');
+        // input genomic coordinate chr8:128304269 into variant 2
+        console.log('[input genomic coordinate chr8:128304269 into variant 2]');
+        const variant2Input = By.css('[id="ldpair-snp2"]');
+        await driver.wait(until.elementLocated(variant2Input));
+        await driver.findElement(variant2Input).sendKeys('chr8:128304269');
+        // select all populations
+        console.log('[select all populations');
+        const populationDropdown = By.xpath('//*[@id="ldpairForm"]/div[3]/div/div/button');
+        await driver.findElement(populationDropdown).click();
+        const populationALLCheckbox = By.xpath('//*[@id="ldpairForm"]/div[3]/div/div/ul/li[1]/a');
+        await driver.findElement(populationALLCheckbox).click();
+		// click calculate button
+        console.log('[click calculate button]');
+        const calculateButton = By.css('[id="ldpair"]');
+        await driver.findElement(calculateButton).click();
+        // assert warning message
+        console.log('[assert if warning message is present');
+        const warningAlert = By.xpath('//*[@id="ldpair-message-warning"]/div');
+        const warningAlertElement = driver.findElement(warningAlert);
+        const warningAlertElementText = await warningAlertElement.getText();
+        warningAlertElementText.should.contain('rs2280548 and rs6984900 are on different chromosomes');
+        // assert if results are in linkage equilibrium
+        console.log('[assert if results are in linkage equilibrium]');
+        const resultsTable = By.xpath('//*[@id="ldpair-results-container"]/table[1]');
+        const resultsTableElement = driver.findElement(resultsTable);
+        await driver.wait(until.elementIsVisible(resultsTableElement));
+        const resultsLinkageEquilibrium = By.xpath('//*[@id="ldpair-results-container"]/div/div');
+        const resultsLinkageEquilibriumElement = driver.findElement(resultsLinkageEquilibrium);
+        const resultsLinkageEquilibriumElementText = await resultsLinkageEquilibriumElement.getText();
+        console.log(resultsLinkageEquilibriumElementText);
+        resultsLinkageEquilibriumElementText.should.contain('rs2280548 and rs6984900 are in linkage equilibrium');
+    });
+
     after(async function() {
         this.driver.quit();
     })
