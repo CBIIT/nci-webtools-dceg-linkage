@@ -11,7 +11,8 @@ LDlink/sftp-config-alt.json
 /common
 common/
 
-node_modules/
+node_modules
+tests/*.xml
 package-lock.json
 geckodriver.exe
 chromedriver.exe

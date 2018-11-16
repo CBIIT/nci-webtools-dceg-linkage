@@ -25,6 +25,37 @@ describe('LDlink Smoke Test', function() {
         title.should.equal('LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups');
     });
 
+    it('should display LDassoc example GWAS data', async function() {
+        const driver = this.driver;
+        // switch to LDassoc tab
+        const tabLDassoc = By.css('[id="ldassoc-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabLDassoc));
+        await driver.findElement(tabLDassoc).click();
+        // click Use example GWAS data
+        const useExampleGWASbutton = By.xpath('//*[@id="ldassoc-sample"]/label/span');
+        await driver.wait(until.elementLocated(useExampleGWASbutton));
+        await driver.findElement(useExampleGWASbutton).click();
+        // click calculate button once enabled
+        const calculateButton = By.css('[id="ldassoc"]');
+        const calculateButtonElement = driver.findElement(calculateButton);
+        await driver.wait(until.elementIsEnabled(calculateButtonElement));
+        await driver.findElement(calculateButton).click();
+        // wait until Bokeh plot is visible
+        const bokehPlot = By.css('[id="ldassoc-bokeh-graph"]');
+        const bokehPlotElement = driver.findElement(bokehPlot);
+        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        // wait until Bokeh Export plot button is enabled
+        const exportPlotButton = By.css('[id="ldassoc-menu1"]');
+        const exportPlotButtonElement = driver.findElement(exportPlotButton);
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
+        // assert if Association Results table is present
+        const associationResultsTable = By.css('[id="new-ldassoc"]');
+        await driver.wait(until.elementLocated(associationResultsTable));
+        const associationResultsTableElement = driver.findElement(associationResultsTable);
+        const associationResultsTableClass = await associationResultsTableElement.getAttribute('class');
+        associationResultsTableClass.should.contain('dataTable');
+    });
+
     after(async function() {
         this.driver.quit();
     })
