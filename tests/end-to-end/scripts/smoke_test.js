@@ -13,19 +13,23 @@ describe('LDlink Smoke Test', function() {
             .forBrowser('firefox')
             .setFirefoxOptions(new firefox.Options().headless())
             .build();
-        // this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
-        this.website = 'https://ldlink-dev.nci.nih.gov/';
+        this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
+        // this.website = 'https://ldlink-dev.nci.nih.gov/';
     });
 
     it('should specify the correct website', async function() {
+        console.log('test -> should specify the correct website');
         const driver = this.driver;
         await driver.get(this.website);
+        console.log('[wait until title of HTML page contains LDlink]');
         await driver.wait(until.titleContains('LDlink'));
+        console.log('[assert title of HTML page]');
         const title = await driver.getTitle();
         title.should.equal('LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups');
     });
 
     it('should display LDassoc example GWAS data', async function() {
+        console.log('test -> should display LDassoc example GWAS data');
         const driver = this.driver;
         // switch to LDassoc tab
         console.log('[switch to LDassoc tab]');
@@ -44,10 +48,12 @@ describe('LDlink Smoke Test', function() {
         await driver.wait(until.elementIsEnabled(calculateButtonElement));
         await driver.findElement(calculateButton).click();
         // wait until Bokeh plot is visible
-        // const bokehPlot = By.css('[id="ldassoc-bokeh-graph"]');
-        // const bokehPlotElement = driver.findElement(bokehPlot);
-        // await driver.wait(until.elementIsVisible(bokehPlotElement));
+        console.log('[wait until Bokeh plot is visible]');
+        const bokehPlot = By.css('[id="ldassoc-bokeh-graph"]');
+        const bokehPlotElement = driver.findElement(bokehPlot);
+        await driver.wait(until.elementIsVisible(bokehPlotElement));
         // wait until Bokeh Export plot button is enabled
+        console.log('[wait until Bokeh Export plot button is enabled]');
         const exportPlotButton = By.css('[id="ldassoc-menu1"]');
         await driver.wait(until.elementLocated(exportPlotButton));
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
