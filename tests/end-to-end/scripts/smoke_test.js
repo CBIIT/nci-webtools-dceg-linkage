@@ -11,10 +11,10 @@ describe('LDlink Smoke Test', function() {
     before(async function() {
         this.driver = await new Builder()
             .forBrowser('firefox')
-            .setFirefoxOptions(new firefox.Options().headless())
+            // .setFirefoxOptions(new firefox.Options().headless())
             .build();
-        this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
-        // this.website = 'https://ldlink-dev.nci.nih.gov/';
+        // this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
+        this.website = 'https://ldlink-dev.nci.nih.gov/';
     });
 
     it('should specify the correct website', async function() {
@@ -257,13 +257,15 @@ describe('LDlink Smoke Test', function() {
         // wait until warning message is visible
         console.log('[wait until warning message is visible]');
         const warningMessage = By.css('[id="snpchip-message-warning-content"]');
-        await driver.wait(until.elementLocated(warningMessage));
+        // await driver.wait(until.elementLocated(warningMessage));
+        const warningMessageElement = driver.findElement(warningMessage);
+        await driver.wait(until.elementIsVisible(warningMessageElement));
         // assert warning message
-        console.log('[assert if warning message is present]');
-        const warningAlert = By.css('[id="snpchip-message-warning-content"]');
-        const warningAlertElement = driver.findElement(warningAlert);
-        const warningAlertElementText = await warningAlertElement.getText();
-        warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
+        // console.log('[assert if warning message is present]');
+        // const warningAlert = By.css('[id="snpchip-message-warning-content"]');
+        // const warningAlertElement = driver.findElement(warningAlert);
+        // const warningAlertElementText = await warningAlertElement.getText();
+        // warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
     });
 
     // it('should display SNPclip results from sample file', async function() {
@@ -324,7 +326,7 @@ describe('LDlink Smoke Test', function() {
     //     helpDescriptionElementText.should.contain('LDlink is designed to be an intuitive and simple tool for investigating patterns of linkage disequilibrium across a variety of ancestral population groups. This help documentation page gives detailed description of the metrics calculated by LDlink modules and aids users in understanding all aspects of the required input and returned output. The documentation is divided into the following sections');
     // });
 
-    // after(async function() {
-    //     this.driver.quit();
-    // })
+    after(async function() {
+        this.driver.quit();
+    })
 });
