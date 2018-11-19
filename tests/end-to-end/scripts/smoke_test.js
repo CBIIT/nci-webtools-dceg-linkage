@@ -254,11 +254,14 @@ describe('LDlink Smoke Test', function() {
         console.log('[click calculate button]');
         const calculateButton = By.css('[id="snpchip"]');
         await driver.findElement(calculateButton).click();
-        // wait until table is visible
-        console.log('[wait until table is visible]');
-        const table = By.xpath('//*[@id="snpchip-thinned-list"]');
-        const tableElement = driver.findElement(table);
-        await driver.wait(until.elementIsVisible(tableElement));
+        // assert RS # in thinned list
+        console.log('[assert RS # in thinned list]');
+        const tableRow = By.xpath('//*[@id="snpchip-thinned-list"]/tbody/tr[58]/td[1]');
+        await driver.wait(until.elementLocated(tableRow));
+        const tableRowElement = driver.findElement(tableRow);
+        const tableRowElementText = await tableRowElement.getText();
+        console.log(tableRowElementText);
+        tableRowElementText.should.contain('rs11962771');
         // assert warning message
         console.log('[assert if warning message is present]');
         const warningAlert = By.xpath('//*[@id="snpchip-message-warning"]/div');
@@ -301,7 +304,6 @@ describe('LDlink Smoke Test', function() {
         const warningAlert = By.xpath('//*[@id="snpclip-message-warning-content"]');
         const warningAlertElement = driver.findElement(warningAlert);
         const warningAlertElementText = await warningAlertElement.getText();
-        console.log(warningAlertElementText);
         warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
     });
 
