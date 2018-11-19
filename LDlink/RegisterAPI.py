@@ -74,20 +74,22 @@ def emailUserUnblocked(email, email_account):
 def emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    admin_token = config['api']['admin_token']
     email_account = config['api']['email_account']
-    approval_email_list = config['api']['approval_email_list']
+    api_superuser = config['api']['api_superuser']
+    api_access_dir = config['api']['api_access_dir']
+    api_superuser_token = getToken(api_superuser, api_access_dir)
     print "sending message justification"
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
     else:
         bool_blocked = "False"
-    emailList = approval_email_list.split(', ') # change to NCILDlinkWebAdmin email or a list of emails later
+    # emailList = approval_email_list.split(', ') # change to NCILDlinkWebAdmin email or a list of emails later
     packet = MIMEMultipart()
     packet['Subject'] = "[Unblock Request] LDLink API Access User"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
-    packet['To'] = ", ".join(emailList)
+    # packet['To'] = ", ".join(emailList)
+    packet['To'] = api_superuser
     message = "The following user has submitted an unblock request:"
     message += "<br><br>First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
@@ -97,10 +99,10 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
-    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + admin_token + '">Click here to unblock user.</a></u>'
+    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP(email_account)
-    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", emailList, packet.as_string())
+    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
     out_json = {
         "email": email,
         "justification": justification
@@ -246,6 +248,23 @@ def checkToken(token, api_access_dir, token_expiration, token_expiration_days):
         else:
             return False
 
+# given email, return token
+def getToken(email, api_access_dir):
+    con = sqlite3.connect(api_access_dir + 'api_access.db')
+    con.text_factory = str
+    cur = con.cursor()
+    cur.execute(
+        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    con.commit()
+    temp = (email,)
+    cur.execute("SELECT * FROM api_users WHERE email=?", temp)
+    record = cur.fetchone()
+    con.close()
+    if record is None:
+        return None
+    else:
+        return record[4]
+
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
 def checkBlocked(token, api_access_dir):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
@@ -290,10 +309,9 @@ def checkBlockedEmail(email, api_access_dir):
 def generateToken(curr):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    admin_token = bool(config['api']['admin_token'])
     token = binascii.b2a_hex(os.urandom(6))
     # if true, generate another token - make sure example token is not generated
-    while(checkUniqueToken(curr, token) or token == "faketoken123" or token == admin_token):
+    while(checkUniqueToken(curr, token) or token == "faketoken123"):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 

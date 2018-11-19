@@ -256,7 +256,7 @@ describe('LDlink Smoke Test', function() {
         await driver.findElement(calculateButton).click();
         // wait until table is visible
         console.log('[wait until table is visible]');
-        const table = By.css('[id="snpchip-results-container"]');
+        const table = By.xpath('//*[@id="snpchip-thinned-list"]');
         const tableElement = driver.findElement(table);
         await driver.wait(until.elementIsVisible(tableElement));
         // assert warning message
@@ -293,7 +293,7 @@ describe('LDlink Smoke Test', function() {
         await driver.findElement(calculateButton).click();
         // wait until table is visible
         console.log('[wait until table is visible]');
-        const table = By.css('[id="snpclip-results-container"]');
+        const table = By.xpath('//*[@id="snpclip-table-thin"]');
         const tableElement = driver.findElement(table);
         await driver.wait(until.elementIsVisible(tableElement));
         // assert warning message

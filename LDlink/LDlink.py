@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser
+from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -164,13 +164,15 @@ def requires_admin_token(f):
     def decorated_function(*args, **kwargs):
         with open('config.yml', 'r') as c:
             config = yaml.load(c)
-        admin_token = config['api']['admin_token']
+        api_superuser = config['api']['api_superuser']
+        api_access_dir = config['api']['api_access_dir']
+        api_superuser_token = getToken(api_superuser, api_access_dir)
         # Check if token argument is missing in api call
         if 'token' not in request.args:
             return sendTraceback('Admin API token missing.')
         token = request.args['token']
         # Check if token is valid
-        if token != admin_token or token is None:
+        if token != api_superuser_token or token is None:
             return sendTraceback('Invalid Admin API token.')
         return f(*args, **kwargs)
     return decorated_function
