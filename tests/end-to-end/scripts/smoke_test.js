@@ -28,6 +28,22 @@ describe('LDlink Smoke Test', function() {
         title.should.equal('LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups');
     });
 
+    it('should display news text from separate html file', async function() {
+        console.log('test -> should display news text from separate html file');
+        const driver = this.driver;
+        // wait until news and updates container is visible
+        console.log('[wait until news and updates container is visible]');
+        const newsContainer = By.css('[id="news-container"]');
+        const newsContainerElement = driver.findElement(newsContainer);
+        await driver.wait(until.elementIsVisible(newsContainerElement));
+        // assert news text
+        console.log('[assert news text]');
+        const newsText = By.xpath('//*[@id="news-container"]');
+        const newsTextElement = driver.findElement(newsText);
+        const newsTextElementText = await newsTextElement.getText();
+        newsTextElementText.should.contain('New features in');
+    });
+
     it('should display LDassoc results from example GWAS data', async function() {
         console.log('test -> should display LDassoc results from example GWAS data');
         const driver = this.driver;
