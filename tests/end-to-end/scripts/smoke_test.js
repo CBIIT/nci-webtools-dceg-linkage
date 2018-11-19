@@ -165,7 +165,7 @@ describe('LDlink Smoke Test', function() {
         await driver.wait(until.elementLocated(variant2Input));
         await driver.findElement(variant2Input).sendKeys('chr8:128304269');
         // select all populations
-        console.log('[select all populations');
+        console.log('[select all populations]');
         const populationDropdown = By.xpath('//*[@id="ldpairForm"]/div[3]/div/div/button');
         await driver.findElement(populationDropdown).click();
         const populationALLCheckbox = By.xpath('//*[@id="ldpairForm"]/div[3]/div/div/ul/li[1]/a');

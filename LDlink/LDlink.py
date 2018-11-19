@@ -840,41 +840,45 @@ def apiaccess_api():
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_api_user_web():
+    isWeb = True
     email = request.args.get('email', False)
     token = request.args.get('token', False)
     in_json = {
         "token": token,
         "email": email
     }
-    out_json = blockUser(email)
+    out_json = blockUser(email, isWeb)
     requests.get(request.url_root + 'LDlinkRest/apiaccess/block_user', params=in_json)
     return sendJSON(out_json)
 
 @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_api_user_api():
+    isWeb = False
     email = request.args.get('email', False)
-    out_json = blockUser(email)
+    out_json = blockUser(email, isWeb)
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_api_user_web():
+    isWeb = True
     email = request.args.get('email', False)
     token = request.args.get('token', False)
     in_json = {
         "token": token,
         "email": email
     }
-    out_json = unblockUser(email)
+    out_json = unblockUser(email, isWeb)
     requests.get(request.url_root + 'LDlinkRest/apiaccess/unblock_user', params=in_json)
     return sendJSON(out_json)
 
 @app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_api_user_api():
+    isWeb = False
     email = request.args.get('email', False)
-    out_json = unblockUser(email)
+    out_json = unblockUser(email, isWeb)
     return sendJSON(out_json)
 
 

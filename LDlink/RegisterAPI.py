@@ -88,13 +88,15 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     packet['Subject'] = "[Unblock Request] LDLink API Access User"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = ", ".join(emailList)
-    message = "First name: " + str(firstname)
+    message = "The following user has submitted an unblock request:"
+    message += "<br><br>First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
-    message += "<br><br>Email: " + str(email)
-    message += "<br><br>Token: " + str(token)
+    message += "<br>Email: " + str(email)
+    message += "<br>Token: " + str(token)
     message += "<br>Registered: " + str(registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
+    message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
     message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + admin_token + '">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP(email_account)
@@ -157,7 +159,7 @@ def logAccess(token, module):
     con.close()
 
 # sets blocked attribute of user to 1=true
-def blockUser(email):
+def blockUser(email, isWeb):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -174,11 +176,12 @@ def blockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    emailUserBlocked(email, email_account)
+    if isWeb:
+        emailUserBlocked(email, email_account)
     return out_json
 
 # sets blocked attribute of user to 0=false
-def unblockUser(email):
+def unblockUser(email, isWeb):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -195,7 +198,8 @@ def unblockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    emailUserUnblocked(email, email_account)
+    if isWeb:
+        emailUserUnblocked(email, email_account)
     return out_json
 
 # update record only if email's token is expired and user re-registers
