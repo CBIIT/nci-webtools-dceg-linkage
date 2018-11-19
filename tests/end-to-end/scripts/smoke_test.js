@@ -11,10 +11,10 @@ describe('LDlink Smoke Test', function() {
     before(async function() {
         this.driver = await new Builder()
             .forBrowser('firefox')
-            // .setFirefoxOptions(new firefox.Options().headless())
+            .setFirefoxOptions(new firefox.Options().headless())
             .build();
-        // this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
-        this.website = 'https://ldlink-dev.nci.nih.gov/';
+        this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
+        // this.website = 'https://ldlink-dev.nci.nih.gov/';
     });
 
     it('should specify the correct website', async function() {
