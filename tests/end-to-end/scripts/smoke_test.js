@@ -175,7 +175,7 @@ describe('LDlink Smoke Test', function() {
         const calculateButton = By.css('[id="ldpair"]');
         await driver.findElement(calculateButton).click();
         // assert warning message
-        console.log('[assert if warning message is present');
+        console.log('[assert if warning message is present]');
         const warningAlert = By.xpath('//*[@id="ldpair-message-warning"]/div');
         const warningAlertElement = driver.findElement(warningAlert);
         const warningAlertElementText = await warningAlertElement.getText();
@@ -233,8 +233,97 @@ describe('LDlink Smoke Test', function() {
         await driver.wait(until.elementLocated(proxyResultsRSQuery));
         const proxyResultsRSQueryElement = driver.findElement(proxyResultsRSQuery);
         const proxyResultsRSQueryElementText = await proxyResultsRSQueryElement.getText();
-        console.log(proxyResultsRSQueryElementText);
         proxyResultsRSQueryElementText.should.contain('rs58892524');
+    });
+
+    it('should display SNPchip results from sample file', async function() {
+        console.log('test -> should display SNPchip results from sample file');
+        const driver = this.driver;
+        // switch to SNPchip tab
+        console.log('[switch to SNPchip tab]');
+        const tabSNPchip = By.css('[id="snpchip-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabSNPchip));
+        await driver.findElement(tabSNPchip).click();
+        // input SNPchip sample file with RS queries
+        console.log('[input SNPchip sample file with RS queries]');
+        const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_SNPchip.txt');
+        const fileInput = By.css('[id="snpchip-file"]');
+        await driver.wait(until.elementLocated(fileInput));
+        await driver.findElement(fileInput).sendKeys(sampleFilePath);
+        // click calculate button
+        console.log('[click calculate button]');
+        const calculateButton = By.css('[id="snpchip"]');
+        await driver.findElement(calculateButton).click();
+        // wait until table is visible
+        console.log('[wait until table is visible]');
+        const table = By.css('[id="snpchip-results-container"]');
+        const tableElement = driver.findElement(table);
+        await driver.wait(until.elementIsVisible(tableElement));
+        // assert warning message
+        console.log('[assert if warning message is present]');
+        const warningAlert = By.xpath('//*[@id="snpchip-message-warning"]/div');
+        const warningAlertElement = driver.findElement(warningAlert);
+        const warningAlertElementText = await warningAlertElement.getText();
+        warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
+    });
+
+    it('should display SNPclip results from sample file', async function() {
+        console.log('test -> should display SNPchip results from sample file');
+        const driver = this.driver;
+        // switch to SNPclip tab
+        console.log('[switch to SNPclip tab]');
+        const tabSNPclip = By.css('[id="snpclip-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabSNPclip));
+        await driver.findElement(tabSNPclip).click();
+        // input SNPclip sample file with RS queries
+        console.log('[input SNPclip sample file with RS queries]');
+        const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_SNPclip.txt');
+        const fileInput = By.css('[id="snpclip-file"]');
+        await driver.wait(until.elementLocated(fileInput));
+        await driver.findElement(fileInput).sendKeys(sampleFilePath);
+        // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
+        console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
+        const populationDropdown = By.xpath('//*[@id="snpclipForm"]/div[3]/div/button');
+        await driver.findElement(populationDropdown).click();
+        const populationYRICheckbox = By.xpath('//*[@id="snpclipForm"]/div[3]/div/ul/li[3]/a');
+        await driver.findElement(populationYRICheckbox).click();
+        // click calculate button
+        console.log('[click calculate button]');
+        const calculateButton = By.css('[id="snpclip"]');
+        await driver.findElement(calculateButton).click();
+        // wait until table is visible
+        console.log('[wait until table is visible]');
+        const table = By.css('[id="snpclip-results-container"]');
+        const tableElement = driver.findElement(table);
+        await driver.wait(until.elementIsVisible(tableElement));
+        // assert warning message
+        console.log('[assert if warning message is present]');
+        const warningAlert = By.xpath('//*[@id="snpclip-message-warning-content"]');
+        const warningAlertElement = driver.findElement(warningAlert);
+        const warningAlertElementText = await warningAlertElement.getText();
+        console.log(warningAlertElementText);
+        warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
+    });
+
+    it('should display help text from separate html file', async function() {
+        console.log('test -> should display help text from separate html file');
+        const driver = this.driver;
+        // switch to help tab
+        console.log('[switch to help tab]');
+        const tabHelp = By.css('[id="help-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabHelp));
+        await driver.findElement(tabHelp).click();
+        // wait until help tab is visible
+        console.log('[wait until help tab is visible]');
+        const tab = By.css('[id="help-tab"]');
+        const tabElement = driver.findElement(tab);
+        await driver.wait(until.elementIsVisible(tabElement));
+        // assert description
+        console.log('[assert description]');
+        const helpDescription = By.xpath('//*[@id="help-tab"]/p[1]');
+        const helpDescriptionElement = driver.findElement(helpDescription);
+        const helpDescriptionElementText = await helpDescriptionElement.getText();
+        helpDescriptionElementText.should.contain('LDlink is designed to be an intuitive and simple tool for investigating patterns of linkage disequilibrium across a variety of ancestral population groups. This help documentation page gives detailed description of the metrics calculated by LDlink modules and aids users in understanding all aspects of the required input and returned output. The documentation is divided into the following sections');
     });
 
     after(async function() {

@@ -76,14 +76,14 @@ def emailJustification(firstname, lastname, email, institution, token, registere
         config = yaml.load(c)
     admin_token = config['api']['admin_token']
     email_account = config['api']['email_account']
-    admin_email_list = config['api']['admin_email_list']
+    approval_email_list = config['api']['approval_email_list']
     print "sending message justification"
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
     else:
         bool_blocked = "False"
-    emailList = admin_email_list.split(', ') # change to NCILDlinkWebAdmin email or a list of emails later
+    emailList = approval_email_list.split(', ') # change to NCILDlinkWebAdmin email or a list of emails later
     packet = MIMEMultipart()
     packet['Subject'] = "[Unblock Request] LDLink API Access User"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
@@ -332,7 +332,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
     if record != None:
         if checkBlockedEmail(record[2], api_access_dir):
             out_json = {
-                "message": "Your API token has been blocked.",
+                "message": "Your email is associated with a blocked API token.",
                 "firstname": record[0],
                 "lastname": record[1],
                 "email": record[2],

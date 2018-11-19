@@ -17,4 +17,4 @@ api:
   token_expiration_days: 365
   admin_token: 'admintoken123'
   email_account: 'localhost'
-  admin_email_list: 'kevin.jiang2@nih.gov, kvvnjng@gmail.com'
+  approval_email_list: 'kevin.jiang2@nih.gov, kvvnjng@gmail.com'

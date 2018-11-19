@@ -1315,17 +1315,20 @@ function checkTextAreaLength(elementId) {
         $('#'+elementId+'-justification-warning').attr('data-content', message);
         setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
         return false;
-    } else if(count < 50) {
-        $('#'+elementId+'-justification-warning').popover('show');
-        var message = "Please respond with at least 50 characters. Current: " + count.toString() + " characters."
-        $('#'+elementId+'-justification-warning').attr('data-content', message);
-        setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
-        return false;
     } else {
         $('#'+elementId+'-justification-warning').popover('hide');
         return true;
     }
+    // minimum character count
+    // else if(count < 50) {
+    //     $('#'+elementId+'-justification-warning').popover('show');
+    //     var message = "Please respond with at least 50 characters. Current: " + count.toString() + " characters."
+    //     $('#'+elementId+'-justification-warning').attr('data-content', message);
+    //     setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
+    //     return false;
+    // } 
 }
+    
 
 function updateLDassoc() {
 
