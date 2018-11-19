@@ -257,9 +257,9 @@ describe('LDlink Smoke Test', function() {
         // wait until warning message is visible
         console.log('[wait until warning message is visible]');
         const warningMessage = By.css('[id="snpchip-message-warning-content"]');
-        // await driver.wait(until.elementLocated(warningMessage));
-        const warningMessageElement = driver.findElement(warningMessage);
-        await driver.wait(until.elementIsVisible(warningMessageElement));
+        await driver.wait(until.elementLocated(warningMessage));
+        // const warningMessageElement = driver.findElement(warningMessage);
+        // await driver.wait(until.elementIsVisible(warningMessageElement));
         // assert warning message
         // console.log('[assert if warning message is present]');
         // const warningAlert = By.css('[id="snpchip-message-warning-content"]');
