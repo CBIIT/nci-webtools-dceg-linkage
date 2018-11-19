@@ -236,39 +236,39 @@ describe('LDlink Smoke Test', function() {
         proxyResultsRSQueryElementText.should.contain('rs58892524');
     });
 
-    it('should display SNPchip results from sample file', async function() {
-        console.log('test -> should display SNPchip results from sample file');
-        const driver = this.driver;
-        // switch to SNPchip tab
-        console.log('[switch to SNPchip tab]');
-        const tabSNPchip = By.css('[id="snpchip-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabSNPchip));
-        await driver.findElement(tabSNPchip).click();
-        // input SNPchip sample file with RS queries
-        console.log('[input SNPchip sample file with RS queries]');
-        const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_SNPchip.txt');
-        const fileInput = By.css('[id="snpchip-file"]');
-        await driver.wait(until.elementLocated(fileInput));
-        await driver.findElement(fileInput).sendKeys(sampleFilePath);
-        // click calculate button
-        console.log('[click calculate button]');
-        const calculateButton = By.css('[id="snpchip"]');
-        await driver.findElement(calculateButton).click();
-        // assert RS # in thinned list
-        console.log('[assert RS # in thinned list]');
-        const tableRow = By.xpath('//*[@id="snpchip-thinned-list"]/tbody/tr[58]/td[1]');
-        await driver.wait(until.elementLocated(tableRow));
-        const tableRowElement = driver.findElement(tableRow);
-        const tableRowElementText = await tableRowElement.getText();
-        console.log(tableRowElementText);
-        tableRowElementText.should.contain('rs11962771');
-        // assert warning message
-        console.log('[assert if warning message is present]');
-        const warningAlert = By.xpath('//*[@id="snpchip-message-warning"]/div');
-        const warningAlertElement = driver.findElement(warningAlert);
-        const warningAlertElementText = await warningAlertElement.getText();
-        warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
-    });
+    // it('should display SNPchip results from sample file', async function() {
+    //     console.log('test -> should display SNPchip results from sample file');
+    //     const driver = this.driver;
+    //     // switch to SNPchip tab
+    //     console.log('[switch to SNPchip tab]');
+    //     const tabSNPchip = By.css('[id="snpchip-tab-anchor"]');
+    //     await driver.wait(until.elementLocated(tabSNPchip));
+    //     await driver.findElement(tabSNPchip).click();
+    //     // input SNPchip sample file with RS queries
+    //     console.log('[input SNPchip sample file with RS queries]');
+    //     const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_SNPchip.txt');
+    //     const fileInput = By.css('[id="snpchip-file"]');
+    //     await driver.wait(until.elementLocated(fileInput));
+    //     await driver.findElement(fileInput).sendKeys(sampleFilePath);
+    //     // click calculate button
+    //     console.log('[click calculate button]');
+    //     const calculateButton = By.css('[id="snpchip"]');
+    //     await driver.findElement(calculateButton).click();
+    //     // assert RS # in thinned list
+    //     console.log('[assert RS # in thinned list]');
+    //     const tableRow = By.xpath('//*[@id="snpchip-thinned-list"]/tbody/tr[58]/td[1]');
+    //     await driver.wait(until.elementLocated(tableRow));
+    //     const tableRowElement = driver.findElement(tableRow);
+    //     const tableRowElementText = await tableRowElement.getText();
+    //     console.log(tableRowElementText);
+    //     tableRowElementText.should.contain('rs11962771');
+    //     // assert warning message
+    //     console.log('[assert if warning message is present]');
+    //     const warningAlert = By.xpath('//*[@id="snpchip-message-warning"]/div');
+    //     const warningAlertElement = driver.findElement(warningAlert);
+    //     const warningAlertElementText = await warningAlertElement.getText();
+    //     warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
+    // });
 
     it('should display SNPclip results from sample file', async function() {
         console.log('test -> should display SNPchip results from sample file');
