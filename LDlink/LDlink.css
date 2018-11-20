@@ -1,18 +1,4 @@
-/* URL change banner */
-#url-alert {
-  color: #444; 
-  background-color: #ffd351; 
-  font-weight: 500; 
-  border: none;
-  margin-top: 0px;
-  margin-bottom: 0px;
-  height: 30px;
-  line-height:30px;
-  padding:0px 15px;
-  border-radius: 0 !important;
-}
-
-/* Help page programmatic access warning */
+/* API Access warning banner */
 .alert-api {
   color: black;
   font-weight: bold;
