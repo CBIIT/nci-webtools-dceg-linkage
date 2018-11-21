@@ -140,7 +140,7 @@ def requires_token(f):
             if require_token:
                 # Check if token argument is missing in api call
                 if 'token' not in request.args:
-                    return sendTraceback('API token missing. Please register using the API Access tab: ' + request.url_root + '/?tab=apiaccess')
+                    return sendTraceback('API token missing. Please register using the API Access tab: ' + request.url_root + '?tab=apiaccess')
                 token = request.args['token']
                 # Check if token is valid
                 if checkToken(token, api_access_dir, token_expiration, token_expiration_days) is False or token is None:
