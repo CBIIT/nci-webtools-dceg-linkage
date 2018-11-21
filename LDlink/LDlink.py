@@ -140,11 +140,11 @@ def requires_token(f):
             if require_token:
                 # Check if token argument is missing in api call
                 if 'token' not in request.args:
-                    return sendTraceback('API token missing. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
+                    return sendTraceback('API token missing. Please register using the API Access tab: ' + request.url_root + '/?tab=apiaccess')
                 token = request.args['token']
                 # Check if token is valid
                 if checkToken(token, api_access_dir, token_expiration, token_expiration_days) is False or token is None:
-                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: https://ldlink.nci.nih.gov/?tab=apiaccess')
+                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + request.url_root + '?tab=apiaccess')
                 # Check if token is blocked
                 if checkBlocked(token, api_access_dir):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
@@ -244,7 +244,6 @@ def restAdd():
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
 def ldpair():
-    # analysistools-sandbox.nci.nih.gov/LDlinkRest/test?snp1=rs2720460&snp2=rs11733615&pop=EUR&reference=28941
     # python LDpair.py rs2720460 rs11733615 EUR 38
     # r1 = '{"corr_alleles":["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],"haplotypes":{"hap1":{"alleles":"AC","count":"576","frequency":"0.573"},"hap2":{"alleles":"GT","count":"361","frequency":"0.359"},"hap3":{"alleles":"GC","count":"42","frequency":"0.042"},"hap4":{"alleles":"AT","count":"27","frequency":"0.027"}},"snp1":{"allele_1":{"allele":"A","count":"603","frequency":"0.599"},"allele_2":{"allele":"G","count":"403","frequency":"0.401"},"coord":"chr4:104054686","rsnum":"rs2720460"},"snp2":{"allele_1":{"allele":"C","count":"618","frequency":"0.614"},"allele_2":{"allele":"T","count":"388","frequency":"0.386"},"coord":"chr4:104157164","rsnum":"rs11733615"},"statistics":{"chisq":"738.354","d_prime":"0.8839","p":"0.0","r2":"0.734"},"two_by_two":{"cells":{"11":"576","12":"27","21":"42","22":"361"},"total":"1006"}'
 
