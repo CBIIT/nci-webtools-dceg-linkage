@@ -14,7 +14,7 @@ import datetime
 # blocked users attribute: 0=false, 1=true
 
 # email user token
-def emailUser(email, token, expiration, firstname, token_expiration, email_account):
+def emailUser(email, token, expiration, firstname, token_expiration, email_account, url_root):
     print "sending message"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
@@ -22,9 +22,9 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
     packet['To'] = email
     message = ''
     if token_expiration:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="'+ url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
     else:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="https://ldlink.nci.nih.gov/?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="' + url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
 
     packet.attach(MIMEText(message, 'html'))
 
@@ -33,7 +33,7 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email user when their token is blocked
-def emailUserBlocked(email, email_account):
+def emailUserBlocked(email, email_account, url_root):
     print "sending message"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Blocked"
@@ -41,7 +41,7 @@ def emailUserBlocked(email, email_account):
     packet['To'] = email
     message = "Dear " + str(email) + ", " + "<br><br>"
     message += "Your LDlink API access token has been blocked.<br><br>"
-    message += "To unblock, resubmit a request in LDlink's <a href=\"https://ldlink.nci.nih.gov/?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
+    message += "To unblock, resubmit a request in LDlink's <a href=\"" + url_root + "?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
     message += "Please contact the LDlink Web Admin (NCILDlinkWebAdmin@mail.nih.gov) for any questions or concerns.<br><br>"
     message += "LDlink Web Admin"
 
@@ -71,7 +71,7 @@ def emailUserUnblocked(email, email_account):
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email unblock request to list of web admins
-def emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification):
+def emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification, url_root):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     email_account = config['api']['email_account']
@@ -99,7 +99,7 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
-    message += '<br><br><u><a href="https://ldlink-dev.nci.nih.gov/LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
+    message += '<br><br><u><a href="' + url_root + 'LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP(email_account)
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
@@ -161,7 +161,7 @@ def logAccess(token, module):
     con.close()
 
 # sets blocked attribute of user to 1=true
-def blockUser(email, isWeb):
+def blockUser(email, isWeb, url_root):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -179,7 +179,7 @@ def blockUser(email, isWeb):
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
     if isWeb:
-        emailUserBlocked(email, email_account)
+        emailUserBlocked(email, email_account, url_root)
     return out_json
 
 # sets blocked attribute of user to 0=false
@@ -307,8 +307,6 @@ def checkBlockedEmail(email, api_access_dir):
 
 # generate unique access token for each user
 def generateToken(curr):
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
     token = binascii.b2a_hex(os.urandom(6))
     # if true, generate another token - make sure example token is not generated
     while(checkUniqueToken(curr, token) or token == "faketoken123"):
@@ -324,7 +322,7 @@ def getExpiration(registered, token_expiration_days):
     return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
-def register_user_web(firstname, lastname, email, institution, reference):
+def register_user_web(firstname, lastname, email, institution, reference, url_root):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -379,7 +377,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
                     "registered": record[5],
                     "blocked": record[6]
                 }
-                emailUser(record[2], record[4], format_expiration, record[0], token_expiration, email_account)
+                emailUser(record[2], record[4], format_expiration, record[0], token_expiration, email_account, url_root)
             else:
                 token = generateToken(curr)
                 registered = getDatetime()
@@ -397,7 +395,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
                     "registered": format_registered,
                     "blocked": blocked
                 }
-                emailUser(email, token, format_expiration, firstname, token_expiration, email_account)
+                emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
     else:
         # if email record does not exists in db, add to table
         token = generateToken(curr)
@@ -416,7 +414,7 @@ def register_user_web(firstname, lastname, email, institution, reference):
             "registered": format_registered,
             "blocked": blocked
         }
-        emailUser(email, token, format_expiration, firstname, token_expiration, email_account)
+        emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
 
     conn.close()
     return out_json
