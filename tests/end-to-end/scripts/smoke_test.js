@@ -368,7 +368,7 @@ describe('LDlink Smoke Test', function() {
         await driver.findElement(submitButton).click();
         // wait until warning modal is visible
         console.log('[wait warning modal is visible]');
-        const warningModal = By.css('[class="modal"]');
+        const warningModal = By.xpath('//*[@class="modal"]');
         const warningModalElement = driver.findElement(warningModal);
         await driver.wait(until.elementIsVisible(warningModalElement));
         // assert modal title
