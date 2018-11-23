@@ -22,7 +22,7 @@ describe('LDlink Smoke Test', function() {
         const driver = this.driver;
         await driver.get(this.website);
         console.log('[wait until title of HTML page contains LDlink]');
-        await driver.wait(until.titleContains('LDlink'));
+        await driver.wait(until.titleContains('LDlink'), 20000);
         console.log('[assert title of HTML page]');
         const title = await driver.getTitle();
         title.should.equal('LDlink | An Interactive Web Tool for Exploring Linkage Disequilibrium in Population Groups');
@@ -35,7 +35,7 @@ describe('LDlink Smoke Test', function() {
         console.log('[wait until news and updates container is visible]');
         const newsContainer = By.css('[id="news-container"]');
         const newsContainerElement = driver.findElement(newsContainer);
-        await driver.wait(until.elementIsVisible(newsContainerElement));
+        await driver.wait(until.elementIsVisible(newsContainerElement), 20000);
         // assert news text
         console.log('[assert news text]');
         const newsText = By.xpath('//*[@id="news-container"]');
@@ -50,34 +50,34 @@ describe('LDlink Smoke Test', function() {
         // switch to LDassoc tab
         console.log('[switch to LDassoc tab]');
         const tabLDassoc = By.css('[id="ldassoc-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabLDassoc));
+        await driver.wait(until.elementLocated(tabLDassoc), 20000);
         await driver.findElement(tabLDassoc).click();
         // click Use example GWAS data
         console.log('[click Use example GWAS data]')
         const useExampleGWASbutton = By.xpath('//*[@id="ldassoc-sample"]/label/span');
-        await driver.wait(until.elementLocated(useExampleGWASbutton));
+        await driver.wait(until.elementLocated(useExampleGWASbutton), 20000);
         await driver.findElement(useExampleGWASbutton).click();
         // click calculate button once enabled
         console.log('[click calculate button once enabled]');
         const calculateButton = By.css('[id="ldassoc"]');
         const calculateButtonElement = driver.findElement(calculateButton);
-        await driver.wait(until.elementIsEnabled(calculateButtonElement));
+        await driver.wait(until.elementIsEnabled(calculateButtonElement), 20000);
         await driver.findElement(calculateButton).click();
         // wait until Bokeh plot is visible
         console.log('[wait until Bokeh plot is visible]');
         const bokehPlot = By.css('[id="ldassoc-bokeh-graph"]');
         const bokehPlotElement = driver.findElement(bokehPlot);
-        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        await driver.wait(until.elementIsVisible(bokehPlotElement), 20000);
         // wait until Bokeh Export plot button is enabled
         console.log('[wait until Bokeh Export plot button is enabled]');
         const exportPlotButton = By.css('[id="ldassoc-menu1"]');
-        await driver.wait(until.elementLocated(exportPlotButton));
+        await driver.wait(until.elementLocated(exportPlotButton), 20000);
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
-        await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 20000);
         // assert if Association Results table is present
         console.log('[assert if Association Results table is present]');
         const associationResultsRSQuery = By.xpath('//*[@id="new-ldassoc"]/tbody/tr[1]/td[1]/a');
-        await driver.wait(until.elementLocated(associationResultsRSQuery));
+        await driver.wait(until.elementLocated(associationResultsRSQuery), 20000);
         const associationResultsRSQueryElement = driver.findElement(associationResultsRSQuery);
         const associationResultsRSQueryElementText = await associationResultsRSQueryElement.getText();
         associationResultsRSQueryElementText.should.contain('rs7837688');
@@ -89,13 +89,13 @@ describe('LDlink Smoke Test', function() {
         // switch to LDhap tab
         console.log('[switch to LDhap tab]');
         const tabLDhap = By.css('[id="ldhap-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabLDhap));
+        await driver.wait(until.elementLocated(tabLDhap), 20000);
         await driver.findElement(tabLDhap).click();
         // input LDhap sample file with RS and genomic coordinate queries
         console.log('[input LDhap sample file with RS and genomic coordinate queries]');
         const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_LDhap.txt');
         const fileInput = By.css('[id="ldhap-file"]');
-        await driver.wait(until.elementLocated(fileInput));
+        await driver.wait(until.elementLocated(fileInput), 20000);
         await driver.findElement(fileInput).sendKeys(sampleFilePath);
         // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
         console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
@@ -111,7 +111,7 @@ describe('LDlink Smoke Test', function() {
         console.log('[assert if Association Results table is present]');
         const resultsTable = By.xpath('//*[@id="ldhap-results-container"]/div');
         const resultsTableElement = driver.findElement(resultsTable);
-        await driver.wait(until.elementIsVisible(resultsTableElement));
+        await driver.wait(until.elementIsVisible(resultsTableElement), 20000);
         const haplotypeFrequency = By.xpath('//*[@id="ldhap-table-right"]/tfoot/tr[2]/td[1]');
         const haplotypeFrequencyElement = driver.findElement(haplotypeFrequency);
         const haplotypeFrequencyResults = await haplotypeFrequencyElement.getText();
@@ -124,13 +124,13 @@ describe('LDlink Smoke Test', function() {
         // switch to LDmatrix tab
         console.log('[switch to LDmatrix tab]');
         const tabLDmatrix = By.css('[id="ldmatrix-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabLDmatrix));
+        await driver.wait(until.elementLocated(tabLDmatrix), 20000);
         await driver.findElement(tabLDmatrix).click();
         // input LDmatrix sample file with RS queries
         console.log('[input LDmatrix sample file with RS queries]');
         const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_LDmatrix.txt');
         const fileInput = By.css('[id="ldmatrix-file"]');
-        await driver.wait(until.elementLocated(fileInput));
+        await driver.wait(until.elementLocated(fileInput), 20000);
         await driver.findElement(fileInput).sendKeys(sampleFilePath);
         // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
         console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
@@ -146,17 +146,17 @@ describe('LDlink Smoke Test', function() {
         console.log('[wait until Bokeh plot is visible]');
         const bokehPlot = By.css('[id="ldmatrix-bokeh-graph"]');
         const bokehPlotElement = driver.findElement(bokehPlot);
-        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        await driver.wait(until.elementIsVisible(bokehPlotElement), 20000);
         // wait until Bokeh Export plot button is enabled
         console.log('[wait until Bokeh Export plot button is enabled]');
         const exportPlotButton = By.css('[id="ldmatrix-menu1"]');
-        await driver.wait(until.elementLocated(exportPlotButton));
+        await driver.wait(until.elementLocated(exportPlotButton), 20000);
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
-        await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 20000);
         // assert if LDmatrix R2 legend is present
         console.log('[assert if LDmatrix R2 legend is present]');
         const legend = By.css('[id="ldmatrix-legend"]');
-        await driver.wait(until.elementLocated(legend));
+        await driver.wait(until.elementLocated(legend), 20000);
         const legendElement = driver.findElement(legend);
         const legendSrc = await legendElement.getAttribute('src');
         legendSrc.should.contain('LDmatrix_legend_R2.png');
@@ -168,17 +168,17 @@ describe('LDlink Smoke Test', function() {
         // switch to LDpair tab
         console.log('[switch to LDpair tab]');
         const tabLDpair = By.css('[id="ldpair-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabLDpair));
+        await driver.wait(until.elementLocated(tabLDpair), 20000);
         await driver.findElement(tabLDpair).click();
         // input RS# rs2280548 into variant 1
         console.log('[input RS# rs2280548 into variant 1]');
         const variant1Input = By.css('[id="ldpair-snp1"]');
-        await driver.wait(until.elementLocated(variant1Input));
+        await driver.wait(until.elementLocated(variant1Input), 20000);
         await driver.findElement(variant1Input).sendKeys('rs2280548');
         // input genomic coordinate chr8:128304269 into variant 2
         console.log('[input genomic coordinate chr8:128304269 into variant 2]');
         const variant2Input = By.css('[id="ldpair-snp2"]');
-        await driver.wait(until.elementLocated(variant2Input));
+        await driver.wait(until.elementLocated(variant2Input), 20000);
         await driver.findElement(variant2Input).sendKeys('chr8:128304269');
         // select all populations
         console.log('[select all populations]');
@@ -200,7 +200,7 @@ describe('LDlink Smoke Test', function() {
         console.log('[assert if results are in linkage equilibrium]');
         const resultsTable = By.xpath('//*[@id="ldpair-results-container"]/table[1]');
         const resultsTableElement = driver.findElement(resultsTable);
-        await driver.wait(until.elementIsVisible(resultsTableElement));
+        await driver.wait(until.elementIsVisible(resultsTableElement), 20000);
         const resultsLinkageEquilibrium = By.xpath('//*[@id="ldpair-results-container"]/div/div');
         const resultsLinkageEquilibriumElement = driver.findElement(resultsLinkageEquilibrium);
         const resultsLinkageEquilibriumElementText = await resultsLinkageEquilibriumElement.getText();
@@ -213,12 +213,12 @@ describe('LDlink Smoke Test', function() {
         // switch to LDproxy tab
         console.log('[switch to LDproxy tab]');
         const tabLDproxy = By.css('[id="ldproxy-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabLDproxy));
+        await driver.wait(until.elementLocated(tabLDproxy), 20000);
         await driver.findElement(tabLDproxy).click();
         // input RS# rs2280548 into variant 1
         console.log('[input genomic coordinate chr22:25855459 into variant]');
         const variantInput = By.css('[id="ldproxy-snp"]');
-        await driver.wait(until.elementLocated(variantInput));
+        await driver.wait(until.elementLocated(variantInput), 20000);
         await driver.findElement(variantInput).sendKeys('chr22:25855459');
         // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
         console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
@@ -230,23 +230,23 @@ describe('LDlink Smoke Test', function() {
         console.log('[click calculate button once enabled]');
         const calculateButton = By.css('[id="ldproxy"]');
         const calculateButtonElement = driver.findElement(calculateButton);
-        await driver.wait(until.elementIsEnabled(calculateButtonElement));
+        await driver.wait(until.elementIsEnabled(calculateButtonElement), 20000);
         await driver.findElement(calculateButton).click();
         // wait until Bokeh plot is visible
         console.log('[wait until Bokeh plot is visible]');
         const bokehPlot = By.css('[id="ldproxy-bokeh-graph"]');
         const bokehPlotElement = driver.findElement(bokehPlot);
-        await driver.wait(until.elementIsVisible(bokehPlotElement));
+        await driver.wait(until.elementIsVisible(bokehPlotElement), 20000);
         // wait until Bokeh Export plot button is enabled
         console.log('[wait until Bokeh Export plot button is enabled]');
         const exportPlotButton = By.css('[id="ldproxy-menu1"]');
-        await driver.wait(until.elementLocated(exportPlotButton));
+        await driver.wait(until.elementLocated(exportPlotButton), 20000);
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
-        await driver.wait(until.elementIsEnabled(exportPlotButtonElement));
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 20000);
         // assert if Proxy Results table is present
         console.log('[assert if Proxy Results table is present]');
         const proxyResultsRSQuery = By.xpath('//*[@id="new-ldproxy"]/tbody/tr[1]/td[1]/a');
-        await driver.wait(until.elementLocated(proxyResultsRSQuery));
+        await driver.wait(until.elementLocated(proxyResultsRSQuery), 20000);
         const proxyResultsRSQueryElement = driver.findElement(proxyResultsRSQuery);
         const proxyResultsRSQueryElementText = await proxyResultsRSQueryElement.getText();
         proxyResultsRSQueryElementText.should.contain('rs58892524');
@@ -258,13 +258,13 @@ describe('LDlink Smoke Test', function() {
         // switch to SNPchip tab
         console.log('[switch to SNPchip tab]');
         const tabSNPchip = By.css('[id="snpchip-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabSNPchip));
+        await driver.wait(until.elementLocated(tabSNPchip), 20000);
         await driver.findElement(tabSNPchip).click();
         // input SNPchip sample file with RS queries
         console.log('[input SNPchip sample file with RS queries]');
         const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_SNPchip.txt');
         const fileInput = By.css('[id="snpchip-file"]');
-        await driver.wait(until.elementLocated(fileInput));
+        await driver.wait(until.elementLocated(fileInput), 20000);
         await driver.findElement(fileInput).sendKeys(sampleFilePath);
         // click calculate button
         console.log('[click calculate button]');
@@ -273,7 +273,7 @@ describe('LDlink Smoke Test', function() {
         // wait until warning message is located
         console.log('[wait until warning message is located]');
         const warningMessage = By.css('[id="snpchip-message-warning-content"]');
-        await driver.wait(until.elementLocated(warningMessage));
+        await driver.wait(until.elementLocated(warningMessage), 20000);
     });
 
     it('should display SNPclip results from sample file', async function() {
@@ -282,13 +282,13 @@ describe('LDlink Smoke Test', function() {
         // switch to SNPclip tab
         console.log('[switch to SNPclip tab]');
         const tabSNPclip = By.css('[id="snpclip-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabSNPclip));
+        await driver.wait(until.elementLocated(tabSNPclip), 20000);
         await driver.findElement(tabSNPclip).click();
         // input SNPclip sample file with RS queries
         console.log('[input SNPclip sample file with RS queries]');
         const sampleFilePath = path.join(process.cwd(), 'tests','end-to-end', 'test-data', 'sample_SNPclip.txt');
         const fileInput = By.css('[id="snpclip-file"]');
-        await driver.wait(until.elementLocated(fileInput));
+        await driver.wait(until.elementLocated(fileInput), 20000);
         await driver.findElement(fileInput).sendKeys(sampleFilePath);
         // select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria
         console.log('[select population (AFR) African - (YRI) Yoruba in Ibadan, Nigeria]');
@@ -304,7 +304,7 @@ describe('LDlink Smoke Test', function() {
         console.log('[wait until table is visible]');
         const table = By.xpath('//*[@id="snpclip-table-thin"]');
         const tableElement = driver.findElement(table);
-        await driver.wait(until.elementIsVisible(tableElement));
+        await driver.wait(until.elementIsVisible(tableElement), 20000);
         // assert warning message
         console.log('[assert if warning message is present]');
         const warningAlert = By.xpath('//*[@id="snpclip-message-warning-content"]');
@@ -319,13 +319,13 @@ describe('LDlink Smoke Test', function() {
         // switch to help tab
         console.log('[switch to help tab]');
         const tabHelp = By.css('[id="help-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabHelp));
+        await driver.wait(until.elementLocated(tabHelp), 20000);
         await driver.findElement(tabHelp).click();
         // wait until help tab is visible
         console.log('[wait until help tab is visible]');
         const tab = By.css('[id="help-tab"]');
         const tabElement = driver.findElement(tab);
-        await driver.wait(until.elementIsVisible(tabElement));
+        await driver.wait(until.elementIsVisible(tabElement), 20000);
         // assert description
         console.log('[assert description]');
         const helpDescription = By.xpath('//*[@id="help-tab"]/p[1]');
@@ -334,19 +334,19 @@ describe('LDlink Smoke Test', function() {
         helpDescriptionElementText.should.contain('LDlink is designed to be an intuitive and simple tool for investigating patterns of linkage disequilibrium across a variety of ancestral population groups. This help documentation page gives detailed description of the metrics calculated by LDlink modules and aids users in understanding all aspects of the required input and returned output. The documentation is divided into the following sections');
     });
 
-    it('should register user in API Access tab if not already', async function() {
+    it('should check if user is already registed in API Access tab', async function() {
         console.log('test -> should check if user is already registed in API Access tab');
         const driver = this.driver;
         // switch to help tab
         console.log('[switch to apiaccess tab]');
         const tabAPIaccess = By.css('[id="apiaccess-tab-anchor"]');
-        await driver.wait(until.elementLocated(tabAPIaccess));
+        await driver.wait(until.elementLocated(tabAPIaccess), 20000);
         await driver.findElement(tabAPIaccess).click();
         // wait until first name input field is visible
         console.log('[wait until first name input field is located]');
         const firstnameInput = By.css('[id="apiaccess-firstname"]');
         const firstnameInputElement = driver.findElement(firstnameInput);
-        await driver.wait(until.elementIsVisible(firstnameInputElement));
+        await driver.wait(until.elementIsVisible(firstnameInputElement), 20000);
         // input "Kevin" into first name input field
         console.log('[input "Kevin" into first name input field]');
         await driver.findElement(firstnameInput).sendKeys('Kevin');
@@ -366,17 +366,52 @@ describe('LDlink Smoke Test', function() {
         console.log('[click submit button]');
         const submitButton = By.css('[id="apiaccess"]');
         await driver.findElement(submitButton).click();
-        // wait until warning modal is visible
-        console.log('[wait warning modal is visible]');
-        const warningModal = By.xpath('//*[@class="modal"]');
-        const warningModalElement = driver.findElement(warningModal);
-        await driver.wait(until.elementIsVisible(warningModalElement));
-        // assert modal title
-        console.log('[assert modal title]');
-        const modalTitle = By.xpath('//*[@class="modal"]/div/div/div[1]');
-        const modalTitleElement = driver.findElement(modalTitle);
-        const modalTitleElementText = await modalTitleElement.getText();
-        modalTitleElementText.should.contain('.');
+        // wait until warning modal is visible for new user
+        console.log('[wait warning modal is visible for new user]');
+        try {
+            const warningModalNew = By.css('[id="apiaccess-new-user"]');
+            const warningModalNewElement = driver.findElement(warningModalNew);
+            await driver.wait(until.elementIsVisible(warningModalNewElement), 3000);
+            // assert modal title
+            console.log('[assert modal title]');
+            const modalTitle = By.xpath('//*[@id="apiaccess-new-user"]/div/div/div[1]');
+            const modalTitleElement = driver.findElement(modalTitle);
+            const modalTitleElementText = await modalTitleElement.getText();
+            modalTitleElementText.should.contain('Thank you for registering to use the LDlink API.');
+        } catch (e) {
+            console.log("[user is not new]");
+        }
+        
+        // wait until warning modal is visible for existing user
+        console.log('[wait warning modal is visible for existing user]');
+        try {
+            const warningModalExisting = By.css('[id="apiaccess-existing-user"]');
+            const warningModalExistingElement = driver.findElement(warningModalExisting);
+            await driver.wait(until.elementIsVisible(warningModalExistingElement), 3000);
+            // assert modal title
+            console.log('[assert modal title]');
+            const modalTitle = By.xpath('//*[@id="apiaccess-existing-user"]/div/div/div[1]');
+            const modalTitleElement = driver.findElement(modalTitle);
+            const modalTitleElementText = await modalTitleElement.getText();
+            modalTitleElementText.should.contain('Email already registered.');
+        } catch(e) {
+            console.log("[user is not existing]");
+        }
+        // wait until warning modal is visible for blocked user
+        console.log('[wait warning modal is visible for blocked user]');
+        try {
+            const warningModalBlocked = By.css('[id="apiaccess-blocked-user"]');
+            const warningModalBlockedElement = driver.findElement(warningModalBlocked);
+            await driver.wait(until.elementIsVisible(warningModalBlockedElement), 3000);
+            // assert modal title
+            console.log('[assert modal title]');
+            const modalTitle = By.xpath('//*[@id="apiaccess-blocked-user"]/div/div/div[1]');
+            const modalTitleElement = driver.findElement(modalTitle);
+            const modalTitleElementText = await modalTitleElement.getText();
+            modalTitleElementText.should.contain('Your email is associated with a blocked API token.');
+        } catch(e) {
+            console.log("[user is not blocked]");
+        }
     });
 
     after(async function() {
