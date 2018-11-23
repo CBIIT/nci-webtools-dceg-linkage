@@ -334,7 +334,7 @@ describe('LDlink Smoke Test', function() {
         helpDescriptionElementText.should.contain('LDlink is designed to be an intuitive and simple tool for investigating patterns of linkage disequilibrium across a variety of ancestral population groups. This help documentation page gives detailed description of the metrics calculated by LDlink modules and aids users in understanding all aspects of the required input and returned output. The documentation is divided into the following sections');
     });
 
-    it('should check if user is already registed in API Access tab', async function() {
+    it('should register user in API Access tab if not already', async function() {
         console.log('test -> should check if user is already registed in API Access tab');
         const driver = this.driver;
         // switch to help tab
@@ -368,15 +368,15 @@ describe('LDlink Smoke Test', function() {
         await driver.findElement(submitButton).click();
         // wait until warning modal is visible
         console.log('[wait warning modal is visible]');
-        const warningModal = By.css('[id="apiaccess-existing-user"]');
+        const warningModal = By.css('[class="modal"]');
         const warningModalElement = driver.findElement(warningModal);
         await driver.wait(until.elementIsVisible(warningModalElement));
         // assert modal title
         console.log('[assert modal title]');
-        const modalTitle = By.xpath('//*[@id="apiaccess-existing-user"]/div/div/div[1]');
+        const modalTitle = By.xpath('//*[@class="modal"]/div/div/div[1]');
         const modalTitleElement = driver.findElement(modalTitle);
         const modalTitleElementText = await modalTitleElement.getText();
-        modalTitleElementText.should.contain('Email already registered.');
+        modalTitleElementText.should.contain('.');
     });
 
     after(async function() {
