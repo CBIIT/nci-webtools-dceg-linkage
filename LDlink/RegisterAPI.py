@@ -103,11 +103,11 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     packet.attach(MIMEText(message, 'html'))
     smtp = smtplib.SMTP(email_account)
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
-    # out_json = {
-    #     "email": email,
-    #     "justification": justification
-    # }
-    # return out_json
+    out_json = {
+        "email": email,
+        "justification": justification
+    }
+    return out_json
 
 # creates table in database if database did not exist before
 def createTables(api_access_dir):
@@ -426,6 +426,8 @@ def register_user_api(firstname, lastname, email, institution, token, registered
         config = yaml.load(f)
     api_access_dir = config['api']['api_access_dir']
 
+    out_json = {}
+
     # create database and table if it does not exist already
     if not os.path.exists(api_access_dir + 'api_access.db'):
         print "api_access.db created."
@@ -446,9 +448,40 @@ def register_user_api(firstname, lastname, email, institution, token, registered
         # if email record in api database does not have new token, update it
         if (record[2] == email and record[4] != token):
             updateRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
+            out_json = {
+                "message": "Thank you for registering to use the LDlink API.",
+                "firstname": firstname,
+                "lastname": lastname,
+                "email": email,
+                "institution": institution,
+                "token": token,
+                "registered": registered,
+                "blocked": blocked
+            }
+        else:
+            out_json = {
+                "message": "Email already registered.",
+                "firstname": record[0],
+                "lastname": record[1],
+                "email": record[2],
+                "institution": record[3],
+                "token": record[4],
+                "registered": record[5],
+                "blocked": record[6]
+            }
     else:
         # if email record does not exists in db, add to table
         insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
+        out_json = {
+            "message": "Thank you for registering to use the LDlink API.",
+            "firstname": firstname,
+            "lastname": lastname,
+            "email": email,
+            "institution": institution,
+            "token": token,
+            "registered": registered,
+            "blocked": blocked
+        }
 
     conn.close()
-    # return out_json
+    return out_json
