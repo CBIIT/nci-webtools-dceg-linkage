@@ -859,7 +859,6 @@ def block_api_user_web():
     print r.url
     out_json2 = {
         "message": out_json["message"],
-        "email": out_json["email"]
     }
     return sendJSON(out_json2)
 
