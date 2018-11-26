@@ -59,7 +59,7 @@ def Multi(folder,db,dictionary):
 		
 #If inserting a single file
 def Single(file,db,dictionary):
-	Insert(file,db)
+	Insert(file,db,dictionary)
 
 def Insert_Platform(platform,dictionary,db):
 	db.platforms.update(

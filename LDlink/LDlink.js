@@ -1,4 +1,4 @@
-var ldlink_version = "Version 3.0";
+var ldlink_version = "Version 3.3.0";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -13,12 +13,12 @@ var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615
 var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Count:40,Frequency:.1852,Haplotype:"GGGGAGCGTTGGGG"},{Count:23,Frequency:.1065,Haplotype:"GCGGAGCGTTGGGG"},{Count:11,Frequency:.0509,Haplotype:"TGGGAGCGTTGGGG"},{Count:8,Frequency:.037,Haplotype:"GCATAGCGTTGGGG"},{Count:7,Frequency:.0324,Haplotype:"TGGGGATAGCAAAG"}],rows:[{Alleles:"G=0.917, T=0.083",Coord:"chr4:104050980",RS:"rs2720457",Haplotypes:["G","G","G","T","G","T"]},{Alleles:"C=0.732, G=0.269",Coord:"chr4:104052963",RS:"rs2720458",Haplotypes:["C","G","C","G","C","G"]},{Alleles:"A=0.625, G=0.375",Coord:"chr4:104055748",RS:"rs2720461",Haplotypes:["A","G","G","G","A","G"]},{Alleles:"T=0.625, G=0.375",Coord:"chr4:104056210",RS:"rs2720462",Haplotypes:["T","G","G","G","T","G"]},{Alleles:"G=0.62, A=0.38",Coord:"chr4:104052068",RS:"rs7661201",Haplotypes:["G","A","A","A","A","G"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104055722",RS:"rs2623063",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"C=0.968, T=0.032",Coord:"chr4:104057121",RS:"rs2623062",Haplotypes:["C","C","C","C","C","T"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104057248",RS:"rs2720463",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"T=0.968, G=0.032",Coord:"chr4:104057887",RS:"rs2711901",Haplotypes:["T","T","T","T","T","G"]},{Alleles:"T=0.968, C=0.032",Coord:"chr4:104051132",RS:"rs2623082",Haplotypes:["T","T","T","T","T","C"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104058596",RS:"rs2711900",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050510",RS:"rs2720456",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050326",RS:"rs2720455",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=1.0, A=0.0",Coord:"chr4:104059542",RS:"rs2243682",Haplotypes:["G","G","G","G","G","G"]}]};
 var ldassocData=[{RS_Number:"rs75563749",Coord:"chr3:171031233",Alleles:"(A/T)",MAF:.1983,Distance:348304,Dprime:.0512,R2:.0021,Correlated_Alleles:"= , =",RegulomeDB:6,Functional_Class:"NA"},{RS_Number:"rs76189435",Coord:"chr3:170980080",Alleles:"(C/G)",MAF:.0527,Distance:-51153,Dprime:.622,R2:.0871,Correlated_Alleles:"= , =",RegulomeDB:"2b",Functional_Class:"NA"},{RS_Number:"rs76140932",Coord:"chr3:170980434",Alleles:"(A/G)",MAF:.0539,Distance:-50799,Dprime:.6073,R2:.085,Correlated_Alleles:"= , =",RegulomeDB:"2b",Functional_Class:"NA"},{RS_Number:"rs76735261",Coord:"chr3:170981252",Alleles:"(G/C)",MAF:.0539,Distance:-49981,Dprime:.6073,R2:.085,Correlated_Alleles:"= , =",RegulomeDB:5,Functional_Class:"NA"},{RS_Number:"rs1158564",Coord:"chr3:171002654",Alleles:"(A/G)",MAF:.4439,Distance:-28579,Dprime:.866,R2:.2324,Correlated_Alleles:"A=A,G=T",RegulomeDB:"2b",Functional_Class:"NA"},{RS_Number:"rs4894756",Coord:"chr3:171002036",Alleles:"(G/A)",MAF:.3806,Distance:-29197,Dprime:.8732,R2:.3069,Correlated_Alleles:"G=A,A=T",RegulomeDB:4,Functional_Class:"NA"},{RS_Number:"rs200296423",Coord:"chr3:170969849",Alleles:"(TGCG/-)",MAF:.0475,Distance:-61384,Dprime:.5965,R2:.0718,Correlated_Alleles:"= , =",RegulomeDB:".",Functional_Class:"NA"},{RS_Number:"rs377580557",Coord:"chr3:171001114",Alleles:"(TTTTCTC/-)",MAF:.0445,Distance:-30119,Dprime:.67,R2:.0846,Correlated_Alleles:"= , =",RegulomeDB:".",Functional_Class:"NA"},{RS_Number:"rs377580557",Coord:"chr3:171001114",Alleles:"(TTTTCTC/-)",MAF:.0445,Distance:-30119,Dprime:.67,R2:.0846,Correlated_Alleles:"= , =",RegulomeDB:".",Functional_Class:"NA"},{RS_Number:"rs6444976",Coord:"chr3:171002143",Alleles:"(G/C)",MAF:.3808,Distance:-29090,Dprime:.8731,R2:.3066,Correlated_Alleles:"G=A,C=T",RegulomeDB:4,Functional_Class:"NA"},{RS_Number:"rs13090306",Coord:"chr3:170969666",Alleles:"(A/C)",MAF:.4163,Distance:-61567,Dprime:.5359,R2:.0996,Correlated_Alleles:"= , =",RegulomeDB:5,Functional_Class:"NA"}];
 
-var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
+// var ldClipDetails={rs1:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs111531283:["chr19:39738317","A=0.737, C=0.263","SNP in LD with rs11322783 (R2=0.2849), SNP removed"],rs11322783:["chr19:39739153","T=0.444, -=0.556","SNP kept"],rs11881222:["chr19:39734923","A=0.672, G=0.328","SNP in LD with rs11322783 (R2=0.2245), SNP removed"],rs11882871:["chr19:39737610","A=0.475, G=0.525","SNP in LD with rs11322783 (R2=0.6373), SNP removed"],rs12979860:["chr19:39738787","C=0.485, T=0.515","SNP in LD with rs11322783 (R2=0.85), SNP removed"],rs12980275:["chr19:39731783","A=0.556, G=0.444","SNP in LD with rs11322783 (R2=0.3546), SNP removed"],rs12980602:["chr19:39752820","T=0.763, C=0.237","SNP kept"],rs2:["NA","NA","SNP not found in dbSNP142, SNP removed."],rs35963157:["chr19:39745695","-=0.338, C=0.662","SNP in LD with rs11322783 (R2=0.1887), SNP removed"],rs368234815:["NA","NA","Variant not in 1000G VCF file, variant removed"],rs4803217:["chr19:39734220","C=0.47, A=0.53","SNP in LD with rs11322783 (R2=0.6526), SNP removed"],rs4803222:["chr19:39739353","G=0.747, C=0.253","SNP in LD with rs11322783 (R2=0.2703), SNP removed"],rs6508852:["chr19:39752262","A=0.263, G=0.737","SNP in LD with rs8101517 (R2=0.609), SNP removed"],rs66477315:["chr19:39751674","T=0.636, -=0.364","SNP in LD with rs8101517 (R2=0.1736), SNP removed"],rs688187:["chr19:39732752","G=0.465, A=0.535","SNP in LD with rs11322783 (R2=0.6682), SNP removed"],rs7248668:["chr19:39743821","G=0.924, A=0.076","SNP in LD with rs8099917 (R2=1.0), SNP removed"],rs74597329:["chr19:39739155","T=0.444, G=0.556","SNP in LD with rs11322783 (R2=1.0), SNP removed"],rs78605718:["chr19:39745812","C=0.904, T=0.096","SNP kept"],rs8099917:["chr19:39743165","T=0.924, G=0.076","SNP kept"],rs8101517:["chr19:39747741","A=0.328, C=0.672","SNP kept"],rs8103142:["chr19:39735106","T=0.424, C=0.576","SNP in LD with rs11322783 (R2=0.6), SNP removed"],rs8109886:["chr19:39742762","C=0.253, A=0.747","SNP in LD with rs11322783 (R2=0.4223), SNP removed"],rs955155:["chr19:39729479","G=0.96, A=0.04","SNP kept"]};
 var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]};
 var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
 var snpchipReverseLookup = [];
 var ldClipRaw;
-var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip" ];
+var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip", "apiaccess" ];
 
 
 Object.size = function(obj) {
@@ -31,11 +31,15 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
-    // console.log("supportAjaxUploadWithProgress: "+supportAjaxUploadWithProgress());
 
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
         $(this).alert('close');
+    });
+
+    // Load news text from news.html to news-container div
+    $.get("news.html", function (data) {
+        $("#news-container").append(data);
     });
     
     $('#progressbar').progressbar();
@@ -105,6 +109,21 @@ $(document).ready(function() {
     });
 
     $('#ldassoc').prop('disabled', true);
+
+    // reset apiaccess form
+    $(".apiaccess-done").click(function(e) {
+        $("#apiaccess-reset").click();
+        $("#apiaccess-new-user").modal('hide');
+        $("#apiaccess-existing-user").modal('hide');
+
+        $('#apiblocked-form').show();
+        $('#apiblocked').show();
+        $('#apiblocked-message').hide();
+        $('#apiblocked-done').val("Cancel");
+
+        $("#apiblocked-reset").click();
+        $("#apiaccess-blocked-user").modal('hide');
+    });
 
     $("#example-gwas").click(function(e){
     //   console.log("Use example GWAS data.");
@@ -179,37 +198,9 @@ $(document).ready(function() {
         $("#region-region-index").val('');
         $("#ldassoc-population-codes").val('');
         refreshPopulation([],"ldassoc");
-        // console.log($("#ldassoc-population-codes").val());
       }
     });
 
-    /*
-    $("#ldassoc-region").multiselect({
-       multiple: false,
-       header: "Select a Region",
-       noneSelectedText: "Region",
-       selectedList: 1
-    });
-    */
-    /*
-    console.dir(ldassocData);
-    $(".draggable").draggable();
-    $(".dropzone").droppable({
-        accept: "li",
-        hoverClass: "highlight",
-        tolerance: "fit",
-        activate: function(evt, ui) {
-            $(this).find("h3").css("background-color", "cornsilk");
-        },
-        deactivate: function(evt, ui) {
-            $(this).find("h3").css("background-color", "");
-        },
-        drop: function(evt, ui) {
-            $(this).find("h3").text("Dropped");
-            //ui.draggable.find("h3").text("Dropped");
-        }
-    });
-    */
     updateVersion(ldlink_version);
     //addValidators();
     $('#ldlink-tabs').on('click', 'a', function(e) {
@@ -265,9 +256,24 @@ $(document).ready(function() {
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
     });
+    
+    $('#apiblocked-loading').hide();
+
     $('.ldlinkForm').on('submit', function(e) {
-        //alert('Validate');
         calculate(e);
+    });
+
+    $(".help-anchor-link").on('click', function(e) { 
+        var tab = e.target.hash;
+        $('#help-tab-anchor').click();
+        setTimeout(function() {
+            window.location = tab;
+        }, 500);
+    });
+
+    $(".anchor-link").on('click', function(e) { 
+        var tab = $(this).attr('dest');
+        $('#' + tab + '-tab-anchor').click();
     });
 
     setupTabs();
@@ -624,6 +630,7 @@ function setupTabs() {
     });
     $("#home-tab-anchor").removeClass('active');
     $("#help-tab-anchor").removeClass('active');
+    $("#apiaccess-tab-anchor").removeClass('active');
     //Look for a tab variable on the url
     var url = "{tab:''}";
     var search = location.search.substring(1);
@@ -644,6 +651,7 @@ function setupTabs() {
     if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
+    if(currentTab.search('access')>=0) currentTab = 'apiaccess';
 
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
@@ -901,7 +909,7 @@ function ldproxy_position_link(data, type, row) {
     var params = {
         db:'hg19',
         position : position,
-        snp142 : 'pack',
+        snp151 : 'pack',
         'hgFind.matches' : rs_number
     };
     var href = server + "?" + $.param(params);
@@ -973,9 +981,9 @@ function cleanSNP(text) {
         });
 
         if(variant.length > 2) {
-            var pos = variant.search(/^[R|r][S|s]\d+$/);
+            // var pos = variant.search(/^[R|r][S|s]\d+$/);
             // add genomic positions too (ex. chr1:123456) in the future
-            // var pos = variant.search(/^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/);
+            var pos = variant.search(/^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/);
             if(pos == 0) {
                 list += variant + '\n';
             }
@@ -1076,6 +1084,7 @@ function populateHeaderValues(event, numFiles, label) {
     }
     */
 }
+
 function loadHelp() {
     $('#help-tab').load('help.html');
 }
@@ -1141,6 +1150,16 @@ function updateData(id) {
             $('#'+id+"-loading").show();
             updateSNPchip();
             break;
+        case 'apiaccess':
+            $('#'+id+"-loading").show();
+            updateAPIaccess();
+            break;
+        case 'apiblocked':
+            if(checkTextAreaLength(id)) {
+                $('#'+id+"-loading").show();
+                updateAPIblocked();
+                break;
+            }
     }
 }
 
@@ -1286,6 +1305,30 @@ function isPopulationSet(elementId) {
         return true;
     }
 }
+
+function checkTextAreaLength(elementId) {
+    var description =  $('#'+elementId+'-justification').val();
+    var count = description.length;
+    if(count > 500 ) {
+        $('#'+elementId+'-justification-warning').popover('show');
+        var message = "Please keep response under 500 characters. Current: " + count.toString() + " characters."
+        $('#'+elementId+'-justification-warning').attr('data-content', message);
+        setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
+        return false;
+    } else {
+        $('#'+elementId+'-justification-warning').popover('hide');
+        return true;
+    }
+    // minimum character count
+    // else if(count < 50) {
+    //     $('#'+elementId+'-justification-warning').popover('show');
+    //     var message = "Please respond with at least 50 characters. Current: " + count.toString() + " characters."
+    //     $('#'+elementId+'-justification-warning').attr('data-content', message);
+    //     setTimeout(function() { $('#'+elementId+'-justification-warning').popover('hide'); }, 4000);
+    //     return false;
+    // } 
+}
+    
 
 function updateLDassoc() {
 
@@ -1826,7 +1869,7 @@ function anchorRSposition(coord, rs_number) {
     params = {
         db:'hg19',
         position : position,
-        snp142 : 'pack',
+        snp151 : 'pack',
         'hgFind.matches' : rs_number
     };
     var url = server + "?" + $.param(params);
@@ -2536,6 +2579,109 @@ function updateLDpair() {
     hideLoadingIcon(ajaxRequest, id);
 }
 
+function updateAPIaccess() {
+    var id = 'apiaccess';
+    var $btn = $('#' + id).button('loading');
+
+    var reference = "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    // if institution field was optional
+    // var institution_opt = $('#apiaccess-institution').val();
+    // if (institution_opt.length == 0) {
+    //     institution_opt = "NA"
+    // }
+
+    var apiaccessInputs = {
+        firstname: $('#apiaccess-firstname').val(),
+        lastname: $('#apiaccess-lastname').val(),
+        email: $('#apiaccess-email').val(),
+        institution: $('#apiaccess-institution').val(),
+        reference: reference
+    };
+
+    var url = restServerUrl + "/apiaccess_web";
+
+    var ajaxRequest = $.ajax({
+        type : "GET",
+        url : url,
+        data : apiaccessInputs,
+        contentType : 'application/json' // JSON
+    });
+
+    ajaxRequest.success(function(data) {
+        $('.modal-title.apiaccess').empty().append(data.message);
+        $('.' + id + '-user-email').empty().append(data.email);
+        $('#apiblocked-firstname').val(data.firstname);
+        $('#apiblocked-lastname').val(data.lastname);
+        $('#apiblocked-institution').val(data.institution);
+        $('#apiblocked-email').val(data.email);
+        $('#apiblocked-token').val(data.token);
+        $('#apiblocked-registered').val(data.registered);
+        $('#apiblocked-blocked').val(data.blocked);
+        if (data.message.substring(0, 5) == "Thank") {
+            // new user
+            $('#' + id + '-new-user').modal('show');
+        } else if (data.message.substring(0, 5) == "Email") { 
+            // existing user
+            $('#' + id + '-existing-user').modal('show');
+        } else {
+            // blocked user
+            $('#' + id + '-blocked-user').modal('show');
+        }
+        $('#' + id + '-loading').hide();
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+    hideLoadingIcon(ajaxRequest, id);
+}
+
+function updateAPIblocked() {
+    var id = 'apiblocked';
+    var $btn = $('#' + id).button('loading');
+
+    var reference = "ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+
+    var apiblockedInputs = {
+        firstname: $('#apiblocked-firstname').val(),
+        lastname: $('#apiblocked-lastname').val(),
+        institution: $('#apiblocked-institution').val(),
+        email: $('#apiblocked-email').val(),
+        token: $('#apiblocked-token').val(),
+        registered: $('#apiblocked-registered').val(),
+        blocked: $('#apiblocked-blocked').val(),
+        justification: $('#apiblocked-justification').val(),
+        reference: reference
+    };
+
+    var url = restServerUrl + "/apiblocked_web";
+
+    var ajaxRequest = $.ajax({
+        type : "GET",
+        url : url,
+        data : apiblockedInputs,
+        contentType : 'application/json' // JSON
+    });
+
+    ajaxRequest.success(function(data) {
+        // reset form
+        $("#apiblocked-reset").click();
+        // hide loading animation
+        $('#' + id + '-loading').hide();
+        // hide form
+        $('#apiblocked-form').hide();
+        // hide submit button
+        $('#apiblocked').hide();
+        // show form submission message
+        $('#apiblocked-message').show();
+        // change cancel to done button
+        $('#apiblocked-done').val("Done");
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+    hideLoadingIcon(ajaxRequest, id);
+}
+
 function displayError(id, data) {
     // Display error or warning if available.
     var error = false;
@@ -2671,7 +2817,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
         params = {
             db:'hg19',
             position : position,
-            snp142 : 'pack',
+            snp151 : 'pack',
             'hgFind.matches' : rs_number
         };
         url = server + "?" + $.param(params);
@@ -2720,7 +2866,7 @@ function addLDpairHyperLinks(data) {
     params = {
         db:'hg19',
         position : position,
-        snp142 : 'pack',
+        snp151 : 'pack',
         'hgFind.matches' : rs_number
     };
     url = server + "?" + $.param(params);
@@ -2736,7 +2882,7 @@ function addLDpairHyperLinks(data) {
     params = {
         db:'hg19',
         position : position,
-        snp142 : 'pack',
+        snp151 : 'pack',
         'hgFind.matches' : rs_number
     };
     url = server + "?" + $.param(params);

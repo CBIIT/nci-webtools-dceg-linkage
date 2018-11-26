@@ -16,15 +16,16 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    gene_dir=config['data']['gene_dir']
-    gene_c_dir=config['data']['gene_c_dir']
-    gene_dir2=config['data']['gene_dir2']
-    recomb_dir=config['data']['recomb_dir']
-    snp_dir=config['data']['snp_dir']
-    pop_dir=config['data']['pop_dir']
-    vcf_dir=config['data']['vcf_dir']
+    gene_dir = config['data']['gene_dir']
+    gene_c_dir = config['data']['gene_c_dir']
+    gene_dir2 = config['data']['gene_dir2']
+    recomb_dir = config['data']['recomb_dir']
+    snp_dir = config['data']['snp_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
+    pop_dir = config['data']['pop_dir']
+    vcf_dir = config['data']['vcf_dir']
 
-    tmp_dir="./tmp/"
+    tmp_dir = "./tmp/"
 
 
     # Ensure tmp directory exists
@@ -38,7 +39,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     if region=="variant":
         if myargsOrigin=="None":
             return None
-            raise
+            
 
     if myargsOrigin!="None":
         # Find coordinates (GRCh37/hg19) for SNP RS number
@@ -50,14 +51,14 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             conn.text_factory=str
             cur=conn.cursor()
 
-            def get_coords(rs):
+            def get_coords_var(rs):
                 id=rs.strip("rs")
                 t=(id,)
                 cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
                 return cur.fetchone()
 
             # Find RS number in snp database
-            var_coord=get_coords(snp)
+            var_coord=get_coords_var(snp)
 
             # Close snp connection
             cur.close()
@@ -65,7 +66,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
             if var_coord==None:
                 return None
-                raise
+                
 
         elif myargsOrigin.split(":")[0].strip("chr") in chrs and len(myargsOrigin.split(":"))==2:
             snp=myargsOrigin
@@ -73,10 +74,10 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
         else:
             return None
-            raise
+            
 
         chromosome=var_coord[1]
-        org_coord=var_coord[2]
+        org_coord=org_coord=str(int(var_coord[2]) + snp_pos_offset) # if new dbSNP151 position is 1 off
 
 
     # Open Association Data
@@ -91,13 +92,13 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     first=assoc_data[1].strip().split()
     if len(header)!=len(first):
         return None
-        raise
+        
 
     # Check header
     for item in header_list:
         if item not in header:
             return None
-            raise
+            
 
     len_head=len(header)
 
@@ -126,21 +127,21 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     elif region=="gene":
         if myargsName=="None":
             return None
-            raise
+            
 
         # Connect to gene database
         conn=sqlite3.connect(gene_dir2)
         conn.text_factory=str
         cur=conn.cursor()
 
-        def get_coords(gene_raw):
+        def get_coords_gene(gene_raw):
             gene=gene_raw.upper()
             t=(gene,)
             cur.execute("SELECT * FROM genes WHERE name=?", t)
             return cur.fetchone()
 
         # Find RS number in snp database
-        gene_coord=get_coords(myargsName)
+        gene_coord=get_coords_gene(myargsName)
 
         # Close snp connection
         cur.close()
@@ -148,7 +149,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
         if gene_coord==None:
             return None
-            raise
+            
 
         # Define search coordinates
         coord1=int(gene_coord[2])-window
@@ -160,28 +161,28 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         if myargsOrigin!="None":
             if gene_coord[1]!=chromosome:
                 return None
-                raise
+                
             if coord1>int(org_coord) or int(org_coord)>coord2:
                 return None
-                raise
+                
         else:
             chromosome=gene_coord[1]
 
     elif region=="region":
         if myargs['start']==None:
             return None
-            raise
+            
         if myargs['end']==None:
             return None
-            raise
+            
 
         # Parse out chr and positions for --region option
         if len(myargs['start'].split(":"))!=2:
             return None
-            raise
+            
         if len(myargs['end'].split(":"))!=2:
             return None
-            raise
+            
 
         chr_s=myargs['start'].strip("chr").split(":")[0]
         coord_s=myargs['start'].split(":")[1]
@@ -190,16 +191,16 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
         if chr_s not in chrs:
             return None
-            raise
+            
         if chr_e not in chrs:
             return None
-            raise
+            
         if chr_s!=chr_e:
             return None
-            raise
+            
         if coord_s>=coord_e:
             return None
-            raise
+            
 
         coord1=int(coord_s)-window
         if coord1<0:
@@ -210,10 +211,10 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         if myargsOrigin!="None":
             if chr_s!=chromosome:
                 return None
-                raise
+                
             if coord1>int(org_coord) or int(org_coord)>coord2:
                 return None
-                raise
+                
         else:
             chromosome=chr_s
 
@@ -221,7 +222,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     max_window=3000000
     if coord2-coord1>max_window:
             return None
-            raise
+            
 
     assoc_coords=[]
     a_pos=[]
@@ -252,7 +253,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Coordinate list checks
     if len(assoc_coords)==0:
         return None
-        raise
+        
 
 
     # Select desired ancestral populations
@@ -263,7 +264,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             pop_dirs.append(pop_dir+pop_i+".txt")
         else:
             return None
-            raise
+            
 
     get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
     subprocess.call(get_pops, shell=True)
@@ -334,7 +335,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     else:
         if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
             return None
-            raise
+            
 
         # Extract query SNP phased genotypes
         vcf_file=vcf_dir+chromosome+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
@@ -354,7 +355,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
             subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
             return None
-            raise
+            
         elif len(vcf)>1:
             geno=[]
             for i in range(len(vcf)):
@@ -364,7 +365,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
                 subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
                 return None
-                raise
+                
         else:
             geno=vcf[0].strip().split()
 
@@ -375,7 +376,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
             subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
             return None
-            raise
+            
 
 
         index=[]
@@ -396,7 +397,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
             subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
             return None
-            raise
+            
 
 
     # Calculate proxy LD statistics in parallel

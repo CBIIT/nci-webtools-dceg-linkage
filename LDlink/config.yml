@@ -1,12 +1,19 @@
 data:
-  snp_dir: '/local/content/ldlink/data/snp142/snp142_annot_2.db'
-  array_dir: '/local/content/ldlink/data/arrays/snp142_arrays.db'
-  dbsnp_version: '142'
-  pop_dir: '/local/content/ldlink/data/1000G/Phase3/samples/'
-  vcf_dir: '/local/content/ldlink/data/1000G/Phase3/genotypes/ALL.chr'
-  reg_dir: '/local/content/ldlink/data/regulomedb/regulomedb.db'
-  gene_dir: '/local/content/ldlink/data/refGene/sorted_refGene.txt.gz'
-  gene_c_dir: '/local/content/ldlink/data/refGene/sorted_refGene_collapsed.txt.gz'
-  gene_dir2: '/local/content/ldlink/data/refGene/gene_names_coords.db'
-  recomb_dir: '/local/content/ldlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
-  array_dir: '/local/content/ldlink/data/arrays/snp142_arrays.db'
+  snp_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.rs.151.db'
+  snp_chr_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.chr.151.db'
+  snp_pos_offset: 1
+  dbsnp_version: '151'
+  pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
+  vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
+  reg_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/regulomedb/regulomedb.db'
+  gene_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene.txt.gz'
+  gene_c_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene_collapsed.txt.gz'
+  gene_dir2: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/gene_names_coords.db'
+  recomb_dir: '/local/content/analysistools/public_html/apps/LDlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
+api:
+  require_token: True
+  api_access_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/apiaccess/'
+  token_expiration: False
+  token_expiration_days: 365
+  email_account: 'localhost'
+  api_superuser: 'kevin.jiang2@nih.gov'

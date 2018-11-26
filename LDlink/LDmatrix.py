@@ -1,26 +1,27 @@
-import yaml
 #!/usr/bin/env python
+import yaml
+import json
+import math
+import operator
+import os
+import sqlite3
+import subprocess
+import sys
 
 # Create LDmatrix function
 
 
 def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
-    import json,math,operator,os,sqlite3,subprocess,sys
-
-    # Set data directories
-    # data_dir = "/local/content/ldlink/data/"
-    # gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
-    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    # pop_dir = data_dir + "1000G/Phase3/samples/"
-    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    gene_dir=config['data']['gene_dir']
-    snp_dir=config['data']['snp_dir']
-    pop_dir=config['data']['pop_dir']
-    vcf_dir=config['data']['vcf_dir']
+    gene_dir = config['data']['gene_dir']
+    snp_dir = config['data']['snp_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
+    pop_dir = config['data']['pop_dir']
+    vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
 
@@ -41,7 +42,6 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         print >> out_json, json_output
         out_json.close()
         return("", "")
-        raise
 
     # Remove duplicate RS numbers
     snps = []
@@ -62,7 +62,6 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
             print >> out_json, json_output
             out_json.close()
             return("", "")
-            raise
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -76,11 +75,42 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     conn.text_factory = str
     cur = conn.cursor()
 
+    # Connect to snp chr database for genomic coordinates queries
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
+
     def get_coords(rs):
         id = rs.strip("rs")
         t = (id,)
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
+
+    # Query genomic coordinates
+    def get_rsnum(coord):
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = str(int(temp_coord[1]) - 1)
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
+
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_rsid(snp_lst):
+        new_snp_lst = []
+        for snp_raw_i in snp_lst:
+            if snp_raw_i[0][0:2] == "rs":
+                new_snp_lst.append(snp_raw_i)
+            else:
+                snp_info = get_rsnum(snp_raw_i[0])
+                if snp_info != None:
+                    var_id = "rs" + str(snp_info[0])
+                    new_snp_lst.append([var_id])
+                else:
+                    new_snp_lst.append(snp_raw_i)
+        return new_snp_lst
+
+    snps = replace_coord_rsid(snps)
 
     # Find RS numbers in snp database
     rs_nums = []
@@ -91,12 +121,14 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     for snp_i in snps:
         if len(snp_i) > 0:
             if len(snp_i[0]) > 2:
-                if snp_i[0][0:2] == "rs" and snp_i[0][-1].isdigit():
+                if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(snp_i[0])
                     if snp_coord != None:
+                        # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[2])
-                        temp = [snp_i[0], snp_coord[1], snp_coord[2]]
+                        snp_pos.append(str(int(snp_coord[2]) + snp_pos_offset))
+                        temp = [snp_i[0], snp_coord[1],
+                                 str(int(snp_coord[2]) + snp_pos_offset)]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -109,27 +141,32 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     cur.close()
     conn.close()
 
+    # Close snp chr connection
+    cur_chr.close()
+    conn_chr.close()
+
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + config['data']['dbsnp_version'] + ": " + ", ".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
+            config['data']['dbsnp_version'] + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + config['data']['dbsnp_version'] +"."
+        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
+            config['data']['dbsnp_version'] + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
         return("", "")
-        raise
 
     # Check SNPs are all on the same chromosome
     for i in range(len(snp_coords)):
         if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
+            output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(
+                snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print >> out_json, json_output
             out_json.close()
             return("", "")
-            raise
 
     # Check max distance between SNPs
     distance_bp = []
@@ -138,7 +175,9 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     distance_max = max(distance_bp) - min(distance_bp)
     if distance_max > 1000000:
         if "warning" in output:
-            output["warning"] = output["warning"] + ". Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
+            output["warning"] = output["warning"] + \
+                ". Switch rate errors become more common as distance between query variants increases (Query range = " + str(
+                    distance_max) + " bp)"
         else:
             output[
                 "warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
@@ -184,7 +223,6 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         print >> out_json, json_output
         out_json.close()
         return("", "")
-        raise
 
     h = 0
     while vcf[h][0:2] == "##":
@@ -261,8 +299,8 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0] = geno[2]
                 # rsnum = geno[2]
-                snps[indx][0]=rs_query
-                rsnum=rs_query
+                snps[indx][0] = rs_query
+                rsnum = rs_query
             else:
                 continue
 
@@ -493,7 +531,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         coord_snps_plot.append(xpos[i])
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
-    
+
     print "early x", x
 
     # Generate error if less than two SNPs
@@ -503,7 +541,6 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         print >> out_json, json_output
         out_json.close()
         return("", "")
-        raise
 
     buffer = (x[-1] - x[0]) * 0.025
     xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
@@ -537,27 +574,27 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
             xname_pos.append(i)
 
     data = {
-            'xname': xnames,
-            'xname_pos': xname_pos,
-            'yname': ynames,
-            'xA': xA,
-            'yA': yA,
-            'xpos': xpos,
-            'ypos': ypos,
-            'R2': R,
-            'Dp': D,
-            'corA': corA,
-            'box_color': box_color,
-            'box_trans': box_trans
+        'xname': xnames,
+        'xname_pos': xname_pos,
+        'yname': ynames,
+        'xA': xA,
+        'yA': yA,
+        'xpos': xpos,
+        'ypos': ypos,
+        'R2': R,
+        'Dp': D,
+        'corA': corA,
+        'box_color': box_color,
+        'box_trans': box_trans
     }
 
     # Delete redundant data
     # startidx = []
     # Isolate indices of elements in y=x
     # for xidx, xn in enumerate(data['xname']):
-        # for yidx, yn in enumerate(data['yname']):
-            # if xn == yn and xidx == yidx:
-                # startidx.append(xidx)
+    # for yidx, yn in enumerate(data['yname']):
+    # if xn == yn and xidx == yidx:
+    # startidx.append(xidx)
     # Flatten list snps
     # flat_snps = [item for sublist in snps for item in sublist]
     # Reverse flattend snp list
@@ -599,7 +636,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     #     print (i, new_data[i])
     # print "END   - debug prints for 45 degree rotation"
     # print "###################################"
-          
+
     # source = ColumnDataSource(new_data)
     source = ColumnDataSource(data)
 
@@ -609,10 +646,10 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                              x_range=xr, y_range=list(reversed(rsnum_lst)),
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-        # CHANGE AXIS LABELS & LINE COLOR: 
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
-        #                     x_range=xr, y_range=list(rsnum_lst), 
-        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        # CHANGE AXIS LABELS & LINE COLOR:
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
+        #                     x_range=xr, y_range=list(rsnum_lst),
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
         #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
@@ -621,22 +658,21 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                              h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
                              tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
         # CHANGE AXIS LABELS & LINE COLOR:
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5, 
-        #                     x_range=xr, y_range=list(rsnum_lst), 
-        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None, 
+        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
+        #                     x_range=xr, y_range=list(rsnum_lst),
+        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
         #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-    
 
     matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
-                    color="box_color", alpha="box_trans", line_color=None)
+                     color="box_color", alpha="box_trans", line_color=None)
     # Rotate LDmatrix 45 degrees
     # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=0.785398, source=source,
     #                 color="box_color", alpha="box_trans", line_color=None)
     # print "spacing"
     # print spacing
     # matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
-    #                 color="box_color", alpha="box_trans", line_color=None) 
-    
+    #                 color="box_color", alpha="box_trans", line_color=None)
+
     matrix_plot.grid.grid_line_color = None
     matrix_plot.axis.axis_line_color = None
     matrix_plot.axis.major_tick_line_color = None
@@ -705,7 +741,8 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
                  title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
                  plot_width=800, plot_height=50, tools="hover,xpan,tap")
-    rug.rect(x='x', y='y', width='w', height='h', fill_color='red', dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
+    rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
+             dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
 
     hover = rug.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -816,7 +853,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
                           genes_plot_yn, color="black", alpha=1, line_width=2)
         gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                        source=source_gene_plot, fill_color='grey', line_color="grey")
+                       source=source_gene_plot, fill_color='grey', line_color="grey")
         gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
         hover = gene_plot.select(dict(type=HoverTool))
@@ -848,7 +885,8 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + r2_d
+        command = "python LDmatrix_plot_sub.py " + \
+            snplst + " " + pop + " " + request + " " + r2_d
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
@@ -885,7 +923,7 @@ def main():
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
-        web =sys.argv[4]
+        web = sys.argv[4]
         r2_d = sys.argv[5]
     else:
         print "Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)"
@@ -918,6 +956,7 @@ def main():
         print ""
         print json_dict["error"]
         print ""
+
 
 if __name__ == "__main__":
     main()

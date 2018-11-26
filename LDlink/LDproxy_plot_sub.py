@@ -14,6 +14,7 @@ from multiprocessing.dummy import Pool
 
 # LDproxy subprocess to export bokeh to high quality images in the background
 
+
 def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     start_time = time.time()
@@ -21,11 +22,13 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    gene_dir=config['data']['gene_dir']
-    recomb_dir=config['data']['recomb_dir']
-    snp_dir=config['data']['snp_dir']
-    pop_dir=config['data']['pop_dir']
-    vcf_dir=config['data']['vcf_dir']
+    gene_dir = config['data']['gene_dir']
+    recomb_dir = config['data']['recomb_dir']
+    snp_dir = config['data']['snp_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
+    pop_dir = config['data']['pop_dir']
+    vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
 
@@ -44,11 +47,41 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     conn.text_factory = str
     cur = conn.cursor()
 
+    # Connect to snp chr database for genomic coordinates queries
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
+
     def get_coords(rs):
         id = rs.strip("rs")
         t = (id,)
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
+
+    # Query genomic coordinates
+    def get_rsnum(coord):
+        coord = coord.lower()
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = str(int(temp_coord[1]) - 1)
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
+
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_rsid(coord):
+        rsid = coord.lower()
+        if rsid[0:2] == "rs":
+            return rsid
+        else:
+            snp_info = get_rsnum(rsid)
+            if snp_info != None:
+                rsid = "rs" + str(snp_info[0])
+            else:
+                return rsid
+        return rsid
+
+    snp = replace_coord_rsid(snp)
 
     # Find RS number in snp database
     snp_coord = get_coords(snp)
@@ -56,6 +89,10 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     # Close snp connection
     cur.close()
     conn.close()
+
+    # Close snp chr connection
+    cur_chr.close()
+    conn_chr.close()
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -86,7 +123,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     head = proc_h.stdout.readlines()[0].strip().split()
 
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord[1], str(int(snp_coord[2]) + snp_pos_offset), tmp_dir + "snp_no_dups_" + request + ".vcf")  # if new dbSNP151 position is 1 off
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -143,10 +180,12 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = int(snp_coord[2]) - window
+    coord1 = int(snp_coord[2]) + snp_pos_offset - \
+        window  # if new dbSNP151 position is 1 off
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord[2]) + window
+    coord2 = int(snp_coord[2]) + snp_pos_offset + \
+        window  # if new dbSNP151 position is 1 off
 
     # Calculate proxy LD statistics in parallel
     threads = 4
@@ -281,7 +320,6 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     from bokeh.io import export_svgs
     import svgutils.compose as sg
 
-
     reset_output()
 
     # Proxy Plot
@@ -320,28 +358,29 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
         recomb_y.append(float(rate) / 100.0)
 
     data = {
-         'x': x,
-         'y': y,
-         'qrs': q_rs,
-         'q_alle': q_allele,
-         'q_maf': q_maf,
-         'prs': p_rs,
-         'p_alle': p_allele,
-         'p_maf': p_maf,
-         'dist': dist,
-         'r': r2_round,
-         'd': d_prime_round,
-         'alleles': corr_alleles,
-         'regdb': regdb,
-         'funct': funct,
-         'size': size,
-         'color': color
+        'x': x,
+        'y': y,
+        'qrs': q_rs,
+        'q_alle': q_allele,
+        'q_maf': q_maf,
+        'prs': p_rs,
+        'p_alle': p_allele,
+        'p_maf': p_maf,
+        'dist': dist,
+        'r': r2_round,
+        'd': d_prime_round,
+        'alleles': corr_alleles,
+        'regdb': regdb,
+        'funct': funct,
+        'size': size,
+        'color': color
     }
     source = ColumnDataSource(data)
 
     proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
 
-    proxy_plot.circle(x='x', y='y', size='size', color='color', alpha=0.5, source=source)
+    proxy_plot.circle(x='x', y='y', size='size',
+                      color='color', alpha=0.5, source=source)
 
     hover = proxy_plot.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -374,24 +413,24 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     yr_rug = Range1d(start=-0.03, end=1.03)
 
     data_rug = {
-          'x': x,
-          'y': y,
-          'y2_ll': y2_ll,
-          'y2_ul': y2_ul,
-          'qrs': q_rs,
-          'q_alle': q_allele,
-          'q_maf': q_maf,
-          'prs': p_rs,
-          'p_alle': p_allele,
-          'p_maf': p_maf,
-          'dist': dist,
-          'r': r2_round,
-          'd': d_prime_round,
-          'alleles': corr_alleles,
-          'regdb': regdb,
-          'funct': funct,
-          'size': size,
-          'color': color
+        'x': x,
+        'y': y,
+        'y2_ll': y2_ll,
+        'y2_ul': y2_ul,
+        'qrs': q_rs,
+        'q_alle': q_allele,
+        'q_maf': q_maf,
+        'prs': p_rs,
+        'p_alle': p_allele,
+        'p_maf': p_maf,
+        'dist': dist,
+        'r': r2_round,
+        'd': d_prime_round,
+        'alleles': corr_alleles,
+        'regdb': regdb,
+        'funct': funct,
+        'size': size,
+        'color': color
     }
     source_rug = ColumnDataSource(data_rug)
 
@@ -475,13 +514,13 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     yr2 = Range1d(start=0, end=n_rows)
 
     data_gene_plot = {
-          'exons_plot_x': exons_plot_x,
-          'exons_plot_yn': exons_plot_yn,
-          'exons_plot_w': exons_plot_w,
-          'exons_plot_h': exons_plot_h,
-          'exons_plot_name': exons_plot_name,
-          'exons_plot_id': exons_plot_id,
-          'exons_plot_exon': exons_plot_exon
+        'exons_plot_x': exons_plot_x,
+        'exons_plot_yn': exons_plot_yn,
+        'exons_plot_w': exons_plot_w,
+        'exons_plot_h': exons_plot_h,
+        'exons_plot_name': exons_plot_name,
+        'exons_plot_id': exons_plot_id,
+        'exons_plot_exon': exons_plot_exon
     }
 
     source_gene_plot = ColumnDataSource(data_gene_plot)
@@ -500,7 +539,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
                       genes_plot_yn, color="black", alpha=1, line_width=2)
 
     gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                    source=source_gene_plot, fill_color="grey", line_color="grey")
+                   source=source_gene_plot, fill_color="grey", line_color="grey")
     gene_plot.xaxis.axis_label = "Chromosome " + \
         snp_coord[1] + " Coordinate (Mb)(GRCh37)"
     gene_plot.yaxis.axis_label = "Genes"
@@ -527,31 +566,40 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     proxy_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_1_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
-    
+    export_svgs(proxy_plot, filename=tmp_dir +
+                "proxy_plot_1_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir +
+                "gene_plot_1_" + request + ".svg")
+
     # Concatenate svgs
     sg.Figure("24.59cm", "27.94cm",
-        sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg"),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 630)
-        ).save(tmp_dir + "proxy_plot_" + request + ".svg")
+              sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg"),
+              sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 630)
+              ).save(tmp_dir + "proxy_plot_" + request + ".svg")
 
     sg.Figure("122.95cm", "139.70cm",
-        sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg").scale(5),
-        sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(0, 3150)
-        ).save(tmp_dir + "proxy_plot_scaled_" + request + ".svg")
+              sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg").scale(5),
+              sg.SVG(tmp_dir + "gene_plot_1_" + request +
+                     ".svg").scale(5).move(0, 3150)
+              ).save(tmp_dir + "proxy_plot_scaled_" + request + ".svg")
 
     # Export to PDF
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".pdf", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_" +
+                    request + ".svg " + tmp_dir + "proxy_plot_" + request + ".pdf", shell=True)
     # Export to PNG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" +
+                    request + ".svg " + tmp_dir + "proxy_plot_" + request + ".png", shell=True)
     # Export to JPEG
-    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" + request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)    
+    subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "proxy_plot_scaled_" +
+                    request + ".svg " + tmp_dir + "proxy_plot_" + request + ".jpeg", shell=True)
     # Remove individual SVG files after they are combined
-    subprocess.call("rm " + tmp_dir + "proxy_plot_1_" + request + ".svg", shell=True)
-    subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "proxy_plot_1_" +
+                    request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "gene_plot_1_" +
+                    request + ".svg", shell=True)
     # Remove scaled SVG file after it is converted to png and jpeg
-    subprocess.call("rm " + tmp_dir + "proxy_plot_scaled_" + request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "proxy_plot_scaled_" +
+                    request + ".svg", shell=True)
 
     reset_output()
 
@@ -583,6 +631,7 @@ def main():
 
     # Run function
     calculate_proxy_svg(snp, pop, request, r2_d)
+
 
 if __name__ == "__main__":
     main()

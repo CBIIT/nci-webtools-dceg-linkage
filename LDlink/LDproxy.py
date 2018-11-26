@@ -1,38 +1,35 @@
-import yaml
 #!/usr/bin/env python
+import yaml
+import csv
+import json
+import operator
+import os
+import sqlite3
+import subprocess
+import sys
+import time
+import threading
+import weakref
+import time
+from multiprocessing.dummy import Pool
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, web, r2_d="r2"):
-    import csv
-    import json
-    import operator
-    import os
-    import sqlite3
-    import subprocess
-    import sys
-    import time
-    import threading
-    import weakref
-    import time
-    from multiprocessing.dummy import Pool
-    start_time = time.time()
 
-    # Set data directories
-    # data_dir = "/local/content/ldlink/data/"
-    # gene_dir = data_dir + "refGene/sorted_refGene.txt.gz"
-    # recomb_dir = data_dir + "recomb/genetic_map_autosomes_combined_b37.txt.gz"
-    # snp_dir = data_dir + "snp142/snp142_annot_2.db"
-    # pop_dir = data_dir + "1000G/Phase3/samples/"
-    # vcf_dir = data_dir + "1000G/Phase3/genotypes/ALL.chr"
+
+def calculate_proxy(snp, pop, request, web, r2_d="r2"):
+
+    start_time = time.time()
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    gene_dir=config['data']['gene_dir']
-    recomb_dir=config['data']['recomb_dir']
-    snp_dir=config['data']['snp_dir']
-    pop_dir=config['data']['pop_dir']
-    vcf_dir=config['data']['vcf_dir']
+    gene_dir = config['data']['gene_dir']
+    recomb_dir = config['data']['recomb_dir']
+    snp_dir = config['data']['snp_dir']
+    snp_chr_dir = config['data']['snp_chr_dir']
+    snp_pos_offset = config['data']['snp_pos_offset']
+    pop_dir = config['data']['pop_dir']
+    vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
 
@@ -53,11 +50,41 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     conn.text_factory = str
     cur = conn.cursor()
 
+    # Connect to snp chr database for genomic coordinates queries
+    conn_chr = sqlite3.connect(snp_chr_dir)
+    conn_chr.text_factory = str
+    cur_chr = conn_chr.cursor()
+
     def get_coords(rs):
         id = rs.strip("rs")
         t = (id,)
         cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
         return cur.fetchone()
+
+    # Query genomic coordinates
+    def get_rsnum(coord):
+        coord = coord.lower()
+        temp_coord = coord.strip("chr").split(":")
+        chro = temp_coord[0]
+        pos = str(int(temp_coord[1]) - 1)
+        t = (pos,)
+        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
+        return cur_chr.fetchone()
+
+    # Replace input genomic coordinates with variant ids (rsids)
+    def replace_coord_rsid(coord):
+        rsid = coord.lower()
+        if rsid[0:2] == "rs":
+            return rsid
+        else:
+            snp_info = get_rsnum(rsid)
+            if snp_info != None:
+                rsid = "rs" + str(snp_info[0])
+            else:
+                return rsid
+        return rsid
+
+    snp = replace_coord_rsid(snp)
 
     # Find RS number in snp database
     snp_coord = get_coords(snp)
@@ -66,13 +93,17 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     cur.close()
     conn.close()
 
+    # Close snp chr connection
+    cur_chr.close()
+    conn_chr.close()
+
     if snp_coord == None:
-        output["error"] = snp + " is not in dbSNP build " + config['data']['dbsnp_version'] + "."
+        output["error"] = snp + " is not in dbSNP build " + \
+            config['data']['dbsnp_version'] + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
         return("", "")
-        raise
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -86,7 +117,6 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
             print >> out_json, json_output
             out_json.close()
             return("", "")
-            raise
 
     get_pops = "cat " + " ".join(pop_dirs) + " > " + \
         tmp_dir + "pops_" + request + ".txt"
@@ -109,8 +139,9 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = proc_h.stdout.readlines()[0].strip().split()
 
+    # if new dbSNP151 position is 1 off
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord[1], str(int(snp_coord[2]) + snp_pos_offset), tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -126,7 +157,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                         request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
-        raise
+
     elif len(vcf) > 1:
         geno = []
         for i in range(len(vcf)):
@@ -142,13 +173,14 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
             subprocess.call("rm " + tmp_dir + "*" +
                             request + "*.vcf", shell=True)
             return("", "")
-            raise
+
     else:
         geno = vcf[0].strip().split()
 
     if geno[2] != snp:
         output["warning"] = "Genomic position for query variant (" + snp + \
-            ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+            ") does not match RS number at 1000G position (chr" + \
+            geno[0]+":"+geno[1]+")"
         snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
@@ -160,7 +192,6 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                         request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
-        raise
 
     index = []
     for i in range(9, len(head)):
@@ -186,14 +217,15 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                         request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return("", "")
-        raise
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = int(snp_coord[2]) - window
+    coord1 = int(snp_coord[2]) + snp_pos_offset - \
+        window  # if new dbSNP151 position is 1 off
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord[2]) + window
+    coord2 = int(snp_coord[2]) + snp_pos_offset + \
+        window  # if new dbSNP151 position is 1 off
     print ""
 
     # Calculate proxy LD statistics in parallel
@@ -414,7 +446,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         for var in ucsc_track["0.6-0.8"]:
             print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
         print >> track, ""
-    
+
     if len(ucsc_track["0.4-0.6"]) > 0:
         if r2_d == "r2":
             print >> track, "track type=bed name=\"0.4<R2<=0.6\" description=\"Proxy Variants with 0.4<R2<=0.6\" color=198,129,0"
@@ -525,7 +557,6 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
     from bokeh.resources import CDN
 
-
     reset_output()
 
     # Proxy Plot
@@ -564,28 +595,29 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         recomb_y.append(float(rate) / 100.0)
 
     data = {
-         'x': x,
-         'y': y,
-         'qrs': q_rs,
-         'q_alle': q_allele,
-         'q_maf': q_maf,
-         'prs': p_rs,
-         'p_alle': p_allele,
-         'p_maf': p_maf,
-         'dist': dist,
-         'r': r2_round,
-         'd': d_prime_round,
-         'alleles': corr_alleles,
-         'regdb': regdb,
-         'funct': funct,
-         'size': size,
-         'color': color
+        'x': x,
+        'y': y,
+        'qrs': q_rs,
+        'q_alle': q_allele,
+        'q_maf': q_maf,
+        'prs': p_rs,
+        'p_alle': p_allele,
+        'p_maf': p_maf,
+        'dist': dist,
+        'r': r2_round,
+        'd': d_prime_round,
+        'alleles': corr_alleles,
+        'regdb': regdb,
+        'funct': funct,
+        'size': size,
+        'color': color
     }
     source = ColumnDataSource(data)
 
     proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
 
-    proxy_plot.circle(x='x', y='y', size='size', color='color', alpha=0.5, source=source)
+    proxy_plot.circle(x='x', y='y', size='size',
+                      color='color', alpha=0.5, source=source)
 
     hover = proxy_plot.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -618,24 +650,24 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     yr_rug = Range1d(start=-0.03, end=1.03)
 
     data_rug = {
-          'x': x,
-          'y': y,
-          'y2_ll': y2_ll,
-          'y2_ul': y2_ul,
-          'qrs': q_rs,
-          'q_alle': q_allele,
-          'q_maf': q_maf,
-          'prs': p_rs,
-          'p_alle': p_allele,
-          'p_maf': p_maf,
-          'dist': dist,
-          'r': r2_round,
-          'd': d_prime_round,
-          'alleles': corr_alleles,
-          'regdb': regdb,
-          'funct': funct,
-          'size': size,
-          'color': color
+        'x': x,
+        'y': y,
+        'y2_ll': y2_ll,
+        'y2_ul': y2_ul,
+        'qrs': q_rs,
+        'q_alle': q_allele,
+        'q_maf': q_maf,
+        'prs': p_rs,
+        'p_alle': p_allele,
+        'p_maf': p_maf,
+        'dist': dist,
+        'r': r2_round,
+        'd': d_prime_round,
+        'alleles': corr_alleles,
+        'regdb': regdb,
+        'funct': funct,
+        'size': size,
+        'color': color
     }
     source_rug = ColumnDataSource(data_rug)
 
@@ -719,13 +751,13 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     yr2 = Range1d(start=0, end=n_rows)
 
     data_gene_plot = {
-          'exons_plot_x': exons_plot_x,
-          'exons_plot_yn': exons_plot_yn,
-          'exons_plot_w': exons_plot_w,
-          'exons_plot_h': exons_plot_h,
-          'exons_plot_name': exons_plot_name,
-          'exons_plot_id': exons_plot_id,
-          'exons_plot_exon': exons_plot_exon
+        'exons_plot_x': exons_plot_x,
+        'exons_plot_yn': exons_plot_yn,
+        'exons_plot_w': exons_plot_w,
+        'exons_plot_h': exons_plot_h,
+        'exons_plot_name': exons_plot_name,
+        'exons_plot_id': exons_plot_id,
+        'exons_plot_exon': exons_plot_exon
     }
 
     source_gene_plot = ColumnDataSource(data_gene_plot)
@@ -744,7 +776,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                       genes_plot_yn, color="black", alpha=1, line_width=2)
 
     gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                    source=source_gene_plot, fill_color="grey", line_color="grey")
+                   source=source_gene_plot, fill_color="grey", line_color="grey")
     gene_plot.xaxis.axis_label = "Chromosome " + \
         snp_coord[1] + " Coordinate (Mb)(GRCh37)"
     gene_plot.yaxis.axis_label = "Genes"
@@ -773,9 +805,9 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
+        command = "python LDproxy_plot_sub.py " + \
+            snp + " " + pop + " " + request + " " + r2_d
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-
 
     ###########################
     # Html output for testing #
@@ -817,20 +849,21 @@ def main():
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = False
-        web =sys.argv[4]
+        web = sys.argv[4]
         r2_d = "r2"
     elif len(sys.argv) == 6:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
-        web = sys.argv [4]
+        web = sys.argv[4]
         r2_d = sys.argv[5]
     else:
         print "Correct useage is: LDproxy.py snp populations request (optional: r2_d)"
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_proxy(snp, pop, request, web, r2_d)
+    out_script, out_div, error_msg = calculate_proxy(
+        snp, pop, request, web, r2_d)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:
@@ -863,6 +896,7 @@ def main():
     else:
         print "WARNING: " + json_dict["warning"] + "!"
         print ""
+
 
 if __name__ == "__main__":
     main()
