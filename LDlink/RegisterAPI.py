@@ -450,37 +450,19 @@ def register_user_api(firstname, lastname, email, institution, token, registered
             updateRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
             out_json = {
                 "message": "Thank you for registering to use the LDlink API.",
-                "firstname": firstname,
-                "lastname": lastname,
-                "email": email,
-                "institution": institution,
-                "token": token,
-                "registered": registered,
-                "blocked": blocked
+                "email": email
             }
         else:
             out_json = {
                 "message": "Email already registered.",
-                "firstname": record[0],
-                "lastname": record[1],
-                "email": record[2],
-                "institution": record[3],
-                "token": record[4],
-                "registered": record[5],
-                "blocked": record[6]
+                "email": record[2]
             }
     else:
         # if email record does not exists in db, add to table
         insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
-            "firstname": firstname,
-            "lastname": lastname,
-            "email": email,
-            "institution": institution,
-            "token": token,
-            "registered": registered,
-            "blocked": blocked
+            "email": email
         }
 
     conn.close()

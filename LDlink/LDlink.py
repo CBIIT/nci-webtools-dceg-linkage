@@ -824,7 +824,11 @@ def apiaccess_web():
     print "debug api register user request url"
     r = requests.get(request.url_root + 'LDlinkRest/apiaccess_api', params=out_json)
     print r.url
-    return sendJSON(out_json)
+    out_json2 = {
+        "message": out_json["message"],
+        "email": out_json["email"]
+    }
+    return sendJSON(out_json2)
 
 @app.route('/LDlinkRest/apiaccess_api', methods=['GET'])
 def apiaccess_api():
@@ -853,7 +857,11 @@ def block_api_user_web():
     print "debug api block user request url"
     r = requests.get(request.url_root + 'LDlinkRest/apiaccess/block_user', params=in_json)
     print r.url
-    return sendJSON(out_json)
+    out_json2 = {
+        "message": out_json["message"],
+        "email": out_json["email"]
+    }
+    return sendJSON(out_json2)
 
 @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
