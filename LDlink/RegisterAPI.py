@@ -513,8 +513,15 @@ def getStats(startdatetime, enddatetime, top):
         "ORDER BY num_calls DESC " + 
         topQuery + ";")
     users = cur.fetchall()
+    users_json = {}
+    for user in users:
+        users_json[user[2]] = {
+            "firstname": user[0],
+            "lastname": user[1],
+            "#_total_api_calls": user[3]
+        }
     out_json = {
         "#_registered_users": numUsers[0],
-        "users": users
+        "users": users_json
     }
     return out_json
