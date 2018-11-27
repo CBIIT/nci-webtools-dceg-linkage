@@ -480,10 +480,37 @@ def getStats(startdate, enddate, top):
     # temp = (token,)
     cur.execute("SELECT count(*) FROM api_users;")
     numUsers = cur.fetchone()
-    cur.execute("SELECT count(*) FROM api_log;")
-    numAPICalls = cur.fetchone()
+
+    whereClause = ""
+    if ((startdate is not False) and (enddate is not False)):
+        whereClause = " WHERE "
+    startdateQuery = ""
+    if startdate is not False:
+        startdatetime = startdate.split("_")
+        startdateQuery = "accessed >= '" + startdatetime[0] + " " + startdatetime[1] + ""
+    enddateQuery = ""
+    if enddate is not False:
+        enddatetime = enddate.split("_")
+        enddateQuery = "accessed <= '" + enddatetime[0] + " " + enddatetime[1] + ""
+    andClause = ""
+    if ((startdate is not False) and (enddate is not False)):
+        andClause = " AND "
+    topQuery = ""
+    if top is not False:
+        topQuery = "LIMIT " + str(top)
+
+
+    cur.execute(
+        "SELECT a.first_name, a.last_name, a.email, count(*) as num_calls " + 
+        "FROM api_users a INNER JOIN " + 
+        "(SELECT * FROM api_log" + whereClause + startdateQuery + andClause + enddateQuery + ") b " + 
+        "ON a.token = b.token " + 
+        "GROUP BY a.email " + 
+        "ORDER BY num_calls DESC " + 
+        topQuery + ";")
+    users = cur.fetchall()
     out_json = {
-        "#_registered_users": numUsers,
-        "#_total_api_calls": numAPICalls
+        "#_registered_users": numUsers[0],
+        "users": users
     }
     return out_json
