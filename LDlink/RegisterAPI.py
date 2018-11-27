@@ -110,17 +110,17 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     return out_json
 
 # creates table in database if database did not exist before
-def createTables(api_access_dir):
-    # create database
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    cur.execute(
-        "CREATE TABLE api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
-    con.commit()
-    con.close()
+# def createTables(api_access_dir):
+#     # create database
+#     con = sqlite3.connect(api_access_dir + 'api_access.db')
+#     con.text_factory = str
+#     cur = con.cursor()
+#     cur.execute(
+#         "CREATE TABLE api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+#     cur.execute(
+#         "CREATE TABLE api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
+#     con.commit()
+#     con.close()
 
 # check if user email record exists
 def getEmailRecord(curr, email):
@@ -132,9 +132,9 @@ def insertRecord(firstname, lastname, email, institution, token, registered, blo
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    con.commit()
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    # con.commit()
     temp = (firstname, lastname, email, institution, token, registered, blocked)
     cur.execute(
         "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, blocked) VALUES (?,?,?,?,?,?,?)", temp)
@@ -150,9 +150,9 @@ def logAccess(token, module):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
-    con.commit()
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
+    # con.commit()
     access_date = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
     temp = (token, module, access_date)
     cur.execute(
@@ -229,9 +229,9 @@ def checkToken(token, api_access_dir, token_expiration, token_expiration_days):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    con.commit()
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    # con.commit()
     temp = (token,)
     cur.execute("SELECT * FROM api_users WHERE token=?", temp)
     record = cur.fetchone()
@@ -253,9 +253,9 @@ def getToken(email, api_access_dir):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    con.commit()
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    # con.commit()
     temp = (email,)
     cur.execute("SELECT * FROM api_users WHERE email=?", temp)
     record = cur.fetchone()
@@ -270,9 +270,9 @@ def checkBlocked(token, api_access_dir):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    con.commit()
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    # con.commit()
     temp = (token,)
     cur.execute("SELECT * FROM api_users WHERE token=?", temp)
     record = cur.fetchone()
@@ -290,9 +290,9 @@ def checkBlockedEmail(email, api_access_dir):
     con = sqlite3.connect(api_access_dir + 'api_access.db')
     con.text_factory = str
     cur = con.cursor()
-    cur.execute(
-        "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    con.commit()
+    # cur.execute(
+    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    # con.commit()
     temp = (email,)
     cur.execute("SELECT * FROM api_users WHERE email=?", temp)
     record = cur.fetchone()
@@ -334,9 +334,9 @@ def register_user_web(firstname, lastname, email, institution, reference, url_ro
     out_json = {}
 
     # create database and table if it does not exist already
-    if not os.path.exists(api_access_dir + 'api_access.db'):
-        print "api_access.db created."
-        createTables(api_access_dir)
+    # if not os.path.exists(api_access_dir + 'api_access.db'):
+    #     print "api_access.db created."
+    #     createTables(api_access_dir)
 
     # by default, users are not blocked
     blocked = 0
@@ -429,9 +429,9 @@ def register_user_api(firstname, lastname, email, institution, token, registered
     out_json = {}
 
     # create database and table if it does not exist already
-    if not os.path.exists(api_access_dir + 'api_access.db'):
-        print "api_access.db created."
-        createTables(api_access_dir)
+    # if not os.path.exists(api_access_dir + 'api_access.db'):
+    #     print "api_access.db created."
+    #     createTables(api_access_dir)
 
     # by default, users are not blocked
     blocked = 0
