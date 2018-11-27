@@ -903,10 +903,10 @@ def unblock_api_user_api():
 
 @app.route('/LDlinkRest/apiaccess/stats', methods=['GET'])
 def api_stats():
-    startdate = request.args.get('startdate', False)
-    enddate = request.args.get('enddate', False)
+    startdatetime = request.args.get('startdatetime', False)
+    enddatetime = request.args.get('enddatetime', False)
     top = request.args.get('top', False)
-    out_json = getStats(startdate, enddate, top)
+    out_json = getStats(startdatetime, enddatetime, top)
     return sendJSON(out_json)
 
 

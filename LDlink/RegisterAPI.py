@@ -469,8 +469,8 @@ def register_user_api(firstname, lastname, email, institution, token, registered
     return out_json
 
 # returns stats of total number of calls per registered api users with optional arguments
-# optional arguments: startdate of api calls, enddate of api calls, top # users with most calls
-def getStats(startdate, enddate, top):
+# optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
+def getStats(startdatetime, enddatetime, top):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_access_dir = config['api']['api_access_dir']
@@ -482,18 +482,22 @@ def getStats(startdate, enddate, top):
     numUsers = cur.fetchone()
 
     whereClause = ""
-    if ((startdate is not False) and (enddate is not False)):
+    if ((startdatetime is not False) and (enddatetime is not False)):
         whereClause = " WHERE "
     startdateQuery = ""
-    if startdate is not False:
-        startdatetime = startdate.split("_")
-        startdateQuery = "accessed >= '" + startdatetime[0] + " " + startdatetime[1] + ""
+    if startdatetime is not False:
+        print startdatetime
+        startdatetimeSplit = startdatetime.split("::")
+        startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + ""
+        print startdateQuery
     enddateQuery = ""
-    if enddate is not False:
-        enddatetime = enddate.split("_")
-        enddateQuery = "accessed <= '" + enddatetime[0] + " " + enddatetime[1] + ""
+    if enddatetime is not False:
+        print enddatetime
+        enddatetimeSplit = enddatetime.split("::")
+        enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + ""
+        print enddateQuery
     andClause = ""
-    if ((startdate is not False) and (enddate is not False)):
+    if ((startdatetime is not False) and (enddatetime is not False)):
         andClause = " AND "
     topQuery = ""
     if top is not False:
