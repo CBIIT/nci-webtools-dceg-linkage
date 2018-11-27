@@ -487,14 +487,14 @@ def getStats(startdatetime, enddatetime, top):
     startdateQuery = ""
     if startdatetime is not False:
         print startdatetime
-        startdatetimeSplit = startdatetime.split("::")
-        startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + ""
+        startdatetimeSplit = startdatetime.split("_")
+        startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + '"
         print startdateQuery
     enddateQuery = ""
     if enddatetime is not False:
         print enddatetime
-        enddatetimeSplit = enddatetime.split("::")
-        enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + ""
+        enddatetimeSplit = enddatetime.split("_")
+        enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + '"
         print enddateQuery
     andClause = ""
     if ((startdatetime is not False) and (enddatetime is not False)):
