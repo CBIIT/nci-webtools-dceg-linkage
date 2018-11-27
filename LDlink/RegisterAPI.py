@@ -482,7 +482,7 @@ def getStats(startdatetime, enddatetime, top):
     numUsers = cur.fetchone()
 
     whereClause = ""
-    if ((startdatetime is not False) and (enddatetime is not False)):
+    if ((startdatetime is not False) or (enddatetime is not False)):
         whereClause = " WHERE "
     startdateQuery = ""
     if startdatetime is not False:
