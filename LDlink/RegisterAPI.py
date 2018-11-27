@@ -71,7 +71,7 @@ def emailUserUnblocked(email, email_account):
     smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email unblock request to list of web admins
-def emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification, url_root):
+def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     email_account = config['api']['email_account']
@@ -94,7 +94,7 @@ def emailJustification(firstname, lastname, email, institution, token, registere
     message += "<br><br>First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
     message += "<br>Email: " + str(email)
-    message += "<br>Token: " + str(token)
+    # message += "<br>Token: " + str(token)
     message += "<br>Registered: " + str(registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)

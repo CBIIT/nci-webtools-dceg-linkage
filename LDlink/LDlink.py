@@ -803,12 +803,12 @@ def apiblocked_web():
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
-    token = request.args.get('token', False)
+    # token = request.args.get('token', False)
     registered = request.args.get('registered', False)
     blocked = request.args.get('blocked', False)
     justification = request.args.get('justification', False)
 
-    out_json = emailJustification(firstname, lastname, email, institution, token, registered, blocked, justification, request.url_root)
+    out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.url_root)
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
@@ -826,7 +826,12 @@ def register_web():
     print r.url
     out_json2 = {
         "message": out_json["message"],
-        "email": out_json["email"]
+        "email": out_json["email"],
+        "firstname": out_json["firstname"],
+        "lastname": out_json["lastname"],
+        "registered": out_json["registered"],
+        "blocked": out_json["blocked"],
+        "institution": out_json["institution"]
     }
     return sendJSON(out_json2)
 

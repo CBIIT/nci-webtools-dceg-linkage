@@ -2614,7 +2614,7 @@ function updateAPIaccess() {
         $('#apiblocked-lastname').val(data.lastname);
         $('#apiblocked-institution').val(data.institution);
         $('#apiblocked-email').val(data.email);
-        $('#apiblocked-token').val(data.token);
+        // $('#apiblocked-token').val(data.token);
         $('#apiblocked-registered').val(data.registered);
         $('#apiblocked-blocked').val(data.blocked);
         if (data.message.substring(0, 5) == "Thank") {
@@ -2646,7 +2646,7 @@ function updateAPIblocked() {
         lastname: $('#apiblocked-lastname').val(),
         institution: $('#apiblocked-institution').val(),
         email: $('#apiblocked-email').val(),
-        token: $('#apiblocked-token').val(),
+        // token: $('#apiblocked-token').val(),
         registered: $('#apiblocked-registered').val(),
         blocked: $('#apiblocked-blocked').val(),
         justification: $('#apiblocked-justification').val(),
