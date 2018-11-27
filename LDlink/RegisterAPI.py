@@ -467,3 +467,23 @@ def register_user_api(firstname, lastname, email, institution, token, registered
 
     conn.close()
     return out_json
+
+# returns stats of total number of calls per registered api users with optional arguments
+# optional arguments: startdate of api calls, enddate of api calls, top # users with most calls
+def getStats(startdate, enddate, top):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    api_access_dir = config['api']['api_access_dir']
+    con = sqlite3.connect(api_access_dir + 'api_access.db')
+    con.text_factory = str
+    cur = con.cursor()
+    # temp = (token,)
+    cur.execute("SELECT count(*) FROM api_users;")
+    numUsers = cur.fetchone()
+    cur.execute("SELECT count(*) FROM api_log;")
+    numAPICalls = cur.fetchone()
+    out_json = {
+        "#_registered_users": numUsers,
+        "#_total_api_calls": numAPICalls
+    }
+    return out_json

@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken
+from RegisterAPI import register_user_web, register_user_api, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -900,6 +900,15 @@ def unblock_api_user_api():
     email = request.args.get('email', False)
     out_json = unblockUser(email, isWeb)
     return sendJSON(out_json)
+
+@app.route('/LDlinkRest/apiaccess/stats', methods=['GET'])
+def api_stats():
+    startdate = request.args.get('startdate', False)
+    enddate = request.args.get('enddate', False)
+    top = request.args.get('top', False)
+    out_json = getStats(startdate, enddate, top)
+    return sendJSON(out_json)
+
 
 
 if __name__ == '__main__':
