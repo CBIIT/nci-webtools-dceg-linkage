@@ -2598,7 +2598,7 @@ function updateAPIaccess() {
         reference: reference
     };
 
-    var url = restServerUrl + "/apiaccess_web";
+    var url = restServerUrl + "/apiaccess/register_web";
 
     var ajaxRequest = $.ajax({
         type : "GET",
@@ -2653,7 +2653,7 @@ function updateAPIblocked() {
         reference: reference
     };
 
-    var url = restServerUrl + "/apiblocked_web";
+    var url = restServerUrl + "/apiaccess/apiblocked_web";
 
     var ajaxRequest = $.ajax({
         type : "GET",
