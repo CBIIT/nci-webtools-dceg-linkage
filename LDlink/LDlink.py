@@ -16,8 +16,6 @@ import time
 import random
 import requests
 import yaml
-from datetime import timedelta
-from functools import update_wrapper
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
@@ -178,47 +176,6 @@ def requires_admin_token(f):
             return sendTraceback('Invalid Admin API token.')
         return f(*args, **kwargs)
     return decorated_function
-
-def crossdomain(origin=None, methods=None, headers=None,
-                max_age=21600, attach_to_all=True,
-                automatic_options=True):
-    if methods is not None:
-        methods = ', '.join(sorted(x.upper() for x in methods))
-    if headers is not None and not isinstance(headers, basestring):
-        headers = ', '.join(x.upper() for x in headers)
-    if not isinstance(origin, basestring):
-        origin = ', '.join(origin)
-    if isinstance(max_age, timedelta):
-        max_age = max_age.total_seconds()
-
-    def get_methods():
-        if methods is not None:
-            return methods
-
-        options_resp = current_app.make_default_options_response()
-        return options_resp.headers['allow']
-
-    def decorator(f):
-        def wrapped_function(*args, **kwargs):
-            if automatic_options and request.method == 'OPTIONS':
-                resp = current_app.make_default_options_response()
-            else:
-                resp = make_response(f(*args, **kwargs))
-            if not attach_to_all and request.method != 'OPTIONS':
-                return resp
-
-            h = resp.headers
-
-            h['Access-Control-Allow-Origin'] = origin
-            h['Access-Control-Allow-Methods'] = get_methods()
-            h['Access-Control-Max-Age'] = str(max_age)
-            if headers is not None:
-                h['Access-Control-Allow-Headers'] = headers
-            return resp
-
-        f.provide_automatic_options = False
-        return update_wrapper(wrapped_function, f)
-    return decorator
 
 
 @app.route('/LDlinkRest/upload', methods=['POST'])
@@ -841,7 +798,6 @@ def status(filename):
     return jsonify(os.path.isfile(filename))
 
 @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def apiblocked_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
@@ -856,7 +812,6 @@ def apiblocked_web():
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def register_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
@@ -881,7 +836,6 @@ def register_web():
     return sendJSON(out_json2)
 
 @app.route('/LDlinkRest/apiaccess/register_api', methods=['GET'])
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def register_api():
     print "debug api register user request url"
     print request.full_path
@@ -898,7 +852,6 @@ def register_api():
 
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def block_user_web():
     isWeb = True
     email = request.args.get('email', False)
@@ -918,7 +871,6 @@ def block_user_web():
 
 @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def block_user_api():
     isWeb = False
     email = request.args.get('email', False)
@@ -927,7 +879,6 @@ def block_user_api():
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def unblock_user_web():
     isWeb = True
     email = request.args.get('email', False)
@@ -944,7 +895,6 @@ def unblock_user_web():
 
 @app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
-@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def unblock_user_api():
     isWeb = False
     email = request.args.get('email', False)
