@@ -852,7 +852,7 @@ def register_api():
 
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
-def block_api_user_web():
+def block_user_web():
     isWeb = True
     email = request.args.get('email', False)
     token = request.args.get('token', False)
@@ -871,7 +871,7 @@ def block_api_user_web():
 
 @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
-def block_api_user_api():
+def block_user_api():
     isWeb = False
     email = request.args.get('email', False)
     out_json = blockUser(email, isWeb, request.url_root)
@@ -879,7 +879,7 @@ def block_api_user_api():
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
-def unblock_api_user_web():
+def unblock_user_web():
     isWeb = True
     email = request.args.get('email', False)
     token = request.args.get('token', False)
@@ -895,7 +895,7 @@ def unblock_api_user_web():
 
 @app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
-def unblock_api_user_api():
+def unblock_user_api():
     isWeb = False
     email = request.args.get('email', False)
     out_json = unblockUser(email, isWeb)
