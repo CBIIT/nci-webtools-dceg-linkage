@@ -798,6 +798,7 @@ def status(filename):
     return jsonify(os.path.isfile(filename))
 
 @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def apiblocked_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
@@ -812,6 +813,7 @@ def apiblocked_web():
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def register_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
@@ -836,6 +838,7 @@ def register_web():
     return sendJSON(out_json2)
 
 @app.route('/LDlinkRest/apiaccess/register_api', methods=['GET'])
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def register_api():
     print "debug api register user request url"
     print request.full_path
@@ -852,6 +855,7 @@ def register_api():
 
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def block_user_web():
     isWeb = True
     email = request.args.get('email', False)
@@ -871,6 +875,7 @@ def block_user_web():
 
 @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def block_user_api():
     isWeb = False
     email = request.args.get('email', False)
@@ -879,6 +884,7 @@ def block_user_api():
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def unblock_user_web():
     isWeb = True
     email = request.args.get('email', False)
@@ -895,6 +901,7 @@ def unblock_user_web():
 
 @app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
+@crossdomain(origin='*',headers=['access-control-allow-origin','Content-Type'])
 def unblock_user_api():
     isWeb = False
     email = request.args.get('email', False)
