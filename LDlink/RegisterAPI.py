@@ -377,7 +377,7 @@ def register_user_web(firstname, lastname, email, institution, reference, url_ro
             }
         else:
             present = getDatetime()
-            registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
+            registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
             expiration = getExpiration(registered, token_expiration_days)
             format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
             if ((present < expiration) or not token_expiration):
