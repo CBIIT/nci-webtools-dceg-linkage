@@ -812,15 +812,14 @@ def apiblocked_web():
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
-def register_user():
+def register_web():
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
 
-    out_json = register_user(
-        firstname, lastname, email, institution, reference, request.url_root)
+    out_json = register_user(firstname, lastname, email, institution, reference, request.url_root)
     # print "debug api register user request url"
     # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/register_api', params=out_json)
     # print r.url
