@@ -776,8 +776,8 @@ def ldassoc():
         return sendTraceback(None)
 
     # copy_output_files(reference)
-    print "out_json:"
-    print out_json
+    # print "out_json:"
+    # print out_json
 
     return sendJSON(out_json)
 
@@ -821,9 +821,9 @@ def register_web():
 
     out_json = register_user_web(
         firstname, lastname, email, institution, reference, request.url_root)
-    print "debug api register user request url"
-    r = requests.get(request.url_root + 'LDlinkRest/apiaccess/register_api', params=out_json)
-    print r.url
+    # print "debug api register user request url"
+    # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/register_api', params=out_json)
+    # print r.url
     out_json2 = {
         "message": out_json["message"],
         "email": out_json["email"],

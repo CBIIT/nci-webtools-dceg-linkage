@@ -10,6 +10,12 @@ from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 # blocked users attribute: 0=false, 1=true
 
@@ -128,18 +134,41 @@ def getEmailRecord(curr, email):
     curr.execute("SELECT * FROM api_users WHERE email=?", temp)
     return curr.fetchone()
 
-def insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir):
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
+def insertUser(firstname, lastname, email, institution, token, registered, blocked):
+    client = MongoClient()
+    client = MongoClient('localhost', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    user = {
+        "firstname": firstname,
+        "lastname": lastname,
+        "email": email,
+        "institution": institution,
+        "token": token,
+        "registered": registered,
+        "blocked": blocked
+    }
+    users = db.api_users
+    user_id = users.insert_one(user).inserted_id
+    print user_id
+
+    # cursor = db.platforms.find({"code": {'$in': code_array}})
+    # for document in cursor:
+    #     platforms.append(document["platform"])
+    # print platforms
+    # return platforms
+
+    # con = sqlite3.connect(api_access_dir + 'api_access.db')
+    # con.text_factory = str
+    # cur = con.cursor()
+    # # cur.execute(
+    # #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    # # con.commit()
+    # temp = (firstname, lastname, email, institution, token, registered, blocked)
     # cur.execute(
-    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
+    #     "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, blocked) VALUES (?,?,?,?,?,?,?)", temp)
     # con.commit()
-    temp = (firstname, lastname, email, institution, token, registered, blocked)
-    cur.execute(
-        "INSERT INTO api_users (first_name, last_name, email, institution, token, registered, blocked) VALUES (?,?,?,?,?,?,?)", temp)
-    con.commit()
-    con.close()
+    # con.close()
 
 # log token's api call to api_log table
 def logAccess(token, module):
@@ -306,10 +335,11 @@ def checkBlockedEmail(email, api_access_dir):
             return False
 
 # generate unique access token for each user
-def generateToken(curr):
+def generateToken():
     token = binascii.b2a_hex(os.urandom(6))
     # if true, generate another token - make sure example token is not generated
-    while(checkUniqueToken(curr, token) or token == "faketoken123"):
+    # while(checkUniqueToken(curr, token) or token == "faketoken123"):
+    while(token == "faketoken123"):
         token = binascii.b2a_hex(os.urandom(6))
     return token
 
@@ -326,97 +356,113 @@ def register_user_web(firstname, lastname, email, institution, reference, url_ro
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    api_access_dir = config['api']['api_access_dir']
+    # api_access_dir = config['api']['api_access_dir']
     token_expiration = bool(config['api']['token_expiration'])
     token_expiration_days = config['api']['token_expiration_days']
     email_account = config['api']['email_account']
 
     out_json = {}
 
-    # create database and table if it does not exist already
-    # if not os.path.exists(api_access_dir + 'api_access.db'):
-    #     print "api_access.db created."
-    #     createTables(api_access_dir)
 
     # by default, users are not blocked
     blocked = 0
 
-    # Connect to snp database
-    conn = sqlite3.connect(api_access_dir + 'api_access.db')
-    conn.text_factory = str
-    curr = conn.cursor()
+    # # Connect to snp database
+    # conn = sqlite3.connect(api_access_dir + 'api_access.db')
+    # conn.text_factory = str
+    # curr = conn.cursor()
 
-    record = getEmailRecord(curr, email)
-    print record
+    # TEST mongodb insert record
+    token = generateToken()
+    registered = getDatetime()
+    expiration = getExpiration(registered, token_expiration_days)
+    format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+    format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
+    insertUser(firstname, lastname, email, institution, token, format_registered, blocked)
+    out_json = {
+        "message": "Thank you for registering to use the LDlink API.",
+        "firstname": firstname,
+        "lastname": lastname,
+        "email": email,
+        "institution": institution,
+        "token": token,
+        "registered": format_registered,
+        "blocked": blocked
+    }
+    emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
+    # TEST mongodb insert record
+
+    # record = getEmailRecord(curr, email)
+    # print record
     # if email record exists, do not insert to db
-    if record != None:
-        if checkBlockedEmail(record[2], api_access_dir):
-            out_json = {
-                "message": "Your email is associated with a blocked API token.",
-                "firstname": record[0],
-                "lastname": record[1],
-                "email": record[2],
-                "institution": record[3],
-                "token": record[4],
-                "registered": record[5],
-                "blocked": record[6]
-            }
-        else:
-            present = getDatetime()
-            registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
-            expiration = getExpiration(registered, token_expiration_days)
-            format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-            if ((present < expiration) or not token_expiration):
-                out_json = {
-                    "message": "Email already registered.",
-                    "firstname": record[0],
-                    "lastname": record[1],
-                    "email": record[2],
-                    "institution": record[3],
-                    "token": record[4],
-                    "registered": record[5],
-                    "blocked": record[6]
-                }
-                emailUser(record[2], record[4], format_expiration, record[0], token_expiration, email_account, url_root)
-            else:
-                token = generateToken(curr)
-                registered = getDatetime()
-                expiration = getExpiration(registered, token_expiration_days)
-                format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
-                format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-                updateRecord(firstname, lastname, email, institution, token, format_registered, blocked, api_access_dir)
-                out_json = {
-                    "message": "Thank you for registering to use the LDlink API.",
-                    "firstname": firstname,
-                    "lastname": lastname,
-                    "email": email,
-                    "institution": institution,
-                    "token": token,
-                    "registered": format_registered,
-                    "blocked": blocked
-                }
-                emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
-    else:
-        # if email record does not exists in db, add to table
-        token = generateToken(curr)
-        registered = getDatetime()
-        expiration = getExpiration(registered, token_expiration_days)
-        format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
-        format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        insertRecord(firstname, lastname, email, institution, token, format_registered, blocked, api_access_dir)
-        out_json = {
-            "message": "Thank you for registering to use the LDlink API.",
-            "firstname": firstname,
-            "lastname": lastname,
-            "email": email,
-            "institution": institution,
-            "token": token,
-            "registered": format_registered,
-            "blocked": blocked
-        }
-        emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
+    # if record != None:
+    #     if checkBlockedEmail(record[2], api_access_dir):
+    #         out_json = {
+    #             "message": "Your email is associated with a blocked API token.",
+    #             "firstname": record[0],
+    #             "lastname": record[1],
+    #             "email": record[2],
+    #             "institution": record[3],
+    #             "token": record[4],
+    #             "registered": record[5],
+    #             "blocked": record[6]
+    #         }
+    #     else:
+    #         present = getDatetime()
+    #         registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
+    #         expiration = getExpiration(registered, token_expiration_days)
+    #         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
+    #         if ((present < expiration) or not token_expiration):
+    #             out_json = {
+    #                 "message": "Email already registered.",
+    #                 "firstname": record[0],
+    #                 "lastname": record[1],
+    #                 "email": record[2],
+    #                 "institution": record[3],
+    #                 "token": record[4],
+    #                 "registered": record[5],
+    #                 "blocked": record[6]
+    #             }
+    #             emailUser(record[2], record[4], format_expiration, record[0], token_expiration, email_account, url_root)
+    #         else:
+    #             token = generateToken(curr)
+    #             registered = getDatetime()
+    #             expiration = getExpiration(registered, token_expiration_days)
+    #             format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+    #             format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
+    #             updateRecord(firstname, lastname, email, institution, token, format_registered, blocked, api_access_dir)
+    #             out_json = {
+    #                 "message": "Thank you for registering to use the LDlink API.",
+    #                 "firstname": firstname,
+    #                 "lastname": lastname,
+    #                 "email": email,
+    #                 "institution": institution,
+    #                 "token": token,
+    #                 "registered": format_registered,
+    #                 "blocked": blocked
+    #             }
+    #             emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
+    # else:
+    #     # if email record does not exists in db, add to table
+    #     token = generateToken(curr)
+    #     registered = getDatetime()
+    #     expiration = getExpiration(registered, token_expiration_days)
+    #     format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+    #     format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
+    #     insertRecord(firstname, lastname, email, institution, token, format_registered, blocked, api_access_dir)
+    #     out_json = {
+    #         "message": "Thank you for registering to use the LDlink API.",
+    #         "firstname": firstname,
+    #         "lastname": lastname,
+    #         "email": email,
+    #         "institution": institution,
+    #         "token": token,
+    #         "registered": format_registered,
+    #         "blocked": blocked
+    #     }
+    #     emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
 
-    conn.close()
+    # conn.close()
     return out_json
 
 # registers new users and emails generated token for API
@@ -459,7 +505,8 @@ def register_user_api(firstname, lastname, email, institution, token, registered
             }
     else:
         # if email record does not exists in db, add to table
-        insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
+        # insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
+        insertUser(firstname, lastname, email, institution, token, registered, blocked)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "email": email
