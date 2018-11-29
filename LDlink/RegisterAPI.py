@@ -306,7 +306,7 @@ def getExpiration(registered, token_expiration_days):
     return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
-def register_user_web(firstname, lastname, email, institution, reference, url_root):
+def register_user(firstname, lastname, email, institution, reference, url_root):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
