@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
+from RegisterAPI import register_user, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
