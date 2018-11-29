@@ -82,8 +82,8 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
         config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
-    api_access_dir = config['api']['api_access_dir']
-    api_superuser_token = getToken(api_superuser, api_access_dir)
+    # api_access_dir = config['api']['api_access_dir']
+    api_superuser_token = getToken(api_superuser)
     print "sending message justification"
     bool_blocked = ""
     if blocked == "1":
@@ -144,65 +144,53 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 
 # log token's api call to api_log table
 def logAccess(token, module):
-    # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
-    api_access_dir = config['api']['api_access_dir']
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    # cur.execute(
-    #     "CREATE TABLE IF NOT EXISTS api_log (`token` TEXT, `module` TEXT, `accessed` DATETIME);")
-    # con.commit()
-    access_date = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
-    temp = (token, module, access_date)
-    cur.execute(
-        "INSERT INTO api_log (token, module, accessed) VALUES (?,?,?)", temp)
-    con.commit()
-    con.close()
+    accessed = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
+    client = MongoClient()
+    client = MongoClient('nciws-d971-c.nci.nih.gov', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    log = {
+        "token": token,
+        "module": module,
+        "accessed": accessed
+    }
+    logs = db.api_log
+    logs.insert_one(log).inserted_id
 
 # sets blocked attribute of user to 1=true
-def blockUser(email, isWeb, url_root):
+def blockUser(email, url_root):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    api_access_dir = config['api']['api_access_dir']
     email_account = config['api']['email_account']
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    temp = (email,)
-    cur.execute(
-        "UPDATE api_users SET blocked=1 WHERE email=?", temp)
-    con.commit()
-    con.close()
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    if isWeb:
-        emailUserBlocked(email, email_account, url_root)
+    client = MongoClient()
+    client = MongoClient('localhost', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    users = db.api_users
+    users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
+    emailUserBlocked(email, email_account, url_root)
     return out_json
 
 # sets blocked attribute of user to 0=false
-def unblockUser(email, isWeb):
+def unblockUser(email):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    api_access_dir = config['api']['api_access_dir']
     email_account = config['api']['email_account']
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    temp = (email,)
-    cur.execute(
-        "UPDATE api_users SET blocked=0 WHERE email=?", temp)
-    con.commit()
-    con.close()
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    if isWeb:
-        emailUserUnblocked(email, email_account)
+    client = MongoClient()
+    client = MongoClient('localhost', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    users = db.api_users
+    users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
+    emailUserUnblocked(email, email_account)
     return out_json
 
 # update record only if email's token is expired and user re-registers
@@ -224,23 +212,19 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
     users.find_one_and_update({"email": email}, { "$set": user})
 
 # check if token is valid when hitting API route and not expired
-def checkToken(token, api_access_dir, token_expiration, token_expiration_days):
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    # cur.execute(
-    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    # con.commit()
-    temp = (token,)
-    cur.execute("SELECT * FROM api_users WHERE token=?", temp)
-    record = cur.fetchone()
-    con.close()
+def checkToken(token, token_expiration, token_expiration_days):
+    client = MongoClient()
+    client = MongoClient('nciws-d971-c.nci.nih.gov', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    users = db.api_users
+    record = users.find_one({"token": token})
     if record is None:
         return False
     else:
         # return True
         present = getDatetime()
-        registered = datetime.datetime.strptime(record[5], "%Y-%m-%d %H:%M:%S")
+        registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
         expiration = getExpiration(registered, token_expiration_days)
         if ((present < expiration) or not token_expiration):
             return True
@@ -248,38 +232,30 @@ def checkToken(token, api_access_dir, token_expiration, token_expiration_days):
             return False
 
 # given email, return token
-def getToken(email, api_access_dir):
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    # cur.execute(
-    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    # con.commit()
-    temp = (email,)
-    cur.execute("SELECT * FROM api_users WHERE email=?", temp)
-    record = cur.fetchone()
-    con.close()
+def getToken(email):
+    client = MongoClient()
+    client = MongoClient('localhost', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    users = db.api_users
+    record = users.find_one({"email": email})
     if record is None:
         return None
     else:
-        return record[4]
+        return record["token"]
 
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
-def checkBlocked(token, api_access_dir):
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    # cur.execute(
-    #     "CREATE TABLE IF NOT EXISTS api_users (`first_name` TEXT, `last_name` TEXT, `email` TEXT, `institution` TEXT, `token` TEXT, `registered` DATETIME, `blocked` INTEGER);")
-    # con.commit()
-    temp = (token,)
-    cur.execute("SELECT * FROM api_users WHERE token=?", temp)
-    record = cur.fetchone()
-    con.close()
+def checkBlocked(token):
+    client = MongoClient()
+    client = MongoClient('nciws-d971-c.nci.nih.gov', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    users = db.api_users
+    record = users.find_one({"token": token})
     if record is None:
         return False
     else:
-        if int(record[6]) == 1:
+        if int(record["blocked"]) == 1:
             return True
         else:
             return False
@@ -434,107 +410,104 @@ def register_user_web(firstname, lastname, email, institution, reference, url_ro
     return out_json
 
 # registers new users and emails generated token for API
-def register_user_api(firstname, lastname, email, institution, token, registered, blocked):
-    # Set data directories using config.yml
-    # with open('config.yml', 'r') as f:
-    #     config = yaml.load(f)
-    # api_access_dir = config['api']['api_access_dir']
-    # out_json = {}
-    # create database and table if it does not exist already
-    # if not os.path.exists(api_access_dir + 'api_access.db'):
-    #     print "api_access.db created."
-    #     createTables(api_access_dir)
+# def register_user_api(firstname, lastname, email, institution, token, registered, blocked):
+#     # Set data directories using config.yml
+#     # with open('config.yml', 'r') as f:
+#     #     config = yaml.load(f)
+#     # api_access_dir = config['api']['api_access_dir']
+#     # out_json = {}
+#     # create database and table if it does not exist already
+#     # if not os.path.exists(api_access_dir + 'api_access.db'):
+#     #     print "api_access.db created."
+#     #     createTables(api_access_dir)
 
-    # by default, users are not blocked
-    blocked = 0
+#     # by default, users are not blocked
+#     blocked = 0
 
-    # Connect to snp database
-    # conn = sqlite3.connect(api_access_dir + 'api_access.db')
-    # conn.text_factory = str
-    # curr = conn.cursor()
+#     # Connect to snp database
+#     # conn = sqlite3.connect(api_access_dir + 'api_access.db')
+#     # conn.text_factory = str
+#     # curr = conn.cursor()
 
-    record = getEmailRecord(email)
+#     record = getEmailRecord(email)
 
-    # if email record exists, do not insert to db
-    if record != None:
-        # if email record in api database does not have new token, update it
-        if (record["email"] == email and record["token"] != token):
-            updateRecord(firstname, lastname, email, institution, token, registered, blocked)
-            out_json = {
-                "message": "Thank you for registering to use the LDlink API.",
-                "email": email
-            }
-        else:
-            out_json = {
-                "message": "Email already registered.",
-                "email": record["email"]
-            }
-    else:
-        # if email record does not exists in db, add to table
-        # insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
-        insertUser(firstname, lastname, email, institution, token, registered, blocked)
-        out_json = {
-            "message": "Thank you for registering to use the LDlink API.",
-            "email": email
-        }
+#     # if email record exists, do not insert to db
+#     if record != None:
+#         # if email record in api database does not have new token, update it
+#         if (record["email"] == email and record["token"] != token):
+#             updateRecord(firstname, lastname, email, institution, token, registered, blocked)
+#             out_json = {
+#                 "message": "Thank you for registering to use the LDlink API.",
+#                 "email": email
+#             }
+#         else:
+#             out_json = {
+#                 "message": "Email already registered.",
+#                 "email": record["email"]
+#             }
+#     else:
+#         # if email record does not exists in db, add to table
+#         # insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
+#         insertUser(firstname, lastname, email, institution, token, registered, blocked)
+#         out_json = {
+#             "message": "Thank you for registering to use the LDlink API.",
+#             "email": email
+#         }
 
-    # conn.close()
-    return out_json
+#     # conn.close()
+#     return out_json
 
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
-def getStats(startdatetime, enddatetime, top):
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
-    api_access_dir = config['api']['api_access_dir']
-    con = sqlite3.connect(api_access_dir + 'api_access.db')
-    con.text_factory = str
-    cur = con.cursor()
-    # temp = (token,)
-    cur.execute("SELECT count(*) FROM api_users;")
-    numUsers = cur.fetchone()
-
-    whereClause = ""
-    if ((startdatetime is not False) or (enddatetime is not False)):
-        whereClause = " WHERE "
-    startdateQuery = ""
-    if startdatetime is not False:
-        print startdatetime
-        startdatetimeSplit = startdatetime.split("_")
-        startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + "'"
-        print startdateQuery
-    enddateQuery = ""
-    if enddatetime is not False:
-        print enddatetime
-        enddatetimeSplit = enddatetime.split("_")
-        enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + "'"
-        print enddateQuery
-    andClause = ""
-    if ((startdatetime is not False) and (enddatetime is not False)):
-        andClause = " AND "
-    topQuery = ""
-    if top is not False:
-        topQuery = "LIMIT " + str(top)
-
-
-    cur.execute(
-        "SELECT a.first_name, a.last_name, a.email, count(*) as num_calls " + 
-        "FROM api_users a INNER JOIN " + 
-        "(SELECT * FROM api_log" + whereClause + startdateQuery + andClause + enddateQuery + ") b " + 
-        "ON a.token = b.token " + 
-        "GROUP BY a.email " + 
-        "ORDER BY num_calls DESC " + 
-        topQuery + ";")
-    users = cur.fetchall()
-    users_json = {}
-    for user in users:
-        users_json[user[2]] = {
-            "firstname": user[0],
-            "lastname": user[1],
-            "#_total_api_calls": user[3]
-        }
-    out_json = {
-        "#_registered_users": numUsers[0],
-        "users": users_json
-    }
-    return out_json
+# def getStats(startdatetime, enddatetime, top):
+#     with open('config.yml', 'r') as c:
+#         config = yaml.load(c)
+#     api_access_dir = config['api']['api_access_dir']
+#     con = sqlite3.connect(api_access_dir + 'api_access.db')
+#     con.text_factory = str
+#     cur = con.cursor()
+#     # temp = (token,)
+#     cur.execute("SELECT count(*) FROM api_users;")
+#     numUsers = cur.fetchone()
+#     whereClause = ""
+#     if ((startdatetime is not False) or (enddatetime is not False)):
+#         whereClause = " WHERE "
+#     startdateQuery = ""
+#     if startdatetime is not False:
+#         print startdatetime
+#         startdatetimeSplit = startdatetime.split("_")
+#         startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + "'"
+#         print startdateQuery
+#     enddateQuery = ""
+#     if enddatetime is not False:
+#         print enddatetime
+#         enddatetimeSplit = enddatetime.split("_")
+#         enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + "'"
+#         print enddateQuery
+#     andClause = ""
+#     if ((startdatetime is not False) and (enddatetime is not False)):
+#         andClause = " AND "
+#     topQuery = ""
+#     if top is not False:
+#         topQuery = "LIMIT " + str(top)
+#     cur.execute(
+#         "SELECT a.first_name, a.last_name, a.email, count(*) as num_calls " + 
+#         "FROM api_users a INNER JOIN " + 
+#         "(SELECT * FROM api_log" + whereClause + startdateQuery + andClause + enddateQuery + ") b " + 
+#         "ON a.token = b.token " + 
+#         "GROUP BY a.email " + 
+#         "ORDER BY num_calls DESC " + 
+#         topQuery + ";")
+#     users = cur.fetchall()
+#     users_json = {}
+#     for user in users:
+#         users_json[user[2]] = {
+#             "firstname": user[0],
+#             "lastname": user[1],
+#             "#_total_api_calls": user[3]
+#         }
+#     out_json = {
+#         "#_registered_users": numUsers[0],
+#         "users": users_json
+#     }
+#     return out_json

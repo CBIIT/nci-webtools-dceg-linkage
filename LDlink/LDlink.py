@@ -40,9 +40,9 @@ if not os.path.exists(tmp_dir):
 # Ensure apiaccess directory exists
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
-api_access_dir = config['api']['api_access_dir']
-if not os.path.exists(api_access_dir):
-    os.makedirs(api_access_dir)
+# api_access_dir = config['api']['api_access_dir']
+# if not os.path.exists(api_access_dir):
+#     os.makedirs(api_access_dir)
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
@@ -132,7 +132,7 @@ def requires_token(f):
         with open('config.yml', 'r') as c:
             config = yaml.load(c)
         require_token = bool(config['api']['require_token'])
-        api_access_dir = config['api']['api_access_dir']
+        # api_access_dir = config['api']['api_access_dir']
         token_expiration = bool(config['api']['token_expiration'])
         token_expiration_days = config['api']['token_expiration_days']
         if ("LDlinkRestWeb" not in request.full_path):
@@ -143,10 +143,10 @@ def requires_token(f):
                     return sendTraceback('API token missing. Please register using the API Access tab: ' + request.url_root + '?tab=apiaccess')
                 token = request.args['token']
                 # Check if token is valid
-                if checkToken(token, api_access_dir, token_expiration, token_expiration_days) is False or token is None:
+                if checkToken(token, token_expiration, token_expiration_days) is False or token is None:
                     return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + request.url_root + '?tab=apiaccess')
                 # Check if token is blocked
-                if checkBlocked(token, api_access_dir):
+                if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
                 logAccess(token, module)
@@ -165,8 +165,8 @@ def requires_admin_token(f):
         with open('config.yml', 'r') as c:
             config = yaml.load(c)
         api_superuser = config['api']['api_superuser']
-        api_access_dir = config['api']['api_access_dir']
-        api_superuser_token = getToken(api_superuser, api_access_dir)
+        # api_access_dir = config['api']['api_access_dir']
+        api_superuser_token = getToken(api_superuser)
         # Check if token argument is missing in api call
         if 'token' not in request.args:
             return sendTraceback('Admin API token missing.')
@@ -835,79 +835,77 @@ def register_web():
     }
     return sendJSON(out_json2)
 
-@app.route('/LDlinkRest/apiaccess/register_api', methods=['GET'])
-def register_api():
-    print "debug api register user request url"
-    print request.full_path
-    firstname = request.args.get('firstname', False)
-    lastname = request.args.get('lastname', False)
-    email = request.args.get('email', False)
-    institution = request.args.get('institution', False)
-    token = request.args.get('token', False)
-    registered = request.args.get('registered', False)
-    blocked = request.args.get('blocked', False)
-    out_json = register_user_api(
-        firstname, lastname, email, institution, token, registered, blocked)
-    return sendJSON(out_json)
+# @app.route('/LDlinkRest/apiaccess/register_api', methods=['GET'])
+# def register_api():
+#     print "debug api register user request url"
+#     print request.full_path
+#     firstname = request.args.get('firstname', False)
+#     lastname = request.args.get('lastname', False)
+#     email = request.args.get('email', False)
+#     institution = request.args.get('institution', False)
+#     token = request.args.get('token', False)
+#     registered = request.args.get('registered', False)
+#     blocked = request.args.get('blocked', False)
+#     out_json = register_user_api(
+#         firstname, lastname, email, institution, token, registered, blocked)
+#     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
-def block_user_web():
-    isWeb = True
+def block_user():
     email = request.args.get('email', False)
     token = request.args.get('token', False)
-    in_json = {
-        "token": token,
-        "email": email
-    }
-    out_json = blockUser(email, isWeb, request.url_root)
-    print "debug api block user request url"
-    r = requests.get(request.url_root + 'LDlinkRest/apiaccess/block_user', params=in_json)
-    print r.url
-    out_json2 = {
-        "message": out_json["message"],
-    }
-    return sendJSON(out_json2)
-
-@app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
-@requires_admin_token
-def block_user_api():
-    isWeb = False
-    email = request.args.get('email', False)
-    out_json = blockUser(email, isWeb, request.url_root)
+    # in_json = {
+    #     "token": token,
+    #     "email": email
+    # }
+    out_json = blockUser(email, request.url_root)
+    # print "debug api block user request url"
+    # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/block_user', params=in_json)
+    # print r.url
+    # out_json2 = {
+    #     "message": out_json["message"],
+    # }
     return sendJSON(out_json)
+
+# @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
+# @requires_admin_token
+# def block_user_api():
+#     isWeb = False
+#     email = request.args.get('email', False)
+#     out_json = blockUser(email, isWeb, request.url_root)
+#     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_user_web():
-    isWeb = True
     email = request.args.get('email', False)
     token = request.args.get('token', False)
-    in_json = {
-        "token": token,
-        "email": email
-    }
-    out_json = unblockUser(email, isWeb)
-    print "debug api unblock user request url"
-    r = requests.get(request.url_root + 'LDlinkRest/apiaccess/unblock_user', params=in_json)
-    print r.url
+    # in_json = {
+    #     "token": token,
+    #     "email": email
+    # }
+    out_json = unblockUser(email)
+    # print "debug api unblock user request url"
+    # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/unblock_user', params=in_json)
+    # print r.url
     return sendJSON(out_json)
 
-@app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
-@requires_admin_token
-def unblock_user_api():
-    isWeb = False
-    email = request.args.get('email', False)
-    out_json = unblockUser(email, isWeb)
-    return sendJSON(out_json)
+# @app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
+# @requires_admin_token
+# def unblock_user_api():
+#     isWeb = False
+#     email = request.args.get('email', False)
+#     out_json = unblockUser(email, isWeb)
+#     return sendJSON(out_json)
 
-@app.route('/LDlinkRest/apiaccess/stats', methods=['GET'])
-def api_stats():
-    startdatetime = request.args.get('startdatetime', False)
-    enddatetime = request.args.get('enddatetime', False)
-    top = request.args.get('top', False)
-    out_json = getStats(startdatetime, enddatetime, top)
-    return sendJSON(out_json)
+# @app.route('/LDlinkRest/apiaccess/stats', methods=['GET'])
+# def api_stats():
+#     startdatetime = request.args.get('startdatetime', False)
+#     enddatetime = request.args.get('enddatetime', False)
+#     top = request.args.get('top', False)
+#     out_json = getStats(startdatetime, enddatetime, top)
+#     return sendJSON(out_json)
 
 @app.after_request
 def after_request(response):
