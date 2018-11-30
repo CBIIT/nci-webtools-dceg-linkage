@@ -13,8 +13,8 @@ import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1] + "test"
-password = contents[1].split('=')[1] + "test"
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
 # blocked users attribute: 0=false, 1=true
