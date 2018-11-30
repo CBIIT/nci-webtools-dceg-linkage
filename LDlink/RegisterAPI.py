@@ -459,55 +459,63 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
 
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
-# def getStats(startdatetime, enddatetime, top):
-#     with open('config.yml', 'r') as c:
-#         config = yaml.load(c)
-#     api_access_dir = config['api']['api_access_dir']
-#     con = sqlite3.connect(api_access_dir + 'api_access.db')
-#     con.text_factory = str
-#     cur = con.cursor()
-#     # temp = (token,)
-#     cur.execute("SELECT count(*) FROM api_users;")
-#     numUsers = cur.fetchone()
-#     whereClause = ""
-#     if ((startdatetime is not False) or (enddatetime is not False)):
-#         whereClause = " WHERE "
-#     startdateQuery = ""
-#     if startdatetime is not False:
-#         print startdatetime
-#         startdatetimeSplit = startdatetime.split("_")
-#         startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + "'"
-#         print startdateQuery
-#     enddateQuery = ""
-#     if enddatetime is not False:
-#         print enddatetime
-#         enddatetimeSplit = enddatetime.split("_")
-#         enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + "'"
-#         print enddateQuery
-#     andClause = ""
-#     if ((startdatetime is not False) and (enddatetime is not False)):
-#         andClause = " AND "
-#     topQuery = ""
-#     if top is not False:
-#         topQuery = "LIMIT " + str(top)
-#     cur.execute(
-#         "SELECT a.first_name, a.last_name, a.email, count(*) as num_calls " + 
-#         "FROM api_users a INNER JOIN " + 
-#         "(SELECT * FROM api_log" + whereClause + startdateQuery + andClause + enddateQuery + ") b " + 
-#         "ON a.token = b.token " + 
-#         "GROUP BY a.email " + 
-#         "ORDER BY num_calls DESC " + 
-#         topQuery + ";")
-#     users = cur.fetchall()
-#     users_json = {}
-#     for user in users:
-#         users_json[user[2]] = {
-#             "firstname": user[0],
-#             "lastname": user[1],
-#             "#_total_api_calls": user[3]
-#         }
-#     out_json = {
-#         "#_registered_users": numUsers[0],
-#         "users": users_json
-#     }
-#     return out_json
+def getStats(startdatetime, enddatetime, top):
+    client = MongoClient()
+    client = MongoClient('localhost', port)
+    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    db = client["LDLink"]
+    users = db.api_users
+    numUsers = users.count()
+    # logs = db.api_log
+    # logs.insert_one(log).inserted_id
+    # with open('config.yml', 'r') as c:
+    #     config = yaml.load(c)
+    # api_access_dir = config['api']['api_access_dir']
+    # con = sqlite3.connect(api_access_dir + 'api_access.db')
+    # con.text_factory = str
+    # cur = con.cursor()
+    # # temp = (token,)
+    # cur.execute("SELECT count(*) FROM api_users;")
+    # numUsers = cur.fetchone()
+    # whereClause = ""
+    # if ((startdatetime is not False) or (enddatetime is not False)):
+    #     whereClause = " WHERE "
+    # startdateQuery = ""
+    # if startdatetime is not False:
+    #     print startdatetime
+    #     startdatetimeSplit = startdatetime.split("_")
+    #     startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + "'"
+    #     print startdateQuery
+    # enddateQuery = ""
+    # if enddatetime is not False:
+    #     print enddatetime
+    #     enddatetimeSplit = enddatetime.split("_")
+    #     enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + "'"
+    #     print enddateQuery
+    # andClause = ""
+    # if ((startdatetime is not False) and (enddatetime is not False)):
+    #     andClause = " AND "
+    # topQuery = ""
+    # if top is not False:
+    #     topQuery = "LIMIT " + str(top)
+    # cur.execute(
+    #     "SELECT a.first_name, a.last_name, a.email, count(*) as num_calls " + 
+    #     "FROM api_users a INNER JOIN " + 
+    #     "(SELECT * FROM api_log" + whereClause + startdateQuery + andClause + enddateQuery + ") b " + 
+    #     "ON a.token = b.token " + 
+    #     "GROUP BY a.email " + 
+    #     "ORDER BY num_calls DESC " + 
+    #     topQuery + ";")
+    # users = cur.fetchall()
+    # users_json = {}
+    # for user in users:
+    #     users_json[user[2]] = {
+    #         "firstname": user[0],
+    #         "lastname": user[1],
+    #         "#_total_api_calls": user[3]
+    #     }
+    out_json = {
+        "#_registered_users": numUsers
+        # "users": users_json
+    }
+    return out_json

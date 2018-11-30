@@ -28,7 +28,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken
+from RegisterAPI import register_user, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -803,7 +803,6 @@ def apiblocked_web():
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
-    # token = request.args.get('token', False)
     registered = request.args.get('registered', False)
     blocked = request.args.get('blocked', False)
     justification = request.args.get('justification', False)
@@ -818,11 +817,7 @@ def register_web():
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
-
     out_json = register_user(firstname, lastname, email, institution, reference, request.url_root)
-    # print "debug api register user request url"
-    # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/register_api', params=out_json)
-    # print r.url
     out_json2 = {
         "message": out_json["message"],
         "email": out_json["email"],
@@ -834,77 +829,29 @@ def register_web():
     }
     return sendJSON(out_json2)
 
-# @app.route('/LDlinkRest/apiaccess/register_api', methods=['GET'])
-# def register_api():
-#     print "debug api register user request url"
-#     print request.full_path
-#     firstname = request.args.get('firstname', False)
-#     lastname = request.args.get('lastname', False)
-#     email = request.args.get('email', False)
-#     institution = request.args.get('institution', False)
-#     token = request.args.get('token', False)
-#     registered = request.args.get('registered', False)
-#     blocked = request.args.get('blocked', False)
-#     out_json = register_user_api(
-#         firstname, lastname, email, institution, token, registered, blocked)
-#     return sendJSON(out_json)
-
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_user():
     email = request.args.get('email', False)
     token = request.args.get('token', False)
-    # in_json = {
-    #     "token": token,
-    #     "email": email
-    # }
     out_json = blockUser(email, request.url_root)
-    # print "debug api block user request url"
-    # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/block_user', params=in_json)
-    # print r.url
-    # out_json2 = {
-    #     "message": out_json["message"],
-    # }
     return sendJSON(out_json)
-
-# @app.route('/LDlinkRest/apiaccess/block_user', methods=['GET'])
-# @requires_admin_token
-# def block_user_api():
-#     isWeb = False
-#     email = request.args.get('email', False)
-#     out_json = blockUser(email, isWeb, request.url_root)
-#     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_user_web():
     email = request.args.get('email', False)
     token = request.args.get('token', False)
-    # in_json = {
-    #     "token": token,
-    #     "email": email
-    # }
     out_json = unblockUser(email)
-    # print "debug api unblock user request url"
-    # r = requests.get(request.url_root + 'LDlinkRest/apiaccess/unblock_user', params=in_json)
-    # print r.url
     return sendJSON(out_json)
 
-# @app.route('/LDlinkRest/apiaccess/unblock_user', methods=['GET'])
-# @requires_admin_token
-# def unblock_user_api():
-#     isWeb = False
-#     email = request.args.get('email', False)
-#     out_json = unblockUser(email, isWeb)
-#     return sendJSON(out_json)
-
-# @app.route('/LDlinkRest/apiaccess/stats', methods=['GET'])
-# def api_stats():
-#     startdatetime = request.args.get('startdatetime', False)
-#     enddatetime = request.args.get('enddatetime', False)
-#     top = request.args.get('top', False)
-#     out_json = getStats(startdatetime, enddatetime, top)
-#     return sendJSON(out_json)
+@app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
+def api_stats():
+    startdatetime = request.args.get('startdatetime', False)
+    enddatetime = request.args.get('enddatetime', False)
+    top = request.args.get('top', False)
+    out_json = getStats(startdatetime, enddatetime, top)
+    return sendJSON(out_json)
 
 @app.after_request
 def after_request(response):
