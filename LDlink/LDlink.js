@@ -118,7 +118,7 @@ $(document).ready(function() {
 
         $('#apiblocked-form').show();
         $('#apiblocked').show();
-        $('#apiblocked-message').hide();
+        $('#apiblocked-submit-message').hide();
         $('#apiblocked-done').val("Cancel");
 
         $("#apiblocked-reset").click();
@@ -258,6 +258,8 @@ $(document).ready(function() {
     });
     
     $('#apiblocked-loading').hide();
+    $('#apiblocked-message').hide();
+    $('#apiblocked-message-warning').hide();
 
     $('.ldlinkForm').on('submit', function(e) {
         calculate(e);
@@ -2660,7 +2662,7 @@ function updateAPIblocked() {
         // hide submit button
         $('#apiblocked').hide();
         // show form submission message
-        $('#apiblocked-message').show();
+        $('#apiblocked-submit-message').show();
         // change cancel to done button
         $('#apiblocked-done').val("Done");
     });
@@ -2710,6 +2712,8 @@ function displayCommFail(id, jqXHR, textStatus) {
     console.warn("CommFail\n"+"Status: "+textStatus);
     var message = jqXHR.responseText;
     message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
+    var reg = new RegExp("[no address given]", "g");
+    message.replace(reg, "NCILDlinkWebAdmin@mail.nih.gov");
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
     $('#' + id + '-progress').hide();
