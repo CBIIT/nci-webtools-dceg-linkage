@@ -2741,44 +2741,51 @@ function displayCommFail(id, jqXHR, textStatus) {
 
 }
 function showMessage(id, message, message_type) {
+    console.log("showMessage");
+    $('#' + id + '-message').show();
+    $('#' + id + '-message-content').empty().append(message);
+    $('#' + id + '-progress').hide();
+    $('#' + id+ '-results-container').hide();
+    //hide loading icon
+    $('#'+id+"-loading").hide();
 
     //
     //  Display either a warning an error.
     //
-    $("#right_panel").show();
-    $("#help").hide();
-    $("#icon").css('visibility', 'visible');
+    // $("#right_panel").show();
+    // $("#help").hide();
+    // $("#icon").css('visibility', 'visible');
 
     // console.log("Show Message");
 
-    var css_class = "";
-    var header = "";
-    var container_id = id+"-message-container";
-    // console.log(container_id);
+    // var css_class = "";
+    // var header = "";
+    // var container_id = id+"-message-container";
+    // // console.log(container_id);
 
-    if(message_type.toUpperCase() == 'ERROR') {
-        css_class = 'panel-danger';
-        header = 'Error';
-    } else {
-        css_class = 'panel-warning';
-        header = 'Warning';
-    }
-    $("#"+container_id).empty().show();
-    $("#"+container_id).append(
-        $('<div>')
-            .addClass('panel')
-            .addClass(css_class)
-            .append(
-                $('<div>')
-                    .addClass('panel-heading')
-                    .append(header)
-                    )
-            .append(
-                $('<div>')
-                    .addClass('panel-body')
-                    .append(message)
-                    )
-        );
+    // if(message_type.toUpperCase() == 'ERROR') {
+    //     css_class = 'panel-danger';
+    //     header = 'Error';
+    // } else {
+    //     css_class = 'panel-warning';
+    //     header = 'Warning';
+    // }
+    // $("#"+container_id).empty().show();
+    // $("#"+container_id).append(
+    //     $('<div>')
+    //         .addClass('panel')
+    //         .addClass(css_class)
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('panel-heading')
+    //                 .append(header)
+    //                 )
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('panel-body')
+    //                 .append(message)
+    //                 )
+    //     );
 }
 
 function addLDHapHyperLinks(request, ldhapTable) {
