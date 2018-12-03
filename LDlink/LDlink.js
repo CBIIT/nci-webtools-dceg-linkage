@@ -2470,20 +2470,20 @@ function getLDAssocResults(jsonfile) {
     hideLoadingIcon(ajaxRequest, id);
 }
 
-function displayCommFail(id, jqXHR, textStatus) {
-    //console.log(textStatus);
-    //console.dir(jqXHR);
-    console.warn("CommFail\n"+"Status: "+textStatus);
-    var message = jqXHR.responseText;
-    message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
-    $('#' + id + '-message').show();
-    $('#' + id + '-message-content').empty().append(message);
-    $('#' + id + '-progress').hide();
-    $('#' + id+ '-results-container').hide();
-    //hide loading icon
-    $('#'+id+"-loading").hide();
+// function displayCommFail(id, jqXHR, textStatus) {
+//     //console.log(textStatus);
+//     //console.dir(jqXHR);
+//     console.warn("CommFail\n"+"Status: "+textStatus);
+//     var message = jqXHR.responseText;
+//     message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
+//     $('#' + id + '-message').show();
+//     $('#' + id + '-message-content').empty().append(message);
+//     $('#' + id + '-progress').hide();
+//     $('#' + id+ '-results-container').hide();
+//     //hide loading icon
+//     $('#'+id+"-loading").hide();
 
-}
+// }
 
 function getLDmatrixResults(jsonfile, request) {
     var id = "ldmatrix";

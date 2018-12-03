@@ -310,32 +310,12 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    # api_access_dir = config['api']['api_access_dir']
     token_expiration = bool(config['api']['token_expiration'])
     token_expiration_days = config['api']['token_expiration_days']
     email_account = config['api']['email_account']
-
     out_json = {}
-
-
     # by default, users are not blocked
     blocked = 0
-
-    # # Connect to snp database
-    # conn = sqlite3.connect(api_access_dir + 'api_access.db')
-    # conn.text_factory = str
-    # curr = conn.cursor()
-
-    # TEST mongodb insert record
-    # token = generateToken()
-    # registered = getDatetime()
-    # expiration = getExpiration(registered, token_expiration_days)
-    # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
-    # format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-    # insertUser(firstname, lastname, email, institution, token, format_registered, blocked)
-    # emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
-    # TEST mongodb insert record
-
     record = getEmailRecord(email)
     # print record
     # if email record exists, do not insert to db
@@ -405,57 +385,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
             "blocked": blocked
         }
         emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
-
-    # conn.close()
     return out_json
-
-# registers new users and emails generated token for API
-# def register_user_api(firstname, lastname, email, institution, token, registered, blocked):
-#     # Set data directories using config.yml
-#     # with open('config.yml', 'r') as f:
-#     #     config = yaml.load(f)
-#     # api_access_dir = config['api']['api_access_dir']
-#     # out_json = {}
-#     # create database and table if it does not exist already
-#     # if not os.path.exists(api_access_dir + 'api_access.db'):
-#     #     print "api_access.db created."
-#     #     createTables(api_access_dir)
-
-#     # by default, users are not blocked
-#     blocked = 0
-
-#     # Connect to snp database
-#     # conn = sqlite3.connect(api_access_dir + 'api_access.db')
-#     # conn.text_factory = str
-#     # curr = conn.cursor()
-
-#     record = getEmailRecord(email)
-
-#     # if email record exists, do not insert to db
-#     if record != None:
-#         # if email record in api database does not have new token, update it
-#         if (record["email"] == email and record["token"] != token):
-#             updateRecord(firstname, lastname, email, institution, token, registered, blocked)
-#             out_json = {
-#                 "message": "Thank you for registering to use the LDlink API.",
-#                 "email": email
-#             }
-#         else:
-#             out_json = {
-#                 "message": "Email already registered.",
-#                 "email": record["email"]
-#             }
-#     else:
-#         # if email record does not exists in db, add to table
-#         # insertRecord(firstname, lastname, email, institution, token, registered, blocked, api_access_dir)
-#         insertUser(firstname, lastname, email, institution, token, registered, blocked)
-#         out_json = {
-#             "message": "Thank you for registering to use the LDlink API.",
-#             "email": email
-#         }
-
-#     # conn.close()
-#     return out_json
 
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
