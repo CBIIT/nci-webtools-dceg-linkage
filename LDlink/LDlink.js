@@ -2470,21 +2470,6 @@ function getLDAssocResults(jsonfile) {
     hideLoadingIcon(ajaxRequest, id);
 }
 
-// function displayCommFail(id, jqXHR, textStatus) {
-//     //console.log(textStatus);
-//     //console.dir(jqXHR);
-//     console.warn("CommFail\n"+"Status: "+textStatus);
-//     var message = jqXHR.responseText;
-//     message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
-//     $('#' + id + '-message').show();
-//     $('#' + id + '-message-content').empty().append(message);
-//     $('#' + id + '-progress').hide();
-//     $('#' + id+ '-results-container').hide();
-//     //hide loading icon
-//     $('#'+id+"-loading").hide();
-
-// }
-
 function getLDmatrixResults(jsonfile, request) {
     var id = "ldmatrix";
     var url = "tmp/matrix"+jsonfile;
@@ -2629,6 +2614,9 @@ function updateAPIaccess() {
         }
         $('#' + id + '-loading').hide();
     });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
     ajaxRequest.always(function() {
         $btn.button('reset');
     });
@@ -2676,6 +2664,9 @@ function updateAPIblocked() {
         // change cancel to done button
         $('#apiblocked-done').val("Done");
     });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
     ajaxRequest.always(function() {
         $btn.button('reset');
     });
@@ -2714,40 +2705,53 @@ function displayError(id, data) {
 }
 
 function displayCommFail(id, jqXHR, textStatus) {
-    // console.log(textStatus);
-    console.dir(jqXHR);
+    //console.log(textStatus);
+    //console.dir(jqXHR);
     console.warn("CommFail\n"+"Status: "+textStatus);
-    //$("#calculating-spinner").modal('hide');
-    //alert("Comm Fail");
-    var message;
-    var errorThrown = "";
-    console.warn("header: " + jqXHR
-    + "\ntextStatus: " + textStatus
-    + "\nerrorThrown: " + errorThrown);
-    //alert('Communication problem: ' + textStatus);
-    // ERROR
-    if(jqXHR.status == 500) {
-        message = 'Internal Server Error: ' + textStatus + "<br>";
-        message += jqXHR.responseText;
-        message += "<br>code("+jqXHR.status+")";
-        message_type = 'warning';
-    } else {
-        message = jqXHR.statusText+" ("+ textStatus + ")<br><br>";
-        message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-        message += "<br>code("+jqXHR.status+")";
-        message_type = 'error';
-    }
-    showMessage(id, message, message_type);
-
-}
-function showMessage(id, message, message_type) {
-    console.log("showMessage");
+    var message = jqXHR.responseText;
+    message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
     $('#' + id + '-progress').hide();
     $('#' + id+ '-results-container').hide();
     //hide loading icon
     $('#'+id+"-loading").hide();
+}
+
+
+// function displayCommFail(id, jqXHR, textStatus) {
+//     console.dir(jqXHR);
+//     console.warn("CommFail\n"+"Status: "+textStatus);
+
+//     var message;
+//     var errorThrown = "";
+//     console.warn("header: " + jqXHR
+//     + "\ntextStatus: " + textStatus
+//     + "\nerrorThrown: " + errorThrown);
+//     //alert('Communication problem: ' + textStatus);
+//     // ERROR
+//     if(jqXHR.status == 500) {
+//         message = 'Internal Server Error: ' + textStatus + "<br>";
+//         message += jqXHR.responseText;
+//         message += "<br>code("+jqXHR.status+")";
+//         message_type = 'warning';
+//     } else {
+//         message = jqXHR.statusText+" ("+ textStatus + ")<br><br>";
+//         message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+//         message += "<br>code("+jqXHR.status+")";
+//         message_type = 'error';
+//     }
+//     showMessage(id, message, message_type);
+// }
+
+// function showMessage(id, message, message_type) {
+//     console.log("showMessage");
+//     $('#' + id + '-message').show();
+//     $('#' + id + '-message-content').empty().append(message);
+//     $('#' + id + '-progress').hide();
+//     $('#' + id+ '-results-container').hide();
+//     //hide loading icon
+//     $('#'+id+"-loading").hide();
 
     //
     //  Display either a warning an error.
@@ -2786,7 +2790,7 @@ function showMessage(id, message, message_type) {
     //                 .append(message)
     //                 )
     //     );
-}
+// }
 
 function addLDHapHyperLinks(request, ldhapTable) {
     $('#ldhap-snps').attr('href', 'tmp/snps_' + request + '.txt');
