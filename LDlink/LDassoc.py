@@ -94,6 +94,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	header_list.append(myargs.bp)
 	header_list.append(myargs.pval)
 
+	print "[ldassoc debug] load input file"
+
 	# Load input file
 	assoc_data=open(file).readlines()
 	header=assoc_data[0].strip().split()
@@ -134,12 +136,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		window=myargs.window
 
 	if region=="variant":
+		print "[ldassoc debug] choose variant"
 		coord1=int(org_coord)-window
 		if coord1<0:
 			coord1=0
 		coord2=int(org_coord)+window
 
 	elif region=="gene":
+		print "[ldassoc debug] choose gene"
 		if myargs.name==None:
 			output["error"]="Gene name (--name) is needed when --gene option is used."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -198,6 +202,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			chromosome=gene_coord[1]
 
 	elif region=="region":
+		print "[ldassoc debug] choose region"
 		if myargs.start==None:
 			output["error"]="Start coordinate is needed when --region option is used."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -515,7 +520,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
 
-
+	print "[ldassoc debug] begin calculating LD in parallel"
 	# Calculate proxy LD statistics in parallel
 	print ""
 	if len(assoc_coords)<60:
@@ -539,6 +544,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
+	print "[ldassoc debug] collect output in parallel" 
+
 	# collect output in parallel
 	def get_output(process):
 		return process.communicate()[0].splitlines()
@@ -548,6 +555,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	pool.close()
 	pool.join()
 
+	print "[ldassoc debug] aggregate output"
 
 	# Aggregate output
 	out_prox=[]
@@ -842,6 +850,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			p_plot_pval2.append(float(assoc_dict[chromosome+":"+input_pos+"-"+input_pos][0]))
 			p_plot_dist.append(str(round(float(input_pos)/1000000-index_var_pos,4)))
 
+	print "[ldassoc debug] begin Bokeh plotting"
 
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
