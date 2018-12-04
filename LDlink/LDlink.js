@@ -2712,8 +2712,7 @@ function displayCommFail(id, jqXHR, textStatus) {
     console.warn("CommFail\n"+"Status: "+textStatus);
     var message = jqXHR.responseText;
     message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
-    var reg = new RegExp("[no address given]", "g");
-    message.replace(reg, "NCILDlinkWebAdmin@mail.nih.gov");
+    message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
     $('#' + id + '-progress').hide();
