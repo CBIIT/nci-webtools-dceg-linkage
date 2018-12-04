@@ -97,8 +97,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	print "[ldassoc debug] load input file"
 
 	# Load input file
+	print "[ldassoc debug] open file and store lines in variable"
 	assoc_data=open(file).readlines()
+	print "[ldassoc debug] get headers"
 	header=assoc_data[0].strip().split()
+	print "[ldassoc debug] get first line"
 	first=assoc_data[1].strip().split()
 	if len(header)!=len(first):
 		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
@@ -107,6 +110,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		print >> out_json, json_output
 		out_json.close()
 		return("","")
+
+	print "[ldassoc debug] check header"
 
 	# Check header
 	for item in header_list:
@@ -304,6 +309,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	a_pos=[]
 	assoc_dict={}
 	assoc_list=[]
+	print "[ldassoc debug] iterate through uploaded file"
 	for i in range(len(assoc_data)):
 		col=assoc_data[i].strip().split()
 		if len(col)==len_head:
