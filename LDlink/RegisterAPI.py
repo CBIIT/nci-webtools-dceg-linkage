@@ -146,7 +146,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 def logAccess(token, module):
     accessed = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
     client = MongoClient()
-    client = MongoClient('nciws-d971-c.nci.nih.gov', port)
+    client = MongoClient('10.208.2.194', port)
     client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     log = {
@@ -214,7 +214,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 # check if token is valid when hitting API route and not expired
 def checkToken(token, token_expiration, token_expiration_days):
     client = MongoClient()
-    client = MongoClient('nciws-d971-c.nci.nih.gov', port)
+    client = MongoClient('10.208.2.194', port)
     client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
@@ -247,7 +247,7 @@ def getToken(email):
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
 def checkBlocked(token):
     client = MongoClient()
-    client = MongoClient('nciws-d971-c.nci.nih.gov', port)
+    client = MongoClient('10.208.2.194', port)
     client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
