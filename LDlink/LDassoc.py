@@ -98,11 +98,19 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	# Load input file
 	print "[ldassoc debug] open file and store lines in variable"
-	assoc_data=open(file).readlines()
+	# assoc_data=open(file).readlines()
 	print "[ldassoc debug] get headers"
-	header=assoc_data[0].strip().split()
+	# header=assoc_data[0].strip().split()
+	header = open(file).readline().strip().split()
 	print "[ldassoc debug] get first line"
-	first=assoc_data[1].strip().split()
+	# first=assoc_data[1].strip().split()
+	with open(file) as fp:
+		for i, line in enumerate(fp):
+			if i == 1:
+				first = line.strip().split()
+			elif i > 1:
+				break
+
 	if len(header)!=len(first):
 		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
 		json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -310,29 +318,30 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	assoc_dict={}
 	assoc_list=[]
 	print "[ldassoc debug] iterate through uploaded file"
-	for i in range(len(assoc_data)):
-		col=assoc_data[i].strip().split()
-		if len(col)==len_head:
-			if col[chr_index].strip("chr")==chromosome:
-				try:
-					int(col[pos_index])
-				except ValueError:
-					continue
-				else:
-					if coord1<=int(col[pos_index])<=coord2:
-						try:
-							float(col[p_index])
-						except ValueError:
-							continue
-						else:
-							coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
-							assoc_coords.append(coord_i)
-							a_pos.append(col[pos_index])
-							assoc_dict[coord_i]=[col[p_index]]
-							assoc_list.append([coord_i,float(col[p_index])])
+	with open(file) as fp:
+		for line in fp:
+			col = line.strip().split()
+			if len(col)==len_head:
+				if col[chr_index].strip("chr")==chromosome:
+					try:
+						int(col[pos_index])
+					except ValueError:
+						continue
+					else:
+						if coord1<=int(col[pos_index])<=coord2:
+							try:
+								float(col[p_index])
+							except ValueError:
+								continue
+							else:
+								coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+								assoc_coords.append(coord_i)
+								a_pos.append(col[pos_index])
+								assoc_dict[coord_i]=[col[p_index]]
+								assoc_list.append([coord_i,float(col[p_index])])
 
-		else:
-			output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
+			else:
+				output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
