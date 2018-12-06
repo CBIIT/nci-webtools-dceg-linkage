@@ -13,7 +13,8 @@ import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
+# username = contents[0].split('=')[1]
+username = 'ncianalysis_api'
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
@@ -117,18 +118,15 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
 
 # check if user email record exists
 def getEmailRecord(email):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     emailRecord = users.find_one({"email": email})
     return emailRecord
 
 def insertUser(firstname, lastname, email, institution, token, registered, blocked):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     user = {
         "firstname": firstname,
@@ -144,10 +142,12 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 
 # log token's api call to api_log table
 def logAccess(token, module):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    api_mongo_addr = config['api']['api_mongo_addr']
     accessed = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
-    client = MongoClient()
-    client = MongoClient('10.208.2.194', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     log = {
         "token": token,
@@ -166,9 +166,9 @@ def blockUser(email, url_root):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
@@ -184,9 +184,9 @@ def unblockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
@@ -195,9 +195,9 @@ def unblockUser(email):
 
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     user = {
         "firstname": firstname,
@@ -213,9 +213,12 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 
 # check if token is valid when hitting API route and not expired
 def checkToken(token, token_expiration, token_expiration_days):
-    client = MongoClient()
-    client = MongoClient('10.208.2.194', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    api_mongo_addr = config['api']['api_mongo_addr']
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -233,9 +236,9 @@ def checkToken(token, token_expiration, token_expiration_days):
 
 # given email, return token
 def getToken(email):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"email": email})
@@ -246,9 +249,12 @@ def getToken(email):
 
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
 def checkBlocked(token):
-    client = MongoClient()
-    client = MongoClient('10.208.2.194', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    api_mongo_addr = config['api']['api_mongo_addr']
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -262,9 +268,9 @@ def checkBlocked(token):
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"email": email})
@@ -278,9 +284,9 @@ def checkBlockedEmail(email):
 
 # check if token is already in db
 def checkUniqueToken(token):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -390,9 +396,9 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
 def getStats(startdatetime, enddatetime, top):
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    # client = MongoClient()
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     users = db.api_users
     numUsers = users.count()
