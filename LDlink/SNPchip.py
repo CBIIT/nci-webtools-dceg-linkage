@@ -27,8 +27,7 @@ port = int(contents[2].split('=')[1])
 def get_platform_request():
 
     try:
-        client = MongoClient()
-        client = MongoClient('localhost', port)
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     except ConnectionFailure:
         print "MongoDB is down"
         print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
@@ -49,9 +48,7 @@ def get_platform_request():
 
 def convert_codeToPlatforms(platform_query):
     platforms = []
-    client = MongoClient()
-    client = MongoClient('localhost', port)
-    client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
@@ -201,8 +198,7 @@ def calculate_chip(snplst, platform_query, request):
         else:
             snp_coords_sort[i][1] = str(snp_coords_sort[i][1])
 
-    client = MongoClient()
-    client = MongoClient('localhost', port)
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     platformcount = 0
     client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
