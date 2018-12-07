@@ -390,11 +390,37 @@ def getStats(startdatetime, enddatetime, top):
     log = db.api_log
     numUsers = users.count()
     pipeline = [
-        { "$group": { "_id": "$token", "count": { "$sum": 1 } } }, 
-        { "$sort": { "count": -1 } }
+        { "$group": { "_id": "$token", "#_total_api_calls": { "$sum": 1 } } }, 
+        { "$sort": { "#_total_api_calls": -1 } }
     ]
     if top is not False:
         pipeline.append({ "$limit": int(top) })
+    
+    if ((startdatetime is not False) or (enddatetime is not False)):
+        rangeQuery = {}
+        if ((startdatetime is not False) and (enddatetime is False)):
+            from_date, from_time = startdatetime.split("_")
+            from_dateS = from_date.split('-')
+            from_timeS = from_time.split(':')
+            from_datetime = datetime.datetime(from_dateS[0], from_dateS[1], from_dateS[2], from_timeS[0], from_timeS[1], from_timeS[2], 0)
+            rangeQuery = { "$match": { "accessed": { "$gte": from_datetime } } }
+        if ((enddatetime is not False) and (startdatetime is False)):
+            to_date, to_time = startdatetime.split("_")
+            to_dateS = to_date.split('-')
+            to_timeS = to_time.split(':')
+            to_datetime = datetime.datetime(to_dateS[0], to_dateS[1], to_dateS[2], to_timeS[0], to_timeS[1], to_timeS[2], 0)
+            rangeQuery = { "$match": { "accessed": { "$lt": to_datetime } } }
+        if ((startdatetime is not False) and (enddatetime is not False)):
+            from_date, from_time = startdatetime.split("_")
+            from_dateS = from_date.split('-')
+            from_timeS = from_time.split(':')
+            from_datetime = datetime.datetime(from_dateS[0], from_dateS[1], from_dateS[2], from_timeS[0], from_timeS[1], from_timeS[2], 0)
+            to_date, to_time = startdatetime.split("_")
+            to_dateS = to_date.split('-')
+            to_timeS = to_time.split(':')
+            to_datetime = datetime.datetime(to_dateS[0], to_dateS[1], to_dateS[2], to_timeS[0], to_timeS[1], to_timeS[2], 0)
+            rangeQuery = { "$match": { "accessed": { "$gte": from_datetime, "$lt": to_datetime } } }
+        pipeline.insert(0, rangeQuery)
     users_json = log.aggregate(pipeline)
     users_json_sanitized = json.loads(json_util.dumps(users_json))
     out_json = {
@@ -402,6 +428,11 @@ def getStats(startdatetime, enddatetime, top):
         "users": users_json_sanitized
     }
     return out_json
+
+    # $gte = from date
+    # $lt = to date
+
+    # db.api_log.find({"accessed": { '$gte': ISODate("2018-12-07T11:50:30.000Z"), '$lt': ISODate("2018-12-07T11:56:45.000Z") }})
 
     # group by token and sum each token's api calls
     # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }])
@@ -416,6 +447,9 @@ def getStats(startdatetime, enddatetime, top):
     # { $lookup : { from : "api_users", localField : "token", foreignField : "token", as : "userinfo" } } 
     
     # db.api_log.aggregate([ { $lookup : { from : "api_users", localField : "token", foreignField : "token", as : "userinfo" } }, { $group : { _id : "$token", count : { $sum : 1 } } } ])
+    
+    # add from-datetime and to-datetime
+    # db.api_log.aggregate([{ $match: { "accessed": { '$gte': ISODate("2018-12-07T11:50:30.000Z"), '$lt': ISODate("2018-12-07T11:56:45.000Z") } } }, { $group : { _id : "$token", count : { $sum : 1 } } }, { $sort : { count : -1 } },{ $limit : 4 } ])
 
     # logs = db.api_log
     # logs.insert_one(log).inserted_id
