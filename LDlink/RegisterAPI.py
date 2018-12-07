@@ -84,7 +84,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
         config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
-    # api_access_dir = config['api']['api_access_dir']
+    format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
     api_superuser_token = getToken(api_superuser)
     print "sending message justification"
     bool_blocked = ""
@@ -102,7 +102,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     message += "<br><br>First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
     message += "<br>Email: " + str(email)
-    message += "<br>Registered: " + str(registered)
+    message += "<br>Registered: " + str(format_registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
@@ -144,7 +144,8 @@ def logAccess(token, module):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_mongo_addr = config['api']['api_mongo_addr']
-    accessed = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
+    # accessed = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
+    accessed = getDatetime()
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
     log = {
@@ -217,7 +218,8 @@ def checkToken(token, token_expiration, token_expiration_days):
     else:
         # return True
         present = getDatetime()
-        registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
+        # registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
+        registered = record["registered"]
         expiration = getExpiration(registered, token_expiration_days)
         if ((present < expiration) or not token_expiration):
             return True
@@ -321,7 +323,8 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
             }
         else:
             present = getDatetime()
-            registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
+            # registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
+            registered = record["registered"]
             expiration = getExpiration(registered, token_expiration_days)
             format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
             if ((present < expiration) or not token_expiration):
@@ -340,9 +343,9 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                 token = generateToken()
                 registered = getDatetime()
                 expiration = getExpiration(registered, token_expiration_days)
-                format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+                # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
                 format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-                updateRecord(firstname, lastname, email, institution, token, format_registered, blocked)
+                updateRecord(firstname, lastname, email, institution, token, registered, blocked)
                 out_json = {
                     "message": "Thank you for registering to use the LDlink API.",
                     "firstname": firstname,
@@ -350,7 +353,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                     "email": email,
                     "institution": institution,
                     "token": token,
-                    "registered": format_registered,
+                    "registered": registered,
                     "blocked": blocked
                 }
                 emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
@@ -359,9 +362,9 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
         token = generateToken()
         registered = getDatetime()
         expiration = getExpiration(registered, token_expiration_days)
-        format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+        # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        insertUser(firstname, lastname, email, institution, token, format_registered, blocked)
+        insertUser(firstname, lastname, email, institution, token, registered, blocked)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
@@ -369,7 +372,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
             "email": email,
             "institution": institution,
             "token": token,
-            "registered": format_registered,
+            "registered": registered,
             "blocked": blocked
         }
         emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
