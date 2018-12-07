@@ -388,7 +388,7 @@ def getStats(startdatetime, enddatetime, top):
         { "$sort": { "count": -1 } }
     ]
     if top is not False:
-        pipeline.append({ "$limit": top })
+        pipeline.append({ "$limit": int(top) })
     users_json = log.aggregate(pipeline)
     users_json_sanitized = json.loads(json_util.dumps(users_json))
     out_json = {
