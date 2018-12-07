@@ -380,7 +380,35 @@ def getStats(startdatetime, enddatetime, top):
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
+    log = db.api_log
     numUsers = users.count()
+    pipeline = [
+        { "$group": { "_id": "$token", "count": { "$sum": 1 } } }, 
+        { "$sort": { "count": -1 } }
+    ]
+    if top is not False:
+        pipeline.append({ "$limit": top })
+    users_json = log.aggregate(pipeline)
+    out_json = {
+        "#_registered_users": numUsers,
+        "users": users_json
+    }
+    return out_json
+
+    # group by token and sum each token's api calls
+    # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }])
+
+    # add limit (top)
+    # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }, { $limit : 4 } ])
+
+    # sort count in desc order (most to least)
+    # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }, { $sort : { count : -1 } },{ $limit : 4 } ])
+
+    # left inner join to get user info from api_users from token
+    # { $lookup : { from : "api_users", localField : "token", foreignField : "token", as : "userinfo" } } 
+    
+    # db.api_log.aggregate([ { $lookup : { from : "api_users", localField : "token", foreignField : "token", as : "userinfo" } }, { $group : { _id : "$token", count : { $sum : 1 } } } ])
+
     # logs = db.api_log
     # logs.insert_one(log).inserted_id
     # with open('config.yml', 'r') as c:
@@ -429,8 +457,3 @@ def getStats(startdatetime, enddatetime, top):
     #         "lastname": user[1],
     #         "#_total_api_calls": user[3]
     #     }
-    out_json = {
-        "#_registered_users": numUsers
-        # "users": users_json
-    }
-    return out_json

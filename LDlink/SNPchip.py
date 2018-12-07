@@ -33,7 +33,6 @@ def get_platform_request():
         print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
         return "Failed to connect to server."
 
-    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     cursor = db.platforms.find(
         {"platform": {'$regex': '.*'}}).sort("platform", -1)
@@ -200,7 +199,6 @@ def calculate_chip(snplst, platform_query, request):
 
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
     platformcount = 0
-    # client.admin.authenticate(username, password, mechanism='SCRAM-SHA-1')
     db = client["LDLink"]
     count = 0
     platform_NOT = []
