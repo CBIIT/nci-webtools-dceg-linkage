@@ -311,6 +311,8 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
     # if email record exists, do not insert to db
     if record != None:
         if checkBlockedEmail(record["email"]):
+            registered = record["registered"]
+            format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
             out_json = {
                 "message": "Your email is associated with a blocked API token.",
                 "firstname": record["firstname"],
@@ -318,7 +320,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                 "email": record["email"],
                 "institution": record["institution"],
                 "token": record["token"],
-                "registered": record["registered"],
+                "registered": format_registered,
                 "blocked": record["blocked"]
             }
         else:
@@ -326,6 +328,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
             # registered = datetime.datetime.strptime(record["registered"], "%Y-%m-%d %H:%M:%S")
             registered = record["registered"]
             expiration = getExpiration(registered, token_expiration_days)
+            format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
             format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
             if ((present < expiration) or not token_expiration):
                 out_json = {
@@ -335,7 +338,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                     "email": record["email"],
                     "institution": record["institution"],
                     "token": record["token"],
-                    "registered": record["registered"],
+                    "registered": format_registered,
                     "blocked": record["blocked"]
                 }
                 emailUser(record["email"], record["token"], format_expiration, record["firstname"], token_expiration, email_account, url_root)
@@ -343,7 +346,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                 token = generateToken()
                 registered = getDatetime()
                 expiration = getExpiration(registered, token_expiration_days)
-                # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+                format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
                 format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
                 updateRecord(firstname, lastname, email, institution, token, registered, blocked)
                 out_json = {
@@ -353,7 +356,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                     "email": email,
                     "institution": institution,
                     "token": token,
-                    "registered": registered,
+                    "registered": format_registered,
                     "blocked": blocked
                 }
                 emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
@@ -362,7 +365,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
         token = generateToken()
         registered = getDatetime()
         expiration = getExpiration(registered, token_expiration_days)
-        # format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+        format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
         insertUser(firstname, lastname, email, institution, token, registered, blocked)
         out_json = {
@@ -372,7 +375,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
             "email": email,
             "institution": institution,
             "token": token,
-            "registered": registered,
+            "registered": format_registered,
             "blocked": blocked
         }
         emailUser(email, token, format_expiration, firstname, token_expiration, email_account, url_root)
