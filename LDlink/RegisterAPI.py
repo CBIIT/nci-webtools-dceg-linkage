@@ -390,8 +390,41 @@ def getStats(startdatetime, enddatetime, top):
     log = db.api_log
     numUsers = users.count()
     pipeline = [
-        { "$group": { "_id": "$token", "#_total_api_calls": { "$sum": 1 } } }, 
-        { "$sort": { "#_total_api_calls": -1 } }
+        { 
+            "$lookup" : { 
+                "from" : "api_users", 
+                "localField" : "token", 
+                "foreignField" : "token", 
+                "as" : "user_info" 
+            } 
+        }, 
+        {   
+            '$unwind' : "$user_info" 
+        },
+        {   
+            "$project" : {
+                "accessed" : 1,
+                "module" : 1,
+                "userinfo" : {
+                    "email" : "$user_info.email",
+                    "firstname" : "$user_info.firstname",
+                    "lastname" : "$user_info.lastname"
+                }
+            } 
+        },
+        { 
+            "$group": { 
+                "_id": "$userinfo", 
+                "#_total_api_calls": { 
+                    "$sum": 1 
+                } 
+            } 
+        }, 
+        { 
+            "$sort": { 
+                "#_total_api_calls": -1 
+            } 
+        }
     ]
     if top is not False:
         pipeline.append({ "$limit": int(top) })
@@ -420,7 +453,7 @@ def getStats(startdatetime, enddatetime, top):
             to_timeS = to_time.split(':')
             to_datetime = datetime.datetime(int(to_dateS[0]), int(to_dateS[1]), int(to_dateS[2]), int(to_timeS[0]), int(to_timeS[1]), int(to_timeS[2]), 0)
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime, "$lt": to_datetime } } }
-        pipeline.insert(0, rangeQuery)
+        pipeline.insert(3, rangeQuery)
     users_json = log.aggregate(pipeline)
     users_json_sanitized = json.loads(json_util.dumps(users_json))
     out_json = {
@@ -429,73 +462,51 @@ def getStats(startdatetime, enddatetime, top):
     }
     return out_json
 
-    # $gte = from date
-    # $lt = to date
-
-    # db.api_log.find({"accessed": { '$gte': ISODate("2018-12-07T11:50:30.000Z"), '$lt': ISODate("2018-12-07T11:56:45.000Z") }})
-
-    # group by token and sum each token's api calls
-    # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }])
-
-    # add limit (top)
-    # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }, { $limit : 4 } ])
-
-    # sort count in desc order (most to least)
-    # db.api_log.aggregate([{ $group : { _id : "$token", count : { $sum : 1 } } }, { $sort : { count : -1 } },{ $limit : 4 } ])
-
-    # left inner join to get user info from api_users from token
-    # { $lookup : { from : "api_users", localField : "token", foreignField : "token", as : "userinfo" } } 
-    
-    # db.api_log.aggregate([ { $lookup : { from : "api_users", localField : "token", foreignField : "token", as : "userinfo" } }, { $group : { _id : "$token", count : { $sum : 1 } } } ])
-    
-    # add from-datetime and to-datetime
-    # db.api_log.aggregate([{ $match: { "accessed": { '$gte': ISODate("2018-12-07T11:50:30.000Z"), '$lt': ISODate("2018-12-07T11:56:45.000Z") } } }, { $group : { _id : "$token", count : { $sum : 1 } } }, { $sort : { count : -1 } },{ $limit : 4 } ])
-
-    # logs = db.api_log
-    # logs.insert_one(log).inserted_id
-    # with open('config.yml', 'r') as c:
-    #     config = yaml.load(c)
-    # api_access_dir = config['api']['api_access_dir']
-    # con = sqlite3.connect(api_access_dir + 'api_access.db')
-    # con.text_factory = str
-    # cur = con.cursor()
-    # # temp = (token,)
-    # cur.execute("SELECT count(*) FROM api_users;")
-    # numUsers = cur.fetchone()
-    # whereClause = ""
-    # if ((startdatetime is not False) or (enddatetime is not False)):
-    #     whereClause = " WHERE "
-    # startdateQuery = ""
-    # if startdatetime is not False:
-    #     print startdatetime
-    #     startdatetimeSplit = startdatetime.split("_")
-    #     startdateQuery = "accessed >= '" + startdatetimeSplit[0] + " " + startdatetimeSplit[1] + "'"
-    #     print startdateQuery
-    # enddateQuery = ""
-    # if enddatetime is not False:
-    #     print enddatetime
-    #     enddatetimeSplit = enddatetime.split("_")
-    #     enddateQuery = "accessed <= '" + enddatetimeSplit[0] + " " + enddatetimeSplit[1] + "'"
-    #     print enddateQuery
-    # andClause = ""
-    # if ((startdatetime is not False) and (enddatetime is not False)):
-    #     andClause = " AND "
-    # topQuery = ""
-    # if top is not False:
-    #     topQuery = "LIMIT " + str(top)
-    # cur.execute(
-    #     "SELECT a.first_name, a.last_name, a.email, count(*) as num_calls " + 
-    #     "FROM api_users a INNER JOIN " + 
-    #     "(SELECT * FROM api_log" + whereClause + startdateQuery + andClause + enddateQuery + ") b " + 
-    #     "ON a.token = b.token " + 
-    #     "GROUP BY a.email " + 
-    #     "ORDER BY num_calls DESC " + 
-    #     topQuery + ";")
-    # users = cur.fetchall()
-    # users_json = {}
-    # for user in users:
-    #     users_json[user[2]] = {
-    #         "firstname": user[0],
-    #         "lastname": user[1],
-    #         "#_total_api_calls": user[3]
-    #     }
+# db.api_log.aggregate([
+#     { 
+#         $lookup : { 
+#             from : "api_users", 
+#             localField : "token", 
+#             foreignField : "token", 
+#             as : "user_info" 
+#         } 
+#     }, 
+#     {   
+#         $unwind : "$user_info" 
+#     },
+#     {   
+#         $project : {
+#             accessed : 1,
+#             module: 1,
+#             userinfo : {
+#                 email : "$user_info.email",
+#                 firstname : "$user_info.firstname",
+#                 lastname : "$user_info.lastname"
+#             }
+#         } 
+#     },
+#     { 
+#         $match: { 
+#             "accessed": { 
+#                 '$gte': ISODate("2018-12-07T11:50:30.000Z"), 
+#                 '$lt': ISODate("2018-12-07T11:56:45.000Z") 
+#             } 
+#         } 
+#     }, 
+#     {
+#         $group : { 
+#             _id : "$userinfo", 
+#             count : { 
+#                 $sum : 1 
+#             }
+#         } 
+#     }, 
+#     { 
+#         $sort : { 
+#             count : -1 
+#         } 
+#     },
+#     { 
+#         $limit : 4 
+#     } 
+# ])
