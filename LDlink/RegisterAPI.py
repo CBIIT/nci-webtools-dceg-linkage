@@ -12,6 +12,7 @@ from email.mime.text import MIMEText
 import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
+from bson import json_util, ObjectId
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 # username = contents[0].split('=')[1]
 username = 'ncianalysis_api'
@@ -389,9 +390,10 @@ def getStats(startdatetime, enddatetime, top):
     if top is not False:
         pipeline.append({ "$limit": top })
     users_json = log.aggregate(pipeline)
+    users_json_sanitized = json.loads(json_util.dumps(users_json))
     out_json = {
         "#_registered_users": numUsers,
-        "users": users_json
+        "users": users_json_sanitized
     }
     return out_json
 
