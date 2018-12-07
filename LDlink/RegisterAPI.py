@@ -402,23 +402,23 @@ def getStats(startdatetime, enddatetime, top):
             from_date, from_time = startdatetime.split("_")
             from_dateS = from_date.split('-')
             from_timeS = from_time.split(':')
-            from_datetime = datetime.datetime(from_dateS[0], from_dateS[1], from_dateS[2], from_timeS[0], from_timeS[1], from_timeS[2], 0)
+            from_datetime = datetime.datetime(int(from_dateS[0]), int(from_dateS[1]), int(from_dateS[2]), int(from_timeS[0]), int(from_timeS[1]), int(from_timeS[2]), 0)
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime } } }
         if ((enddatetime is not False) and (startdatetime is False)):
             to_date, to_time = startdatetime.split("_")
             to_dateS = to_date.split('-')
             to_timeS = to_time.split(':')
-            to_datetime = datetime.datetime(to_dateS[0], to_dateS[1], to_dateS[2], to_timeS[0], to_timeS[1], to_timeS[2], 0)
+            to_datetime = datetime.datetime(int(to_dateS[0]), int(to_dateS[1]), int(to_dateS[2]), int(to_timeS[0]), int(to_timeS[1]), int(to_timeS[2]), 0)
             rangeQuery = { "$match": { "accessed": { "$lt": to_datetime } } }
         if ((startdatetime is not False) and (enddatetime is not False)):
             from_date, from_time = startdatetime.split("_")
             from_dateS = from_date.split('-')
             from_timeS = from_time.split(':')
-            from_datetime = datetime.datetime(from_dateS[0], from_dateS[1], from_dateS[2], from_timeS[0], from_timeS[1], from_timeS[2], 0)
+            from_datetime = datetime.datetime(int(from_dateS[0]), int(from_dateS[1]), int(from_dateS[2]), int(from_timeS[0]), int(from_timeS[1]), int(from_timeS[2]), 0)
             to_date, to_time = startdatetime.split("_")
             to_dateS = to_date.split('-')
             to_timeS = to_time.split(':')
-            to_datetime = datetime.datetime(to_dateS[0], to_dateS[1], to_dateS[2], to_timeS[0], to_timeS[1], to_timeS[2], 0)
+            to_datetime = datetime.datetime(int(to_dateS[0]), int(to_dateS[1]), int(to_dateS[2]), int(to_timeS[0]), int(to_timeS[1]), int(to_timeS[2]), 0)
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime, "$lt": to_datetime } } }
         pipeline.insert(0, rangeQuery)
     users_json = log.aggregate(pipeline)
