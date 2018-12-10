@@ -1527,6 +1527,25 @@
 					<div id="apiaccess-loading">
 						<img src="calculating_LD.gif" alt="loading icon" class="loading">
 					</div>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="apiaccess-message">
+							<div class="panel panel-danger">
+								<div class="panel-heading">Error</div>
+								<div class="panel-body" id="apiaccess-message-content"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="apiaccess-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="apiaccess-message-warning-content">
+								</div>
+							</div>
+						</div>
+					</div>
 
 					<!-- apiaccess modals -->
 					<div id="apiaccess-new-user" class="modal fade" data-backdrop="static">
@@ -1569,7 +1588,7 @@
 								</div>
 								<form id="apiblockedForm" class="ldlinkForm">
 									<div class="modal-body">
-										<div id="apiblocked-message" style="text-align: center; display:none;">
+										<div id="apiblocked-submit-message" style="text-align: center; display:none;">
 											You request to unblock API token has been submitted. Approval pending...
 										</div>
 										<div id="apiblocked-form" style="margin-left: auto; margin-right: auto;">
@@ -1578,7 +1597,7 @@
 												<input type="text" class="form-control" id="apiblocked-institution" placeholder="Institution" disabled>
 												<input type="text" class="form-control" id="apiblocked-firstname" placeholder="First name" disabled>
 												<input type="text" class="form-control" id="apiblocked-lastname" placeholder="Last name" disabled>
-												<input type="text" class="form-control" id="apiblocked-token" placeholder="Token" disabled>
+												<!-- <input type="text" class="form-control" id="apiblocked-token" placeholder="Token" disabled> -->
 												<input type="text" class="form-control" id="apiblocked-registered" placeholder="Registered" disabled>
 												<input type="text" class="form-control" id="apiblocked-blocked" placeholder="Blocked" disabled>
 											</div>
@@ -1602,6 +1621,25 @@
 											<!-- loading animation -->
 											<div id="apiblocked-loading">
 												<img src="calculating_LD.gif" alt="loading icon" class="loading">
+											</div>
+											<!-- Message ERROR -->
+											<div class="row">
+												<div class="col-sm-7 col-sm-offset-2" id="apiblocked-message">
+													<div class="panel panel-danger">
+														<div class="panel-heading">Error</div>
+														<div class="panel-body" id="apiblocked-message-content"></div>
+													</div>
+												</div>
+											</div>
+											<!-- Message WARNING -->
+											<div class="row">
+												<div class="col-sm-7 col-sm-offset-2" id="apiblocked-message-warning">
+													<div class="panel panel-warning">
+														<div class="panel-heading">Warning</div>
+														<div class="panel-body" id="apiblocked-message-warning-content">
+														</div>
+													</div>
+												</div>
 											</div>
 										</div>
 									</div>

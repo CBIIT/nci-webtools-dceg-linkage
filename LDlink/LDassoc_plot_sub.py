@@ -87,9 +87,14 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     header_list.append(myargs['pval'])
 
     # Load input file
-    assoc_data=open(file).readlines()
-    header=assoc_data[0].strip().split()
-    first=assoc_data[1].strip().split()
+    header = open(file).readline().strip().split()
+    with open(file) as fp:
+        for i, line in enumerate(fp):
+            if i == 1:
+                first = line.strip().split()
+            elif i > 1:
+                break
+
     if len(header)!=len(first):
         return None
         
@@ -228,26 +233,27 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     a_pos=[]
     assoc_dict={}
     assoc_list=[]
-    for i in range(len(assoc_data)):
-        col=assoc_data[i].strip().split()
-        if len(col)==len_head:
-            if col[chr_index].strip("chr")==chromosome:
-                try:
-                    int(col[pos_index])
-                except ValueError:
-                    continue
-                else:
-                    if coord1<=int(col[pos_index])<=coord2:
-                        try:
-                            float(col[p_index])
-                        except ValueError:
-                            continue
-                        else:
-                            coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
-                            assoc_coords.append(coord_i)
-                            a_pos.append(col[pos_index])
-                            assoc_dict[coord_i]=[col[p_index]]
-                            assoc_list.append([coord_i,float(col[p_index])])
+    with open(file) as fp:
+        for line in fp:
+            col=line.strip().split()
+            if len(col)==len_head:
+                if col[chr_index].strip("chr")==chromosome:
+                    try:
+                        int(col[pos_index])
+                    except ValueError:
+                        continue
+                    else:
+                        if coord1<=int(col[pos_index])<=coord2:
+                            try:
+                                float(col[p_index])
+                            except ValueError:
+                                continue
+                            else:
+                                coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+                                assoc_coords.append(coord_i)
+                                a_pos.append(col[pos_index])
+                                assoc_dict[coord_i]=[col[p_index]]
+                                assoc_list.append([coord_i,float(col[p_index])])
 
 
     # Coordinate list checks

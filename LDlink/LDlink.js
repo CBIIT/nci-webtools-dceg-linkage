@@ -118,7 +118,7 @@ $(document).ready(function() {
 
         $('#apiblocked-form').show();
         $('#apiblocked').show();
-        $('#apiblocked-message').hide();
+        $('#apiblocked-submit-message').hide();
         $('#apiblocked-done').val("Cancel");
 
         $("#apiblocked-reset").click();
@@ -258,6 +258,8 @@ $(document).ready(function() {
     });
     
     $('#apiblocked-loading').hide();
+    $('#apiblocked-message').hide();
+    $('#apiblocked-message-warning').hide();
 
     $('.ldlinkForm').on('submit', function(e) {
         calculate(e);
@@ -436,8 +438,9 @@ function errorHandler(e) {
 }
 
 function showCommError(e) {
-    $('#myModal').find('.modal-title').html(e.status+" - "+e.statusText);
+    $('#myModal').find('.modal-title').html("File Upload Error - " + e.status);
     $('#myModal').find('.modal-body').html(e.responseText);
+    $('#myModal').find('.modal-body').append("\n File uploaded may have exceeded the size limit.");
     $("#myModal").modal();
 }
 
@@ -2470,21 +2473,6 @@ function getLDAssocResults(jsonfile) {
     hideLoadingIcon(ajaxRequest, id);
 }
 
-function displayCommFail(id, jqXHR, textStatus) {
-    //console.log(textStatus);
-    //console.dir(jqXHR);
-    console.warn("CommFail\n"+"Status: "+textStatus);
-    var message = jqXHR.responseText;
-    message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
-    $('#' + id + '-message').show();
-    $('#' + id + '-message-content').empty().append(message);
-    $('#' + id + '-progress').hide();
-    $('#' + id+ '-results-container').hide();
-    //hide loading icon
-    $('#'+id+"-loading").hide();
-
-}
-
 function getLDmatrixResults(jsonfile, request) {
     var id = "ldmatrix";
     var url = "tmp/matrix"+jsonfile;
@@ -2598,7 +2586,7 @@ function updateAPIaccess() {
         reference: reference
     };
 
-    var url = restServerUrl + "/apiaccess_web";
+    var url = restServerUrl + "/apiaccess/register_web";
 
     var ajaxRequest = $.ajax({
         type : "GET",
@@ -2614,7 +2602,7 @@ function updateAPIaccess() {
         $('#apiblocked-lastname').val(data.lastname);
         $('#apiblocked-institution').val(data.institution);
         $('#apiblocked-email').val(data.email);
-        $('#apiblocked-token').val(data.token);
+        // $('#apiblocked-token').val(data.token);
         $('#apiblocked-registered').val(data.registered);
         $('#apiblocked-blocked').val(data.blocked);
         if (data.message.substring(0, 5) == "Thank") {
@@ -2628,6 +2616,9 @@ function updateAPIaccess() {
             $('#' + id + '-blocked-user').modal('show');
         }
         $('#' + id + '-loading').hide();
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2646,14 +2637,14 @@ function updateAPIblocked() {
         lastname: $('#apiblocked-lastname').val(),
         institution: $('#apiblocked-institution').val(),
         email: $('#apiblocked-email').val(),
-        token: $('#apiblocked-token').val(),
+        // token: $('#apiblocked-token').val(),
         registered: $('#apiblocked-registered').val(),
         blocked: $('#apiblocked-blocked').val(),
         justification: $('#apiblocked-justification').val(),
         reference: reference
     };
 
-    var url = restServerUrl + "/apiblocked_web";
+    var url = restServerUrl + "/apiaccess/apiblocked_web";
 
     var ajaxRequest = $.ajax({
         type : "GET",
@@ -2672,9 +2663,12 @@ function updateAPIblocked() {
         // hide submit button
         $('#apiblocked').hide();
         // show form submission message
-        $('#apiblocked-message').show();
+        $('#apiblocked-submit-message').show();
         // change cancel to done button
         $('#apiblocked-done').val("Done");
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2714,72 +2708,93 @@ function displayError(id, data) {
 }
 
 function displayCommFail(id, jqXHR, textStatus) {
-    // console.log(textStatus);
-    console.dir(jqXHR);
+    //console.log(textStatus);
+    //console.dir(jqXHR);
     console.warn("CommFail\n"+"Status: "+textStatus);
-    //$("#calculating-spinner").modal('hide');
-    //alert("Comm Fail");
-    var message;
-    var errorThrown = "";
-    console.warn("header: " + jqXHR
-    + "\ntextStatus: " + textStatus
-    + "\nerrorThrown: " + errorThrown);
-    //alert('Communication problem: ' + textStatus);
-    // ERROR
-    if(jqXHR.status == 500) {
-        message = 'Internal Server Error: ' + textStatus + "<br>";
-        message += jqXHR.responseText;
-        message += "<br>code("+jqXHR.status+")";
-        message_type = 'warning';
-    } else {
-        message = jqXHR.statusText+" ("+ textStatus + ")<br><br>";
-        message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
-        message += "<br>code("+jqXHR.status+")";
-        message_type = 'error';
-    }
-    showMessage(id, message, message_type);
-
+    var message = jqXHR.responseText;
+    message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
+    message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
+    $('#' + id + '-message').show();
+    $('#' + id + '-message-content').empty().append(message);
+    $('#' + id + '-progress').hide();
+    $('#' + id+ '-results-container').hide();
+    //hide loading icon
+    $('#'+id+"-loading").hide();
 }
-function showMessage(id, message, message_type) {
+
+
+// function displayCommFail(id, jqXHR, textStatus) {
+//     console.dir(jqXHR);
+//     console.warn("CommFail\n"+"Status: "+textStatus);
+
+//     var message;
+//     var errorThrown = "";
+//     console.warn("header: " + jqXHR
+//     + "\ntextStatus: " + textStatus
+//     + "\nerrorThrown: " + errorThrown);
+//     //alert('Communication problem: ' + textStatus);
+//     // ERROR
+//     if(jqXHR.status == 500) {
+//         message = 'Internal Server Error: ' + textStatus + "<br>";
+//         message += jqXHR.responseText;
+//         message += "<br>code("+jqXHR.status+")";
+//         message_type = 'warning';
+//     } else {
+//         message = jqXHR.statusText+" ("+ textStatus + ")<br><br>";
+//         message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
+//         message += "<br>code("+jqXHR.status+")";
+//         message_type = 'error';
+//     }
+//     showMessage(id, message, message_type);
+// }
+
+// function showMessage(id, message, message_type) {
+//     console.log("showMessage");
+//     $('#' + id + '-message').show();
+//     $('#' + id + '-message-content').empty().append(message);
+//     $('#' + id + '-progress').hide();
+//     $('#' + id+ '-results-container').hide();
+//     //hide loading icon
+//     $('#'+id+"-loading").hide();
 
     //
     //  Display either a warning an error.
     //
-    $("#right_panel").show();
-    $("#help").hide();
-    $("#icon").css('visibility', 'visible');
+    // $("#right_panel").show();
+    // $("#help").hide();
+    // $("#icon").css('visibility', 'visible');
 
     // console.log("Show Message");
 
-    var css_class = "";
-    var header = "";
-    var container_id = id+"-message-container";
-    // console.log(container_id);
+    // var css_class = "";
+    // var header = "";
+    // var container_id = id+"-message-container";
+    // // console.log(container_id);
 
-    if(message_type.toUpperCase() == 'ERROR') {
-        css_class = 'panel-danger';
-        header = 'Error';
-    } else {
-        css_class = 'panel-warning';
-        header = 'Warning';
-    }
-    $("#"+container_id).empty().show();
-    $("#"+container_id).append(
-        $('<div>')
-            .addClass('panel')
-            .addClass(css_class)
-            .append(
-                $('<div>')
-                    .addClass('panel-heading')
-                    .append(header)
-                    )
-            .append(
-                $('<div>')
-                    .addClass('panel-body')
-                    .append(message)
-                    )
-        );
-}
+    // if(message_type.toUpperCase() == 'ERROR') {
+    //     css_class = 'panel-danger';
+    //     header = 'Error';
+    // } else {
+    //     css_class = 'panel-warning';
+    //     header = 'Warning';
+    // }
+    // $("#"+container_id).empty().show();
+    // $("#"+container_id).append(
+    //     $('<div>')
+    //         .addClass('panel')
+    //         .addClass(css_class)
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('panel-heading')
+    //                 .append(header)
+    //                 )
+    //         .append(
+    //             $('<div>')
+    //                 .addClass('panel-body')
+    //                 .append(message)
+    //                 )
+    //     );
+// }
 
 function addLDHapHyperLinks(request, ldhapTable) {
     $('#ldhap-snps').attr('href', 'tmp/snps_' + request + '.txt');
