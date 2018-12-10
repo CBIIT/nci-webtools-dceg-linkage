@@ -293,8 +293,7 @@ def getDatetime():
 
 # get current date and time
 def getExpiration(registered, token_expiration_days):
-    return registered + datetime.timedelta(minutes=5)
-    # return registered + datetime.timedelta(days=token_expiration_days)
+    return registered + datetime.timedelta(days=token_expiration_days)
 
 # registers new users and emails generated token for WEB
 def register_user(firstname, lastname, email, institution, reference, url_root):
