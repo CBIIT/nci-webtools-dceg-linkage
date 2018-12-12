@@ -11,6 +11,8 @@ LDlink/sftp-config-alt.json
 /common
 common/
 
+.DS_Store
+
 node_modules
 tests/*.xml
 package-lock.json

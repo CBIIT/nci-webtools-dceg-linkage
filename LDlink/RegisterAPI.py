@@ -388,7 +388,9 @@ def getStats(startdatetime, enddatetime, top):
     db = client["LDLink"]
     users = db.api_users
     log = db.api_log
+    # get number of registered users in total
     numUsers = users.count()
+    # join api_log and api_users by foreign key to retrieve user info per api_log record
     pipeline = [
         { 
             "$lookup" : { 
@@ -426,87 +428,60 @@ def getStats(startdatetime, enddatetime, top):
             } 
         }
     ]
+    # handle if top parameter is indicated or not
     if top is not False:
         pipeline.append({ "$limit": int(top) })
-    
+    # handle startdatetime and enddatetime parameters
     if ((startdatetime is not False) or (enddatetime is not False)):
         rangeQuery = {}
         if ((startdatetime is not False) and (enddatetime is False)):
-            from_date, from_time = startdatetime.split("_")
-            from_dateS = from_date.split('-')
-            from_timeS = from_time.split(':')
-            from_datetime = datetime.datetime(int(from_dateS[0]), int(from_dateS[1]), int(from_dateS[2]), int(from_timeS[0]), int(from_timeS[1]), int(from_timeS[2]), 0)
+            fromdatetime = startdatetime.split("-")
+            if (len(fromdatetime) == 6): 
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), int(fromdatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), 0, 0, 0, 0)
+            elif (len(fromdatetime) == 5):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), 0, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime } } }
         if ((enddatetime is not False) and (startdatetime is False)):
-            to_date, to_time = enddatetime.split("_")
-            to_dateS = to_date.split('-')
-            to_timeS = to_time.split(':')
-            to_datetime = datetime.datetime(int(to_dateS[0]), int(to_dateS[1]), int(to_dateS[2]), int(to_timeS[0]), int(to_timeS[1]), int(to_timeS[2]), 0)
+            todatetime = enddatetime.split("-")
+            if (len(fromdatetime) == 6): 
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), int(todatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), 23, 59, 59, 0)
+            elif (len(fromdatetime) == 5):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), 59, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             rangeQuery = { "$match": { "accessed": { "$lt": to_datetime } } }
         if ((startdatetime is not False) and (enddatetime is not False)):
-            from_date, from_time = startdatetime.split("_")
-            from_dateS = from_date.split('-')
-            from_timeS = from_time.split(':')
-            from_datetime = datetime.datetime(int(from_dateS[0]), int(from_dateS[1]), int(from_dateS[2]), int(from_timeS[0]), int(from_timeS[1]), int(from_timeS[2]), 0)
-            to_date, to_time = enddatetime.split("_")
-            to_dateS = to_date.split('-')
-            to_timeS = to_time.split(':')
-            to_datetime = datetime.datetime(int(to_dateS[0]), int(to_dateS[1]), int(to_dateS[2]), int(to_timeS[0]), int(to_timeS[1]), int(to_timeS[2]), 0)
+            fromdatetime = startdatetime.split("-")
+            if (len(fromdatetime) == 6): 
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), int(fromdatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), 0, 0, 0, 0)
+            elif (len(fromdatetime) == 5):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), 0, 0)
+            else:
+                return { "message": "Invalid input parameters."}
+            todatetime = enddatetime.split("-")
+            if (len(todatetime) == 6): 
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), int(todatetime[5]), 0)
+            elif (len(todatetime) == 3):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), 23, 59, 59, 0)
+            elif (len(todatetime) == 5):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), 59, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime, "$lt": to_datetime } } }
         pipeline.insert(3, rangeQuery)
     users_json = log.aggregate(pipeline)
+    # santize string to be returned as proper json
     users_json_sanitized = json.loads(json_util.dumps(users_json))
     out_json = {
         "#_registered_users": numUsers,
         "users": users_json_sanitized
     }
     return out_json
-
-# db.api_log.aggregate([
-#     { 
-#         $lookup : { 
-#             from : "api_users", 
-#             localField : "token", 
-#             foreignField : "token", 
-#             as : "user_info" 
-#         } 
-#     }, 
-#     {   
-#         $unwind : "$user_info" 
-#     },
-#     {   
-#         $project : {
-#             accessed : 1,
-#             module: 1,
-#             userinfo : {
-#                 email : "$user_info.email",
-#                 firstname : "$user_info.firstname",
-#                 lastname : "$user_info.lastname"
-#             }
-#         } 
-#     },
-#     { 
-#         $match: { 
-#             "accessed": { 
-#                 '$gte': ISODate("2018-12-07T11:50:30.000Z"), 
-#                 '$lt': ISODate("2018-12-07T11:56:45.000Z") 
-#             } 
-#         } 
-#     }, 
-#     {
-#         $group : { 
-#             _id : "$userinfo", 
-#             count : { 
-#                 $sum : 1 
-#             }
-#         } 
-#     }, 
-#     { 
-#         $sort : { 
-#             count : -1 
-#         } 
-#     },
-#     { 
-#         $limit : 4 
-#     } 
-# ])
