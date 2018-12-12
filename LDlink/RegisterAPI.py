@@ -433,17 +433,45 @@ def getStats(startdatetime, enddatetime, top):
         rangeQuery = {}
         if ((startdatetime is not False) and (enddatetime is False)):
             fromdatetime = startdatetime.split("-")
-            from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), int(fromdatetime[5]), 0)
+            if (len(fromdatetime) == 6): 
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), int(fromdatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), 0, 0, 0, 0)
+            elif (len(from_datetime == 5)):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), 0, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime } } }
         if ((enddatetime is not False) and (startdatetime is False)):
             todatetime = enddatetime.split("-")
-            to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), int(todatetime[5]), 0)
+            if (len(fromdatetime) == 6): 
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), int(todatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), 23, 59, 59, 0)
+            elif (len(from_datetime == 5)):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), 59, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             rangeQuery = { "$match": { "accessed": { "$lt": to_datetime } } }
         if ((startdatetime is not False) and (enddatetime is not False)):
             fromdatetime = startdatetime.split("-")
-            from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), int(fromdatetime[5]), 0)
+            if (len(fromdatetime) == 6): 
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), int(fromdatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), 0, 0, 0, 0)
+            elif (len(from_datetime == 5)):
+                from_datetime = datetime.datetime(int(fromdatetime[0]), int(fromdatetime[1]), int(fromdatetime[2]), int(fromdatetime[3]), int(fromdatetime[4]), 0, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             todatetime = enddatetime.split("-")
-            to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), int(todatetime[5]), 0)
+            if (len(fromdatetime) == 6): 
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), int(todatetime[5]), 0)
+            elif (len(fromdatetime) == 3):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), 23, 59, 59, 0)
+            elif (len(from_datetime == 5)):
+                to_datetime = datetime.datetime(int(todatetime[0]), int(todatetime[1]), int(todatetime[2]), int(todatetime[3]), int(todatetime[4]), 59, 0)
+            else:
+                return { "message": "Invalid input parameters."}
             rangeQuery = { "$match": { "accessed": { "$gte": from_datetime, "$lt": to_datetime } } }
         pipeline.insert(3, rangeQuery)
     users_json = log.aggregate(pipeline)
