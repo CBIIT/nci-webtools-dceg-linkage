@@ -438,9 +438,9 @@ function errorHandler(e) {
 }
 
 function showCommError(e) {
-    $('#myModal').find('.modal-title').html("File Upload Error - " + e.status);
+    $('#myModal').find('.modal-title').html(e.status + " - " + e.statusText);
     $('#myModal').find('.modal-body').html(e.responseText);
-    $('#myModal').find('.modal-body').append("\n File uploaded may have exceeded the size limit.");
+    // $('#myModal').find('.modal-body').append("\n File uploaded may have exceeded the size limit.");
     $("#myModal").modal();
 }
 
