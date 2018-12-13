@@ -86,7 +86,6 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
         config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
-    format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
     api_superuser_token = getToken(api_superuser)
     print "sending message justification"
     new_url_root = url_root.replace('http://', 'https://')
@@ -105,7 +104,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     message += "<br><br>First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
     message += "<br>Email: " + str(email)
-    message += "<br>Registered: " + str(format_registered)
+    message += "<br>Registered: " + str(registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
