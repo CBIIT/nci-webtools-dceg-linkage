@@ -1,0 +1,19 @@
+data:
+  snp_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.rs.151.db'
+  snp_chr_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/snp151/dbsnp.chr.151.db'
+  snp_pos_offset: 1
+  dbsnp_version: '151'
+  pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
+  vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
+  reg_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/regulomedb/regulomedb.db'
+  gene_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene.txt.gz'
+  gene_c_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene_collapsed.txt.gz'
+  gene_dir2: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/gene_names_coords.db'
+  recomb_dir: '/local/content/analysistools/public_html/apps/LDlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
+api:
+  require_token: True
+  api_mongo_addr: 'nciws-d971-c.nci.nih.gov'
+  token_expiration: False
+  token_expiration_days: 365
+  email_account: 'mailfwd.nih.gov'
+  api_superuser: 'kevin.jiang2@nih.gov'
