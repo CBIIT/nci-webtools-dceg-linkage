@@ -132,6 +132,8 @@ def requires_token(f):
         with open('config.yml', 'r') as c:
             config = yaml.load(c)
         require_token = bool(config['api']['require_token'])
+        url_root = request.url_root
+        new_url_root = url_root.replace('http://', 'https://')
         # api_access_dir = config['api']['api_access_dir']
         token_expiration = bool(config['api']['token_expiration'])
         token_expiration_days = config['api']['token_expiration_days']
@@ -140,11 +142,11 @@ def requires_token(f):
             if require_token:
                 # Check if token argument is missing in api call
                 if 'token' not in request.args:
-                    return sendTraceback('API token missing. Please register using the API Access tab: ' + request.url_root + '?tab=apiaccess')
+                    return sendTraceback('API token missing. Please register using the API Access tab: ' + new_url_root + '?tab=apiaccess')
                 token = request.args['token']
                 # Check if token is valid
                 if checkToken(token, token_expiration, token_expiration_days) is False or token is None:
-                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + request.url_root + '?tab=apiaccess')
+                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + new_url_root + '?tab=apiaccess')
                 # Check if token is blocked
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
