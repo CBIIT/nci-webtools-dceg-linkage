@@ -39,12 +39,10 @@ def smtp_send(smtp, email_account, email, packet):
         smtp = smtp_connect(email_account)
         try:
             smtp_send(smtp, email_account, email, packet)
-            # smtp.quit()
         except Exception:
             smtp.quit()
             smtp = smtp_connect(email_account)
             smtp_send(smtp, email_account, email, packet)
-            # smtp.quit()
 
 # email user token
 def emailUser(email, token, expiration, firstname, token_expiration, email_account, url_root):
@@ -62,8 +60,6 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, email, packet)
-    # smtp = smtplib.SMTP(email_account)
-    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email user when their token is blocked
 def emailUserBlocked(email, email_account, url_root):
@@ -81,8 +77,6 @@ def emailUserBlocked(email, email_account, url_root):
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, email, packet)
-    # smtp = smtplib.SMTP(email_account)
-    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email user when their token is unblocked
 def emailUserUnblocked(email, email_account):
@@ -99,8 +93,6 @@ def emailUserUnblocked(email, email_account):
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, email, packet)
-    # smtp = smtplib.SMTP(email_account)
-    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
@@ -134,8 +126,6 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, api_superuser, packet)
-    # smtp = smtplib.SMTP(email_account)
-    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
     out_json = {
         "email": email,
         "justification": justification
@@ -170,7 +160,6 @@ def logAccess(token, module):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_mongo_addr = config['api']['api_mongo_addr']
-    # accessed = getDatetime().strftime("%Y-%m-%d %H:%M:%S")
     accessed = getDatetime()
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
@@ -184,7 +173,6 @@ def logAccess(token, module):
 
 # sets blocked attribute of user to 1=true
 def blockUser(email, url_root):
-    # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     email_account = config['api']['email_account']
@@ -200,7 +188,6 @@ def blockUser(email, url_root):
 
 # sets blocked attribute of user to 0=false
 def unblockUser(email):
-    # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     email_account = config['api']['email_account']
@@ -323,7 +310,6 @@ def getExpiration(registered, token_expiration_days):
 
 # registers new users and emails generated token for WEB
 def register_user(firstname, lastname, email, institution, reference, url_root):
-    # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     token_expiration = bool(config['api']['token_expiration'])
