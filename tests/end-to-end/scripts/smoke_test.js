@@ -236,13 +236,13 @@ describe('LDlink Smoke Test', function() {
         console.log('[wait until Bokeh plot is visible]');
         const bokehPlot = By.css('[id="ldproxy-bokeh-graph"]');
         const bokehPlotElement = driver.findElement(bokehPlot);
-        await driver.wait(until.elementIsVisible(bokehPlotElement), 20000);
+        await driver.wait(until.elementIsVisible(bokehPlotElement), 30000);
         // wait until Bokeh Export plot button is enabled
         console.log('[wait until Bokeh Export plot button is enabled]');
         const exportPlotButton = By.css('[id="ldproxy-menu1"]');
         await driver.wait(until.elementLocated(exportPlotButton), 20000);
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
-        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 20000);
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 30000);
         // assert if Proxy Results table is present
         console.log('[assert if Proxy Results table is present]');
         const proxyResultsRSQuery = By.xpath('//*[@id="new-ldproxy"]/tbody/tr[1]/td[1]/a');
