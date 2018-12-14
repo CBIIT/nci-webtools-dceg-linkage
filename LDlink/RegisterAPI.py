@@ -32,6 +32,7 @@ def smtp_send(smtp, email_account, email, packet):
         smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
         smtp.quit()
     except Exception:
+        smtp.quit()
         smtp = smtp_connect(email_account)
         smtp_send(smtp, email_account, email, packet)
 
