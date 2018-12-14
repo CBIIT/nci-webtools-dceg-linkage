@@ -30,6 +30,7 @@ def smtp_connect(email_account):
 def smtp_send(smtp, email_account, email, packet):
     try:
         smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+        smtp.quit()
     except Exception:
         smtp = smtp_connect(email_account)
         smtp_send(smtp, email_account, email, packet)
@@ -121,7 +122,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     message += '<br><br><u><a href="' + new_url_root + 'LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
-    smtp_send(smtp, email_account, email, packet)
+    smtp_send(smtp, email_account, api_superuser, packet)
     # smtp = smtplib.SMTP(email_account)
     # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
     out_json = {
