@@ -12,6 +12,7 @@ LDlink/sftp-config-alt.json
 common/
 
 .DS_Store
+.vscode
 
 node_modules
 tests/*.xml

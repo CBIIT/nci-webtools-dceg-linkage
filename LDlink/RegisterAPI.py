@@ -21,47 +21,70 @@ port = int(contents[2].split('=')[1])
 
 # blocked users attribute: 0=false, 1=true
 
+# connect to email account
+def smtp_connect(email_account):
+    smtp = smtplib.SMTP(email_account)
+    return smtp
+
+# send email
+def smtp_send(smtp, email_account, email, packet):
+    # retries twice upon failure (often connection timeout)
+    try:
+        smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+        smtp.quit()
+    except Exception:
+        smtp.quit()
+        smtp = smtp_connect(email_account)
+        try:
+            smtp_send(smtp, email_account, email, packet)
+            smtp.quit()
+        except Exception:
+            smtp.quit()
+            smtp = smtp_connect(email_account)
+            smtp_send(smtp, email_account, email, packet)
+            smtp.quit()
+
 # email user token
 def emailUser(email, token, expiration, firstname, token_expiration, email_account, url_root):
-    print "sending message"
+    print "sending message registered"
+    new_url_root = url_root.replace('http://', 'https://')
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = email
     message = ''
     if token_expiration:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="'+ url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="'+ new_url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
     else:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="' + url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
-
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="' + new_url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
     packet.attach(MIMEText(message, 'html'))
-
-    # temp use localhost, use official NIH mailfwd account in future (put in config file)
-    smtp = smtplib.SMTP(email_account)
-    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+    smtp = smtp_connect(email_account)
+    smtp_send(smtp, email_account, email, packet)
+    # smtp = smtplib.SMTP(email_account)
+    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email user when their token is blocked
 def emailUserBlocked(email, email_account, url_root):
-    print "sending message"
+    print "sending message blocked"
+    new_url_root = url_root.replace('http://', 'https://')
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Blocked"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = email
     message = "Dear " + str(email) + ", " + "<br><br>"
     message += "Your LDlink API access token has been blocked.<br><br>"
-    message += "To unblock, resubmit a request in LDlink's <a href=\"" + url_root + "?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
+    message += "To unblock, resubmit a request in LDlink's <a href=\"" + new_url_root + "?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
     message += "Please contact the LDlink Web Admin (NCILDlinkWebAdmin@mail.nih.gov) for any questions or concerns.<br><br>"
     message += "LDlink Web Admin"
-
     packet.attach(MIMEText(message, 'html'))
-
-    # temp use localhost, use official NIH mailfwd account in future (put in config file)
-    smtp = smtplib.SMTP(email_account)
-    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+    smtp = smtp_connect(email_account)
+    smtp_send(smtp, email_account, email, packet)
+    # smtp = smtplib.SMTP(email_account)
+    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email user when their token is unblocked
 def emailUserUnblocked(email, email_account):
-    print "sending message"
+    print "sending message unblocked"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Unblocked"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
@@ -71,12 +94,11 @@ def emailUserUnblocked(email, email_account):
     message += "Your LDlink API access token has been unblocked.<br><br>"
     message += "Please contact the LDlink Web Admin (NCILDlinkWebAdmin@mail.nih.gov) for any questions or concerns.<br><br>"
     message += "LDlink Web Admin"
-
     packet.attach(MIMEText(message, 'html'))
-
-    # temp use localhost, use official NIH mailfwd account in future (put in config file)
-    smtp = smtplib.SMTP(email_account)
-    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
+    smtp = smtp_connect(email_account)
+    smtp_send(smtp, email_account, email, packet)
+    # smtp = smtplib.SMTP(email_account)
+    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
 
 # email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
@@ -84,9 +106,9 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
         config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
-    format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
     api_superuser_token = getToken(api_superuser)
     print "sending message justification"
+    new_url_root = url_root.replace('http://', 'https://')
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
@@ -102,14 +124,16 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     message += "<br><br>First name: " + str(firstname)
     message += "<br>Last name: " + str(lastname)
     message += "<br>Email: " + str(email)
-    message += "<br>Registered: " + str(format_registered)
+    message += "<br>Registered: " + str(registered)
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
-    message += '<br><br><u><a href="' + url_root + 'LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
+    message += '<br><br><u><a href="' + new_url_root + 'LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
     packet.attach(MIMEText(message, 'html'))
-    smtp = smtplib.SMTP(email_account)
-    smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
+    smtp = smtp_connect(email_account)
+    smtp_send(smtp, email_account, api_superuser, packet)
+    # smtp = smtplib.SMTP(email_account)
+    # smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", api_superuser, packet.as_string())
     out_json = {
         "email": email,
         "justification": justification
