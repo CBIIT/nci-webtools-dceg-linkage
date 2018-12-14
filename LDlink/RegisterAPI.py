@@ -28,13 +28,21 @@ def smtp_connect(email_account):
 
 # send email
 def smtp_send(smtp, email_account, email, packet):
+    # retries twice upon failure (often connection timeout)
     try:
         smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
         smtp.quit()
     except Exception:
         smtp.quit()
         smtp = smtp_connect(email_account)
-        smtp_send(smtp, email_account, email, packet)
+        try:
+            smtp_send(smtp, email_account, email, packet)
+            smtp.quit()
+        except Exception:
+            smtp.quit()
+            smtp = smtp_connect(email_account)
+            smtp_send(smtp, email_account, email, packet)
+            smtp.quit()
 
 # email user token
 def emailUser(email, token, expiration, firstname, token_expiration, email_account, url_root):
