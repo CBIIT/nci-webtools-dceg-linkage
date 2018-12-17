@@ -668,7 +668,7 @@ def read_csv_headers(example_filepath):
     #     for heads in headers:
     #         if len(heads) > 0:
     #             final_headers.append(heads)
-    with open(file) as fp:
+    with open(example_filepath) as fp:
         headers = fp.readline().strip().split()
     for heads in headers:
         if len(heads) > 0:
