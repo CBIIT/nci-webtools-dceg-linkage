@@ -12,7 +12,7 @@ data:
   recomb_dir: '/local/content/analysistools/public_html/apps/LDlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
 api:
   require_token: True
-  api_mongo_addr: 'nciws-q937-c.nci.nih.gov'
+  api_mongo_addr: 'nciws-d971-c.nci.nih.gov'
   token_expiration: False
   token_expiration_days: 365
   email_account: 'mailfwd.nih.gov'

@@ -250,7 +250,7 @@ def ldpair():
     # r1 = '{"corr_alleles":["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],"haplotypes":{"hap1":{"alleles":"AC","count":"576","frequency":"0.573"},"hap2":{"alleles":"GT","count":"361","frequency":"0.359"},"hap3":{"alleles":"GC","count":"42","frequency":"0.042"},"hap4":{"alleles":"AT","count":"27","frequency":"0.027"}},"snp1":{"allele_1":{"allele":"A","count":"603","frequency":"0.599"},"allele_2":{"allele":"G","count":"403","frequency":"0.401"},"coord":"chr4:104054686","rsnum":"rs2720460"},"snp2":{"allele_1":{"allele":"C","count":"618","frequency":"0.614"},"allele_2":{"allele":"T","count":"388","frequency":"0.386"},"coord":"chr4:104157164","rsnum":"rs11733615"},"statistics":{"chisq":"738.354","d_prime":"0.8839","p":"0.0","r2":"0.734"},"two_by_two":{"cells":{"11":"576","12":"27","21":"42","22":"361"},"total":"1006"}'
 
     isProgrammatic = False
-    print 'Execute TEST'
+    print 'Execute ldpair'
     print 'Gathering Variables from url'
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
@@ -405,7 +405,6 @@ def ldmatrix():
 def ldhap():
     isProgrammatic = False
     print 'Execute ldhap'
-    print 'working'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
@@ -591,7 +590,7 @@ def snpchip():
 
     # Command line example
     isProgrammatic = False
-    print "snpChip"
+    print "Execute snpchip"
 
     data = json.loads(request.stream.read())
     snps = data['snps']
@@ -655,7 +654,6 @@ def ldassoc_example():
 
     example = {
         'filename': os.path.basename(example_filepath),
-        # 'headers': ['A', 'B', 'C']
         'headers': read_csv_headers(example_filepath)
     }
     return json.dumps(example)
@@ -663,13 +661,18 @@ def ldassoc_example():
 
 def read_csv_headers(example_filepath):
     final_headers = []
-    with open(example_filepath, 'r') as f:
-        lines = f.readlines()
-        first_line = lines[0]
-        headers = first_line.split()
-        for heads in headers:
-            if len(heads) > 0:
-                final_headers.append(heads)
+    # with open(example_filepath, 'r') as f:
+    #     lines = f.readlines()
+    #     first_line = lines[0]
+    #     headers = first_line.split()
+    #     for heads in headers:
+    #         if len(heads) > 0:
+    #             final_headers.append(heads)
+    with open(example_filepath) as fp:
+        headers = fp.readline().strip().split()
+    for heads in headers:
+        if len(heads) > 0:
+            final_headers.append(heads)
     return final_headers
 
 
@@ -680,12 +683,12 @@ def ldassoc():
     myargs = argparse.Namespace()
     myargs.window = None
 
-    print "LDassoc"
+    print "Execute ldassoc"
     print 'Gathering Variables from url'
 
-    print type(request.args)
-    for arg in request.args:
-        print arg
+    # print type(request.args)
+    # for arg in request.args:
+    #     print arg
 
     data = str(request.args)
     json_dumps = json.dumps(data)
@@ -709,8 +712,8 @@ def ldassoc():
     myargs.bp = str(request.args.get('columns[position]'))
     myargs.pval = str(request.args.get('columns[pvalue]'))
 
-    print "myargs:"
-    print type(myargs.chr)
+    # print "myargs:"
+    # print type(myargs.chr)
     # regionValues = json.loads(request.args.get('region'))
     # variantValues = json.loads(request.args.get('variant'))
     # columns = json.loads(request.args.get('columns'))
@@ -801,6 +804,7 @@ def status(filename):
 
 @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
 def apiblocked_web():
+    print "Execute api blocked user justification submission"
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
@@ -814,6 +818,7 @@ def apiblocked_web():
 
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
 def register_web():
+    print "Execute api register user"
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
@@ -834,6 +839,7 @@ def register_web():
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_user():
+    print "Execute api block user"
     email = request.args.get('email', False)
     token = request.args.get('token', False)
     out_json = blockUser(email, request.url_root)
@@ -842,6 +848,7 @@ def block_user():
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_user_web():
+    print "Execute api unblock user"
     email = request.args.get('email', False)
     token = request.args.get('token', False)
     out_json = unblockUser(email)
@@ -849,6 +856,7 @@ def unblock_user_web():
 
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
 def api_stats():
+    print "Execute api stats"
     startdatetime = request.args.get('startdatetime', False)
     enddatetime = request.args.get('enddatetime', False)
     top = request.args.get('top', False)

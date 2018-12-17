@@ -95,15 +95,15 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     conn_chr.close()
 
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(pop_dir + pop_i + ".txt")
+    # pops = pop.split("+")
+    # pop_dirs = []
+    # for pop_i in pops:
+    #     if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
+    #         pop_dirs.append(pop_dir + pop_i + ".txt")
 
-    get_pops = "cat " + " ".join(pop_dirs) + " > " + \
-        tmp_dir + "pops_" + request + ".txt"
-    subprocess.call(get_pops, shell=True)
+    # get_pops = "cat " + " ".join(pop_dirs) + " > " + \
+    #     tmp_dir + "pops_" + request + ".txt"
+    # subprocess.call(get_pops, shell=True)
 
     # Get population ids
     pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
@@ -345,9 +345,9 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     proxy_plot.title.align = "center"
 
-    tabix_recomb = "tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord[
-        1], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
-    subprocess.call(tabix_recomb, shell=True)
+    # tabix_recomb = "tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord[
+    #     1], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
+    # subprocess.call(tabix_recomb, shell=True)
     filename = tmp_dir + "recomb_" + request + ".txt"
     recomb_raw = open(filename).readlines()
     recomb_x = []
@@ -444,9 +444,9 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     rug.toolbar_location = None
 
     # Gene Plot
-    tabix_gene = "tabix -fh {0} {1}:{2}-{3} > {4}".format(
-        gene_dir, snp_coord[1], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
-    subprocess.call(tabix_gene, shell=True)
+    # tabix_gene = "tabix -fh {0} {1}:{2}-{3} > {4}".format(
+    #     gene_dir, snp_coord[1], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
+    # subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
 

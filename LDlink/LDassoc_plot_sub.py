@@ -87,13 +87,16 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     header_list.append(myargs['pval'])
 
     # Load input file
-    header = open(file).readline().strip().split()
     with open(file) as fp:
-        for i, line in enumerate(fp):
-            if i == 1:
-                first = line.strip().split()
-            elif i > 1:
-                break
+        header = fp.readline().strip().split()
+        first = fp.readline().strip().split()
+    # header = open(file).readline().strip().split()
+    # with open(file) as fp:
+    #     for i, line in enumerate(fp):
+    #         if i == 1:
+    #             first = line.strip().split()
+    #         elif i > 1:
+    #             break
 
     if len(header)!=len(first):
         return None
@@ -263,17 +266,17 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
 
     # Select desired ancestral populations
-    pops=pop.split("+")
-    pop_dirs=[]
-    for pop_i in pops:
-        if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-            pop_dirs.append(pop_dir+pop_i+".txt")
-        else:
-            return None
+    # pops=pop.split("+")
+    # pop_dirs=[]
+    # for pop_i in pops:
+    #     if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
+    #         pop_dirs.append(pop_dir+pop_i+".txt")
+    #     else:
+    #         return None
             
 
-    get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
-    subprocess.call(get_pops, shell=True)
+    # get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
+    # subprocess.call(get_pops, shell=True)
 
 
     # Get population ids
@@ -299,8 +302,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=proc_h.stdout.readlines()[0].strip().split()
 
-            tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
-            subprocess.call(tabix_snp, shell=True)
+            # tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
+            # subprocess.call(tabix_snp, shell=True)
 
 
             # Check lowest P SNP is in the 1000G population and not monoallelic
@@ -590,8 +593,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     assoc_plot.title.align="center"
 
     # Add recombination rate
-    tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
-    subprocess.call(tabix_recomb, shell=True)
+    # tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
+    # subprocess.call(tabix_recomb, shell=True)
     filename=tmp_dir+"recomb_"+request+".txt"
     recomb_raw=open(filename).readlines()
     recomb_x=[]
@@ -656,8 +659,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
-        tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
-        subprocess.call(tabix_gene, shell=True)
+        # tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
+        # subprocess.call(tabix_gene, shell=True)
         filename=tmp_dir+"genes_"+request+".txt"
         genes_raw=open(filename).readlines()
 
@@ -802,8 +805,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Gene Plot (Collapsed)
     else:
-        tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
-        subprocess.call(tabix_gene_c, shell=True)
+        # tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
+        # subprocess.call(tabix_gene_c, shell=True)
         filename_c=tmp_dir+"genes_c_"+request+".txt"
         genes_c_raw=open(filename_c).readlines()
 
@@ -941,10 +944,11 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Remove temporary files
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.txt", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
+    print "Bokeh high quality image export complete!"
 
     # Return plot output
     return None
