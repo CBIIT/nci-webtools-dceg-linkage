@@ -101,15 +101,17 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# assoc_data=open(file).readlines()
 	# print "[ldassoc debug] get headers"
 	# header=assoc_data[0].strip().split()
-	header = open(file).readline().strip().split()
+	# header = open(file).readline().strip().split()
 	# print "[ldassoc debug] get first line"
 	# first=assoc_data[1].strip().split()
 	with open(file) as fp:
-		for i, line in enumerate(fp):
-			if i == 1:
-				first = line.strip().split()
-			elif i > 1:
-				break
+		header = fp.readline().strip().split()
+		first = fp.readline().strip().split()
+		# for i, line in enumerate(fp):
+		# 	if i == 1:
+		# 		first = line.strip().split()
+		# 	elif i > 1:
+		# 		break
 
 	if len(header)!=len(first):
 		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
