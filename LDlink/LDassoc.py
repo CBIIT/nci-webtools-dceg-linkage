@@ -112,8 +112,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		# 		first = line.strip().split()
 		# 	elif i > 1:
 		# 		break
-	print "HEADER: " + header
-	print "FIRST: " + first
+	print "HEADER: " + str(header)
+	print "FIRST: " + str(first)
 
 	if len(header)!=len(first):
 		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
