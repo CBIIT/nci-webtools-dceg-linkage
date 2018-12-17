@@ -578,9 +578,9 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     rug.toolbar_location = None
 
     # Gene Plot
-    tabix_gene = "tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coords[1][1], int(
-        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt")
-    subprocess.call(tabix_gene, shell=True)
+    # tabix_gene = "tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, snp_coords[1][1], int(
+    #     (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt")
+    # subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
 
@@ -743,6 +743,9 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     # Remove scaled SVG file after it is converted to png and jpeg
     subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" +
                     request + ".svg", shell=True)
+    # Remove temporary file(s)
+    subprocess.call("rm " + tmp_dir + "genes_" + 
+                    request + ".txt", shell=True)
 
     reset_output()
 

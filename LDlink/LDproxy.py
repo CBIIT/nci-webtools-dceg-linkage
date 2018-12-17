@@ -830,10 +830,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     print "Run time: " + str(duration) + " seconds\n"
 
     # Remove temporary files
-    subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-    subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-    subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
-    subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
+    # subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+    # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+    # subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
+    # subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
     # Return plot output
     return(out_script, out_div)
