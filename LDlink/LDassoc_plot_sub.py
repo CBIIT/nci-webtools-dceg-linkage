@@ -302,8 +302,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=proc_h.stdout.readlines()[0].strip().split()
 
-            tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
-            subprocess.call(tabix_snp, shell=True)
+            # tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
+            # subprocess.call(tabix_snp, shell=True)
 
 
             # Check lowest P SNP is in the 1000G population and not monoallelic
@@ -944,8 +944,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Remove temporary files
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_c_"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.txt", shell=True)
+    # subprocess.call("rm "+tmp_dir+"genes_c_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
