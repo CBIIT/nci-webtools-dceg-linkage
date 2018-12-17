@@ -112,6 +112,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		# 		first = line.strip().split()
 		# 	elif i > 1:
 		# 		break
+	print "HEADER: " + header
+	print "FIRST: " + first
 
 	if len(header)!=len(first):
 		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
@@ -476,6 +478,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
+			print "Temporary population file removed."
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
@@ -490,6 +493,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
+				print "Temporary population file removed."
 				subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 				subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 				return("","")
@@ -509,6 +513,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
+			print "Temporary population file removed."
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
@@ -533,6 +538,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
+			print "Temporary population file removed."
 			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 			return("","")
@@ -547,6 +553,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	block=len(assoc_coords)/threads
 	commands=[]
+	print "Create LDassoc_sub subprocesses"
 	for i in range(threads):
 		if i==min(range(threads)) and i==max(range(threads)):
 			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
@@ -1114,6 +1121,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		# Generate high quality images only if accessed via web instance
 		if web:
 			# Open thread for high quality image exports
+			print "Open thread for high quality image exports."
 			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
@@ -1254,6 +1262,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		# Generate high quality images only if accessed via web instance
 		if web:
 			# Open thread for high quality image exports
+			print "Open thread for high quality image exports."
 			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
@@ -1279,6 +1288,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 
 	# Remove temporary files
+	print "Temporary population file removed."
 	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 	subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)

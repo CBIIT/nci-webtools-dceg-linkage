@@ -87,13 +87,16 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     header_list.append(myargs['pval'])
 
     # Load input file
-    header = open(file).readline().strip().split()
     with open(file) as fp:
-        for i, line in enumerate(fp):
-            if i == 1:
-                first = line.strip().split()
-            elif i > 1:
-                break
+        header = fp.readline().strip().split()
+        first = fp.readline().strip().split()
+    # header = open(file).readline().strip().split()
+    # with open(file) as fp:
+    #     for i, line in enumerate(fp):
+    #         if i == 1:
+    #             first = line.strip().split()
+    #         elif i > 1:
+    #             break
 
     if len(header)!=len(first):
         return None
