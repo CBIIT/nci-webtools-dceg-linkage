@@ -266,17 +266,17 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
 
     # Select desired ancestral populations
-    pops=pop.split("+")
-    pop_dirs=[]
-    for pop_i in pops:
-        if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-            pop_dirs.append(pop_dir+pop_i+".txt")
-        else:
-            return None
+    # pops=pop.split("+")
+    # pop_dirs=[]
+    # for pop_i in pops:
+    #     if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
+    #         pop_dirs.append(pop_dir+pop_i+".txt")
+    #     else:
+    #         return None
             
 
-    get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
-    subprocess.call(get_pops, shell=True)
+    # get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
+    # subprocess.call(get_pops, shell=True)
 
 
     # Get population ids
@@ -805,8 +805,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Gene Plot (Collapsed)
     else:
-        tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
-        subprocess.call(tabix_gene_c, shell=True)
+        # tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
+        # subprocess.call(tabix_gene_c, shell=True)
         filename_c=tmp_dir+"genes_c_"+request+".txt"
         genes_c_raw=open(filename_c).readlines()
 
@@ -944,7 +944,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Remove temporary files
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_c_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
