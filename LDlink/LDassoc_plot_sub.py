@@ -945,7 +945,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
     subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.txt", shell=True)
-    # subprocess.call("rm "+tmp_dir+"genes_c_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 

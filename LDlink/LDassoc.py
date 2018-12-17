@@ -345,7 +345,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 								assoc_list.append([coord_i,float(col[p_index])])
 
 			else:
-				output["warning"]="Line "+str(i+1)+" of association data file has a different number of elements than the header"
+				output["warning"]="Line: '" + str(line) + "' of association data file has a different number of elements than the header"
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
