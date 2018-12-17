@@ -1292,7 +1292,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# Remove temporary files
 	# print "Temporary population file removed."
 	print "Temporary files NOT removed at end of LDassoc.py."
-	# subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
+	subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
 	# subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
 	# subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
 	# subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)

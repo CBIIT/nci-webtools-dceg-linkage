@@ -593,8 +593,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     assoc_plot.title.align="center"
 
     # Add recombination rate
-    tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
-    subprocess.call(tabix_recomb, shell=True)
+    # tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
+    # subprocess.call(tabix_recomb, shell=True)
     filename=tmp_dir+"recomb_"+request+".txt"
     recomb_raw=open(filename).readlines()
     recomb_x=[]
@@ -659,8 +659,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
-        tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
-        subprocess.call(tabix_gene, shell=True)
+        # tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
+        # subprocess.call(tabix_gene, shell=True)
         filename=tmp_dir+"genes_"+request+".txt"
         genes_raw=open(filename).readlines()
 
