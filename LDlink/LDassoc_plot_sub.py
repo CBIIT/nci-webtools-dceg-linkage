@@ -777,14 +777,17 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         gene_plot.output_backend = "svg"
         export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
         export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+
+        svg_height = str(20.00 + (1.42 * len(genes_raw))) + "cm"
+        svg_height_scaled = str(100.00 + (7.10 * len(genes_raw))) + "cm"
         
         # Concatenate svgs
-        sg.Figure("24.59cm", "27.94cm",
+        sg.Figure("24.59cm", svg_height,
             sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
             ).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
-        sg.Figure("122.95cm", "139.70cm",
+        sg.Figure("122.95cm", svg_height_scaled,
             sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
             ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
@@ -917,7 +920,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
         svg_height = str(20.00 + (1.42 * len(genes_c_raw))) + "cm"
-        svg_height_scaled = str((20.00 + (1.42 * len(genes_c_raw)) * 5)) + "cm"
+        svg_height_scaled = str(100.00 + (7.10 * len(genes_raw))) + "cm"
 
         # Concatenate svgs
         sg.Figure("24.59cm", svg_height,
