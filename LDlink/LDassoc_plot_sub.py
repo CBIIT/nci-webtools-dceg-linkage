@@ -778,8 +778,9 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
         export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
-        svg_height = str(20.00 + (1.42 * len(genes_raw))) + "cm"
-        svg_height_scaled = str(100.00 + (7.10 * len(genes_raw))) + "cm"
+        # 1 pixel = 0.0264583333 cm
+        svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
+        svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
         
         # Concatenate svgs
         sg.Figure("24.59cm", svg_height,
@@ -918,9 +919,10 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         gene_c_plot.output_backend = "svg"
         export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
         export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
-
-        svg_height = str(20.00 + (1.42 * len(genes_c_raw))) + "cm"
-        svg_height_scaled = str(100.00 + (7.10 * len(genes_raw))) + "cm"
+        
+        # 1 pixel = 0.0264583333 cm
+        svg_height = str(20.00 + (0.0264583333 * plot_c_h_pix)) + "cm"
+        svg_height_scaled = str(100.00 + (0.1322916665 * plot_c_h_pix)) + "cm"
 
         # Concatenate svgs
         sg.Figure("24.59cm", svg_height,
