@@ -742,24 +742,24 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                             title="", h_symmetry=False, v_symmetry=False, logo=None,
                             plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-        if len(genes_raw) <= max_genes:
-            gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
-                                genes_plot_yn, color="black", alpha=1, line_width=2)
-            gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                            source=source_gene_plot, fill_color="grey", line_color="grey")
-            gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-                            text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-            hover = gene_plot.select(dict(type=HoverTool))
-            hover.tooltips = OrderedDict([
-                ("Gene", "@exons_plot_name"),
-                ("Transcript ID", "@exons_plot_id"),
-                ("Exon", "@exons_plot_exon"),
-            ])
+        # if len(genes_raw) <= max_genes:
+        gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+                            genes_plot_yn, color="black", alpha=1, line_width=2)
+        gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
+                        source=source_gene_plot, fill_color="grey", line_color="grey")
+        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+        hover = gene_plot.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("Gene", "@exons_plot_name"),
+            ("Transcript ID", "@exons_plot_id"),
+            ("Exon", "@exons_plot_exon"),
+        ])
 
-        else:
-            x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
-            gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
-                            text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+        # else:
+        #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+        #     gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
+        #                     text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
         gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
         gene_plot.yaxis.axis_label = "Genes (All Transcripts)"
@@ -881,23 +881,23 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                             title="", h_symmetry=False, v_symmetry=False, logo=None,
                             plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-        if len(genes_c_raw) <= max_genes_c:
-            gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
-                                genes_c_plot_yn, color="black", alpha=1, line_width=2)
-            gene_c_plot.rect(x='exons_c_plot_x', y='exons_c_plot_yn', width='exons_c_plot_w', height='exons_c_plot_h',
-                            source=source_gene_c_plot, fill_color="grey", line_color="grey")
-            gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
-                            text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-            hover = gene_c_plot.select(dict(type=HoverTool))
-            hover.tooltips = OrderedDict([
-                ("Gene", "@exons_c_plot_name"),
-                ("Transcript IDs", "@exons_c_plot_id"),
-            ])
+        # if len(genes_c_raw) <= max_genes_c:
+        gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
+                            genes_c_plot_yn, color="black", alpha=1, line_width=2)
+        gene_c_plot.rect(x='exons_c_plot_x', y='exons_c_plot_yn', width='exons_c_plot_w', height='exons_c_plot_h',
+                        source=source_gene_c_plot, fill_color="grey", line_color="grey")
+        gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
+                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+        hover = gene_c_plot.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("Gene", "@exons_c_plot_name"),
+            ("Transcript IDs", "@exons_c_plot_id"),
+        ])
 
-        else:
-            x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
-            gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
-                            text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+        # else:
+        #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+        #     gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
+        #                     text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
         gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
         gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
@@ -916,13 +916,16 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
         export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
+        svg_height = str(20.00 + (1.42 * len(genes_c_raw))) + "cm"
+        svg_height_scaled = str((20.00 + (1.42 * len(genes_c_raw)) * 5)) + "cm"
+
         # Concatenate svgs
-        sg.Figure("24.59cm", "27.94cm",
+        sg.Figure("24.59cm", svg_height,
             sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
             ).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
-        sg.Figure("122.95cm", "139.70cm",
+        sg.Figure("122.95cm", svg_height_scaled,
             sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
             ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
