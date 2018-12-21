@@ -790,6 +790,7 @@ def ldassoc():
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
 @app.route('/ping/', strict_slashes=False)
 def ping():
+    print "pong"
     try:
         return "true"
     except Exception as e:

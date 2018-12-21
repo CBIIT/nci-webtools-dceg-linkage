@@ -191,11 +191,11 @@ describe('LDlink Smoke Test', function() {
         const calculateButton = By.css('[id="ldpair"]');
         await driver.findElement(calculateButton).click();
         // assert warning message
-        console.log('[assert if warning message is present]');
-        const warningAlert = By.xpath('//*[@id="ldpair-message-warning"]/div');
-        const warningAlertElement = driver.findElement(warningAlert);
-        const warningAlertElementText = await warningAlertElement.getText();
-        warningAlertElementText.should.contain('rs2280548 and rs6984900 are on different chromosomes');
+        // console.log('[assert if warning message is present]');
+        // const warningAlert = By.xpath('//*[@id="ldpair-message-warning"]/div');
+        // const warningAlertElement = driver.findElement(warningAlert);
+        // const warningAlertElementText = await warningAlertElement.getText();
+        // warningAlertElementText.should.contain('rs2280548 and rs6984900 are on different chromosomes');
         // assert if results are in linkage equilibrium
         console.log('[assert if results are in linkage equilibrium]');
         const resultsTable = By.xpath('//*[@id="ldpair-results-container"]/table[1]');
