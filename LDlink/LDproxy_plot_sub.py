@@ -571,13 +571,17 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     export_svgs(gene_plot, filename=tmp_dir +
                 "gene_plot_1_" + request + ".svg")
 
+    # 1 pixel = 0.0264583333 cm
+    svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
+    svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
+
     # Concatenate svgs
-    sg.Figure("24.59cm", "27.94cm",
+    sg.Figure("24.59cm", svg_height,
               sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg"),
               sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 630)
               ).save(tmp_dir + "proxy_plot_" + request + ".svg")
 
-    sg.Figure("122.95cm", "139.70cm",
+    sg.Figure("122.95cm", svg_height_scaled,
               sg.SVG(tmp_dir + "proxy_plot_1_" + request + ".svg").scale(5),
               sg.SVG(tmp_dir + "gene_plot_1_" + request +
                      ".svg").scale(5).move(0, 3150)

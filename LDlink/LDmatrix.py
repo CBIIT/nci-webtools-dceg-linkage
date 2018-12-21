@@ -839,7 +839,8 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     source_gene_plot = ColumnDataSource(data_gene_plot)
 
     max_genes = 40
-    if len(lines) < 3 or len(genes_raw) > max_genes:
+    # if len(lines) < 3 or len(genes_raw) > max_genes:
+    if len(lines) < 3:
         plot_h_pix = 150
     else:
         plot_h_pix = 150 + (len(lines) - 2) * 50
@@ -849,24 +850,24 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                        title="", h_symmetry=False, v_symmetry=False, logo=None,
                        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
-    if len(genes_raw) <= max_genes:
-        gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
-                          genes_plot_yn, color="black", alpha=1, line_width=2)
-        gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                       source=source_gene_plot, fill_color='grey', line_color="grey")
-        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-                       text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-        hover = gene_plot.select(dict(type=HoverTool))
-        hover.tooltips = OrderedDict([
-            ("Gene", "@exons_plot_name"),
-            ("ID", "@exons_plot_id"),
-            ("Exon", "@exons_plot_exon"),
-        ])
+    # if len(genes_raw) <= max_genes:
+    gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+                        genes_plot_yn, color="black", alpha=1, line_width=2)
+    gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
+                    source=source_gene_plot, fill_color='grey', line_color="grey")
+    gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+                    text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+    hover = gene_plot.select(dict(type=HoverTool))
+    hover.tooltips = OrderedDict([
+        ("Gene", "@exons_plot_name"),
+        ("ID", "@exons_plot_id"),
+        ("Exon", "@exons_plot_exon"),
+    ])
 
-    else:
-        x_coord_text = x[0] + (x[-1] - x[0]) / 2.0
-        gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
-                       text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+    # else:
+    #     x_coord_text = x[0] + (x[-1] - x[0]) / 2.0
+    #     gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
+    #                    text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
     gene_plot.xaxis.axis_label = "Chromosome " + \
         snp_coords[1][1] + " Coordinate (Mb)(GRCh37)"
