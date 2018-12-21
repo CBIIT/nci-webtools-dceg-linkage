@@ -1054,7 +1054,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		source_gene_plot=ColumnDataSource(data_gene_plot)
 
 		max_genes = 40
-		if len(lines) < 3 or len(genes_raw) > max_genes:
+		# if len(lines) < 3 or len(genes_raw) > max_genes:
+		if len(lines) < 3:
 			plot_h_pix = 150
 		else:
 			plot_h_pix = 150 + (len(lines) - 2) * 50
@@ -1197,7 +1198,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		source_gene_c_plot=ColumnDataSource(data_gene_c_plot)
 
 		max_genes_c = 40
-		if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
+		# if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
+		if len(lines_c) < 3:
 			plot_c_h_pix = 150
 		else:
 			plot_c_h_pix = 150 + (len(lines_c) - 2) * 50
