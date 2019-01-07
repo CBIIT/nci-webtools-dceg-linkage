@@ -291,22 +291,29 @@ $(document).on('change','.btn-snp :file', createFileSelectTrigger);
 $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
-function checkFile(id, fileURL) {
-    $.ajax({
-        // type : 'GET',
-        url : 'status' + fileURL + '?_=' + new Date().getTime(),
-        contentType : 'application/json', // JSON
-        cache: false
-    }).done(function(response) {
-        if (response) {
-            $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
-            $('#' + id + "-menu1").prop('disabled', false);
-        } else {
-            setTimeout(function() { 
-                checkFile(id, fileURL); 
-            }, 3000);
-        } 
-    });
+function checkFile(id, fileURL, retries) {
+    // add countdown retries here to prevent hang up of infinite loop
+    if (retries > 0) {
+        var countdown = retries - 1
+        $.ajax({
+            // type : 'GET',
+            url : 'status' + fileURL + '?_=' + new Date().getTime(),
+            contentType : 'application/json', // JSON
+            cache: false
+        }).done(function(response) {
+            if (response) {
+                $('#' + id + "-menu1").html('Export Plot <span class="caret"></span>');
+                $('#' + id + "-menu1").prop('disabled', false);
+            } else {
+                setTimeout(function() { 
+                    checkFile(id, fileURL, countdown); 
+                }, 5000);
+            } 
+        });
+    } else {
+        $('#' + id + "-menu1").html('Export Failed');
+        $('#' + id + "-menu1").prop('disabled', true);
+    }
 }
 
 
@@ -1430,7 +1437,7 @@ function updateLDassoc() {
 
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
-            checkFile(id, fileURL);
+            checkFile(id, fileURL, 5);
 
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
@@ -2151,7 +2158,7 @@ function updateLDmatrix() {
             
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
-            checkFile(id, fileURL);
+            checkFile(id, fileURL, 5);
 
             $('#' + id + '-results-container').show();
             getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
@@ -2354,7 +2361,7 @@ function updateLDproxy() {
 
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
-            checkFile(id, fileURL);
+            checkFile(id, fileURL, 5);
 
             $('#' + id + '-results-container').show();
             getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
