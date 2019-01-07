@@ -354,23 +354,23 @@ def calculate_pair(snp1, snp2, pop, request=None):
     allele2 = {"0|0": [snp2_a1, snp2_a1], "0|1": [snp2_a1, snp2_a2], "1|0": [snp2_a2, snp2_a1], "1|1": [
         snp2_a2, snp2_a2], "0": [snp2_a1, "."], "1": [snp2_a2, "."], "./.": [".", "."], ".": [".", "."]}
 
-    if snp1_indel:
-        if str(int(geno1[1]) - 1) != vcf1_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(int(geno1[1]) - 1) + " " + str(vcf1_pos)
-            return(json.dumps(output, sort_keys=True, indent=2))
-    else:
-        if geno1[1] != vcf1_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(geno1[1]) + " " + str(vcf1_pos)
-            return(json.dumps(output, sort_keys=True, indent=2))
+    # if snp1_indel:
+    #     if str(int(geno1[1]) - 1) != vcf1_pos:
+    #         output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(int(geno1[1]) - 1) + " " + str(vcf1_pos)
+    #         return(json.dumps(output, sort_keys=True, indent=2))
+    # else:
+    if geno1[1] != vcf1_pos:
+        output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(geno1[1]) + " " + str(vcf1_pos)
+        return(json.dumps(output, sort_keys=True, indent=2))
 
-    if snp2_indel:
-        if str(int(geno2[1]) - 1) != vcf2_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(int(geno2[1]) - 1) + " " + str(vcf2_pos)
-            return(json.dumps(output, sort_keys=True, indent=2))
-    else:
-        if geno2[1] != vcf2_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(geno2[1]) + " " + str(vcf2_pos)
-            return(json.dumps(output, sort_keys=True, indent=2))
+    # if snp2_indel:
+    #     if str(int(geno2[1]) - 1) != vcf2_pos:
+    #         output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(int(geno2[1]) - 1) + " " + str(vcf2_pos)
+    #         return(json.dumps(output, sort_keys=True, indent=2))
+    # else:
+    if geno2[1] != vcf2_pos:
+        output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(geno2[1]) + " " + str(vcf2_pos)
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Get headers
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
