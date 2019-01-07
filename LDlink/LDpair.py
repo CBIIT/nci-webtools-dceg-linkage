@@ -192,7 +192,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
                 1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
         # if new dbSNP151 position is 1 off
         tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-            vcf_file1, snp1_coord[1], str(snp1_coord[2])
+            vcf_file1, snp1_coord[1], str(snp1_coord[2]))
         proc1_offset = subprocess.Popen(
             tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
         vcf1_offset = proc1_offset.stdout.readlines()
@@ -292,7 +292,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
                 1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
         # if new dbSNP151 position is 1 off
         tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-            vcf_file2, snp2_coord[1], str(snp2_coord[2])
+            vcf_file2, snp2_coord[1], str(snp2_coord[2]))
         proc2_offset = subprocess.Popen(
             tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
         vcf2_offset = proc2_offset.stdout.readlines()
