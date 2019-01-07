@@ -265,7 +265,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
 
     if snp1_indel:
         if str(int(geno1[1]) - 1) != vcf1_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(geno1[1]) + " " + str(vcf1_pos)
+            output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(int(geno1[1]) - 1) + " " + str(vcf1_pos)
             return(json.dumps(output, sort_keys=True, indent=2))
     else:
         if geno1[1] != vcf1_pos:
@@ -273,11 +273,11 @@ def calculate_pair(snp1, snp2, pop, request=None):
             return(json.dumps(output, sort_keys=True, indent=2))
 
     if snp2_indel:
-        if geno2[1] != vcf2_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(geno2[1]) + " " + str(vcf2_pos)
+        if str(int(geno2[1]) - 1) != vcf2_pos:
+            output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(int(geno2[1]) - 1) + " " + str(vcf2_pos)
             return(json.dumps(output, sort_keys=True, indent=2))
     else:
-        if str(int(geno2[1]) - 1) != vcf2_pos:
+        if geno2[1] != vcf2_pos:
             output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(geno2[1]) + " " + str(vcf2_pos)
             return(json.dumps(output, sort_keys=True, indent=2))
 
