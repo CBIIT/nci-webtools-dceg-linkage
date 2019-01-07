@@ -189,12 +189,12 @@ def calculate_pair(snp1, snp2, pop, request=None):
         snp1_a1 = "-"
         snp1_a2 = geno1[4][1:]
         if dbsnp_version is not '142':
-            vcf1_pos = str(int(snp1_coord[2]) + snp_pos_offset)
+            vcf1_pos = str(int(snp1_coord[2]))
     elif len(geno1[3]) > 1 and len(geno1[4]) == 1:
         snp1_a1 = geno1[3][1:]
         snp1_a2 = "-"
         if dbsnp_version is not '142':
-            vcf1_pos = str(int(snp1_coord[2]) + snp_pos_offset)
+            vcf1_pos = str(int(snp1_coord[2]))
     elif len(geno1[3]) > 1 and len(geno1[4]) > 1:
         snp1_a1 = geno1[3][1:]
         snp1_a2 = geno1[4][1:]
@@ -242,12 +242,12 @@ def calculate_pair(snp1, snp2, pop, request=None):
         snp2_a1 = "-"
         snp2_a2 = geno2[4][1:]
         if dbsnp_version is not '142':
-            vcf2_pos = str(int(snp2_coord[2]) + snp_pos_offset)
+            vcf2_pos = str(int(snp2_coord[2]))
     elif len(geno2[3]) > 1 and len(geno2[4]) == 1:
         snp2_a1 = geno2[3][1:]
         snp2_a2 = "-"
         if dbsnp_version is not '142':
-            vcf2_pos = str(int(snp2_coord[2]) + snp_pos_offset)
+            vcf2_pos = str(int(snp2_coord[2]))
     elif len(geno2[3]) > 1 and len(geno2[4]) > 1:
         snp2_a1 = geno2[3][1:]
         snp2_a2 = geno2[4][1:]
