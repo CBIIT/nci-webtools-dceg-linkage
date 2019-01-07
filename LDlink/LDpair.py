@@ -256,11 +256,11 @@ def calculate_pair(snp1, snp2, pop, request=None):
         snp2_a2, snp2_a2], "0": [snp2_a1, "."], "1": [snp2_a2, "."], "./.": [".", "."], ".": [".", "."]}
 
     if geno1[1] != vcf1_pos:
-        output["error"] = "VCF File does not match variant coordinates for SNP1."
+        output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(geno1[1]) + " " + str(vcf1_pos)
         return(json.dumps(output, sort_keys=True, indent=2))
 
     if geno2[1] != vcf2_pos:
-        output["error"] = "VCF File does not match variant coordinates for SNP2."
+        output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(geno2[1]) + " " + str(vcf2_pos)
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Get headers
