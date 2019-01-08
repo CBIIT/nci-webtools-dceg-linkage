@@ -12,6 +12,10 @@ import time
 
 def calculate_pair(snp1, snp2, pop, request=None):
 
+    # trim any whitespace
+    snp1 = snp1.strip()
+    snp2 = snp2.strip() 
+
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)

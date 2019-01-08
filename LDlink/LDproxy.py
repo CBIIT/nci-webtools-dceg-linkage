@@ -18,6 +18,9 @@ from multiprocessing.dummy import Pool
 
 def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
+    # trim any whitespace
+    snp = snp.strip()
+
     start_time = time.time()
 
     # Set data directories using config.yml
