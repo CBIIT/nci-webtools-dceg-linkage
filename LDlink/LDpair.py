@@ -8,9 +8,7 @@ import subprocess
 import sys
 import time
 
-
 # Create LDpair function
-
 
 def calculate_pair(snp1, snp2, pop, request=None):
 
@@ -80,15 +78,13 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # SNP1
     snp1_coord = get_coords(snp1)
     if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + \
-            config['data']['dbsnp_version'] + "."
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # SNP2
     snp2_coord = get_coords(snp2)
     if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + \
-            config['data']['dbsnp_version'] + "."
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Close snp connection
@@ -152,8 +148,8 @@ def calculate_pair(snp1, snp2, pop, request=None):
 
     # Import SNP VCF files
 
-    snp1_indel = False
-    snp2_indel = False
+    # snp1_indel = False
+    # snp2_indel = False
 
     # SNP1
     if len(vcf1) == 0:
@@ -171,49 +167,49 @@ def calculate_pair(snp1, snp2, pop, request=None):
         geno1 = vcf1[0].strip().split()
 
     # detect if variant has indel coords
-    if len(geno1[3]) == 1 and len(geno1[4]) > 1:
-        snp1_a1 = "-"
-        snp1_a2 = geno1[4][1:]
-        snp1_indel = True
-        if dbsnp_version is not '142':
-            vcf1_pos = str(int(snp1_coord[2]))
-    elif len(geno1[3]) > 1 and len(geno1[4]) == 1:
-        snp1_a1 = geno1[3][1:]
-        snp1_a2 = "-"
-        snp1_indel = True
-        if dbsnp_version is not '142':
-            vcf1_pos = str(int(snp1_coord[2]))
+    # if len(geno1[3]) == 1 and len(geno1[4]) > 1:
+    #     snp1_a1 = "-"
+    #     snp1_a2 = geno1[4][1:]
+    #     snp1_indel = True
+    #     if dbsnp_version is not '142':
+    #         vcf1_pos = str(int(snp1_coord[2]))
+    # elif len(geno1[3]) > 1 and len(geno1[4]) == 1:
+    #     snp1_a1 = geno1[3][1:]
+    #     snp1_a2 = "-"
+    #     snp1_indel = True
+    #     if dbsnp_version is not '142':
+    #         vcf1_pos = str(int(snp1_coord[2]))
 
-    # if yes, re query VCF without 1-off offset
-    if snp1_indel:
-        # SNP1
-        vcf_file1 = vcf_dir + \
-            snp1_coord[
-                1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-        # if new dbSNP151 position is 1 off
-        tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-            vcf_file1, snp1_coord[1], str(snp1_coord[2]))
-        proc1_offset = subprocess.Popen(
-            tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
-        vcf1_offset = proc1_offset.stdout.readlines()
+    # # if yes, re query VCF without 1-off offset
+    # if snp1_indel:
+    #     # SNP1
+    #     vcf_file1 = vcf_dir + \
+    #         snp1_coord[
+    #             1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    #     # if new dbSNP151 position is 1 off
+    #     tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+    #         vcf_file1, snp1_coord[1], str(snp1_coord[2]))
+    #     proc1_offset = subprocess.Popen(
+    #         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
+    #     vcf1_offset = proc1_offset.stdout.readlines()
 
-        vcf1_pos = str(snp1_coord[2])
-        vcf1 = vcf1_offset
-        if len(vcf1) == 0:
-            output["error"] = snp1 + " is not in 1000G reference panel."
-            return(json.dumps(output, sort_keys=True, indent=2))
+    #     vcf1_pos = str(snp1_coord[2])
+    #     vcf1 = vcf1_offset
+    #     if len(vcf1) == 0:
+    #         output["error"] = snp1 + " is not in 1000G reference panel."
+    #         return(json.dumps(output, sort_keys=True, indent=2))
 
-        elif len(vcf1) > 1:
-            geno1 = []
-            for i in range(len(vcf1)):
-                if vcf1[i].strip().split()[2] == snp1:
-                    geno1 = vcf1[i].strip().split()
-            if geno1 == []:
-                output["error"] = snp1 + " is not in 1000G reference panel."
-                return(json.dumps(output, sort_keys=True, indent=2))
+    #     elif len(vcf1) > 1:
+    #         geno1 = []
+    #         for i in range(len(vcf1)):
+    #             if vcf1[i].strip().split()[2] == snp1:
+    #                 geno1 = vcf1[i].strip().split()
+    #         if geno1 == []:
+    #             output["error"] = snp1 + " is not in 1000G reference panel."
+    #             return(json.dumps(output, sort_keys=True, indent=2))
 
-        else:
-            geno1 = vcf1[0].strip().split()
+    #     else:
+    #         geno1 = vcf1[0].strip().split()
 
     if geno1[2] != snp1:
         if "warning" in output:
@@ -257,7 +253,6 @@ def calculate_pair(snp1, snp2, pop, request=None):
     if len(vcf2) == 0:
         output["error"] = snp2 + " is not in 1000G reference panel."
         return(json.dumps(output, sort_keys=True, indent=2))
-
     elif len(vcf2) > 1:
         geno2 = []
         for i in range(len(vcf2)):
@@ -266,55 +261,53 @@ def calculate_pair(snp1, snp2, pop, request=None):
         if geno2 == []:
             output["error"] = snp2 + " is not in 1000G reference panel."
             return(json.dumps(output, sort_keys=True, indent=2))
-
     else:
         geno2 = vcf2[0].strip().split()
 
     # detect if variant has indel coords
-    if len(geno2[3]) == 1 and len(geno2[4]) > 1:
-        snp2_a1 = "-"
-        snp2_a2 = geno2[4][1:]
-        snp2_indel = True
-        if dbsnp_version is not '142':
-            vcf2_pos = str(int(snp2_coord[2]))
-    elif len(geno2[3]) > 1 and len(geno2[4]) == 1:
-        snp2_a1 = geno2[3][1:]
-        snp2_a2 = "-"
-        snp2_indel = True
-        if dbsnp_version is not '142':
-            vcf2_pos = str(int(snp2_coord[2]))
+    # if len(geno2[3]) == 1 and len(geno2[4]) > 1:
+    #     snp2_a1 = "-"
+    #     snp2_a2 = geno2[4][1:]
+    #     snp2_indel = True
+    #     if dbsnp_version is not '142':
+    #         vcf2_pos = str(int(snp2_coord[2]))
+    # elif len(geno2[3]) > 1 and len(geno2[4]) == 1:
+    #     snp2_a1 = geno2[3][1:]
+    #     snp2_a2 = "-"
+    #     snp2_indel = True
+    #     if dbsnp_version is not '142':
+    #         vcf2_pos = str(int(snp2_coord[2]))
 
-    # if yes, re query VCF without 1-off offset
-    if snp2_indel:
-        # SNP2
-        vcf_file2 = vcf_dir + \
-            snp2_coord[
-                1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-        # if new dbSNP151 position is 1 off
-        tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-            vcf_file2, snp2_coord[1], str(snp2_coord[2]))
-        proc2_offset = subprocess.Popen(
-            tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
-        vcf2_offset = proc2_offset.stdout.readlines()
+    # # if yes, re query VCF without 1-off offset
+    # if snp2_indel:
+    #     # SNP2
+    #     vcf_file2 = vcf_dir + \
+    #         snp2_coord[
+    #             1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    #     # if new dbSNP151 position is 1 off
+    #     tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+    #         vcf_file2, snp2_coord[1], str(snp2_coord[2]))
+    #     proc2_offset = subprocess.Popen(
+    #         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
+    #     vcf2_offset = proc2_offset.stdout.readlines()
 
-        vcf2_pos = str(snp2_coord[2])
-        vcf2 = vcf2_offset
-        if len(vcf2) == 0:
-            output["error"] = snp2 + " is not in 1000G reference panel."
-            return(json.dumps(output, sort_keys=True, indent=2))
+    #     vcf2_pos = str(snp2_coord[2])
+    #     vcf2 = vcf2_offset
+    #     if len(vcf2) == 0:
+    #         output["error"] = snp2 + " is not in 1000G reference panel."
+    #         return(json.dumps(output, sort_keys=True, indent=2))
 
-        elif len(vcf2) > 1:
-            geno2 = []
-            for i in range(len(vcf2)):
-                if vcf2[i].strip().split()[2] == snp2:
-                    geno2 = vcf2[i].strip().split()
-            if geno2 == []:
-                output["error"] = snp2 + " is not in 1000G reference panel."
-                return(json.dumps(output, sort_keys=True, indent=2))
+    #     elif len(vcf2) > 1:
+    #         geno2 = []
+    #         for i in range(len(vcf2)):
+    #             if vcf2[i].strip().split()[2] == snp2:
+    #                 geno2 = vcf2[i].strip().split()
+    #         if geno2 == []:
+    #             output["error"] = snp2 + " is not in 1000G reference panel."
+    #             return(json.dumps(output, sort_keys=True, indent=2))
 
-        else:
-            geno2 = vcf2[0].strip().split()
-        
+    #     else:
+    #         geno2 = vcf2[0].strip().split()
 
     if geno2[2] != snp2:
         if "warning" in output:
@@ -360,7 +353,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     #         return(json.dumps(output, sort_keys=True, indent=2))
     # else:
     if geno1[1] != vcf1_pos:
-        output["error"] = "VCF File does not match variant coordinates for SNP1." + " " + str(geno1[1]) + " " + str(vcf1_pos)
+        output["error"] = "VCF File does not match variant coordinates for SNP1."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # if snp2_indel:
@@ -369,7 +362,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     #         return(json.dumps(output, sort_keys=True, indent=2))
     # else:
     if geno2[1] != vcf2_pos:
-        output["error"] = "VCF File does not match variant coordinates for SNP2." + " " + str(geno2[1]) + " " + str(vcf2_pos)
+        output["error"] = "VCF File does not match variant coordinates for SNP2."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Get headers
