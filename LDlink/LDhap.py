@@ -102,7 +102,7 @@ def calculate_hap(snplst, pop, request):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151_test.find({"chromosome": chro, "position": pos})
+        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
         # t = (pos,)
