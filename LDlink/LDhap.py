@@ -119,24 +119,28 @@ def calculate_hap(snplst, pop, request):
                 snp_info_lst = get_rsnum(snp_raw_i[0])
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
-                        # do something
-                        var_id = snp_info_lst[0]['id']
-                        if len(snp_info_lst) > 1:
-                            ref_variants = []
-                            for snp_info in snp_info_lst:
-                                if snp_info['id'] == snp_info['ref_id']:
-                                    ref_variants.append(snp_info['id'])
-                                    # var_id = snp_info['id']
-                            if len(ref_variants) > 1:
-                                var_id = ref_variants[0]
-                                if "warning" in output:
-                                    output["warning"] = output["warning"] + \
-                                    ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
-                                else:
-                                    output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                        var_id = "rs" + snp_info_lst[0]['id']
+                        ref_variants = []
+                        for snp_info in snp_info_lst:
+                            if snp_info['id'] == snp_info['ref_id']:
+                                ref_variants.append(snp_info['id'])
+                        if len(ref_variants) > 1:
+                            var_id = ref_variants[0]
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                var_id = ref_variants[0]
-                        new_snp_lst.append([var_id])
+                                output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
+                            var_id = snp_info_lst[0]['id']
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                            else:
+                                output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                        else:
+                            var_id = ref_variants[0]
+                        new_snp_lst.append(var_id)
                     elif len(snp_info_lst) == 1:
                         var_id = "rs" + snp_info_lst[0]['id']
                         new_snp_lst.append([var_id])
