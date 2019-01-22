@@ -84,7 +84,7 @@ def calculate_hap(snplst, pop, request):
     # conn_chr.text_factory = str
     # cur_chr = conn_chr.cursor()
 
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):

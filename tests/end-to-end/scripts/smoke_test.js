@@ -215,7 +215,7 @@ describe('LDlink Smoke Test', function() {
         const tabLDproxy = By.css('[id="ldproxy-tab-anchor"]');
         await driver.wait(until.elementLocated(tabLDproxy), 20000);
         await driver.findElement(tabLDproxy).click();
-        // input RS# rs2280548 into variant 1
+        // input genomic coordinate chr22:25855459 into variant 1
         console.log('[input genomic coordinate chr22:25855459 into variant]');
         const variantInput = By.css('[id="ldproxy-snp"]');
         await driver.wait(until.elementLocated(variantInput), 20000);
@@ -277,7 +277,7 @@ describe('LDlink Smoke Test', function() {
     });
 
     it('should display SNPclip results from sample file', async function() {
-        console.log('test -> should display SNPchip results from sample file');
+        console.log('test -> should display SNPclip results from sample file');
         const driver = this.driver;
         // switch to SNPclip tab
         console.log('[switch to SNPclip tab]');
