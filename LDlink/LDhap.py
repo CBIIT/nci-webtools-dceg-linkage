@@ -10,7 +10,7 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = 'ncianalysis_api'
+username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
@@ -117,6 +117,8 @@ def calculate_hap(snplst, pop, request):
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(snp_raw_i[0])
+                print "snp_info_lst"
+                print snp_info_lst
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -151,6 +153,8 @@ def calculate_hap(snplst, pop, request):
         return new_snp_lst
 
     snps = replace_coord_rsid(snps)
+    print "SNP INPUT LISET AFTER replace_coord_rsid(snps)"
+    print str(snps)
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
     snp_pos = []

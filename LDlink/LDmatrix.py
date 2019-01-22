@@ -5,8 +5,14 @@ import math
 import operator
 import os
 import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
 import subprocess
 import sys
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 # Create LDmatrix function
 
