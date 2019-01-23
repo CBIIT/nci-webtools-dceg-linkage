@@ -215,7 +215,7 @@ for geno_n in vcf:
                 snp_coord = get_coords(db, rs_n)
 
                 if snp_coord != None:
-                    funct = snp_coord[3]
+                    funct = snp_coord['function']
                 else:
                     funct = "."
             else:
