@@ -2,13 +2,23 @@ import yaml
 import argparse
 import json
 import sys
-import csv,operator,os,sqlite3,subprocess,time
+import csv
+import operator
+import os
+import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
+import subprocess
+import time
 from multiprocessing.dummy import Pool
 from math import log10
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 
 # LDassoc subprocess to export bokeh to high quality images in the background
-
 # Create LDproxy function
 def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
     start_time=time.time()
@@ -20,8 +30,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     gene_c_dir = config['data']['gene_c_dir']
     gene_dir2 = config['data']['gene_dir2']
     recomb_dir = config['data']['recomb_dir']
-    snp_dir = config['data']['snp_dir']
-    snp_pos_offset = config['data']['snp_pos_offset']
+    # snp_dir = config['data']['snp_dir']
+    # snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -47,22 +57,30 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             snp=myargsOrigin
 
             # Connect to snp database
-            conn=sqlite3.connect(snp_dir)
-            conn.text_factory=str
-            cur=conn.cursor()
+            # conn=sqlite3.connect(snp_dir)
+            # conn.text_factory=str
+            # cur=conn.cursor()
+            # Connect to Mongo snp database
+            client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+            db = client["LDLink"]
 
-            def get_coords_var(rs):
-                id=rs.strip("rs")
-                t=(id,)
-                cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-                return cur.fetchone()
+
+            def get_coords_var(db, rsid):
+                rsid = rsid.strip("rs")
+                query_results = db.dbsnp151.find_one({"id": rsid})
+                query_results_sanitized = json.loads(json_util.dumps(query_results))
+                return query_results_sanitized
+                # id=rs.strip("rs")
+                # t=(id,)
+                # cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+                # return cur.fetchone()
 
             # Find RS number in snp database
-            var_coord=get_coords_var(snp)
+            var_coord=get_coords_var(db, snp)
 
-            # Close snp connection
-            cur.close()
-            conn.close()
+            # # Close snp connection
+            # cur.close()
+            # conn.close()
 
             if var_coord==None:
                 return None
@@ -76,8 +94,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             return None
             
 
-        chromosome=var_coord[1]
-        org_coord=org_coord=str(int(var_coord[2]) + snp_pos_offset) # if new dbSNP151 position is 1 off
+        chromosome = var_coord['chromosome']
+        org_coord = var_coord['position']
 
 
     # Open Association Data

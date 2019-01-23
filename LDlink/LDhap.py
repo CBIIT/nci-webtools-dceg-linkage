@@ -14,9 +14,8 @@ username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
+
 # Create LDhap function
-
-
 def calculate_hap(snplst, pop, request):
 
     # Set data directories using config.yml
@@ -84,6 +83,7 @@ def calculate_hap(snplst, pop, request):
     # conn_chr.text_factory = str
     # cur_chr = conn_chr.cursor()
 
+    # Connect to Mongo snp database
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
     db = client["LDLink"]
 
@@ -153,7 +153,7 @@ def calculate_hap(snplst, pop, request):
         return new_snp_lst
 
     snps = replace_coord_rsid(snps)
-    print "SNP INPUT LISET AFTER replace_coord_rsid(snps)"
+    print "SNP INPUT LIST AFTER replace_coord_rsid(snps)"
     print str(snps)
     # Find RS numbers and genomic coords in snp database
     rs_nums = []

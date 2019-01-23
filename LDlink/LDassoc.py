@@ -1,7 +1,19 @@
 #!/usr/bin/env python
 import yaml
-import csv,json,operator,os,sqlite3,subprocess,time
+import csv
+import json
+import operator
+import os
+import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
+import subprocess
+import time
 from multiprocessing.dummy import Pool
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 
 # Create LDproxy function
@@ -15,8 +27,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	gene_c_dir = config['data']['gene_c_dir']
 	gene_dir2 = config['data']['gene_dir2']
 	recomb_dir = config['data']['recomb_dir']
-	snp_dir = config['data']['snp_dir']
-	snp_pos_offset = config['data']['snp_pos_offset']
+	# snp_dir = config['data']['snp_dir']
+	# snp_pos_offset = config['data']['snp_pos_offset']
 	pop_dir = config['data']['pop_dir']
 	vcf_dir = config['data']['vcf_dir']
 
@@ -49,22 +61,29 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			snp=myargs.origin
 
 			# Connect to snp database
-			conn=sqlite3.connect(snp_dir)
-			conn.text_factory=str
-			cur=conn.cursor()
+			# conn=sqlite3.connect(snp_dir)
+			# conn.text_factory=str
+			# cur=conn.cursor()
+			# Connect to Mongo snp database
+			client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+			db = client["LDLink"]
 
-			def get_coords_var(rs):
-				id=rs.strip("rs")
-				t=(id,)
-				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-				return cur.fetchone()
+			def get_coords_var(db, rsid):
+				rsid = rsid.strip("rs")
+				query_results = db.dbsnp151.find_one({"id": rsid})
+				query_results_sanitized = json.loads(json_util.dumps(query_results))
+				return query_results_sanitized
+				# id=rs.strip("rs")
+				# t=(id,)
+				# cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
+				# return cur.fetchone()
 
 			# Find RS number in snp database
-			var_coord=get_coords_var(snp)
+			var_coord=get_coords_var(db, snp)
 
-			# Close snp connection
-			cur.close()
-			conn.close()
+			# # Close snp connection
+			# cur.close()
+			# conn.close()
 
 			if var_coord==None:
 				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
@@ -84,8 +103,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			out_json.close()
 			return("","")
 
-		chromosome=var_coord[1]
-		org_coord=str(int(var_coord[2]) + snp_pos_offset) # new dbSNP151 position is 1 off
+		chromosome = var_coord['chromosome']
+		org_coord = var_coord['position']
 
 
 	# Open Association Data
@@ -182,9 +201,9 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		# Find RS number in snp database
 		gene_coord=get_coords_gene(myargs.name)
 
-		# Close snp connection
-		cur.close()
-		conn.close()
+		# # Close snp connection
+		# cur.close()
+		# conn.close()
 
 		if gene_coord==None:
 			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
