@@ -23,6 +23,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
+	dbsnp_version = config['data']['dbsnp_version']
 	gene_dir = config['data']['gene_dir']
 	gene_c_dir = config['data']['gene_c_dir']
 	gene_dir2 = config['data']['gene_dir2']
@@ -72,7 +73,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			var_coord=get_coords_var(db, snp)
 
 			if var_coord==None:
-				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
+				output["error"]=snp+" is not in dbSNP build " + dbsnp_version + "."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()

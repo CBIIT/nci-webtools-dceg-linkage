@@ -26,6 +26,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    dbsnp_version = config['data']['dbsnp_version']
     gene_dir = config['data']['gene_dir']
     recomb_dir = config['data']['recomb_dir']
     snp_dir = config['data']['snp_dir']
@@ -101,8 +102,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     conn_chr.close()
 
     if snp_coord == None:
-        output["error"] = snp + " is not in dbSNP build " + \
-            config['data']['dbsnp_version'] + "."
+        output["error"] = snp + " is not in dbSNP build " + dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()

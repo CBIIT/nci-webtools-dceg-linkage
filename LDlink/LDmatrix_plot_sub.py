@@ -74,7 +74,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         return query_results_sanitized
         
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(snp_lst):
+    def replace_coord_rsid(db, snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -106,7 +106,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(snps)
+    snps = replace_coord_rsid(db, snps)
 
     # Find RS numbers in snp database
     rs_nums = []

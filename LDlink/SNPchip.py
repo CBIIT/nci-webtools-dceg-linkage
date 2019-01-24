@@ -62,6 +62,7 @@ def calculate_chip(snplst, platform_query, request):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    dbsnp_version = config['data']['dbsnp_version']
     snp_dir = config['data']['snp_dir']
     snp_chr_dir = config['data']['snp_chr_dir']
     snp_pos_offset = config['data']['snp_pos_offset']
@@ -175,10 +176,10 @@ def calculate_chip(snplst, platform_query, request):
     output["error"] = ""
     if warn != [] and len(rs_nums) != 0:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            config['data']['dbsnp_version'] + ": " + ", ".join(warn)+".\n"
+            dbsnp_version + ": " + ", ".join(warn)+".\n"
     elif len(rs_nums) == 0:
         output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            config['data']['dbsnp_version'] + ".\n"
+            dbsnp_version + ".\n"
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()

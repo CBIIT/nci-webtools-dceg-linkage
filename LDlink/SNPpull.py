@@ -19,6 +19,7 @@ def calculate_pull(snplst, request):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    dbsnp_version = config['data']['dbsnp_version']
     gene_dir = config['data']['gene_dir']
     snp_dir = config['data']['snp_dir']
     snp_pos_offset = config['data']['snp_pos_offset']
@@ -118,7 +119,7 @@ def calculate_pull(snplst, request):
                     else:
                         warn.append(snp_i[0])
                         details[snp_i[0]] = "SNP not found in dbSNP" + \
-                            config['data']['dbsnp_version'] + ", SNP removed."
+                            dbsnp_version + ", SNP removed."
                 else:
                     warn.append(snp_i[0])
                     details[snp_i[0]] = "Not an RS number, query removed."
@@ -139,11 +140,11 @@ def calculate_pull(snplst, request):
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            config['data']['dbsnp_version'] + ": " + ", ".join(warn)
+            dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            config['data']['dbsnp_version'] + "."
+            dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()

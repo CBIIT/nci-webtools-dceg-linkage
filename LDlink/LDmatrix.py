@@ -21,6 +21,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    dbsnp_version = config['data']['dbsnp_version']
     gene_dir = config['data']['gene_dir']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
@@ -90,9 +91,9 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
-        
+
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(snp_lst):
+    def replace_coord_rsid(db, snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -112,16 +113,16 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                             var_id = "rs" + ref_variants[0]
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                         elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
                             var_id = "rs" + snp_info_lst[0]['id']
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                         else:
                             var_id = "rs" + ref_variants[0]
                         new_snp_lst.append([var_id])
@@ -134,7 +135,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(snps)
+    snps = replace_coord_rsid(db, snps)
 
     # Find RS numbers in snp database
     rs_nums = []
@@ -163,11 +164,11 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     # Check RS numbers were found
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            config['data']['dbsnp_version'] + ": " + ", ".join(warn)
+            dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            config['data']['dbsnp_version'] + "."
+            dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -267,10 +268,10 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"] + ". Genomic position (" + geno[
-                    1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
+                    1] + ") in VCF file does not match db" + dbsnp_version + " search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position (" + geno[
-                    1] + ") in VCF file does not match db" + config['data']['dbsnp_version'] + " search coordinates for query variant"
+                    1] + ") in VCF file does not match db" + dbsnp_version + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:

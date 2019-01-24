@@ -24,6 +24,7 @@ def calculate_hap(snplst, pop, request):
     # snp_dir = config['data']['snp_dir']
     # snp_chr_dir = config['data']['snp_chr_dir']
     # snp_pos_offset = config['data']['snp_pos_offset']
+    dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -110,7 +111,7 @@ def calculate_hap(snplst, pop, request):
         # return cur_chr.fetchone()
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(snp_lst):
+    def replace_coord_rsid(db, snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -130,16 +131,16 @@ def calculate_hap(snplst, pop, request):
                             var_id = "rs" + ref_variants[0]
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                         elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
                             var_id = "rs" + snp_info_lst[0]['id']
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ",".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
                         else:
                             var_id = "rs" + ref_variants[0]
                         new_snp_lst.append([var_id])
@@ -152,8 +153,8 @@ def calculate_hap(snplst, pop, request):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(snps)
-    print "SNP INPUT LIST AFTER replace_coord_rsid(snps)"
+    snps = replace_coord_rsid(db, snps)
+    print "SNP INPUT LIST AFTER replace_coord_rsid(db, snps)"
     print str(snps)
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
@@ -192,11 +193,11 @@ def calculate_hap(snplst, pop, request):
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            config['data']['dbsnp_version'] + ": " + ", ".join(warn)
+            dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            config['data']['dbsnp_version'] + "."
+            dbsnp_version + "."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome
@@ -288,12 +289,10 @@ def calculate_hap(snplst, pop, request):
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    config['data']['dbsnp_version'] + \
-                    " search coordinates for query variant"
+                    dbsnp_version + " search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    config['data']['dbsnp_version'] + \
-                    " search coordinates for query variant"
+                    dbsnp_version + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:

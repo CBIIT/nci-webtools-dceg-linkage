@@ -23,6 +23,7 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    dbsnp_version = config['data']['dbsnp_version']
     snp_dir = config['data']['snp_dir']
     snp_chr_dir = config['data']['snp_chr_dir']
     snp_pos_offset = config['data']['snp_pos_offset']
@@ -140,8 +141,7 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
-                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" +
-                                             config['data']['dbsnp_version'] + ", variant removed."]
+                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
                 else:
                     warn.append(snp_i[0])
                     details[snp_i[0]] = ["NA", "NA",
@@ -167,11 +167,11 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            config['data']['dbsnp_version'] + ": " + ", ".join(warn)
+            dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            config['data']['dbsnp_version'] + "."
+            dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -287,12 +287,10 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    config['data']['dbsnp_version'] + \
-                    " search coordinates for query variant"
+                    dbsnp_version + " search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    config['data']['dbsnp_version'] + \
-                    " search coordinates for query variant"
+                    dbsnp_version + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
