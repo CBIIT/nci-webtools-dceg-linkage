@@ -37,13 +37,6 @@ tmp_dir = "./tmp/"
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
-# Ensure apiaccess directory exists
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
-# api_access_dir = config['api']['api_access_dir']
-# if not os.path.exists(api_access_dir):
-#     os.makedirs(api_access_dir)
-
 app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')

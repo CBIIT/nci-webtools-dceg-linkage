@@ -57,47 +57,45 @@ def calculate_pair(snp1, snp2, pop, request=None):
         return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                new_snp_lst.append(snp_raw_i)
-            else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print "snp_info_lst"
-                print snp_info_lst
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+    def replace_coord_rsid(db, snp):
+        if snp[0:2] == "rs":
+            return snp
+        else:
+            snp_info_lst = get_rsnum(db, snp)
+            print "snp_info_lst"
+            print snp_info_lst
+            if snp_info_lst != None:
+                if len(snp_info_lst) > 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    ref_variants = []
+                    for snp_info in snp_info_lst:
+                        if snp_info['id'] == snp_info['ref_id']:
+                            ref_variants.append(snp_info['id'])
+                    if len(ref_variants) > 1:
+                        var_id = "rs" + ref_variants[0]
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                            ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
                         else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                            ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                        else:
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
                     else:
-                        new_snp_lst.append(snp_raw_i)
+                        var_id = "rs" + ref_variants[0]
+                    return var_id
+                elif len(snp_info_lst) == 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    return var_id
                 else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
+                    return snp
+            else:
+                return snp
+        return snp
 
     snp1 = replace_coord_rsid(db, snp1)
     snp2 = replace_coord_rsid(db, snp2)

@@ -104,7 +104,7 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
         return cur_chr.fetchone()
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(snp_lst):
+    def replace_coords_rsid(snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -118,7 +118,7 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(snps)
+    snps = replace_coords_rsid(snps)
 
     # Find RS numbers in snp database
     details = collections.OrderedDict()

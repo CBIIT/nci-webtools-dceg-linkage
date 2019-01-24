@@ -13,9 +13,8 @@ username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
+
 # Create LDmatrix function
-
-
 def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
 
     # Set data directories using config.yml
@@ -93,7 +92,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
         return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp_lst):
+    def replace_coords_rsid(db, snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -135,7 +134,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(db, snps)
+    snps = replace_coords_rsid(db, snps)
 
     # Find RS numbers in snp database
     rs_nums = []

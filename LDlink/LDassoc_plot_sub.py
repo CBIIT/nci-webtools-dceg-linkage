@@ -18,7 +18,6 @@ port = int(contents[2].split('=')[1])
 
 
 # LDassoc subprocess to export bokeh to high quality images in the background
-# Create LDproxy function
 def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
 
     # Set data directories using config.yml

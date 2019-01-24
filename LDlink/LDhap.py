@@ -111,7 +111,7 @@ def calculate_hap(snplst, pop, request):
         # return cur_chr.fetchone()
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp_lst):
+    def replace_coords_rsid(db, snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -153,8 +153,8 @@ def calculate_hap(snplst, pop, request):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(db, snps)
-    print "SNP INPUT LIST AFTER replace_coord_rsid(db, snps)"
+    snps = replace_coords_rsid(db, snps)
+    print "SNP INPUT LIST AFTER replace_coords_rsid(db, snps)"
     print str(snps)
     # Find RS numbers and genomic coords in snp database
     rs_nums = []

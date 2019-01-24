@@ -117,7 +117,7 @@ def calculate_chip(snplst, platform_query, request):
         return cur_chr.fetchone()
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(snp_lst):
+    def replace_coords_rsid(snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
@@ -131,7 +131,7 @@ def calculate_chip(snplst, platform_query, request):
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(snps)
+    snps = replace_coords_rsid(snps)
 
     # Find RS numbers in snp database
     rs_nums = []
