@@ -13,9 +13,9 @@ Each row of output file(s) contains a variant JSON object with keys: RS id, chro
 
 ### Running script
 
-Clone this repo into your data directory on the Biowulf cluster /data/your_username. 
+Copy this directory into your data directory on the Biowulf cluster /data/your_username. 
 
-Create folder named `json_refsnp` in the repo's directory and place all compressed json `json.gz` files in folder.
+Create folder named `json_refsnp` in this directory and place all compressed json `json.gz` files from the FTP in the folder.
 
 Run `./rsjson_run.sh` to queue 24 jobs to process the 24 compressed chromosome .json.gz files.
 
