@@ -154,7 +154,6 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = proc_h.stdout.readlines()[0].strip().split()
 
-    # if new dbSNP151 position is 1 off
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
         vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)

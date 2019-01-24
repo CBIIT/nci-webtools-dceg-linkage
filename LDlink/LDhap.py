@@ -171,7 +171,6 @@ def calculate_hap(snplst, pop, request):
                     print "SNP_COORD"
                     print snp_coord
                     if snp_coord != None:
-                        # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord['position'])
                         temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position']]

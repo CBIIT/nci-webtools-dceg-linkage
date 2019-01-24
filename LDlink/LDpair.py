@@ -139,7 +139,6 @@ def calculate_pair(snp1, snp2, pop, request=None):
 
     # SNP1
     vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    # if new dbSNP151 position is 1 off
     tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
     proc1_offset = subprocess.Popen(
@@ -148,7 +147,6 @@ def calculate_pair(snp1, snp2, pop, request=None):
 
     # SNP2
     vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    # if new dbSNP151 position is 1 off
     tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
     proc2_offset = subprocess.Popen(

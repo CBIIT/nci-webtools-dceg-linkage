@@ -118,7 +118,6 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None:
-                        # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord['position'])
                         temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position']]
