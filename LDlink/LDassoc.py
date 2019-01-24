@@ -27,8 +27,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	gene_c_dir = config['data']['gene_c_dir']
 	gene_dir2 = config['data']['gene_dir2']
 	recomb_dir = config['data']['recomb_dir']
-	# snp_dir = config['data']['snp_dir']
-	# snp_pos_offset = config['data']['snp_pos_offset']
 	pop_dir = config['data']['pop_dir']
 	vcf_dir = config['data']['vcf_dir']
 
@@ -60,10 +58,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
-			# Connect to snp database
-			# conn=sqlite3.connect(snp_dir)
-			# conn.text_factory=str
-			# cur=conn.cursor()
 			# Connect to Mongo snp database
 			client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
 			db = client["LDLink"]
@@ -73,17 +67,9 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				query_results = db.dbsnp151.find_one({"id": rsid})
 				query_results_sanitized = json.loads(json_util.dumps(query_results))
 				return query_results_sanitized
-				# id=rs.strip("rs")
-				# t=(id,)
-				# cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-				# return cur.fetchone()
 
 			# Find RS number in snp database
 			var_coord=get_coords_var(db, snp)
-
-			# # Close snp connection
-			# cur.close()
-			# conn.close()
 
 			if var_coord==None:
 				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
@@ -116,21 +102,9 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# print "[ldassoc debug] load input file"
 
 	# Load input file
-	# print "[ldassoc debug] open file and store lines in variable"
-	# assoc_data=open(file).readlines()
-	# print "[ldassoc debug] get headers"
-	# header=assoc_data[0].strip().split()
-	# header = open(file).readline().strip().split()
-	# print "[ldassoc debug] get first line"
-	# first=assoc_data[1].strip().split()
 	with open(file) as fp:
 		header = fp.readline().strip().split()
 		first = fp.readline().strip().split()
-		# for i, line in enumerate(fp):
-		# 	if i == 1:
-		# 		first = line.strip().split()
-		# 	elif i > 1:
-		# 		break
 	print "HEADER: " + str(header)
 	print "FIRST: " + str(first)
 
@@ -201,9 +175,9 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		# Find RS number in snp database
 		gene_coord=get_coords_gene(myargs.name)
 
-		# # Close snp connection
-		# cur.close()
-		# conn.close()
+		# Close snp connection
+		cur.close()
+		conn.close()
 
 		if gene_coord==None:
 			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
@@ -1310,14 +1284,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	print "Run time: "+str(duration)+" seconds\n"
 
 
-	# Remove temporary files
-	# print "Temporary population file removed."
-	# print "Temporary files NOT removed at end of LDassoc.py."
-	# subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-	# subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	# subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
-	# subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
-
+	# Remove temporary files in LDassoc_plot_sub.py
 
 	# Return plot output
 	return(out_script,out_div)

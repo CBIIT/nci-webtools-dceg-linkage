@@ -9,7 +9,6 @@ import sqlite3
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
-import time
 from multiprocessing.dummy import Pool
 from math import log10
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
@@ -21,18 +20,11 @@ port = int(contents[2].split('=')[1])
 # LDassoc subprocess to export bokeh to high quality images in the background
 # Create LDproxy function
 def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
-    start_time=time.time()
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    gene_dir = config['data']['gene_dir']
-    gene_c_dir = config['data']['gene_c_dir']
     gene_dir2 = config['data']['gene_dir2']
-    recomb_dir = config['data']['recomb_dir']
-    # snp_dir = config['data']['snp_dir']
-    # snp_pos_offset = config['data']['snp_pos_offset']
-    pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
@@ -56,10 +48,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         if myargsOrigin[0:2]=="rs":
             snp=myargsOrigin
 
-            # Connect to snp database
-            # conn=sqlite3.connect(snp_dir)
-            # conn.text_factory=str
-            # cur=conn.cursor()
             # Connect to Mongo snp database
             client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
             db = client["LDLink"]
@@ -70,17 +58,9 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 query_results = db.dbsnp151.find_one({"id": rsid})
                 query_results_sanitized = json.loads(json_util.dumps(query_results))
                 return query_results_sanitized
-                # id=rs.strip("rs")
-                # t=(id,)
-                # cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-                # return cur.fetchone()
 
             # Find RS number in snp database
             var_coord=get_coords_var(db, snp)
-
-            # # Close snp connection
-            # cur.close()
-            # conn.close()
 
             if var_coord==None:
                 return None
@@ -108,13 +88,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     with open(file) as fp:
         header = fp.readline().strip().split()
         first = fp.readline().strip().split()
-    # header = open(file).readline().strip().split()
-    # with open(file) as fp:
-    #     for i, line in enumerate(fp):
-    #         if i == 1:
-    #             first = line.strip().split()
-    #         elif i > 1:
-    #             break
 
     if len(header)!=len(first):
         return None
@@ -280,24 +253,9 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Coordinate list checks
     if len(assoc_coords)==0:
         return None
-        
 
 
-    # Select desired ancestral populations
-    # pops=pop.split("+")
-    # pop_dirs=[]
-    # for pop_i in pops:
-    #     if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-    #         pop_dirs.append(pop_dir+pop_i+".txt")
-    #     else:
-    #         return None
-            
-
-    # get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
-    # subprocess.call(get_pops, shell=True)
-
-
-    # Get population ids
+    # Get population ids from population output file from LDassoc.py
     pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
     ids=[]
     for i in range(len(pop_list)):
@@ -320,11 +278,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=proc_h.stdout.readlines()[0].strip().split()
 
-            # tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
-            # subprocess.call(tabix_snp, shell=True)
-
-
-            # Check lowest P SNP is in the 1000G population and not monoallelic
+            # Check lowest P SNP is in the 1000G population and not monoallelic from LDassoc.py output file
             vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
             if len(vcf)==0:
@@ -610,9 +564,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     assoc_plot.title.align="center"
 
-    # Add recombination rate
-    # tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
-    # subprocess.call(tabix_recomb, shell=True)
+    # Add recombination rate from LDassoc.py output file
     filename=tmp_dir+"recomb_"+request+".txt"
     recomb_raw=open(filename).readlines()
     recomb_x=[]
@@ -677,8 +629,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
-        # tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
-        # subprocess.call(tabix_gene, shell=True)
+        # Get genes from LDassoc.py output file
         filename=tmp_dir+"genes_"+request+".txt"
         genes_raw=open(filename).readlines()
 
@@ -828,8 +779,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Gene Plot (Collapsed)
     else:
-        # tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
-        # subprocess.call(tabix_gene_c, shell=True)
+        # Get genes from LDassoc.py output file
         filename_c=tmp_dir+"genes_c_"+request+".txt"
         genes_c_raw=open(filename_c).readlines()
 

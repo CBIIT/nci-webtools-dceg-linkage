@@ -98,7 +98,7 @@ def calculate_hap(snplst, pop, request):
         # return cur.fetchone()
 
     # Query genomic coordinates
-    def get_rsnum(coord):
+    def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
@@ -116,7 +116,7 @@ def calculate_hap(snplst, pop, request):
             if snp_raw_i[0][0:2] == "rs":
                 new_snp_lst.append(snp_raw_i)
             else:
-                snp_info_lst = get_rsnum(snp_raw_i[0])
+                snp_info_lst = get_rsnum(db, snp_raw_i[0])
                 print "snp_info_lst"
                 print snp_info_lst
                 if snp_info_lst != None:

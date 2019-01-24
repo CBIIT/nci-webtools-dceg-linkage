@@ -20,7 +20,6 @@ process = sys.argv[5]
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
-# snp_dir = config['data']['snp_dir']
 pop_dir = config['data']['pop_dir']
 vcf_dir = config['data']['vcf_dir']
 reg_dir = config['data']['reg_dir']
@@ -134,11 +133,6 @@ def get_regDB(chr, pos):
         return a[1]
 
 
-# # Open Connection to SNP
-# con2 = sqlite3.connect(snp_dir)
-# con2.row_factory = sqlite3.Row
-# con2.text_factory = str
-# curr2 = con2.cursor()
 # Connect to Mongo snp database
 client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
 db = client["LDLink"]
@@ -149,10 +143,6 @@ def get_coords(db, rsid):
     query_results = db.dbsnp151.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
-    # id = rs.strip("rs")
-    # t = (id,)
-    # curr2.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-    # return curr2.fetchone()
 
 
 # Import SNP VCF files
