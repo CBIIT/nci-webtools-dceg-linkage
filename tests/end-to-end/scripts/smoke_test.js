@@ -310,7 +310,7 @@ describe('LDlink Smoke Test', function() {
         const warningAlert = By.xpath('//*[@id="snpclip-message-warning-content"]');
         const warningAlertElement = driver.findElement(warningAlert);
         const warningAlertElementText = await warningAlertElement.getText();
-        warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
+        warningAlertElementText.should.contain('Genomic position for query variant (rs536475674) does not match RS number at 1000G position (chr6:5687279). Genomic position for query variant (rs544061638) does not match RS number at 1000G position (chr6:18252763). Genomic position for query variant (rs562596074) does not match RS number at 1000G position (chr6:22075527). Genomic position for query variant (rs6915408) does not match RS number at 1000G position (chr6:29763303)');
     });
 
     it('should display help text from separate html file', async function() {
