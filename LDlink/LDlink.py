@@ -849,6 +849,7 @@ def unblock_user_web():
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
+@requires_admin_token
 def api_stats():
     print "Execute api stats"
     startdatetime = request.args.get('startdatetime', False)
