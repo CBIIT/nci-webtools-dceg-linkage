@@ -1437,7 +1437,7 @@ function updateLDassoc() {
 
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
-            checkFile(id, fileURL, 96);
+            checkFile(id, fileURL, 180);
 
             $('#' + id + '-results-container').show();
             getLDAssocResults('assoc'+ldInputs.reference+".json");
@@ -2158,7 +2158,7 @@ function updateLDmatrix() {
             
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
-            checkFile(id, fileURL, 96);
+            checkFile(id, fileURL, 180);
 
             $('#' + id + '-results-container').show();
             getLDmatrixResults(ldmatrixInputs.reference + ".json", ldmatrixInputs.reference);
@@ -2361,7 +2361,7 @@ function updateLDproxy() {
 
             // enable button once .svg file is generated from subprocess
             var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
-            checkFile(id, fileURL, 96);
+            checkFile(id, fileURL, 180);
 
             $('#' + id + '-results-container').show();
             getLDProxyResults('proxy'+ldproxyInputs.reference+".json");
