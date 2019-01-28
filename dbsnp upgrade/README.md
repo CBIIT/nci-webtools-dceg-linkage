@@ -1,28 +1,61 @@
-# dbsnp
-For constructing dbSNP build (151). Can be modified for future dbSNP updates.
+# dbsnp-mongodb
+Scripts to filter dbsnp records provided by NCBI and create files that can be imported to a MongoDB collection. NCBI dbsnp records are located here: ftp://ftp.ncbi.nlm.nih.gov/snp/.redesign/
 
 Built off Lon Phan's `rsjson_test.py` (lonphan@ncbi.nlm.nih.gov)
 
-Includes script `rsjson_dbsnp.py` to parse gzipped JSON files and create SQLite database indexed by (RS)ID.
+## Step 1: Parse chromosome files 1 - 22, X and Y.
 
-- Outputs SQLITE database: `dbsnp.rs.151.db`
+Includes script `rsjson_mongo_filter.py` to parse dbsnp .json.gz files and creates .json files that can be imported into MongoDB collection(s).
 
-Includes script `chrjson_dbsnp.py` to parse gzipped JSON files and create SQLITE database indexed by CHROMOSOME. 
+- Outputs .json file(s): `chr_#_filtered.json`
 
-- Outputs SQLITE database: `dbsnp.chr.151.db`
-  
-Each row contains the attributes: id, chromosome, position, and function. Data will be duplicated for each of the rsid's associated merged-rsids. 
+Each row of output file(s) contains a variant JSON object with keys: RS id, chromosome, position, type (snv, delins, etc), and function (annotation). Record will be duplicated for each of the variant's merged RS ids - meaning, another record will be created with all the same fields except the RS id key (which will be the merged variant's RS id). This file can be imported into MongoDB via mongoimport.
 
-## Running script
+### Running script
 
-Create folder named `json_refsnp` in script's directory and place all compressed json `json.gz` files in folder. There should be one file for each chromosome (1-22, X & Y - 24 in total).
+Copy this directory into your data directory on the Biowulf cluster /data/your_username. 
 
-Current refsnp data files are pulled from here: ftp://ftp.ncbi.nlm.nih.gov/snp/.redesign/latest_release/JSON
+Create folder named `json_refsnp` in this directory and place all compressed json `json.gz` files from the FTP in the folder.
 
-Run `python rsjson_dbSNP.py` to execute the script to build SQLite database indexed by RS number.
+Run `./rsjson_run.sh` to queue 24 jobs to process the 24 compressed chromosome .json.gz files.
 
-Run `python chrjson_dbSNP.py` to execute the script to build SQLite database indexed by chromosome.
+## Step 2: Import chromosome variants and index collection.
 
-** To ensure success, make sure scripts are ran in stable environment. Could take up to 5 days to complete. **
+Use mongoimport to import `processed_merges.json` into the Mongo dbsnp build:
 
-** To prevent corrupted `.json.gz` files (failed CRC-checksum), it is recommented to `curl` or `wget` directly from ftp server when downloading data files **
+`mongoimport --db <db_name> --collection <collection_name> --file chr_#_filtered.json`
+
+Use this script to import ALL files in a folder into a MongoDB collection:
+
+`for filename in *; do mongoimport --db <db_name> --collection <collection_name> --file $filename; done`
+
+Create indexes on the collection to significantly speed up queries. Log into the the Mongo shell and execute these commands:
+
+`use <db_name>`
+`db.<collection_name>.createIndex({id: 1})`
+`db.<collection_name>.createIndex({chromosome: 1, position: 1})`
+
+This process may take a long time. Make sure to keep your machine awake to prevent loss of progress.
+
+## Step 3: Parse merged variants file.
+
+Includes scripts `rsjson_find_merges.py` and `rsjson_process_merges.py` to find and parse merged variants set aside in refsnp-merged.json.gz file. `rsjson_find_merges.py` parses the refsnp-merged.json.gz file for required fields and outputs a .json file. `rsjson_process_merges.py` processed the file outputted from `rsjson_find_merges.py` by looking up each merged RS id in MongoDB dbsnp to prevent duplicate insertions and if the record does not already exists, it will query the reference RS id's merged RS id and create a record with the data. The newly created merged RS id records will be in a new file called processed_merges.json .
+
+- `rsjson_find_merges.py` outputs .json file: `refsnp-merged_merges.json`
+- `rsjson_process_merges.py` outputs .json file `processed_merges.json`
+
+Each row of output file `processed_merges.json` contains a variant JSON object with keys: RS id, chromosome, position, type (snv, delins, etc), and function (annotation). This file can be imported into MongoDB via mongoimport.
+
+### Running scripts
+
+Run `./rsjson_run_merges.sh` to queue job to parse the refsnp-merged.json.gz file. Make sure refsnp-merged.json.gz is located in the `json_refsnp` directory.
+
+Run `python rsjson_process_merges.py refsnp-merged_merges.json` to process the parsed RS ids and create records to be imported the MongoDB dbsnp build.
+
+## Step 4: Import merged variants and index collection.
+
+Again, use mongoimport to import `processed_merges.json` into the Mongo dbsnp build:
+
+`mongoimport --db <db_name> --collection <collection_name> --file processed_merges.json`
+
+

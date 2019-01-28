@@ -3,23 +3,28 @@ import yaml
 import json
 import math
 import os
-import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
 import subprocess
 import sys
 import time
-
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 # Create LDpair function
 
-
 def calculate_pair(snp1, snp2, pop, request=None):
+
+    # trim any whitespace
+    snp1 = snp1.strip()
+    snp2 = snp2.strip() 
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    snp_dir = config['data']['snp_dir']
-    snp_chr_dir = config['data']['snp_chr_dir']
-    snp_pos_offset = config['data']['snp_pos_offset']
+    dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -32,74 +37,84 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # Create JSON output
     output = {}
 
-    # Connect to snp database
-    conn = sqlite3.connect(snp_dir)
-    conn.text_factory = str
-    cur = conn.cursor()
+    # Connect to Mongo snp database
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    db = client["LDLink"]
 
-    # Connect to snp chr database for genomic coordinates queries
-    conn_chr = sqlite3.connect(snp_chr_dir)
-    conn_chr.text_factory = str
-    cur_chr = conn_chr.cursor()
-
-    def get_coords(rs):
-        rs = rs.lower()
-        id = rs.strip("rs")
-        t = (id,)
-        cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
-        return cur.fetchone()
+    def get_coords(db, rsid):
+        rsid = rsid.strip("rs")
+        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
 
     # Query genomic coordinates
-    def get_rsnum(coord):
-        coord = coord.lower()
+    def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
-        pos = str(int(temp_coord[1]) - 1)
-        t = (pos,)
-        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
-        return cur_chr.fetchone()
+        pos = temp_coord[1]
+        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(coord):
-        rsid = coord.lower()
-        if rsid[0:2] == "rs":
-            return rsid
+    def replace_coord_rsid(db, snp):
+        if snp[0:2] == "rs":
+            return snp
         else:
-            snp_info = get_rsnum(rsid)
-            if snp_info != None:
-                rsid = "rs" + str(snp_info[0])
+            snp_info_lst = get_rsnum(db, snp)
+            print "snp_info_lst"
+            print snp_info_lst
+            if snp_info_lst != None:
+                if len(snp_info_lst) > 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    ref_variants = []
+                    for snp_info in snp_info_lst:
+                        if snp_info['id'] == snp_info['ref_id']:
+                            ref_variants.append(snp_info['id'])
+                    if len(ref_variants) > 1:
+                        var_id = "rs" + ref_variants[0]
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                            ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                        else:
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
+                        var_id = "rs" + snp_info_lst[0]['id']
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                            ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                        else:
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                    else:
+                        var_id = "rs" + ref_variants[0]
+                    return var_id
+                elif len(snp_info_lst) == 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    return var_id
+                else:
+                    return snp
             else:
-                return rsid
-        return rsid
+                return snp
+        return snp
 
-    snp1 = replace_coord_rsid(snp1)
-    snp2 = replace_coord_rsid(snp2)
+    snp1 = replace_coord_rsid(db, snp1)
+    snp2 = replace_coord_rsid(db, snp2)
 
     # Find RS numbers in snp database
     # SNP1
-    snp1_coord = get_coords(snp1)
+    snp1_coord = get_coords(db, snp1)
     if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + \
-            config['data']['dbsnp_version'] + "."
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # SNP2
-    snp2_coord = get_coords(snp2)
+    snp2_coord = get_coords(db, snp2)
     if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + \
-            config['data']['dbsnp_version'] + "."
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
         return(json.dumps(output, sort_keys=True, indent=2))
 
-    # Close snp connection
-    cur.close()
-    conn.close()
-
-    # Close snp chr connection
-    cur_chr.close()
-    conn_chr.close()
-
     # Check if SNPs are on the same chromosome
-    if snp1_coord[1] != snp2_coord[1]:
+    if snp1_coord['chromosome'] != snp2_coord['chromosome']:
         output["warning"] = snp1 + " and " + \
             snp2 + " are on different chromosomes"
 
@@ -121,34 +136,30 @@ def calculate_pair(snp1, snp2, pop, request=None):
     pop_ids = list(set(ids))
 
     # Extract 1000 Genomes phased genotypes
+
     # SNP1
-    vcf_file1 = vcf_dir + \
-        snp1_coord[
-            1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    # if new dbSNP151 position is 1 off
+    vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord[1], str(int(snp1_coord[2]) + snp_pos_offset))
+        vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = proc1_offset.stdout.readlines()
 
     # SNP2
-    vcf_file2 = vcf_dir + \
-        snp2_coord[
-            1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    # if new dbSNP151 position is 1 off
+    vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord[1], str(int(snp2_coord[2]) + snp_pos_offset))
+        vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = proc2_offset.stdout.readlines()
 
-    vcf1_pos = str(int(snp1_coord[2]) + snp_pos_offset)
-    vcf2_pos = str(int(snp2_coord[2]) + snp_pos_offset)
+    vcf1_pos = snp1_coord['position']
+    vcf2_pos = snp2_coord['position']
     vcf1 = vcf1_offset
     vcf2 = vcf2_offset
 
     # Import SNP VCF files
+
     # SNP1
     if len(vcf1) == 0:
         output["error"] = snp1 + " is not in 1000G reference panel."
@@ -200,7 +211,6 @@ def calculate_pair(snp1, snp2, pop, request=None):
     if len(vcf2) == 0:
         output["error"] = snp2 + " is not in 1000G reference panel."
         return(json.dumps(output, sort_keys=True, indent=2))
-
     elif len(vcf2) > 1:
         geno2 = []
         for i in range(len(vcf2)):
@@ -209,7 +219,6 @@ def calculate_pair(snp1, snp2, pop, request=None):
         if geno2 == []:
             output["error"] = snp2 + " is not in 1000G reference panel."
             return(json.dumps(output, sort_keys=True, indent=2))
-
     else:
         geno2 = vcf2[0].strip().split()
 
@@ -391,7 +400,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
     # Create JSON output
     snp_1 = {}
     snp_1["rsnum"] = snp1
-    snp_1["coord"] = "chr" + snp1_coord[1] + ":" + \
+    snp_1["coord"] = "chr" + snp1_coord['chromosome'] + ":" + \
         vcf1_pos
 
     snp_1_allele_1 = {}
@@ -409,7 +418,7 @@ def calculate_pair(snp1, snp2, pop, request=None):
 
     snp_2 = {}
     snp_2["rsnum"] = snp2
-    snp_2["coord"] = "chr" + snp2_coord[1] + ":" + \
+    snp_2["coord"] = "chr" + snp2_coord['chromosome'] + ":" + \
         vcf2_pos
 
     snp_2_allele_1 = {}

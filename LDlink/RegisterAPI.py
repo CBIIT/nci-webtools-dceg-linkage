@@ -1,6 +1,4 @@
 #!/usr/bin/env python
-
-import sqlite3
 import json
 import os.path
 import binascii
