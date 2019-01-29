@@ -782,7 +782,7 @@ def ldassoc():
     print "annotate: " + str(myargs.annotate)
 
     try:
-        # pass flag to LDproxy to allow svg generation only for web instance
+        # pass flag to LDassoc to allow svg generation only for web instance
         web = False
         if 'LDlinkRestWeb' in request.path:
             web = True

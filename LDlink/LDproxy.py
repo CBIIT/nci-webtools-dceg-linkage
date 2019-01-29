@@ -818,8 +818,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python LDproxy_plot_sub.py " + \
-            snp + " " + pop + " " + request + " " + r2_d
+        command = "python LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
