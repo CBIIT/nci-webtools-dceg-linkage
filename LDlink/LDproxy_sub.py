@@ -145,7 +145,7 @@ def get_regDB(chr, pos):
 
 
 # Connect to Mongo snp database
-if web:
+if web == "True":
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
 else:
     client = MongoClient('localhost', port)
