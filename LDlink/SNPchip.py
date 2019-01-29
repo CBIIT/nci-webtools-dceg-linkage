@@ -27,7 +27,7 @@ def get_platform_request(web):
         # Connect to Mongo snp database
         if web:
             client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-        else :
+        else:
             client = MongoClient('localhost', port)
     except ConnectionFailure:
         print "MongoDB is down"
@@ -50,7 +50,7 @@ def convert_codeToPlatforms(platform_query, web):
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
     code_array = platform_query.split('+')
@@ -95,7 +95,7 @@ def calculate_chip(snplst, platform_query, web, request):
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 
@@ -217,7 +217,7 @@ def calculate_chip(snplst, platform_query, web, request):
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
     platformcount = 0

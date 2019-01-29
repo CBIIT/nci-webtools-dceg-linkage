@@ -75,7 +75,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 

@@ -40,7 +40,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 

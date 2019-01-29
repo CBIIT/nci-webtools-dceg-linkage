@@ -83,7 +83,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 

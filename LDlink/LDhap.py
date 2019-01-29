@@ -87,7 +87,7 @@ def calculate_hap(snplst, pop, request, web):
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else :
+    else:
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 
