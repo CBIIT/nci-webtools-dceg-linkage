@@ -52,10 +52,10 @@ def main():
 	file = "meta_assoc.meta"
 	region = "variant"
 	args = {}
-	args.["origin"] = "rs1231"
+	args["origin"] = "rs1231"
 	print args
 	try:
-		out_json = calculate_hap(snplst,pop,request)
+		out_json = calculate_hap(snplst,pop,request, false)
 		#out_json = calculate_assoc(file,region,pop,request,args)
 	except:
 		return sendTraceback()
