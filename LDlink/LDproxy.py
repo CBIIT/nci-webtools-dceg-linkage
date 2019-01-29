@@ -50,7 +50,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     output = {}
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else :
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -246,18 +249,18 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     commands = []
     for i in range(threads):
         if i == min(range(threads)) and i == max(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + \
+            command = "python LDproxy_sub.py " + web + " " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord2) + " " + request + " " + str(i)
         elif i == min(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + \
+            command = "python LDproxy_sub.py " + web + " " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord1 + block) + " " + request + " " + str(i)
         elif i == max(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + snp_coord['chromosome'] + " " + str(
+            command = "python LDproxy_sub.py " + web + " " + snp + " " + snp_coord['chromosome'] + " " + str(
                 coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
         else:
-            command = "python LDproxy_sub.py " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
+            command = "python LDproxy_sub.py " + web + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
                 block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
         commands.append(command)
 
@@ -872,8 +875,7 @@ def main():
         sys.exit()
 
     # Run function
-    out_script, out_div, error_msg = calculate_proxy(
-        snp, pop, request, web, r2_d)
+    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:

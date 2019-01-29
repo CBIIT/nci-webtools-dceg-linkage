@@ -11,12 +11,13 @@ username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
-snp = sys.argv[1]
-chr = sys.argv[2]
-start = sys.argv[3]
-stop = sys.argv[4]
-request = sys.argv[5]
-process = sys.argv[6]
+web = sys.argv[1]
+snp = sys.argv[2]
+chr = sys.argv[3]
+start = sys.argv[4]
+stop = sys.argv[5]
+request = sys.argv[6]
+process = sys.argv[7]
 
 
 # Set data directories using config.yml
@@ -144,7 +145,10 @@ def get_regDB(chr, pos):
 
 
 # Connect to Mongo snp database
-client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+if web:
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+else :
+    client = MongoClient('localhost', port)
 db = client["LDLink"]
 
 

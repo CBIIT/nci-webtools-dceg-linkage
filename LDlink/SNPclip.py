@@ -21,7 +21,7 @@ port = int(contents[2].split('=')[1])
 # Create SNPtip function
 
 
-def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
+def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.01):
 
     max_list = 5000
 
@@ -81,7 +81,10 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else :
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -430,31 +433,34 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import SNPclip options
-    if len(sys.argv) == 4:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
+    if len(sys.argv) == 5:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
         r2_threshold = 0.10
         maf_threshold = 0.01
-    elif len(sys.argv) == 5:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
-        r2_threshold = sys.argv[4]
-        maf_threshold = 0.01
     elif len(sys.argv) == 6:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
-        r2_threshold = sys.argv[4]
-        maf_threshold = sys.argv[5]
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        r2_threshold = sys.argv[5]
+        maf_threshold = 0.01
+    elif len(sys.argv) == 7:
+        web = sys.argv[1]
+        snplst = sys.argv[3]
+        pop = sys.argv[4]
+        request = sys.argv[5]
+        r2_threshold = sys.argv[6]
+        maf_threshold = sys.argv[7]
     else:
-        print "Correct useage is: SNPclip.py snplst populations request (optional: r2_threshold maf_threshold)"
+        print "Correct useage is: SNPclip.py false snplst populations request (optional: r2_threshold maf_threshold)"
         sys.exit()
 
     # Run function
     snps, thin_list, details = calculate_clip(
-        snplst, pop, request, r2_threshold, maf_threshold)
+        snplst, pop, request, web, r2_threshold, maf_threshold)
 
     # Print output
     with open(tmp_dir+"clip"+request+".json") as f:

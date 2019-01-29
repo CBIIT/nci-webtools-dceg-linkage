@@ -15,7 +15,7 @@ port = int(contents[2].split('=')[1])
 
 # Create LDpair function
 
-def calculate_pair(snp1, snp2, pop, request=None):
+def calculate_pair(snp1, snp2, pop, web, request=None):
 
     # trim any whitespace
     snp1 = snp1.strip()
@@ -38,7 +38,10 @@ def calculate_pair(snp1, snp2, pop, request=None):
     output = {}
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else :
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -561,18 +564,19 @@ def main():
         snp1 = sys.argv[1]
         snp2 = sys.argv[2]
         pop = sys.argv[3]
-        request = sys.argv[4]
+        web = sys.argv[4]
+        request = sys.argv[5]
     elif sys.argv[4] is False:
         snp1 = sys.argv[1]
         snp2 = sys.argv[2]
         pop = sys.argv[3]
         request = str(time.strftime("%I%M%S"))
     else:
-        print "Correct useage is: LDpair.py snp1 snp2 populations request"
+        print "Correct useage is: LDpair.py snp1 snp2 populations request false"
         sys.exit()
 
     # Run function
-    out_json = calculate_pair(snp1, snp2, pop, request)
+    out_json = calculate_pair(snp1, snp2, pop, web, request)
 
     # Print output
     json_dict = json.loads(out_json)

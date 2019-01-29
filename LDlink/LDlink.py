@@ -263,7 +263,7 @@ def ldpair():
     print 'request: ' + str(reference)
 
     try:
-        out_json = calculate_pair(var1, var2, pop, reference)
+        out_json = calculate_pair(var1, var2, pop, isProgrammatic, reference)
         # if API call has error, retrieve error message from json returned from calculation
         try:
             if isProgrammatic:
@@ -367,8 +367,7 @@ def ldmatrix():
             web = True
         else:
             web = False
-        out_script, out_div = calculate_matrix(
-            snplst, pop, reference, web, r2_d)
+        out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
         try:
             if isProgrammatic:
                 resultFile = ""
@@ -426,7 +425,7 @@ def ldhap():
     f.close()
 
     try:
-        out_json = calculate_hap(snplst, pop, reference)
+        out_json = calculate_hap(snplst, pop, reference, isProgrammatic)
         # if API call has error, retrieve error message from json returned from calculation
         try:
             if isProgrammatic:
@@ -490,8 +489,7 @@ def snpclip():
     clip = {}
 
     try:
-        (snps, snp_list, details) = calculate_clip(snpfile, pop,
-                                                   reference, float(r2_threshold), float(maf_threshold))
+        (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, isProgrammatic, float(r2_threshold), float(maf_threshold))
     except:
         return sendTraceback(None)
 
@@ -612,7 +610,7 @@ def snpchip():
     f.close()
 
     try:
-        snp_chip = calculate_chip(snplst, platforms, reference)
+        snp_chip = calculate_chip(snplst, platforms, isProgrammatic, reference)
     except:
         return sendTraceback(None)
 
@@ -637,7 +635,12 @@ def snpchip():
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
-    return get_platform_request()
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    return get_platform_request(web)
 
 
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])

@@ -16,7 +16,7 @@ port = int(contents[2].split('=')[1])
 
 
 # Create LDhap function
-def calculate_hap(snplst, pop, request):
+def calculate_hap(snplst, pop, request, web):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -85,7 +85,10 @@ def calculate_hap(snplst, pop, request):
     # cur_chr = conn_chr.cursor()
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else :
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -483,12 +486,13 @@ def main():
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
+        web = sys.argv[4]
     else:
-        print "Correct useage is: LDLink.py snplst populations request"
+        print "Correct useage is: LDLink.py snplst populations request false"
         sys.exit()
 
     # Run function
-    out_json = calculate_hap(snplst, pop, request)
+    out_json = calculate_hap(snplst, pop, request, web)
 
     # Print output
     json_dict = json.loads(out_json)
