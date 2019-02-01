@@ -179,18 +179,18 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     commands = []
     for i in range(threads):
         if i == min(range(threads)) and i == max(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + \
+            command = "python LDproxy_sub.py " + "True " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord2) + " " + request + " " + str(i)
         elif i == min(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + \
+            command = "python LDproxy_sub.py " + "True " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord1 + block) + " " + request + " " + str(i)
         elif i == max(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + snp_coord['chromosome'] + " " + str(
+            command = "python LDproxy_sub.py " + "True " + snp + " " + snp_coord['chromosome'] + " " + str(
                 coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
         else:
-            command = "python LDproxy_sub.py " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
+            command = "python LDproxy_sub.py " + "True " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
                 block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
         commands.append(command)
 

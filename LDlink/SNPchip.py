@@ -21,10 +21,14 @@ password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
 
-def get_platform_request():
+def get_platform_request(web):
 
     try:
-        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+        # Connect to Mongo snp database
+        if web:
+            client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+        else:
+            client = MongoClient('localhost', port)
     except ConnectionFailure:
         print "MongoDB is down"
         print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
@@ -41,9 +45,13 @@ def get_platform_request():
 
 
 # Create SNPchip function
-def convert_codeToPlatforms(platform_query):
+def convert_codeToPlatforms(platform_query, web):
     platforms = []
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
@@ -53,7 +61,7 @@ def convert_codeToPlatforms(platform_query):
     return platforms
 
 
-def calculate_chip(snplst, platform_query, request):
+def calculate_chip(snplst, platform_query, web, request):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -85,7 +93,10 @@ def calculate_chip(snplst, platform_query, request):
             snps.append(snp)
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -203,13 +214,17 @@ def calculate_chip(snplst, platform_query, request):
         else:
             snp_coords_sort[i][1] = str(snp_coords_sort[i][1])
 
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    platformcount = 0
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
+    platformcount = 0
     count = 0
     platform_NOT = []
     if platform_query != "":  # <--If user did not enter platforms as a request
-        platform_list = convert_codeToPlatforms(platform_query)
+        platform_list = convert_codeToPlatforms(platform_query, web)
     # Quering MongoDB to get platforms for position/chromsome pairs
     else:
         platform_list = []
@@ -312,15 +327,16 @@ def main():
 
     # Import SNPchip options
     if len(sys.argv) == 4:
-        snplst = sys.argv[1]
-        platform_query = sys.argv[2]
-        request = sys.argv[3]
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        platform_query = sys.argv[3]
+        request = sys.argv[4]
     else:
-        print "Correct useage is: SNPchip.py snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\""
+        print "Correct useage is: SNPchip.py false snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\""
         sys.exit()
 
     # Run function
-    calculate_chip(snplst, platform_query, request)
+    calculate_chip(snplst, platform_query, web, request)
 
 
 if __name__ == "__main__":

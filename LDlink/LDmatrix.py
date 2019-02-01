@@ -73,7 +73,10 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
