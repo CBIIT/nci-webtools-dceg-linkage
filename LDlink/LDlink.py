@@ -37,13 +37,6 @@ tmp_dir = "./tmp/"
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
-# Ensure apiaccess directory exists
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
-# api_access_dir = config['api']['api_access_dir']
-# if not os.path.exists(api_access_dir):
-#     os.makedirs(api_access_dir)
-
 app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
@@ -248,7 +241,11 @@ def restAdd():
 def ldpair():
     # python LDpair.py rs2720460 rs11733615 EUR 38
     # r1 = '{"corr_alleles":["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],"haplotypes":{"hap1":{"alleles":"AC","count":"576","frequency":"0.573"},"hap2":{"alleles":"GT","count":"361","frequency":"0.359"},"hap3":{"alleles":"GC","count":"42","frequency":"0.042"},"hap4":{"alleles":"AT","count":"27","frequency":"0.027"}},"snp1":{"allele_1":{"allele":"A","count":"603","frequency":"0.599"},"allele_2":{"allele":"G","count":"403","frequency":"0.401"},"coord":"chr4:104054686","rsnum":"rs2720460"},"snp2":{"allele_1":{"allele":"C","count":"618","frequency":"0.614"},"allele_2":{"allele":"T","count":"388","frequency":"0.386"},"coord":"chr4:104157164","rsnum":"rs11733615"},"statistics":{"chisq":"738.354","d_prime":"0.8839","p":"0.0","r2":"0.734"},"two_by_two":{"cells":{"11":"576","12":"27","21":"42","22":"361"},"total":"1006"}'
-
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
     isProgrammatic = False
     print 'Execute ldpair'
     print 'Gathering Variables from url'
@@ -270,7 +267,7 @@ def ldpair():
     print 'request: ' + str(reference)
 
     try:
-        out_json = calculate_pair(var1, var2, pop, reference)
+        out_json = calculate_pair(var1, var2, pop, web, reference)
         # if API call has error, retrieve error message from json returned from calculation
         try:
             if isProgrammatic:
@@ -374,8 +371,7 @@ def ldmatrix():
             web = True
         else:
             web = False
-        out_script, out_div = calculate_matrix(
-            snplst, pop, reference, web, r2_d)
+        out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
         try:
             if isProgrammatic:
                 resultFile = ""
@@ -403,6 +399,11 @@ def ldmatrix():
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
 def ldhap():
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
     isProgrammatic = False
     print 'Execute ldhap'
     print 'Gathering Variables from url'
@@ -433,7 +434,7 @@ def ldhap():
     f.close()
 
     try:
-        out_json = calculate_hap(snplst, pop, reference)
+        out_json = calculate_hap(snplst, pop, reference, web)
         # if API call has error, retrieve error message from json returned from calculation
         try:
             if isProgrammatic:
@@ -463,7 +464,11 @@ def ldhap():
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
 def snpclip():
-
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
     isProgrammatic = False
     # Command line example
     # [ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
@@ -497,8 +502,7 @@ def snpclip():
     clip = {}
 
     try:
-        (snps, snp_list, details) = calculate_clip(snpfile, pop,
-                                                   reference, float(r2_threshold), float(maf_threshold))
+        (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
     except:
         return sendTraceback(None)
 
@@ -587,7 +591,11 @@ def snpclip():
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
 def snpchip():
-
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
     # Command line example
     isProgrammatic = False
     print "Execute snpchip"
@@ -619,7 +627,7 @@ def snpchip():
     f.close()
 
     try:
-        snp_chip = calculate_chip(snplst, platforms, reference)
+        snp_chip = calculate_chip(snplst, platforms, web, reference)
     except:
         return sendTraceback(None)
 
@@ -644,7 +652,12 @@ def snpchip():
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
-    return get_platform_request()
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    return get_platform_request(web)
 
 
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
@@ -769,7 +782,7 @@ def ldassoc():
     print "annotate: " + str(myargs.annotate)
 
     try:
-        # pass flag to LDproxy to allow svg generation only for web instance
+        # pass flag to LDassoc to allow svg generation only for web instance
         web = False
         if 'LDlinkRestWeb' in request.path:
             web = True
@@ -856,6 +869,7 @@ def unblock_user_web():
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
+@requires_admin_token
 def api_stats():
     print "Execute api stats"
     startdatetime = request.args.get('startdatetime', False)

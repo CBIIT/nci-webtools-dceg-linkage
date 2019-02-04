@@ -215,7 +215,7 @@ describe('LDlink Smoke Test', function() {
         const tabLDproxy = By.css('[id="ldproxy-tab-anchor"]');
         await driver.wait(until.elementLocated(tabLDproxy), 20000);
         await driver.findElement(tabLDproxy).click();
-        // input RS# rs2280548 into variant 1
+        // input genomic coordinate chr22:25855459 into variant 1
         console.log('[input genomic coordinate chr22:25855459 into variant]');
         const variantInput = By.css('[id="ldproxy-snp"]');
         await driver.wait(until.elementLocated(variantInput), 20000);
@@ -277,7 +277,7 @@ describe('LDlink Smoke Test', function() {
     });
 
     it('should display SNPclip results from sample file', async function() {
-        console.log('test -> should display SNPchip results from sample file');
+        console.log('test -> should display SNPclip results from sample file');
         const driver = this.driver;
         // switch to SNPclip tab
         console.log('[switch to SNPclip tab]');
@@ -310,7 +310,7 @@ describe('LDlink Smoke Test', function() {
         const warningAlert = By.xpath('//*[@id="snpclip-message-warning-content"]');
         const warningAlertElement = driver.findElement(warningAlert);
         const warningAlertElementText = await warningAlertElement.getText();
-        warningAlertElementText.should.contain('The following RS number(s) or coordinate(s) were not found in dbSNP 151: rs562596074.');
+        warningAlertElementText.should.contain('Genomic position for query variant (rs536475674) does not match RS number at 1000G position (chr6:5687279). Genomic position for query variant (rs544061638) does not match RS number at 1000G position (chr6:18252763). Genomic position for query variant (rs562596074) does not match RS number at 1000G position (chr6:22075527). Genomic position for query variant (rs6915408) does not match RS number at 1000G position (chr6:29763303)');
     });
 
     it('should display help text from separate html file', async function() {

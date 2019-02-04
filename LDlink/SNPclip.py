@@ -4,10 +4,15 @@ import json
 import math
 import operator
 import os
-import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
 import subprocess
 import sys
 import collections
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 ###########
 # SNPclip #
@@ -16,16 +21,14 @@ import collections
 # Create SNPtip function
 
 
-def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
+def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.01):
 
     max_list = 5000
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    snp_dir = config['data']['snp_dir']
-    snp_chr_dir = config['data']['snp_chr_dir']
-    snp_pos_offset = config['data']['snp_pos_offset']
+    dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -77,47 +80,72 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    # Connect to snp database
-    conn = sqlite3.connect(snp_dir)
-    conn.text_factory = str
-    cur = conn.cursor()
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
+    db = client["LDLink"]
 
-    # Connect to snp chr database for genomic coordinates queries
-    conn_chr = sqlite3.connect(snp_chr_dir)
-    conn_chr.text_factory = str
-    cur_chr = conn_chr.cursor()
-
-    def get_coords(rs):
-        id = rs.strip("rs")
-        t = (id,)
-        cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-        return cur.fetchone()
+    def get_coords(db, rsid):
+        rsid = rsid.strip("rs")
+        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
 
     # Query genomic coordinates
-    def get_rsnum(coord):
+    def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
-        pos = str(int(temp_coord[1]) - 1)
-        t = (pos,)
-        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
-        return cur_chr.fetchone()
+        pos = temp_coord[1]
+        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(snp_lst):
+    def replace_coords_rsid(db, snp_lst):
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
                 new_snp_lst.append(snp_raw_i)
             else:
-                snp_info = get_rsnum(snp_raw_i[0])
-                if snp_info != None:
-                    var_id = "rs" + str(snp_info[0])
-                    new_snp_lst.append([var_id])
+                snp_info_lst = get_rsnum(db, snp_raw_i[0])
+                print "snp_info_lst"
+                print snp_info_lst
+                if snp_info_lst != None:
+                    if len(snp_info_lst) > 1:
+                        var_id = "rs" + snp_info_lst[0]['id']
+                        ref_variants = []
+                        for snp_info in snp_info_lst:
+                            if snp_info['id'] == snp_info['ref_id']:
+                                ref_variants.append(snp_info['id'])
+                        if len(ref_variants) > 1:
+                            var_id = "rs" + ref_variants[0]
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                            else:
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
+                            var_id = "rs" + snp_info_lst[0]['id']
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                            else:
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                        else:
+                            var_id = "rs" + ref_variants[0]
+                        new_snp_lst.append([var_id])
+                    elif len(snp_info_lst) == 1:
+                        var_id = "rs" + snp_info_lst[0]['id']
+                        new_snp_lst.append([var_id])
+                    else:
+                        new_snp_lst.append(snp_raw_i)
                 else:
                     new_snp_lst.append(snp_raw_i)
         return new_snp_lst
 
-    snps = replace_coord_rsid(snps)
+    snps = replace_coords_rsid(db, snps)
 
     # Find RS numbers in snp database
     details = collections.OrderedDict()
@@ -130,18 +158,15 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
         if len(snp_i) > 0:
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
-                    snp_coord = get_coords(snp_i[0])
+                    snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None:
-                        # if new dbSNP151 position is 1 off
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(str(int(snp_coord[2]) + snp_pos_offset))
-                        temp = [snp_i[0], snp_coord[1],
-                                 str(int(snp_coord[2]) + snp_pos_offset)]
+                        snp_pos.append(snp_coord['position'])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position']]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
-                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" +
-                                             config['data']['dbsnp_version'] + ", variant removed."]
+                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
                 else:
                     warn.append(snp_i[0])
                     details[snp_i[0]] = ["NA", "NA",
@@ -157,21 +182,13 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
             out_json.close()
             return("", "", "")
 
-    # Close snp connection
-    cur.close()
-    conn.close()
-
-    # Close snp chr connection
-    cur_chr.close()
-    conn_chr.close()
-
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            config['data']['dbsnp_version'] + ": " + ", ".join(warn)
+            dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            config['data']['dbsnp_version'] + "."
+            dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -287,12 +304,10 @@ def calculate_clip(snplst, pop, request, r2_threshold=0.1, maf_threshold=0.01):
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    config['data']['dbsnp_version'] + \
-                    " search coordinates for query variant"
+                    dbsnp_version + " search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    config['data']['dbsnp_version'] + \
-                    " search coordinates for query variant"
+                    dbsnp_version + " search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
@@ -418,31 +433,34 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import SNPclip options
-    if len(sys.argv) == 4:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
+    if len(sys.argv) == 5:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
         r2_threshold = 0.10
         maf_threshold = 0.01
-    elif len(sys.argv) == 5:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
-        r2_threshold = sys.argv[4]
-        maf_threshold = 0.01
     elif len(sys.argv) == 6:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
-        r2_threshold = sys.argv[4]
-        maf_threshold = sys.argv[5]
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        r2_threshold = sys.argv[5]
+        maf_threshold = 0.01
+    elif len(sys.argv) == 7:
+        web = sys.argv[1]
+        snplst = sys.argv[3]
+        pop = sys.argv[4]
+        request = sys.argv[5]
+        r2_threshold = sys.argv[6]
+        maf_threshold = sys.argv[7]
     else:
-        print "Correct useage is: SNPclip.py snplst populations request (optional: r2_threshold maf_threshold)"
+        print "Correct useage is: SNPclip.py false snplst populations request (optional: r2_threshold maf_threshold)"
         sys.exit()
 
     # Run function
     snps, thin_list, details = calculate_clip(
-        snplst, pop, request, r2_threshold, maf_threshold)
+        snplst, pop, request, web, r2_threshold, maf_threshold)
 
     # Print output
     with open(tmp_dir+"clip"+request+".json") as f:

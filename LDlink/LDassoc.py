@@ -1,7 +1,19 @@
 #!/usr/bin/env python
 import yaml
-import csv,json,operator,os,sqlite3,subprocess,time
+import csv
+import json
+import operator
+import os
+import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
+import subprocess
+import time
 from multiprocessing.dummy import Pool
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
 
 # Create LDproxy function
@@ -11,12 +23,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
+	dbsnp_version = config['data']['dbsnp_version']
 	gene_dir = config['data']['gene_dir']
 	gene_c_dir = config['data']['gene_c_dir']
 	gene_dir2 = config['data']['gene_dir2']
 	recomb_dir = config['data']['recomb_dir']
-	snp_dir = config['data']['snp_dir']
-	snp_pos_offset = config['data']['snp_pos_offset']
 	pop_dir = config['data']['pop_dir']
 	vcf_dir = config['data']['vcf_dir']
 
@@ -48,26 +59,21 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
-			# Connect to snp database
-			conn=sqlite3.connect(snp_dir)
-			conn.text_factory=str
-			cur=conn.cursor()
+			# Connect to Mongo snp database
+			client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+			db = client["LDLink"]
 
-			def get_coords_var(rs):
-				id=rs.strip("rs")
-				t=(id,)
-				cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-				return cur.fetchone()
+			def get_coords_var(db, rsid):
+				rsid = rsid.strip("rs")
+				query_results = db.dbsnp151.find_one({"id": rsid})
+				query_results_sanitized = json.loads(json_util.dumps(query_results))
+				return query_results_sanitized
 
 			# Find RS number in snp database
-			var_coord=get_coords_var(snp)
-
-			# Close snp connection
-			cur.close()
-			conn.close()
+			var_coord=get_coords_var(db, snp)
 
 			if var_coord==None:
-				output["error"]=snp+" is not in dbSNP build " + config['data']['dbsnp_version'] + "."
+				output["error"]=snp+" is not in dbSNP build " + dbsnp_version + "."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print >> out_json, json_output
 				out_json.close()
@@ -84,8 +90,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			out_json.close()
 			return("","")
 
-		chromosome=var_coord[1]
-		org_coord=str(int(var_coord[2]) + snp_pos_offset) # new dbSNP151 position is 1 off
+		chromosome = var_coord['chromosome']
+		org_coord = var_coord['position']
 
 
 	# Open Association Data
@@ -97,21 +103,9 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# print "[ldassoc debug] load input file"
 
 	# Load input file
-	# print "[ldassoc debug] open file and store lines in variable"
-	# assoc_data=open(file).readlines()
-	# print "[ldassoc debug] get headers"
-	# header=assoc_data[0].strip().split()
-	# header = open(file).readline().strip().split()
-	# print "[ldassoc debug] get first line"
-	# first=assoc_data[1].strip().split()
 	with open(file) as fp:
 		header = fp.readline().strip().split()
 		first = fp.readline().strip().split()
-		# for i, line in enumerate(fp):
-		# 	if i == 1:
-		# 		first = line.strip().split()
-		# 	elif i > 1:
-		# 		break
 	print "HEADER: " + str(header)
 	print "FIRST: " + str(first)
 
@@ -1291,14 +1285,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	print "Run time: "+str(duration)+" seconds\n"
 
 
-	# Remove temporary files
-	# print "Temporary population file removed."
-	# print "Temporary files NOT removed at end of LDassoc.py."
-	# subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-	# subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-	# subprocess.call("rm "+tmp_dir+"genes_*"+request+".txt", shell=True)
-	# subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
-
+	# Remove temporary files in LDassoc_plot_sub.py
 
 	# Return plot output
 	return(out_script,out_div)

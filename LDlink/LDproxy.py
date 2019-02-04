@@ -4,7 +4,8 @@ import csv
 import json
 import operator
 import os
-import sqlite3
+from pymongo import MongoClient
+from bson import json_util, ObjectId
 import subprocess
 import sys
 import time
@@ -12,22 +13,26 @@ import threading
 import weakref
 import time
 from multiprocessing.dummy import Pool
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
+
 
 # Create LDproxy function
-
-
 def calculate_proxy(snp, pop, request, web, r2_d="r2"):
+
+    # trim any whitespace
+    snp = snp.strip()
 
     start_time = time.time()
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    dbsnp_version = config['data']['dbsnp_version']
     gene_dir = config['data']['gene_dir']
     recomb_dir = config['data']['recomb_dir']
-    snp_dir = config['data']['snp_dir']
-    snp_chr_dir = config['data']['snp_chr_dir']
-    snp_pos_offset = config['data']['snp_pos_offset']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -44,62 +49,76 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
 
-    # Find coordinates (GRCh37/hg19) for SNP RS number
-    # Connect to snp database
-    conn = sqlite3.connect(snp_dir)
-    conn.text_factory = str
-    cur = conn.cursor()
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
+    db = client["LDLink"]
 
-    # Connect to snp chr database for genomic coordinates queries
-    conn_chr = sqlite3.connect(snp_chr_dir)
-    conn_chr.text_factory = str
-    cur_chr = conn_chr.cursor()
-
-    def get_coords(rs):
-        id = rs.strip("rs")
-        t = (id,)
-        cur.execute("SELECT * FROM tbl_" + id[-1] + " WHERE id=?", t)
-        return cur.fetchone()
+    def get_coords(db, rsid):
+        rsid = rsid.strip("rs")
+        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
 
     # Query genomic coordinates
-    def get_rsnum(coord):
-        coord = coord.lower()
+    def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
-        pos = str(int(temp_coord[1]) - 1)
-        t = (pos,)
-        cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
-        return cur_chr.fetchone()
+        pos = temp_coord[1]
+        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(coord):
-        rsid = coord.lower()
-        if rsid[0:2] == "rs":
-            return rsid
+    def replace_coord_rsid(db, snp):
+        if snp[0:2] == "rs":
+            return snp
         else:
-            snp_info = get_rsnum(rsid)
-            if snp_info != None:
-                rsid = "rs" + str(snp_info[0])
+            snp_info_lst = get_rsnum(db, snp)
+            print "snp_info_lst"
+            print snp_info_lst
+            if snp_info_lst != None:
+                if len(snp_info_lst) > 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    ref_variants = []
+                    for snp_info in snp_info_lst:
+                        if snp_info['id'] == snp_info['ref_id']:
+                            ref_variants.append(snp_info['id'])
+                    if len(ref_variants) > 1:
+                        var_id = "rs" + ref_variants[0]
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                        else:
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
+                        var_id = "rs" + snp_info_lst[0]['id']
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                        else:
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                    else:
+                        var_id = "rs" + ref_variants[0]
+                    return var_id
+                elif len(snp_info_lst) == 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    return var_id
+                else:
+                    return snp
             else:
-                return rsid
-        return rsid
+                return snp
+        return snp
 
-    snp = replace_coord_rsid(snp)
+    snp = replace_coord_rsid(db, snp)
 
     # Find RS number in snp database
-    snp_coord = get_coords(snp)
-
-    # Close snp connection
-    cur.close()
-    conn.close()
-
-    # Close snp chr connection
-    cur_chr.close()
-    conn_chr.close()
+    snp_coord = get_coords(db, snp)
 
     if snp_coord == None:
-        output["error"] = snp + " is not in dbSNP build " + \
-            config['data']['dbsnp_version'] + "."
+        output["error"] = snp + " is not in dbSNP build " + dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
         out_json.close()
@@ -132,16 +151,14 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Extract query SNP phased genotypes
     vcf_file = vcf_dir + \
-        snp_coord[
-            1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+        snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 
     tabix_snp_h = "tabix -H {0} | grep CHROM".format(vcf_file)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = proc_h.stdout.readlines()[0].strip().split()
 
-    # if new dbSNP151 position is 1 off
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord[1], str(int(snp_coord[2]) + snp_pos_offset), tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -220,12 +237,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Define window of interest around query SNP
     window = 500000
-    coord1 = int(snp_coord[2]) + snp_pos_offset - \
-        window  # if new dbSNP151 position is 1 off
+    coord1 = int(snp_coord['position']) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord[2]) + snp_pos_offset + \
-        window  # if new dbSNP151 position is 1 off
+    coord2 = int(snp_coord['position']) + window
     print ""
 
     # Calculate proxy LD statistics in parallel
@@ -234,18 +249,18 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     commands = []
     for i in range(threads):
         if i == min(range(threads)) and i == max(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + \
-                snp_coord[1] + " " + str(coord1) + " " + \
+            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + \
+                snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord2) + " " + request + " " + str(i)
         elif i == min(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + \
-                snp_coord[1] + " " + str(coord1) + " " + \
+            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + \
+                snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord1 + block) + " " + request + " " + str(i)
         elif i == max(range(threads)):
-            command = "python LDproxy_sub.py " + snp + " " + snp_coord[1] + " " + str(
+            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(
                 coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
         else:
-            command = "python LDproxy_sub.py " + snp + " " + snp_coord[1] + " " + str(coord1 + (
+            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
                 block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
         commands.append(command)
 
@@ -396,7 +411,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     track = open(tmp_dir + "track" + request + ".txt", "w")
     print >> track, "browser position chr" + \
-        str(snp_coord[1]) + ":" + str(coord1) + "-" + str(coord2)
+        str(snp_coord['chromosome']) + ":" + str(coord1) + "-" + str(coord2)
     print >> track, ""
 
     if r2_d == "r2":
@@ -582,8 +597,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     proxy_plot.title.align = "center"
 
-    tabix_recomb = "tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord[
-        1], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
+    tabix_recomb = "tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
     subprocess.call(tabix_recomb, shell=True)
     filename = tmp_dir + "recomb_" + request + ".txt"
     recomb_raw = open(filename).readlines()
@@ -682,7 +696,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Gene Plot
     tabix_gene = "tabix -fh {0} {1}:{2}-{3} > {4}".format(
-        gene_dir, snp_coord[1], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
+        gene_dir, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
@@ -777,8 +791,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
                    source=source_gene_plot, fill_color="grey", line_color="grey")
-    gene_plot.xaxis.axis_label = "Chromosome " + \
-        snp_coord[1] + " Coordinate (Mb)(GRCh37)"
+    gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(GRCh37)"
     gene_plot.yaxis.axis_label = "Genes"
     gene_plot.ygrid.grid_line_color = None
     gene_plot.yaxis.axis_line_color = None
@@ -805,8 +818,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python LDproxy_plot_sub.py " + \
-            snp + " " + pop + " " + request + " " + r2_d
+        command = "python LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
@@ -862,8 +874,7 @@ def main():
         sys.exit()
 
     # Run function
-    out_script, out_div, error_msg = calculate_proxy(
-        snp, pop, request, web, r2_d)
+    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:

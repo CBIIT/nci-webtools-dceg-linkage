@@ -1,21 +1,28 @@
 import yaml
 import csv
 import sqlite3
+import json
+from pymongo import MongoClient
+from bson import json_util, ObjectId
 import subprocess
 import sys
+contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
 
-snp = sys.argv[1]
-chr = sys.argv[2]
-start = sys.argv[3]
-stop = sys.argv[4]
-request = sys.argv[5]
-process = sys.argv[6]
+web = sys.argv[1]
+snp = sys.argv[2]
+chr = sys.argv[3]
+start = sys.argv[4]
+stop = sys.argv[5]
+request = sys.argv[6]
+process = sys.argv[7]
 
 
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
-snp_dir = config['data']['snp_dir']
 pop_dir = config['data']['pop_dir']
 vcf_dir = config['data']['vcf_dir']
 reg_dir = config['data']['reg_dir']
@@ -137,18 +144,19 @@ def get_regDB(chr, pos):
         return a[1]
 
 
-# Open Connection to SNP
-con2 = sqlite3.connect(snp_dir)
-con2.row_factory = sqlite3.Row
-con2.text_factory = str
-curr2 = con2.cursor()
+# Connect to Mongo snp database
+if web == "True":
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+else:
+    client = MongoClient('localhost', port)
+db = client["LDLink"]
 
 
-def get_coords(rs):
-    id = rs.strip("rs")
-    t = (id,)
-    curr2.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-    return curr2.fetchone()
+def get_coords(db, rsid):
+    rsid = rsid.strip("rs")
+    query_results = db.dbsnp151.find_one({"id": rsid})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
 
 
 # Import SNP VCF files
@@ -214,10 +222,10 @@ for geno_n in vcf:
 
             # Get dbSNP function
             if rs_n[0:2] == "rs":
-                snp_coord = get_coords(rs_n)
+                snp_coord = get_coords(db, rs_n)
 
                 if snp_coord != None:
-                    funct = snp_coord[3]
+                    funct = snp_coord['function']
                 else:
                     funct = "."
             else:
@@ -235,5 +243,3 @@ for i in range(len(out)):
 # Close SQLite connections
 curr.close()
 con.close()
-curr2.close()
-con2.close()
