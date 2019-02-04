@@ -135,16 +135,16 @@ def calculate_chip(snplst, platform_query, web, request):
                             var_id = "rs" + ref_variants[0]
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                         elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
                             var_id = "rs" + snp_info_lst[0]['id']
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp_raw_i[0]
+                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                         else:
                             var_id = "rs" + ref_variants[0]
                         new_snp_lst.append([var_id])

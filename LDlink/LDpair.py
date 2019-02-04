@@ -78,16 +78,16 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
                         var_id = "rs" + ref_variants[0]
                         if "warning" in output:
                             output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
                         else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
                     elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
                         if "warning" in output:
                             output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
                         else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(ref_variants) + ") map to genomic coordinates " + snp
+                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
                     else:
                         var_id = "rs" + ref_variants[0]
                     return var_id
