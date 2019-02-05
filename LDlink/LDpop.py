@@ -212,6 +212,9 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     rs1_dict = dict(zip(head1, vcf1))
     rs2_dict = dict(zip(head2, vcf2))
 
+    print rs1_dict
+    print rs2_dict
+
     # vcf1_pos = snp1_coord['position']
     # vcf2_pos = snp2_coord['position']
     # vcf1 = vcf1_offset
