@@ -1061,109 +1061,35 @@
 				<div class="jumbotron">
 					<!-- LDpop CONTAINER -->
 					<div class="container-fluid overflowy" id="ldpop-results-container">
-						<table class="table-condensed center-align">
-							<tbody>
-								<!-- SNP 1 rsnum and coordinates -->
+						<table id="new-ldassoc" class="table display compact">
+							<thead>
 								<tr>
-									<td></td>
-									<td></td>
-									<td colspan="2" class="cell-center"><a id="snp2-rsnum" data-bind="text: snp2.rsnum" href="#" title="Cluster Report:"
-										 target="LDPop-snp2-rsnum"><span class="sr-only">Cluster Report</span></a><br /> <a id="snp2-coord"
-										 data-bind="text: snp2.coord" href="#" title="Genome Browser" target="LDPop-snp2-coord"><span class="sr-only">Genome
-												Browser</span>
-										</a></td>
-									<td></td>
-									<td></td>
+									<th>Population</th>
+									<!-- <th class="dt-body-center">Chr</th> -->
+									<th>N</th>
+									<th>rs#1 allele freq</th>
+									<th>rs#2 allele freq</th>
+									<th>D'</th>
+									<th>R<sup>2</sup></th>
 								</tr>
-								<!-- Header row -->
+							</thead>
+							<tfoot>
 								<tr>
-									<td></td>
-									<td></td>
-									<td class="cell-center" data-bind="text: snp2.allele_1.allele"></td>
-									<td class="cell-center" data-bind="text: snp2.allele_2.allele"></td>
-									<td></td>
-									<td></td>
+									<th>Population</th>
+									<!-- <th class="dt-body-center">Chr</th> -->
+									<th>N</th>
+									<th>rs#1 allele freq</th>
+									<th>rs#2 allele freq</th>
+									<th>D'</th>
+									<th>R<sup>2</sup></th>
 								</tr>
-								<!-- Row 2 -->
-								<tr>
-									<td class="cell-center" rowspan="2" style="vertical-align: middle">
-										<a id="snp1-rsnum" data-bind="text: snp1.rsnum" href="#" title="Cluster Report:" target="LDPop-snp1-rsnum"><span
-											 class="sr-only">Cluster Report</span></a><br />
-										<a id="snp1-coord" data-bind="text: snp1.coord" href="#" title="Genome Browser" target="LDPop-snp1-coord"><span
-											 class="sr-only">Genome Browser</span></a>
-									</td>
-									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
-
-									<td colspan="2" rowspan="2">
-										<!-- two-by-two sub table -->
-										<table style="width:100%" class="table table-condensed table-bordered two-by-two">
-											<tbody>
-												<tr>
-													<td class="ldpop-results cell-center" width="50%" data-bind="text: two_by_two.cells.c11"></td>
-													<td class="ldpop-results cell-center" data-bind="text: two_by_two.cells.c12"></td>
-												</tr>
-												<tr>
-													<td class="ldpop-results cell-center" data-bind="text: two_by_two.cells.c21"></td>
-													<td class="ldpop-results cell-center" data-bind="text: two_by_two.cells.c22"></td>
-												</tr>
-											</tbody>
-										</table>
-									</td>
-									<td data-bind="text: snp1.allele_1.count"></td>
-									<td class="cell-left">(<span data-bind="text: snp1.allele_1.frequency"></span>)
-									</td>
-								</tr>
-								<!-- Row 3 -->
-								<tr>
-
-									<td class="cell-center" data-bind="text: snp1.allele_2.allele"></td>
-									<td data-bind="text: snp1.allele_2.count"></td>
-									<td class="cell-left">(<span data-bind="text: snp1.allele_2.frequency"></span>)
-									</td>
-								</tr>
-								<!-- Row 4 -->
-								<tr>
-									<td></td>
-									<td></td>
-									<td class="cell-center"><span data-bind="text: snp2.allele_1.count"></span><br> (<span data-bind="text: snp2.allele_1.frequency"></span>)</td>
-									<td class="cell-center"><span data-bind="text: snp2.allele_2.count"></span><br> (<span data-bind="text: snp2.allele_2.frequency"></span>)</td>
-									<td data-bind="text: two_by_two.total"></td>
-									<td></td>
-								</tr>
-							</tbody>
+							</tfoot>
 						</table>
-						<br />
-						<table class="table-condensed center-align">
-							<tbody>
-								<tr>
-									<td colspan="2" class="cell-center"><u>Haplotypes</u></td>
-									<td class="spacer"></td>
-									<td colspan="2" class="cell-center"><u>Statistics</u></td>
-								</tr>
-								<tr>
-									<td class="cell-right"><span data-bind="text: haplotypes.hap1.alleles"></span>:<br> <span data-bind="text: haplotypes.hap2.alleles"></span>:<br>
-										<span data-bind="text: haplotypes.hap3.alleles"></span>:<br> <span data-bind="text: haplotypes.hap4.alleles"></span>:<br></td>
-									<td nowrap><span data-bind="text: haplotypes.hap1.count"></span>&nbsp;
-										(<span data-bind="text: haplotypes.hap1.frequency"></span>) <br>
-										<span data-bind="text: haplotypes.hap2.count"></span>&nbsp; (<span data-bind="text: haplotypes.hap2.frequency"></span>)
-										<br>
-										<span data-bind="text: haplotypes.hap3.count"></span>&nbsp; (<span data-bind="text: haplotypes.hap3.frequency"></span>)
-										<br>
-										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span data-bind="text: haplotypes.hap4.frequency"></span>)
-										<br></td>
-									<td class="spacer"></td>
-									<td class="cell-right">D':<br>R<sup>2</sup>:<br>Chi-sq:<br>p-value:
-									</td>
-									<td><span data-bind="text: statistics.d_prime"></span><br>
-										<span data-bind="text: statistics.r2"></span><br> <span data-bind="text: statistics.chisq"></span><br> <span
-										 data-bind="text: statistics.p"></span><br></td>
-								</tr>
-							</tbody>
-						</table>
-						<br />
-						<div data-bind="foreach: corr_alleles" style="margin-bottom:2%">
-							<div style="text-align: center" data-bind="text: $data"></div>
+
+						<div class="row">
+							<a id="ldassoc-results-link" target="LDProxy-SNP-File"> <span>Download association data for all variants</span></a>
 						</div>
+
 						<a id="ldpop" style="margin-left:20%;margin-top:2%" target="ldpop"><span class="sr-only">LDpop Results</span></a>
 
 					</div>

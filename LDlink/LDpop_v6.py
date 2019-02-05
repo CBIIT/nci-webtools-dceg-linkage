@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 import yaml
 import json
@@ -7,8 +6,8 @@ import os
 import sqlite3
 import subprocess
 import sys
-import time
-import pandas
+# import time
+# import pandas
 
 #rs184056664 60795
 #60479	rs149529999	C	T
