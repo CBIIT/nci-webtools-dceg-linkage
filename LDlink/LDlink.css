@@ -162,6 +162,11 @@ html body .footer {
 	border: 1px solid #ddd;
 }
 
+.ldpop-results {
+	text-align:center;
+	border: 1px solid #ddd;
+}
+
 .center-align {
 	margin: 0 auto !important;
 	float: none !important;
@@ -194,6 +199,10 @@ table tr th:last-child {
 
 */
 table.ldpair,table.ldpair tr, table.ldpair th {
+  background-color: white !important;
+}
+
+table.ldpop,table.ldpop tr, table.ldpop th {
   background-color: white !important;
 }
 
@@ -253,6 +262,9 @@ table.ldhap,table.ldhap tr, table.ldhap th {
   padding:10px 15px;
 }
 .ldpair-stats {
+  float:left;
+}
+.ldpop-stats {
   float:left;
 }
 table.fixed {
@@ -741,6 +753,9 @@ table#snpchip-thinned-list > thead > tr {
 	padding-top:30px;
 }
 #ldpair-snp1, #ldpair-snp2 {
+	min-width:145px;
+}
+#ldpop-snp1, #ldpop-snp2 {
 	min-width:145px;
 }
 #snpclip-thresholds > div.input-group {

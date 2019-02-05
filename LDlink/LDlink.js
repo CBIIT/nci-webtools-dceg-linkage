@@ -18,7 +18,7 @@ var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752
 var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
 var snpchipReverseLookup = [];
 var ldClipRaw;
-var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip", "apiaccess" ];
+var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "snpclip", "snpchip", "apiaccess" ];
 
 
 Object.size = function(obj) {
@@ -658,6 +658,7 @@ function setupTabs() {
     if(currentTab.search('hap')>=0) currentTab = 'ldhap';
     if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
     if(currentTab.search('pair')>=0) currentTab = 'ldpair';
+    if(currentTab.search('pop')>=0) currentTab = 'ldpop';
     if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
@@ -699,6 +700,15 @@ function autoCalculate() {
             if(url.var1 && url.var2 && url.pop) {
                 $("#ldpair-snp1").prop('value', url.var1);
                 $("#ldpair-snp2").prop('value', url.var2);
+                refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+                initCalculate(id);
+                updateData(id);
+            }
+            break;
+        case "ldpop":
+            if(url.var1 && url.var2 && url.pop) {
+                $("#ldpop-snp1").prop('value', url.var1);
+                $("#ldpop-snp2").prop('value', url.var2);
                 refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
                 initCalculate(id);
                 updateData(id);
@@ -1142,6 +1152,12 @@ function updateData(id) {
             if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDpair();
+            }
+            break;
+        case 'ldpop':
+            if(isPopulationSet(id)) {
+                $('#'+id+"-loading").show();
+                updateLDpop();
             }
             break;
         case 'ldproxy':
@@ -2564,6 +2580,50 @@ function updateLDpair() {
         $("#ldpair_results").text("Download Results");
             $('#ldpair_results').css("text-decoration", "underline");
             $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+    hideLoadingIcon(ajaxRequest, id);
+}
+
+function updateLDpop() {
+    var id = 'ldpop';
+    var $btn = $('#' + id).button('loading');
+
+    var population = getPopulationCodes(id+'-population-codes');
+
+    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var ldpopInputs = {
+        var1 : $('#ldpop-snp1').val(),
+        var2 : $('#ldpop-snp2').val(),
+        pop : population.join("+"),
+        reference : reference
+    };
+
+    updateHistoryURL(id, ldpopInputs);
+
+    var url = restServerUrl + "/ldpop";
+
+    var ajaxRequest = $.ajax({
+        type : "GET",
+        url : url,
+        data : ldpopInputs,
+        contentType : 'application/json' // JSON
+    });
+
+    ajaxRequest.success(function(data) {
+        if (displayError(id, data) == false) {
+            ko.mapping.fromJS(data, ldpairModel);
+            $('#' + id + '-results-container').show();
+            addLDpairHyperLinks(data);
+        }
+        $("#ldpop_results").text("Download Results");
+            $('#ldpop_results').css("text-decoration", "underline");
+            $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);

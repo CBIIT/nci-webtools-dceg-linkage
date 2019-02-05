@@ -7,7 +7,7 @@
 	<meta name="generator" content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="LDlink is a suite of web-based applications designed to easily and efficiently interrogate linkage disequilibrium in population groups." />
-	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDproxy, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
+	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDpop, LDproxy, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
 	<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 	<link rel="/LDlink/shortcut icon" href="LD.ico">
 	<!-- DAP code -->
@@ -65,11 +65,14 @@
 					<li>
 						<a id="ldpair-tab-anchor" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
 					</li>
+					<!-- POP -->
+					<li>
+						<a id="ldpop-tab-anchor" href="#ldpop-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants with regard to population">LDpop</a>
+					</li>
 					<!-- PROXY -->
 					<li>
 						<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
 					</li>
-		
 					<!-- CHIP -->
 					<li>
 						<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
@@ -80,7 +83,7 @@
 					</li>
 					<!-- API ACCESS -->
 					<li>
-						<a id="apiaccess-tab-anchor" href="#apiaccess-tab" data-toggle="tab">API Access</a>
+						<a id="apiaccess-tab-anchor" href="#apiaccess-tab" data-toggle="tab" title="Register email to receive API token">API Access</a>
 					</li>
 					<!-- HELP -->
 					<li>
@@ -126,6 +129,9 @@
 
 					<b><a class="anchor-link" dest="ldpair">LDpair</a></b>: Investigate correlated alleles for a pair of variants in
 					high LD. Input is two RS numbers and a population group.<br>
+
+					<b><a class="anchor-link" dest="ldpop">LDpop</a></b>: Investigate correlated alleles for a pair of variants with regard to population 
+					in high LD. Input is two RS numbers and a population group.<br>
 
 					<b><a class="anchor-link" dest="ldproxy">LDproxy</a></b>: Interactively explore proxy and putatively
 					functional variants for a query variant. Input is an RS number and a
@@ -984,6 +990,188 @@
 				</div>
 
 			</div>
+
+			<!-- LDpop -->
+			<div class="tab-pane fade" id="ldpop-tab">
+				<!-- LDpop INPUTS-->
+
+				<div class="row" style="padding-top: 10px;">
+					<div class="col-sm-11">
+						<!-- FORM 4 LDpop -->
+
+						<form id="ldpopForm" class="ldlinkForm">
+							<div class="form-group">
+								<div class="col-sm-3">
+									<input id="ldpop-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RS Number or Coordinate"
+									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 required />
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-3">
+									<input id="ldpop-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RS Number or Coordinate"
+									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 required />
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-4">
+									<a id="ldpop-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
+											codes</span></a>
+									<label for="ldpop-population-codes" style="display: none;">Populations</label>
+									<select id="ldpop-population-codes" multiple="multiple" name="populations">
+									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-1">
+									<input type="submit" id="ldpop" value="Calculate" class="btn btn-default calculate" />
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
+				<hr>
+				<div id="ldpop-loading">
+					<img src="calculating_LD.gif" alt="loading icon" class="loading">
+				</div>
+				<!-- Message ERROR -->
+				<div class="row">
+					<div class="col-sm-7 col-sm-offset-2" id="ldpop-message">
+						<div class="panel panel-danger">
+							<div class="panel-heading">Error</div>
+							<div class="panel-body" id="ldpop-message-content"></div>
+						</div>
+					</div>
+				</div>
+				<!-- Message WARNING -->
+				<div class="row">
+					<div class="col-sm-7 col-sm-offset-2" id="ldpop-message-warning">
+						<div class="panel panel-warning">
+							<div class="panel-heading">Warning</div>
+							<div class="panel-body" id="ldpop-message-warning-content">
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- LDpop OUTPUT Results -->
+
+				<div class="jumbotron">
+					<!-- LDpop CONTAINER -->
+					<div class="container-fluid overflowy" id="ldpop-results-container">
+						<table class="table-condensed center-align">
+							<tbody>
+								<!-- SNP 1 rsnum and coordinates -->
+								<tr>
+									<td></td>
+									<td></td>
+									<td colspan="2" class="cell-center"><a id="snp2-rsnum" data-bind="text: snp2.rsnum" href="#" title="Cluster Report:"
+										 target="LDPop-snp2-rsnum"><span class="sr-only">Cluster Report</span></a><br /> <a id="snp2-coord"
+										 data-bind="text: snp2.coord" href="#" title="Genome Browser" target="LDPop-snp2-coord"><span class="sr-only">Genome
+												Browser</span>
+										</a></td>
+									<td></td>
+									<td></td>
+								</tr>
+								<!-- Header row -->
+								<tr>
+									<td></td>
+									<td></td>
+									<td class="cell-center" data-bind="text: snp2.allele_1.allele"></td>
+									<td class="cell-center" data-bind="text: snp2.allele_2.allele"></td>
+									<td></td>
+									<td></td>
+								</tr>
+								<!-- Row 2 -->
+								<tr>
+									<td class="cell-center" rowspan="2" style="vertical-align: middle">
+										<a id="snp1-rsnum" data-bind="text: snp1.rsnum" href="#" title="Cluster Report:" target="LDPop-snp1-rsnum"><span
+											 class="sr-only">Cluster Report</span></a><br />
+										<a id="snp1-coord" data-bind="text: snp1.coord" href="#" title="Genome Browser" target="LDPop-snp1-coord"><span
+											 class="sr-only">Genome Browser</span></a>
+									</td>
+									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
+
+									<td colspan="2" rowspan="2">
+										<!-- two-by-two sub table -->
+										<table style="width:100%" class="table table-condensed table-bordered two-by-two">
+											<tbody>
+												<tr>
+													<td class="ldpop-results cell-center" width="50%" data-bind="text: two_by_two.cells.c11"></td>
+													<td class="ldpop-results cell-center" data-bind="text: two_by_two.cells.c12"></td>
+												</tr>
+												<tr>
+													<td class="ldpop-results cell-center" data-bind="text: two_by_two.cells.c21"></td>
+													<td class="ldpop-results cell-center" data-bind="text: two_by_two.cells.c22"></td>
+												</tr>
+											</tbody>
+										</table>
+									</td>
+									<td data-bind="text: snp1.allele_1.count"></td>
+									<td class="cell-left">(<span data-bind="text: snp1.allele_1.frequency"></span>)
+									</td>
+								</tr>
+								<!-- Row 3 -->
+								<tr>
+
+									<td class="cell-center" data-bind="text: snp1.allele_2.allele"></td>
+									<td data-bind="text: snp1.allele_2.count"></td>
+									<td class="cell-left">(<span data-bind="text: snp1.allele_2.frequency"></span>)
+									</td>
+								</tr>
+								<!-- Row 4 -->
+								<tr>
+									<td></td>
+									<td></td>
+									<td class="cell-center"><span data-bind="text: snp2.allele_1.count"></span><br> (<span data-bind="text: snp2.allele_1.frequency"></span>)</td>
+									<td class="cell-center"><span data-bind="text: snp2.allele_2.count"></span><br> (<span data-bind="text: snp2.allele_2.frequency"></span>)</td>
+									<td data-bind="text: two_by_two.total"></td>
+									<td></td>
+								</tr>
+							</tbody>
+						</table>
+						<br />
+						<table class="table-condensed center-align">
+							<tbody>
+								<tr>
+									<td colspan="2" class="cell-center"><u>Haplotypes</u></td>
+									<td class="spacer"></td>
+									<td colspan="2" class="cell-center"><u>Statistics</u></td>
+								</tr>
+								<tr>
+									<td class="cell-right"><span data-bind="text: haplotypes.hap1.alleles"></span>:<br> <span data-bind="text: haplotypes.hap2.alleles"></span>:<br>
+										<span data-bind="text: haplotypes.hap3.alleles"></span>:<br> <span data-bind="text: haplotypes.hap4.alleles"></span>:<br></td>
+									<td nowrap><span data-bind="text: haplotypes.hap1.count"></span>&nbsp;
+										(<span data-bind="text: haplotypes.hap1.frequency"></span>) <br>
+										<span data-bind="text: haplotypes.hap2.count"></span>&nbsp; (<span data-bind="text: haplotypes.hap2.frequency"></span>)
+										<br>
+										<span data-bind="text: haplotypes.hap3.count"></span>&nbsp; (<span data-bind="text: haplotypes.hap3.frequency"></span>)
+										<br>
+										<span data-bind="text: haplotypes.hap4.count"></span>&nbsp; (<span data-bind="text: haplotypes.hap4.frequency"></span>)
+										<br></td>
+									<td class="spacer"></td>
+									<td class="cell-right">D':<br>R<sup>2</sup>:<br>Chi-sq:<br>p-value:
+									</td>
+									<td><span data-bind="text: statistics.d_prime"></span><br>
+										<span data-bind="text: statistics.r2"></span><br> <span data-bind="text: statistics.chisq"></span><br> <span
+										 data-bind="text: statistics.p"></span><br></td>
+								</tr>
+							</tbody>
+						</table>
+						<br />
+						<div data-bind="foreach: corr_alleles" style="margin-bottom:2%">
+							<div style="text-align: center" data-bind="text: $data"></div>
+						</div>
+						<a id="ldpop" style="margin-left:20%;margin-top:2%" target="ldpop"><span class="sr-only">LDpop Results</span></a>
+
+					</div>
+
+				</div>
+
+			</div>
+
 			<!-- LDproxy -->
 			<div class="tab-pane fade" id="ldproxy-tab">
 				<!-- LDproxy INPUTS-->
@@ -1668,6 +1856,8 @@
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDpair">LDpair</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&token=faketoken123'</pre></p>
+					<p><a class="help-anchor-link" href="#LDpop">LDpop</a><br>
+						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpop?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&token=faketoken123'</pre></p>	
 					<p><a class="help-anchor-link" href="#LDproxy">LDproxy</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#SNPchip">SNPchip</a><br>
