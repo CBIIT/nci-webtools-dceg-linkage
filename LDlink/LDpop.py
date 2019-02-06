@@ -110,11 +110,15 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     # SNP1
     if snp1_coord == None:
         output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        if web:
+            output = json.dumps(output, sort_keys=True, indent=2)
+        return output
     # SNP2
     if snp2_coord == None:
         output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        if web:
+            output = json.dumps(output, sort_keys=True, indent=2)
+        return output
     # Check if SNPs are on the same chromosome
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
         output["warning"] = snp1 + " and " + \
@@ -130,7 +134,9 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             pop_dirs.append(pop_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            return(json.dumps(output, sort_keys=True, indent=2))
+            if web:
+                output = json.dumps(output, sort_keys=True, indent=2)
+            return output
            
 
     #make empty dictionary to keep sample IDs in for each wanted population 
@@ -181,11 +187,15 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     # SNP1
     if len(vcf1) == 0:
         output["error"] = snp1 + " is not in 1000G reference panel."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        if web:
+            output = json.dumps(output, sort_keys=True, indent=2)
+        return output
     # SNP2
     if len(vcf2) == 0:
         output["error"] = snp2 + " is not in 1000G reference panel."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        if web:
+            output = json.dumps(output, sort_keys=True, indent=2)
+        return output
     
 
     if snp1 != rs1_dict["ID"]:
@@ -314,7 +324,8 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         }
     
     print json.dumps(output)
-    # return(json.dumps(output, sort_keys=True, indent=2))
+    if web:
+        output = json.dumps(output, sort_keys=True, indent=2)
     return output
 
 
