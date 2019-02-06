@@ -114,7 +114,7 @@ def allele_freq_per_pop(snp1, snp2, pop):
 
     rs1_dict = dict(zip(head1, vcf1))
     rs2_dict = dict(zip(head2, vcf2))
-    
+
     
     if snp1 != rs1_dict["ID"]:
         if "warning" in output:

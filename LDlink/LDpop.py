@@ -212,6 +212,10 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     rs1_dict = dict(zip(head1, vcf1))
     rs2_dict = dict(zip(head2, vcf2))
 
+    print "head1", head1
+    print "head2", head2
+    
+
     print rs1_dict
     print rs2_dict
 
