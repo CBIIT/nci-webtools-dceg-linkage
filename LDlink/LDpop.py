@@ -316,10 +316,23 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         output[pops] = {
             'Population': pops , 
             'N': sample_size_dict[pops], \
-            rs1_dict["ID"] + ' Allele Freq': {rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
-            rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"} , \
-            rs2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
-            rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
+            # rs1_dict["ID"] + ' Allele Freq': {
+            #     rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
+            #     rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"
+            # }, \
+            # rs2_dict["ID"] + ' Allele Freq': {
+            #     rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
+            #     rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"
+            # }, 
+            'rs#1 Allele Freq': {
+                rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
+                rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"
+            }, \
+            'rs#2 Allele Freq': {
+                rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
+                rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"
+            }, 
+            "D'" : matrix_values[pops]["D_prime"], \
             "R2" : matrix_values[pops]["r2"]
         }
 
@@ -329,7 +342,18 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     
     print json.dumps(output)
     if web:
-        output = json.dumps(output, sort_keys=True, indent=2)
+        output_table = { 
+            "aaData": []
+        }
+        for key in output.keys():
+            key_pop = output[key]['Population']
+            key_N = output[key]['N']
+            key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
+            key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
+            key_D_prime = output[key]["D'"]
+            key_R_2 = output[key]['R2']
+            output_table["aaData"].append([key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+        output = json.dumps(output_table, sort_keys=True, indent=2)
     return output
 
 

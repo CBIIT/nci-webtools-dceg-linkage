@@ -597,18 +597,7 @@ function createPopTable() {
         "deferRender": false,
         // "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
         "columnDefs": [
-            {
-                "render": function ( data, type, row ) {
-                    return ldproxy_rs_results_link(data, type, row);
-                },
-                "targets": 0
-            },
-            {
-                "render": function ( data, type, row ) {
-                    return ldproxy_rs_results_link(data, type, row);
-                },
-                "targets": 0
-            }
+            { className: "dt-body-center", "targets": [ 1, 4, 5 ] }
         ]
     });
 
@@ -2646,11 +2635,10 @@ function updateLDpop() {
     });
 
     ajaxRequest.success(function(data) {
+        console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);
-            console.log(data);
-            // addLDpairHyperLinks(data);
         }
         $("#ldpop_results").text("Download Results");
             $('#ldpop_results').css("text-decoration", "underline");
