@@ -2640,8 +2640,8 @@ function updateLDpop() {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);
         }
-        $("#ldpop_rs1").text(data.inputs.rs1);
-        $("#ldpop_rs2").text(data.inputs.rs2);
+        // $("#ldpop_rs1").text(data.inputs.rs1);
+        // $("#ldpop_rs2").text(data.inputs.rs2);
         $('#ldpop_results').css("text-decoration", "underline");
         $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
     });
