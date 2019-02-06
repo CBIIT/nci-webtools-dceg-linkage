@@ -322,6 +322,10 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
             "R2" : matrix_values[pops]["r2"]
         }
+
+    # Generate output file
+    with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
+        json.dump(output, ldpop_out)
     
     print json.dumps(output)
     if web:
