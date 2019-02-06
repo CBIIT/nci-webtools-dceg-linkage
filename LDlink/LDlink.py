@@ -322,8 +322,7 @@ def ldpop():
                 # fp = open('./tmp/LDpop_'+reference+'.txt', "r")
                 # content = fp.read()
                 # fp.close()
-                output = json.loads(out_json)
-                return output
+                return sendJSON(out_json)
         except:
             output = json.loads(out_json)
             return sendTraceback(output["error"])

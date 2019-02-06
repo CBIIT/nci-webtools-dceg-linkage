@@ -137,16 +137,15 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     ID_dict = {k: [] for k in pop_split}
     adds = ["CHROM", "POS", "ID", "REF", "ALT"]
     
-    for i in pop_dirs:        
-        with open(i, "r") as f:
-            print i
-            print i.strip(".txt").strip(pop_dir)
+    for pop_i in pop_split:        
+        with open(pop_dir + pop_i + ".txt", "r") as f:
+            print pop_dir + pop_i + ".txt"
             for line in f:
                 cleanedLine = line.strip()
                 if cleanedLine: # is not empty
-                    ID_dict[i.strip(".txt").strip(pop_dir)].append(cleanedLine)
+                    ID_dict[pop_i].append(cleanedLine)
             for entry in adds:
-                ID_dict[i.strip(".txt").strip(pop_dir)].append(entry)
+                ID_dict[pop_i].append(entry)
             print ID_dict
     
     # Extract 1000 Genomes phased genotypes
