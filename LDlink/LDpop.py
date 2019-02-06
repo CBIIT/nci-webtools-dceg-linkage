@@ -346,13 +346,18 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             "aaData": []
         }
         for key in output.keys():
-            key_pop = output[key]['Population']
-            key_N = output[key]['N']
-            key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
-            key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
-            key_D_prime = output[key]["D'"]
-            key_R_2 = output[key]['R2']
-            output_table["aaData"].append([key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+            if key != "warning" or key != "error":
+                key_pop = output[key]['Population']
+                key_N = output[key]['N']
+                key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
+                key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
+                key_D_prime = output[key]["D'"]
+                key_R_2 = output[key]['R2']
+                output_table["aaData"].append([key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+        if "warning" in output:
+            output_table["warning"] = output["warning"]
+        if "error" in output:
+            output_table["error"] = output["error"]
         output = json.dumps(output_table, sort_keys=True, indent=2)
     return output
 
