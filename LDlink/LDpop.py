@@ -152,7 +152,6 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                     ID_dict[pop_i].append(cleanedLine)
             for entry in adds:
                 ID_dict[pop_i].append(entry)
-            print ID_dict
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
@@ -343,13 +342,16 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     print json.dumps(output)
     if web:
         output_table = { 
+            "inputs": {
+                "rs1": snp1,
+                "rs2": snp2
+            },
             "aaData": []
         }
         print output.keys()
         for key in output.keys():
-            print key
             if len(key) == 3:
-                print "parse for table"
+                print key, "parse for table"
                 key_pop = output[key]['Population']
                 key_N = output[key]['N']
                 key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])

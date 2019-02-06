@@ -2597,8 +2597,8 @@ function updateLDpair() {
             addLDpairHyperLinks(data);
         }
         $("#ldpair_results").text("Download Results");
-            $('#ldpair_results').css("text-decoration", "underline");
-            $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+        $('#ldpair_results').css("text-decoration", "underline");
+        $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
@@ -2640,9 +2640,10 @@ function updateLDpop() {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);
         }
-        $("#ldpop_results").text("Download Results");
-            $('#ldpop_results').css("text-decoration", "underline");
-            $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
+        $("#ldpop_rs1").text(data.inputs.rs1);
+        $("#ldpop_rs2").text(data.inputs.rs2);
+        $('#ldpop_results').css("text-decoration", "underline");
+        $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
