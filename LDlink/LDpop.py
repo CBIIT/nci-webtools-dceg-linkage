@@ -136,17 +136,16 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     # SNP1
     # vcf_dir = "vcfs/"
    
-    vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz" 
+    vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
-    vcf1 = proc1.stdout.readlines()[0].strip().split("\t")
+    vcf1 = proc1.stdout.readlines()[0].strip().split()
 
-    vcf_rs2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+    vcf_rs2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
-    vcf2 = proc2.stdout.readlines()[0].strip().split("\t")
+    vcf2 = proc2.stdout.readlines()[0].strip().split()
     
-
 
     # Get headers
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
