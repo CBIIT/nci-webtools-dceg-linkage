@@ -283,7 +283,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                         rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
                         "R2" : matrix_values[pops]["r2"]}
     
-    # json.dumps(output)
+    print json.dumps(output)
     return(json.dumps(output, sort_keys=True, indent=2))
 
 

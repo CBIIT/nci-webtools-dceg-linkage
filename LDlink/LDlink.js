@@ -2619,7 +2619,8 @@ function updateLDpop() {
         if (displayError(id, data) == false) {
             ko.mapping.fromJS(data, ldpairModel);
             $('#' + id + '-results-container').show();
-            addLDpairHyperLinks(data);
+            console.log(data);
+            // addLDpairHyperLinks(data);
         }
         $("#ldpop_results").text("Download Results");
             $('#ldpop_results').css("text-decoration", "underline");
