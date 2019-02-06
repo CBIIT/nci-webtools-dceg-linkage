@@ -44,7 +44,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 
-    def get_coords(db, rsid):
+    def get_chrom_coords(db, rsid):
         rsid = rsid.strip("rs")
         query_results = db.dbsnp151.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
@@ -102,52 +102,27 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
 
     snp1 = replace_coord_rsid(db, snp1)
     snp2 = replace_coord_rsid(db, snp2)
-
-
-
-
-    # Find RS numbers in snp database
-    # SNP1
-    snp1_coord = get_coords(db, snp1)
-    if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    # SNP2
-    snp2_coord = get_coords(db, snp2)
-    if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    # Check if SNPs are on the same chromosome
-    if snp1_coord['chromosome'] != snp2_coord['chromosome']:
-        output["warning"] = snp1 + " and " + \
-            snp2 + " are on different chromosomes"
-
-
-
-
-    # Select desired ancestral populations
-    pop_split = pop.split("+")
+    
+    snp1_coord = get_chrom_coords(db, snp1)
+    snp2_coord = get_chrom_coords(db, snp2)
+  
+    #empty list for paths to population data
     pop_dirs = []
+    pop_split = pop.split("+")
+    # pop_dir = "1000gpopulationdefs/"
+    
     for pop_i in pop_split:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
             pop_dirs.append(pop_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             return(json.dumps(output, sort_keys=True, indent=2))
+           
 
-    # get_pops = "cat " + " ".join(pop_dirs)
-    # proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    # pop_list = proc.stdout.readlines()
-
-    # ids = [i.strip() for i in pop_list]
-    # pop_ids = list(set(ids))
-
-    # make empty dictionary to keep sample IDs in for each wanted population 
+    #make empty dictionary to keep sample IDs in for each wanted population 
     ID_dict = {k: [] for k in pop_split}
     adds = ["CHROM", "POS", "ID", "REF", "ALT"]
-
+    
     for i in pop_dirs:        
         with open(i, "r") as f:
             for line in f:
@@ -156,91 +131,40 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                     ID_dict[i.strip(".txt").strip(pop_dir)].append(cleanedLine)
             for entry in adds:
                 ID_dict[i.strip(".txt").strip(pop_dir)].append(entry)
-
+    
     # Extract 1000 Genomes phased genotypes
-
-
-
-    # vcf_dir = "vcfs/"
-                          
-    # vcf_rs1 = vcf_dir + "ALL.chr" + snp1_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz" 
-    # rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord[1], snp1_coord[2]) 
-    # proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
-    # vcf1 = proc1.stdout.readlines()[0].strip().split("\t")
-
-    # vcf_rs2 = vcf_dir + "ALL.chr" + snp2_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
-    # rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord[1], snp2_coord[2])
-    # proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
-    # vcf2 = proc2.stdout.readlines()[0].strip().split("\t")
-    
-    
-    # Get headers
-    # tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
-    # proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    # head1 = proc1_h.stdout.readlines()[0].strip().split()
-
-    # tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_rs2)
-    # proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    # head2 = proc2_h.stdout.readlines()[0].strip().split()
-
-    # rs1_dict = dict(zip(head1, vcf1))
-    # rs2_dict = dict(zip(head2, vcf2))
-
-
-
     # SNP1
-    vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp1 = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
-    proc1 = subprocess.Popen(tabix_snp1, shell=True, stdout=subprocess.PIPE)
-    vcf1 = proc1.stdout.readlines()
+    # vcf_dir = "vcfs/"
+   
+    vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz" 
+    rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
+    proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
+    vcf1 = proc1.stdout.readlines()[0].strip().split("\t")
 
-    # SNP2
-    vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp2 = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
-    proc2 = subprocess.Popen(tabix_snp2, shell=True, stdout=subprocess.PIPE)
-    vcf2 = proc2.stdout.readlines()
+    vcf_rs2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz"
+    rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
+    proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
+    vcf2 = proc2.stdout.readlines()[0].strip().split("\t")
+    
+
 
     # Get headers
-    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
+    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = proc1_h.stdout.readlines()[0].strip().split()
 
-    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
-    proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
+    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_rs2)
+    proc2_h = subprocess.Popen(
+        tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = proc2_h.stdout.readlines()[0].strip().split()
 
+
+    
     rs1_dict = dict(zip(head1, vcf1))
     rs2_dict = dict(zip(head2, vcf2))
 
-    print "head1", head1
-    print "head2", head2
     
 
-    print rs1_dict
-    print rs2_dict
-
-    # vcf1_pos = snp1_coord['position']
-    # vcf2_pos = snp2_coord['position']
-    # vcf1 = vcf1_offset
-    # vcf2 = vcf2_offset
-
-    # Import SNP VCF files
-
-    # SNP1 
-    if len(vcf1) == 0:
-        output["error"] = snp1 + " is not in 1000G reference panel."
-        return(json.dumps(output, sort_keys=True, indent=2))
-    elif len(vcf1) > 1:
-        geno1 = []
-        for i in range(len(vcf1)):
-            if vcf1[i].strip().split()[2] == snp1:
-                geno1 = vcf1[i].strip().split()
-        if geno1 == []:
-            output["error"] = snp1 + " is not in 1000G reference panel."
-            return(json.dumps(output, sort_keys=True, indent=2))
-    else:
-        geno1 = vcf1[0].strip().split()
-    
     if snp1 != rs1_dict["ID"]:
         if "warning" in output:
             output["warning"] = output["warning"] + \
@@ -253,28 +177,6 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
         snp1 = rs1_dict["ID"]
 
-    if "<" in rs1_dict["REF"]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                "." + snp1 + "is a CNV marker. " 
-        else:
-            output["warning"] = snp1 + "is a CNV marker. " 
-
-    # SNP2
-    if len(vcf2) == 0:
-        output["error"] = snp2 + " is not in 1000G reference panel."
-        return(json.dumps(output, sort_keys=True, indent=2))
-    elif len(vcf2) > 1:
-        geno2 = []
-        for i in range(len(vcf2)):
-            if vcf2[i].strip().split()[2] == snp2:
-                geno2 = vcf2[i].strip().split()
-        if geno2 == []:
-            output["error"] = snp2 + " is not in 1000G reference panel."
-            return(json.dumps(output, sort_keys=True, indent=2))
-    else:
-        geno2 = vcf2[0].strip().split()
-
     if snp2 != rs2_dict["ID"]:
         if "warning" in output:
             output["warning"] = output["warning"] + \
@@ -286,29 +188,26 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 ") does not match RS number at 1000G position (chr" + \
                 rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
         snp2 = rs2_dict["ID"]
-
+    
+    if "<" in rs1_dict["REF"]:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                "." + snp1 + "is a CNV marker. " 
+        else:
+            output["warning"] = snp1 + "is a CNV marker. " 
+            
     if "<" in rs2_dict["REF"]:
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 "." + snp2 + "is a CNV marker. " 
         else:
             output["warning"] = snp2 + "is a CNV marker. " 
+    
+    geno_ind = {"rs1" : {k: [] for k in pop_split},
+            "rs2" : {k: [] for k in pop_split} 
+            }
+    
 
-
-
-    # if geno1[1] != vcf1_pos:
-    #     output["error"] = "VCF File does not match variant coordinates for SNP1."
-    #     return(json.dumps(output, sort_keys=True, indent=2))
-
-    # if geno2[1] != vcf2_pos:
-    #     output["error"] = "VCF File does not match variant coordinates for SNP2."
-    #     return(json.dumps(output, sort_keys=True, indent=2))
-
-
-    geno_ind = {
-        "rs1" : {k: [] for k in pop_split},
-        "rs2" : {k: [] for k in pop_split} 
-    }
 
     #SNP1
     for colname in rs1_dict:       
@@ -323,14 +222,12 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 geno_ind["rs2"][key].append(rs2_dict[colname])
     
     #population freqency dictionary to fill in
-    pop_freqs = {
-        "ref_freq_snp1" : { }, \
+    pop_freqs = {"ref_freq_snp1" : { }, \
         "ref_freq_snp2" : { }, \
         "alt_freq_snp1" : { }, \
         "alt_freq_snp2" : { }, \
-        "total_alleles": { }
-    }      
-
+        "total_alleles": {}}           
+    
     for key in geno_ind["rs1"]:
         pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0"))
         pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
@@ -338,15 +235,13 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
         pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
         
-    
     #get sample size for each population
     sample_size_dict = {}  
      
     for key in ID_dict:
         sample_size_dict[key] = len(ID_dict[key])- len(adds)
         
-    # Combine phased genotypes
-    
+    # Combine phased genotype
     # Extract haplotypes
     hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0} for k in pop_split}
     
@@ -354,10 +249,11 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         for ind in range(len(geno_ind["rs1"][pop])):
             hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
             hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
+
             if hap1 in hap[pop]:
                 hap[pop][hap1] += 1           
                 hap[pop][hap2] += 1
-
+        
     # Sort haplotypes
     matrix_values = {k : {"A": "", "B": "", "C": "", "D": "", "N": "", "delta" : "", "Ms" : "" , "D_prime":"", "r2":""} for k in pop_split}
     for pop in hap:
@@ -387,161 +283,23 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                         rs2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
                         rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
                         "R2" : matrix_values[pops]["r2"]}
-
-    json.dumps(output)
-    print(json.dumps(output, sort_keys=True, indent=2))
-
-
-    for key in geno_ind["rs1"]:
-        pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0"))
-        pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        
     
-    #get sample size for each population
-    sample_size_dict = {}  
-     
-    for key in ID_dict:
-        sample_size_dict[key] = len(ID_dict[key])- len(adds)
-        
-    # Combine phased genotypes
-    
-    # Extract haplotypes
-    hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0} for k in pop_split}
-    
-    for pop in geno_ind["rs1"]:
-        for ind in range(len(geno_ind["rs1"][pop])):
-            hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
-            hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
-            if hap1 in hap[pop]:
-                hap[pop][hap1] += 1           
-                hap[pop][hap2] += 1
-
-    # Sort haplotypes
-    matrix_values = {k : {"A": "", "B": "", "C": "", "D": "", "N": "", "delta" : "", "Ms" : "" , "D_prime":"", "r2":""} for k in pop_split}
-    for pop in hap:
-        matrix_values[pop]["A"] = hap[pop][sorted(hap[pop])[0]]
-        matrix_values[pop]["B"] = hap[pop][sorted(hap[pop])[1]]
-        matrix_values[pop]["C"] = hap[pop][sorted(hap[pop])[2]]
-        matrix_values[pop]["D"] = hap[pop][sorted(hap[pop])[3]]
-        matrix_values[pop]["N"] = matrix_values[pop]["A"] + matrix_values[pop]["B"] + matrix_values[pop]["C"] + matrix_values[pop]["D"]
-        matrix_values[pop]["delta"] = float(matrix_values[pop]["A"] * matrix_values[pop]["D"] - matrix_values[pop]["B"] * matrix_values[pop]["C"])
-        matrix_values[pop]["Ms"] = float((matrix_values[pop]["A"] + matrix_values[pop]["C"]) * (matrix_values[pop]["B"] + matrix_values[pop]["D"]) * (matrix_values[pop]["A"] + matrix_values[pop]["B"]) * (matrix_values[pop]["C"] + matrix_values[pop]["D"]))
-        if matrix_values[pop]["Ms"] != 0:
-            # D prime
-            if matrix_values[pop]["delta"] < 0:
-                matrix_values[pop]["D_prime"] = abs(matrix_values[pop]["delta"] / min((matrix_values[pop]["A"] + matrix_values[pop]["C"]) * (matrix_values[pop]["A"] + matrix_values[pop]["B"]), (matrix_values[pop]["B"] + matrix_values[pop]["D"]) * (matrix_values[pop]["C"] + matrix_values[pop]["D"])))
-            else:
-                matrix_values[pop]["D_prime"] = abs(matrix_values[pop]["delta"] / min((matrix_values[pop]["A"] + matrix_values[pop]["C"]) * (matrix_values[pop]["C"] + matrix_values[pop]["D"]), (matrix_values[pop]["A"] + matrix_values[pop]["B"]) * (matrix_values[pop]["B"] + matrix_values[pop]["D"])))
-            # R2
-            matrix_values[pop]["r2"]= (matrix_values[pop]["delta"]**2) / matrix_values[pop]["Ms"]
-        else:
-            matrix_values[pop]["D_prime"] = "NA"
-            matrix_values[pop]["r2"] = "NA"
-    
-    for pops in sample_size_dict:    
-        output[pops] = {'Population': pops , 'N': sample_size_dict[pops], \
-                        rs1_dict["ID"] + ' Allele Freq': {rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
-                        rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"} , \
-                        rs2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
-                        rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
-                        "R2" : matrix_values[pops]["r2"]}
-
-    json.dumps(output)
-    print(json.dumps(output, sort_keys=True, indent=2))
-
-    # Generate output file
-    # ldpair_out = open(tmp_dir + "LDpair_" + request + ".txt", "w")
-    # print >> ldpair_out, "Query SNPs:"
-    # print >> ldpair_out, output["snp1"]["rsnum"] + \
-    #     " (" + output["snp1"]["coord"] + ")"
-    # print >> ldpair_out, output["snp2"]["rsnum"] + \
-    #     " (" + output["snp2"]["coord"] + ")"
-    # print >> ldpair_out, ""
-    # print >> ldpair_out, pop + " Haplotypes:"
-    # print >> ldpair_out, " " * 15 + output["snp2"]["rsnum"]
-    # print >> ldpair_out, " " * 15 + \
-    #     output["snp2"]["allele_1"]["allele"] + " " * \
-    #     7 + output["snp2"]["allele_2"]["allele"]
-    # print >> ldpair_out, " " * 13 + "-" * 17
-    # print >> ldpair_out, " " * 11 + output["snp1"]["allele_1"]["allele"] + " | " + output["two_by_two"]["cells"]["c11"] + " " * (5 - len(output["two_by_two"]["cells"]["c11"])) + " | " + output["two_by_two"]["cells"]["c12"] + " " * (
-    #     5 - len(output["two_by_two"]["cells"]["c12"])) + " | " + output["snp1"]["allele_1"]["count"] + " " * (5 - len(output["snp1"]["allele_1"]["count"])) + " (" + output["snp1"]["allele_1"]["frequency"] + ")"
-    # print >> ldpair_out, output["snp1"]["rsnum"] + " " * \
-    #     (10 - len(output["snp1"]["rsnum"])) + " " * 3 + "-" * 17
-    # print >> ldpair_out, " " * 11 + output["snp1"]["allele_2"]["allele"] + " | " + output["two_by_two"]["cells"]["c21"] + " " * (5 - len(output["two_by_two"]["cells"]["c21"])) + " | " + output["two_by_two"]["cells"]["c22"] + " " * (
-    #     5 - len(output["two_by_two"]["cells"]["c22"])) + " | " + output["snp1"]["allele_2"]["count"] + " " * (5 - len(output["snp1"]["allele_2"]["count"])) + " (" + output["snp1"]["allele_2"]["frequency"] + ")"
-    # print >> ldpair_out, " " * 13 + "-" * 17
-    # print >> ldpair_out, " " * 15 + output["snp2"]["allele_1"]["count"] + " " * (5 - len(output["snp2"]["allele_1"]["count"])) + " " * 3 + output["snp2"]["allele_2"]["count"] + " " * (
-    #     5 - len(output["snp2"]["allele_2"]["count"])) + " " * 3 + output["two_by_two"]["total"]
-    # print >> ldpair_out, " " * 14 + "(" + output["snp2"]["allele_1"]["frequency"] + ")" + " " * (5 - len(output["snp2"]["allele_1"]["frequency"])) + \
-    #     " (" + output["snp2"]["allele_2"]["frequency"] + ")" + \
-    #     " " * (5 - len(output["snp2"]["allele_2"]["frequency"]))
-    # print >> ldpair_out, ""
-    # print >> ldpair_out, "          " + output["haplotypes"]["hap1"]["alleles"] + ": " + \
-    #     output["haplotypes"]["hap1"]["count"] + \
-    #     " (" + output["haplotypes"]["hap1"]["frequency"] + ")"
-    # print >> ldpair_out, "          " + output["haplotypes"]["hap2"]["alleles"] + ": " + \
-    #     output["haplotypes"]["hap2"]["count"] + \
-    #     " (" + output["haplotypes"]["hap2"]["frequency"] + ")"
-    # print >> ldpair_out, "          " + output["haplotypes"]["hap3"]["alleles"] + ": " + \
-    #     output["haplotypes"]["hap3"]["count"] + \
-    #     " (" + output["haplotypes"]["hap3"]["frequency"] + ")"
-    # print >> ldpair_out, "          " + output["haplotypes"]["hap4"]["alleles"] + ": " + \
-    #     output["haplotypes"]["hap4"]["count"] + \
-    #     " (" + output["haplotypes"]["hap4"]["frequency"] + ")"
-    # print >> ldpair_out, ""
-    # print >> ldpair_out, "          D': " + output["statistics"]["d_prime"]
-    # print >> ldpair_out, "          R2: " + output["statistics"]["r2"]
-    # print >> ldpair_out, "      Chi-sq: " + output["statistics"]["chisq"]
-    # print >> ldpair_out, "     p-value: " + output["statistics"]["p"]
-    # print >> ldpair_out, ""
-    # if len(output["corr_alleles"]) == 2:
-    #     print >> ldpair_out, output["corr_alleles"][0]
-    #     print >> ldpair_out, output["corr_alleles"][1]
-    # else:
-    #     print >> ldpair_out, output["corr_alleles"][0]
-
-    # try:
-    #     output["warning"]
-    # except KeyError:
-    #     www = "do nothing"
-    # else:
-    #     print >> ldpair_out, "WARNING: " + output["warning"] + "!"
-    # ldpair_out.close()
-
-    # Return output
+    # json.dumps(output)
     return(json.dumps(output, sort_keys=True, indent=2))
 
 
 def main():
-    import json
-    import sys
-
-    # Import LDpair options
-    if len(sys.argv) == 6:
-        snp1 = sys.argv[1]
-        snp2 = sys.argv[2]
-        pop = sys.argv[3]
-        web = sys.argv[4]
-        request = sys.argv[5]
-    elif sys.argv[4] is False:
-        snp1 = sys.argv[1]
-        snp2 = sys.argv[2]
-        pop = sys.argv[3]
-        web = sys.argv[4]
-        request = str(time.strftime("%I%M%S"))
-    else:
-        print "Correct useage is: LDpop.py snp1 snp2 populations request false"
-        sys.exit()
+    snp1 = sys.argv[1]
+    snp2 = sys.argv[2]
+    pop = sys.argv[3]
+    web = False
+    request = None
 
     # Run function
     out_json = calculate_pop(snp1, snp2, pop, web, request)
 
     # Print output
-    json_dict = json.loads(out_json)
-    print json_dict
+    print out_json
 
 if __name__ == "__main__":
     main()
