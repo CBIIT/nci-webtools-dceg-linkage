@@ -169,8 +169,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     head1 = proc1_h.stdout.readlines()[0].strip().split()
 
     tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_rs2)
-    proc2_h = subprocess.Popen(
-        tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
+    proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = proc2_h.stdout.readlines()[0].strip().split()
 
 
@@ -227,9 +226,10 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         else:
             output["warning"] = snp2 + "is a CNV marker. " 
     
-    geno_ind = {"rs1" : {k: [] for k in pop_split},
-            "rs2" : {k: [] for k in pop_split} 
-            }
+    geno_ind = {
+        "rs1" : {k: [] for k in pop_split},
+        "rs2" : {k: [] for k in pop_split} 
+    }
     
 
 
@@ -246,11 +246,13 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 geno_ind["rs2"][key].append(rs2_dict[colname])
     
     #population freqency dictionary to fill in
-    pop_freqs = {"ref_freq_snp1" : { }, \
+    pop_freqs = {
+        "ref_freq_snp1" : { }, \
         "ref_freq_snp2" : { }, \
         "alt_freq_snp1" : { }, \
         "alt_freq_snp2" : { }, \
-        "total_alleles": {}}           
+        "total_alleles": { }
+    }           
     
     for key in geno_ind["rs1"]:
         pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0"))
@@ -301,15 +303,19 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             matrix_values[pop]["r2"] = "NA"
     
     for pops in sample_size_dict:    
-        output[pops] = {'Population': pops , 'N': sample_size_dict[pops], \
-                        rs1_dict["ID"] + ' Allele Freq': {rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
-                        rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"} , \
-                        rs2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
-                        rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
-                        "R2" : matrix_values[pops]["r2"]}
+        output[pops] = {
+            'Population': pops , 
+            'N': sample_size_dict[pops], \
+            rs1_dict["ID"] + ' Allele Freq': {rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
+            rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"} , \
+            s2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
+            rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
+            "R2" : matrix_values[pops]["r2"]
+        }
     
     print json.dumps(output)
-    return(json.dumps(output, sort_keys=True, indent=2))
+    # return(json.dumps(output, sort_keys=True, indent=2))
+    return output
 
 
 def main():
