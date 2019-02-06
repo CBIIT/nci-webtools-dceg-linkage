@@ -319,10 +319,11 @@ def ldpop():
         # if API call has error, retrieve error message from json returned from calculation
         try:
             if isProgrammatic:
-                fp = open('./tmp/LDpop_'+reference+'.txt', "r")
-                content = fp.read()
-                fp.close()
-                return content
+                # fp = open('./tmp/LDpop_'+reference+'.txt', "r")
+                # content = fp.read()
+                # fp.close()
+                output = json.loads(out_json)
+                return output
         except:
             output = json.loads(out_json)
             return sendTraceback(output["error"])

@@ -105,6 +105,20 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     
     snp1_coord = get_chrom_coords(db, snp1)
     snp2_coord = get_chrom_coords(db, snp2)
+
+    # Check if RS numbers are in snp database
+    # SNP1
+    if snp1_coord == None:
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
+    # SNP2
+    if snp2_coord == None:
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
+    # Check if SNPs are on the same chromosome
+    if snp1_coord['chromosome'] != snp2_coord['chromosome']:
+        output["warning"] = snp1 + " and " + \
+            snp2 + " are on different chromosomes"
   
     #empty list for paths to population data
     pop_dirs = []
@@ -125,12 +139,15 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     
     for i in pop_dirs:        
         with open(i, "r") as f:
+            print i
+            print i.strip(".txt").strip(pop_dir)
             for line in f:
                 cleanedLine = line.strip()
                 if cleanedLine: # is not empty
                     ID_dict[i.strip(".txt").strip(pop_dir)].append(cleanedLine)
             for entry in adds:
                 ID_dict[i.strip(".txt").strip(pop_dir)].append(entry)
+            print ID_dict
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
@@ -162,6 +179,15 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     rs1_dict = dict(zip(head1, vcf1))
     rs2_dict = dict(zip(head2, vcf2))
 
+    # Check if SNPs are in 1000G reference panel
+    # SNP1
+    if len(vcf1) == 0:
+        output["error"] = snp1 + " is not in 1000G reference panel."
+        return(json.dumps(output, sort_keys=True, indent=2))
+    # SNP2
+    if len(vcf2) == 0:
+        output["error"] = snp2 + " is not in 1000G reference panel."
+        return(json.dumps(output, sort_keys=True, indent=2))
     
 
     if snp1 != rs1_dict["ID"]:
