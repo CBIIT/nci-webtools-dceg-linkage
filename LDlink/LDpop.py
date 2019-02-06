@@ -308,7 +308,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             'N': sample_size_dict[pops], \
             rs1_dict["ID"] + ' Allele Freq': {rs1_dict["REF"] : str(pop_freqs["ref_freq_snp1"][pops]) + "%", \
             rs1_dict["ALT"] : str(pop_freqs["alt_freq_snp1"][pops]) + "%"} , \
-            s2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
+            rs2_dict["ID"] + ' Allele Freq': {rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
             rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"}, "D'" : matrix_values[pops]["D_prime"], \
             "R2" : matrix_values[pops]["r2"]
         }
