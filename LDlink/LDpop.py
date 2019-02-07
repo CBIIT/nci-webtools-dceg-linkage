@@ -430,7 +430,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         print table_data
         def getKeyOrder(element):
             return element[0]
-        table_data = table_data.sort(key=getKeyOrder)
+        table_data.sort(key=getKeyOrder)
         print table_data
         output_table["aaData"] = [xs[1:] for xs in table_data]
         print output_table["aaData"]
