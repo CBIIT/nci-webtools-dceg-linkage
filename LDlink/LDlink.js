@@ -586,9 +586,9 @@ function createAssocTable() {
 function createPopTable() {
 
     var ldpopTable = $('#new-ldpop').DataTable( {
-        "bPaginate": true,
+        "bPaginate": false,
         "bJQueryUI": false,  // ThemeRoller
-        "bLengthChange": true,
+        "bLengthChange": false,
         "bFilter": true,
         "bSort": true,
         "bInfo": true,
@@ -889,10 +889,10 @@ var snpclipModel = ko.mapping.fromJS(snpclipData);
 var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
-    table = $(tableId).dataTable();
+    table = $(tableId).DataTable();
     oSettings = table.fnSettings();
     table.fnClearTable(this);
-    for (var i=0; i<json.aaData.length; i++) {
+    for (var i = 0; i < json.aaData.length; i++) {
       table.oApi._fnAddData(oSettings, json.aaData[i]);
     }
     oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
