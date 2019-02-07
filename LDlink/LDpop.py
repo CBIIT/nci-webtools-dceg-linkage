@@ -406,12 +406,9 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             "D'" : matrix_values[pops]["D_prime"], \
             "R2" : matrix_values[pops]["r2"]
         }
-
-    # Generate output file
-    with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
-        json.dump(output, ldpop_out)
     
     print json.dumps(output)
+
     if web:
         output_table = { 
             "inputs": {
@@ -444,7 +441,20 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             output_table["warning"] = output["warning"]
         if "error" in output:
             output_table["error"] = output["error"]
+        # Generate output file
+        with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
+            ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "D'", "R2"]))
+            for row in output_table["aaData"]:
+                ldpop_out.write("\t".join(row))
+            if "error" in output_table:
+                ldpop_out.write("\n")
+                ldpop_out.write(output_table["error"])
+            if "warning" in output_table:
+                ldpop_out.write("\n")
+                ldpop_out.write(output_table["warning"])
         output = json.dumps(output_table, sort_keys=True, indent=2)
+
+        
     return output
 
 
