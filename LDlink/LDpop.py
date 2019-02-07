@@ -426,9 +426,9 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 key_pop = output[key]['Population']
                 key_N = output[key]['N']
                 # key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
-                key_rs1_allele_freq = rs1_dict["REF"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["REF"]] + "%" + ", " + rs1_dict["ALT"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["ALT"]] + "%"
+                key_rs1_allele_freq = rs1_dict["REF"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["REF"]] + ", " + rs1_dict["ALT"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["ALT"]]
                 # key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
-                key_rs2_allele_freq = rs2_dict["REF"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["REF"]] + "%" + ", " + rs2_dict["ALT"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["ALT"]] + "%"
+                key_rs2_allele_freq = rs2_dict["REF"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["REF"]] + ", " + rs2_dict["ALT"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["ALT"]]
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
                 table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
