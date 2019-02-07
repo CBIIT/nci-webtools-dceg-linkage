@@ -586,6 +586,7 @@ function createAssocTable() {
 function createPopTable() {
 
     var ldpopTable = $('#new-ldpop').DataTable( {
+        "aaSorting": [],  /* Disable initial sort */
         "bPaginate": false,
         "bJQueryUI": false,  // ThemeRoller
         "bLengthChange": false,
@@ -890,20 +891,6 @@ var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
     table = $(tableId).dataTable();
-    oSettings = table.fnSettings();
-    table.fnClearTable(this);
-    for (var i = 0; i < json.aaData.length; i++) {
-      table.oApi._fnAddData(oSettings, json.aaData[i]);
-    }
-    oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
-    table.fnDraw();
-}
-
-function RefreshTablePop(tableId, json) {
-    table = $(tableId).dataTable({
-        /* Disable initial sort */
-        "aaSorting": []
-    });
     oSettings = table.fnSettings();
     table.fnClearTable(this);
     for (var i = 0; i < json.aaData.length; i++) {
@@ -2652,7 +2639,7 @@ function updateLDpop() {
         console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
-            RefreshTablePop('#new-ldpop', data);
+            RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
             $('#ldpop_results').css("text-decoration", "underline");
