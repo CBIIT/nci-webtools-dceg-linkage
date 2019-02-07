@@ -174,26 +174,27 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         pop_split.remove("ALL")
         pop_split = pop_split + pop_groups["ALL"]
         pop_split = list(set(pop_split)) # unique elements
-    if "AFR" in pop_split:
-        pop_split.remove("AFR")
-        pop_split = pop_split + pop_groups["AFR"]
-        pop_split = list(set(pop_split)) # unique elements
-    if "AMR" in pop_split:
-        pop_split.remove("AMR")
-        pop_split = pop_split + pop_groups["AMR"]
-        pop_split = list(set(pop_split)) # unique elements
-    if "EAS" in pop_split:
-        pop_split.remove("EAS")
-        pop_split = pop_split + pop_groups["EAS"]
-        pop_split = list(set(pop_split)) # unique elements
-    if "EUR" in pop_split:
-        pop_split.remove("EUR")
-        pop_split = pop_split + pop_groups["EUR"]
-        pop_split = list(set(pop_split)) # unique elements
-    if "SAS" in pop_split:
-        pop_split.remove("SAS")
-        pop_split = pop_split + pop_groups["SAS"]
-        pop_split = list(set(pop_split)) # unique elements
+    else:
+        if "AFR" in pop_split:
+            pop_split.remove("AFR")
+            pop_split = pop_split + pop_groups["AFR"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "AMR" in pop_split:
+            pop_split.remove("AMR")
+            pop_split = pop_split + pop_groups["AMR"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "EAS" in pop_split:
+            pop_split.remove("EAS")
+            pop_split = pop_split + pop_groups["EAS"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "EUR" in pop_split:
+            pop_split.remove("EUR")
+            pop_split = pop_split + pop_groups["EUR"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "SAS" in pop_split:
+            pop_split.remove("SAS")
+            pop_split = pop_split + pop_groups["SAS"]
+            pop_split = list(set(pop_split)) # unique elements
     
     for pop_i in pop_split:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
@@ -417,13 +418,18 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         for key in output.keys():
             if len(key) == 3:
                 print key, "parse for table"
+                key_order = pop_order[key]
                 key_pop = output[key]['Population']
                 key_N = output[key]['N']
                 key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
                 key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
-                output_table["aaData"].append([key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+                output_table["aaData"].append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+        def getKeyOrder(element):
+            return element[0]
+        output_table["aaData"] = output_table["aaData"].sort(key=getKeyOrder)
+        output_table["aaData"] = [xs[1:] for xs in output_table["aaData"]]
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:
