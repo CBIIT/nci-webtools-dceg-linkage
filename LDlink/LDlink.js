@@ -2639,11 +2639,11 @@ function updateLDpop() {
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);
+            $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
+            $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
+            $('#ldpop_results').css("text-decoration", "underline");
+            $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
         }
-        $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
-        $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
-        $('#ldpop_results').css("text-decoration", "underline");
-        $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
