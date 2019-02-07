@@ -21,6 +21,9 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     snp1 = snp1.strip()
     snp2 = snp2.strip() 
 
+    snp1_input = snp1
+    snp2_input = snp2
+
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -343,8 +346,8 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     if web:
         output_table = { 
             "inputs": {
-                "rs1": snp1,
-                "rs2": snp2
+                "rs1": snp1_input,
+                "rs2": snp2_input
             },
             "aaData": []
         }

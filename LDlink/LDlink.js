@@ -597,7 +597,7 @@ function createPopTable() {
         "deferRender": false,
         // "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
         "columnDefs": [
-            { className: "dt-body-center", "targets": [ 1, 4, 5 ] }
+            { className: "dt-body-center", "targets": [ 4, 5 ] }
         ]
     });
 
@@ -890,6 +890,20 @@ var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
     table = $(tableId).dataTable();
+    oSettings = table.fnSettings();
+    table.fnClearTable(this);
+    for (var i = 0; i < json.aaData.length; i++) {
+      table.oApi._fnAddData(oSettings, json.aaData[i]);
+    }
+    oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+    table.fnDraw();
+}
+
+function RefreshTablePop(tableId, json) {
+    table = $(tableId).dataTable({
+        /* Disable initial sort */
+        "aaSorting": []
+    });
     oSettings = table.fnSettings();
     table.fnClearTable(this);
     for (var i = 0; i < json.aaData.length; i++) {
@@ -2638,7 +2652,7 @@ function updateLDpop() {
         console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
-            RefreshTable('#new-ldpop', data);
+            RefreshTablePop('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
             $('#ldpop_results').css("text-decoration", "underline");
