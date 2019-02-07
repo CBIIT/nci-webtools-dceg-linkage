@@ -126,11 +126,74 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
         output["warning"] = snp1 + " and " + \
             snp2 + " are on different chromosomes"
-  
+
+    # create indexes for population order
+    pop_order = {
+        "YRI": 1,
+        "LWK": 2,
+        "GWD": 3,
+        "MSL": 4,
+        "ESN": 5,
+        "ASW": 6,
+        "ACB": 7,
+        "MXL": 8,
+        "PUR": 9,
+        "CLM": 10,
+        "PEL": 11,
+        "CHB": 12,
+        "JPT": 13,
+        "CHS": 14,
+        "CDX": 15,
+        "KHV": 16,
+        "CEU": 17,
+        "TSI": 18,
+        "FIN": 19,
+        "GBR": 20,
+        "IBS": 21,
+        "GIH": 22,
+        "PJL": 23,
+        "BEB": 24,
+        "STU": 25,
+        "ITU": 26
+    }
+
+    pop_groups = {
+        "ALL": ["ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"],
+        "AFR": ["YRI", "LWK", "GWD", "MSL", "ESN", "ASW", "ACB"],
+        "AMR": [ "MXL", "PUR", "CLM", "PEL"],
+        "EAS": ["CHB", "JPT", "CHS", "CDX", "KHV"],
+        "EUR": ["CEU", "TSI", "FIN", "GBR" , "IBS"],
+        "SAS": ["GIH", "PJL", "BEB", "STU" , "ITU"]
+    }
+
     #empty list for paths to population data
     pop_dirs = []
     pop_split = pop.split("+")
-    # pop_dir = "1000gpopulationdefs/"
+    
+    if "ALL" in pop_split:
+        pop_split.remove("ALL")
+        pop_split = pop_split + pop_groups["ALL"]
+        pop_split = list(set(pop_split)) # unique elements
+    if "AFR" in pop_split:
+        pop_split.remove("AFR")
+        pop_split = pop_split + pop_groups["AFR"]
+        pop_split = list(set(pop_split)) # unique elements
+    if "AMR" in pop_split:
+        pop_split.remove("AMR")
+        pop_split = pop_split + pop_groups["AMR"]
+        pop_split = list(set(pop_split)) # unique elements
+    if "EAS" in pop_split:
+        pop_split.remove("EAS")
+        pop_split = pop_split + pop_groups["EAS"]
+        pop_split = list(set(pop_split)) # unique elements
+    if "EUR" in pop_split:
+        pop_split.remove("EUR")
+        pop_split = pop_split + pop_groups["EUR"]
+        pop_split = list(set(pop_split)) # unique elements
+    if "SAS" in pop_split:
+        pop_split.remove("SAS")
+        pop_split = pop_split + pop_groups["SAS"]
+        pop_split = list(set(pop_split)) # unique elements
     
     for pop_i in pop_split:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
@@ -158,7 +221,6 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    # vcf_dir = "vcfs/"
    
     vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
