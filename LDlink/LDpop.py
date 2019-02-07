@@ -414,6 +414,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             },
             "aaData": []
         }
+        table_data = []
         print output.keys()
         for key in output.keys():
             if len(key) == 3:
@@ -425,11 +426,14 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
-                output_table["aaData"].append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+                table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+        print table_data
         def getKeyOrder(element):
             return element[0]
-        output_table["aaData"] = output_table["aaData"].sort(key=getKeyOrder)
-        output_table["aaData"] = [xs[1:] for xs in output_table["aaData"]]
+        table_data = table_data.sort(key=getKeyOrder)
+        print table_data
+        output_table["aaData"] = [xs[1:] for xs in table_data]
+        print output_table["aaData"]
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:
