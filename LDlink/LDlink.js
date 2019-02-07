@@ -889,7 +889,7 @@ var snpclipModel = ko.mapping.fromJS(snpclipData);
 var snpchipModel = ko.mapping.fromJS(snpchipData);
 
 function RefreshTable(tableId, json) {
-    table = $(tableId).DataTable();
+    table = $(tableId).dataTable();
     oSettings = table.fnSettings();
     table.fnClearTable(this);
     for (var i = 0; i < json.aaData.length; i++) {
