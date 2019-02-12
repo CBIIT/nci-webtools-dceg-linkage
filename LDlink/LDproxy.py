@@ -23,7 +23,7 @@ port = int(contents[2].split('=')[1])
 def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # trim any whitespace
-    snp = snp.strip()
+    snp = snp.lower().strip()
 
     start_time = time.time()
 
@@ -56,14 +56,14 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         client = MongoClient('localhost', port)
     db = client["LDLink"]
 
-    def get_coords(db, rsid):
+    def get_coords(rsid):
         rsid = rsid.strip("rs")
         query_results = db.dbsnp151.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
     # Query genomic coordinates
-    def get_rsnum(db, coord):
+    def get_rsnum(coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
@@ -72,11 +72,11 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp):
+    def replace_coord_rsid(snp):
         if snp[0:2] == "rs":
             return snp
         else:
-            snp_info_lst = get_rsnum(db, snp)
+            snp_info_lst = get_rsnum(snp)
             print "snp_info_lst"
             print snp_info_lst
             if snp_info_lst != None:
@@ -112,10 +112,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                 return snp
         return snp
 
-    snp = replace_coord_rsid(db, snp)
+    snp = replace_coord_rsid(snp)
 
     # Find RS number in snp database
-    snp_coord = get_coords(db, snp)
+    snp_coord = get_coords(snp)
 
     if snp_coord == None:
         output["error"] = snp + " is not in dbSNP build " + dbsnp_version + "."
