@@ -166,7 +166,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     pop_groups = {
         "ALL": ["ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"],
         "AFR": ["YRI", "LWK", "GWD", "MSL", "ESN", "ASW", "ACB"],
-        "AMR": [ "MXL", "PUR", "CLM", "PEL"],
+        "AMR": ["MXL", "PUR", "CLM", "PEL"],
         "EAS": ["CHB", "JPT", "CHS", "CDX", "KHV"],
         "EUR": ["CEU", "TSI", "FIN", "GBR" , "IBS"],
         "SAS": ["GIH", "PJL", "BEB", "STU" , "ITU"]
@@ -179,7 +179,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     # display superpopulation and all subpopulations
     if "ALL" in pop_split:
         # pop_split.remove("ALL")
-        pop_split = pop_split + pop_groups["ALL"]
+        pop_split = pop_split + pop_groups["ALL"] + pop_groups.keys()
         pop_split = list(set(pop_split)) # unique elements
     else:
         if "AFR" in pop_split:
