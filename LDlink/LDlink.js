@@ -597,9 +597,11 @@ function createPopTable() {
         "bProcessing": false,
         "deferRender": false,
         // "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
-        "columnDefs": [
-            { className: "dt-body-center", "targets": [ 4, 5 ] }
-        ]
+        "columnDefs": [{ 
+            className: "dt-head-center", 
+            className: "dt-body-center",
+            "targets": [ 0, 1, 2, 3, 4, 5 ] 
+        }]
     });
 
 }
