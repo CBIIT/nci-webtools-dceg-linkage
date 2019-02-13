@@ -404,8 +404,8 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
                 rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"
             }, 
-            "D'" : round(matrix_values[pops]["D_prime"], 4), \
-            "R2" : round(matrix_values[pops]["r2"], 4)
+            "D'" : round(float(matrix_values[pops]["D_prime"]), 4), \
+            "R2" : round(float(matrix_values[pops]["r2"]), 4)
         }
     
     print json.dumps(output)
