@@ -163,44 +163,45 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         "ITU": 32
     }
 
-    # pop_groups = {
-    #     "ALL": ["ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"],
-    #     "AFR": ["YRI", "LWK", "GWD", "MSL", "ESN", "ASW", "ACB"],
-    #     "AMR": [ "MXL", "PUR", "CLM", "PEL"],
-    #     "EAS": ["CHB", "JPT", "CHS", "CDX", "KHV"],
-    #     "EUR": ["CEU", "TSI", "FIN", "GBR" , "IBS"],
-    #     "SAS": ["GIH", "PJL", "BEB", "STU" , "ITU"]
-    # }
+    pop_groups = {
+        "ALL": ["ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"],
+        "AFR": ["YRI", "LWK", "GWD", "MSL", "ESN", "ASW", "ACB"],
+        "AMR": [ "MXL", "PUR", "CLM", "PEL"],
+        "EAS": ["CHB", "JPT", "CHS", "CDX", "KHV"],
+        "EUR": ["CEU", "TSI", "FIN", "GBR" , "IBS"],
+        "SAS": ["GIH", "PJL", "BEB", "STU" , "ITU"]
+    }
 
-    #empty list for paths to population data
+    # empty list for paths to population data
     pop_dirs = []
     pop_split = pop.split("+")
     
-    # if "ALL" in pop_split:
-    #     pop_split.remove("ALL")
-    #     pop_split = pop_split + pop_groups["ALL"]
-    #     pop_split = list(set(pop_split)) # unique elements
-    # else:
-    #     if "AFR" in pop_split:
-    #         pop_split.remove("AFR")
-    #         pop_split = pop_split + pop_groups["AFR"]
-    #         pop_split = list(set(pop_split)) # unique elements
-    #     if "AMR" in pop_split:
-    #         pop_split.remove("AMR")
-    #         pop_split = pop_split + pop_groups["AMR"]
-    #         pop_split = list(set(pop_split)) # unique elements
-    #     if "EAS" in pop_split:
-    #         pop_split.remove("EAS")
-    #         pop_split = pop_split + pop_groups["EAS"]
-    #         pop_split = list(set(pop_split)) # unique elements
-    #     if "EUR" in pop_split:
-    #         pop_split.remove("EUR")
-    #         pop_split = pop_split + pop_groups["EUR"]
-    #         pop_split = list(set(pop_split)) # unique elements
-    #     if "SAS" in pop_split:
-    #         pop_split.remove("SAS")
-    #         pop_split = pop_split + pop_groups["SAS"]
-    #         pop_split = list(set(pop_split)) # unique elements
+    # display superpopulation and all subpopulations
+    if "ALL" in pop_split:
+        # pop_split.remove("ALL")
+        pop_split = pop_split + pop_groups["ALL"]
+        pop_split = list(set(pop_split)) # unique elements
+    else:
+        if "AFR" in pop_split:
+            # pop_split.remove("AFR")
+            pop_split = pop_split + pop_groups["AFR"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "AMR" in pop_split:
+            # pop_split.remove("AMR")
+            pop_split = pop_split + pop_groups["AMR"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "EAS" in pop_split:
+            # pop_split.remove("EAS")
+            pop_split = pop_split + pop_groups["EAS"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "EUR" in pop_split:
+            # pop_split.remove("EUR")
+            pop_split = pop_split + pop_groups["EUR"]
+            pop_split = list(set(pop_split)) # unique elements
+        if "SAS" in pop_split:
+            # pop_split.remove("SAS")
+            pop_split = pop_split + pop_groups["SAS"]
+            pop_split = list(set(pop_split)) # unique elements
     
     for pop_i in pop_split:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
