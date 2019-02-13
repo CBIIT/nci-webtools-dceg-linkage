@@ -991,3 +991,9 @@ input:checked + .slider:before {
 .dt-head-center {
   text-align: center;
 }
+
+/* Always set the map height explicitly to define the size of the div
+ * element that contains the map. */
+ #ldpop-map {
+  height: 100%;
+}
