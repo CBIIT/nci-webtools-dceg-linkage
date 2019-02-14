@@ -416,7 +416,8 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 "rs1": snp1_input,
                 "rs2": snp2_input
             },
-            "aaData": []
+            "aaData": [],
+            "locations": []
         }
         table_data = []
         print output.keys()

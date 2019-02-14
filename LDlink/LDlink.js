@@ -31,7 +31,6 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
-
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
         $(this).alert('close');
@@ -283,7 +282,6 @@ $(document).ready(function() {
     autoCalculate();
     createFileSelectEvent();
     createEnterEvent();
-
 });
 
 // Set file support trigger
@@ -2612,6 +2610,40 @@ function updateLDpair() {
     hideLoadingIcon(ajaxRequest, id);
 }
 
+// Initialize and add the map
+function initMap(locations) {
+    var centerMap = {lat: 0, lng: 0};
+    var map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 1, 
+        center: centerMap
+    });
+
+    // var locations = [
+    //     ['Bondi Beach', -33.890542, 151.274856, 4],
+    //     ['Coogee Beach', -33.923036, 151.259052, 5],
+    //     ['Cronulla Beach', -34.028249, 151.157507, 3],
+    //     ['Manly Beach', -33.80010128657071, 151.28747820854187, 2],
+    //     ['Maroubra Beach', -33.950198, 151.259302, 1]
+    // ];
+
+    var infowindow = new google.maps.InfoWindow();
+    var marker, i;
+
+    for (i = 0; i < locations.length; i++) {
+        marker = new google.maps.Marker({
+            position: {lat: locations[i][1], lng: locations[i][2]}, 
+            map: map
+        });
+        google.maps.event.addListener(marker, 'click', (function(marker, i) {
+            return function() {
+                var contentString = '<h1>' + locations[i][0] + '</h1>';
+                infowindow.setContent(contentString);
+                infowindow.open(map, marker);
+            }
+        })(marker, i));
+    }
+}
+
 function updateLDpop() {
     var id = 'ldpop';
     var $btn = $('#' + id).button('loading');
@@ -2644,6 +2676,7 @@ function updateLDpop() {
             RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
+            initMap(data.locations)
         }
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");
@@ -3489,62 +3522,3 @@ function readCookie(name) {
 function eraseCookie(name) {
     createCookie(name,"",-1);
 }
-
-// LDpop Google Maps API
-// function initMap() {
-//     var chicago = new google.maps.LatLng(41.850, -87.650);
-  
-//     var map = new google.maps.Map(document.getElementById('ldpop-map'), {
-//       center: chicago,
-//       zoom: 3
-//     });
-  
-//     var coordInfoWindow = new google.maps.InfoWindow();
-//     coordInfoWindow.setContent(createInfoWindowContent(chicago, map.getZoom()));
-//     coordInfoWindow.setPosition(chicago);
-//     coordInfoWindow.open(map);
-  
-//     map.addListener('zoom_changed', function() {
-//       coordInfoWindow.setContent(createInfoWindowContent(chicago, map.getZoom()));
-//       coordInfoWindow.open(map);
-//     });
-//   }
-  
-//   var TILE_SIZE = 256;
-  
-//   function createInfoWindowContent(latLng, zoom) {
-//     var scale = 1 << zoom;
-  
-//     var worldCoordinate = project(latLng);
-  
-//     var pixelCoordinate = new google.maps.Point(
-//         Math.floor(worldCoordinate.x * scale),
-//         Math.floor(worldCoordinate.y * scale));
-  
-//     var tileCoordinate = new google.maps.Point(
-//         Math.floor(worldCoordinate.x * scale / TILE_SIZE),
-//         Math.floor(worldCoordinate.y * scale / TILE_SIZE));
-  
-//     return [
-//       'Chicago, IL',
-//       'LatLng: ' + latLng,
-//       'Zoom level: ' + zoom,
-//       'World Coordinate: ' + worldCoordinate,
-//       'Pixel Coordinate: ' + pixelCoordinate,
-//       'Tile Coordinate: ' + tileCoordinate
-//     ].join('<br>');
-//   }
-  
-//   // The mapping between latitude, longitude and pixels is defined by the web
-//   // mercator projection.
-//   function project(latLng) {
-//     var siny = Math.sin(latLng.lat() * Math.PI / 180);
-  
-//     // Truncating to 0.9999 effectively limits latitude to 89.189. This is
-//     // about a third of a tile past the edge of the world tile.
-//     siny = Math.min(Math.max(siny, -0.9999), 0.9999);
-  
-//     return new google.maps.Point(
-//         TILE_SIZE * (0.5 + latLng.lng() / 360),
-//         TILE_SIZE * (0.5 - Math.log((1 + siny) / (1 - siny)) / (4 * Math.PI)));
-//   }
