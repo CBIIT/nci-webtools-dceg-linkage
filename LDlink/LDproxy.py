@@ -23,7 +23,7 @@ port = int(contents[2].split('=')[1])
 def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # trim any whitespace
-    snp = snp.strip()
+    snp = snp.lower().strip()
 
     start_time = time.time()
 

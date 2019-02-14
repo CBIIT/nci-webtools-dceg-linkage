@@ -18,8 +18,8 @@ port = int(contents[2].split('=')[1])
 def calculate_pair(snp1, snp2, pop, web, request=None):
 
     # trim any whitespace
-    snp1 = snp1.strip()
-    snp2 = snp2.strip() 
+    snp1 = snp1.lower().strip()
+    snp2 = snp2.lower().strip() 
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
