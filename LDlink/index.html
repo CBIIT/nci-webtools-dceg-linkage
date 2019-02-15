@@ -1040,13 +1040,25 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-4">
+								<div class="col-sm-2">
 									<a id="ldpop-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
 									<label for="ldpop-population-codes" style="display: none;">Populations</label>
 									<select id="ldpop-population-codes" multiple="multiple" name="populations">
 									</select>
+								</div>
+							</div>
+							<div class="form-group">
+								<div class="col-sm-2 col-sm-offset-1">
+									<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
+										<label class="btn btn-default active" id="pop_ld_r2">
+											<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
+										</label>
+										<label class="btn btn-default">
+											<input type="radio" autocomplete="off" name="options"> D'
+										</label>
+									</div>
 								</div>
 							</div>
 							<div class="form-group">
@@ -1103,8 +1115,7 @@
 									<th class="dt-head-center dt-body-center">N</th>
 									<th class="dt-head-center dt-body-center" id="ldpop_rs1">rs#1 Allele Freq</th>
 									<th class="dt-head-center dt-body-center" id="ldpop_rs2">rs#2 Allele Freq</th>
-									<th class="dt-head-center dt-body-center">D'</th>
-									<th class="dt-head-center dt-body-center">R<sup>2</sup></th>
+									<th class="dt-head-center dt-body-center" id="ldpop_ld">R<sup>2</sup></th>
 								</tr>
 							</thead>
 							<!-- <tfoot>

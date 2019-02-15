@@ -15,7 +15,7 @@ port = int(contents[2].split('=')[1])
 
 # Create LDpop function
 
-def calculate_pop(snp1, snp2, pop, web, request=None):
+def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
 
     # trim any whitespace
     snp1 = snp1.lower().strip()
@@ -600,12 +600,18 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 key_rs2_allele_freq = rs2_dict["REF"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["REF"]] + ", " + rs2_dict["ALT"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["ALT"]]
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
-                table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+                if r2_d == 'r2':
+                    table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2])
+                else:
+                    table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime])
                 # populate map data
                 if key not in pop_groups.keys():
                     rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
                     rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
-                    rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_R_2, key_D_prime])
+                    if r2_d == 'r2':
+                        rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], "<u>R<sup>2</sup></u>", key_R_2])
+                    else:
+                        rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], "<u>D\'</u>", key_D_prime])
         output_table["locations"]["rs1_map"] = rs1_map_data
         output_table["locations"]["rs2_map"] = rs2_map_data
         output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
@@ -638,11 +644,12 @@ def main():
     snp1 = sys.argv[1]
     snp2 = sys.argv[2]
     pop = sys.argv[3]
+    r2_d = sys.argv[4]
     web = False
     request = None
 
     # Run function
-    out_json = calculate_pop(snp1, snp2, pop, web, request)
+    out_json = calculate_pop(snp1, snp2, pop, r2_d, web, request)
 
     # Print output
     print out_json

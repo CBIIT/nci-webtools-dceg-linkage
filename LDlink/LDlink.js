@@ -730,9 +730,11 @@ function autoCalculate() {
             }
             break;
         case "ldpop":
-            if(url.var1 && url.var2 && url.pop) {
+            if(url.var1 && url.var2 && url.pop && url.r2_d) {
                 $("#ldpop-snp1").prop('value', url.var1);
                 $("#ldpop-snp2").prop('value', url.var2);
+                $("#pop_ld_r2").toggleClass('active', url.r2_d == "r2");
+                $("#pop_ld_r2").next().toggleClass('active', url.r2_d == "d");
                 refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
                 initCalculate(id);
                 updateData(id);
@@ -2682,8 +2684,7 @@ function addMarkers(locations) {
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map3_i][0] + ') - ' + locations.rs1_rs2_LD_map[map3_i][1] + '</b><br>' + 
-                    '<u>R<sup>2</sup></u>: ' + locations.rs1_rs2_LD_map[map3_i][5] + '<br>' +
-                    '<u>D\'</u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div>';
+                    '<u>' + locations.rs1_rs2_LD_map[map3_i][5] + '</u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
             }
@@ -2695,15 +2696,24 @@ function addMarkers(locations) {
 function updateLDpop() {
     var id = 'ldpop';
     var $btn = $('#' + id).button('loading');
-
     var population = getPopulationCodes(id+'-population-codes');
+    var r2_d;
+
+    if($('#pop_ld_r2').hasClass('active')) {
+        r2_d = 'r2'; // i.e. R2
+        $("#ldpop_ld").html("R<sup>2</sup>");
+    } else {
+        r2_d = 'd';  // i.e.  Dprime
+        $("#ldpop_ld").text("D\'");
+    }
 
     var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
     var ldpopInputs = {
         var1 : $('#ldpop-snp1').val(),
         var2 : $('#ldpop-snp2').val(),
         pop : population.join("+"),
-        reference : reference
+        reference : reference,
+        r2_d: r2_d
     };
 
     updateHistoryURL(id, ldpopInputs);
