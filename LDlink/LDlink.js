@@ -2627,6 +2627,7 @@ function initMap() {
 }
 
 function addMarkers(locations) {
+    // rs#1 Frequencies map
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
     for (map1_i = 0; map1_i < locations.rs1_map.length; map1_i++) {
@@ -2646,6 +2647,29 @@ function addMarkers(locations) {
                 map1_infowindow.open(map1, map1_marker);
             }
         })(map1_marker, map1_i));
+    }
+    // rs#2 Frequencies map
+    var map2_infowindow = new google.maps.InfoWindow();
+    var map2_marker, map2_i;
+    var map2_infowindow = new google.maps.InfoWindow();
+    var map2_marker, map2_i;
+    for (map2_i = 0; map2_i < locations.rs2_map.length; map2_i++) {
+        map2_marker = new google.maps.Marker({
+            position: {
+                lat: locations.rs2_map[map2_i][3], 
+                lng: locations.rs2_map[map2_i][4]
+            }, 
+            map: map2
+        });
+    var map2_marker, map2_i;
+        google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
+            return function() {
+                var contentString = '<div><b>(' + locations.rs2_map[map2_i][0] + ') - ' + locations.rs2_map[map2_i][1] + '</b><br>' + 
+                    '<u>rs#2 Allele Freq</u>: ' + locations.rs2_map[map2_i][5] + '</div>';
+                map2_infowindow.setContent(contentString);
+                map2_infowindow.open(map2, map2_marker);
+            }
+        })(map2_marker, map2_i));
     }
     
 }
