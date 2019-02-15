@@ -414,158 +414,158 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
         "YRI": {
             "location": "Yoruba in Ibadan, Nigeria",
             "superpopulation": "AFR",
-            "latitude": "7.40026",
-            "longitude": "3.910742"
+            "latitude": 7.40026,
+            "longitude": 3.910742
         },
         "LWK": {
             "location": "Luhya in Webuye, Kenya",
             "superpopulation": "AFR",
-            "latitude": "0.59738",
-            "longitude": "34.777227"
+            "latitude": 0.59738,
+            "longitude": 34.777227
         },
         "GWD": {
             "location": "Gambian in Western Divisions in the Gambia",
             "superpopulation": "AFR",
-            "latitude": "13.474133",
-            "longitude": "-16.394272"
+            "latitude": 13.474133,
+            "longitude": -16.394272
         },
         "MSL": {
             "location": "Mende in Sierra Leone",
             "superpopulation": "AFR",
-            "latitude": "8.176076",
-            "longitude": "-11.040253"
+            "latitude": 8.176076,
+            "longitude": -11.040253
         },
         "ESN": {
             "location": "Esan in Nigeria",
             "superpopulation": "AFR",
-            "latitude": "6.687988",
-            "longitude": "6.212868"
+            "latitude": 6.687988,
+            "longitude": 6.212868
         },
         "ASW": {
             "location": "Americans of African Ancestry in SW USA",
             "superpopulation": "AFR",
-            "latitude": "35.310647",
-            "longitude": "-107.975885"
+            "latitude": 35.310647,
+            "longitude": -107.975885
         },
         "ACB": {
             "location": "African Caribbeans in Barbados",
             "superpopulation": "AFR",
-            "latitude": "13.172483",
-            "longitude": "-59.552779"
+            "latitude": 13.172483,
+            "longitude": -59.552779
         },
         "MXL": {
             "location": "Mexican Ancestry from Los Angeles USA",
             "superpopulation": "AMR",
-            "latitude": "34.113837",
-            "longitude": "-118.440427"
+            "latitude": 34.113837,
+            "longitude": -118.440427
         },
         "PUR": {
             "location": "Puerto Ricans from Puerto Rico",
             "superpopulation": "AMR",
-            "latitude": "18.234429",
-            "longitude": "-66.418775"
+            "latitude": 18.234429,
+            "longitude": -66.418775
         },
         "CLM": {
             "location": "Colombians from Medellin, Colombia",
             "superpopulation": "AMR",
-            "latitude": "6.252089",
-            "longitude": "-75.594652"
+            "latitude": 6.252089,
+            "longitude": -75.594652
         },
         "PEL": {
             "location": "Peruvians from Lima, Peru",
             "superpopulation": "AMR",
-            "latitude": "-12.046543",
-            "longitude": "-77.046155"
+            "latitude": -12.046543,
+            "longitude": -77.046155
         },
         "CHB": {
             "location": "Han Chinese in Beijing, China",
             "superpopulation": "EAS",
-            "latitude": "39.906802",
-            "longitude": "116.407323"
+            "latitude": 39.906802,
+            "longitude": 116.407323
         },
         "JPT": {
             "location": "Japanese in Tokyo, Japan",
             "superpopulation": "EAS",
-            "latitude": "35.709444",
-            "longitude": "139.731815"
+            "latitude": 35.709444,
+            "longitude": 139.731815
         },
         "CHS": {
             "location": "Southern Han Chinese",
             "superpopulation": "EAS",
-            "latitude": "24.719998",
-            "longitude": "113.043464"
+            "latitude": 24.719998,
+            "longitude": 113.043464
         },
         "CDX": {
             "location": "Chinese Dai in Xishuangbanna, China",
             "superpopulation": "EAS",
-            "latitude": "22.008264",
-            "longitude": "100.796045"
+            "latitude": 22.008264,
+            "longitude": 100.796045
         },
         "KHV": {
             "location": "Kinh in Ho Chi Minh City, Vietnam",
             "superpopulation": "EAS",
-            "latitude": "10.812236",
-            "longitude": "106.633978"
+            "latitude": 10.812236,
+            "longitude": 106.633978
         },
         "CEU": {
             "location": "Utah Residents (CEPH) with Northern and Western European Ancestry",
             "superpopulation": "EUR",
-            "latitude": "39.250493",
-            "longitude": "-111.631295"
+            "latitude": 39.250493,
+            "longitude": -111.631295
         },
         "TSI": {
             "location": "Toscani in Italia",
             "superpopulation": "EUR",
-            "latitude": "43.444187",
-            "longitude": "11.117199"
+            "latitude": 43.444187,
+            "longitude": 11.117199
         },
         "FIN": {
             "location": "Finnish in Finland",
             "superpopulation": "EUR",
-            "latitude": "63.112",
-            "longitude": "26.770837"
+            "latitude": 63.112,
+            "longitude": 26.770837
         },
         "GBR": {
             "location": "British in England and Scotland",
             "superpopulation": "EUR",
-            "latitude": "54.55902",
-            "longitude": "-2.143222"
+            "latitude": 54.55902,
+            "longitude": -2.143222
         },
         "IBS": {
             "location": "Iberian Population in Spain",
             "superpopulation": "EUR",
-            "latitude": "40.482057",
-            "longitude": "-4.088383"
+            "latitude": 40.482057,
+            "longitude": -4.088383"
         },
         "GIH": {
             "location": "Gujarati Indian from Houston, Texas",
             "superpopulation": "SAS",
-            "latitude": "29.760619",
-            "longitude": "-95.361356"
+            "latitude": 29.760619,
+            "longitude": -95.361356
         },
         "PJL": {
             "location": "Punjabi from Lahore, Pakistan",
             "superpopulation": "SAS",
-            "latitude": "31.515188",
-            "longitude": "74.357703"
+            "latitude": 31.515188,
+            "longitude": 74.357703
         },
         "BEB": {
             "location": "Bengali from Bangladesh",
             "superpopulation": "SAS",
-            "latitude": "24.013458",
-            "longitude": "90.233561"
+            "latitude": 24.013458,
+            "longitude": 90.233561
         },
         "STU": {
             "location": "Sri Lankan Tamil from the UK",
             "superpopulation": "SAS",
-            "latitude": "7.595905",
-            "longitude": "80.843382"
+            "latitude": 7.595905,
+            "longitude": 80.843382
         },
         "ITU": {
             "location": "Indian Telugu from the UK",
             "superpopulation": "SAS",
-            "latitude": "15.489823",
-            "longitude": "78.487081"
+            "latitude": 15.489823,
+            "longitude": 78.487081
         }
     }
 
