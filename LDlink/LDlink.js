@@ -2639,8 +2639,8 @@ function initMap(locations) {
         });
         google.maps.event.addListener(marker, 'click', (function(marker, i) {
             return function() {
-                var contentString = '<div><h2>(' + locations[i][0] + ') - ' + locations[i][1] + '</h2><br>' + 
-                    'rs#1 Allele Freq: ' + locations[i][5] + '</div>';
+                var contentString = '<div><u><b>(' + locations[i][0] + ') - ' + locations[i][1] + '</b></u><br>' + 
+                    '<u>rs#1 Allele Freq</u>: ' + locations[i][5] + '</div>';
                 infowindow.setContent(contentString);
                 infowindow.open(map, marker);
             }
