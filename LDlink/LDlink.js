@@ -282,6 +282,8 @@ $(document).ready(function() {
     autoCalculate();
     createFileSelectEvent();
     createEnterEvent();
+    // Google Maps API
+    initMap();
 });
 
 // Set file support trigger
@@ -2612,7 +2614,7 @@ function updateLDpair() {
 
 var map, map2;
 // Initialize and add the map
-function initMap(locations) {
+function initMap() {
     var initOptions = {
         zoom: 1, 
         center: {
@@ -2622,7 +2624,9 @@ function initMap(locations) {
     };
     map = new google.maps.Map(document.getElementById('map'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
+}
 
+function addMarkers(locations) {
     var infowindow = new google.maps.InfoWindow();
     var marker, i;
 
@@ -2677,7 +2681,8 @@ function updateLDpop() {
             RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
-            $(initMap(data.locations));
+            // $(initMap(data.locations));
+            addMarkers(data.locations);
         }
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");
