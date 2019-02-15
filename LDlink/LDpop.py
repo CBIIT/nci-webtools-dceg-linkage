@@ -576,10 +576,14 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 "rs2": snp2_input
             },
             "aaData": [],
-            "locations": []
+            "locations": {
+                "rs1_map": [],
+                "rs2_map": []
+            }
         }
         table_data = []
-        map_data = []
+        rs1_map_data = []
+        rs2_map_data = []
         print output.keys()
         # populate table data
         for key in output.keys():
@@ -597,16 +601,14 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
                 # populate map data
                 if key not in pop_groups.keys():
-                    map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
-        print table_data
-        print map_data
-        output_table["locations"] = map_data
+                    rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
+                    rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
+        output_table["locations"]["rs1_map"] = rs1_map_data
+        output_table["locations"]["rs2_map"] = rs2_map_data
         def getKeyOrder(element):
             return element[0]
         table_data.sort(key=getKeyOrder)
-        print table_data
         output_table["aaData"] = [xs[1:] for xs in table_data]
-        print output_table["aaData"]
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:
