@@ -2612,7 +2612,7 @@ function updateLDpair() {
     hideLoadingIcon(ajaxRequest, id);
 }
 
-var map1, map2;
+var map1, map2, map3;
 // Initialize and add the map
 function initMap() {
     var initOptions = {
@@ -2624,6 +2624,7 @@ function initMap() {
     };
     map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
+    map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
 }
 
 function addMarkers(locations) {
@@ -2667,6 +2668,27 @@ function addMarkers(locations) {
             }
         })(map2_marker, map2_i));
     }
+    // rs#1-rs#2 LD map
+    var map3_infowindow = new google.maps.InfoWindow();
+    var map3_marker, map3_i;
+    for (map3_i = 0; map3_i < locations.rs1_rs2_LD_map.length; map3_i++) {
+        map3_marker = new google.maps.Marker({
+            position: {
+                lat: locations.rs1_rs2_LD_map[map3_i][3], 
+                lng: locations.rs1_rs2_LD_map[map3_i][4]
+            }, 
+            map: map2
+        });
+        google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
+            return function() {
+                var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map3_i][0] + ') - ' + locations.rs1_rs2_LD_map[map3_i][1] + '</b><br>' + 
+                    '<u>R<sup>2</sup></u>: ' + locations.rs1_rs2_LD_map[map3_i][5] +
+                    '<u>D\'</u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div>';
+                map3_infowindow.setContent(contentString);
+                map3_infowindow.open(map3, map3_marker);
+            }
+        })(map3_marker, map3_i));
+    }
     
 }
 
@@ -2704,6 +2726,7 @@ function updateLDpop() {
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
             $("#ldpop-map1-title").text(data.inputs.rs1 + " Frequencies");
             $("#ldpop-map2-title").text(data.inputs.rs2 + " Frequencies");
+            $("#ldpop-map3-title").html(data.inputs.rs1 + "-" + data.inputs.rs2 + " LD: (R<sup>2</sup>/D')");
             // $(initMap(data.locations));
             addMarkers(data.locations);
         }
