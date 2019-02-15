@@ -8,7 +8,7 @@ data:
   gene_dir2: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/gene_names_coords.db'
   recomb_dir: '/local/content/analysistools/public_html/apps/LDlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
 api:
-  gmap_key: 'AIzaSyDzKIB3rzV9ddwjnWT7UZSzaESWrLMkgvk'
+  gmap_key: 'DzKIB3rzV9ddwjnWT7UZSzaESWrLMkgvk'
   require_token: True
   api_mongo_addr: 'nciws-d971-c.nci.nih.gov'
   token_expiration: False
