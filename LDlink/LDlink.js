@@ -2638,7 +2638,6 @@ function addMarkers(locations) {
             }, 
             map: map1
         });
-    var map1_marker, map1_i;
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_map[map1_i][0] + ') - ' + locations.rs1_map[map1_i][1] + '</b><br>' + 
@@ -2651,8 +2650,6 @@ function addMarkers(locations) {
     // rs#2 Frequencies map
     var map2_infowindow = new google.maps.InfoWindow();
     var map2_marker, map2_i;
-    var map2_infowindow = new google.maps.InfoWindow();
-    var map2_marker, map2_i;
     for (map2_i = 0; map2_i < locations.rs2_map.length; map2_i++) {
         map2_marker = new google.maps.Marker({
             position: {
@@ -2661,7 +2658,6 @@ function addMarkers(locations) {
             }, 
             map: map2
         });
-    var map2_marker, map2_i;
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs2_map[map2_i][0] + ') - ' + locations.rs2_map[map2_i][1] + '</b><br>' + 
