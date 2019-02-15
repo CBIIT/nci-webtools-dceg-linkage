@@ -627,7 +627,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
             ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "D'", "R2"]) + "\n")
             for row in output_table["aaData"]:
-                ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
+                ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\n")
             if "error" in output_table:
                 ldpop_out.write("\n")
                 ldpop_out.write(output_table["error"])
