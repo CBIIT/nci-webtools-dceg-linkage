@@ -2682,7 +2682,7 @@ function addMarkers(locations) {
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map3_i][0] + ') - ' + locations.rs1_rs2_LD_map[map3_i][1] + '</b><br>' + 
-                    '<u>R<sup>2</sup></u>: ' + locations.rs1_rs2_LD_map[map3_i][5] +
+                    '<u>R<sup>2</sup></u>: ' + locations.rs1_rs2_LD_map[map3_i][5] + '<br>' +
                     '<u>D\'</u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
