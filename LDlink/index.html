@@ -1902,8 +1902,21 @@
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js"></script>
 	<script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.js"></script>
 
+	<!-- YAML JS + Google Maps API -->
+	<script type="text/javascript" src="yaml.js"></script>
+	<script type="text/javascript">
+		YAML.load('config.yml', function(result) {
+			nativeObject = result;
+			console.log(nativeObject.api.gmap_key);
+			var s = document.createElement("script");
+			s.type = "text/javascript";
+			s.src = "https://maps.googleapis.com/maps/api/js?key=" + nativeObject.api.gmap_key;
+			$("head").append(s);
+		});
+	</script>
+
 	<!-- Google Maps API -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3wd4PBMpQgi_j8vEqfHYkdJEF8mRBdmA"></script>
+	<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3wd4PBMpQgi_j8vEqfHYkdJEF8mRBdmA"></script> -->
 
 	<!-- Google Analytics -->
 	<script async src='//www.google-analytics.com/analytics.js'></script>

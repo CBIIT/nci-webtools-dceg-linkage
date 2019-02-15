@@ -14,3 +14,4 @@ api:
   token_expiration_days: 365
   email_account: 'mailfwd.nih.gov'
   api_superuser: 'kevin.jiang2@nih.gov'
+  gmap_key: 'AIzaSyDzKIB3rzV9ddwjnWT7UZSzaESWrLMkgvk'
