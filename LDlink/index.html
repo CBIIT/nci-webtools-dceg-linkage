@@ -24,6 +24,18 @@
 	<link rel="stylesheet" href="/common/css/style.css">
 	<link rel="stylesheet" href="/common/css/social.css">
 	<link rel="stylesheet" href="LDlink.css">
+	<!-- YAML JS + Google Maps API -->
+	<script type="text/javascript" src="yaml.js"></script>
+	<script type="text/javascript">
+		YAML.load('config.yml', function(result) {
+			// nativeObject = result;
+			console.log(nativeObject);
+			var s = document.createElement("script");
+			s.type = "text/javascript";
+			s.src = "https://maps.googleapis.com/maps/api/js?key=" + nativeObject.gmap.key;
+			$("body").append(s);
+		});
+	</script>
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
@@ -1066,6 +1078,9 @@
 						<div class="center-align"><h3>rs#1 Frequencies</h3></div>
 						<div id="map" class="center-align"></div>
 						<br>
+						<div class="center-align"><h3>rs#2 Frequencies</h3></div>
+						<div id="map2" class="center-align"></div>
+						<br>
 						<table id="new-ldpop" class="table display compact">
 							<thead>
 								<tr>
@@ -1916,7 +1931,7 @@
 	</script> -->
 
 	<!-- Google Maps API -->
-	<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3wd4PBMpQgi_j8vEqfHYkdJEF8mRBdmA"></script>
+	<!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB3wd4PBMpQgi_j8vEqfHYkdJEF8mRBdmA"></script> -->
 
 	<!-- Google Analytics -->
 	<script async src='//www.google-analytics.com/analytics.js'></script>

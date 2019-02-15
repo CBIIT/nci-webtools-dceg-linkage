@@ -2612,11 +2612,16 @@ function updateLDpair() {
 
 // Initialize and add the map
 function initMap(locations) {
-    var centerMap = {lat: 0, lng: 0};
-    var map = new google.maps.Map(document.getElementById('map'), {
+    var map, map2;
+    var initOptions = {
         zoom: 1, 
-        center: centerMap
-    });
+        center: {
+            lat: 0, 
+            lng: 0
+        }
+    };
+    map = new google.maps.Map(document.getElementById('map'), initOptions);
+    map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
 
     var infowindow = new google.maps.InfoWindow();
     var marker, i;
