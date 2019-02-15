@@ -2680,7 +2680,7 @@ function updateLDpop() {
             RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
-            initMap(data.locations)
+            $(initMap(data.locations));
         }
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");
