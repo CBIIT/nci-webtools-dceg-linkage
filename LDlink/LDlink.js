@@ -2610,9 +2610,9 @@ function updateLDpair() {
     hideLoadingIcon(ajaxRequest, id);
 }
 
+var map, map2;
 // Initialize and add the map
 function initMap(locations) {
-    var map, map2;
     var initOptions = {
         zoom: 1, 
         center: {
