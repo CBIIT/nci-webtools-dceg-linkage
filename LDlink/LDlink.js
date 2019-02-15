@@ -2677,7 +2677,7 @@ function addMarkers(locations) {
                 lat: locations.rs1_rs2_LD_map[map3_i][3], 
                 lng: locations.rs1_rs2_LD_map[map3_i][4]
             }, 
-            map: map2
+            map: map3
         });
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
