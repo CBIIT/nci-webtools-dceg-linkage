@@ -2612,7 +2612,7 @@ function updateLDpair() {
     hideLoadingIcon(ajaxRequest, id);
 }
 
-var map, map2;
+var map1, map2;
 // Initialize and add the map
 function initMap() {
     var initOptions = {
@@ -2622,7 +2622,7 @@ function initMap() {
             lng: 0
         }
     };
-    map = new google.maps.Map(document.getElementById('map'), initOptions);
+    map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
 }
 
@@ -2635,14 +2635,15 @@ function addMarkers(locations) {
                 lat: locations.rs1_map[map1_i][3], 
                 lng: locations.rs1_map[map1_i][4]
             }, 
-            map: map
+            map: map1
         });
-        google.maps.event.addListener(marker, 'click', (function(map1_marker, map1_i) {
+    var map1_marker, map1_i;
+        google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_map[map1_i][0] + ') - ' + locations.rs1_map[map1_i][1] + '</b><br>' + 
                     '<u>rs#1 Allele Freq</u>: ' + locations.rs1_map[map1_i][5] + '</div>';
                 map1_infowindow.setContent(contentString);
-                map1_infowindow.open(map, marker);
+                map1_infowindow.open(map1, map1_marker);
             }
         })(map1_marker, map1_i));
     }
