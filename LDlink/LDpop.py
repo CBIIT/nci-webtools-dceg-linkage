@@ -410,6 +410,165 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
     
     print json.dumps(output)
 
+    location_data = {
+        "YRI": {
+            "location": "Yoruba in Ibadan, Nigeria",
+            "superpopulation": "AFR",
+            "latitude": "7.40026",
+            "longitude": "3.910742"
+        },
+        "LWK": {
+            "location": "Luhya in Webuye, Kenya",
+            "superpopulation": "AFR",
+            "latitude": "0.59738",
+            "longitude": "34.777227"
+        },
+        "GWD": {
+            "location": "Gambian in Western Divisions in the Gambia",
+            "superpopulation": "AFR",
+            "latitude": "13.474133",
+            "longitude": "-16.394272"
+        },
+        "MSL": {
+            "location": "Mende in Sierra Leone",
+            "superpopulation": "AFR",
+            "latitude": "8.176076",
+            "longitude": "-11.040253"
+        },
+        "ESN": {
+            "location": "Esan in Nigeria",
+            "superpopulation": "AFR",
+            "latitude": "6.687988",
+            "longitude": "6.212868"
+        },
+        "ASW": {
+            "location": "Americans of African Ancestry in SW USA",
+            "superpopulation": "AFR",
+            "latitude": "35.310647",
+            "longitude": "-107.975885"
+        },
+        "ACB": {
+            "location": "African Caribbeans in Barbados",
+            "superpopulation": "AFR",
+            "latitude": "13.172483",
+            "longitude": "-59.552779"
+        },
+        "MXL": {
+            "location": "Mexican Ancestry from Los Angeles USA",
+            "superpopulation": "AMR",
+            "latitude": "34.113837",
+            "longitude": "-118.440427"
+        },
+        "PUR": {
+            "location": "Puerto Ricans from Puerto Rico",
+            "superpopulation": "AMR",
+            "latitude": "18.234429",
+            "longitude": "-66.418775"
+        },
+        "CLM": {
+            "location": "Colombians from Medellin, Colombia",
+            "superpopulation": "AMR",
+            "latitude": "6.252089",
+            "longitude": "-75.594652"
+        },
+        "PEL": {
+            "location": "Peruvians from Lima, Peru",
+            "superpopulation": "AMR",
+            "latitude": "-12.046543",
+            "longitude": "-77.046155"
+        },
+        "CHB": {
+            "location": "Han Chinese in Beijing, China",
+            "superpopulation": "EAS",
+            "latitude": "39.906802",
+            "longitude": "116.407323"
+        },
+        "JPT": {
+            "location": "Japanese in Tokyo, Japan",
+            "superpopulation": "EAS",
+            "latitude": "35.709444",
+            "longitude": "139.731815"
+        },
+        "CHS": {
+            "location": "Southern Han Chinese",
+            "superpopulation": "EAS",
+            "latitude": "24.719998",
+            "longitude": "113.043464"
+        },
+        "CDX": {
+            "location": "Chinese Dai in Xishuangbanna, China",
+            "superpopulation": "EAS",
+            "latitude": "22.008264",
+            "longitude": "100.796045"
+        },
+        "KHV": {
+            "location": "Kinh in Ho Chi Minh City, Vietnam",
+            "superpopulation": "EAS",
+            "latitude": "10.812236",
+            "longitude": "106.633978"
+        },
+        "CEU": {
+            "location": "Utah Residents (CEPH) with Northern and Western European Ancestry",
+            "superpopulation": "EUR",
+            "latitude": "39.250493",
+            "longitude": "-111.631295"
+        },
+        "TSI": {
+            "location": "Toscani in Italia",
+            "superpopulation": "EUR",
+            "latitude": "43.444187",
+            "longitude": "11.117199"
+        },
+        "FIN": {
+            "location": "Finnish in Finland",
+            "superpopulation": "EUR",
+            "latitude": "63.112",
+            "longitude": "26.770837"
+        },
+        "GBR": {
+            "location": "British in England and Scotland",
+            "superpopulation": "EUR",
+            "latitude": "54.55902",
+            "longitude": "-2.143222"
+        },
+        "IBS": {
+            "location": "Iberian Population in Spain",
+            "superpopulation": "EUR",
+            "latitude": "40.482057",
+            "longitude": "-4.088383"
+        },
+        "GIH": {
+            "location": "Gujarati Indian from Houston, Texas",
+            "superpopulation": "SAS",
+            "latitude": "29.760619",
+            "longitude": "-95.361356"
+        },
+        "PJL": {
+            "location": "Punjabi from Lahore, Pakistan",
+            "superpopulation": "SAS",
+            "latitude": "31.515188",
+            "longitude": "74.357703"
+        },
+        "BEB": {
+            "location": "Bengali from Bangladesh",
+            "superpopulation": "SAS",
+            "latitude": "24.013458",
+            "longitude": "90.233561"
+        },
+        "STU": {
+            "location": "Sri Lankan Tamil from the UK",
+            "superpopulation": "SAS",
+            "latitude": "7.595905",
+            "longitude": "80.843382"
+        },
+        "ITU": {
+            "location": "Indian Telugu from the UK",
+            "superpopulation": "SAS",
+            "latitude": "15.489823",
+            "longitude": "78.487081"
+        }
+    }
+
     if web:
         output_table = { 
             "inputs": {
@@ -420,7 +579,9 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             "locations": []
         }
         table_data = []
+        map_data = []
         print output.keys()
+        # populate table data
         for key in output.keys():
             if len(key) == 3:
                 print key, "parse for table"
@@ -435,6 +596,13 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 key_R_2 = output[key]['R2']
                 table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
         print table_data
+        # populate map data
+        for key in output.keys():
+            if len(key) == 3:
+                print key, "parse for map"
+                map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"]])
+        print map_data
+        output_table["locations"] = map_data
         def getKeyOrder(element):
             return element[0]
         table_data.sort(key=getKeyOrder)
