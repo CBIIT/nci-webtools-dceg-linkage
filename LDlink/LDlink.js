@@ -2631,13 +2631,16 @@ function initMap(locations) {
 
     for (i = 0; i < locations.length; i++) {
         marker = new google.maps.Marker({
-            position: {lat: locations[i][3], lng: locations[i][4]}, 
+            position: {
+                lat: locations[i][3], 
+                lng: locations[i][4]
+            }, 
             map: map
         });
         google.maps.event.addListener(marker, 'click', (function(marker, i) {
             return function() {
-                var contentString = '<h2>' + locations[i][1] + '</h2><br>' + 
-                    '<h3>' + locations[i][0] + '</h3>';
+                var contentString = '<div><h2>(' + locations[i][0] + ') - ' + locations[i][1] + '</h2><br>' + 
+                    'rs#1 Allele Freq: ' + locations[i][5] + '</div>';
                 infowindow.setContent(contentString);
                 infowindow.open(map, marker);
             }

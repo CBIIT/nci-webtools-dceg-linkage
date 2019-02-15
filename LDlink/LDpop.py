@@ -595,12 +595,13 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
                 table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_D_prime, key_R_2])
+                map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
         print table_data
         # populate map data
-        for key in output.keys():
-            if len(key) == 3:
-                print key, "parse for map"
-                map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"]])
+        # for key in output.keys():
+        #     if len(key) == 3:
+        #         print key, "parse for map"
+        #         map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"]])
         print map_data
         output_table["locations"] = map_data
         def getKeyOrder(element):
