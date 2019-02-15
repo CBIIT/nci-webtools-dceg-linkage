@@ -535,7 +535,7 @@ def calculate_pop(snp1, snp2, pop, web, request=None):
             "location": "Iberian Population in Spain",
             "superpopulation": "EUR",
             "latitude": 40.482057,
-            "longitude": -4.088383"
+            "longitude": -4.088383
         },
         "GIH": {
             "location": "Gujarati Indian from Houston, Texas",
