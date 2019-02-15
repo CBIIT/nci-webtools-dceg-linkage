@@ -2630,7 +2630,7 @@ function addMarkers(locations) {
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
     for (map1_i = 0; map1_i < locations.rs1_map.length; map1_i++) {
-        marker = new google.maps.Marker({
+        map1_marker = new google.maps.Marker({
             position: {
                 lat: locations.rs1_map[map1_i][3], 
                 lng: locations.rs1_map[map1_i][4]
