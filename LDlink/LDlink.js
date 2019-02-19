@@ -600,7 +600,7 @@ function createPopTable() {
         "columnDefs": [{ 
             className: "dt-head-center", 
             className: "dt-body-center",
-            "targets": [ 0, 1, 2, 3, 4 ] 
+            "targets": [ 0, 1, 2, 3, 4, 5 ] 
         }]
     });
 
