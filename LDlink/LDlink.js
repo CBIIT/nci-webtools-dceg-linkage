@@ -2622,7 +2622,8 @@ function initMap() {
         center: {
             lat: 30, 
             lng: 0
-        }
+        },
+        controlSize: 24
     };
     map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
