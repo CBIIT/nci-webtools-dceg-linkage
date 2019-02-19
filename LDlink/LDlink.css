@@ -998,3 +998,11 @@ input:checked + .slider:before {
   height: 500px;
   width: 100%;
 }
+
+.ldpop-map-content {
+  -webkit-box-shadow: none !important;
+  -moz-box-shadow: none !important;
+  box-shadow: none !important;
+  border-radius: 0px !important;
+  margin-bottom: 0px !important;
+}
