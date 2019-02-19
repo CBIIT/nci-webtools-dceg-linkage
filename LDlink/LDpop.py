@@ -578,9 +578,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             },
             "aaData": [],
             "locations": {
+                "rs1_rs2_LD_map": [],
                 "rs1_map": [],
-                "rs2_map": [],
-                "rs1_rs2_LD_map": []
+                "rs2_map": []
             }
         }
         table_data = []
@@ -604,12 +604,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
                 # populate map data
                 if key not in pop_groups.keys():
+                    rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
                     rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
                     rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
-                    rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_R_2, key_D_prime])
+        output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
         output_table["locations"]["rs1_map"] = rs1_map_data
         output_table["locations"]["rs2_map"] = rs2_map_data
-        output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
         def getKeyOrder(element):
             return element[0]
         table_data.sort(key=getKeyOrder)
@@ -620,9 +620,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             output_table["error"] = output["error"]
         # Generate output file
         with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
-            ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "D'", "R2"]) + "\n")
+            ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'"]) + "\n")
             for row in output_table["aaData"]:
-                ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\n")
+                ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
             if "error" in output_table:
                 ldpop_out.write("\n")
                 ldpop_out.write(output_table["error"])

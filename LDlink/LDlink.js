@@ -2635,18 +2635,21 @@ function addMarkers(data) {
     // rs#1 Frequencies map
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
-    for (map1_i = 0; map1_i < locations.rs1_map.length; map1_i++) {
+    for (map1_i = 0; map1_i < locations.rs1_rs2_LD_map.length; map1_i++) {
         map1_marker = new google.maps.Marker({
             position: {
-                lat: locations.rs1_map[map1_i][3], 
-                lng: locations.rs1_map[map1_i][4]
+                lat: locations.rs1_rs2_LD_map[map1_i][3], 
+                lng: locations.rs1_rs2_LD_map[map1_i][4]
             }, 
             map: map1
         });
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
-                var contentString = '<div><b>(' + locations.rs1_map[map1_i][0] + ') - ' + locations.rs1_map[map1_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
-                    '<u>' + data.inputs.rs1 + ' Allele Freq</u>: ' + locations.rs1_map[map1_i][5] + '</div>';
+                var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map1_i][0] + ') - ' + locations.rs1_rs2_LD_map[map1_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
+                    '<b>' + data.inputs.rs1 + ' Allele Freq</b>: ' + locations.rs1_rs2_LD_map[map1_i][5] + '<br>' + 
+                    '<b>' + data.inputs.rs2 + ' Allele Freq</b>: ' + locations.rs1_rs2_LD_map[map1_i][6] + '<br>' + 
+                    '<b>R<sup>2</sup></b>: ' + locations.rs1_rs2_LD_map[map1_i][7] + '<br>' + 
+                    '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
             }
@@ -2655,18 +2658,18 @@ function addMarkers(data) {
     // rs#2 Frequencies map
     var map2_infowindow = new google.maps.InfoWindow();
     var map2_marker, map2_i;
-    for (map2_i = 0; map2_i < locations.rs2_map.length; map2_i++) {
+    for (map2_i = 0; map2_i < locations.rs1_map.length; map2_i++) {
         map2_marker = new google.maps.Marker({
             position: {
-                lat: locations.rs2_map[map2_i][3], 
-                lng: locations.rs2_map[map2_i][4]
-            }, 
+                lat: locations.rs1_map[map2_i][3], 
+                lng: locations.rs1_map[map2_i][4]
+            },
             map: map2
         });
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
             return function() {
-                var contentString = '<div><b>(' + locations.rs2_map[map2_i][0] + ') - ' + locations.rs2_map[map2_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
-                    '<u>' + data.inputs.rs2 + ' Allele Freq</u>: ' + locations.rs2_map[map2_i][5] + '</div>';
+                var contentString = '<div><b>(' + locations.rs1_map[map2_i][0] + ') - ' + locations.rs1_map[map2_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
+                    locations.rs1_map[map2_i][5] + '</div>';
                 map2_infowindow.setContent(contentString);
                 map2_infowindow.open(map2, map2_marker);
             }
@@ -2675,19 +2678,18 @@ function addMarkers(data) {
     // rs#1-rs#2 LD map
     var map3_infowindow = new google.maps.InfoWindow();
     var map3_marker, map3_i;
-    for (map3_i = 0; map3_i < locations.rs1_rs2_LD_map.length; map3_i++) {
+    for (map3_i = 0; map3_i < locations.rs2_map.length; map3_i++) {
         map3_marker = new google.maps.Marker({
             position: {
-                lat: locations.rs1_rs2_LD_map[map3_i][3], 
-                lng: locations.rs1_rs2_LD_map[map3_i][4]
+                lat: locations.rs2_map[map3_i][3], 
+                lng: locations.rs2_map[map3_i][4]
             }, 
             map: map3
         });
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
-                var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map3_i][0] + ') - ' + locations.rs1_rs2_LD_map[map3_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
-                    '<u>R<sup>2</sup></u>: ' + locations.rs1_rs2_LD_map[map3_i][5] + '<br>' + 
-                    '<u>D\'</u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div>';
+                var contentString = '<div><b>(' + locations.rs2_map[map3_i][0] + ') - ' + locations.rs2_map[map3_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
+                    locations.rs2_map[map3_i][5] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
             }
@@ -2735,9 +2737,9 @@ function updateLDpop() {
             RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
-            $(".ldpop-map1-title").text(data.inputs.rs1 + " Allele Frequency");
-            $(".ldpop-map2-title").text(data.inputs.rs2 + " Allele Frequency");
-            $(".ldpop-map3-title").html(data.inputs.rs1 + "-" + data.inputs.rs2 + " LD: (R<sup>2</sup>/D')");
+            $(".ldpop-map1-title").html(data.inputs.rs1 + " " + data.inputs.rs2 + " LD");
+            $(".ldpop-map2-title").text(data.inputs.rs1 + " Allele Frequency");
+            $(".ldpop-map3-title").text(data.inputs.rs2 + " Allele Frequency");
             // $(initMap(data.locations));
             addMarkers(data);
         }
