@@ -729,17 +729,17 @@ function autoCalculate() {
                 updateData(id);
             }
             break;
-        // case "ldpop":
-        //     if(url.var1 && url.var2 && url.pop && url.r2_d) {
-        //         $("#ldpop-snp1").prop('value', url.var1);
-        //         $("#ldpop-snp2").prop('value', url.var2);
-        //         $("#pop_ld_r2").toggleClass('active', url.r2_d == "r2");
-        //         $("#pop_ld_r2").next().toggleClass('active', url.r2_d == "d");
-        //         refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
-        //         initCalculate(id);
-        //         updateData(id);
-        //     }
-        //     break;
+        case "ldpop":
+            if(url.var1 && url.var2 && url.pop && url.r2_d) {
+                $("#ldpop-snp1").prop('value', url.var1);
+                $("#ldpop-snp2").prop('value', url.var2);
+                $("#pop_ld_r2").toggleClass('active', url.r2_d == "r2");
+                $("#pop_ld_r2").next().toggleClass('active', url.r2_d == "d");
+                refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+                initCalculate(id);
+                updateData(id);
+            }
+            break;
         case "ldproxy":
             if(url.var && url.pop && url.r2_d) {
                 $("#ldproxy-snp").prop('value', url.var);
