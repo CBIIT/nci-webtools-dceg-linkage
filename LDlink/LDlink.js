@@ -2646,8 +2646,8 @@ function addMarkers(data) {
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map1_i][0] + ') - ' + locations.rs1_rs2_LD_map[map1_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
-                    '<b>' + data.inputs.rs1 + ' Allele Freq</b>: ' + locations.rs1_rs2_LD_map[map1_i][5] + '<br>' + 
-                    '<b>' + data.inputs.rs2 + ' Allele Freq</b>: ' + locations.rs1_rs2_LD_map[map1_i][6] + '<br>' + 
+                    '<b>' + data.inputs.rs1 + '</b>: ' + locations.rs1_rs2_LD_map[map1_i][5] + '<br>' + 
+                    '<b>' + data.inputs.rs2 + '</b>: ' + locations.rs1_rs2_LD_map[map1_i][6] + '<br>' + 
                     '<b>R<sup>2</sup></b>: ' + locations.rs1_rs2_LD_map[map1_i][7] + '<br>' + 
                     '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
