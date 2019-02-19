@@ -729,17 +729,17 @@ function autoCalculate() {
                 updateData(id);
             }
             break;
-        case "ldpop":
-            if(url.var1 && url.var2 && url.pop && url.r2_d) {
-                $("#ldpop-snp1").prop('value', url.var1);
-                $("#ldpop-snp2").prop('value', url.var2);
-                $("#pop_ld_r2").toggleClass('active', url.r2_d == "r2");
-                $("#pop_ld_r2").next().toggleClass('active', url.r2_d == "d");
-                refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
-                initCalculate(id);
-                updateData(id);
-            }
-            break;
+        // case "ldpop":
+        //     if(url.var1 && url.var2 && url.pop && url.r2_d) {
+        //         $("#ldpop-snp1").prop('value', url.var1);
+        //         $("#ldpop-snp2").prop('value', url.var2);
+        //         $("#pop_ld_r2").toggleClass('active', url.r2_d == "r2");
+        //         $("#pop_ld_r2").next().toggleClass('active', url.r2_d == "d");
+        //         refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+        //         initCalculate(id);
+        //         updateData(id);
+        //     }
+        //     break;
         case "ldproxy":
             if(url.var && url.pop && url.r2_d) {
                 $("#ldproxy-snp").prop('value', url.var);
@@ -2618,9 +2618,9 @@ var map1, map2, map3;
 // Initialize and add the map
 function initMap() {
     var initOptions = {
-        zoom: 1.5, 
+        zoom: 2, 
         center: {
-            lat: 0, 
+            lat: 30, 
             lng: 0
         }
     };
@@ -2629,7 +2629,8 @@ function initMap() {
     map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
 }
 
-function addMarkers(locations) {
+function addMarkers(data) {
+    var locations = data.locations;
     // rs#1 Frequencies map
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
@@ -2644,7 +2645,7 @@ function addMarkers(locations) {
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_map[map1_i][0] + ') - ' + locations.rs1_map[map1_i][1] + '</b><br>' + 
-                    '<u>rs#1 Allele Freq</u>: ' + locations.rs1_map[map1_i][5] + '</div>';
+                    '<u>' + data.inputs.rs1 + ' Allele Freq</u>: ' + locations.rs1_map[map1_i][5] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
             }
@@ -2664,7 +2665,7 @@ function addMarkers(locations) {
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs2_map[map2_i][0] + ') - ' + locations.rs2_map[map2_i][1] + '</b><br>' + 
-                    '<u>rs#2 Allele Freq</u>: ' + locations.rs2_map[map2_i][5] + '</div>';
+                    '<u>' + data.inputs.rs2 + ' Allele Freq</u>: ' + locations.rs2_map[map2_i][5] + '</div>';
                 map2_infowindow.setContent(contentString);
                 map2_infowindow.open(map2, map2_marker);
             }
@@ -2684,7 +2685,8 @@ function addMarkers(locations) {
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map3_i][0] + ') - ' + locations.rs1_rs2_LD_map[map3_i][1] + '</b><br>' + 
-                    '<u>' + locations.rs1_rs2_LD_map[map3_i][5] + '</u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div>';
+                    '<u>R<sup>2</sup></u>: ' + locations.rs1_rs2_LD_map[map3_i][6] + '</div><br>' + 
+                    '<u>D\'</u>: ' + locations.rs1_rs2_LD_map[map3_i][7];
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
             }
@@ -2701,10 +2703,8 @@ function updateLDpop() {
 
     if($('#pop_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
-        $("#ldpop_ld").html("R<sup>2</sup>");
     } else {
-        r2_d = 'd';  // i.e.  Dprime
-        $("#ldpop_ld").text("D\'");
+        r2_d = 'd';  // i.e. Dprime
     }
 
     var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
@@ -2738,7 +2738,7 @@ function updateLDpop() {
             $("#ldpop-map2-title").text(data.inputs.rs2 + " Frequencies");
             $("#ldpop-map3-title").html(data.inputs.rs1 + "-" + data.inputs.rs2 + " LD: (R<sup>2</sup>/D')");
             // $(initMap(data.locations));
-            addMarkers(data.locations);
+            addMarkers(data);
         }
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");
