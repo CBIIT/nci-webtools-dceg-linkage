@@ -2618,7 +2618,7 @@ var map1, map2, map3;
 // Initialize and add the map
 function initMap() {
     var initOptions = {
-        zoom: 1, 
+        zoom: 1.5, 
         center: {
             lat: 0, 
             lng: 0
