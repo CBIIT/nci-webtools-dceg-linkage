@@ -2628,6 +2628,30 @@ function initMap() {
     map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
     map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
+
+    // add example marker
+    // var myLatLng = {lat: 20, lng: 20};
+    // var icon = {
+    //     path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
+    //     anchor: new google.maps.Point(270, 80),
+    //     strokeColor: "black",
+    //     stokeOpacity: 1,
+    //     strokeWeight: .75,
+    //     fillColor: "red",
+    //     rotation: 135,
+    //     fillOpacity: 1,
+    //     scale: .40
+    // }
+    // var marker = new google.maps.Marker({
+    //     position: myLatLng,
+    //     map: map1,
+    //     icon: icon
+    // });
+    // var marker2 = new google.maps.Marker({
+    //     position: myLatLng,
+    //     map: map1
+    // });
+    
 }
 
 function addMarkers(data) {
@@ -2636,11 +2660,23 @@ function addMarkers(data) {
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
     for (map1_i = 0; map1_i < locations.rs1_rs2_LD_map.length; map1_i++) {
+        let icon = {
+            path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
+            anchor: new google.maps.Point(270, 80),
+            strokeColor: "black",
+            stokeOpacity: 1,
+            strokeWeight: .75,
+            fillColor: "red",
+            rotation: 135,
+            fillOpacity: 1,
+            scale: .40
+        }
         map1_marker = new google.maps.Marker({
             position: {
                 lat: locations.rs1_rs2_LD_map[map1_i][3], 
                 lng: locations.rs1_rs2_LD_map[map1_i][4]
             }, 
+            icon: icon,
             map: map1
         });
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
@@ -2659,11 +2695,23 @@ function addMarkers(data) {
     var map2_infowindow = new google.maps.InfoWindow();
     var map2_marker, map2_i;
     for (map2_i = 0; map2_i < locations.rs1_map.length; map2_i++) {
+        let icon = {
+            path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
+            anchor: new google.maps.Point(270, 80),
+            strokeColor: "black",
+            stokeOpacity: 1,
+            strokeWeight: .75,
+            fillColor: "white",
+            rotation: 135,
+            fillOpacity: 1,
+            scale: .40
+        }
         map2_marker = new google.maps.Marker({
             position: {
                 lat: locations.rs1_map[map2_i][3], 
                 lng: locations.rs1_map[map2_i][4]
             },
+            icon: icon,
             map: map2
         });
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
@@ -2679,11 +2727,23 @@ function addMarkers(data) {
     var map3_infowindow = new google.maps.InfoWindow();
     var map3_marker, map3_i;
     for (map3_i = 0; map3_i < locations.rs2_map.length; map3_i++) {
+        let icon = {
+            path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
+            anchor: new google.maps.Point(270, 80),
+            strokeColor: "black",
+            stokeOpacity: 1,
+            strokeWeight: .75,
+            fillColor: "blue",
+            rotation: 135,
+            fillOpacity: 1,
+            scale: .40
+        }
         map3_marker = new google.maps.Marker({
             position: {
                 lat: locations.rs2_map[map3_i][3], 
                 lng: locations.rs2_map[map3_i][4]
             }, 
+            icon: icon,
             map: map3
         });
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
