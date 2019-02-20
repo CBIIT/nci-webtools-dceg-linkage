@@ -2673,7 +2673,8 @@ function setLDColor(LD) {
     };
     var round_LD = Math.round(LD * 10 ) / 10;
     console.log("Rounded", round_LD);
-    return LDColorData.round_LD;
+    console.log("Color", LDColorData[round_LD]);
+    return LDColorData[round_LD];
     // round r2 to 1 decimal place and return color
 }
 
