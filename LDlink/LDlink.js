@@ -2814,8 +2814,10 @@ function updateLDpop() {
 
     if($('#pop_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
+        $("#ldpop-ld-legend-img").attr('src', 'LDmatrix_legend_R2.png');
     } else {
         r2_d = 'd';  // i.e. Dprime
+        $("#ldpop-ld-legend-img").attr('src', 'LDmatrix_legend_Dprime.png');
     }
 
     var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
