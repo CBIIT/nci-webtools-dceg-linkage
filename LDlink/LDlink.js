@@ -2673,16 +2673,16 @@ function setLightPercentage(col, p) {
     const RO = ((NR.toString(16).length === 1) ? "0" + NR.toString(16) : NR.toString(16));
     const GO = ((NG.toString(16).length === 1) ? "0" + NG.toString(16) : NG.toString(16));
     const BO = ((NB.toString(16).length === 1) ? "0" + NB.toString(16) : NB.toString(16));
-
+    console.log("#" + RO + GO + BO);
     return "#" + RO + GO + BO;
 }
 
 function colorMarkerLD(LD, location) {
-    console.log("LD", LD);
+    // console.log("LD", LD);
     var r2 = location[7];
     var dprime = location[8];
-    console.log("R2", r2);
-    console.log("D\'", dprime);
+    // console.log("R2", r2);
+    // console.log("D\'", dprime);
     if (LD == "R2") {
         return setLightPercentage("#FF0000", r2 * 100.0);
     } else {
