@@ -2629,6 +2629,9 @@ function initMap() {
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
     map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
 
+    var LDlegend = document.getElementById('ldpop-ld-legend');
+    map1.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(LDlegend);
+
     // add example marker
     // var myLatLng = {lat: 20, lng: 20};
     // var icon = {
@@ -2681,13 +2684,14 @@ function colorMarkerLD(LD, location) {
     // console.log("LD", LD);
     var r2 = location[7];
     var dprime = location[8];
-    // console.log("R2", r2);
-    // console.log("D\'", dprime);
+    console.log("R2: ", r2);
+    // console.log("D\': ", dprime);
     if (LD == "r2") {
         if (r2 == "NA") {
-            r2 = 0.0;
+            return "#E9F3F9";
+        } else {
+            return setLightPercentage("#FF0000", 100.0 - (r2 * 100.0));
         }
-        return setLightPercentage("#FF0000", 100.0 - (r2 * 100.0));
     } else {
         // do something
     }
