@@ -2654,6 +2654,29 @@ function initMap() {
     
 }
 
+function setLightPercentage(col, p) {
+    const R = parseInt(col.substring(1, 3), 16);
+    const G = parseInt(col.substring(3, 5), 16);
+    const B = parseInt(col.substring(5, 7), 16);
+    const curr_total_dark = (255 * 3) - (R + G + B);
+
+    const RR = ((255 - R) / curr_total_dark);
+    const GR = ((255 - G) / curr_total_dark);
+    const BR = ((255 - B) / curr_total_dark);
+
+    const new_total_dark = ((255 - 255 * (p / 100)) * 3);
+
+    const NR = 255 - Math.round(RR * new_total_dark);
+    const NG = 255 - Math.round(GR * new_total_dark);
+    const NB = 255 - Math.round(BR * new_total_dark);
+
+    const RO = ((NR.toString(16).length === 1) ? "0" + NR.toString(16) : NR.toString(16));
+    const GO = ((NG.toString(16).length === 1) ? "0" + NG.toString(16) : NG.toString(16));
+    const BO = ((NB.toString(16).length === 1) ? "0" + NB.toString(16) : NB.toString(16));
+
+    return "#" + RO + GO + BO;
+}
+
 function colorMarkerLD(LD, location) {
     console.log("LD", LD);
     var r2 = location[7];
@@ -2661,12 +2684,11 @@ function colorMarkerLD(LD, location) {
     console.log("R2", r2);
     console.log("D\'", dprime);
     if (LD == "R2") {
-        return r2;
+        return setLightPercentage("#FF0000", r2 * 100.0);
     } else {
         // do something
-        return 1.0;
     }
-    // return "red"
+    return "red"
 }
 
 function colorMarkerMAF(location) {
@@ -2685,9 +2707,9 @@ function addMarkers(data) {
             strokeColor: "black",
             stokeOpacity: 1,
             strokeWeight: .75,
-            fillColor: "red",
+            fillColor: colorMarkerLD(data.inputs.LD, locations.rs1_rs2_LD_map[map1_i]),
             rotation: 135,
-            fillOpacity: colorMarkerLD(data.inputs.LD, locations.rs1_rs2_LD_map[map1_i]),
+            fillOpacity: 1,
             scale: .40
         }
         map1_marker = new google.maps.Marker({
