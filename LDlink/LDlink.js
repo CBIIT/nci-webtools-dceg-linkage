@@ -1,4 +1,4 @@
-var ldlink_version = "Version 3.5.0";
+var ldlink_version = "Version 3.5";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -2654,6 +2654,10 @@ function initMap() {
     
 }
 
+function colorMarker(location) {
+    return "red"
+}
+
 function addMarkers(data) {
     var locations = data.locations;
     // rs#1 Frequencies map
@@ -2666,7 +2670,7 @@ function addMarkers(data) {
             strokeColor: "black",
             stokeOpacity: 1,
             strokeWeight: .75,
-            fillColor: "red",
+            fillColor: colorMarker(locations.rs1_rs2_LD_map[map1_i]),
             rotation: 135,
             fillOpacity: 1,
             scale: .40
