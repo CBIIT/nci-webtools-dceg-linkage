@@ -2654,8 +2654,23 @@ function initMap() {
     
 }
 
-function colorMarker(location) {
-    return "red"
+function colorMarkerLD(LD, location) {
+    console.log("LD", LD);
+    var r2 = location[7];
+    var dprime = location[8];
+    console.log("R2", r2);
+    console.log("D\'", dprime);
+    if (LD == "R2") {
+        return r2;
+    } else {
+        // do something
+        return 1.0;
+    }
+    // return "red"
+}
+
+function colorMarkerMAF(location) {
+    return "blue"
 }
 
 function addMarkers(data) {
@@ -2670,9 +2685,9 @@ function addMarkers(data) {
             strokeColor: "black",
             stokeOpacity: 1,
             strokeWeight: .75,
-            fillColor: colorMarker(locations.rs1_rs2_LD_map[map1_i]),
+            fillColor: "red",
             rotation: 135,
-            fillOpacity: 1,
+            fillOpacity: colorMarkerLD(data.inputs.LD, locations.rs1_rs2_LD_map[map1_i]),
             scale: .40
         }
         map1_marker = new google.maps.Marker({
@@ -2705,7 +2720,7 @@ function addMarkers(data) {
             strokeColor: "black",
             stokeOpacity: 1,
             strokeWeight: .75,
-            fillColor: "white",
+            fillColor: colorMarkerMAF(locations.rs1_map[map2_i]),
             rotation: 135,
             fillOpacity: 1,
             scale: .40
@@ -2737,7 +2752,7 @@ function addMarkers(data) {
             strokeColor: "black",
             stokeOpacity: 1,
             strokeWeight: .75,
-            fillColor: "blue",
+            fillColor: colorMarkerMAF(locations.rs2_map[map3_i]),
             rotation: 135,
             fillOpacity: 1,
             scale: .40
