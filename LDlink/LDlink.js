@@ -2683,7 +2683,7 @@ function colorMarkerLD(LD, location) {
     var dprime = location[8];
     // console.log("R2", r2);
     // console.log("D\'", dprime);
-    if (LD == "R2") {
+    if (LD == "r2") {
         return setLightPercentage("#FF0000", r2 * 100.0);
     } else {
         // do something
