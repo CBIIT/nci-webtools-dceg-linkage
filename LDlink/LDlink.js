@@ -2657,27 +2657,24 @@ function initMap() {
     
 }
 
-function setLightPercentage(col, p) {
-    const R = parseInt(col.substring(1, 3), 16);
-    const G = parseInt(col.substring(3, 5), 16);
-    const B = parseInt(col.substring(5, 7), 16);
-    const curr_total_dark = (255 * 3) - (R + G + B);
-
-    const RR = ((255 - R) / curr_total_dark);
-    const GR = ((255 - G) / curr_total_dark);
-    const BR = ((255 - B) / curr_total_dark);
-
-    const new_total_dark = ((255 - 255 * (p / 100)) * 3);
-
-    const NR = 255 - Math.round(RR * new_total_dark);
-    const NG = 255 - Math.round(GR * new_total_dark);
-    const NB = 255 - Math.round(BR * new_total_dark);
-
-    const RO = ((NR.toString(16).length === 1) ? "0" + NR.toString(16) : NR.toString(16));
-    const GO = ((NG.toString(16).length === 1) ? "0" + NG.toString(16) : NG.toString(16));
-    const BO = ((NB.toString(16).length === 1) ? "0" + NB.toString(16) : NB.toString(16));
-    console.log("#" + RO + GO + BO);
-    return "#" + RO + GO + BO;
+function setLDColor(LD) {
+    var LDColorData = {
+        0.0 : "#FFFFFF",
+        0.1 : "#FBE6E6",
+        0.2 : "#F8D3D2",
+        0.3 : "#F4B5B4",
+        0.4 : "#F19E9C",
+        0.5 : "#EF8683",
+        0.6 : "#EC706B",
+        0.7 : "#EB5A54",
+        0.8 : "#EB483F",
+        0.9 : "#E9392D",
+        1.0 : "#E9392D"
+    };
+    var round_LD = Math.round(LD * 10 ) / 10;
+    console.log("Rounded", round_LD);
+    return LDColorData.round_LD;
+    // round r2 to 1 decimal place and return color
 }
 
 function colorMarkerLD(LD, location) {
@@ -2690,10 +2687,14 @@ function colorMarkerLD(LD, location) {
         if (r2 == "NA") {
             return "#E9F3F9";
         } else {
-            return setLightPercentage("#FF0000", 100.0 - (r2 * 100.0));
+            return setLDColor(r2);
         }
     } else {
-        // do something
+        if (dprime == "NA") {
+            return "#E9F3F9";
+        } else {
+            return setLDColor(dprime);
+        }
     }
     return "red"
 }
