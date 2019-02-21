@@ -2679,6 +2679,38 @@ function colorMarkerLD(LD, location) {
     }
 }
 
+function getMinorAllele(variantIndex, locations) {
+    var alleles = locations[0][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+    var allele1 = alleles[0];
+    var allele2 = alleles[2];
+    var allele1PopSize = 0;
+    var allele2PopSize = 0;
+    for (i = 0; i < locations.length; i++) {
+        let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+        let allele1Freq = parseFloat(alleleData[1]);
+        let allele2Freq = parseFloat(alleleData[3]);
+        if (allele1Freq == allele2Freq) {
+            allele1PopSize = allele1PopSize + locations[i][1];
+            allele2PopSize = allele2PopSize + locations[i][1];
+        } else if (allele1Freq > allele2Freq) {
+            allele1PopSize = allele1PopSize + locations[i][1];
+        } else {
+            allele2PopSize = allele2PopSize + locations[i][1];
+        }
+    }
+    if (allele1PopSize == allele2PopSize) {
+        if (allele1 < allele2) {
+            return allele1;
+        } else {
+            return allele2;
+        }
+    } else if (allele1PopSize > allele2PopSize) {
+        return allele1;
+    } else {
+        return allele2;
+    }
+}
+
 function setMAFColor(MAF) {
     var MAFColorData = {
         0: "#FFFFFF",
@@ -2700,8 +2732,15 @@ function setMAFColor(MAF) {
     return MAFColorData[round_MAF];
 }
 
-function colorMarkerMAF(location) {
-    return "blue"
+function colorMarkerMAF(minorAllele, location) {
+    console.log("Minor Allele: ", minorAllele);
+    var alleleData = location[5];
+    var alleleData = alleleData.replace(/[\s\%]/g, '').split(/[\,\:]/);
+    var alleleDataHash = {};
+    alleleDataHash[alleleData[0]] = parseFloat(alleleData[1]);
+    alleleDataHash[alleleData[2]] = parseFloat(alleleData[3]);
+    var MAF = alleleDataHash[minorAllele] / 100.0;
+    return setMAFColor(MAF);
 }
 
 var markersArray = [];
@@ -2714,6 +2753,8 @@ function clearOverlays() {
 
 function addMarkers(data) {
     var locations = data.locations;
+    var rs1MinorAllele = getMinorAllele(2, data.aaData);
+    var rs2MinorAllele = getMinorAllele(3, data.aaData);
     // rs#1 Frequencies map
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
@@ -2753,7 +2794,7 @@ function addMarkers(data) {
         let icon = {
             path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
             strokeColor: "black",
-            fillColor: colorMarkerMAF(locations.rs1_map[map2_i]),
+            fillColor: colorMarkerMAF(rs1MinorAllele, locations.rs1_map[map2_i]),
             fillOpacity: 1,
             scale: .85
         }
@@ -2782,7 +2823,7 @@ function addMarkers(data) {
         let icon = {
             path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
             strokeColor: "black",
-            fillColor: colorMarkerMAF(locations.rs2_map[map3_i]),
+            fillColor: colorMarkerMAF(rs2MinorAllele, locations.rs2_map[map3_i]),
             fillOpacity: 1,
             scale: .85
         }
