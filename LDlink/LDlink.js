@@ -2659,6 +2659,7 @@ function initMap() {
 
 function setLDColor(LD) {
     var LDColorData = {
+        0: "#FFFFFF",
         0.0 : "#FFFFFF",
         0.1 : "#FBE6E6",
         0.2 : "#F8D3D2",
@@ -2669,13 +2670,14 @@ function setLDColor(LD) {
         0.7 : "#EB5A54",
         0.8 : "#EB483F",
         0.9 : "#E9392D",
-        1.0 : "#E9392D"
+        1.0 : "#E9392D",
+        1: "#E9392D"
     };
+    // round r2 to 1 decimal place and return color
     var round_LD = Math.round(LD * 10 ) / 10;
     console.log("Rounded", round_LD);
     console.log("Color", LDColorData[round_LD]);
     return LDColorData[round_LD];
-    // round r2 to 1 decimal place and return color
 }
 
 function colorMarkerLD(LD, location) {
@@ -2697,7 +2699,6 @@ function colorMarkerLD(LD, location) {
             return setLDColor(dprime);
         }
     }
-    return "red"
 }
 
 function colorMarkerMAF(location) {
