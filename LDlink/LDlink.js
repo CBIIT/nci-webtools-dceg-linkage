@@ -2630,10 +2630,11 @@ function initMap() {
     map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
 
     var LDlegend = document.getElementById('ldpop-ld-legend');
-    var MAFlegend = document.getElementById('ldpop-maf-legend');
+    var MAFlegend1 = document.getElementById('ldpop-maf-legend1');
+    var MAFlegend2 = document.getElementById('ldpop-maf-legend2');
     map1.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(LDlegend);
-    map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend);
-    map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend);
+    map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend1);
+    map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend2);
 }
 
 function setLDColor(LD) {
