@@ -2631,30 +2631,6 @@ function initMap() {
 
     var LDlegend = document.getElementById('ldpop-ld-legend');
     map1.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(LDlegend);
-
-    // add example marker
-    // var myLatLng = {lat: 20, lng: 20};
-    // var icon = {
-    //     path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
-    //     anchor: new google.maps.Point(270, 80),
-    //     strokeColor: "black",
-    //     stokeOpacity: 1,
-    //     strokeWeight: .75,
-    //     fillColor: "red",
-    //     rotation: 135,
-    //     fillOpacity: 1,
-    //     scale: .40
-    // }
-    // var marker = new google.maps.Marker({
-    //     position: myLatLng,
-    //     map: map1,
-    //     icon: icon
-    // });
-    // var marker2 = new google.maps.Marker({
-    //     position: myLatLng,
-    //     map: map1
-    // });
-    
 }
 
 function setLDColor(LD) {
@@ -2675,8 +2651,6 @@ function setLDColor(LD) {
     };
     // round r2 to 1 decimal place and return color
     var round_LD = Math.round(LD * 10 ) / 10;
-    console.log("Rounded", round_LD);
-    console.log("Color", LDColorData[round_LD]);
     return LDColorData[round_LD];
 }
 
@@ -2684,7 +2658,7 @@ function colorMarkerLD(LD, location) {
     // console.log("LD", LD);
     var r2 = location[7];
     var dprime = location[8];
-    console.log("R2: ", r2);
+    // console.log("R2: ", r2);
     // console.log("D\': ", dprime);
     if (LD == "r2") {
         if (r2 == "NA") {
@@ -2712,15 +2686,11 @@ function addMarkers(data) {
     var map1_marker, map1_i;
     for (map1_i = 0; map1_i < locations.rs1_rs2_LD_map.length; map1_i++) {
         let icon = {
-            path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
-            anchor: new google.maps.Point(270, 80),
+            path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
             strokeColor: "black",
-            stokeOpacity: 1,
-            strokeWeight: .75,
             fillColor: colorMarkerLD(data.inputs.LD, locations.rs1_rs2_LD_map[map1_i]),
-            rotation: 135,
             fillOpacity: 1,
-            scale: .40
+            scale: .85
         }
         map1_marker = new google.maps.Marker({
             position: {
@@ -2747,15 +2717,11 @@ function addMarkers(data) {
     var map2_marker, map2_i;
     for (map2_i = 0; map2_i < locations.rs1_map.length; map2_i++) {
         let icon = {
-            path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
-            anchor: new google.maps.Point(270, 80),
+            path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
             strokeColor: "black",
-            stokeOpacity: 1,
-            strokeWeight: .75,
             fillColor: colorMarkerMAF(locations.rs1_map[map2_i]),
-            rotation: 135,
             fillOpacity: 1,
-            scale: .40
+            scale: .85
         }
         map2_marker = new google.maps.Marker({
             position: {
@@ -2779,15 +2745,11 @@ function addMarkers(data) {
     var map3_marker, map3_i;
     for (map3_i = 0; map3_i < locations.rs2_map.length; map3_i++) {
         let icon = {
-            path: "M230 80 A 45 45, 0, 1, 0, 275 125 L 275 80 Z",
-            anchor: new google.maps.Point(270, 80),
+            path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
             strokeColor: "black",
-            stokeOpacity: 1,
-            strokeWeight: .75,
             fillColor: colorMarkerMAF(locations.rs2_map[map3_i]),
-            rotation: 135,
             fillOpacity: 1,
-            scale: .40
+            scale: .85
         }
         map3_marker = new google.maps.Marker({
             position: {
@@ -2806,7 +2768,6 @@ function addMarkers(data) {
             }
         })(map3_marker, map3_i));
     }
-    
 }
 
 function updateLDpop() {
