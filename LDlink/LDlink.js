@@ -2740,6 +2740,7 @@ function addMarkers(data) {
             icon: icon,
             map: map2
         });
+        markersArray.push(map2_marker);
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_map[map2_i][0] + ') - ' + locations.rs1_map[map2_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
@@ -2768,6 +2769,7 @@ function addMarkers(data) {
             icon: icon,
             map: map3
         });
+        markersArray.push(map3_marker);
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs2_map[map3_i][0] + ') - ' + locations.rs2_map[map3_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
