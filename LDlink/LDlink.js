@@ -2630,7 +2630,10 @@ function initMap() {
     map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
 
     var LDlegend = document.getElementById('ldpop-ld-legend');
+    var MAFlegend = document.getElementById('ldpop-maf-legend');
     map1.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(LDlegend);
+    map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend);
+    map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend);
 }
 
 function setLDColor(LD) {
@@ -2673,6 +2676,27 @@ function colorMarkerLD(LD, location) {
             return setLDColor(dprime);
         }
     }
+}
+
+function setMAFColor(MAF) {
+    var MAFColorData = {
+        0: "#FFFFFF",
+        0.0 : "#FFFFFF",
+        0.1 : "#E5E7FD",
+        0.2 : "#D0D4FB",
+        0.3 : "#B3BAFA",
+        0.4 : "#9AA3F8",
+        0.5 : "#828EF7",
+        0.6 : "#6877F6",
+        0.7 : "#4E60F5",
+        0.8 : "#354CF5",
+        0.9 : "#1B37F3",
+        1.0 : "#1B37F3",
+        1: "#1B37F3"
+    };
+    // round MAF to 1 decimal place and return color
+    var round_MAF = Math.round(MAF * 10 ) / 10;
+    return MAFColorData[round_MAF];
 }
 
 function colorMarkerMAF(location) {
