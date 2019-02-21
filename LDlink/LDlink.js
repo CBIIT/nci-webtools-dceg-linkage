@@ -2679,6 +2679,14 @@ function colorMarkerMAF(location) {
     return "blue"
 }
 
+var markersArray = [];
+function clearOverlays() {
+    for (var i = 0; i < markersArray.length; i++ ) {
+        markersArray[i].setMap(null);
+    }
+    markersArray.length = 0;
+}
+
 function addMarkers(data) {
     var locations = data.locations;
     // rs#1 Frequencies map
@@ -2700,6 +2708,7 @@ function addMarkers(data) {
             icon: icon,
             map: map1
         });
+        markersArray.push(map1_marker);
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
                 var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map1_i][0] + ') - ' + locations.rs1_rs2_LD_map[map1_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
@@ -2815,6 +2824,7 @@ function updateLDpop() {
             $(".ldpop-map2-title").text(data.inputs.rs1 + " Allele Frequency");
             $(".ldpop-map3-title").text(data.inputs.rs2 + " Allele Frequency");
             // $(initMap(data.locations));
+            clearOverlays();
             addMarkers(data);
         }
         $("#ldpop_results").text("Download Table");
