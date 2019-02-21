@@ -2680,6 +2680,7 @@ function colorMarkerLD(LD, location) {
 }
 
 function getMinorAllele(variantIndex, locations) {
+    console.log(variantIndex);
     var alleles = locations[0][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
     var allele1 = alleles[0];
     var allele2 = alleles[2];
@@ -2692,12 +2693,14 @@ function getMinorAllele(variantIndex, locations) {
         if (allele1Freq == allele2Freq) {
             allele1PopSize = allele1PopSize + locations[i][1];
             allele2PopSize = allele2PopSize + locations[i][1];
-        } else if (allele1Freq > allele2Freq) {
+        } else if (allele1Freq < allele2Freq) {
             allele1PopSize = allele1PopSize + locations[i][1];
         } else {
             allele2PopSize = allele2PopSize + locations[i][1];
         }
     }
+    console.log("Allele 1 Pop Size: ", allele1PopSize);
+    console.log("Allele 2 Pop Size: ", allele2PopSize);
     if (allele1PopSize == allele2PopSize) {
         if (allele1 < allele2) {
             return allele1;
