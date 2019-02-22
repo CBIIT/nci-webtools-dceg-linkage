@@ -2736,7 +2736,7 @@ function setMAFColor(MAF) {
 }
 
 function colorMarkerMAF(minorAllele, location) {
-    console.log("Minor Allele: ", minorAllele);
+    // console.log("Minor Allele: ", minorAllele);
     var alleleData = location[5];
     var alleleData = alleleData.replace(/[\s\%]/g, '').split(/[\,\:]/);
     var alleleDataHash = {};
@@ -2894,7 +2894,6 @@ function updateLDpop() {
             $(".ldpop-map1-title").html(data.inputs.rs1 + " " + data.inputs.rs2 + " LD");
             $(".ldpop-map2-title").text(data.inputs.rs1 + " Allele Frequency");
             $(".ldpop-map3-title").text(data.inputs.rs2 + " Allele Frequency");
-            // $(initMap(data.locations));
             clearOverlays();
             addMarkers(data);
         }
