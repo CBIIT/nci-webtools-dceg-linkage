@@ -2680,7 +2680,7 @@ function colorMarkerLD(LD, location) {
 }
 
 function getMinorAllele(variantIndex, locations) {
-    console.log(variantIndex);
+    // console.log(variantIndex);
     var alleles = locations[0][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
     var allele1 = alleles[0];
     var allele2 = alleles[2];
@@ -2699,8 +2699,8 @@ function getMinorAllele(variantIndex, locations) {
             allele2PopSize = allele2PopSize + locations[i][1];
         }
     }
-    console.log("Allele 1 Pop Size: ", allele1PopSize);
-    console.log("Allele 2 Pop Size: ", allele2PopSize);
+    // console.log("Allele 1 Pop Size: ", allele1PopSize);
+    // console.log("Allele 2 Pop Size: ", allele2PopSize);
     if (allele1PopSize == allele2PopSize) {
         if (allele1 < allele2) {
             return allele1;
