@@ -2901,6 +2901,8 @@ function updateLDpop() {
         $('#ldpop_results').css("text-decoration", "underline");
         $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
         $("#new-ldpop_filter").after($("#ldpop-download-table"));
+        $("#new-ldpop_wrapper").prepend($("#new-ldpop_info").clone().prop('id', 'new-ldpop_info_clone'));
+        $("#new-ldpop_info_clone").css("padding", "0px 10px 0px 0px");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
