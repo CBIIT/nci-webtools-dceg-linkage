@@ -1005,6 +1005,8 @@ input:checked + .slider:before {
   box-shadow: none !important;
   border-radius: 0px !important;
   margin-bottom: 0px !important;
+  min-height: 0px !important;
+  height: 100% !important;
 }
 
 #new-ldpop_filter {
