@@ -1,4 +1,4 @@
-var ldlink_version = "Version 3.4.0";
+var ldlink_version = "Version 3.5";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -18,7 +18,7 @@ var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752
 var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
 var snpchipReverseLookup = [];
 var ldClipRaw;
-var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldproxy", "snpclip", "snpchip", "apiaccess" ];
+var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "snpclip", "snpchip", "apiaccess" ];
 
 
 Object.size = function(obj) {
@@ -31,7 +31,6 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
-
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
         $(this).alert('close');
@@ -224,6 +223,7 @@ $(document).ready(function() {
     showFFWarning();
 
     createAssocTable();
+    createPopTable();
     createProxyTable();
     var new_assoc_data = {"aaData":
     [
@@ -282,7 +282,8 @@ $(document).ready(function() {
     autoCalculate();
     createFileSelectEvent();
     createEnterEvent();
-
+    // Google Maps API
+    initMap();
 });
 
 // Set file support trigger
@@ -582,6 +583,29 @@ function createAssocTable() {
 
 }
 
+function createPopTable() {
+
+    var ldpopTable = $('#new-ldpop').DataTable( {
+        "aaSorting": [],  /* Disable initial sort */
+        "bPaginate": false,
+        "bJQueryUI": false,  // ThemeRoller
+        "bLengthChange": false,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bAutoWidth": true,
+        "bProcessing": false,
+        "deferRender": false,
+        // "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
+        "columnDefs": [{ 
+            className: "dt-head-center", 
+            className: "dt-body-center",
+            "targets": [ 0, 1, 2, 3, 4, 5 ] 
+        }]
+    });
+
+}
+
 function createProxyTable() {
 
     var ldproxyTable = $('#new-ldproxy').DataTable( {
@@ -658,6 +682,7 @@ function setupTabs() {
     if(currentTab.search('hap')>=0) currentTab = 'ldhap';
     if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
     if(currentTab.search('pair')>=0) currentTab = 'ldpair';
+    if(currentTab.search('pop')>=0) currentTab = 'ldpop';
     if(currentTab.search('proxy')>=0) currentTab = 'ldproxy';
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
@@ -699,6 +724,17 @@ function autoCalculate() {
             if(url.var1 && url.var2 && url.pop) {
                 $("#ldpair-snp1").prop('value', url.var1);
                 $("#ldpair-snp2").prop('value', url.var2);
+                refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+                initCalculate(id);
+                updateData(id);
+            }
+            break;
+        case "ldpop":
+            if(url.var1 && url.var2 && url.pop && url.r2_d) {
+                $("#ldpop-snp1").prop('value', url.var1);
+                $("#ldpop-snp2").prop('value', url.var2);
+                $("#pop_ld_r2").toggleClass('active', url.r2_d == "r2");
+                $("#pop_ld_r2").next().toggleClass('active', url.r2_d == "d");
                 refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
                 initCalculate(id);
                 updateData(id);
@@ -861,14 +897,12 @@ function RefreshTable(tableId, json) {
     table = $(tableId).dataTable();
     oSettings = table.fnSettings();
     table.fnClearTable(this);
-    for (var i=0; i<json.aaData.length; i++) {
+    for (var i = 0; i < json.aaData.length; i++) {
       table.oApi._fnAddData(oSettings, json.aaData[i]);
     }
     oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
     table.fnDraw();
 }
-
-
 
 function ldproxy_rs_results_link(data, type, row) {
 
@@ -1142,6 +1176,12 @@ function updateData(id) {
             if(isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDpair();
+            }
+            break;
+        case 'ldpop':
+            if(isPopulationSet(id)) {
+                $('#'+id+"-loading").show();
+                updateLDpop();
             }
             break;
         case 'ldproxy':
@@ -2562,8 +2602,310 @@ function updateLDpair() {
             addLDpairHyperLinks(data);
         }
         $("#ldpair_results").text("Download Results");
-            $('#ldpair_results').css("text-decoration", "underline");
-            $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+        $('#ldpair_results').css("text-decoration", "underline");
+        $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+    hideLoadingIcon(ajaxRequest, id);
+}
+
+var map1, map2, map3;
+// Initialize and add the map
+function initMap() {
+    var initOptions = {
+        zoom: 2, 
+        center: {
+            lat: 30, 
+            lng: 0
+        },
+        controlSize: 24
+    };
+    map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
+    map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
+    map3 = new google.maps.Map(document.getElementById('map3'), initOptions);
+
+    var LDlegend = document.getElementById('ldpop-ld-legend');
+    var MAFlegend1 = document.getElementById('ldpop-maf-legend1');
+    var MAFlegend2 = document.getElementById('ldpop-maf-legend2');
+    map1.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(LDlegend);
+    map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend1);
+    map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend2);
+}
+
+function setLDColor(LD) {
+    var LDColorData = {
+        0: "#FFFFFF",
+        0.0 : "#FFFFFF",
+        0.1 : "#FBE6E6",
+        0.2 : "#F8D3D2",
+        0.3 : "#F4B5B4",
+        0.4 : "#F19E9C",
+        0.5 : "#EF8683",
+        0.6 : "#EC706B",
+        0.7 : "#EB5A54",
+        0.8 : "#EB483F",
+        0.9 : "#E9392D",
+        1.0 : "#E9392D",
+        1: "#E9392D"
+    };
+    // round r2 to 1 decimal place and return color
+    var round_LD = Math.round(LD * 10 ) / 10;
+    return LDColorData[round_LD];
+}
+
+function colorMarkerLD(LD, location) {
+    // console.log("LD", LD);
+    var r2 = location[7];
+    var dprime = location[8];
+    // console.log("R2: ", r2);
+    // console.log("D\': ", dprime);
+    if (LD == "r2") {
+        if (r2 == "NA") {
+            return "#E9F3F9";
+        } else {
+            return setLDColor(r2);
+        }
+    } else {
+        if (dprime == "NA") {
+            return "#E9F3F9";
+        } else {
+            return setLDColor(dprime);
+        }
+    }
+}
+
+function getMinorAllele(variantIndex, locations) {
+    // console.log(variantIndex);
+    var alleles = locations[0][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+    var allele1 = alleles[0];
+    var allele2 = alleles[2];
+    var allele1PopSize = 0;
+    var allele2PopSize = 0;
+    for (i = 0; i < locations.length; i++) {
+        let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+        let allele1Freq = parseFloat(alleleData[1]);
+        let allele2Freq = parseFloat(alleleData[3]);
+        if (allele1Freq == allele2Freq) {
+            allele1PopSize = allele1PopSize + locations[i][1];
+            allele2PopSize = allele2PopSize + locations[i][1];
+        } else if (allele1Freq < allele2Freq) {
+            allele1PopSize = allele1PopSize + locations[i][1];
+        } else {
+            allele2PopSize = allele2PopSize + locations[i][1];
+        }
+    }
+    // console.log("Allele 1 Pop Size: ", allele1PopSize);
+    // console.log("Allele 2 Pop Size: ", allele2PopSize);
+    if (allele1PopSize == allele2PopSize) {
+        if (allele1 < allele2) {
+            return allele1;
+        } else {
+            return allele2;
+        }
+    } else if (allele1PopSize > allele2PopSize) {
+        return allele1;
+    } else {
+        return allele2;
+    }
+}
+
+function setMAFColor(MAF) {
+    var MAFColorData = {
+        0: "#FFFFFF",
+        0.0 : "#FFFFFF",
+        0.1 : "#E5E7FD",
+        0.2 : "#D0D4FB",
+        0.3 : "#B3BAFA",
+        0.4 : "#9AA3F8",
+        0.5 : "#828EF7",
+        0.6 : "#6877F6",
+        0.7 : "#4E60F5",
+        0.8 : "#354CF5",
+        0.9 : "#1B37F3",
+        1.0 : "#1B37F3",
+        1: "#1B37F3"
+    };
+    // round MAF to 1 decimal place and return color
+    var round_MAF = Math.round(MAF * 10 ) / 10;
+    return MAFColorData[round_MAF];
+}
+
+function colorMarkerMAF(minorAllele, location) {
+    // console.log("Minor Allele: ", minorAllele);
+    var alleleData = location[5];
+    var alleleData = alleleData.replace(/[\s\%]/g, '').split(/[\,\:]/);
+    var alleleDataHash = {};
+    alleleDataHash[alleleData[0]] = parseFloat(alleleData[1]);
+    alleleDataHash[alleleData[2]] = parseFloat(alleleData[3]);
+    var MAF = alleleDataHash[minorAllele] / 100.0;
+    return setMAFColor(MAF);
+}
+
+var markersArray = [];
+function clearOverlays() {
+    for (var i = 0; i < markersArray.length; i++ ) {
+        markersArray[i].setMap(null);
+    }
+    markersArray.length = 0;
+}
+
+function addMarkers(data) {
+    var locations = data.locations;
+    var rs1MinorAllele = getMinorAllele(2, data.aaData);
+    var rs2MinorAllele = getMinorAllele(3, data.aaData);
+    // rs#1 Frequencies map
+    var map1_infowindow = new google.maps.InfoWindow();
+    var map1_marker, map1_i;
+    for (map1_i = 0; map1_i < locations.rs1_rs2_LD_map.length; map1_i++) {
+        let icon = {
+            path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+            strokeColor: "black",
+            fillColor: colorMarkerLD(data.inputs.LD, locations.rs1_rs2_LD_map[map1_i]),
+            fillOpacity: 1,
+            scale: .85
+        }
+        map1_marker = new google.maps.Marker({
+            position: {
+                lat: locations.rs1_rs2_LD_map[map1_i][3], 
+                lng: locations.rs1_rs2_LD_map[map1_i][4]
+            }, 
+            icon: icon,
+            map: map1
+        });
+        markersArray.push(map1_marker);
+        google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
+            return function() {
+                var contentString = '<div><b>(' + locations.rs1_rs2_LD_map[map1_i][0] + ') - ' + locations.rs1_rs2_LD_map[map1_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
+                    '<b>' + data.inputs.rs1 + '</b>: ' + locations.rs1_rs2_LD_map[map1_i][5] + '<br>' + 
+                    '<b>' + data.inputs.rs2 + '</b>: ' + locations.rs1_rs2_LD_map[map1_i][6] + '<br>' + 
+                    '<b>R<sup>2</sup></b>: ' + locations.rs1_rs2_LD_map[map1_i][7] + '<br>' + 
+                    '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
+                map1_infowindow.setContent(contentString);
+                map1_infowindow.open(map1, map1_marker);
+            }
+        })(map1_marker, map1_i));
+    }
+    // rs#2 Frequencies map
+    var map2_infowindow = new google.maps.InfoWindow();
+    var map2_marker, map2_i;
+    for (map2_i = 0; map2_i < locations.rs1_map.length; map2_i++) {
+        let icon = {
+            path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+            strokeColor: "black",
+            fillColor: colorMarkerMAF(rs1MinorAllele, locations.rs1_map[map2_i]),
+            fillOpacity: 1,
+            scale: .85
+        }
+        map2_marker = new google.maps.Marker({
+            position: {
+                lat: locations.rs1_map[map2_i][3], 
+                lng: locations.rs1_map[map2_i][4]
+            },
+            icon: icon,
+            map: map2
+        });
+        markersArray.push(map2_marker);
+        google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
+            return function() {
+                var contentString = '<div><b>(' + locations.rs1_map[map2_i][0] + ') - ' + locations.rs1_map[map2_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
+                    locations.rs1_map[map2_i][5] + '</div>';
+                map2_infowindow.setContent(contentString);
+                map2_infowindow.open(map2, map2_marker);
+            }
+        })(map2_marker, map2_i));
+    }
+    // rs#1-rs#2 LD map
+    var map3_infowindow = new google.maps.InfoWindow();
+    var map3_marker, map3_i;
+    for (map3_i = 0; map3_i < locations.rs2_map.length; map3_i++) {
+        let icon = {
+            path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+            strokeColor: "black",
+            fillColor: colorMarkerMAF(rs2MinorAllele, locations.rs2_map[map3_i]),
+            fillOpacity: 1,
+            scale: .85
+        }
+        map3_marker = new google.maps.Marker({
+            position: {
+                lat: locations.rs2_map[map3_i][3], 
+                lng: locations.rs2_map[map3_i][4]
+            }, 
+            icon: icon,
+            map: map3
+        });
+        markersArray.push(map3_marker);
+        google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
+            return function() {
+                var contentString = '<div><b>(' + locations.rs2_map[map3_i][0] + ') - ' + locations.rs2_map[map3_i][1] + '</b><hr style="margin-top: 5px; margin-bottom: 5px;">' + 
+                    locations.rs2_map[map3_i][5] + '</div>';
+                map3_infowindow.setContent(contentString);
+                map3_infowindow.open(map3, map3_marker);
+            }
+        })(map3_marker, map3_i));
+    }
+}
+
+function updateLDpop() {
+    var id = 'ldpop';
+    var $btn = $('#' + id).button('loading');
+    var population = getPopulationCodes(id+'-population-codes');
+    var r2_d;
+
+    if($('#pop_ld_r2').hasClass('active')) {
+        r2_d = 'r2'; // i.e. R2
+        $("#ldpop-ld-legend-img").attr('src', 'LDmatrix_legend_R2.png');
+    } else {
+        r2_d = 'd';  // i.e. Dprime
+        $("#ldpop-ld-legend-img").attr('src', 'LDmatrix_legend_Dprime.png');
+    }
+
+    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var ldpopInputs = {
+        var1 : $('#ldpop-snp1').val(),
+        var2 : $('#ldpop-snp2').val(),
+        pop : population.join("+"),
+        reference : reference,
+        r2_d: r2_d
+    };
+
+    updateHistoryURL(id, ldpopInputs);
+
+    var url = restServerUrl + "/ldpop";
+
+    var ajaxRequest = $.ajax({
+        type : "GET",
+        url : url,
+        data : ldpopInputs,
+        contentType : 'application/json' // JSON
+    });
+
+    ajaxRequest.success(function(data) {
+        // console.log(data);
+        if (displayError(id, data) == false) {
+            $('#' + id + '-results-container').show();
+            RefreshTable('#new-ldpop', data);
+            $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
+            $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
+            $(".ldpop-map1-title").html(data.inputs.rs1 + " " + data.inputs.rs2 + " LD");
+            $(".ldpop-map2-title").text(data.inputs.rs1 + " Allele Frequency");
+            $(".ldpop-map3-title").text(data.inputs.rs2 + " Allele Frequency");
+            clearOverlays();
+            addMarkers(data);
+        }
+        $("#ldpop_results").text("Download Table");
+        $('#ldpop_results').css("text-decoration", "underline");
+        $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
+        $("#new-ldpop_filter").after($("#ldpop-download-table"));
+        if(!$('#new-ldpop_topInfo').length) {
+            $('<div id="new-ldpop_topInfo"></div>').prependTo('#new-ldpop_wrapper');
+        }    
+        $("#new-ldpop_topInfo").html($("#new-ldpop_info").clone().prop('id', 'new-ldpop_info_clone'));
+        $("#new-ldpop_info_clone").css("padding", "0px 10px 0px 0px");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);

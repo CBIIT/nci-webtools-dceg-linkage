@@ -22,6 +22,7 @@ from xml.sax.saxutils import escape, unescape
 from socket import gethostname
 from pandas import DataFrame
 from LDpair import calculate_pair
+from LDpop import calculate_pop
 from LDproxy import calculate_proxy
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
@@ -275,6 +276,55 @@ def ldpair():
                 content = fp.read()
                 fp.close()
                 return content
+        except:
+            output = json.loads(out_json)
+            return sendTraceback(output["error"])
+    except:
+        return sendTraceback(None)
+
+    return current_app.response_class(out_json, mimetype='application/json')
+
+@app.route('/LDlinkRest/ldpop', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
+@requires_token
+def ldpop():
+    # python LDpop.py rs2720460 rs11733615 EUR False 38
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    isProgrammatic = False
+    print 'Execute ldpop'
+    print 'Gathering Variables from url'
+    var1 = request.args.get('var1', False)
+    var2 = request.args.get('var2', False)
+    pop = request.args.get('pop', False)
+    r2_d = request.args.get('r2_d', False)
+
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        isProgrammatic = True
+
+    print 'var1: ' + var1
+    print 'var2: ' + var2
+    print 'pop: ' + pop
+    print 'request: ' + str(reference)
+    print 'r2_d: ' + r2_d
+
+    try:
+        out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+        # if API call has error, retrieve error message from json returned from calculation
+        try:
+            if isProgrammatic:
+                # fp = open('./tmp/LDpop_'+reference+'.txt', "r")
+                # content = fp.read()
+                # fp.close()
+                return sendJSON(out_json)
         except:
             output = json.loads(out_json)
             return sendTraceback(output["error"])
