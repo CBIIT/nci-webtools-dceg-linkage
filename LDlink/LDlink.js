@@ -2891,9 +2891,9 @@ function updateLDpop() {
             RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
-            $(".ldpop-map1-title").html(data.inputs.rs1 + " " + data.inputs.rs2 + " LD");
-            $(".ldpop-map2-title").text(data.inputs.rs1 + " Allele Frequency");
-            $(".ldpop-map3-title").text(data.inputs.rs2 + " Allele Frequency");
+            $(".ldpop-map1-title").html("<b>" + data.inputs.rs1 + " " + data.inputs.rs2 + " LD" + "</b>");
+            $(".ldpop-map2-title").html("<b>" + data.inputs.rs1 + " Allele Frequency" + "</b>");
+            $(".ldpop-map3-title").html("<b>" + data.inputs.rs2 + " Allele Frequency" + "</b>");
             clearOverlays();
             addMarkers(data);
         }
