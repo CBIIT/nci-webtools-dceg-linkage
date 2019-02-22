@@ -2885,7 +2885,7 @@ function updateLDpop() {
     });
 
     ajaxRequest.success(function(data) {
-        console.log(data);
+        // console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);
@@ -2900,6 +2900,7 @@ function updateLDpop() {
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");
         $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
+        $("#new-ldpop_filter").after($("#ldpop-download-table"));
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
