@@ -982,8 +982,7 @@ function ldproxy_rs_results_link(data, type, row) {
 
 function ldpop_ldpair_results_link(data, type, row) {
     // parse data
-    console.log(data);
-    // var ldpair_data = data.split('-');
+    // console.log(data);
     var snp1 = data[0];
     var snp2 = data[1];
     var pops = data[2];
