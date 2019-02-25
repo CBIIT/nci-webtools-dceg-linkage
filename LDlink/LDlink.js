@@ -596,12 +596,24 @@ function createPopTable() {
         "bAutoWidth": true,
         "bProcessing": false,
         "deferRender": false,
-        // "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
-        "columnDefs": [{ 
-            className: "dt-head-center", 
-            className: "dt-body-center",
-            "targets": [ 0, 1, 2, 3, 4, 5 ] 
-        }]
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (isNaN(data)) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 1
+            },
+            { 
+                className: "dt-head-center", 
+                className: "dt-body-center",
+                "targets": [ 0, 1, 2, 3, 4, 5 ] 
+            }
+        ]
     });
 
 }
@@ -921,6 +933,24 @@ function ldproxy_rs_results_link(data, type, row) {
     var link;
     link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
     //return data +' ('+ row[3]+')';
+    return link;
+}
+
+function ldpop_ldpair_results_link(data, type, row) {
+    // parse data
+    console.log(data);
+    var ldpair_data = data.split('-');
+    var snp1 = ldpair_data[0];
+    var snp2 = ldpair_data[1];
+    var pops = ldpair_data[2];
+    var server = 'https://ldlink-dev.nci.nih.gov/?tab=ldpair';
+    var params = {
+        var1: snp1,
+        var2: snp2,
+        populations: pops
+    };
+    var href = server + $.param(params);
+    var link = '<a href="' + href + '">link</a>';
     return link;
 }
 
@@ -2935,7 +2965,7 @@ function updateLDpop() {
     });
 
     ajaxRequest.success(function(data) {
-        // console.log(data);
+        console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);

@@ -563,6 +563,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         }
     }
 
+    # Change manipulate output data for frontend only if accessed via Web instance
     if web:
         output_table = { 
             "inputs": {
@@ -601,13 +602,22 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                     rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
                     rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
                     rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
+        # Add map data
         output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
         output_table["locations"]["rs1_map"] = rs1_map_data
         output_table["locations"]["rs2_map"] = rs2_map_data
         def getKeyOrder(element):
             return element[0]
         table_data.sort(key=getKeyOrder)
+        # Add table data sorting order of rows
         output_table["aaData"] = [xs[1:] for xs in table_data]
+        # Add final row link to LDpair
+        ldpair_pops = []
+        for pop in output.keys():
+            if pop not in pop_groups.keys():
+                ldpair_pops.append(pop)
+        ldpair_data = snp1_input + "-" + snp2_input + "-" + "%2B".join(ldpair_pops)
+        output_table["aaData"].append(["LDpair", ldpair_data, "", "", "", ""])
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:
