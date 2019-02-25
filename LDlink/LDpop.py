@@ -653,7 +653,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 key_rs2_allele_freq = rs2_dict["REF"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["REF"]] + ", " + rs2_dict["ALT"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["ALT"]]
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
-                table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
+                # set up data for ldpair link
+                ldpair_pops = []
+                if key in pop_groups.keys():
+                    ldpair_pops = pop_groups[key]
+                ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+                table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
                 # populate map data
                 if key not in pop_groups.keys():
                     rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
@@ -669,12 +674,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         # Add table data sorting order of rows
         output_table["aaData"] = [xs[1:] for xs in table_data]
         # Add final row link to LDpair
-        ldpair_pops = []
-        for pop in output.keys():
-            if pop not in pop_groups.keys() and len(pop) == 3:
-                ldpair_pops.append(pop)
-        ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
-        output_table["aaData"].append(["LDpair", ldpair_data, ldpair_data, ldpair_data, ldpair_data, ldpair_data])
+        # ldpair_pops = []
+        # for pop in output.keys():
+        #     if pop not in pop_groups.keys() and len(pop) == 3:
+        #         ldpair_pops.append(pop)
+        # ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+        # output_table["aaData"].append(["LDpair", ldpair_data, ldpair_data, ldpair_data, ldpair_data, ldpair_data])
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:

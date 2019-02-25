@@ -600,62 +600,14 @@ function createPopTable() {
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair in final row
-                    if (data instanceof Array) {
-                        return ldpop_ldpair_results_link(data, type, row);
-                    } else {
-                        return data;
-                    }
+                    return ldpop_ldpair_results_link(data, type, row);
                 },
-                "targets": 1
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Provide link to LDpair in final row
-                    if (data instanceof Array) {
-                        return ldpop_ldpair_results_link(data, type, row);
-                    } else {
-                        return data;
-                    }
-                },
-                "targets": 2
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Provide link to LDpair in final row
-                    if (data instanceof Array) {
-                        return ldpop_ldpair_results_link(data, type, row);
-                    } else {
-                        return data;
-                    }
-                },
-                "targets": 3
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Provide link to LDpair in final row
-                    if (data instanceof Array) {
-                        return ldpop_ldpair_results_link(data, type, row);
-                    } else {
-                        return data;
-                    }
-                },
-                "targets": 4
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Provide link to LDpair in final row
-                    if (data instanceof Array) {
-                        return ldpop_ldpair_results_link(data, type, row);
-                    } else {
-                        return data;
-                    }
-                },
-                "targets": 5
+                "targets": 6
             },
             { 
                 className: "dt-head-center", 
                 className: "dt-body-center",
-                "targets": [ 0, 1, 2, 3, 4, 5 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6 ] 
             }
         ]
     });
