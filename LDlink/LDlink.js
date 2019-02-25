@@ -2813,7 +2813,7 @@ function addMarkers(data) {
                     '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
-                map1_marker.setZIndex(map1_marker.getZIndex() + 1);
+                map1_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map1_marker, map1_i));
     }
@@ -2848,7 +2848,7 @@ function addMarkers(data) {
                     locations.rs1_map[map2_i][5] + '</div>';
                 map2_infowindow.setContent(contentString);
                 map2_infowindow.open(map2, map2_marker);
-                map2_marker.setZIndex(map2_marker.getZIndex() + 1);
+                map2_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map2_marker, map2_i));
     }
@@ -2883,7 +2883,7 @@ function addMarkers(data) {
                     locations.rs2_map[map3_i][5] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
-                map3_marker.setZIndex(map3_marker.getZIndex() + 1);
+                map3_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map3_marker, map3_i));
     }
