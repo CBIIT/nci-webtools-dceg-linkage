@@ -244,15 +244,72 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
+    elif len(vcf1) > 1:
+        geno1 = []
+        for i in range(len(vcf1)):
+            if vcf1[i].strip().split()[2] == snp1:
+                geno1 = vcf1[i].strip().split()
+        if geno1 == []:
+            output["error"] = snp1 + " is not in 1000G reference panel."
+            if web:
+                output = json.dumps(output, sort_keys=True, indent=2)
+            return output
+    else:
+        geno1 = vcf1[0].strip().split()
+
+    if geno1[2] != snp1:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". Genomic position for query variant1 (" + snp1 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno1[0]+":"+geno1[1]+")"
+        else:
+            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno1[0]+":"+geno1[1]+")"
+        snp1 = geno1[2]
+
+    if "," in geno1[3] or "," in geno1[4]:
+        output["error"] = snp1 + " is not a biallelic variant."
+        return(json.dumps(output, sort_keys=True, indent=2))
+
     # SNP2
     if len(vcf2) == 0:
         output["error"] = snp2 + " is not in 1000G reference panel."
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
+    elif len(vcf2) > 1:
+        geno2 = []
+        for i in range(len(vcf2)):
+            if vcf2[i].strip().split()[2] == snp2:
+                geno2 = vcf2[i].strip().split()
+        if geno2 == []:
+            output["error"] = snp2 + " is not in 1000G reference panel."
+            if web:
+                output = json.dumps(output, sort_keys=True, indent=2)
+            return output
+    else:
+        geno2 = vcf2[0].strip().split()
 
-    vcf1 = vcf1[0].strip().split()
-    vcf2 = vcf2[0].strip().split()
+    if geno2[2] != snp2:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". Genomic position for query variant2 (" + snp2 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno2[0]+":"+geno2[1]+")"
+        else:
+            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno2[0]+":"+geno2[1]+")"
+        snp2 = geno2[2]
+
+    if "," in geno2[3] or "," in geno2[4]:
+        output["error"] = snp2 + " is not a biallelic variant."
+        return(json.dumps(output, sort_keys=True, indent=2))
+
+    # vcf1 = vcf1[0].strip().split()
+    # vcf2 = vcf2[0].strip().split()
 
     # Get headers
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
@@ -263,32 +320,32 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = proc2_h.stdout.readlines()[0].strip().split()
 
-    rs1_dict = dict(zip(head1, vcf1))
-    rs2_dict = dict(zip(head2, vcf2))
+    rs1_dict = dict(zip(head1, geno1))
+    rs2_dict = dict(zip(head2, geno2))
 
-    if snp1 != rs1_dict["ID"]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
-        else:
-            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
-        snp1 = rs1_dict["ID"]
+    # if snp1 != rs1_dict["ID"]:
+    #     if "warning" in output:
+    #         output["warning"] = output["warning"] + \
+    #             ". Genomic position for query variant1 (" + snp1 + \
+    #             ") does not match RS number at 1000G position (chr" + \
+    #             rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
+    #     else:
+    #         output["warning"] = "Genomic position for query variant1 (" + snp1 + \
+    #             ") does not match RS number at 1000G position (chr" + \
+    #             rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
+    #     snp1 = rs1_dict["ID"]
 
-    if snp2 != rs2_dict["ID"]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
-        else:
-            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
-        snp2 = rs2_dict["ID"]
+    # if snp2 != rs2_dict["ID"]:
+    #     if "warning" in output:
+    #         output["warning"] = output["warning"] + \
+    #             ". Genomic position for query variant2 (" + snp2 + \
+    #             ") does not match RS number at 1000G position (chr" + \
+    #             rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
+    #     else:
+    #         output["warning"] = "Genomic position for query variant2 (" + snp2 + \
+    #             ") does not match RS number at 1000G position (chr" + \
+    #             rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
+    #     snp2 = rs2_dict["ID"]
     
     if "<" in rs1_dict["REF"]:
         if "warning" in output:
@@ -563,6 +620,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         }
     }
 
+    # Change manipulate output data for frontend only if accessed via Web instance
     if web:
         output_table = { 
             "inputs": {
@@ -601,13 +659,22 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                     rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
                     rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
                     rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
+        # Add map data
         output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
         output_table["locations"]["rs1_map"] = rs1_map_data
         output_table["locations"]["rs2_map"] = rs2_map_data
         def getKeyOrder(element):
             return element[0]
         table_data.sort(key=getKeyOrder)
+        # Add table data sorting order of rows
         output_table["aaData"] = [xs[1:] for xs in table_data]
+        # Add final row link to LDpair
+        ldpair_pops = []
+        for pop in output.keys():
+            if pop not in pop_groups.keys() and len(pop) == 3:
+                ldpair_pops.append(pop)
+        ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+        output_table["aaData"].append(["LDpair", ldpair_data, ldpair_data, ldpair_data, ldpair_data, ldpair_data])
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:

@@ -596,12 +596,68 @@ function createPopTable() {
         "bAutoWidth": true,
         "bProcessing": false,
         "deferRender": false,
-        // "order": [[ 9, "asc" ], [ 5, "asc"]], //Order desc on DPrime
-        "columnDefs": [{ 
-            className: "dt-head-center", 
-            className: "dt-body-center",
-            "targets": [ 0, 1, 2, 3, 4, 5 ] 
-        }]
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 3
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 4
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 5
+            },
+            { 
+                className: "dt-head-center", 
+                className: "dt-body-center",
+                "targets": [ 0, 1, 2, 3, 4, 5 ] 
+            }
+        ]
     });
 
 }
@@ -921,6 +977,23 @@ function ldproxy_rs_results_link(data, type, row) {
     var link;
     link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
     //return data +' ('+ row[3]+')';
+    return link;
+}
+
+function ldpop_ldpair_results_link(data, type, row) {
+    // parse data
+    // console.log(data);
+    var snp1 = data[0];
+    var snp2 = data[1];
+    var pops = data[2];
+    var server = window.location.origin + '/?tab=ldpair';
+    var params = {
+        var1: snp1,
+        var2: snp2,
+        pop: pops
+    };
+    var href = server + '&' + $.param(params);
+    var link = '<a href="' + href + '" + target="_blank">link</a>';
     return link;
 }
 
@@ -2635,6 +2708,27 @@ function initMap() {
     map1.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(LDlegend);
     map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend1);
     map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend2);
+
+    // sample marker
+    // var myLatLng = {lat: -25.363, lng: 131.044};
+    // let icon = {
+    //     path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+    //     strokeColor: "black",
+    //     fillColor: "red",
+    //     fillOpacity: 1,
+    //     scale: .85,
+    //     labelOrigin: new google.maps.Point(0, -30)
+    // }
+    // var marker = new google.maps.Marker({
+    //     position: myLatLng,
+    //     map: map1,
+    //     icon: icon,
+    //     title: 'Hello World!',
+    //     label: {
+    //         text: "GWK",
+    //         fontSize: "12px"
+    //     }
+    // });
 }
 
 function setLDColor(LD) {
@@ -2687,16 +2781,18 @@ function getMinorAllele(variantIndex, locations) {
     var allele1PopSize = 0;
     var allele2PopSize = 0;
     for (i = 0; i < locations.length; i++) {
-        let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
-        let allele1Freq = parseFloat(alleleData[1]);
-        let allele2Freq = parseFloat(alleleData[3]);
-        if (allele1Freq == allele2Freq) {
-            allele1PopSize = allele1PopSize + locations[i][1];
-            allele2PopSize = allele2PopSize + locations[i][1];
-        } else if (allele1Freq < allele2Freq) {
-            allele1PopSize = allele1PopSize + locations[i][1];
-        } else {
-            allele2PopSize = allele2PopSize + locations[i][1];
+        if (!locations[i][variantIndex] instanceof Array) {
+            let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+            let allele1Freq = parseFloat(alleleData[1]);
+            let allele2Freq = parseFloat(alleleData[3]);
+            if (allele1Freq == allele2Freq) {
+                allele1PopSize = allele1PopSize + locations[i][1];
+                allele2PopSize = allele2PopSize + locations[i][1];
+            } else if (allele1Freq < allele2Freq) {
+                allele1PopSize = allele1PopSize + locations[i][1];
+            } else {
+                allele2PopSize = allele2PopSize + locations[i][1];
+            }
         }
     }
     // console.log("Allele 1 Pop Size: ", allele1PopSize);
@@ -2754,6 +2850,14 @@ function clearOverlays() {
     markersArray.length = 0;
 }
 
+function resetMarkerZIndex() {
+    var count = 0;
+    for (var i = 0; i < markersArray.length; i++ ) {
+        count = count + 1;
+        markersArray[i].setZIndex(count);
+    }
+}
+
 function addMarkers(data) {
     var locations = data.locations;
     var rs1MinorAllele = getMinorAllele(2, data.aaData);
@@ -2767,7 +2871,8 @@ function addMarkers(data) {
             strokeColor: "black",
             fillColor: colorMarkerLD(data.inputs.LD, locations.rs1_rs2_LD_map[map1_i]),
             fillOpacity: 1,
-            scale: .85
+            scale: .85,
+            labelOrigin: new google.maps.Point(0, -30)
         }
         map1_marker = new google.maps.Marker({
             position: {
@@ -2775,7 +2880,11 @@ function addMarkers(data) {
                 lng: locations.rs1_rs2_LD_map[map1_i][4]
             }, 
             icon: icon,
-            map: map1
+            map: map1,
+            label: {
+                text: locations.rs1_rs2_LD_map[map1_i][0],
+                fontSize: "12px"
+            }
         });
         markersArray.push(map1_marker);
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
@@ -2787,6 +2896,8 @@ function addMarkers(data) {
                     '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
+                resetMarkerZIndex();
+                map1_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map1_marker, map1_i));
     }
@@ -2799,7 +2910,8 @@ function addMarkers(data) {
             strokeColor: "black",
             fillColor: colorMarkerMAF(rs1MinorAllele, locations.rs1_map[map2_i]),
             fillOpacity: 1,
-            scale: .85
+            scale: .85,
+            labelOrigin: new google.maps.Point(0, -30)
         }
         map2_marker = new google.maps.Marker({
             position: {
@@ -2807,7 +2919,11 @@ function addMarkers(data) {
                 lng: locations.rs1_map[map2_i][4]
             },
             icon: icon,
-            map: map2
+            map: map2,
+            label: {
+                text: locations.rs1_map[map2_i][0],
+                fontSize: "12px"
+            }
         });
         markersArray.push(map2_marker);
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
@@ -2816,6 +2932,8 @@ function addMarkers(data) {
                     locations.rs1_map[map2_i][5] + '</div>';
                 map2_infowindow.setContent(contentString);
                 map2_infowindow.open(map2, map2_marker);
+                resetMarkerZIndex();
+                map2_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map2_marker, map2_i));
     }
@@ -2828,7 +2946,8 @@ function addMarkers(data) {
             strokeColor: "black",
             fillColor: colorMarkerMAF(rs2MinorAllele, locations.rs2_map[map3_i]),
             fillOpacity: 1,
-            scale: .85
+            scale: .85,
+            labelOrigin: new google.maps.Point(0, -30)
         }
         map3_marker = new google.maps.Marker({
             position: {
@@ -2836,7 +2955,11 @@ function addMarkers(data) {
                 lng: locations.rs2_map[map3_i][4]
             }, 
             icon: icon,
-            map: map3
+            map: map3,
+            label: {
+                text: locations.rs2_map[map3_i][0],
+                fontSize: "12px"
+            }
         });
         markersArray.push(map3_marker);
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
@@ -2845,6 +2968,8 @@ function addMarkers(data) {
                     locations.rs2_map[map3_i][5] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
+                resetMarkerZIndex();
+                map3_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map3_marker, map3_i));
     }
