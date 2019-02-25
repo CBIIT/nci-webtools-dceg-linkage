@@ -2775,6 +2775,12 @@ function clearOverlays() {
     markersArray.length = 0;
 }
 
+function resetMarkerZIndex() {
+    for (var i = 0; i < markersArray.length; i++ ) {
+        markersArray[i].setZIndex(0);
+    }
+}
+
 function addMarkers(data) {
     var locations = data.locations;
     var rs1MinorAllele = getMinorAllele(2, data.aaData);
@@ -2813,7 +2819,8 @@ function addMarkers(data) {
                     '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
-                map1_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                resetMarkerZIndex();
+                map1_marker.setZIndex(10);
             }
         })(map1_marker, map1_i));
     }
@@ -2848,7 +2855,8 @@ function addMarkers(data) {
                     locations.rs1_map[map2_i][5] + '</div>';
                 map2_infowindow.setContent(contentString);
                 map2_infowindow.open(map2, map2_marker);
-                map2_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                resetMarkerZIndex();
+                map2_marker.setZIndex(10);
             }
         })(map2_marker, map2_i));
     }
@@ -2883,7 +2891,8 @@ function addMarkers(data) {
                     locations.rs2_map[map3_i][5] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
-                map3_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
+                resetMarkerZIndex();
+                map3_marker.setZIndex(10);
             }
         })(map3_marker, map3_i));
     }
