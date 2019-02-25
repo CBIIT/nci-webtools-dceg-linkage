@@ -2775,11 +2775,13 @@ function clearOverlays() {
     markersArray.length = 0;
 }
 
-// function resetMarkerZIndex() {
-//     for (var i = 0; i < markersArray.length; i++ ) {
-//         markersArray[i].setZIndex(0);
-//     }
-// }
+function resetMarkerZIndex() {
+    var count = 0;
+    for (var i = 0; i < markersArray.length; i++ ) {
+        count = count + 1;
+        markersArray[i].setZIndex(count);
+    }
+}
 
 function addMarkers(data) {
     var locations = data.locations;
@@ -2788,7 +2790,6 @@ function addMarkers(data) {
     // rs#1 Frequencies map
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
-    var map1_marker_index = 0;
     for (map1_i = 0; map1_i < locations.rs1_rs2_LD_map.length; map1_i++) {
         let icon = {
             path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
@@ -2810,8 +2811,6 @@ function addMarkers(data) {
                 fontSize: "12px"
             }
         });
-        map1_marker_index = map1_marker_index + 1;
-        map1_marker.setZIndex(map1_marker_index);
         markersArray.push(map1_marker);
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
             return function() {
@@ -2822,18 +2821,14 @@ function addMarkers(data) {
                     '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
-                // resetMarkerZIndex();
-                var marker1ZIndex = map1_marker.getZIndex();
-                console.log("marker1ZIndex", marker1ZIndex);
-                console.log("new marker1ZIndex", marker1ZIndex + 26);
-                map1_marker.setZIndex(marker1ZIndex + 26);
+                resetMarkerZIndex();
+                map1_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map1_marker, map1_i));
     }
     // rs#2 Frequencies map
     var map2_infowindow = new google.maps.InfoWindow();
     var map2_marker, map2_i;
-    var map2_marker_index = 0;
     for (map2_i = 0; map2_i < locations.rs1_map.length; map2_i++) {
         let icon = {
             path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
@@ -2855,8 +2850,6 @@ function addMarkers(data) {
                 fontSize: "12px"
             }
         });
-        map2_marker_index = map2_marker_index + 1;
-        map2_marker.setZIndex(map2_marker_index);
         markersArray.push(map2_marker);
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
             return function() {
@@ -2864,18 +2857,14 @@ function addMarkers(data) {
                     locations.rs1_map[map2_i][5] + '</div>';
                 map2_infowindow.setContent(contentString);
                 map2_infowindow.open(map2, map2_marker);
-                // resetMarkerZIndex();
-                var marker2ZIndex = map2_marker.getZIndex();
-                console.log("marker2ZIndex", marker2ZIndex);
-                console.log("new marker2ZIndex", marker2ZIndex + 26);
-                map2_marker.setZIndex(marker2ZIndex + 26);
+                resetMarkerZIndex();
+                map2_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map2_marker, map2_i));
     }
     // rs#1-rs#2 LD map
     var map3_infowindow = new google.maps.InfoWindow();
     var map3_marker, map3_i;
-    var map3_marker_index = 0;
     for (map3_i = 0; map3_i < locations.rs2_map.length; map3_i++) {
         let icon = {
             path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
@@ -2897,8 +2886,6 @@ function addMarkers(data) {
                 fontSize: "12px"
             }
         });
-        map3_marker_index = map3_marker_index + 1;
-        map3_marker.setZIndex(map3_marker_index);
         markersArray.push(map3_marker);
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
             return function() {
@@ -2906,11 +2893,8 @@ function addMarkers(data) {
                     locations.rs2_map[map3_i][5] + '</div>';
                 map3_infowindow.setContent(contentString);
                 map3_infowindow.open(map3, map3_marker);
-                // resetMarkerZIndex();
-                var marker3ZIndex = map3_marker.getZIndex();
-                console.log("marker3ZIndex", marker3ZIndex);
-                console.log("new marker3ZIndex", marker3ZIndex + 26);
-                map3_marker.setZIndex(marker3ZIndex + 26);
+                resetMarkerZIndex();
+                map3_marker.setZIndex(google.maps.Marker.MAX_ZINDEX + 1);
             }
         })(map3_marker, map3_i));
     }
