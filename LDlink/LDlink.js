@@ -947,7 +947,7 @@ function ldpop_ldpair_results_link(data, type, row) {
     var params = {
         var1: snp1,
         var2: snp2,
-        populations: pops
+        pop: pops
     };
     var href = server + '&' + $.param(params);
     var link = '<a href="' + href + '" + target="_blank">link</a>';
