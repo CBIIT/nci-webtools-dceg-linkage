@@ -606,7 +606,18 @@ function createPopTable() {
                         return data;
                     }
                 },
-                "targets": 1
+                "targets": 2
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (isNaN(data)) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 3
             },
             { 
                 className: "dt-head-center", 
