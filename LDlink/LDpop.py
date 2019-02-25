@@ -654,7 +654,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 key_D_prime = output[key]["D'"]
                 key_R_2 = output[key]['R2']
                 # set up data for ldpair link
-                ldpair_pops = []
+                ldpair_pops = [key]
                 if key in pop_groups.keys():
                     ldpair_pops = pop_groups[key]
                 ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
