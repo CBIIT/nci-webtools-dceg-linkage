@@ -616,8 +616,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         for pop in output.keys():
             if pop not in pop_groups.keys() and len(pop) == 3:
                 ldpair_pops.append(pop)
-        ldpair_data = snp1_input + "-" + snp2_input + "-" + "%2B".join(ldpair_pops)
-        output_table["aaData"].append(["LDpair", "", ldpair_data, ldpair_data, "", ""])
+        ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+        output_table["aaData"].append(["LDpair", ldpair_data, ldpair_data, ldpair_data, ldpair_data, ldpair_data])
         if "warning" in output:
             output_table["warning"] = output["warning"]
         if "error" in output:

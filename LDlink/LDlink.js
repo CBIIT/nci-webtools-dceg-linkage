@@ -600,7 +600,18 @@ function createPopTable() {
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair in final row
-                    if (isNaN(data)) {
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 1
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
                         return ldpop_ldpair_results_link(data, type, row);
                     } else {
                         return data;
@@ -611,13 +622,35 @@ function createPopTable() {
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair in final row
-                    if (isNaN(data)) {
+                    if (data instanceof Array) {
                         return ldpop_ldpair_results_link(data, type, row);
                     } else {
                         return data;
                     }
                 },
                 "targets": 3
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 4
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    if (data instanceof Array) {
+                        return ldpop_ldpair_results_link(data, type, row);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": 5
             },
             { 
                 className: "dt-head-center", 
