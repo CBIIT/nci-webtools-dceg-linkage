@@ -2782,16 +2782,18 @@ function getMinorAllele(variantIndex, locations) {
     var allele1PopSize = 0;
     var allele2PopSize = 0;
     for (i = 0; i < locations.length; i++) {
-        let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
-        let allele1Freq = parseFloat(alleleData[1]);
-        let allele2Freq = parseFloat(alleleData[3]);
-        if (allele1Freq == allele2Freq) {
-            allele1PopSize = allele1PopSize + locations[i][1];
-            allele2PopSize = allele2PopSize + locations[i][1];
-        } else if (allele1Freq < allele2Freq) {
-            allele1PopSize = allele1PopSize + locations[i][1];
-        } else {
-            allele2PopSize = allele2PopSize + locations[i][1];
+        if (!locations[i][variantIndex] instanceof Array) {
+            let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+            let allele1Freq = parseFloat(alleleData[1]);
+            let allele2Freq = parseFloat(alleleData[3]);
+            if (allele1Freq == allele2Freq) {
+                allele1PopSize = allele1PopSize + locations[i][1];
+                allele2PopSize = allele2PopSize + locations[i][1];
+            } else if (allele1Freq < allele2Freq) {
+                allele1PopSize = allele1PopSize + locations[i][1];
+            } else {
+                allele2PopSize = allele2PopSize + locations[i][1];
+            }
         }
     }
     // console.log("Allele 1 Pop Size: ", allele1PopSize);
