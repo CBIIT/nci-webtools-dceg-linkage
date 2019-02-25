@@ -2819,8 +2819,11 @@ function addMarkers(data) {
                     '<b>D\'</b>: ' + locations.rs1_rs2_LD_map[map1_i][8] + '</div>';
                 map1_infowindow.setContent(contentString);
                 map1_infowindow.open(map1, map1_marker);
-                resetMarkerZIndex();
-                map1_marker.setZIndex(10);
+                // resetMarkerZIndex();
+                var marker1ZIndex = map1_marker.getZIndex();
+                console.log("marker1ZIndex", marker1ZIndex);
+                console.log("new marker1ZIndex", marker1ZIndex + 26);
+                map1_marker.setZIndex(marker1ZIndex + 26);
             }
         })(map1_marker, map1_i));
     }
