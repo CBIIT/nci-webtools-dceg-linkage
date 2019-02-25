@@ -3010,7 +3010,7 @@ function updateLDpop() {
     });
 
     ajaxRequest.success(function(data) {
-        console.log(data);
+        // console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
             RefreshTable('#new-ldpop', data);
