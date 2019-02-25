@@ -943,14 +943,14 @@ function ldpop_ldpair_results_link(data, type, row) {
     var snp1 = ldpair_data[0];
     var snp2 = ldpair_data[1];
     var pops = ldpair_data[2];
-    var server = 'https://ldlink-dev.nci.nih.gov/?tab=ldpair';
+    var server = window.location.origin + '/?tab=ldpair';
     var params = {
         var1: snp1,
         var2: snp2,
         populations: pops
     };
-    var href = server + $.param(params);
-    var link = '<a href="' + href + '">link</a>';
+    var href = server + '&' + $.param(params);
+    var link = '<a href="' + href + '" + target="_blank">link</a>';
     return link;
 }
 
