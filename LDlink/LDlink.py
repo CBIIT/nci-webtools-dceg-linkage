@@ -50,7 +50,7 @@ print "gmap key"
 print gmap_key
 render_template('index.html', api_key=gmap_key)
 
-@app.route('/')
+# @app.route('/')
 def index():
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
@@ -74,11 +74,11 @@ def copy_output_files(reference):
     # copy *<reference_no>.* to htodocs
     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
     # read google maps api key
-    # with open('config.yml', 'r') as c:
-    #     config = yaml.load(c)
-    # print "gmap key"
-    # gmap_key = config['gmap']['key']
-    # return render_template('index.html', api_key="gmap_key")
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    print "gmap key"
+    gmap_key = config['gmap']['key']
+    return render_template('index.html', api_key=gmap_key)
 
 
 def jsonp(func):
