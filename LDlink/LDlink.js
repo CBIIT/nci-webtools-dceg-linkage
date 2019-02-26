@@ -2735,7 +2735,7 @@ function getMinorAllele(variantIndex, locations) {
     var pop_groups = ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS"];
     for (i = 0; i < locations.length; i++) {
         if (!pop_groups.includes(locations[i][0])) {
-            console.log(locations[i][0]);
+            // console.log(locations[i][0]);
             let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
             let allele1Freq = parseFloat(alleleData[1]);
             let allele2Freq = parseFloat(alleleData[3]);
@@ -2818,8 +2818,8 @@ function addMarkers(data) {
     var locations = data.locations;
     var rs1MinorAllele = getMinorAllele(2, data.aaData);
     var rs2MinorAllele = getMinorAllele(3, data.aaData);
-    console.log("Minor Allele rs#1: ", rs1MinorAllele);
-    console.log("Minor Allele rs#2: ", rs2MinorAllele);
+    // console.log("Minor Allele rs#1: ", rs1MinorAllele);
+    // console.log("Minor Allele rs#2: ", rs2MinorAllele);
     // rs#1 Frequencies map
     var map1_infowindow = new google.maps.InfoWindow();
     var map1_marker, map1_i;
