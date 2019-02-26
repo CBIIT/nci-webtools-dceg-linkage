@@ -67,8 +67,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             return snp
         else:
             snp_info_lst = get_rsnum(db, snp)
-            print "snp_info_lst"
-            print snp_info_lst
+            # print "snp_info_lst"
+            # print snp_info_lst
             if snp_info_lst != None:
                 if len(snp_info_lst) > 1:
                     var_id = "rs" + snp_info_lst[0]['id']
@@ -217,7 +217,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     
     for pop_i in pop_split:        
         with open(pop_dir + pop_i + ".txt", "r") as f:
-            print pop_dir + pop_i + ".txt"
+            # print pop_dir + pop_i + ".txt"
             for line in f:
                 cleanedLine = line.strip()
                 if cleanedLine: # is not empty
@@ -459,7 +459,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             "R2" : matrix_values[pops]["r2"] if isinstance(matrix_values[pops]["r2"], basestring) else round(float(matrix_values[pops]["r2"]), 4)
         }
     
-    print json.dumps(output)
+    # print json.dumps(output)
 
     location_data = {
         "YRI": {
@@ -643,7 +643,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         # populate table data
         for key in output.keys():
             if key in pop_order.keys():
-                print key, "parse for table"
+                # print key, "parse for table"
                 key_order = pop_order[key]
                 key_pop = output[key]['Population']
                 key_N = output[key]['N']
@@ -711,7 +711,7 @@ def main():
     out_json = calculate_pop(snp1, snp2, pop, r2_d, web, request)
 
     # Print output
-    print out_json
+    # print out_json
 
 if __name__ == "__main__":
     main()
