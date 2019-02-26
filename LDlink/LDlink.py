@@ -38,16 +38,24 @@ tmp_dir = "./tmp/"
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
-app = Flask(__name__, static_folder='', static_url_path='/', template_folder='')
+app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
+
+with open('config.yml', 'r') as c:
+    config = yaml.load(c)
+gmap_key = config['gmap']['key']
+print "gmap key"
+print gmap_key
+render_template('index.html', api_key=gmap_key)
 
 @app.route('/')
 def index():
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     gmap_key = config['gmap']['key']
+    print "gmap key"
     print gmap_key
     return render_template('index.html', api_key=gmap_key)
 
@@ -68,6 +76,7 @@ def copy_output_files(reference):
     # read google maps api key
     # with open('config.yml', 'r') as c:
     #     config = yaml.load(c)
+    # print "gmap key"
     # gmap_key = config['gmap']['key']
     # return render_template('index.html', api_key="gmap_key")
 
