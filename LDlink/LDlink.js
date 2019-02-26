@@ -2726,7 +2726,7 @@ function colorMarkerLD(LD, location) {
 }
 
 function getMinorAllele(variantIndex, locations) {
-    // console.log(variantIndex);
+    console.log(variantIndex);
     var alleles = locations[0][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
     var allele1 = alleles[0];
     var allele2 = alleles[2];
@@ -2734,25 +2734,25 @@ function getMinorAllele(variantIndex, locations) {
     var allele2PopSize = 0;
     var pop_groups = ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS"];
     for (i = 0; i < locations.length; i++) {
-        if (!pop_groups.includes(locations[i][0])) {
+        // if (!pop_groups.includes(locations[i][0])) {
             // console.log(locations[i][0]);
-            let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
-            let allele1Freq = parseFloat(alleleData[1]);
-            let allele2Freq = parseFloat(alleleData[3]);
-            if (allele1Freq == allele2Freq) {
-                allele1PopSize = allele1PopSize + locations[i][1];
-                allele2PopSize = allele2PopSize + locations[i][1];
-            } else if (allele1Freq < allele2Freq) {
-                allele1PopSize = allele1PopSize + locations[i][1];
-            } else {
-                allele2PopSize = allele2PopSize + locations[i][1];
-            }
+        let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
+        let allele1Freq = parseFloat(alleleData[1]);
+        let allele2Freq = parseFloat(alleleData[3]);
+        if (allele1Freq == allele2Freq) {
+            allele1PopSize = allele1PopSize + locations[i][1];
+            allele2PopSize = allele2PopSize + locations[i][1];
+        } else if (allele1Freq < allele2Freq) {
+            allele1PopSize = allele1PopSize + locations[i][1];
+        } else {
+            allele2PopSize = allele2PopSize + locations[i][1];
         }
+        // }
     }
-    // console.log("Allele 1: ", allele1);
-    // console.log("Allele 1 Pop Size: ", allele1PopSize);
-    // console.log("Allele 2: ", allele2);
-    // console.log("Allele 2 Pop Size: ", allele2PopSize);
+    console.log("Allele 1: ", allele1);
+    console.log("Allele 1 Pop Size: ", allele1PopSize);
+    console.log("Allele 2: ", allele2);
+    console.log("Allele 2 Pop Size: ", allele2PopSize);
     if (allele1PopSize == allele2PopSize) {
         if (allele1 < allele2) {
             return allele1;
@@ -2788,7 +2788,7 @@ function setMAFColor(MAF) {
 }
 
 function colorMarkerMAF(minorAllele, location) {
-    // console.log("Minor Allele: ", minorAllele);
+    console.log("Minor Allele: ", minorAllele);
     var alleleData = location[5];
     var alleleData = alleleData.replace(/[\s\%]/g, '').split(/[\,\:]/);
     var alleleDataHash = {};
