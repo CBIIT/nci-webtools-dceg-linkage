@@ -43,12 +43,12 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
-with open('config.yml', 'r') as c:
-    config = yaml.load(c)
-gmap_key = config['gmap']['key']
-print "gmap key"
-print gmap_key
-render_template('index.html', api_key=gmap_key)
+# with open('config.yml', 'r') as c:
+#     config = yaml.load(c)
+# gmap_key = config['gmap']['key']
+# print "gmap key"
+# print gmap_key
+# render_template('index.html', api_key=gmap_key)
 
 # @app.route('/')
 def index():
