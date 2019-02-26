@@ -45,7 +45,8 @@ app.debug = True
 
 @app.route('/')
 # copy output files from tools' tmp directory to apache tmp directory
-def copy_output_files(reference):
+def index(reference):
+    # copy_output_files
     apache_root = "/analysistools/"
     # check if URL contains the keyword sandbox
     if 'sandbox' in request.url_root:
@@ -60,7 +61,7 @@ def copy_output_files(reference):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     gmap_key = config['gmap']['key']
-    return render_template('index.html', api_key=gmap_key)
+    return render_template('index.html', api_key="gmap_key")
 
 
 def jsonp(func):
