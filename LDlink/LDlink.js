@@ -2726,7 +2726,7 @@ function colorMarkerLD(LD, location) {
 }
 
 function getMinorAllele(variantIndex, locations) {
-    console.log(variantIndex);
+    // console.log(variantIndex);
     var alleles = locations[0][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
     var allele1 = alleles[0];
     var allele2 = alleles[2];
@@ -2735,6 +2735,7 @@ function getMinorAllele(variantIndex, locations) {
     var pop_groups = ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS"];
     for (i = 0; i < locations.length; i++) {
         if (!pop_groups.includes(locations[i][0])) {
+            console.log(locations[i][0]);
             let alleleData = locations[i][variantIndex].replace(/[\s\%]/g, '').split(/[\,\:]/);
             let allele1Freq = parseFloat(alleleData[1]);
             let allele2Freq = parseFloat(alleleData[3]);
@@ -2748,10 +2749,10 @@ function getMinorAllele(variantIndex, locations) {
             }
         }
     }
-    console.log("Allele 1: ", allele1);
-    console.log("Allele 1 Pop Size: ", allele1PopSize);
-    console.log("Allele 2: ", allele2);
-    console.log("Allele 2 Pop Size: ", allele2PopSize);
+    // console.log("Allele 1: ", allele1);
+    // console.log("Allele 1 Pop Size: ", allele1PopSize);
+    // console.log("Allele 2: ", allele2);
+    // console.log("Allele 2 Pop Size: ", allele2PopSize);
     if (allele1PopSize == allele2PopSize) {
         if (allele1 < allele2) {
             return allele1;
