@@ -43,26 +43,42 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
-@app.route('/')
+# with open('config.yml', 'r') as c:
+#     config = yaml.load(c)
+# gmap_key = config['gmap']['key']
+# print "gmap key"
+# print gmap_key
+# render_template('index.html', api_key=gmap_key)
+
+# @app.route('/')
+# def index():
+#     with open('config.yml', 'r') as c:
+#         config = yaml.load(c)
+#     gmap_key = config['gmap']['key']
+#     print "gmap key"
+#     print gmap_key
+#     return render_template('index.html', api_key=gmap_key)
+
 # copy output files from tools' tmp directory to apache tmp directory
+@app.route('/')
 def copy_output_files(reference):
+    # copy_output_files
     apache_root = "/analysistools/"
     # check if URL contains the keyword sandbox
     if 'sandbox' in request.url_root:
         apache_root = "/analysistools-sandbox/"
-
     apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
-
     # Ensure apache tmp directory exists
     if not os.path.exists(apache_tmp_dir):
         os.makedirs(apache_tmp_dir)
-
     # copy *<reference_no>.* to htodocs
     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
-
-
-def index():
-    return render_template('index.html')
+    # read google maps api key
+    # with open('config.yml', 'r') as c:
+    #     config = yaml.load(c)
+    # print "gmap key"
+    # gmap_key = config['gmap']['key']
+    # return render_template('index.html', api_key=gmap_key)
 
 
 def jsonp(func):
