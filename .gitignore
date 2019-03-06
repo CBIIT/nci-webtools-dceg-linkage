@@ -17,5 +17,5 @@ common/
 node_modules
 tests/*.xml
 package-lock.json
-geckodriver.exe
-chromedriver.exe
+geckodriver*
+chromedriver*

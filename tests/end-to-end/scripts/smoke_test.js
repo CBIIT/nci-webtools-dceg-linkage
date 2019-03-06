@@ -11,7 +11,7 @@ describe('LDlink Smoke Test', function() {
     before(async function() {
         this.driver = await new Builder()
             .forBrowser('firefox')
-            .setFirefoxOptions(new firefox.Options().headless())
+            .setFirefoxOptions(new firefox.Options().headless()) // comment out to see browser locally
             .build();
         this.website = process.env.TEST_WEBSITE.replace(/\/$/, '');
         // this.website = 'https://ldlink-dev.nci.nih.gov/';
@@ -205,6 +205,50 @@ describe('LDlink Smoke Test', function() {
         const resultsLinkageEquilibriumElement = driver.findElement(resultsLinkageEquilibrium);
         const resultsLinkageEquilibriumElementText = await resultsLinkageEquilibriumElement.getText();
         resultsLinkageEquilibriumElementText.should.contain('rs2280548 and rs6984900 are in linkage equilibrium');
+    });
+
+    it('should display LDpop results from a sample RS pair query', async function() {
+        console.log('test -> should display LDpop results from a sample RS pair query');
+        const driver = this.driver;
+        // switch to LDpop tab
+        console.log('[switch to LDpop tab]');
+        const tabLDpair = By.css('[id="ldpop-tab-anchor"]');
+        await driver.wait(until.elementLocated(tabLDpair), 20000);
+        await driver.findElement(tabLDpair).click();
+        // input RS# rs408825 into variant 1
+        console.log('[input RS# rs408825 into variant 1]');
+        const variant1Input = By.css('[id="ldpop-snp1"]');
+        await driver.wait(until.elementLocated(variant1Input), 20000);
+        await driver.findElement(variant1Input).sendKeys('rs408825');
+        // input genomic coordinate rs398206 into variant 2
+        console.log('[input genomic coordinate rs398206 into variant 2]');
+        const variant2Input = By.css('[id="ldpop-snp2"]');
+        await driver.wait(until.elementLocated(variant2Input), 20000);
+        await driver.findElement(variant2Input).sendKeys('rs398206');
+        // select all populations
+        console.log('[select all populations]');
+        const populationDropdown = By.xpath('//*[@id="ldpopForm"]/div[3]/div/div/button');
+        await driver.findElement(populationDropdown).click();
+        const populationALLCheckbox = By.xpath('//*[@id="ldpopForm"]/div[3]/div/div/ul/li[1]/a');
+        await driver.findElement(populationALLCheckbox).click();
+		// click calculate button
+        console.log('[click calculate button]');
+        const calculateButton = By.css('[id="ldpop"]');
+        await driver.findElement(calculateButton).click();
+        // assert if Google Maps API is being displayed
+        console.log('[assert if Google Maps API is being displayed]');
+        const mapAPI = By.xpath('//*[@id="map1"]');
+        const mapAPIElement = driver.findElement(mapAPI);
+        await driver.wait(until.elementIsVisible(mapAPIElement), 20000);
+        // assert if results table is being displayed
+        console.log('[assert if results table is being displayed]');
+        const resultsTable = By.xpath('//*[@id="new-ldpop_wrapper"]');
+        const resultsTableElement = driver.findElement(resultsTable);
+        await driver.wait(until.elementIsVisible(resultsTableElement), 20000);
+        const resultsShownEntries = By.xpath('//*[@id="new-ldpop_info_clone"]');
+        const resultsShownEntriesElement = driver.findElement(resultsShownEntries);
+        const rresultsShownEntriesElementText = await resultsShownEntriesElement.getText();
+        rresultsShownEntriesElementText.should.contain('Showing 1 to 32 of 32 entries');
     });
 
     it('should display LDproxy results from a sample genomic query', async function() {
