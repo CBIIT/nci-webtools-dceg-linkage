@@ -1055,7 +1055,7 @@
 
 				<div hidden>
 					<div id="ldpop-ld-legend">
-						<img id="ldpop-ld-legend-img" src="LDmatrix_legend_R2.png" title="LDpop LD Legend" alt="LDpop LD legend" width="75%" height="75%">
+						<img id="ldpop-ld-legend-img" src="LDpop_legend_R2.png" title="LDpop LD Legend" alt="LDpop LD legend" width="75%" height="75%">
 					</div>
 					<div id="ldpop-maf-legend1">
 						<img id="ldpop-maf-legend-img1" src="LDpop_legend_MAF.png" title="LDpop MAF Legend" alt="LDpop MAF legend" width="75%" height="75%">
@@ -1067,15 +1067,72 @@
 				
 				<div class="tab-content ldpop-map-content">
 					<div id="ldpop-map1" class="tab-pane fade in active">
-						<h3 align="center" class="ldpop-map1-title">rs#1 rs#2 LD</h3>
+						<div class="row">
+							<div class="col-md-4 dropdown"></div>
+							<h3 align="center" class="col-md-4 ldpop-map1-title">rs#1 rs#2 LD</h3>
+							<div class="col-md-4">
+								<div class="dropdown pull-right">
+									<button class="btn btn-default dropdown-toggle" type="button" id="ldpop-menu1" data-toggle="dropdown">
+										Export LD Map <span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
+										<li role="presentation">
+											<a role="menuitem" id="ldpop-LD-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+										</li>
+										<li role="presentation" class="divider"></li>
+										<li role="presentation">
+											<a role="menuitem" id="ldpop-LD-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
 						<div id="map1" class="map-item center-align"></div>
 					</div>
 					<div id="ldpop-map2" class="tab-pane fade">
-						<h3 align="center" class="ldpop-map2-title">rs#1 Allele Frequency</h3>
+						<div class="row">
+							<div class="col-md-4 dropdown"></div>
+							<h3 align="center" class="col-md-4 ldpop-map2-title">rs#1 Allele Frequency</h3>
+							<div class="col-md-4">
+								<div class="dropdown pull-right">
+									<button class="btn btn-default dropdown-toggle" type="button" id="ldpop-menu2" data-toggle="dropdown">
+										Export AF Map <span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
+										<li role="presentation">
+											<a role="menuitem" id="ldpop-AFvar1-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+										</li>
+										<li role="presentation" class="divider"></li>
+										<li role="presentation">
+											<a role="menuitem" id="ldpop-AFvar1-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
 						<div id="map2" class="map-item center-align"></div>
 					</div>
 					<div id="ldpop-map3" class="tab-pane fade">
-						<h3 align="center" class="ldpop-map3-title">rs#2 Allele Frequency</h3>
+						<div class="row">
+							<div class="col-md-4 dropdown"></div>
+							<h3 align="center" class="col-md-4 ldpop-map3-title">rs#2 Allele Frequency</h3>
+							<div class="col-md-4">
+								<div class="dropdown pull-right">
+									<button class="btn btn-default dropdown-toggle" type="button" id="ldpop-menu3" data-toggle="dropdown">
+										Export AF Map <span class="caret"></span>
+									</button>
+									<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
+										<li role="presentation">
+											<a role="menuitem" id="ldpop-AFvar2-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+										</li>
+										<li role="presentation" class="divider"></li>
+										<li role="presentation">
+											<a role="menuitem" id="ldpop-AFvar2-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+										</li>
+									</ul>
+								</div>
+							</div>
+						</div>
 						<div id="map3" class="map-item center-align"></div>
 					</div>
 				</div> -->
@@ -1115,7 +1172,7 @@
 
 						<div hidden>
 							<div id="ldpop-ld-legend">
-								<img id="ldpop-ld-legend-img" src="LDmatrix_legend_R2.png" title="LDpop LD Legend" alt="LDpop LD legend" width="75%" height="75%">
+								<img id="ldpop-ld-legend-img" src="LDpop_legend_R2.png" title="LDpop LD Legend" alt="LDpop LD legend" width="75%" height="75%">
 							</div>
 							<div id="ldpop-maf-legend1">
 								<img id="ldpop-maf-legend-img1" src="LDpop_legend_MAF.png" title="LDpop MAF Legend" alt="LDpop MAF legend" width="75%" height="75%">
@@ -1127,12 +1184,72 @@
 						
 						<div class="tab-content ldpop-map-content">
 							<div id="ldpop-map1" class="tab-pane fade in active">
+								<div class="row">
+									<div class="col-md-4 dropdown"></div>
+									<h3 align="center" class="col-md-4 ldpop-map1-title">rs#1 rs#2 LD</h3>
+									<div class="col-md-4">
+										<div class="dropdown pull-right">
+											<button class="btn btn-default dropdown-toggle" type="button" id="ldpop-menu1" data-toggle="dropdown">
+												Export LD Map <span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
+												<li role="presentation">
+													<a role="menuitem" id="ldpop-LD-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+												</li>
+												<li role="presentation" class="divider"></li>
+												<li role="presentation">
+													<a role="menuitem" id="ldpop-LD-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
 								<div id="map1" class="map-item center-align"></div>
 							</div>
 							<div id="ldpop-map2" class="tab-pane fade">
+								<div class="row">
+									<div class="col-md-4 dropdown"></div>
+									<h3 align="center" class="col-md-4 ldpop-map2-title">rs#1 Allele Frequency</h3>
+									<div class="col-md-4">
+										<div class="dropdown pull-right">
+											<button class="btn btn-default dropdown-toggle" type="button" id="ldpop-menu2" data-toggle="dropdown">
+												Export AF Map <span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
+												<li role="presentation">
+													<a role="menuitem" id="ldpop-AFvar1-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+												</li>
+												<li role="presentation" class="divider"></li>
+												<li role="presentation">
+													<a role="menuitem" id="ldpop-AFvar1-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
 								<div id="map2" class="map-item center-align"></div>
 							</div>
 							<div id="ldpop-map3" class="tab-pane fade">
+								<div class="row">
+									<div class="col-md-4 dropdown"></div>
+									<h3 align="center" class="col-md-4 ldpop-map3-title">rs#2 Allele Frequency</h3>
+									<div class="col-md-4">
+										<div class="dropdown pull-right">
+											<button class="btn btn-default dropdown-toggle" type="button" id="ldpop-menu3" data-toggle="dropdown">
+												Export AF Map <span class="caret"></span>
+											</button>
+											<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
+												<li role="presentation">
+													<a role="menuitem" id="ldpop-AFvar2-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+												</li>
+												<li role="presentation" class="divider"></li>
+												<li role="presentation">
+													<a role="menuitem" id="ldpop-AFvar2-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+												</li>
+											</ul>
+										</div>
+									</div>
+								</div>
 								<div id="map3" class="map-item center-align"></div>
 							</div>
 						</div>
@@ -1964,6 +2081,8 @@
 	<script type="text/javascript" src="/common/js/bootstrap-multiselect.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js"></script>
 	<script type="text/javascript" src="https://cdn.datatables.net/1.10.8/js/jquery.dataTables.js"></script>
+
+	<script src="html2canvas.min.js"></script>
 
 	<!-- Google Maps API -->
 	<script src="https://maps.googleapis.com/maps/api/js?key=@gmap_key@"></script>
