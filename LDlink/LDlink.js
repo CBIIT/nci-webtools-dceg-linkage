@@ -946,7 +946,7 @@ function ldpop_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
-    var link = '<a href="' + href + '" + target="_blank">link</a>';
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
     return link;
 }
 
@@ -2662,6 +2662,26 @@ function initMap() {
     map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend1);
     map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend2);
 
+    // add alt text to maps
+    google.maps.event.addListener(map1, 'tilesloaded', function() {
+        var images1 = document.querySelectorAll('#map1 img');
+        images1.forEach(function(image1) {
+            image1.alt = "Google Maps API control";
+        });
+    });
+    google.maps.event.addListener(map2, 'tilesloaded', function() {
+        var images2 = document.querySelectorAll('#map2 img');
+        images2.forEach(function(image2) {
+            image2.alt = "Google Maps API control";
+        });
+    });
+    google.maps.event.addListener(map3, 'tilesloaded', function() {
+        var images3 = document.querySelectorAll('#map3 img');
+        images3.forEach(function(image3) {
+            image3.alt = "Google Maps API control";
+        });
+    });
+
     // sample marker test google maps api local
     // var myLatLng = {lat: -25.363, lng: 131.044};
     // let icon = {
@@ -2843,7 +2863,8 @@ function addMarkers(data) {
             label: {
                 text: locations.rs1_rs2_LD_map[map1_i][0],
                 fontSize: "12px"
-            }
+            },
+            title: "(" + locations.rs1_rs2_LD_map[map1_i][0] + ") " + locations.rs1_rs2_LD_map[map1_i][1]
         });
         markersArray.push(map1_marker);
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
@@ -2882,7 +2903,8 @@ function addMarkers(data) {
             label: {
                 text: locations.rs1_map[map2_i][0],
                 fontSize: "12px"
-            }
+            },
+            title: "(" + locations.rs1_map[map2_i][0] + ") " + locations.rs1_map[map2_i][1]
         });
         markersArray.push(map2_marker);
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
@@ -2918,7 +2940,8 @@ function addMarkers(data) {
             label: {
                 text: locations.rs2_map[map3_i][0],
                 fontSize: "12px"
-            }
+            },
+            title: "(" + locations.rs2_map[map3_i][0] + ") " + locations.rs2_map[map3_i][1]
         });
         markersArray.push(map3_marker);
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
