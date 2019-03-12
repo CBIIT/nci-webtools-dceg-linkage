@@ -284,7 +284,39 @@ $(document).ready(function() {
     createEnterEvent();
     // Google Maps API
     initMap();
-
+    // export LDpop map dropdown buttons
+    $("#ldpop-LD-downloadPNG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop LD map export png");
+        exportMap(1, "LD", "png");
+    });
+    $("#ldpop-LD-downloadJPEG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop LD export jpeg");
+        exportMap(1, "LD", "jpeg");
+    });
+    // export variant 1 allele freq map
+    $("#ldpop-AFvar1-downloadPNG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 1 allele freq map export png");
+        exportMap(2, "AF", "png");
+    });
+    $("#ldpop-AFvar1-downloadJPEG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 1 allele freq map export jpeg");
+        exportMap(2, "AF", "jpeg");
+    });
+    // export variant 2 allele freq map
+    $("#ldpop-AFvar2-downloadPNG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 2 allele freq map export png");
+        exportMap(3, "AF", "png");
+    });
+    $("#ldpop-AFvar2-downloadJPEG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 2 allele freq map export jpeg");
+        exportMap(3, "AF", "jpeg");
+    });
 });
 
 // Set file support trigger
@@ -2963,11 +2995,14 @@ function exportMap(mapNum, mapType, imageType) {
     $('#ldpop-menu' + mapNum).html('Exporting Map <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span>');
     $('#ldpop-menu' + mapNum).prop('disabled', true);
     // use html2canvas js to convert google maps api div to canvas object
-    html2canvas($('#map' + mapNum + '>div>div')[0], {
+    var map = $('#map' + mapNum).children().children()[0];
+    // console.log(map);
+    html2canvas(map, {
         useCORS: true,
         allowTaint: false,
-        async: false,
-        logging: false
+        async: true,
+        logging: false,
+        scale: 2
     }).then(canvas => {
         // convert canvas to image
         var imgSRC = canvas.toDataURL("image/" + imageType);
@@ -3031,39 +3066,6 @@ function updateLDpop() {
             $(".ldpop-map3-title").html("<b>" + data.inputs.rs2 + " Allele Frequency" + "</b>");
             clearOverlays();
             addMarkers(data);
-            // export map dropdown buttons
-            $("#ldpop-LD-downloadPNG").click(function(e) {
-                e.preventDefault();
-                // console.log("ldpop LD map export png");
-                exportMap(1, "LD", "png");
-            });
-            $("#ldpop-LD-downloadJPEG").click(function(e) {
-                e.preventDefault();
-                // console.log("ldpop LD export jpeg");
-                exportMap(1, "LD", "jpeg");
-            });
-            // export variant 1 allele freq map
-            $("#ldpop-AFvar1-downloadPNG").click(function(e) {
-                e.preventDefault();
-                // console.log("ldpop variant 1 allele freq map export png");
-                exportMap(2, "AF", "png");
-            });
-            $("#ldpop-AFvar1-downloadJPEG").click(function(e) {
-                e.preventDefault();
-                // console.log("ldpop variant 1 allele freq map export jpeg");
-                exportMap(2, "AF", "jpeg");
-            });
-            // export variant 2 allele freq map
-            $("#ldpop-AFvar2-downloadPNG").click(function(e) {
-                e.preventDefault();
-                // console.log("ldpop variant 2 allele freq map export png");
-                exportMap(3, "AF", "png");
-            });
-            $("#ldpop-AFvar2-downloadJPEG").click(function(e) {
-                e.preventDefault();
-                // console.log("ldpop variant 2 allele freq map export jpeg");
-                exportMap(3, "AF", "jpeg");
-            });
         }
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");

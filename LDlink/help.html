@@ -41,6 +41,7 @@
 	<p style="margin-left: 80px;"> <a href="#LDhap"><strong>LDhap</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDmatrix"><strong>LDmatrix</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDpair"><strong>LDpair</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDpop"><strong>LDpop</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDproxy"><strong>LDproxy</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#SNPchip"><strong>SNPchip</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#SNPclip"><strong>SNPclip</strong></a></p>
@@ -146,8 +147,8 @@
 	<br>
 	<p> <strong><a name="Modules"></a>Modules</strong>
 	</p>
-	<p>LDlink consists of seven modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
-		<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>,
+	<p>LDlink consists of eight modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
+		<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>, <a href="#LDpop">LDpop</a>, 
 		<a href="#LDproxy">LDproxy</a>, <a href="#SNPchip">SNPchip</a>,
 		and <a href="#SNPclip">SNPclip</a>. Each module can be
 		accessed by clicking on the desired tab at
@@ -355,6 +356,48 @@
 		- alleles that are
 		correlated if linkage disequilibrium is present (R<sup>2</sup>
 		&gt; 0.1). If linkage equilibrium, no alleles are reported.
+	</p>
+	<br>
+
+
+	<p style="margin-left: 40px;"> <strong><a name="LDpop"></a><span style="text-decoration: underline;">LDpop</span></strong>
+		- Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Variant1 RS number</u>
+		- RS number for query
+		variant 1. RS number must match a bi-allelic variant.
+	</p>
+	<p style="margin-left: 120px;"><u>Variant2 RS number</u>
+		- RS number for query
+		variant 2. RS number must match a bi-allelic variant.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference
+			population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+		- select if desured output is based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Interactive maps</u>
+		- three interactive maps will be returned as tabbed output. 
+		The first tab displays a map with the chosen linkage disequilibrium measure 
+		between query variants 1 and 2 for the selected 1000G populations. 
+		The second and third tabs will display maps of allele frequency distribution 
+		for query variants 1 and 2, respectively, for the selected 1000G populations. 
+		Map pins are color coded based on LD/allele frequency and when clicked display 
+		additional information for the population.
+	</p>
+	<p style="margin-left: 120px;"><u>Table of populations</u>
+		- a searchable and sortable table is generated showing allele frequency and LD 
+		values for the query variants and selected 1000G populations.
+	</p>
+	<p style="margin-left: 120px;"><u>Download table</u>
+		- link to download data in the table of populations.
 	</p>
 	<br>
 
