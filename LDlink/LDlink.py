@@ -124,6 +124,8 @@ def getModule(fullPath):
         return "LDmatrix"
     elif "ldpair" in fullPath:
         return "LDpair"
+    elif "ldpop" in fullPath:
+        return "LDpop"
     elif "ldproxy" in fullPath:
         return "LDproxy"
     elif "snpchip" in fullPath:
