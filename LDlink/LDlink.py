@@ -322,6 +322,7 @@ def ldpop():
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
+    token = request.args.get('token', False)
 
     # check if call is from API or Web instance by seeing if reference number has already been generated or not
     # if accessed by web instance, generate reference number via javascript after hit calculate button
@@ -338,18 +339,22 @@ def ldpop():
     print 'r2_d: ' + r2_d
 
     try:
+        if isProgrammatic:
+            toggleLocked(token, 1)
         out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
         # if API call has error, retrieve error message from json returned from calculation
         try:
             if isProgrammatic:
-                # fp = open('./tmp/LDpop_'+reference+'.txt', "r")
-                # content = fp.read()
-                # fp.close()
+                toggleLocked(token, 0)
                 return sendJSON(out_json)
         except:
             output = json.loads(out_json)
+            if isProgrammatic:
+                toggleLocked(token, 0)
             return sendTraceback(output["error"])
     except:
+        if isProgrammatic:
+                toggleLocked(token, 0)
         return sendTraceback(None)
 
     return current_app.response_class(out_json, mimetype='application/json')
