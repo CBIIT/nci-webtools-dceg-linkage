@@ -284,6 +284,39 @@ $(document).ready(function() {
     createEnterEvent();
     // Google Maps API
     initMap();
+    // export LDpop map dropdown buttons
+    $("#ldpop-LD-downloadPNG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop LD map export png");
+        exportMap(1, "LD", "png");
+    });
+    $("#ldpop-LD-downloadJPEG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop LD export jpeg");
+        exportMap(1, "LD", "jpeg");
+    });
+    // export variant 1 allele freq map
+    $("#ldpop-AFvar1-downloadPNG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 1 allele freq map export png");
+        exportMap(2, "AF", "png");
+    });
+    $("#ldpop-AFvar1-downloadJPEG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 1 allele freq map export jpeg");
+        exportMap(2, "AF", "jpeg");
+    });
+    // export variant 2 allele freq map
+    $("#ldpop-AFvar2-downloadPNG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 2 allele freq map export png");
+        exportMap(3, "AF", "png");
+    });
+    $("#ldpop-AFvar2-downloadJPEG").click(function(e) {
+        e.preventDefault();
+        // console.log("ldpop variant 2 allele freq map export jpeg");
+        exportMap(3, "AF", "jpeg");
+    });
 });
 
 // Set file support trigger
@@ -945,7 +978,7 @@ function ldpop_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
-    var link = '<a href="' + href + '" + target="_blank">link</a>';
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
     return link;
 }
 
@@ -2649,6 +2682,8 @@ function initMap() {
             lng: 0
         },
         controlSize: 24
+        // disableDefaultUI: true
+        // streetViewControl: false
     };
     map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
@@ -2661,7 +2696,27 @@ function initMap() {
     map2.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend1);
     map3.controls[google.maps.ControlPosition.BOTTOM_LEFT].push(MAFlegend2);
 
-    // sample marker
+    // add alt text to maps
+    google.maps.event.addListener(map1, 'tilesloaded', function() {
+        var images1 = document.querySelectorAll('#map1 img');
+        images1.forEach(function(image1) {
+            image1.alt = "Google Maps API control";
+        });
+    });
+    google.maps.event.addListener(map2, 'tilesloaded', function() {
+        var images2 = document.querySelectorAll('#map2 img');
+        images2.forEach(function(image2) {
+            image2.alt = "Google Maps API control";
+        });
+    });
+    google.maps.event.addListener(map3, 'tilesloaded', function() {
+        var images3 = document.querySelectorAll('#map3 img');
+        images3.forEach(function(image3) {
+            image3.alt = "Google Maps API control";
+        });
+    });
+
+    // sample marker test google maps api local
     // var myLatLng = {lat: -25.363, lng: 131.044};
     // let icon = {
     //     path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
@@ -2842,7 +2897,8 @@ function addMarkers(data) {
             label: {
                 text: locations.rs1_rs2_LD_map[map1_i][0],
                 fontSize: "12px"
-            }
+            },
+            title: "(" + locations.rs1_rs2_LD_map[map1_i][0] + ") " + locations.rs1_rs2_LD_map[map1_i][1]
         });
         markersArray.push(map1_marker);
         google.maps.event.addListener(map1_marker, 'click', (function(map1_marker, map1_i) {
@@ -2881,7 +2937,8 @@ function addMarkers(data) {
             label: {
                 text: locations.rs1_map[map2_i][0],
                 fontSize: "12px"
-            }
+            },
+            title: "(" + locations.rs1_map[map2_i][0] + ") " + locations.rs1_map[map2_i][1]
         });
         markersArray.push(map2_marker);
         google.maps.event.addListener(map2_marker, 'click', (function(map2_marker, map2_i) {
@@ -2917,7 +2974,8 @@ function addMarkers(data) {
             label: {
                 text: locations.rs2_map[map3_i][0],
                 fontSize: "12px"
-            }
+            },
+            title: "(" + locations.rs2_map[map3_i][0] + ") " + locations.rs2_map[map3_i][1]
         });
         markersArray.push(map3_marker);
         google.maps.event.addListener(map3_marker, 'click', (function(map3_marker, map3_i) {
@@ -2933,6 +2991,37 @@ function addMarkers(data) {
     }
 }
 
+function exportMap(mapNum, mapType, imageType) {
+    // console.log("EXPORT MAP");
+    // display loading text when map is exporting
+    $('#ldpop-menu' + mapNum).html('Exporting Map <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span>');
+    $('#ldpop-menu' + mapNum).prop('disabled', true);
+    // use html2canvas js to convert google maps api div to canvas object
+    var map = $('#map' + mapNum).children().children()[0];
+    // console.log(map);
+    html2canvas(map, {
+        useCORS: true,
+        allowTaint: false,
+        async: true,
+        logging: false,
+        scale: 2
+    }).then(canvas => {
+        // convert canvas to image
+        var imgSRC = canvas.toDataURL("image/" + imageType);
+        // download image
+        var a = document.createElement('a');
+        a.setAttribute("type", "hidden");
+        a.href = imgSRC;
+        a.download = mapType + "-map." + imageType;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        // re-enable export dropdown after export is complete
+        $('#ldpop-menu' + mapNum).html('Export ' + mapType + ' Map <span class="caret"></span>');
+        $('#ldpop-menu' + mapNum).prop('disabled', false);
+    });
+}
+
 function updateLDpop() {
     var id = 'ldpop';
     var $btn = $('#' + id).button('loading');
@@ -2941,10 +3030,10 @@ function updateLDpop() {
 
     if($('#pop_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
-        $("#ldpop-ld-legend-img").attr('src', 'LDmatrix_legend_R2.png');
+        $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_R2.png');
     } else {
         r2_d = 'd';  // i.e. Dprime
-        $("#ldpop-ld-legend-img").attr('src', 'LDmatrix_legend_Dprime.png');
+        $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
     }
 
     var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
