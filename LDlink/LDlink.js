@@ -2682,6 +2682,8 @@ function initMap() {
             lng: 0
         },
         controlSize: 24
+        // disableDefaultUI: true
+        // streetViewControl: false
     };
     map1 = new google.maps.Map(document.getElementById('map1'), initOptions);
     map2 = new google.maps.Map(document.getElementById('map2'), initOptions);
