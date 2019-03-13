@@ -29,7 +29,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user, checkToken, checkBlocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
+from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -160,6 +160,9 @@ def requires_token(f):
                 # Check if token is blocked
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
+                # Check if token is locked
+                if checkLocked(token):
+                    return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
                 logAccess(token, module)
                 return f(*args, **kwargs)

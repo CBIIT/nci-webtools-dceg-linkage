@@ -265,6 +265,23 @@ def checkBlocked(token):
         else:
             return False
 
+# check if token is locked (1=locked, 0=not locked). returns true (1) if token is locked
+def checkLocked(token):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    api_mongo_addr = config['api']['api_mongo_addr']
+    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    record = users.find_one({"token": token})
+    if record is None:
+        return False
+    else:
+        if int(record["locked"]) == 1:
+            return True
+        else:
+            return False
+
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
