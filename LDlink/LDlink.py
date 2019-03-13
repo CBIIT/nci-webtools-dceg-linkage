@@ -29,7 +29,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import *
-from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
+from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -365,6 +365,7 @@ def ldproxy():
     var = request.args.get('var', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
+    token = request.args.get('token', False)
 
     print 'var: ' + var
     print 'pop: ' + pop
@@ -385,18 +386,24 @@ def ldproxy():
             web = True
         else:
             web = False
+            toggleLocked(token, 1)
         out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
         try:
             if isProgrammatic:
                 fp = open('./tmp/proxy'+reference+'.txt', "r")
                 content = fp.read()
                 fp.close()
+                toggleLocked(token, 0)
                 return content
         except:
+            if isProgrammatic:
+                toggleLocked(token, 0)
             with open(tmp_dir + "proxy" + reference + ".json") as f:
                 json_dict = json.load(f)
                 return sendTraceback(json_dict["error"])
     except:
+        if isProgrammatic:
+            toggleLocked(token, 0)
         return sendTraceback(None)
 
     return out_script + "\n " + out_div
