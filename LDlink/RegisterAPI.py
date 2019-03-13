@@ -277,8 +277,11 @@ def checkLocked(token):
     if record is None:
         return False
     else:
-        if int(record["locked"]) == 1:
-            return True
+        if "locked" in record:
+            if int(record["locked"]) == 1:
+                return True
+            else:
+                return False
         else:
             return False
 
