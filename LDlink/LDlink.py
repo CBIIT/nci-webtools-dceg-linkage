@@ -17,6 +17,8 @@ import random
 import requests
 import yaml
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
 from socket import gethostname
@@ -28,7 +30,7 @@ from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
-from SNPchip import *
+from SNPchip import calculate_chip, get_platform_request
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
@@ -42,6 +44,12 @@ app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
+
+limiter = Limiter(
+    app,
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"]
+)
 
 # with open('config.yml', 'r') as c:
 #     config = yaml.load(c)
@@ -481,6 +489,7 @@ def ldmatrix():
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
+@limiter.limit("1 per day")
 def ldhap():
     web = False
     if 'LDlinkRestWeb' in request.path:
