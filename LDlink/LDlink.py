@@ -45,9 +45,11 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
+
+# limit requests with token on API calls only
 limiter = Limiter(
     app,
-    key_func=get_remote_address
+    key_func=request.args.get('token')
 )
 
 # limiter = Limiter(
@@ -56,21 +58,6 @@ limiter = Limiter(
 #     default_limits=["200 per day", "50 per hour"]
 # )
 
-# with open('config.yml', 'r') as c:
-#     config = yaml.load(c)
-# gmap_key = config['gmap']['key']
-# print "gmap key"
-# print gmap_key
-# render_template('index.html', api_key=gmap_key)
-
-# @app.route('/')
-# def index():
-#     with open('config.yml', 'r') as c:
-#         config = yaml.load(c)
-#     gmap_key = config['gmap']['key']
-#     print "gmap key"
-#     print gmap_key
-#     return render_template('index.html', api_key=gmap_key)
 
 # copy output files from tools' tmp directory to apache tmp directory
 @app.route('/')
@@ -86,12 +73,6 @@ def copy_output_files(reference):
         os.makedirs(apache_tmp_dir)
     # copy *<reference_no>.* to htodocs
     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
-    # read google maps api key
-    # with open('config.yml', 'r') as c:
-    #     config = yaml.load(c)
-    # print "gmap key"
-    # gmap_key = config['gmap']['key']
-    # return render_template('index.html', api_key=gmap_key)
 
 
 def jsonp(func):
@@ -521,9 +502,10 @@ def ldhap_web():
     return sendJSON(out_json)
 
 
+# @limiter.limit("3 per day", key_func = lambda : request.args.get('token'))
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 @requires_token
-@limiter.limit("3 per day", key_func = lambda : request.args.get('token'))
+@limiter.limit("3 per day")
 def ldhap_api():
     web = False
     print 'Execute ldhap api'
