@@ -47,9 +47,14 @@ app.debug = True
 
 limiter = Limiter(
     app,
-    key_func=get_remote_address,
-    default_limits=["200 per day", "50 per hour"]
+    key_func=get_remote_address
 )
+
+# limiter = Limiter(
+#     app,
+#     key_func=get_remote_address,
+#     default_limits=["200 per day", "50 per hour"]
+# )
 
 # with open('config.yml', 'r') as c:
 #     config = yaml.load(c)
@@ -486,37 +491,52 @@ def ldmatrix():
     return out_script + "\n " + out_div
 
 
-@app.route('/LDlinkRest/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
-@requires_token
-@limiter.limit("1 per day")
-def ldhap():
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    isProgrammatic = False
-    print 'Execute ldhap'
+@limiter.exempt
+def ldhap_web():
+    web = True
+    print 'Execute ldhap web'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
 
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
+    reference = request.args.get('reference', False)
     print 'snps: ' + snps
     # print 'pop: ' + pop
     print 'request: ' + str(reference)
 
-    if reference is False:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+    snplst = tmp_dir + 'snps' + reference + '.txt'
+    print 'snplst: ' + snplst
+
+    f = open(snplst, 'w')
+    f.write(snps.lower())
+    f.close()
+
+    try:
+        out_json = calculate_hap(snplst, pop, reference, web)
+    except:
+        return sendTraceback(None)
+
+    return sendJSON(out_json)
+
+
+@app.route('/LDlinkRest/ldhap', methods=['GET'])
+@requires_token
+@limiter.limit("3 per day")
+def ldhap_api():
+    web = False
+    print 'Execute ldhap api'
+    print 'Gathering Variables from url'
+
+    snps = request.args.get('snps', False)
+    pop = request.args.get('pop', False)
+
+    reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+
+    print 'snps: ' + snps
+    # print 'pop: ' + pop
+    print 'request: ' + str(reference)
 
     snplst = tmp_dir + 'snps' + reference + '.txt'
     print 'snplst: ' + snplst
@@ -529,27 +549,23 @@ def ldhap():
         out_json = calculate_hap(snplst, pop, reference, web)
         # if API call has error, retrieve error message from json returned from calculation
         try:
-            if isProgrammatic:
-                resultFile = ""
-                resultFile1 = "./tmp/snps_"+reference+".txt"
-                resultFile2 = "./tmp/haplotypes_"+reference+".txt"
+            resultFile1 = "./tmp/snps_"+reference+".txt"
+            resultFile2 = "./tmp/haplotypes_"+reference+".txt"
 
-                fp = open(resultFile1, "r")
-                content1 = fp.read()
-                fp.close()
+            fp = open(resultFile1, "r")
+            content1 = fp.read()
+            fp.close()
 
-                fp = open(resultFile2, "r")
-                content2 = fp.read()
-                fp.close()
+            fp = open(resultFile2, "r")
+            content2 = fp.read()
+            fp.close()
 
-                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+            return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
         except:
             output = json.loads(out_json)
             return sendTraceback(output["error"])
     except:
         return sendTraceback(None)
-
-    return sendJSON(out_json)
 
 
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
