@@ -282,6 +282,7 @@ $(document).ready(function() {
     autoCalculate();
     createFileSelectEvent();
     createEnterEvent();
+    initAPIExamples();
     // Google Maps API
     initMap();
     // export LDpop map dropdown buttons
@@ -349,8 +350,11 @@ function checkFile(id, fileURL, retries) {
         $('#' + id + "-menu1").prop('disabled', true);
     }
 }
-
-
+function initAPIExamples() {
+    $(".apiaccess-examples").each( function(index) { 
+        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nci.nih.gov', window.location.origin);
+    });
+}
 function setBootstrapSelector(id, value) {
     var str = id.substr(6);
     str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
