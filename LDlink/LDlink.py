@@ -523,7 +523,7 @@ def ldhap_web():
 
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 @requires_token
-@limiter.limit("3 per day")
+@limiter.limit("3 per day", key_func = lambda : request.args.get('token'))
 def ldhap_api():
     web = False
     print 'Execute ldhap api'
