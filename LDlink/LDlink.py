@@ -45,11 +45,13 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
+def get_token():
+    return request.args.get('token')
 
 # limit requests with token on API calls only
 limiter = Limiter(
     app,
-    key_func=request.args.get('token')
+    key_func=get_token
 )
 
 # limiter = Limiter(
