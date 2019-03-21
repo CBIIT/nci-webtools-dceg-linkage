@@ -428,9 +428,9 @@ def ldmatrix():
         else:
             pop = False
         if data['reference']:
-            request_id = data['reference']
+            reference = data['reference']
         else:
-            request_id = False
+            reference = False
         if data['r2_d']:
             r2_d = data['r2_d']
         else:
@@ -438,12 +438,12 @@ def ldmatrix():
     else:
         snps = request.args.get('snps', False)
         pop = request.args.get('pop', False)
-        request_id = request.args.get('reference', False)
+        reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
 
     # check if call is from API or Web instance by seeing if reference number has already been generated or not
     # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request_id == False:
+    if reference == False:
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
         isProgrammatic = True
 
