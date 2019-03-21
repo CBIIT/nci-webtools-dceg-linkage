@@ -410,27 +410,31 @@ def ldproxy():
     return out_script + "\n " + out_div
 
 
-@app.route('/LDlinkRest/ldmatrix', methods=['GET'])
+@app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
 def ldmatrix():
-
     isProgrammatic = False
     print 'Execute ldmatrix'
     print 'Gathering Variables from url'
-
-    snps = request.args.get('snps', False)
-    pop = request.args.get('pop', False)
+    if request.method == 'POST':
+        data = json.loads(request.stream.read())
+        snps = data['snps']
+        pop = data['pop']
+        request_id = data['request_id']
+        r2_d = data['r2_d']
+    else:
+        snps = request.args.get('snps', False)
+        pop = request.args.get('pop', False)
+        request_id = request.args.get('reference', False)
+        r2_d = request.args.get('r2_d', False)
 
     # check if call is from API or Web instance by seeing if reference number has already been generated or not
     # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
-    else:
+    if request_id == False:
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
         isProgrammatic = True
 
-    r2_d = request.args.get('r2_d', False)
     print 'snps: ' + snps
     print 'pop: ' + pop
     print 'request: ' + str(reference)
