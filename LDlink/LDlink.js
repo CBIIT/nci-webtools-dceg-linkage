@@ -1229,7 +1229,7 @@ function updateData(id) {
             }
             break;
         case 'ldmatrix':
-            if(isPopulationSet(id)) {
+            if(isPopulationSet(id) && checkSNPListLength(id)) {
                 $('#'+id+"-loading").show();
                 updateLDmatrix();
             }
@@ -1414,6 +1414,22 @@ function isPopulationSet(elementId) {
         return false;
     } else {
         $('#'+elementId+'-population-codes-zero').popover('hide');
+        return true;
+    }
+}
+
+function checkSNPListLength(elementId) {
+    var snps =  $('#'+elementId+'-file-snp-numbers').val();
+    var snplist = snps.split("\n");
+    // console.log(snplist);
+    snplist = snplist.filter(Boolean);
+    // console.log(snplist.length);
+    if(snplist.length > 300) {
+        $('#'+elementId+'-file-snp-warning').popover('show');
+        setTimeout(function() { $('#'+elementId+'-file-snp-warning').popover('hide'); }, 4000);
+        return false;
+    } else {
+        $('#'+elementId+'-file-snp-warning').popover('hide');
         return true;
     }
 }
