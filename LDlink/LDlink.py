@@ -464,6 +464,17 @@ def ldmatrix():
         web = False
         if 'LDlinkRestWeb' in request.path:
             web = True
+            # check if SNP list contains <= 300 SNPs
+            snps_raw = open(snplst).readlines()
+            if len(snps_raw) > 300:
+                out_json = open(tmp_dir + "matrix" + reference + ".json", "w")
+                output = {}
+                output["error"] = "Maximum variant list is 300 RS numbers. Your list contains " + \
+                    str(len(snps_raw)) + " entries."
+                json_output = json.dumps(output, sort_keys=True, indent=2)
+                print >> out_json, json_output
+                out_json.close()
+                return "" + "\n " + ""
         else:
             web = False
         out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
