@@ -419,19 +419,19 @@ def ldmatrix():
     print 'Gathering Variables from url'
     if request.method == 'POST':
         data = json.loads(request.stream.read())
-        if data['snps']:
+        if 'snps' in data:
             snps = data['snps']
         else:
             snps = False
-        if data['pop']:
+        if "pop" in data:
             pop = data['pop']
         else:
             pop = False
-        if data['reference']:
+        if "reference" in data:
             reference = data['reference']
         else:
             reference = False
-        if data['r2_d']:
+        if "r2_d" in data:
             r2_d = data['r2_d']
         else:
             r2_d = False
