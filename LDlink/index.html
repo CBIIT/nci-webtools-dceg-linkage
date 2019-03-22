@@ -1966,7 +1966,13 @@
 					<p><a class="help-anchor-link" href="#LDhap">LDhap</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDmatrix">LDmatrix</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">
+							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'
+							<br>
+							<br>
+							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d"}' 'https://ldlink-dev.nci.nih.gov/LDlinkRest/ldmatrix?&token=faketoken123'
+						</pre>
+					</p>
 					<p><a class="help-anchor-link" href="#LDpair">LDpair</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDpop">LDpop</a><br>
