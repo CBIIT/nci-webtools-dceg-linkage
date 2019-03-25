@@ -1,5 +1,4 @@
 #!flask/bin/python
-
 import pandas as pd
 import numpy as np
 import sys
@@ -60,8 +59,7 @@ app.debug = True
 #     default_limits=["200 per day", "50 per hour"]
 # )
 
-
-# copy output files from tools' tmp directory to apache tmp directory
+# Copy output files from tools' tmp directory to apache tmp directory
 @app.route('/')
 def copy_output_files(reference):
     # copy_output_files
@@ -76,43 +74,40 @@ def copy_output_files(reference):
     # copy *<reference_no>.* to htodocs
     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
 
+# TEST Wraps JSONified output for JSONP requests.
+# def jsonp(func):
+#     @wraps(func)
+#     def decorated_function(*args, **kwargs):
+#         callback = request.args.get('callback', False)
+#         if callback:
+#             data = str(func(*args, **kwargs).data)
+#             content = str(callback) + '(' + data + ')'
+#             # mimetype = 'application/javascript'
+#             mimetype = 'application/json'
+#             return current_app.response_class(content, mimetype=mimetype)
+#         else:
+#             return func(*args, **kwargs)
+#     return decorated_function
 
-def jsonp(func):
-    """Wraps JSONified output for JSONP requests."""
-    @wraps(func)
-    def decorated_function(*args, **kwargs):
-        callback = request.args.get('callback', False)
-        if callback:
-            data = str(func(*args, **kwargs).data)
-            content = str(callback) + '(' + data + ')'
-            # mimetype = 'application/javascript'
-            mimetype = 'application/json'
-            return current_app.response_class(content, mimetype=mimetype)
-        else:
-            return func(*args, **kwargs)
-    return decorated_function
-
-
+# Return error and traceback from calculations
 def sendTraceback(error):
     custom = {}
-
     if (error is None):
         custom["error"] = "Raised when a generated error does not fall into any category."
     else:
         custom["error"] = error
-
     print "Unexpected error:", sys.exc_info()[0]
     traceback.print_exc()
-    # custom["error"] = "Raised when a generated error does not fall into any category."
     custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
     return current_app.response_class(out_json, mimetype='application/json')
 
-
+# Return JSON output from calculations
 def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
 
+# Get module name from request path for API logs collection in MongoDB 
 def getModule(fullPath):
     if "ldhap" in fullPath:
         return "LDhap"
@@ -190,17 +185,15 @@ def requires_admin_token(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
+# File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])
 @app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():
-
     print "Processing upload"
     print "****** Stage 1: UPLOAD BUTTON ***** "
     print "UPLOAD_DIR = %s" % (app.config['UPLOAD_DIR'])
     for arg in request.args:
         print arg
-
     print "request.method = %s" % (request.method)
     if request.method == 'POST':
         # check if the post request has the file part
@@ -209,9 +202,7 @@ def upload():
         if 'ldassocFile' not in request.files:
             print('No file part')
             return 'No file part...'
-
         file = request.files['ldassocFile']
-
         # if user does not select file, browser also
         # submit a empty part without filename
         print type(file)
@@ -226,33 +217,24 @@ def upload():
             print "filename = " + filename
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return 'File was saved'
-    #        print "FILE SAVED.  Alright!"
-    #        return '{"status" : "File was saved"}'
-    # print filename
 
-    # message = fileUploadService.upload_file(request, 'ldassocFile', os.path.join(app.config['UPLOAD_DIR']))
-    # return message
-    # return 'No Success'
+# Test route
+# @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
+# @app.route("/LDlinkRestWeb/demoapp/add", methods=['POST'])
+# def restAdd():
+#     print type(request.args)
+#     for arg in request.args:
+#         print arg
+#     data = str(request.args)
+#     json_dumps = json.dumps(data)
+#     first = request.args.get('first', False)
+#     second = request.form.get('second')
+#     test = request.form.get('test')
+#     print first
+#     print json_dumps
+#     return jsonify(success=True, data=json_dumps)
 
-
-@app.route("/LDlinkRest/demoapp/add", methods=['POST'])
-@app.route("/LDlinkRestWeb/demoapp/add", methods=['POST'])
-def restAdd():
-    print type(request.args)
-    for arg in request.args:
-        print arg
-
-    data = str(request.args)
-    json_dumps = json.dumps(data)
-
-    first = request.args.get('first', False)
-    second = request.form.get('second')
-    test = request.form.get('test')
-    print first
-    print json_dumps
-    return jsonify(success=True, data=json_dumps)
-
-
+# Web and API route for LDpair
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
@@ -270,7 +252,6 @@ def ldpair():
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
-
     # check if call is from API or Web instance by seeing if reference number has already been generated or not
     # if accessed by web instance, generate reference number via javascript after hit calculate button
     if request.args.get('reference', False):
@@ -278,12 +259,10 @@ def ldpair():
     else:
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
         isProgrammatic = True
-
     print 'var1: ' + var1
     print 'var2: ' + var2
     print 'pop: ' + pop
     print 'request: ' + str(reference)
-
     try:
         out_json = calculate_pair(var1, var2, pop, web, reference)
         # if API call has error, retrieve error message from json returned from calculation
@@ -298,9 +277,9 @@ def ldpair():
             return sendTraceback(output["error"])
     except:
         return sendTraceback(None)
-
     return current_app.response_class(out_json, mimetype='application/json')
 
+# Web and API route for LDpop
 @app.route('/LDlinkRest/ldpop', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
 @requires_token
@@ -351,7 +330,7 @@ def ldpop():
             return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
 
-
+# Web and API route for LDproxy
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 @requires_token
@@ -403,46 +382,7 @@ def ldproxy():
             return sendTraceback(None)
     return out_script + "\n " + out_div
 
-
-
-    # # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # # if accessed by web instance, generate reference number via javascript after hit calculate button
-    # if request.args.get('reference', False):
-    #     reference = request.args.get('reference', False)
-    # else:
-    #     reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-    #     isProgrammatic = True
-
-    # try:
-    #     # pass flag to LDproxy to allow svg generation only for web instance
-    #     web = False
-    #     if 'LDlinkRestWeb' in request.path:
-    #         web = True
-    #     else:
-    #         web = False
-    #         toggleLocked(token, 1)
-    #     out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
-    #     try:
-    #         if isProgrammatic:
-    #             fp = open('./tmp/proxy'+reference+'.txt', "r")
-    #             content = fp.read()
-    #             fp.close()
-    #             toggleLocked(token, 0)
-    #             return content
-    #     except:
-    #         if isProgrammatic:
-    #             toggleLocked(token, 0)
-    #         with open(tmp_dir + "proxy" + reference + ".json") as f:
-    #             json_dict = json.load(f)
-    #             return sendTraceback(json_dict["error"])
-    # except:
-    #     if isProgrammatic:
-    #         toggleLocked(token, 0)
-    #     return sendTraceback(None)
-
-    # return out_script + "\n " + out_div
-
-
+# Web and API route for LDmatrix
 @app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
@@ -522,6 +462,7 @@ def ldmatrix():
     # copy_output_files(reference)
     return out_script + "\n " + out_div
 
+# Web and API route for LDhap
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
@@ -583,87 +524,9 @@ def ldhap():
             return sendTraceback(output["error"])
     except:
         return sendTraceback(None)
-
     return sendJSON(out_json)
 
-# @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
-# @limiter.exempt
-# def ldhap_web():
-#     web = True
-#     print 'Execute ldhap web'
-#     print 'Gathering Variables from url'
-
-#     snps = request.args.get('snps', False)
-#     pop = request.args.get('pop', False)
-
-#     reference = request.args.get('reference', False)
-#     print 'snps: ' + snps
-#     # print 'pop: ' + pop
-#     print 'request: ' + str(reference)
-
-#     snplst = tmp_dir + 'snps' + reference + '.txt'
-#     print 'snplst: ' + snplst
-
-#     f = open(snplst, 'w')
-#     f.write(snps.lower())
-#     f.close()
-
-#     try:
-#         out_json = calculate_hap(snplst, pop, reference, web)
-#     except:
-#         return sendTraceback(None)
-
-#     return sendJSON(out_json)
-
-
-# # @limiter.limit("3 per day", key_func = lambda : request.args.get('token'))
-# @app.route('/LDlinkRest/ldhap', methods=['GET'])
-# @requires_token
-# @limiter.limit("3 per day")
-# def ldhap_api():
-#     web = False
-#     print 'Execute ldhap api'
-#     print 'Gathering Variables from url'
-
-#     snps = request.args.get('snps', False)
-#     pop = request.args.get('pop', False)
-
-#     reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-
-#     print 'snps: ' + snps
-#     # print 'pop: ' + pop
-#     print 'request: ' + str(reference)
-
-#     snplst = tmp_dir + 'snps' + reference + '.txt'
-#     print 'snplst: ' + snplst
-
-#     f = open(snplst, 'w')
-#     f.write(snps.lower())
-#     f.close()
-
-#     try:
-#         out_json = calculate_hap(snplst, pop, reference, web)
-#         # if API call has error, retrieve error message from json returned from calculation
-#         try:
-#             resultFile1 = "./tmp/snps_"+reference+".txt"
-#             resultFile2 = "./tmp/haplotypes_"+reference+".txt"
-
-#             fp = open(resultFile1, "r")
-#             content1 = fp.read()
-#             fp.close()
-
-#             fp = open(resultFile2, "r")
-#             content2 = fp.read()
-#             fp.close()
-
-#             return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
-#         except:
-#             output = json.loads(out_json)
-#             return sendTraceback(output["error"])
-#     except:
-#         return sendTraceback(None)
-
-
+# Web and API route for SNPclip
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
@@ -790,7 +653,19 @@ def snpclip():
 
     return current_app.response_class(out_json, mimetype=mimetype)
 
+# Route to retrieve platform data for SNPchip
+@app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
+@app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
+def snpchip_platforms():
+    print "Retrieve SNPchip Platforms"
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    return get_platform_request(web)
 
+# Web and API route for SNPchip
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
@@ -851,40 +726,9 @@ def snpchip():
 
     return current_app.response_class(out_json, mimetype='application/json')
 
-
-@app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
-@app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
-def snpchip_platforms():
-    print "Retrieve SNPchip Platforms"
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    return get_platform_request(web)
-
-
-@app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
-def ldassoc_example():
-    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
-
-    example = {
-        'filename': os.path.basename(example_filepath),
-        'headers': read_csv_headers(example_filepath)
-    }
-    return json.dumps(example)
-
-
+# Read headers from uploaded data files for LDassoc
 def read_csv_headers(example_filepath):
     final_headers = []
-    # with open(example_filepath, 'r') as f:
-    #     lines = f.readlines()
-    #     first_line = lines[0]
-    #     headers = first_line.split()
-    #     for heads in headers:
-    #         if len(heads) > 0:
-    #             final_headers.append(heads)
     with open(example_filepath) as fp:
         headers = fp.readline().strip().split()
     for heads in headers:
@@ -892,14 +736,23 @@ def read_csv_headers(example_filepath):
             final_headers.append(heads)
     return final_headers
 
+# Route for LDassoc example GWAS data
+@app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
+def ldassoc_example():
+    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+    example = {
+        'filename': os.path.basename(example_filepath),
+        'headers': read_csv_headers(example_filepath)
+    }
+    return json.dumps(example)
 
+# Web and API route for LDassoc
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
-
     myargs = argparse.Namespace()
     myargs.window = None
-
     print "Execute ldassoc"
     print 'Gathering Variables from url'
 
@@ -1003,7 +856,7 @@ def ldassoc():
 
     return sendJSON(out_json)
 
-
+# Ping route for API and Web instances
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
 @app.route('/ping/', strict_slashes=False)
 def ping():
@@ -1015,11 +868,12 @@ def ping():
         traceback.print_exc(1)
         return str(e), 400
 
-
+# Route to check file exist status 
 @app.route('/status/<path:filename>', strict_slashes=False)
 def status(filename):
     return jsonify(os.path.isfile(filename))
 
+# Web route to send API token unblock request from front-end
 @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
 def apiblocked_web():
     print "Execute api blocked user justification submission"
@@ -1034,6 +888,7 @@ def apiblocked_web():
     out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.url_root)
     return sendJSON(out_json)
 
+# Web route to register user's email for API token
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
 def register_web():
     print "Execute api register user"
@@ -1054,6 +909,7 @@ def register_web():
     }
     return sendJSON(out_json2)
 
+# Web route to block user's API token
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_user():
@@ -1062,6 +918,7 @@ def block_user():
     out_json = blockUser(email, request.url_root)
     return sendJSON(out_json)
 
+# Web route to unblock user's API token
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_user():
@@ -1070,6 +927,7 @@ def unblock_user():
     out_json = unblockUser(email)
     return sendJSON(out_json)
 
+# Web route to unlock user's API token
 @app.route('/LDlinkRestWeb/apiaccess/unlock_user', methods=['GET'])
 @requires_admin_token
 def unlock_user():
@@ -1078,6 +936,7 @@ def unlock_user():
     out_json = unlockUser(email)
     return sendJSON(out_json)
 
+# Web route to unlock all users API tokens
 @app.route('/LDlinkRestWeb/apiaccess/unlock_all_users', methods=['GET'])
 @requires_admin_token
 def unlock_all_users():
@@ -1085,6 +944,7 @@ def unlock_all_users():
     out_json = unlockAllUsers()
     return sendJSON(out_json)
 
+# Web route to retrieve API log stats
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
 @requires_admin_token
 def api_stats():
@@ -1095,6 +955,7 @@ def api_stats():
     out_json = getStats(startdatetime, enddatetime, top)
     return sendJSON(out_json)
 
+# Add request headers
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -1112,7 +973,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     port_num = int(args.port_number)
     debugger = args.debug == 'True'
-
     hostname = gethostname()
     app.run(host='0.0.0.0', port=port_num, debug=debugger, use_evalex=False)
     application = DebuggedApplication(app, True)
