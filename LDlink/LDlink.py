@@ -34,16 +34,19 @@ from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, to
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
 
-tmp_dir = "./tmp/"
 # Ensure tmp directory exists
+tmp_dir = "./tmp/"
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
+
+### Initialize Flask App ###
 
 app = Flask(__name__, static_folder='', static_url_path='/')
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
+# Flask Limiter initialization
 # def get_token():
 #     return request.args.get('token')
 # # limit requests with token on API calls only
@@ -56,36 +59,9 @@ app.debug = True
 #     key_func=get_remote_address,
 #     default_limits=["200 per day", "50 per hour"]
 # )
+# Example Flask Limiter decorator: @limiter.limit("1 per second")
 
-# Copy output files from tools' tmp directory to apache tmp directory
-@app.route('/')
-def copy_output_files(reference):
-    # copy_output_files
-    apache_root = "/analysistools/"
-    # check if URL contains the keyword sandbox
-    if 'sandbox' in request.url_root:
-        apache_root = "/analysistools-sandbox/"
-    apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
-    # Ensure apache tmp directory exists
-    if not os.path.exists(apache_tmp_dir):
-        os.makedirs(apache_tmp_dir)
-    # copy *<reference_no>.* to htodocs
-    os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
-
-# TEST Wraps JSONified output for JSONP requests.
-# def jsonp(func):
-#     @wraps(func)
-#     def decorated_function(*args, **kwargs):
-#         callback = request.args.get('callback', False)
-#         if callback:
-#             data = str(func(*args, **kwargs).data)
-#             content = str(callback) + '(' + data + ')'
-#             # mimetype = 'application/javascript'
-#             mimetype = 'application/json'
-#             return current_app.response_class(content, mimetype=mimetype)
-#         else:
-#             return func(*args, **kwargs)
-#     return decorated_function
+### Helper functions ###
 
 # Return error and traceback from calculations
 def sendTraceback(error):
@@ -104,6 +80,18 @@ def sendTraceback(error):
 def sendJSON(inputString):
     out_json = json.dumps(inputString, sort_keys=False)
     return current_app.response_class(out_json, mimetype='application/json')
+
+# Read headers from uploaded data files for LDassoc
+def read_csv_headers(example_filepath):
+    final_headers = []
+    with open(example_filepath) as fp:
+        headers = fp.readline().strip().split()
+    for heads in headers:
+        if len(heads) > 0:
+            final_headers.append(heads)
+    return final_headers
+
+### API Tokenization ###
 
 # Get module name from request path for API logs collection in MongoDB 
 def getModule(fullPath):
@@ -164,6 +152,7 @@ def requires_token(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# Flask decorator
 # Requires API route to include valid token in argument or will throw error
 def requires_admin_token(f):
     @wraps(f)
@@ -182,6 +171,123 @@ def requires_admin_token(f):
             return sendTraceback('Invalid Admin API token.')
         return f(*args, **kwargs)
     return decorated_function
+
+# Web route to send API token unblock request from front-end
+@app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
+def apiblocked_web():
+    print "Execute api blocked user justification submission"
+    firstname = request.args.get('firstname', False)
+    lastname = request.args.get('lastname', False)
+    email = request.args.get('email', False)
+    institution = request.args.get('institution', False)
+    registered = request.args.get('registered', False)
+    blocked = request.args.get('blocked', False)
+    justification = request.args.get('justification', False)
+
+    out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.url_root)
+    return sendJSON(out_json)
+
+# Web route to register user's email for API token
+@app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
+def register_web():
+    print "Execute api register user"
+    firstname = request.args.get('firstname', False)
+    lastname = request.args.get('lastname', False)
+    email = request.args.get('email', False)
+    institution = request.args.get('institution', False)
+    reference = request.args.get('reference', False)
+    out_json = register_user(firstname, lastname, email, institution, reference, request.url_root)
+    out_json2 = {
+        "message": out_json["message"],
+        "email": out_json["email"],
+        "firstname": out_json["firstname"],
+        "lastname": out_json["lastname"],
+        "registered": out_json["registered"],
+        "blocked": out_json["blocked"],
+        "institution": out_json["institution"]
+    }
+    return sendJSON(out_json2)
+
+# Web route to block user's API token
+@app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
+@requires_admin_token
+def block_user():
+    print "Execute api block user"
+    email = request.args.get('email', False)
+    out_json = blockUser(email, request.url_root)
+    return sendJSON(out_json)
+
+# Web route to unblock user's API token
+@app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
+@requires_admin_token
+def unblock_user():
+    print "Execute api unblock user"
+    email = request.args.get('email', False)
+    out_json = unblockUser(email)
+    return sendJSON(out_json)
+
+# Web route to unlock user's API token
+@app.route('/LDlinkRestWeb/apiaccess/unlock_user', methods=['GET'])
+@requires_admin_token
+def unlock_user():
+    print "Execute api unlock user"
+    email = request.args.get('email', False)
+    out_json = unlockUser(email)
+    return sendJSON(out_json)
+
+# Web route to unlock all users API tokens
+@app.route('/LDlinkRestWeb/apiaccess/unlock_all_users', methods=['GET'])
+@requires_admin_token
+def unlock_all_users():
+    print "Execute api unlock all users"
+    out_json = unlockAllUsers()
+    return sendJSON(out_json)
+
+# Web route to retrieve API log stats
+@app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
+@requires_admin_token
+def api_stats():
+    print "Execute api stats"
+    startdatetime = request.args.get('startdatetime', False)
+    enddatetime = request.args.get('enddatetime', False)
+    top = request.args.get('top', False)
+    out_json = getStats(startdatetime, enddatetime, top)
+    return sendJSON(out_json)
+
+### LDLink Helper Routes ###
+
+# Copy output files from tools' tmp directory to apache tmp directory
+@app.route('/')
+def copy_output_files(reference):
+    # copy_output_files
+    apache_root = "/analysistools/"
+    # check if URL contains the keyword sandbox
+    if 'sandbox' in request.url_root:
+        apache_root = "/analysistools-sandbox/"
+    apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
+    # Ensure apache tmp directory exists
+    if not os.path.exists(apache_tmp_dir):
+        os.makedirs(apache_tmp_dir)
+    # copy *<reference_no>.* to htodocs
+    os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
+
+
+# Ping route for API and Web instances
+@app.route('/LDlinkRest/ping/', strict_slashes=False)
+@app.route('/ping/', strict_slashes=False)
+def ping():
+    print "pong"
+    try:
+        return "true"
+    except Exception as e:
+        print('------------EXCEPTION------------')
+        traceback.print_exc(1)
+        return str(e), 400
+
+# Route to check file exist status 
+@app.route('/status/<path:filename>', strict_slashes=False)
+def status(filename):
+    return jsonify(os.path.isfile(filename))
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])
@@ -215,6 +321,284 @@ def upload():
             print "filename = " + filename
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return 'File was saved'
+
+# Route for LDassoc example GWAS data
+@app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
+def ldassoc_example():
+    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+    example = {
+        'filename': os.path.basename(example_filepath),
+        'headers': read_csv_headers(example_filepath)
+    }
+    return json.dumps(example)
+
+# Route to retrieve platform data for SNPchip
+@app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
+@app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
+def snpchip_platforms():
+    print "Retrieve SNPchip Platforms"
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    return get_platform_request(web)
+
+### LDLink Main Module Routes ###
+
+# Web and API route for LDassoc
+@app.route('/LDlinkRest/ldassoc', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
+def ldassoc():
+    myargs = argparse.Namespace()
+    myargs.window = None
+    print "Execute ldassoc"
+    print 'Gathering Variables from url'
+
+    # print type(request.args)
+    # for arg in request.args:
+    #     print arg
+
+    data = str(request.args)
+    json_dumps = json.dumps(data)
+
+    pop = request.args.get('pop', False)
+
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+
+    filename = secure_filename(request.args.get('filename', False))
+    matrixVariable = request.args.get('matrixVariable')
+    region = request.args.get('calculateRegion')
+
+    myargs.dprime = bool(request.args.get("dprime") == "True")
+    print "dprime: " + str(myargs.dprime)
+
+    # Column settings
+    myargs.chr = str(request.args.get('columns[chromosome]'))
+    myargs.bp = str(request.args.get('columns[position]'))
+    myargs.pval = str(request.args.get('columns[pvalue]'))
+
+    # print "myargs:"
+    # print type(myargs.chr)
+    # regionValues = json.loads(request.args.get('region'))
+    # variantValues = json.loads(request.args.get('variant'))
+    # columns = json.loads(request.args.get('columns'))
+
+    if bool(request.args.get("useEx") == "True"):
+        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+    else:
+        filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(
+            str(request.args.get('filename'))))
+
+    print 'filename: ' + filename
+    print 'region: ' + region
+    print 'pop: ' + pop
+    print 'reference: ' + reference
+    print 'region: ' + region
+
+    if region == "variant":
+        print "Region is variant"
+        print "index: " + str(request.args.get('variant[index]'))
+        print "base pair window: " + request.args.get('variant[basepair]')
+        print
+        myargs.window = int(request.args.get('variant[basepair]'))
+
+        if request.args.get('variant[index]') == "":
+            myargs.origin = None
+        else:
+            myargs.origin = request.args.get('variant[index]')
+
+    if region == "gene":
+        print "Region is gene"
+        if request.args.get('gene[index]') == "":
+            myargs.origin = None
+        else:
+            myargs.origin = request.args.get('gene[index]')
+
+        myargs.name = request.args.get('gene[name]')
+        myargs.window = int(request.args.get('gene[basepair]'))
+
+    if region == "region":
+        print "Region is region"
+        if request.args.get('region[index]') == "":
+            myargs.origin = None
+        else:
+            myargs.origin = request.args.get('region[index]')
+
+        myargs.start = str(request.args.get('region[start]'))
+        myargs.end = str(request.args.get('region[end]'))
+
+    myargs.transcript = bool(request.args.get("transcript") == "True")
+    print "transcript: " + str(myargs.transcript)
+
+    myargs.annotate = bool(request.args.get("annotate") == "True")
+    print "annotate: " + str(myargs.annotate)
+
+    try:
+        # pass flag to LDassoc to allow svg generation only for web instance
+        web = False
+        if 'LDlinkRestWeb' in request.path:
+            web = True
+        else:
+            web = False
+        out_json = calculate_assoc(
+            filename, region, pop, reference, web, myargs)
+    except:
+        return sendTraceback(None)
+
+    # copy_output_files(reference)
+    # print "out_json:"
+    # print out_json
+
+    return sendJSON(out_json)
+
+# Web and API route for LDhap
+@app.route('/LDlinkRest/ldhap', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
+@requires_token
+def ldhap():
+    web = False
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    isProgrammatic = False
+    print 'Execute ldhap'
+    print 'Gathering Variables from url'
+
+    snps = request.args.get('snps', False)
+    pop = request.args.get('pop', False)
+
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        isProgrammatic = True
+
+    print 'snps: ' + snps
+    # print 'pop: ' + pop
+    print 'request: ' + str(reference)
+
+    if reference is False:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+
+    snplst = tmp_dir + 'snps' + reference + '.txt'
+    print 'snplst: ' + snplst
+
+    f = open(snplst, 'w')
+    f.write(snps.lower())
+    f.close()
+
+    try:
+        out_json = calculate_hap(snplst, pop, reference, web)
+        # if API call has error, retrieve error message from json returned from calculation
+        try:
+            if isProgrammatic:
+                resultFile = ""
+                resultFile1 = "./tmp/snps_"+reference+".txt"
+                resultFile2 = "./tmp/haplotypes_"+reference+".txt"
+
+                fp = open(resultFile1, "r")
+                content1 = fp.read()
+                fp.close()
+
+                fp = open(resultFile2, "r")
+                content2 = fp.read()
+                fp.close()
+
+                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+        except:
+            output = json.loads(out_json)
+            return sendTraceback(output["error"])
+    except:
+        return sendTraceback(None)
+    return sendJSON(out_json)
+
+# Web and API route for LDmatrix
+@app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
+@app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
+@requires_token
+def ldmatrix():
+    isProgrammatic = False
+    print 'Execute ldmatrix'
+    print 'Gathering Variables from url'
+    if request.method == 'POST':
+        data = json.loads(request.stream.read())
+        if 'snps' in data:
+            snps = data['snps']
+        else:
+            snps = False
+        if "pop" in data:
+            pop = data['pop']
+        else:
+            pop = False
+        if "reference" in data:
+            reference = data['reference']
+        else:
+            reference = False
+        if "r2_d" in data:
+            r2_d = data['r2_d']
+        else:
+            r2_d = False
+    else:
+        snps = request.args.get('snps', False)
+        pop = request.args.get('pop', False)
+        reference = request.args.get('reference', False)
+        r2_d = request.args.get('r2_d', False)
+
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
+    if reference == False:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        isProgrammatic = True
+
+    print 'snps: ' + snps
+    print 'pop: ' + pop
+    print 'request: ' + str(reference)
+    print 'r2_d: ' + r2_d
+
+    snplst = tmp_dir + 'snps' + str(reference) + '.txt'
+    print 'snplst: ' + snplst
+
+    f = open(snplst, 'w')
+    f.write(snps.lower())
+    f.close()
+
+    try:
+        # pass flag to LDmatrix to allow svg generation only for web instance
+        web = False
+        if 'LDlinkRestWeb' in request.path:
+            web = True
+        else:
+            web = False
+        out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
+        try:
+            if isProgrammatic:
+                resultFile = ""
+                if r2_d == "d":
+                    resultFile = "./tmp/d_prime_"+reference+".txt"
+                else:
+                    resultFile = "./tmp/r2_"+reference+".txt"
+
+                fp = open(resultFile, "r")
+                content = fp.read()
+                fp.close()
+                return content
+        except:
+            with open(tmp_dir + "matrix" + reference + ".json") as f:
+                json_dict = json.load(f)
+                return sendTraceback(json_dict["error"])
+    except:
+        return sendTraceback(None)
+
+    # copy_output_files(reference)
+    return out_script + "\n " + out_div
 
 # Web and API route for LDpair
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
@@ -364,117 +748,38 @@ def ldproxy():
             return sendTraceback(None)
     return out_script + "\n " + out_div
 
-# Web and API route for LDmatrix
-@app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
-@app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
+# Web and API route for SNPchip
+@app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
+@app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
-def ldmatrix():
-    isProgrammatic = False
-    print 'Execute ldmatrix'
-    print 'Gathering Variables from url'
-    if request.method == 'POST':
-        data = json.loads(request.stream.read())
-        if 'snps' in data:
-            snps = data['snps']
-        else:
-            snps = False
-        if "pop" in data:
-            pop = data['pop']
-        else:
-            pop = False
-        if "reference" in data:
-            reference = data['reference']
-        else:
-            reference = False
-        if "r2_d" in data:
-            r2_d = data['r2_d']
-        else:
-            r2_d = False
-    else:
-        snps = request.args.get('snps', False)
-        pop = request.args.get('pop', False)
-        reference = request.args.get('reference', False)
-        r2_d = request.args.get('r2_d', False)
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if reference == False:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
-    print 'snps: ' + snps
-    print 'pop: ' + pop
-    print 'request: ' + str(reference)
-    print 'r2_d: ' + r2_d
-
-    snplst = tmp_dir + 'snps' + str(reference) + '.txt'
-    print 'snplst: ' + snplst
-
-    f = open(snplst, 'w')
-    f.write(snps.lower())
-    f.close()
-
-    try:
-        # pass flag to LDmatrix to allow svg generation only for web instance
-        web = False
-        if 'LDlinkRestWeb' in request.path:
-            web = True
-        else:
-            web = False
-        out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
-        try:
-            if isProgrammatic:
-                resultFile = ""
-                if r2_d == "d":
-                    resultFile = "./tmp/d_prime_"+reference+".txt"
-                else:
-                    resultFile = "./tmp/r2_"+reference+".txt"
-
-                fp = open(resultFile, "r")
-                content = fp.read()
-                fp.close()
-                return content
-        except:
-            with open(tmp_dir + "matrix" + reference + ".json") as f:
-                json_dict = json.load(f)
-                return sendTraceback(json_dict["error"])
-    except:
-        return sendTraceback(None)
-
-    # copy_output_files(reference)
-    return out_script + "\n " + out_div
-
-# Web and API route for LDhap
-@app.route('/LDlinkRest/ldhap', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
-@requires_token
-def ldhap():
+def snpchip():
     web = False
     if 'LDlinkRestWeb' in request.path:
         web = True
     else:
         web = False
+    # Command line example
     isProgrammatic = False
-    print 'Execute ldhap'
-    print 'Gathering Variables from url'
+    print "Execute snpchip"
 
-    snps = request.args.get('snps', False)
-    pop = request.args.get('pop', False)
+    data = json.loads(request.stream.read())
+    snps = data['snps']
+    platforms = data['platforms']
 
     # check if call is from API or Web instance by seeing if reference number has already been generated or not
     # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
+    if 'reference' in data.keys():
+        reference = str(data['reference'])
     else:
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
         isProgrammatic = True
 
+    #snps = request.args.get('snps', False)
+    #platforms = request.args.get('platforms', False)
+    #reference = request.args.get('reference', False)
     print 'snps: ' + snps
-    # print 'pop: ' + pop
-    print 'request: ' + str(reference)
-
-    if reference is False:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+    print 'platforms: ' + platforms
+    print 'request: ' + reference
 
     snplst = tmp_dir + 'snps' + reference + '.txt'
     print 'snplst: ' + snplst
@@ -484,29 +789,25 @@ def ldhap():
     f.close()
 
     try:
-        out_json = calculate_hap(snplst, pop, reference, web)
-        # if API call has error, retrieve error message from json returned from calculation
-        try:
-            if isProgrammatic:
-                resultFile = ""
-                resultFile1 = "./tmp/snps_"+reference+".txt"
-                resultFile2 = "./tmp/haplotypes_"+reference+".txt"
-
-                fp = open(resultFile1, "r")
-                content1 = fp.read()
-                fp.close()
-
-                fp = open(resultFile2, "r")
-                content2 = fp.read()
-                fp.close()
-
-                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
-        except:
-            output = json.loads(out_json)
-            return sendTraceback(output["error"])
+        snp_chip = calculate_chip(snplst, platforms, web, reference)
     except:
         return sendTraceback(None)
-    return sendJSON(out_json)
+
+    chip = {}
+    chip["snp_chip"] = snp_chip
+    # copy_output_files(reference)
+    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+
+    if isProgrammatic:
+        resultFile = "./tmp/details"+reference+".txt"
+
+        fp = open(resultFile, "r")
+        content = fp.read()
+        fp.close()
+
+        return content
+
+    return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for SNPclip
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
@@ -635,309 +936,7 @@ def snpclip():
 
     return current_app.response_class(out_json, mimetype=mimetype)
 
-# Route to retrieve platform data for SNPchip
-@app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
-@app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
-def snpchip_platforms():
-    print "Retrieve SNPchip Platforms"
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    return get_platform_request(web)
-
-# Web and API route for SNPchip
-@app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
-@app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
-@requires_token
-def snpchip():
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    # Command line example
-    isProgrammatic = False
-    print "Execute snpchip"
-
-    data = json.loads(request.stream.read())
-    snps = data['snps']
-    platforms = data['platforms']
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if 'reference' in data.keys():
-        reference = str(data['reference'])
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
-    #snps = request.args.get('snps', False)
-    #platforms = request.args.get('platforms', False)
-    #reference = request.args.get('reference', False)
-    print 'snps: ' + snps
-    print 'platforms: ' + platforms
-    print 'request: ' + reference
-
-    snplst = tmp_dir + 'snps' + reference + '.txt'
-    print 'snplst: ' + snplst
-
-    f = open(snplst, 'w')
-    f.write(snps.lower())
-    f.close()
-
-    try:
-        snp_chip = calculate_chip(snplst, platforms, web, reference)
-    except:
-        return sendTraceback(None)
-
-    chip = {}
-    chip["snp_chip"] = snp_chip
-    # copy_output_files(reference)
-    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-
-    if isProgrammatic:
-        resultFile = "./tmp/details"+reference+".txt"
-
-        fp = open(resultFile, "r")
-        content = fp.read()
-        fp.close()
-
-        return content
-
-    return current_app.response_class(out_json, mimetype='application/json')
-
-# Read headers from uploaded data files for LDassoc
-def read_csv_headers(example_filepath):
-    final_headers = []
-    with open(example_filepath) as fp:
-        headers = fp.readline().strip().split()
-    for heads in headers:
-        if len(heads) > 0:
-            final_headers.append(heads)
-    return final_headers
-
-# Route for LDassoc example GWAS data
-@app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
-def ldassoc_example():
-    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
-    example = {
-        'filename': os.path.basename(example_filepath),
-        'headers': read_csv_headers(example_filepath)
-    }
-    return json.dumps(example)
-
-# Web and API route for LDassoc
-@app.route('/LDlinkRest/ldassoc', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
-def ldassoc():
-    myargs = argparse.Namespace()
-    myargs.window = None
-    print "Execute ldassoc"
-    print 'Gathering Variables from url'
-
-    # print type(request.args)
-    # for arg in request.args:
-    #     print arg
-
-    data = str(request.args)
-    json_dumps = json.dumps(data)
-
-    pop = request.args.get('pop', False)
-
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-
-    filename = secure_filename(request.args.get('filename', False))
-    matrixVariable = request.args.get('matrixVariable')
-    region = request.args.get('calculateRegion')
-
-    myargs.dprime = bool(request.args.get("dprime") == "True")
-    print "dprime: " + str(myargs.dprime)
-
-    # Column settings
-    myargs.chr = str(request.args.get('columns[chromosome]'))
-    myargs.bp = str(request.args.get('columns[position]'))
-    myargs.pval = str(request.args.get('columns[pvalue]'))
-
-    # print "myargs:"
-    # print type(myargs.chr)
-    # regionValues = json.loads(request.args.get('region'))
-    # variantValues = json.loads(request.args.get('variant'))
-    # columns = json.loads(request.args.get('columns'))
-
-    if bool(request.args.get("useEx") == "True"):
-        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
-    else:
-        filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(
-            str(request.args.get('filename'))))
-
-    print 'filename: ' + filename
-    print 'region: ' + region
-    print 'pop: ' + pop
-    print 'reference: ' + reference
-    print 'region: ' + region
-
-    if region == "variant":
-        print "Region is variant"
-        print "index: " + str(request.args.get('variant[index]'))
-        print "base pair window: " + request.args.get('variant[basepair]')
-        print
-        myargs.window = int(request.args.get('variant[basepair]'))
-
-        if request.args.get('variant[index]') == "":
-            myargs.origin = None
-        else:
-            myargs.origin = request.args.get('variant[index]')
-
-    if region == "gene":
-        print "Region is gene"
-        if request.args.get('gene[index]') == "":
-            myargs.origin = None
-        else:
-            myargs.origin = request.args.get('gene[index]')
-
-        myargs.name = request.args.get('gene[name]')
-        myargs.window = int(request.args.get('gene[basepair]'))
-
-    if region == "region":
-        print "Region is region"
-        if request.args.get('region[index]') == "":
-            myargs.origin = None
-        else:
-            myargs.origin = request.args.get('region[index]')
-
-        myargs.start = str(request.args.get('region[start]'))
-        myargs.end = str(request.args.get('region[end]'))
-
-    myargs.transcript = bool(request.args.get("transcript") == "True")
-    print "transcript: " + str(myargs.transcript)
-
-    myargs.annotate = bool(request.args.get("annotate") == "True")
-    print "annotate: " + str(myargs.annotate)
-
-    try:
-        # pass flag to LDassoc to allow svg generation only for web instance
-        web = False
-        if 'LDlinkRestWeb' in request.path:
-            web = True
-        else:
-            web = False
-        out_json = calculate_assoc(
-            filename, region, pop, reference, web, myargs)
-    except:
-        return sendTraceback(None)
-
-    # copy_output_files(reference)
-    # print "out_json:"
-    # print out_json
-
-    return sendJSON(out_json)
-
-# Ping route for API and Web instances
-@app.route('/LDlinkRest/ping/', strict_slashes=False)
-@app.route('/ping/', strict_slashes=False)
-def ping():
-    print "pong"
-    try:
-        return "true"
-    except Exception as e:
-        print('------------EXCEPTION------------')
-        traceback.print_exc(1)
-        return str(e), 400
-
-# Route to check file exist status 
-@app.route('/status/<path:filename>', strict_slashes=False)
-def status(filename):
-    return jsonify(os.path.isfile(filename))
-
-# Web route to send API token unblock request from front-end
-@app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
-def apiblocked_web():
-    print "Execute api blocked user justification submission"
-    firstname = request.args.get('firstname', False)
-    lastname = request.args.get('lastname', False)
-    email = request.args.get('email', False)
-    institution = request.args.get('institution', False)
-    registered = request.args.get('registered', False)
-    blocked = request.args.get('blocked', False)
-    justification = request.args.get('justification', False)
-
-    out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.url_root)
-    return sendJSON(out_json)
-
-# Web route to register user's email for API token
-@app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
-def register_web():
-    print "Execute api register user"
-    firstname = request.args.get('firstname', False)
-    lastname = request.args.get('lastname', False)
-    email = request.args.get('email', False)
-    institution = request.args.get('institution', False)
-    reference = request.args.get('reference', False)
-    out_json = register_user(firstname, lastname, email, institution, reference, request.url_root)
-    out_json2 = {
-        "message": out_json["message"],
-        "email": out_json["email"],
-        "firstname": out_json["firstname"],
-        "lastname": out_json["lastname"],
-        "registered": out_json["registered"],
-        "blocked": out_json["blocked"],
-        "institution": out_json["institution"]
-    }
-    return sendJSON(out_json2)
-
-# Web route to block user's API token
-@app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
-@requires_admin_token
-def block_user():
-    print "Execute api block user"
-    email = request.args.get('email', False)
-    out_json = blockUser(email, request.url_root)
-    return sendJSON(out_json)
-
-# Web route to unblock user's API token
-@app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
-@requires_admin_token
-def unblock_user():
-    print "Execute api unblock user"
-    email = request.args.get('email', False)
-    out_json = unblockUser(email)
-    return sendJSON(out_json)
-
-# Web route to unlock user's API token
-@app.route('/LDlinkRestWeb/apiaccess/unlock_user', methods=['GET'])
-@requires_admin_token
-def unlock_user():
-    print "Execute api unlock user"
-    email = request.args.get('email', False)
-    out_json = unlockUser(email)
-    return sendJSON(out_json)
-
-# Web route to unlock all users API tokens
-@app.route('/LDlinkRestWeb/apiaccess/unlock_all_users', methods=['GET'])
-@requires_admin_token
-def unlock_all_users():
-    print "Execute api unlock all users"
-    out_json = unlockAllUsers()
-    return sendJSON(out_json)
-
-# Web route to retrieve API log stats
-@app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
-@requires_admin_token
-def api_stats():
-    print "Execute api stats"
-    startdatetime = request.args.get('startdatetime', False)
-    enddatetime = request.args.get('enddatetime', False)
-    top = request.args.get('top', False)
-    out_json = getStats(startdatetime, enddatetime, top)
-    return sendJSON(out_json)
-
-# Add request headers
+### Add Request Headers & Initialize Flags ###
 @app.after_request
 def after_request(response):
     response.headers.add('Access-Control-Allow-Origin', '*')
