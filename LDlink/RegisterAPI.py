@@ -201,7 +201,7 @@ def unblockUser(email):
 # sets locked attribute of user to 0=false
 def unlockUser(email):
     out_json = {
-        "message": "Email user (" + email + ")'s token access has been unocked."
+        "message": "Email user (" + email + ")'s token access has been unlocked."
     }
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]

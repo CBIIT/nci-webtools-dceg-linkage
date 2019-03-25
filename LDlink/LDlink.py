@@ -32,7 +32,7 @@ from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, unlockUser, unlockAllUsers
-from werkzeug import secure_filename
+from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
 
 tmp_dir = "./tmp/"
