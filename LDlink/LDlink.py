@@ -183,7 +183,6 @@ def apiblocked_web():
     registered = request.args.get('registered', False)
     blocked = request.args.get('blocked', False)
     justification = request.args.get('justification', False)
-
     out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.url_root)
     return sendJSON(out_json)
 
@@ -270,7 +269,6 @@ def copy_output_files(reference):
         os.makedirs(apache_tmp_dir)
     # copy *<reference_no>.* to htodocs
     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
-
 
 # Ping route for API and Web instances
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
@@ -461,63 +459,58 @@ def ldassoc():
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
 def ldhap():
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    isProgrammatic = False
-    print 'Execute ldhap'
-    print 'Gathering Variables from url'
-
+    print 'Execute ldhap.'
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
+    token = request.args.get('token', False)
     print 'snps: ' + snps
-    # print 'pop: ' + pop
-    print 'request: ' + str(reference)
-
-    if reference is False:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-
-    snplst = tmp_dir + 'snps' + reference + '.txt'
-    print 'snplst: ' + snplst
-
-    f = open(snplst, 'w')
-    f.write(snps.lower())
-    f.close()
-
-    try:
-        out_json = calculate_hap(snplst, pop, reference, web)
-        # if API call has error, retrieve error message from json returned from calculation
+    print 'pop: ' + pop
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+        reference = request.args.get('reference', False)
+        print 'request: ' + str(reference)
+        snplst = tmp_dir + 'snps' + reference + '.txt'
+        with open(snplst, 'w') as f:
+            f.write(snps.lower())
         try:
-            if isProgrammatic:
-                resultFile = ""
-                resultFile1 = "./tmp/snps_"+reference+".txt"
-                resultFile2 = "./tmp/haplotypes_"+reference+".txt"
-
-                fp = open(resultFile1, "r")
-                content1 = fp.read()
-                fp.close()
-
-                fp = open(resultFile2, "r")
-                content2 = fp.read()
-                fp.close()
-
-                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+            out_json = calculate_hap(snplst, pop, reference, web)
         except:
-            output = json.loads(out_json)
-            return sendTraceback(output["error"])
-    except:
-        return sendTraceback(None)
+            return sendTraceback(None)
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        print 'request: ' + str(reference)
+        snplst = tmp_dir + 'snps' + reference + '.txt'
+        with open(snplst, 'w') as f:
+            f.write(snps.lower())
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            out_json = calculate_hap(snplst, pop, reference, web)
+            # retrieve error message from json returned from calculation
+            try: 
+                # unlock token then display api output
+                resultFile1 = "./tmp/snps_" + reference + ".txt"
+                resultFile2 = "./tmp/haplotypes_" + reference + ".txt"
+                with open(resultFile1, "r") as fp:
+                    content1 = fp.read()
+                with open(resultFile2, "r") as fp:
+                    content2 = fp.read()
+                toggleLocked(token, 0)
+                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+            except:
+                # unlock token then display error message
+                output = json.loads(out_json)
+                toggleLocked(token, 0)
+                return sendTraceback(output["error"])
+        except:
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
     return sendJSON(out_json)
 
 # Web and API route for LDmatrix
