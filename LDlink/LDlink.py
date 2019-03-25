@@ -314,7 +314,6 @@ def ldpop():
     print 'var1: ' + var1
     print 'var2: ' + var2
     print 'pop: ' + pop
-    # print 'request: ' + str(reference)
     print 'r2_d: ' + r2_d
     web = False
     # differentiate web or api request
@@ -351,87 +350,97 @@ def ldpop():
             toggleLocked(token, 0)
             return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    # if request.args.get('reference', False):
-        # reference = request.args.get('reference', False)
-    # else:
-    #     reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-    #     isProgrammatic = True
-    # try:
-    #     ###  
-    #     if isProgrammatic:
-    #         toggleLocked(token, 1)
-    #     out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
-    #     # if API call has error, retrieve error message from json returned from calculation
-    #     try:
-    #         if isProgrammatic:
-    #             toggleLocked(token, 0)
-    #             return sendJSON(out_json)
-    #     except:
-    #         output = json.loads(out_json)
-    #         if isProgrammatic:
-    #             toggleLocked(token, 0)
-    #         return sendTraceback(output["error"])
-    # except:
-    #     if isProgrammatic:
-    #         toggleLocked(token, 0)
-    #     return sendTraceback(None)
-    # return current_app.response_class(out_json, mimetype='application/json')
 
 
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 @requires_token
 def ldproxy():
-    isProgrammatic = False
-    print 'Execute ldproxy'
-    print 'Gathering Variables from url'
+    print 'Execute ldproxy.'
     var = request.args.get('var', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
-
     print 'var: ' + var
     print 'pop: ' + pop
     print 'r2_d: ' + r2_d
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request.args.get('reference', False):
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
         reference = request.args.get('reference', False)
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
-    try:
-        # pass flag to LDproxy to allow svg generation only for web instance
-        web = False
-        if 'LDlinkRestWeb' in request.path:
-            web = True
-        else:
-            web = False
-            toggleLocked(token, 1)
-        out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+        print 'request: ' + str(reference)
         try:
-            if isProgrammatic:
-                fp = open('./tmp/proxy'+reference+'.txt', "r")
-                content = fp.read()
-                fp.close()
+            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+        except:
+            return sendTraceback(None)
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        print 'request: ' + str(reference)
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+            # retrieve error message from json returned from calculation
+            try:
+                # unlock token then display api output
+                with open('./tmp/proxy'+reference+'.txt', "r") as fp:
+                    content = fp.read()
                 toggleLocked(token, 0)
                 return content
-        except:
-            if isProgrammatic:
+            except:
+                # unlock token then display error message
+                with open(tmp_dir + "proxy" + reference + ".json") as f:
+                    json_dict = json.load(f)
                 toggleLocked(token, 0)
-            with open(tmp_dir + "proxy" + reference + ".json") as f:
-                json_dict = json.load(f)
                 return sendTraceback(json_dict["error"])
-    except:
-        if isProgrammatic:
+        except:
+            # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
-        return sendTraceback(None)
-
+            return sendTraceback(None)
     return out_script + "\n " + out_div
+
+
+
+    # # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # # if accessed by web instance, generate reference number via javascript after hit calculate button
+    # if request.args.get('reference', False):
+    #     reference = request.args.get('reference', False)
+    # else:
+    #     reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+    #     isProgrammatic = True
+
+    # try:
+    #     # pass flag to LDproxy to allow svg generation only for web instance
+    #     web = False
+    #     if 'LDlinkRestWeb' in request.path:
+    #         web = True
+    #     else:
+    #         web = False
+    #         toggleLocked(token, 1)
+    #     out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+    #     try:
+    #         if isProgrammatic:
+    #             fp = open('./tmp/proxy'+reference+'.txt', "r")
+    #             content = fp.read()
+    #             fp.close()
+    #             toggleLocked(token, 0)
+    #             return content
+    #     except:
+    #         if isProgrammatic:
+    #             toggleLocked(token, 0)
+    #         with open(tmp_dir + "proxy" + reference + ".json") as f:
+    #             json_dict = json.load(f)
+    #             return sendTraceback(json_dict["error"])
+    # except:
+    #     if isProgrammatic:
+    #         toggleLocked(token, 0)
+    #     return sendTraceback(None)
+
+    # return out_script + "\n " + out_div
 
 
 @app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
