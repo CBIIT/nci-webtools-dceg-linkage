@@ -46,13 +46,11 @@ app.debug = True
 
 # def get_token():
 #     return request.args.get('token')
-
 # # limit requests with token on API calls only
 # limiter = Limiter(
 #     app,
 #     key_func=get_token
 # )
-
 # limiter = Limiter(
 #     app,
 #     key_func=get_remote_address,
@@ -217,22 +215,6 @@ def upload():
             print "filename = " + filename
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return 'File was saved'
-
-# Test route
-# @app.route("/LDlinkRest/demoapp/add", methods=['POST'])
-# @app.route("/LDlinkRestWeb/demoapp/add", methods=['POST'])
-# def restAdd():
-#     print type(request.args)
-#     for arg in request.args:
-#         print arg
-#     data = str(request.args)
-#     json_dumps = json.dumps(data)
-#     first = request.args.get('first', False)
-#     second = request.form.get('second')
-#     test = request.form.get('test')
-#     print first
-#     print json_dumps
-#     return jsonify(success=True, data=json_dumps)
 
 # Web and API route for LDpair
 @app.route('/LDlinkRest/ldpair', methods=['GET'])
