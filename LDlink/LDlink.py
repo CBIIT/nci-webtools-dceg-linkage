@@ -17,8 +17,8 @@ import random
 import requests
 import yaml
 from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+# from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address
 from functools import wraps
 from xml.sax.saxutils import escape, unescape
 from socket import gethostname
@@ -31,7 +31,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats
+from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, unlockUser, unlockAllUsers
 from werkzeug import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -45,14 +45,14 @@ app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = True
 
-def get_token():
-    return request.args.get('token')
+# def get_token():
+#     return request.args.get('token')
 
-# limit requests with token on API calls only
-limiter = Limiter(
-    app,
-    key_func=get_token
-)
+# # limit requests with token on API calls only
+# limiter = Limiter(
+#     app,
+#     key_func=get_token
+# )
 
 # limiter = Limiter(
 #     app,
@@ -305,55 +305,79 @@ def ldpair():
 @app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
 @requires_token
 def ldpop():
-    # python LDpop.py rs2720460 rs11733615 EUR False 38
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    isProgrammatic = False
-    print 'Execute ldpop'
-    print 'Gathering Variables from url'
+    print 'Execute ldpop.'
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
     print 'var1: ' + var1
     print 'var2: ' + var2
     print 'pop: ' + pop
-    print 'request: ' + str(reference)
+    # print 'request: ' + str(reference)
     print 'r2_d: ' + r2_d
-
-    try:
-        if isProgrammatic:
-            toggleLocked(token, 1)
-        out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
-        # if API call has error, retrieve error message from json returned from calculation
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+        reference = request.args.get('reference', False)
+        print 'request: ' + str(reference)
         try:
-            if isProgrammatic:
+            out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+        except:
+            return sendTraceback(None)
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        print 'request: ' + str(reference)
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+            # retrieve error message from json returned from calculation
+            try:
+                # unlock token then display api output
                 toggleLocked(token, 0)
                 return sendJSON(out_json)
+            except:
+                # unlock token then display error message
+                output = json.loads(out_json)
+                toggleLocked(token, 0)
+                return sendTraceback(output["error"])
         except:
-            output = json.loads(out_json)
-            if isProgrammatic:
-                toggleLocked(token, 0)
-            return sendTraceback(output["error"])
-    except:
-        if isProgrammatic:
-                toggleLocked(token, 0)
-        return sendTraceback(None)
-
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
+    # if request.args.get('reference', False):
+        # reference = request.args.get('reference', False)
+    # else:
+    #     reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+    #     isProgrammatic = True
+    # try:
+    #     ###  
+    #     if isProgrammatic:
+    #         toggleLocked(token, 1)
+    #     out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+    #     # if API call has error, retrieve error message from json returned from calculation
+    #     try:
+    #         if isProgrammatic:
+    #             toggleLocked(token, 0)
+    #             return sendJSON(out_json)
+    #     except:
+    #         output = json.loads(out_json)
+    #         if isProgrammatic:
+    #             toggleLocked(token, 0)
+    #         return sendTraceback(output["error"])
+    # except:
+    #     if isProgrammatic:
+    #         toggleLocked(token, 0)
+    #     return sendTraceback(None)
+    # return current_app.response_class(out_json, mimetype='application/json')
 
 
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
@@ -489,54 +513,36 @@ def ldmatrix():
     # copy_output_files(reference)
     return out_script + "\n " + out_div
 
-
-@app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
-@limiter.exempt
-def ldhap_web():
-    web = True
-    print 'Execute ldhap web'
-    print 'Gathering Variables from url'
-
-    snps = request.args.get('snps', False)
-    pop = request.args.get('pop', False)
-
-    reference = request.args.get('reference', False)
-    print 'snps: ' + snps
-    # print 'pop: ' + pop
-    print 'request: ' + str(reference)
-
-    snplst = tmp_dir + 'snps' + reference + '.txt'
-    print 'snplst: ' + snplst
-
-    f = open(snplst, 'w')
-    f.write(snps.lower())
-    f.close()
-
-    try:
-        out_json = calculate_hap(snplst, pop, reference, web)
-    except:
-        return sendTraceback(None)
-
-    return sendJSON(out_json)
-
-
-# @limiter.limit("3 per day", key_func = lambda : request.args.get('token'))
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
-@limiter.limit("3 per day")
-def ldhap_api():
+def ldhap():
     web = False
-    print 'Execute ldhap api'
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    isProgrammatic = False
+    print 'Execute ldhap'
     print 'Gathering Variables from url'
 
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
 
-    reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+    # check if call is from API or Web instance by seeing if reference number has already been generated or not
+    # if accessed by web instance, generate reference number via javascript after hit calculate button
+    if request.args.get('reference', False):
+        reference = request.args.get('reference', False)
+    else:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        isProgrammatic = True
 
     print 'snps: ' + snps
     # print 'pop: ' + pop
     print 'request: ' + str(reference)
+
+    if reference is False:
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
 
     snplst = tmp_dir + 'snps' + reference + '.txt'
     print 'snplst: ' + snplst
@@ -549,23 +555,104 @@ def ldhap_api():
         out_json = calculate_hap(snplst, pop, reference, web)
         # if API call has error, retrieve error message from json returned from calculation
         try:
-            resultFile1 = "./tmp/snps_"+reference+".txt"
-            resultFile2 = "./tmp/haplotypes_"+reference+".txt"
+            if isProgrammatic:
+                resultFile = ""
+                resultFile1 = "./tmp/snps_"+reference+".txt"
+                resultFile2 = "./tmp/haplotypes_"+reference+".txt"
 
-            fp = open(resultFile1, "r")
-            content1 = fp.read()
-            fp.close()
+                fp = open(resultFile1, "r")
+                content1 = fp.read()
+                fp.close()
 
-            fp = open(resultFile2, "r")
-            content2 = fp.read()
-            fp.close()
+                fp = open(resultFile2, "r")
+                content2 = fp.read()
+                fp.close()
 
-            return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+                return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
         except:
             output = json.loads(out_json)
             return sendTraceback(output["error"])
     except:
         return sendTraceback(None)
+
+    return sendJSON(out_json)
+
+# @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
+# @limiter.exempt
+# def ldhap_web():
+#     web = True
+#     print 'Execute ldhap web'
+#     print 'Gathering Variables from url'
+
+#     snps = request.args.get('snps', False)
+#     pop = request.args.get('pop', False)
+
+#     reference = request.args.get('reference', False)
+#     print 'snps: ' + snps
+#     # print 'pop: ' + pop
+#     print 'request: ' + str(reference)
+
+#     snplst = tmp_dir + 'snps' + reference + '.txt'
+#     print 'snplst: ' + snplst
+
+#     f = open(snplst, 'w')
+#     f.write(snps.lower())
+#     f.close()
+
+#     try:
+#         out_json = calculate_hap(snplst, pop, reference, web)
+#     except:
+#         return sendTraceback(None)
+
+#     return sendJSON(out_json)
+
+
+# # @limiter.limit("3 per day", key_func = lambda : request.args.get('token'))
+# @app.route('/LDlinkRest/ldhap', methods=['GET'])
+# @requires_token
+# @limiter.limit("3 per day")
+# def ldhap_api():
+#     web = False
+#     print 'Execute ldhap api'
+#     print 'Gathering Variables from url'
+
+#     snps = request.args.get('snps', False)
+#     pop = request.args.get('pop', False)
+
+#     reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+
+#     print 'snps: ' + snps
+#     # print 'pop: ' + pop
+#     print 'request: ' + str(reference)
+
+#     snplst = tmp_dir + 'snps' + reference + '.txt'
+#     print 'snplst: ' + snplst
+
+#     f = open(snplst, 'w')
+#     f.write(snps.lower())
+#     f.close()
+
+#     try:
+#         out_json = calculate_hap(snplst, pop, reference, web)
+#         # if API call has error, retrieve error message from json returned from calculation
+#         try:
+#             resultFile1 = "./tmp/snps_"+reference+".txt"
+#             resultFile2 = "./tmp/haplotypes_"+reference+".txt"
+
+#             fp = open(resultFile1, "r")
+#             content1 = fp.read()
+#             fp.close()
+
+#             fp = open(resultFile2, "r")
+#             content2 = fp.read()
+#             fp.close()
+
+#             return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
+#         except:
+#             output = json.loads(out_json)
+#             return sendTraceback(output["error"])
+#     except:
+#         return sendTraceback(None)
 
 
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
@@ -963,17 +1050,30 @@ def register_web():
 def block_user():
     print "Execute api block user"
     email = request.args.get('email', False)
-    token = request.args.get('token', False)
     out_json = blockUser(email, request.url_root)
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
-def unblock_user_web():
+def unblock_user():
     print "Execute api unblock user"
     email = request.args.get('email', False)
-    token = request.args.get('token', False)
     out_json = unblockUser(email)
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRestWeb/apiaccess/unlock_user', methods=['GET'])
+@requires_admin_token
+def unlock_user():
+    print "Execute api unlock user"
+    email = request.args.get('email', False)
+    out_json = unlockUser(email)
+    return sendJSON(out_json)
+
+@app.route('/LDlinkRestWeb/apiaccess/unlock_all_users', methods=['GET'])
+@requires_admin_token
+def unlock_all_users():
+    print "Execute api unlock all users"
+    out_json = unlockAllUsers()
     return sendJSON(out_json)
 
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
