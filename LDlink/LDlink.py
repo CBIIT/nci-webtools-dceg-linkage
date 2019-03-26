@@ -918,57 +918,6 @@ def snpclip():
             return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
 
-    ###
-
-    # clip = {}
-    # try:
-    #     (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
-    # except:
-    #     return sendTraceback(None)
-
-    # clip["snp_list"] = snp_list
-    # clip["details"] = details
-    # clip["snps"] = snps
-    # clip["filtered"] = collections.OrderedDict()
-
-    # # Print output
-    # with open(tmp_dir + "clip" + reference + ".json") as f:
-    #     json_dict = json.load(f)
-    # if "error" in json_dict:
-    #     clip["error"] = json_dict["error"]
-    # else:
-    #     for snp in snps:
-    #         clip["filtered"][snp[0]] = details[snp[0]]
-    #     if "warning" in json_dict:
-    #         clip["warning"] = json_dict["warning"]
-
-    # # SNP List file
-    # with open('tmp/snp_list' + reference + '.txt', 'w') as f:
-    #     for rs_number in snp_list:
-    #         f.write(rs_number + '\n')
-
-    # with open('tmp/details' + reference + '.txt', 'w') as f:
-    #     f.write("RS Number\tPosition\tAlleles\tDetails\n")
-    #     if(type(details) is collections.OrderedDict):
-    #         for snp in snps:
-    #             f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
-    #             f.write("\n")
-
-    # out_json = json.dumps(clip, sort_keys=False)
-    # try:
-    #     if isProgrammatic:
-    #         resultFile = "./tmp/details" + reference + ".txt"
-    #         with open(resultFile, "r") as fp:
-    #             content = fp.read()
-    #         with open(tmp_dir + "clip" + reference + ".json") as f:
-    #             json_dict = json.load(f)
-    #             if "error" in json_dict:
-    #                 return sendTraceback(json_dict["error"])
-    #         return content
-    # except:
-    #     return sendTraceback(None)
-    # return current_app.response_class(out_json, mimetype='application/json')
-
 ### Add Request Headers & Initialize Flags ###
 @app.after_request
 def after_request(response):
