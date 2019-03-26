@@ -494,7 +494,7 @@ def ldhap():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_hap(snplst, pop, reference, web)
-            # retrieve error message from json returned from calculation
+            # display api out
             try: 
                 # unlock token then display api output
                 resultFile1 = "./tmp/snps_" + reference + ".txt"
@@ -578,7 +578,7 @@ def ldmatrix():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
-            # retrieve error message from json returned from calculation
+            # display api out
             try:
                 # unlock token then display api output
                 resultFile = ""
@@ -635,7 +635,7 @@ def ldpair():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pair(var1, var2, pop, web, reference)
-            # retrieve error message from json returned from calculation
+            # display api out
             try:
                 # unlock token then display api output
                 with open('./tmp/LDpair_'+reference+'.txt', "r") as fp:
@@ -688,7 +688,7 @@ def ldpop():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
-            # retrieve error message from json returned from calculation
+            # display api out
             try:
                 # unlock token then display api output
                 toggleLocked(token, 0)
@@ -737,7 +737,7 @@ def ldproxy():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
-            # retrieve error message from json returned from calculation
+            # display api out
             try:
                 # unlock token then display api output
                 with open('./tmp/proxy'+reference+'.txt', "r") as fp:
@@ -795,7 +795,7 @@ def snpchip():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             snp_chip = calculate_chip(snplst, platforms, web, reference)
-            # retrieve error message from json returned from calculation
+            # display api out
             try:
                 # unlock token then display api output
                 resultFile = "./tmp/details"+reference+".txt"
@@ -826,79 +826,148 @@ def snpclip():
     pop = data['pop']
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
+    token = request.args.get('token', False)
+    print 'snps: ' + snps
+    print 'pop: ' + pop
+    print 'r2_threshold: ' + r2_threshold
+    print 'maf_threshold: ' + maf_threshold
     web = False
+    # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
         web = True
-    else:
-        web = False
-    isProgrammatic = False
-    
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if 'reference' in data.keys():
         reference = str(data['reference'])
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
-    snpfile = str(tmp_dir + 'snps' + reference + '.txt')
-    snplist = snps.splitlines()
-
-    with open(snpfile, 'w') as f:
-        for s in snplist:
-            s = s.lstrip()
-            if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
-                f.write(s.lower() + '\n')
-
-    clip = {}
-
-    try:
-        (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
-    except:
-        return sendTraceback(None)
-
-    clip["snp_list"] = snp_list
-    clip["details"] = details
-    clip["snps"] = snps
-    clip["filtered"] = collections.OrderedDict()
-
-    # Print output
-    with open(tmp_dir + "clip" + reference + ".json") as f:
-        json_dict = json.load(f)
-    if "error" in json_dict:
-        clip["error"] = json_dict["error"]
-    else:
-        for snp in snps:
-            clip["filtered"][snp[0]] = details[snp[0]]
-        if "warning" in json_dict:
-            clip["warning"] = json_dict["warning"]
-
-    # SNP List file
-    with open('tmp/snp_list' + reference + '.txt', 'w') as f:
-        for rs_number in snp_list:
-            f.write(rs_number + '\n')
-
-    with open('tmp/details' + reference + '.txt', 'w') as f:
-        f.write("RS Number\tPosition\tAlleles\tDetails\n")
-        if(type(details) is collections.OrderedDict):
-            for snp in snps:
-                f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
-                f.write("\n")
-
-    out_json = json.dumps(clip, sort_keys=False)
-    try:
-        if isProgrammatic:
-            resultFile = "./tmp/details" + reference + ".txt"
-            with open(resultFile, "r") as fp:
-                content = fp.read()
+        snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+        snplist = snps.splitlines()
+        with open(snpfile, 'w') as f:
+            for s in snplist:
+                s = s.lstrip()
+                if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                    f.write(s.lower() + '\n')
+        try:
+            clip = {}
+            (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
+            clip["snp_list"] = snp_list
+            clip["details"] = details
+            clip["snps"] = snps
+            clip["filtered"] = collections.OrderedDict()
             with open(tmp_dir + "clip" + reference + ".json") as f:
                 json_dict = json.load(f)
-                if "error" in json_dict:
-                    return sendTraceback(json_dict["error"])
-            return content
-    except:
-        return sendTraceback(None)
+            if "error" in json_dict:
+                clip["error"] = json_dict["error"]
+            else:
+                for snp in snps:
+                    clip["filtered"][snp[0]] = details[snp[0]]
+                if "warning" in json_dict:
+                    clip["warning"] = json_dict["warning"]
+            with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+                for rs_number in snp_list:
+                    f.write(rs_number + '\n')
+            with open('tmp/details' + reference + '.txt', 'w') as f:
+                f.write("RS Number\tPosition\tAlleles\tDetails\n")
+                if(type(details) is collections.OrderedDict):
+                    for snp in snps:
+                        f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
+                        f.write("\n")
+            out_json = json.dumps(clip, sort_keys=False)
+        except:
+            return sendTraceback(None)
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+        snplist = snps.splitlines()
+        with open(snpfile, 'w') as f:
+            for s in snplist:
+                s = s.lstrip()
+                if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                    f.write(s.lower() + '\n')
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
+            with open(tmp_dir + "clip" + reference + ".json") as f:
+                json_dict = json.load(f)
+            with open('tmp/details' + reference + '.txt', 'w') as f:
+                f.write("RS Number\tPosition\tAlleles\tDetails\n")
+                if(type(details) is collections.OrderedDict):
+                    for snp in snps:
+                        f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
+                        f.write("\n")
+            # display api out
+            try:
+                # unlock token then display api output
+                resultFile = "./tmp/details" + reference + ".txt"
+                with open(resultFile, "r") as fp:
+                    content = fp.read()
+                with open(tmp_dir + "clip" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                    if "error" in json_dict:
+                        toggleLocked(token, 0)
+                        return sendTraceback(json_dict["error"])
+                toggleLocked(token, 0)
+                return content
+            except:
+                # unlock token then display error message
+                toggleLocked(token, 0)
+                return sendTraceback(None)
+        except:
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
+
+    ###
+
+    # clip = {}
+    # try:
+    #     (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
+    # except:
+    #     return sendTraceback(None)
+
+    # clip["snp_list"] = snp_list
+    # clip["details"] = details
+    # clip["snps"] = snps
+    # clip["filtered"] = collections.OrderedDict()
+
+    # # Print output
+    # with open(tmp_dir + "clip" + reference + ".json") as f:
+    #     json_dict = json.load(f)
+    # if "error" in json_dict:
+    #     clip["error"] = json_dict["error"]
+    # else:
+    #     for snp in snps:
+    #         clip["filtered"][snp[0]] = details[snp[0]]
+    #     if "warning" in json_dict:
+    #         clip["warning"] = json_dict["warning"]
+
+    # # SNP List file
+    # with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+    #     for rs_number in snp_list:
+    #         f.write(rs_number + '\n')
+
+    # with open('tmp/details' + reference + '.txt', 'w') as f:
+    #     f.write("RS Number\tPosition\tAlleles\tDetails\n")
+    #     if(type(details) is collections.OrderedDict):
+    #         for snp in snps:
+    #             f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
+    #             f.write("\n")
+
+    # out_json = json.dumps(clip, sort_keys=False)
+    # try:
+    #     if isProgrammatic:
+    #         resultFile = "./tmp/details" + reference + ".txt"
+    #         with open(resultFile, "r") as fp:
+    #             content = fp.read()
+    #         with open(tmp_dir + "clip" + reference + ".json") as f:
+    #             json_dict = json.load(f)
+    #             if "error" in json_dict:
+    #                 return sendTraceback(json_dict["error"])
+    #         return content
+    # except:
+    #     return sendTraceback(None)
+    # return current_app.response_class(out_json, mimetype='application/json')
 
 ### Add Request Headers & Initialize Flags ###
 @app.after_request

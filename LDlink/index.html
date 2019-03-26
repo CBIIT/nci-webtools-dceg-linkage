@@ -1968,8 +1968,9 @@
 					<p><a class="help-anchor-link" href="#LDmatrix">LDmatrix</a><br>
 						<pre class="apiaccess-examples">
 							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'
-							<br>
-							<br>
+						</pre>
+						<br>
+						<pre class="apiaccess-examples">
 							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d"}' 'https://ldlink-dev.nci.nih.gov/LDlinkRest/ldmatrix?&token=faketoken123'
 						</pre>
 					</p>
