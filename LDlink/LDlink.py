@@ -820,22 +820,19 @@ def snpchip():
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
 def snpclip():
+    print 'Execute snpclip.'
+    data = json.loads(request.stream.read())
+    snps = data['snps']
+    pop = data['pop']
+    r2_threshold = data['r2_threshold']
+    maf_threshold = data['maf_threshold']
     web = False
     if 'LDlinkRestWeb' in request.path:
         web = True
     else:
         web = False
     isProgrammatic = False
-    # Command line example
-    # [ncianalysis@nciws-d275-v LDlinkc]$ python ./SNPclip.py LDlink-rs-numbers.txt YRI 333
-    mimetype = 'application/json'
-    data = json.loads(request.stream.read())
-    print 'Execute snpclip'
-    snps = data['snps']
-    pop = data['pop']
-    r2_threshold = data['r2_threshold']
-    maf_threshold = data['maf_threshold']
-
+    
     # check if call is from API or Web instance by seeing if reference number has already been generated or not
     # if accessed by web instance, generate reference number via javascript after hit calculate button
     if 'reference' in data.keys():
@@ -847,13 +844,11 @@ def snpclip():
     snpfile = str(tmp_dir + 'snps' + reference + '.txt')
     snplist = snps.splitlines()
 
-    f = open(snpfile, 'w')
-    for s in snplist:
-        s = s.lstrip()
-        if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
-            f.write(s.lower() + '\n')
-
-    f.close()
+    with open(snpfile, 'w') as f:
+        for s in snplist:
+            s = s.lstrip()
+            if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                f.write(s.lower() + '\n')
 
     clip = {}
 
@@ -870,77 +865,40 @@ def snpclip():
     # Print output
     with open(tmp_dir + "clip" + reference + ".json") as f:
         json_dict = json.load(f)
-
-    try:
-        json_dict["error"]
-    except KeyError:
-        # print ""
-        print "LD Thinned SNP list (" + pop + "):"
-        for snp in snp_list:
-            print snp
-
-        print "The snps.."
+    if "error" in json_dict:
+        clip["error"] = json_dict["error"]
+    else:
         for snp in snps:
-            print snp
-
-        print ""
-        print "RS Number\tPosition\tAlleles\tDetails"
-        for snp in snps:
-            print snp[0] + "\t" + "\t".join(details[snp[0]])
             clip["filtered"][snp[0]] = details[snp[0]]
-
-        try:
-            json_dict["warning"]
-
-        except KeyError:
-            print ""
-        else:
-            print ""
-            print "WARNING: " + json_dict["warning"] + "!"
-            print ""
+        if "warning" in json_dict:
             clip["warning"] = json_dict["warning"]
 
-    else:
-        print ""
-        print json_dict["error"]
-        print ""
-        clip["error"] = json_dict["error"]
-
     # SNP List file
-    f = open('tmp/snp_list' + reference + '.txt', 'w')
-    for rs_number in snp_list:
-        f.write(rs_number + '\n')
+    with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+        for rs_number in snp_list:
+            f.write(rs_number + '\n')
 
-    f.close()
+    with open('tmp/details' + reference + '.txt', 'w') as f:
+        f.write("RS Number\tPosition\tAlleles\tDetails\n")
+        if(type(details) is collections.OrderedDict):
+            for snp in snps:
+                f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
+                f.write("\n")
 
-    f = open('tmp/details' + reference + '.txt', 'w')
-    f.write("RS Number\tPosition\tAlleles\tDetails\n")
-    if(type(details) is collections.OrderedDict):
-        for snp in snps:
-            f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
-            f.write("\n")
-
-    f.close()
-    # copy_output_files(reference)
     out_json = json.dumps(clip, sort_keys=False)
     try:
         if isProgrammatic:
-            resultFile = "./tmp/details"+reference+".txt"
-
-            fp = open(resultFile, "r")
-            content = fp.read()
-            fp.close()
-
+            resultFile = "./tmp/details" + reference + ".txt"
+            with open(resultFile, "r") as fp:
+                content = fp.read()
             with open(tmp_dir + "clip" + reference + ".json") as f:
                 json_dict = json.load(f)
                 if "error" in json_dict:
                     return sendTraceback(json_dict["error"])
-
             return content
     except:
         return sendTraceback(None)
-
-    return current_app.response_class(out_json, mimetype=mimetype)
+    return current_app.response_class(out_json, mimetype='application/json')
 
 ### Add Request Headers & Initialize Flags ###
 @app.after_request
