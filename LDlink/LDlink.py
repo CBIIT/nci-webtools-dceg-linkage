@@ -352,109 +352,69 @@ def snpchip_platforms():
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
+    print "Execute ldassoc."
     myargs = argparse.Namespace()
     myargs.window = None
-    print "Execute ldassoc"
-    print 'Gathering Variables from url'
-
-    # print type(request.args)
-    # for arg in request.args:
-    #     print arg
-
-    data = str(request.args)
-    json_dumps = json.dumps(data)
-
-    pop = request.args.get('pop', False)
-
-    if request.args.get('reference', False):
-        reference = request.args.get('reference', False)
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-
     filename = secure_filename(request.args.get('filename', False))
-    matrixVariable = request.args.get('matrixVariable')
     region = request.args.get('calculateRegion')
-
-    myargs.dprime = bool(request.args.get("dprime") == "True")
-    print "dprime: " + str(myargs.dprime)
-
-    # Column settings
-    myargs.chr = str(request.args.get('columns[chromosome]'))
-    myargs.bp = str(request.args.get('columns[position]'))
-    myargs.pval = str(request.args.get('columns[pvalue]'))
-
-    # print "myargs:"
-    # print type(myargs.chr)
-    # regionValues = json.loads(request.args.get('region'))
-    # variantValues = json.loads(request.args.get('variant'))
-    # columns = json.loads(request.args.get('columns'))
-
-    if bool(request.args.get("useEx") == "True"):
-        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
-    else:
-        filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(
-            str(request.args.get('filename'))))
-
+    pop = request.args.get('pop', False)
     print 'filename: ' + filename
     print 'region: ' + region
     print 'pop: ' + pop
-    print 'reference: ' + reference
-    print 'region: ' + region
-
+    myargs.dprime = bool(request.args.get("dprime") == "True")
+    myargs.chr = str(request.args.get('columns[chromosome]'))
+    myargs.bp = str(request.args.get('columns[position]'))
+    myargs.pval = str(request.args.get('columns[pvalue]'))
+    print "dprime: " + str(myargs.dprime)
+    if bool(request.args.get("useEx") == "True"):
+        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+    else:
+        filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
         print "Region is variant"
         print "index: " + str(request.args.get('variant[index]'))
         print "base pair window: " + request.args.get('variant[basepair]')
         print
         myargs.window = int(request.args.get('variant[basepair]'))
-
         if request.args.get('variant[index]') == "":
             myargs.origin = None
         else:
             myargs.origin = request.args.get('variant[index]')
-
     if region == "gene":
         print "Region is gene"
         if request.args.get('gene[index]') == "":
             myargs.origin = None
         else:
             myargs.origin = request.args.get('gene[index]')
-
         myargs.name = request.args.get('gene[name]')
         myargs.window = int(request.args.get('gene[basepair]'))
-
     if region == "region":
         print "Region is region"
         if request.args.get('region[index]') == "":
             myargs.origin = None
         else:
             myargs.origin = request.args.get('region[index]')
-
         myargs.start = str(request.args.get('region[start]'))
         myargs.end = str(request.args.get('region[end]'))
-
     myargs.transcript = bool(request.args.get("transcript") == "True")
     print "transcript: " + str(myargs.transcript)
-
     myargs.annotate = bool(request.args.get("annotate") == "True")
     print "annotate: " + str(myargs.annotate)
-
-    try:
-        # pass flag to LDassoc to allow svg generation only for web instance
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+        reference = request.args.get('reference', False)
+        print 'reference: ' + reference
+        try:
+            out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
+        except:
+            return sendTraceback(None)
+    else:
+        # API REQUEST
         web = False
-        if 'LDlinkRestWeb' in request.path:
-            web = True
-        else:
-            web = False
-        out_json = calculate_assoc(
-            filename, region, pop, reference, web, myargs)
-    except:
-        return sendTraceback(None)
-
-    # copy_output_files(reference)
-    # print "out_json:"
-    # print out_json
-
+        # PROGRAMMATIC ACCESS NOT AVAILABLE
     return sendJSON(out_json)
 
 # Web and API route for LDhap
