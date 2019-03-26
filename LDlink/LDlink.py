@@ -337,9 +337,12 @@ def ldassoc_example():
 def snpchip_platforms():
     print "Retrieve SNPchip Platforms"
     web = False
+    # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
         web = True
     else:
+        # API REQUEST
         web = False
     return get_platform_request(web)
 
@@ -518,9 +521,7 @@ def ldhap():
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
 def ldmatrix():
-    isProgrammatic = False
-    print 'Execute ldmatrix'
-    print 'Gathering Variables from url'
+    print 'Execute ldmatrix.'
     if request.method == 'POST':
         data = json.loads(request.stream.read())
         if 'snps' in data:
@@ -544,53 +545,58 @@ def ldmatrix():
         pop = request.args.get('pop', False)
         reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if reference == False:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
+    token = request.args.get('token', False)
     print 'snps: ' + snps
     print 'pop: ' + pop
-    print 'request: ' + str(reference)
     print 'r2_d: ' + r2_d
-
-    snplst = tmp_dir + 'snps' + str(reference) + '.txt'
-    print 'snplst: ' + snplst
-
-    f = open(snplst, 'w')
-    f.write(snps.lower())
-    f.close()
-
-    try:
-        # pass flag to LDmatrix to allow svg generation only for web instance
-        web = False
-        if 'LDlinkRestWeb' in request.path:
-            web = True
-        else:
-            web = False
-        out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+        reference = request.args.get('reference', False)
+        print 'request: ' + str(reference)
+        snplst = tmp_dir + 'snps' + str(reference) + '.txt'
+        with open(snplst, 'w') as f:
+            f.write(snps.lower())
         try:
-            if isProgrammatic:
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
+        except:
+            return sendTraceback(None)
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        print 'request: ' + str(reference)            
+        snplst = tmp_dir + 'snps' + str(reference) + '.txt'
+        with open(snplst, 'w') as f:
+            f.write(snps.lower())
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
+            # retrieve error message from json returned from calculation
+            try:
+                # unlock token then display api output
                 resultFile = ""
                 if r2_d == "d":
                     resultFile = "./tmp/d_prime_"+reference+".txt"
                 else:
                     resultFile = "./tmp/r2_"+reference+".txt"
-
-                fp = open(resultFile, "r")
-                content = fp.read()
-                fp.close()
+                with open(resultFile, "r") as fp:
+                    content = fp.read()
+                toggleLocked(token, 0)
                 return content
-        except:
-            with open(tmp_dir + "matrix" + reference + ".json") as f:
-                json_dict = json.load(f)
+            except:
+                # unlock token then display error message
+                with open(tmp_dir + "matrix" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
-    except:
-        return sendTraceback(None)
-
-    # copy_output_files(reference)
+        except:
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
     return out_script + "\n " + out_div
 
 # Web and API route for LDpair
