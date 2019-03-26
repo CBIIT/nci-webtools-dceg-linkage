@@ -522,7 +522,9 @@ def ldhap():
 @requires_token
 def ldmatrix():
     print 'Execute ldmatrix.'
+    # differentiate POST or GET request
     if request.method == 'POST':
+        # POST REQUEST
         data = json.loads(request.stream.read())
         if 'snps' in data:
             snps = data['snps']
@@ -541,6 +543,7 @@ def ldmatrix():
         else:
             r2_d = False
     else:
+        # GET REQUEST
         snps = request.args.get('snps', False)
         pop = request.args.get('pop', False)
         reference = request.args.get('reference', False)
@@ -758,60 +761,58 @@ def ldproxy():
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
 def snpchip():
-    web = False
-    if 'LDlinkRestWeb' in request.path:
-        web = True
-    else:
-        web = False
-    # Command line example
-    isProgrammatic = False
-    print "Execute snpchip"
-
+    print "Execute snpchip."
     data = json.loads(request.stream.read())
     snps = data['snps']
     platforms = data['platforms']
-
-    # check if call is from API or Web instance by seeing if reference number has already been generated or not
-    # if accessed by web instance, generate reference number via javascript after hit calculate button
-    if 'reference' in data.keys():
-        reference = str(data['reference'])
-    else:
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        isProgrammatic = True
-
-    #snps = request.args.get('snps', False)
-    #platforms = request.args.get('platforms', False)
-    #reference = request.args.get('reference', False)
+    token = request.args.get('token', False)
     print 'snps: ' + snps
     print 'platforms: ' + platforms
-    print 'request: ' + reference
-
-    snplst = tmp_dir + 'snps' + reference + '.txt'
-    print 'snplst: ' + snplst
-
-    f = open(snplst, 'w')
-    f.write(snps.lower())
-    f.close()
-
-    try:
-        snp_chip = calculate_chip(snplst, platforms, web, reference)
-    except:
-        return sendTraceback(None)
-
-    chip = {}
-    chip["snp_chip"] = snp_chip
-    # copy_output_files(reference)
-    out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-
-    if isProgrammatic:
-        resultFile = "./tmp/details"+reference+".txt"
-
-        fp = open(resultFile, "r")
-        content = fp.read()
-        fp.close()
-
-        return content
-
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+        reference = str(data['reference'])
+        print 'request: ' + reference
+        snplst = tmp_dir + 'snps' + reference + '.txt'
+        with open(snplst, 'w') as f:
+            f.write(snps.lower())
+        try:
+            snp_chip = calculate_chip(snplst, platforms, web, reference)
+            out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+        except:
+            return sendTraceback(None)
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        print 'request: ' + reference
+        snplst = tmp_dir + 'snps' + reference + '.txt'
+        with open(snplst, 'w') as f:
+            f.write(snps.lower())
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            snp_chip = calculate_chip(snplst, platforms, web, reference)
+            # retrieve error message from json returned from calculation
+            try:
+                # unlock token then display api output
+                resultFile = "./tmp/details"+reference+".txt"
+                with open(resultFile, "r") as fp:
+                    content = fp.read()
+                toggleLocked(token, 0)
+                return content
+            except:
+                # unlock token then display error message
+                out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+                output = json.loads(out_json)
+                toggleLocked(token, 0)
+                return sendTraceback(output["error"])
+        except:
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for SNPclip
