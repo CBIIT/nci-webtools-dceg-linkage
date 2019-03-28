@@ -1,4 +1,4 @@
-var ldlink_version = "Version 3.5";
+var ldlink_version = "Version 3.6";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -282,6 +282,7 @@ $(document).ready(function() {
     autoCalculate();
     createFileSelectEvent();
     createEnterEvent();
+    initAPIExamples();
     // Google Maps API
     initMap();
     // export LDpop map dropdown buttons
@@ -349,8 +350,11 @@ function checkFile(id, fileURL, retries) {
         $('#' + id + "-menu1").prop('disabled', true);
     }
 }
-
-
+function initAPIExamples() {
+    $(".apiaccess-examples").each( function(index) { 
+        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nci.nih.gov', window.location.origin);
+    });
+}
 function setBootstrapSelector(id, value) {
     var str = id.substr(6);
     str = str.toLowerCase().replace(/\b[a-z]/g, function(letter) {
@@ -1225,7 +1229,7 @@ function updateData(id) {
             }
             break;
         case 'ldmatrix':
-            if(isPopulationSet(id)) {
+            if(isPopulationSet(id) && checkSNPListLength(id)) {
                 $('#'+id+"-loading").show();
                 updateLDmatrix();
             }
@@ -1410,6 +1414,22 @@ function isPopulationSet(elementId) {
         return false;
     } else {
         $('#'+elementId+'-population-codes-zero').popover('hide');
+        return true;
+    }
+}
+
+function checkSNPListLength(elementId) {
+    var snps =  $('#'+elementId+'-file-snp-numbers').val();
+    var snplist = snps.split("\n");
+    // console.log(snplist);
+    snplist = snplist.filter(Boolean);
+    // console.log(snplist.length);
+    if(snplist.length > 300) {
+        $('#'+elementId+'-file-snp-warning').popover('show');
+        setTimeout(function() { $('#'+elementId+'-file-snp-warning').popover('hide'); }, 4000);
+        return false;
+    } else {
+        $('#'+elementId+'-file-snp-warning').popover('hide');
         return true;
     }
 }

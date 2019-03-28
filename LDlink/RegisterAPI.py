@@ -12,7 +12,6 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-# username = contents[0].split('=')[1]
 username = 'ncianalysis_api'
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
@@ -199,6 +198,28 @@ def unblockUser(email):
     emailUserUnblocked(email, email_account)
     return out_json
 
+# sets locked attribute of user to 0=false
+def unlockUser(email):
+    out_json = {
+        "message": "Email user (" + email + ")'s token access has been unlocked."
+    }
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    users.find_one_and_update({"email": email}, { "$set": {"locked": 0}})
+    return out_json
+
+# sets locked attribute of all users to 0=false
+def unlockAllUsers():
+    out_json = {
+        "message": "All tokens have been unlocked."
+    }
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    users.update_many({}, { "$set": {"locked": 0}})
+    return out_json
+
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked):
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -264,6 +285,35 @@ def checkBlocked(token):
             return True
         else:
             return False
+
+# check if token is locked (1=locked, 0=not locked). returns true (1) if token is locked
+def checkLocked(token):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    api_mongo_addr = config['api']['api_mongo_addr']
+    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    record = users.find_one({"token": token})
+    if record is None:
+        return False
+    else:
+        if "locked" in record:
+            if int(record["locked"]) == 1:
+                return True
+            else:
+                return False
+        else:
+            return False
+
+def toggleLocked(token, lock):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    api_mongo_addr = config['api']['api_mongo_addr']
+    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):

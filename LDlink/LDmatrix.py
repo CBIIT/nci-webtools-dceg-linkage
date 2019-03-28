@@ -37,8 +37,12 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
 
     # Open SNP list file
     snps_raw = open(snplst).readlines()
-    if len(snps_raw) > 300:
-        output["error"] = "Maximum variant list is 300 RS numbers. Your list contains " + \
+    if web:
+        snp_limit = 300
+    else:
+        snp_limit = 1000
+    if len(snps_raw) > snp_limit:
+        output["error"] = "Maximum variant list is " + str(snp_limit) + " RS numbers. Your list contains " + \
             str(len(snps_raw)) + " entries."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print >> out_json, json_output
