@@ -310,10 +310,12 @@ def toggleLocked(token, lock):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     api_mongo_addr = config['api']['api_mongo_addr']
-    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
-    db = client["LDLink"]
-    users = db.api_users
-    users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
+    restrict_concurrency = config['api']['restrict_concurrency']
+    if restrict_concurrency:
+        client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+        db = client["LDLink"]
+        users = db.api_users
+        users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):
