@@ -523,7 +523,7 @@ def ldmatrix():
         with open(snplst, 'w') as f:
             f.write(snps.lower())
         try:
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
         except:
             return sendTraceback(None)
     else:
@@ -537,7 +537,7 @@ def ldmatrix():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, r2_d)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
             # display api out
             try:
                 # unlock token then display api output
