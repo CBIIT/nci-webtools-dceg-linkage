@@ -15,7 +15,7 @@ port = int(contents[2].split('=')[1])
 
 
 # Create LDmatrix function
-def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
+def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -37,7 +37,7 @@ def calculate_matrix(snplst, pop, request, web, r2_d="r2"):
 
     # Open SNP list file
     snps_raw = open(snplst).readlines()
-    if web:
+    if web or request_method == "GET":
         snp_limit = 300
     else:
         snp_limit = 1000
@@ -952,7 +952,7 @@ def main():
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_matrix(snplst, pop, request, web, r2_d)
+    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", r2_d)
 
     # Print output
     with open(tmp_dir + "matrix" + request + ".json") as f:
