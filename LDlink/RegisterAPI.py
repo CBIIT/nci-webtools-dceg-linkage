@@ -310,7 +310,10 @@ def toggleLocked(token, lock):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     api_mongo_addr = config['api']['api_mongo_addr']
-    restrict_concurrency = config['api']['restrict_concurrency']
+    if "restrict_concurrency" in config['api']:
+        restrict_concurrency = config['api']['restrict_concurrency']
+    else: 
+        restrict_concurrency = True
     if restrict_concurrency:
         client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
         db = client["LDLink"]
