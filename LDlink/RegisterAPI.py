@@ -299,10 +299,10 @@ def checkLocked(token):
         return False
     else:
         if "locked" in record:
-            if int(record["locked"]) == 1:
-                return True
-            else:
+            if record["locked"] == 0:
                 return False
+            else:
+                return True
         else:
             return False
 
@@ -318,7 +318,11 @@ def toggleLocked(token, lock):
         client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
         db = client["LDLink"]
         users = db.api_users
-        users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
+        if lock == 1:
+            calcStartTime = getDatetime()
+            users.find_one_and_update({"token": token}, { "$set": {"locked": calcStartTime}})
+        else: 
+            users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email):
