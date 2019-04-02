@@ -1971,14 +1971,12 @@
 					<p><a class="help-anchor-link" href="#LDmatrix">LDmatrix</a><br>
 						<pre class="apiaccess-examples">
 							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'
-							<br>
-							<p style="font-style: italic;"><i>Note: GET request can support up to 300 SNPs.</i></p>
 						</pre>
+						<p><i>Note: GET request can support up to 300 SNPs.</i></p>
 						<pre class="apiaccess-examples">
 							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d"}' 'https://ldlink-dev.nci.nih.gov/LDlinkRest/ldmatrix?&token=faketoken123'
-							<br>
-							<p style="font-style: italic;"><i>Note: POST request can support up to 1,000 SNPs.</i></p>
 						</pre>
+						<p><i>Note: POST request can support up to 1,000 SNPs.</i></p>
 					</p>
 					<p><a class="help-anchor-link" href="#LDpair">LDpair</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&token=faketoken123'</pre></p>
