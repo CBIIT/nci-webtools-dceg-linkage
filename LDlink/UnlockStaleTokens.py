@@ -15,7 +15,7 @@ def getDatetime():
 # script to free token locks older than 15 minutes at some scheduled time
 # triggered from CRON job
 def main():
-    with open('config.yml', 'r') as f:
+    with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as f:
         config = yaml.load(f)
     api_mongo_addr = config['api']['api_mongo_addr']
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
