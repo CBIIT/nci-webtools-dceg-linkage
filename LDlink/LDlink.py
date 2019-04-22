@@ -436,16 +436,19 @@ def ldhap():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = request.args.get('reference', False)
-        print 'request: ' + str(reference)
-        snplst = tmp_dir + 'snps' + reference + '.txt'
-        with open(snplst, 'w') as f:
-            f.write(snps.lower())
-        try:
-            out_json = calculate_hap(snplst, pop, reference, web)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = request.args.get('reference', False)
+            print 'request: ' + str(reference)
+            snplst = tmp_dir + 'snps' + reference + '.txt'
+            with open(snplst, 'w') as f:
+                f.write(snps.lower())
+            try:
+                out_json = calculate_hap(snplst, pop, reference, web)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
