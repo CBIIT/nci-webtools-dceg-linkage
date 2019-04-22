@@ -424,6 +424,9 @@ def ldassoc():
 def ldhap():
     print 'Execute ldhap.'
     print 'Request User Agent: ', request.user_agent
+    print 'Request User Agent Platform: ', request.user_agent.platform
+    print 'Request User Agent Browser: ', request.user_agent.browser
+
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
