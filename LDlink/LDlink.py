@@ -423,6 +423,7 @@ def ldassoc():
 @requires_token
 def ldhap():
     print 'Execute ldhap.'
+    print 'Request User Agent: ', request.user_agent
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
