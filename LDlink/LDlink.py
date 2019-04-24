@@ -423,6 +423,10 @@ def ldassoc():
 @requires_token
 def ldhap():
     print 'Execute ldhap.'
+    # print 'Request User Agent: ', request.user_agent
+    # print 'Request User Agent Platform: ', request.user_agent.platform
+    # print 'Request User Agent Browser: ', request.user_agent.browser
+
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
@@ -432,16 +436,19 @@ def ldhap():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = request.args.get('reference', False)
-        print 'request: ' + str(reference)
-        snplst = tmp_dir + 'snps' + reference + '.txt'
-        with open(snplst, 'w') as f:
-            f.write(snps.lower())
-        try:
-            out_json = calculate_hap(snplst, pop, reference, web)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = request.args.get('reference', False)
+            print 'request: ' + str(reference)
+            snplst = tmp_dir + 'snps' + reference + '.txt'
+            with open(snplst, 'w') as f:
+                f.write(snps.lower())
+            try:
+                out_json = calculate_hap(snplst, pop, reference, web)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
@@ -516,16 +523,19 @@ def ldmatrix():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = request.args.get('reference', False)
-        print 'request: ' + str(reference)
-        snplst = tmp_dir + 'snps' + str(reference) + '.txt'
-        with open(snplst, 'w') as f:
-            f.write(snps.lower())
-        try:
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = request.args.get('reference', False)
+            print 'request: ' + str(reference)
+            snplst = tmp_dir + 'snps' + str(reference) + '.txt'
+            with open(snplst, 'w') as f:
+                f.write(snps.lower())
+            try:
+                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
@@ -579,13 +589,16 @@ def ldpair():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = request.args.get('reference', False)
-        print 'request: ' + str(reference)
-        try:
-            out_json = calculate_pair(var1, var2, pop, web, reference)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = request.args.get('reference', False)
+            print 'request: ' + str(reference)
+            try:
+                out_json = calculate_pair(var1, var2, pop, web, reference)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
@@ -632,13 +645,16 @@ def ldpop():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = request.args.get('reference', False)
-        print 'request: ' + str(reference)
-        try:
-            out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = request.args.get('reference', False)
+            print 'request: ' + str(reference)
+            try:
+                out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
@@ -681,13 +697,16 @@ def ldproxy():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = request.args.get('reference', False)
-        print 'request: ' + str(reference)
-        try:
-            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = request.args.get('reference', False)
+            print 'request: ' + str(reference)
+            try:
+                out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
@@ -732,17 +751,20 @@ def snpchip():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = str(data['reference'])
-        print 'request: ' + reference
-        snplst = tmp_dir + 'snps' + reference + '.txt'
-        with open(snplst, 'w') as f:
-            f.write(snps.lower())
-        try:
-            snp_chip = calculate_chip(snplst, platforms, web, reference)
-            out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-        except:
-            return sendTraceback(None)
+        if request.user_agent.browser is not None:
+            web = True
+            reference = str(data['reference'])
+            print 'request: ' + reference
+            snplst = tmp_dir + 'snps' + reference + '.txt'
+            with open(snplst, 'w') as f:
+                f.write(snps.lower())
+            try:
+                snp_chip = calculate_chip(snplst, platforms, web, reference)
+                out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
@@ -795,43 +817,46 @@ def snpclip():
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
-        web = True
-        reference = str(data['reference'])
-        snpfile = str(tmp_dir + 'snps' + reference + '.txt')
-        snplist = snps.splitlines()
-        with open(snpfile, 'w') as f:
-            for s in snplist:
-                s = s.lstrip()
-                if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
-                    f.write(s.lower() + '\n')
-        try:
-            clip = {}
-            (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
-            clip["snp_list"] = snp_list
-            clip["details"] = details
-            clip["snps"] = snps
-            clip["filtered"] = collections.OrderedDict()
-            with open(tmp_dir + "clip" + reference + ".json") as f:
-                json_dict = json.load(f)
-            if "error" in json_dict:
-                clip["error"] = json_dict["error"]
-            else:
-                for snp in snps:
-                    clip["filtered"][snp[0]] = details[snp[0]]
-                if "warning" in json_dict:
-                    clip["warning"] = json_dict["warning"]
-            with open('tmp/snp_list' + reference + '.txt', 'w') as f:
-                for rs_number in snp_list:
-                    f.write(rs_number + '\n')
-            with open('tmp/details' + reference + '.txt', 'w') as f:
-                f.write("RS Number\tPosition\tAlleles\tDetails\n")
-                if(type(details) is collections.OrderedDict):
+        if request.user_agent.browser is not None:
+            web = True
+            reference = str(data['reference'])
+            snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+            snplist = snps.splitlines()
+            with open(snpfile, 'w') as f:
+                for s in snplist:
+                    s = s.lstrip()
+                    if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                        f.write(s.lower() + '\n')
+            try:
+                clip = {}
+                (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
+                clip["snp_list"] = snp_list
+                clip["details"] = details
+                clip["snps"] = snps
+                clip["filtered"] = collections.OrderedDict()
+                with open(tmp_dir + "clip" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                if "error" in json_dict:
+                    clip["error"] = json_dict["error"]
+                else:
                     for snp in snps:
-                        f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
-                        f.write("\n")
-            out_json = json.dumps(clip, sort_keys=False)
-        except:
-            return sendTraceback(None)
+                        clip["filtered"][snp[0]] = details[snp[0]]
+                    if "warning" in json_dict:
+                        clip["warning"] = json_dict["warning"]
+                with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+                    for rs_number in snp_list:
+                        f.write(rs_number + '\n')
+                with open('tmp/details' + reference + '.txt', 'w') as f:
+                    f.write("RS Number\tPosition\tAlleles\tDetails\n")
+                    if(type(details) is collections.OrderedDict):
+                        for snp in snps:
+                            f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
+                            f.write("\n")
+                out_json = json.dumps(clip, sort_keys=False)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("Please use LDLink API when accessing modules programmatically.")
     else:
         # API REQUEST
         web = False
