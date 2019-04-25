@@ -448,7 +448,7 @@ def ldhap():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
@@ -535,7 +535,7 @@ def ldmatrix():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
@@ -598,7 +598,7 @@ def ldpair():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
@@ -654,7 +654,7 @@ def ldpop():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
@@ -706,7 +706,7 @@ def ldproxy():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
@@ -764,7 +764,7 @@ def snpchip():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
@@ -856,7 +856,7 @@ def snpclip():
             except:
                 return sendTraceback(None)
         else:
-            return sendJSON("Please use LDLink API when accessing modules programmatically.")
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
     else:
         # API REQUEST
         web = False
