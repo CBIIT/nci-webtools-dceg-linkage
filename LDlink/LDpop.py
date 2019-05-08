@@ -621,80 +621,83 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     }
 
     # Change manipulate output data for frontend only if accessed via Web instance
-    if web:
-        output_table = { 
-            "inputs": {
-                "rs1": snp1_input,
-                "rs2": snp2_input,
-                "LD": r2_d
-            },
-            "aaData": [],
-            "locations": {
-                "rs1_rs2_LD_map": [],
-                "rs1_map": [],
-                "rs2_map": []
-            }
+    # if web:
+    output_table = { 
+        "inputs": {
+            "rs1": snp1_input,
+            "rs2": snp2_input,
+            "LD": r2_d
+        },
+        "aaData": [],
+        "locations": {
+            "rs1_rs2_LD_map": [],
+            "rs1_map": [],
+            "rs2_map": []
         }
-        table_data = []
-        rs1_map_data = []
-        rs2_map_data = []
-        rs1_rs2_LD_map_data = []
-        print output.keys()
-        # populate table data
-        for key in output.keys():
-            if key in pop_order.keys():
-                # print key, "parse for table"
-                key_order = pop_order[key]
-                key_pop = output[key]['Population']
-                key_N = output[key]['N']
-                # key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
-                key_rs1_allele_freq = rs1_dict["REF"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["REF"]] + ", " + rs1_dict["ALT"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["ALT"]]
-                # key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
-                key_rs2_allele_freq = rs2_dict["REF"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["REF"]] + ", " + rs2_dict["ALT"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["ALT"]]
-                key_D_prime = output[key]["D'"]
-                key_R_2 = output[key]['R2']
-                # set up data for ldpair link
-                ldpair_pops = [key]
-                if key in pop_groups.keys():
-                    ldpair_pops = pop_groups[key]
-                ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
-                table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
-                # populate map data
-                if key not in pop_groups.keys():
-                    rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
-                    rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
-                    rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
-        # Add map data
-        output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
-        output_table["locations"]["rs1_map"] = rs1_map_data
-        output_table["locations"]["rs2_map"] = rs2_map_data
-        def getKeyOrder(element):
-            return element[0]
-        table_data.sort(key=getKeyOrder)
-        # Add table data sorting order of rows
-        output_table["aaData"] = [xs[1:] for xs in table_data]
-        # Add final row link to LDpair
-        # ldpair_pops = []
-        # for pop in output.keys():
-        #     if pop not in pop_groups.keys() and len(pop) == 3:
-        #         ldpair_pops.append(pop)
-        # ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
-        # output_table["aaData"].append(["LDpair", ldpair_data, ldpair_data, ldpair_data, ldpair_data, ldpair_data])
-        if "warning" in output:
-            output_table["warning"] = output["warning"]
-        if "error" in output:
-            output_table["error"] = output["error"]
-        # Generate output file
-        with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
-            ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'"]) + "\n")
-            for row in output_table["aaData"]:
-                ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
-            if "error" in output_table:
-                ldpop_out.write("\n")
-                ldpop_out.write(output_table["error"])
-            if "warning" in output_table:
-                ldpop_out.write("\n")
-                ldpop_out.write(output_table["warning"])
+    }
+    table_data = []
+    rs1_map_data = []
+    rs2_map_data = []
+    rs1_rs2_LD_map_data = []
+    print output.keys()
+    # populate table data
+    for key in output.keys():
+        if key in pop_order.keys():
+            # print key, "parse for table"
+            key_order = pop_order[key]
+            key_pop = output[key]['Population']
+            key_N = output[key]['N']
+            # key_rs1_allele_freq = ", ".join([allele + ": " + output[key]['rs#1 Allele Freq'][allele] + "%" for allele in output[key]['rs#1 Allele Freq']])
+            key_rs1_allele_freq = rs1_dict["REF"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["REF"]] + ", " + rs1_dict["ALT"] + ": " + output[key]['rs#1 Allele Freq'][rs1_dict["ALT"]]
+            # key_rs2_allele_freq = ", ".join([allele + ": " + output[key]['rs#2 Allele Freq'][allele] + "%" for allele in output[key]['rs#2 Allele Freq']])
+            key_rs2_allele_freq = rs2_dict["REF"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["REF"]] + ", " + rs2_dict["ALT"] + ": " + output[key]['rs#2 Allele Freq'][rs2_dict["ALT"]]
+            key_D_prime = output[key]["D'"]
+            key_R_2 = output[key]['R2']
+            # set up data for ldpair link
+            ldpair_pops = [key]
+            if key in pop_groups.keys():
+                ldpair_pops = pop_groups[key]
+            ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+            table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
+            # populate map data
+            if key not in pop_groups.keys():
+                rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
+                rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
+                rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
+    # Add map data
+    output_table["locations"]["rs1_rs2_LD_map"] = rs1_rs2_LD_map_data
+    output_table["locations"]["rs1_map"] = rs1_map_data
+    output_table["locations"]["rs2_map"] = rs2_map_data
+    def getKeyOrder(element):
+        return element[0]
+    table_data.sort(key=getKeyOrder)
+    # Add table data sorting order of rows
+    output_table["aaData"] = [xs[1:] for xs in table_data]
+    # Add final row link to LDpair
+    # ldpair_pops = []
+    # for pop in output.keys():
+    #     if pop not in pop_groups.keys() and len(pop) == 3:
+    #         ldpair_pops.append(pop)
+    # ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+    # output_table["aaData"].append(["LDpair", ldpair_data, ldpair_data, ldpair_data, ldpair_data, ldpair_data])
+    if "warning" in output:
+        output_table["warning"] = output["warning"]
+    if "error" in output:
+        output_table["error"] = output["error"]
+    # Generate output file
+    with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
+        ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'"]) + "\n")
+        for row in output_table["aaData"]:
+            ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
+        if "error" in output_table:
+            ldpop_out.write("\n")
+            ldpop_out.write(output_table["error"])
+        if "warning" in output_table:
+            ldpop_out.write("\n")
+            ldpop_out.write(output_table["warning"])
+
+    # Change manipulate output data for frontend only if accessed via Web instance
+    if web:
         output = json.dumps(output_table, sort_keys=True, indent=2)
         
     return output
