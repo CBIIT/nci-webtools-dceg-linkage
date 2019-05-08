@@ -674,10 +674,8 @@ def ldpop():
             except:
                 # unlock token then display error message
                 # output = json.loads(out_json)
-                print out_json
                 toggleLocked(token, 0)
-                return out_json
-                # return sendTraceback(output["error"])
+                return sendTraceback(out_json["error"])
         except:
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
