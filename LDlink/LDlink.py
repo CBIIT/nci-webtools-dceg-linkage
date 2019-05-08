@@ -667,8 +667,10 @@ def ldpop():
             # display api out
             try:
                 # unlock token then display api output
+                with open('./tmp/LDpop_' + reference + '.txt', "r") as fp:
+                    content = fp.read()
                 toggleLocked(token, 0)
-                return sendJSON(out_json)
+                return content
             except:
                 # unlock token then display error message
                 output = json.loads(out_json)
@@ -719,7 +721,7 @@ def ldproxy():
             # display api out
             try:
                 # unlock token then display api output
-                with open('./tmp/proxy'+reference+'.txt', "r") as fp:
+                with open('./tmp/proxy' + reference + '.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
