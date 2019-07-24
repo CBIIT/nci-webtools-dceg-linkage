@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import datetime
+import dateutil.parser
 import yaml
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
@@ -26,13 +27,14 @@ def main():
     unlockTokens = []
     # look at each token
     for user in users.find():
-        locked = user["locked"]
-        if locked != 0:
-            diff = present - locked
-            diffMinutes = diff.seconds % 3600 / 60.0
-            # if token is locked for over 15 mins, unlock
-            if diffMinutes > 15.0:
-                unlockTokens.append(user["token"])
+        if "locked" in user:
+            locked = user["locked"]
+            if locked != 0:
+                diff = present - dateutil.parser.parse(locked, ignoretz=True)
+                diffMinutes = diff.seconds % 3600 / 60.0
+                # if token is locked for over 15 mins, unlock
+                if diffMinutes > 15.0:
+                    unlockTokens.append(user["token"])
     for token in unlockTokens:
         users.find_one_and_update({"token": token}, { "$set": {"locked": 0}})
 

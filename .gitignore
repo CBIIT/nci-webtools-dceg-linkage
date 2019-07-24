@@ -19,3 +19,6 @@ tests/*.xml
 package-lock.json
 geckodriver*
 chromedriver*
+
+data/
+LDlink/tmp/
