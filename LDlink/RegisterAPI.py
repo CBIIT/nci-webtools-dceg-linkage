@@ -147,7 +147,8 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
         "institution": institution,
         "token": token,
         "registered": registered,
-        "blocked": blocked
+        "blocked": blocked,
+        "locked": 0
     }
     users = db.api_users
     users.insert_one(user).inserted_id
@@ -554,3 +555,32 @@ def getStats(startdatetime, enddatetime, top):
         "users": users_json_sanitized
     }
     return out_json
+
+# returns stats of api users with locked tokens
+def getLockedUsers():
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    locked_users_json = users.find({"locked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "locked": 1,  "_id": 0 })
+    locked_users_json_sanitized = json.loads(json_util.dumps(locked_users_json))
+    numLockedUsers = len(locked_users_json_sanitized)
+    out_json = {
+        "#_locked_users": numLockedUsers,
+        "locked_users": locked_users_json_sanitized
+    }
+    return out_json
+
+# returns stats of api users with blocked tokens
+def getBlockedUsers():
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    blocked_users_json = users.find({"blocked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "blocked": 1,  "_id": 0 })
+    blocked_users_json_sanitized = json.loads(json_util.dumps(blocked_users_json))
+    numBlockedUsers = len(blocked_users_json_sanitized)
+    out_json = {
+        "#_blocked_users": numBlockedUsers,
+        "blocked_users": blocked_users_json_sanitized
+    }
+    return out_json
+

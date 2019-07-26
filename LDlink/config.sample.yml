@@ -4,7 +4,7 @@ data:
   vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
   reg_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/regulomedb/regulomedb.db'
   gene_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene.txt.gz'
-  gene_c_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene_collapsed.txt.gz'
+  gene_c_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene_collapsed_3.txt.gz'
   gene_dir2: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/gene_names_coords.db'
   recomb_dir: '/local/content/analysistools/public_html/apps/LDlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz'
 api:
