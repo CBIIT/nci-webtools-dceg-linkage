@@ -147,7 +147,8 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
         "institution": institution,
         "token": token,
         "registered": registered,
-        "blocked": blocked
+        "blocked": blocked,
+        "locked": 0
     }
     users = db.api_users
     users.insert_one(user).inserted_id
@@ -554,3 +555,17 @@ def getStats(startdatetime, enddatetime, top):
         "users": users_json_sanitized
     }
     return out_json
+
+# returns stats of api users with locked tokens
+def getLockedUsers():
+    client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
+    db = client["LDLink"]
+    users = db.api_users
+    lockedUsers = list(users.find({"locked": {"$exists": True, "$ne": 0}}))
+    numLockedUsers = len(lockedUsers)
+    out_json = {
+        "#_locked_users": numLockedUsers,
+        "locked_users": lockedUsers
+    }
+    return out_json
+

@@ -30,7 +30,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, unlockUser, unlockAllUsers
+from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, unlockUser, unlockAllUsers, getLockedUsers
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -251,6 +251,14 @@ def api_stats():
     enddatetime = request.args.get('enddatetime', False)
     top = request.args.get('top', False)
     out_json = getStats(startdatetime, enddatetime, top)
+    return sendJSON(out_json)
+
+# Web route to retrieve all locked API users
+@app.route('/LDlinkRestWeb/apiaccess/locked_users', methods=['GET'])
+@requires_admin_token
+def api_locked_users():
+    print "Execute api locked users stats"
+    out_json = getLockedUsers()
     return sendJSON(out_json)
 
 ### LDLink Helper Routes ###
