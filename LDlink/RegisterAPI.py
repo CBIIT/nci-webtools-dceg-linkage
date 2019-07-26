@@ -561,11 +561,12 @@ def getLockedUsers():
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
-    lockedUsers = list(users.find({"locked": {"$exists": True, "$ne": 0}}))
-    numLockedUsers = len(lockedUsers)
+    locked_users_json = users.find({"locked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "locked": 1,  "_id": 0 })
+    locked_users_json_sanitized = json.loads(json_util.dumps(locked_users_json))
+    numLockedUsers = len(locked_users_json_sanitized)
     out_json = {
         "#_locked_users": numLockedUsers,
-        "locked_users": lockedUsers
+        "locked_users": locked_users_json_sanitized
     }
     return out_json
 
