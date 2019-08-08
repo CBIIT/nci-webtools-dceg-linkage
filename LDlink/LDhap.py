@@ -322,7 +322,6 @@ def calculate_hap(snplst, pop, request, web):
             found = "false"
             while count <= 2 and count+g < len(vcf):
                 geno_next = vcf[g+count].strip().split()
-                print "geno_next", geno_next
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
