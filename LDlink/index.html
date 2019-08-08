@@ -316,7 +316,7 @@
 												<div class="form-group">
 													<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
 													<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)"
-													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
+													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 											</div>
 											<!-- region = Region -->
@@ -326,19 +326,19 @@
 												<div>
 													<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in GRCh37</label>
 													<input type="text" id="region-region-start-coord" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37"
-													 pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)">
+													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<a id="ldassoc-region-region-end" style="position:relative;left:155px;top:17px" href="#" data-toggle="popover"
 												 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
 												<div>
 													<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
 													<input type="text" id="region-region-end-coord" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000) in GRCh37"
-													 pattern="(^(chr)?(\d{1,2}|(x|y)):\d+$)">
+													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div>
 													<label for="region-region-index" style="display:none;">Index variant (optional)</label>
 													<input type="text" id="region-region-index" class="form-control" style="width:300px;" placeholder="Index variant (optional)"
-													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
+													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 											</div>
 											<!-- region = Variant -->
@@ -347,7 +347,7 @@
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
 													<label for="region-variant-index" style="display:none;">Index variant (optional)</label>
-													<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y)):\d+$)">
+													<input type="text" id="region-variant-index" class="form-control" placeholder="Index variant" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div class="form-group">
 													<a id="ldassoc-variant-bp-pop" style="position:relative;left:95px;top:5px" href="#" data-toggle="popover"
