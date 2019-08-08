@@ -242,11 +242,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
-
-		chr_s=myargs.start.strip("chr").split(":")[0]
-		coord_s=myargs.start.split(":")[1]
-		chr_e=myargs.end.strip("chr").split(":")[0]
-		coord_e=myargs.end.split(":")[1]
+		
+		chr_s = myargs.start.strip("chr").split(":")[0]
+		chr_s = chr_s.upper() if chr_s == 'x' or chr_s == 'y' else chr_s
+		coord_s = myargs.start.split(":")[1]
+		chr_e = myargs.end.strip("chr").split(":")[0]
+		chr_e = chr_e.upper() if chr_e == 'x' or chr_e == 'y' else chr_e
+		coord_e = myargs.end.split(":")[1]
 
 		if chr_s not in chrs:
 			output["error"]="Start chromosome (chr"+chr_s+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chrY)."
@@ -256,20 +258,20 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 			
 		if chr_e not in chrs:
-			output["error"]="End chromosome (chr"+chr_e+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chr Y)."
+			output["error"]="End chromosome (chr"+chr_e+") is not an autosome (chr1-chr22) or sex chromosome (chrX or chrY)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
 			
-		if chr_s!=chr_e:
+		if chr_s != chr_e:
 			output["error"]="Start and end chromosome must be the same (chr"+chr_s+" is not equal to chr"+chr_e+")."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
 			out_json.close()
 			return("","")
 			
-		if coord_s>=coord_e:
+		if coord_s >= coord_e:
 			output["error"]="End coordinate ("+myargs.end+") must be greater than start coordinate("+myargs.start+")."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print >> out_json, json_output
