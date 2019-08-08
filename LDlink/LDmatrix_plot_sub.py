@@ -68,7 +68,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
+        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
         
@@ -215,7 +215,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
             found = "false"
             while count <= 2 and count + g < len(vcf):
                 geno_next = vcf[g + count].strip().split()
-                if rs_query == geno_next[2]:
+                if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
                 count += 1

@@ -3811,7 +3811,7 @@ function validateBasePairWindows() {
 }
 
 function validateTextarea() {
-    var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, x, y):##### (ex: chr1:12345)";
+    var errorMsg = "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)";
     var textarea = this;
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     // check each line of text
