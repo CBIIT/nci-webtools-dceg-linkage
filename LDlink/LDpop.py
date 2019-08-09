@@ -388,6 +388,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     }           
     
     for key in geno_ind["rs1"]:
+        print "total alleles for: ", key, float(pop_freqs["total_alleles"][key])
         pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0"))
         pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
         pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
@@ -410,17 +411,17 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
                 hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
             elif len(geno_ind["rs1"][pop][ind]) < 3 and len(geno_ind["rs2"][pop][ind]) >= 3:
-                output["error"] = "Missing allele data for " + snp1 + " in 1000G reference panel."
+                output["error"] = "Missing haplotype data for " + snp1 + " in 1000G reference panel."
                 if web:
                     output = json.dumps(output, sort_keys=True, indent=2)
                 return output
             elif len(geno_ind["rs1"][pop][ind]) >= 3 and len(geno_ind["rs2"][pop][ind]) < 3:
-                output["error"] = "Missing allele data for " + snp2 + " in 1000G reference panel."
+                output["error"] = "Missing haplotype data for " + snp2 + " in 1000G reference panel."
                 if web:
                     output = json.dumps(output, sort_keys=True, indent=2)
                 return output
             else :
-                output["error"] = "Missing allele data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
+                output["error"] = "Missing haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
                 if web:
                     output = json.dumps(output, sort_keys=True, indent=2)
                 return output
