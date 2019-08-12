@@ -397,7 +397,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
             pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
         else :
-            output["error"] = "Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
+            output["error"] = "1 Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
             if web:
                 output = json.dumps(output, sort_keys=True, indent=2)
             return output
@@ -430,17 +430,17 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
                 hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
             elif len(geno_ind["rs1"][pop][ind]) < 3 and len(geno_ind["rs2"][pop][ind]) >= 3:
-                output["error"] = "Insufficient haplotype data for " + snp1 + " in 1000G reference panel."
+                output["error"] = "2 Insufficient haplotype data for " + snp1 + " in 1000G reference panel."
                 if web:
                     output = json.dumps(output, sort_keys=True, indent=2)
                 return output
             elif len(geno_ind["rs1"][pop][ind]) >= 3 and len(geno_ind["rs2"][pop][ind]) < 3:
-                output["error"] = "Insufficient haplotype data for " + snp2 + " in 1000G reference panel."
+                output["error"] = "2 Insufficient haplotype data for " + snp2 + " in 1000G reference panel."
                 if web:
                     output = json.dumps(output, sort_keys=True, indent=2)
                 return output
             else :
-                output["error"] = "Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
+                output["error"] = "2 Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
                 if web:
                     output = json.dumps(output, sort_keys=True, indent=2)
                 return output
