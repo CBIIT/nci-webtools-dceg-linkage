@@ -348,7 +348,6 @@ def calculate_hap(snplst, pop, request, web):
 
         if "," not in geno[3] and "," not in geno[4]:
             a1, a2 = set_alleles(geno[3], geno[4])
-            print "a1 / a2:", str(a1) + " / " + str(a2)
             count0 = 0
             count1 = 0
             for i in range(len(index)):
@@ -381,8 +380,6 @@ def calculate_hap(snplst, pop, request, web):
                 else:
                     hap1[i].append(".")
                     hap2[i].append(".")
-                print "hap1:", hap1
-                print "hap2:", hap2
 
             rsnum_lst.append(rsnum)
 
@@ -403,8 +400,6 @@ def calculate_hap(snplst, pop, request, web):
     for i in range(len(index)):
         h1 = "_".join(hap1[i])
         h2 = "_".join(hap2[i])
-        print "h1", h1
-        print "h2", h2
         if h1 in haps:
             haps[h1] += 1
         else:
@@ -414,7 +409,6 @@ def calculate_hap(snplst, pop, request, web):
             haps[h2] += 1
         else:
             haps[h2] = 1
-    print "haps", haps
 
     # Remove Missing Haplotypes
     keys = haps.keys()

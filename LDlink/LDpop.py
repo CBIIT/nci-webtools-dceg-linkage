@@ -390,7 +390,6 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     for key in geno_ind["rs1"]:
         print "key:", key
         pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0") + 2* geno_ind["rs1"][key].count("0") + 2* geno_ind["rs1"][key].count("1"))
-        print 'pop_freqs["total_alleles"][key]', pop_freqs["total_alleles"][key]
         if (pop_freqs["total_alleles"][key] > 0):
             pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
             pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
@@ -401,6 +400,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             if web:
                 output = json.dumps(output, sort_keys=True, indent=2)
             return output
+        print "pop_freqs:", pop_freqs
         
 
     # round(
@@ -426,17 +426,26 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     
     for pop in geno_ind["rs1"]:
         for ind in range(len(geno_ind["rs1"][pop])):
-            if len(geno_ind["rs1"][pop][ind]) == 3:
-                hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
-                hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
+            # if len(geno_ind["rs1"][pop][ind]) == 3:
+            hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
+            hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
+            print "hap1:", hap1
+            print "hap2:", hap2
             # elif len(geno_ind["rs1"][pop][ind]) == 1: 
-            #     # if geno_ind["rs1"][pop][ind][0] == '1':
-                    
-            else:
-                output["error"] = "2 Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
-                if web:
-                    output = json.dumps(output, sort_keys=True, indent=2)
-                return output
+            #     if geno_ind["rs1"][pop][ind][0] == '0':
+            #         hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
+            #         hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
+            #     elif geno_ind["rs1"][pop][ind][0] == '0':
+            #         hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
+            #         hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
+            #     else:
+            #         hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
+            #         hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]   
+            # else:
+            #     output["error"] = "2 Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
+            #     if web:
+            #         output = json.dumps(output, sort_keys=True, indent=2)
+            #     return output
             # elif len(geno_ind["rs1"][pop][ind]) < 3 and len(geno_ind["rs2"][pop][ind]) >= 3:
             #     output["error"] = "2 Insufficient haplotype data for " + snp1 + " in 1000G reference panel."
             #     if web:
@@ -456,6 +465,14 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             if hap1 in hap[pop]:
                 hap[pop][hap1] += 1           
                 hap[pop][hap2] += 1
+
+    print "hap:", hap
+
+    # # Remove missing haplotypes
+    # keys = hap.keys()
+    # for key in keys:
+    #     if "." in key:
+    #         hap.pop(key, None)
         
     # Sort haplotypes
     matrix_values = {k : {"A": "", "B": "", "C": "", "D": "", "N": "", "delta" : "", "Ms" : "" , "D_prime":"", "r2":""} for k in pop_split}
