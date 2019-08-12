@@ -388,7 +388,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     }           
     
     for key in geno_ind["rs1"]:
-        print "total alleles acc: ", pop_freqs["total_alleles"]
+        print "key:", key
         pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0") + 2* geno_ind["rs1"][key].count("0") + 2* geno_ind["rs1"][key].count("1"))
         print 'pop_freqs["total_alleles"][key]', pop_freqs["total_alleles"][key]
         if (pop_freqs["total_alleles"][key] > 0):
