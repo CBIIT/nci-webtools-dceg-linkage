@@ -423,6 +423,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # Combine phased genotype
     # Extract haplotypes
     hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0} for k in pop_split}
+
+    print "geno_ind:", geno_ind
     
     for pop in geno_ind["rs1"]:
         for ind in range(len(geno_ind["rs1"][pop])):
@@ -473,6 +475,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # for key in keys:
     #     if "." in key:
     #         hap.pop(key, None)
+    # print "hap after . pop:", hap
+
         
     # Sort haplotypes
     matrix_values = {k : {"A": "", "B": "", "C": "", "D": "", "N": "", "delta" : "", "Ms" : "" , "D_prime":"", "r2":""} for k in pop_split}

@@ -319,6 +319,9 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         if "." in key:
             hap.pop(key, None)
 
+    print "hap after . pop:", hap
+
+
     # Check all haplotypes are present
     if len(hap) != 4:
         snp1_a = [snp1_a1, snp1_a2]
