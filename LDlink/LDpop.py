@@ -370,13 +370,13 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     for colname in rs1_dict:       
         for key in ID_dict:
             if (colname in ID_dict[key]) and (colname not in adds):
-                geno_ind["rs1"][key].append(rs1_dict[colname])
+                geno_ind["rs1"][key].append(rs1_dict[colname] + "|." if len(rs1_dict[colname] == 1) else rs1_dict[colname])
     
     #SNP2            
     for colname in rs2_dict:       
         for key in ID_dict:
             if (colname in ID_dict[key]) and (colname not in adds):
-                geno_ind["rs2"][key].append(rs2_dict[colname])
+                geno_ind["rs2"][key].append(rs2_dict[colname] + "|." if len(rs2_dict[colname] == 1) else rs2_dict[colname])
     
     #population freqency dictionary to fill in
     pop_freqs = {
@@ -391,10 +391,10 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         print "key:", key
         pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0") + 2* geno_ind["rs1"][key].count("0") + 2* geno_ind["rs1"][key].count("1"))
         if (pop_freqs["total_alleles"][key] > 0):
-            pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-            pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-            pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-            pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0") + geno_ind["rs1"][key].count("1|.") + geno_ind["rs1"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0") + geno_ind["rs2"][key].count("1|.") + geno_ind["rs2"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0") + geno_ind["rs1"][key].count("1|.") + geno_ind["rs1"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0") + geno_ind["rs2"][key].count("1|.") + geno_ind["rs2"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
         else :
             output["error"] = "1 Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
             if web:
