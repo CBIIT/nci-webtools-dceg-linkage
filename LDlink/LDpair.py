@@ -210,8 +210,6 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     allele1 = {"0|0": [snp1_a1, snp1_a1], "0|1": [snp1_a1, snp1_a2], "1|0": [snp1_a2, snp1_a1], "1|1": [
         snp1_a2, snp1_a2], "0": [snp1_a1, "."], "1": [snp1_a2, "."], "./.": [".", "."], ".": [".", "."]}
 
-    print "allele1:", allele1
-
     # SNP2
     if len(vcf2) == 0:
         output["error"] = snp2 + " is not in 1000G reference panel."
@@ -259,8 +257,6 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     allele2 = {"0|0": [snp2_a1, snp2_a1], "0|1": [snp2_a1, snp2_a2], "1|0": [snp2_a2, snp2_a1], "1|1": [
         snp2_a2, snp2_a2], "0": [snp2_a1, "."], "1": [snp2_a2, "."], "./.": [".", "."], ".": [".", "."]}
 
-    print "allele2:", allele2
-
     if geno1[1] != vcf1_pos:
         output["error"] = "VCF File does not match variant coordinates for SNP1."
         return(json.dumps(output, sort_keys=True, indent=2))
@@ -289,18 +285,12 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         if head2[i] in geno:
             geno[head2[i]][1] = allele2[geno2[i]]
 
-    print "geno:", geno
-
     # Extract haplotypes
     hap = {}
     for ind in pop_ids:
         if ind in geno:
             hap1 = geno[ind][0][0] + "_" + geno[ind][1][0]
             hap2 = geno[ind][0][1] + "_" + geno[ind][1][1]
-            
-            print "hap1:", hap1
-            print "hap2:", hap2
-
             if hap1 in hap:
                 hap[hap1] += 1
             else:
@@ -311,16 +301,11 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
             else:
                 hap[hap2] = 1
 
-    print "hap:", hap
-
     # Remove missing haplotypes
     keys = hap.keys()
     for key in keys:
         if "." in key:
             hap.pop(key, None)
-
-    print "hap after . pop:", hap
-
 
     # Check all haplotypes are present
     if len(hap) != 4:
