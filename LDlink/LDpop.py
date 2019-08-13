@@ -370,13 +370,13 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     for colname in rs1_dict:       
         for key in ID_dict:
             if (colname in ID_dict[key]) and (colname not in adds):
-                geno_ind["rs1"][key].append(rs1_dict[colname])
+                geno_ind["rs1"][key].append(rs1_dict[colname] + "|." if len(rs1_dict[colname]) == 1 else rs1_dict[colname])
     
     #SNP2            
     for colname in rs2_dict:       
         for key in ID_dict:
             if (colname in ID_dict[key]) and (colname not in adds):
-                geno_ind["rs2"][key].append(rs2_dict[colname])
+                geno_ind["rs2"][key].append(rs2_dict[colname] + "|." if len(rs2_dict[colname]) == 1 else rs2_dict[colname])
     
     #population freqency dictionary to fill in
     pop_freqs = {
@@ -388,11 +388,17 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     }           
     
     for key in geno_ind["rs1"]:
-        pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0"))
-        pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
-        pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0"))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+        pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0") + 2* geno_ind["rs1"][key].count("0|.") + 2* geno_ind["rs1"][key].count("1|."))
+        if (pop_freqs["total_alleles"][key] > 0):
+            pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0") + geno_ind["rs1"][key].count("1|.") + geno_ind["rs1"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0") + geno_ind["rs2"][key].count("1|.") + geno_ind["rs2"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["alt_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("1|1") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0") + geno_ind["rs1"][key].count("1|.") + geno_ind["rs1"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+            pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0") + geno_ind["rs2"][key].count("1|.") + geno_ind["rs2"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
+        else :
+            output["error"] = "1 Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
+            if web:
+                output = json.dumps(output, sort_keys=True, indent=2)
+            return output
         
     #get sample size for each population
     sample_size_dict = {}  
@@ -402,32 +408,24 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         
     # Combine phased genotype
     # Extract haplotypes
-    hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0} for k in pop_split}
+    hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0, "0_.": 0, "1_.": 0, "._.": 0} for k in pop_split}
     
     for pop in geno_ind["rs1"]:
         for ind in range(len(geno_ind["rs1"][pop])):
-            if len(geno_ind["rs1"][pop][ind]) >= 3 and len(geno_ind["rs2"][pop][ind]) >= 3:
-                hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
-                hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
-            elif len(geno_ind["rs1"][pop][ind]) < 3 and len(geno_ind["rs2"][pop][ind]) >= 3:
-                output["error"] = "Missing allele data for " + snp1 + " in 1000G reference panel."
-                if web:
-                    output = json.dumps(output, sort_keys=True, indent=2)
-                return output
-            elif len(geno_ind["rs1"][pop][ind]) >= 3 and len(geno_ind["rs2"][pop][ind]) < 3:
-                output["error"] = "Missing allele data for " + snp2 + " in 1000G reference panel."
-                if web:
-                    output = json.dumps(output, sort_keys=True, indent=2)
-                return output
-            else :
-                output["error"] = "Missing allele data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
-                if web:
-                    output = json.dumps(output, sort_keys=True, indent=2)
-                return output
-
+            # if len(geno_ind["rs1"][pop][ind]) == 3:
+            hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
+            hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
             if hap1 in hap[pop]:
                 hap[pop][hap1] += 1           
                 hap[pop][hap2] += 1
+
+    # Remove missing haplotypes
+    pops = hap.keys()
+    for pop in pops:
+        keys = hap[pop].keys()
+        for key in keys:
+            if "." in key:
+                hap[pop].pop(key, None)
         
     # Sort haplotypes
     matrix_values = {k : {"A": "", "B": "", "C": "", "D": "", "N": "", "delta" : "", "Ms" : "" , "D_prime":"", "r2":""} for k in pop_split}
@@ -673,7 +671,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             ldpair_pops = [key]
             if key in pop_groups.keys():
                 ldpair_pops = pop_groups[key]
-            ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+            ldpair_data = [snp1, snp2, "%2B".join(ldpair_pops)]
             table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
             # populate map data
             if key not in pop_groups.keys():

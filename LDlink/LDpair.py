@@ -291,7 +291,6 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         if ind in geno:
             hap1 = geno[ind][0][0] + "_" + geno[ind][1][0]
             hap2 = geno[ind][0][1] + "_" + geno[ind][1][1]
-
             if hap1 in hap:
                 hap[hap1] += 1
             else:
