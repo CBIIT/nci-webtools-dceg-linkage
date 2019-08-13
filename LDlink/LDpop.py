@@ -370,13 +370,13 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     for colname in rs1_dict:       
         for key in ID_dict:
             if (colname in ID_dict[key]) and (colname not in adds):
-                geno_ind["rs1"][key].append(rs1_dict[colname] + "|." if len(rs1_dict[colname] == 1) else rs1_dict[colname])
+                geno_ind["rs1"][key].append(rs1_dict[colname] + "|." if len(rs1_dict[colname]) == 1 else rs1_dict[colname])
     
     #SNP2            
     for colname in rs2_dict:       
         for key in ID_dict:
             if (colname in ID_dict[key]) and (colname not in adds):
-                geno_ind["rs2"][key].append(rs2_dict[colname] + "|." if len(rs2_dict[colname] == 1) else rs2_dict[colname])
+                geno_ind["rs2"][key].append(rs2_dict[colname] + "|." if len(rs2_dict[colname]) == 1 else rs2_dict[colname])
     
     #population freqency dictionary to fill in
     pop_freqs = {
