@@ -471,10 +471,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     print "hap:", hap
 
     # Remove missing haplotypes
-    keys = hap.keys()
-    for key in keys:
-        if "." in key:
-            hap.pop(key, None)
+    pops = hap.keys()
+    for pop in pops:
+        keys = hap[pop].keys()
+        for key in keys:
+            if "." in key:
+                hap[pop].pop(key, None)
     print "hap after . pop:", hap
 
         
