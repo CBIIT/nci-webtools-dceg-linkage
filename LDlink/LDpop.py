@@ -389,7 +389,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     
     for key in geno_ind["rs1"]:
         print "key:", key
-        pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0") + 2* geno_ind["rs1"][key].count("0") + 2* geno_ind["rs1"][key].count("1"))
+        pop_freqs["total_alleles"][key] = float(2*geno_ind["rs1"][key].count("0|0") + 2*geno_ind["rs1"][key].count("0|1") +  2*geno_ind["rs1"][key].count("1|1") + 2* geno_ind["rs1"][key].count("1|0") + 2* geno_ind["rs1"][key].count("0|.") + 2* geno_ind["rs1"][key].count("1|."))
         if (pop_freqs["total_alleles"][key] > 0):
             pop_freqs["ref_freq_snp1"][key] = round(((2*geno_ind["rs1"][key].count("0|0") + geno_ind["rs1"][key].count("0|1") + geno_ind["rs1"][key].count("1|0") + geno_ind["rs1"][key].count("1|.") + geno_ind["rs1"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
             pop_freqs["ref_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("0|0") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0") + geno_ind["rs2"][key].count("1|.") + geno_ind["rs2"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
@@ -422,7 +422,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         
     # Combine phased genotype
     # Extract haplotypes
-    hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0} for k in pop_split}
+    hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0, "0_.": 0, "1_.": 0} for k in pop_split}
 
     print "geno_ind:", geno_ind
     
