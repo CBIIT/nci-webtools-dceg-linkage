@@ -413,6 +413,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     for pop in geno_ind["rs1"]:
         for ind in range(len(geno_ind["rs1"][pop])):
             # if len(geno_ind["rs1"][pop][ind]) == 3:
+            print "geno_ind", geno_ind
             hap1 = geno_ind["rs1"][pop][ind][0] + "_" + geno_ind["rs2"][pop][ind][0]
             hap2 = geno_ind["rs1"][pop][ind][2] + "_" + geno_ind["rs2"][pop][ind][2]
             if hap1 in hap[pop]:
