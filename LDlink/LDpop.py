@@ -410,8 +410,6 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # Extract haplotypes
     hap = {k: {"0_0": 0, "0_1": 0, "1_0": 0, "1_1": 0, "0_.": 0, "1_.": 0, "._.": 0, "._0": 0, "._1": 0} for k in pop_split}
     
-    print "geno_ind", geno_ind
-
     for pop in geno_ind["rs1"]:
         if len(geno_ind["rs1"][pop]) == len(geno_ind["rs2"][pop]):
             geno_ind_range = len(geno_ind["rs1"][pop])
