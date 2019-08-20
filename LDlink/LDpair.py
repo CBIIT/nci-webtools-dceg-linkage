@@ -285,6 +285,8 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         if head2[i] in geno:
             geno[head2[i]][1] = allele2[geno2[i]]
 
+    print "geno", geno
+
     # Extract haplotypes
     hap = {}
     for ind in pop_ids:
