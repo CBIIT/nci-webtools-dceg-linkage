@@ -70,7 +70,7 @@ def sendTraceback(error):
         custom["error"] = "Raised when a generated error does not fall into any category."
     else:
         custom["error"] = error
-    print "Unexpected error:", sys.exc_info()[0]
+    print("Unexpected error:", sys.exc_info()[0])
     traceback.print_exc()
     custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
@@ -175,7 +175,7 @@ def requires_admin_token(f):
 # Web route to send API token unblock request from front-end
 @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
 def apiblocked_web():
-    print "Execute api blocked user justification submission"
+    print("Execute api blocked user justification submission")
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
@@ -189,7 +189,7 @@ def apiblocked_web():
 # Web route to register user's email for API token
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
 def register_web():
-    print "Execute api register user"
+    print("Execute api register user")
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
@@ -211,7 +211,7 @@ def register_web():
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_user():
-    print "Execute api block user"
+    print("Execute api block user")
     email = request.args.get('email', False)
     out_json = blockUser(email, request.url_root)
     return sendJSON(out_json)
@@ -220,7 +220,7 @@ def block_user():
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_user():
-    print "Execute api unblock user"
+    print("Execute api unblock user")
     email = request.args.get('email', False)
     out_json = unblockUser(email)
     return sendJSON(out_json)
@@ -229,7 +229,7 @@ def unblock_user():
 @app.route('/LDlinkRestWeb/apiaccess/unlock_user', methods=['GET'])
 @requires_admin_token
 def unlock_user():
-    print "Execute api unlock user"
+    print("Execute api unlock user")
     email = request.args.get('email', False)
     out_json = unlockUser(email)
     return sendJSON(out_json)
@@ -238,7 +238,7 @@ def unlock_user():
 @app.route('/LDlinkRestWeb/apiaccess/unlock_all_users', methods=['GET'])
 @requires_admin_token
 def unlock_all_users():
-    print "Execute api unlock all users"
+    print("Execute api unlock all users")
     out_json = unlockAllUsers()
     return sendJSON(out_json)
 
@@ -246,7 +246,7 @@ def unlock_all_users():
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
 @requires_admin_token
 def api_stats():
-    print "Execute api stats"
+    print("Execute api stats")
     startdatetime = request.args.get('startdatetime', False)
     enddatetime = request.args.get('enddatetime', False)
     top = request.args.get('top', False)
@@ -257,7 +257,7 @@ def api_stats():
 @app.route('/LDlinkRestWeb/apiaccess/locked_users', methods=['GET'])
 @requires_admin_token
 def api_locked_users():
-    print "Execute api locked users stats"
+    print("Execute api locked users stats")
     out_json = getLockedUsers()
     return sendJSON(out_json)
 
@@ -265,7 +265,7 @@ def api_locked_users():
 @app.route('/LDlinkRestWeb/apiaccess/blocked_users', methods=['GET'])
 @requires_admin_token
 def api_blocked_users():
-    print "Execute api blocked users stats"
+    print("Execute api blocked users stats")
     out_json = getBlockedUsers()
     return sendJSON(out_json)
 
@@ -290,7 +290,7 @@ def copy_output_files(reference):
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
 @app.route('/ping/', strict_slashes=False)
 def ping():
-    print "pong"
+    print("pong")
     try:
         return "true"
     except Exception as e:
@@ -307,15 +307,15 @@ def status(filename):
 @app.route('/LDlinkRest/upload', methods=['POST'])
 @app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():
-    print "Processing upload"
-    print "****** Stage 1: UPLOAD BUTTON ***** "
-    print "UPLOAD_DIR = %s" % (app.config['UPLOAD_DIR'])
+    print("Processing upload")
+    print("****** Stage 1: UPLOAD BUTTON ***** ")
+    print("UPLOAD_DIR = %s" % (app.config['UPLOAD_DIR']))
     for arg in request.args:
-        print arg
-    print "request.method = %s" % (request.method)
+        print(arg)
+    print("request.method = %s" % (request.method))
     if request.method == 'POST':
         # check if the post request has the file part
-        print " We got a POST"
+        print(" We got a POST")
         # print dir(request.files)
         if 'ldassocFile' not in request.files:
             print('No file part')
@@ -323,16 +323,16 @@ def upload():
         file = request.files['ldassocFile']
         # if user does not select file, browser also
         # submit a empty part without filename
-        print type(file)
+        print(type(file))
         if file.filename == '':
             print('No selected file')
             return 'No selected file'
         if file:
-            print 'file.filename ' + file.filename
+            print('file.filename ' + file.filename)
             print('file and allowed_file')
             filename = secure_filename(file.filename)
-            print "About to SAVE file"
-            print "filename = " + filename
+            print("About to SAVE file")
+            print("filename = " + filename)
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return 'File was saved'
 
@@ -351,7 +351,7 @@ def ldassoc_example():
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
-    print "Retrieve SNPchip Platforms"
+    print("Retrieve SNPchip Platforms")
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -368,36 +368,36 @@ def snpchip_platforms():
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
-    print "Execute ldassoc."
+    print("Execute ldassoc.")
     myargs = argparse.Namespace()
     myargs.window = None
     filename = secure_filename(request.args.get('filename', False))
     region = request.args.get('calculateRegion')
     pop = request.args.get('pop', False)
-    print 'filename: ' + filename
-    print 'region: ' + region
-    print 'pop: ' + pop
+    print('filename: ' + filename)
+    print('region: ' + region)
+    print('pop: ' + pop)
     myargs.dprime = bool(request.args.get("dprime") == "True")
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
     myargs.pval = str(request.args.get('columns[pvalue]'))
-    print "dprime: " + str(myargs.dprime)
+    print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
         filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
-        print "Region is variant"
-        print "index: " + str(request.args.get('variant[index]'))
-        print "base pair window: " + request.args.get('variant[basepair]')
-        print
+        print("Region is variant")
+        print("index: " + str(request.args.get('variant[index]')))
+        print("base pair window: " + request.args.get('variant[basepair]'))
+        print()
         myargs.window = int(request.args.get('variant[basepair]'))
         if request.args.get('variant[index]') == "":
             myargs.origin = None
         else:
             myargs.origin = request.args.get('variant[index]')
     if region == "gene":
-        print "Region is gene"
+        print("Region is gene")
         if request.args.get('gene[index]') == "":
             myargs.origin = None
         else:
@@ -405,7 +405,7 @@ def ldassoc():
         myargs.name = request.args.get('gene[name]')
         myargs.window = int(request.args.get('gene[basepair]'))
     if region == "region":
-        print "Region is region"
+        print("Region is region")
         if request.args.get('region[index]') == "":
             myargs.origin = None
         else:
@@ -413,16 +413,16 @@ def ldassoc():
         myargs.start = str(request.args.get('region[start]'))
         myargs.end = str(request.args.get('region[end]'))
     myargs.transcript = bool(request.args.get("transcript") == "True")
-    print "transcript: " + str(myargs.transcript)
+    print("transcript: " + str(myargs.transcript))
     myargs.annotate = bool(request.args.get("annotate") == "True")
-    print "annotate: " + str(myargs.annotate)
+    print("annotate: " + str(myargs.annotate))
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         web = True
         reference = request.args.get('reference', False)
-        print 'reference: ' + reference
+        print('reference: ' + reference)
         try:
             out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
         except:
@@ -438,7 +438,7 @@ def ldassoc():
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
 def ldhap():
-    print 'Execute ldhap.'
+    print('Execute ldhap.')
     # print 'Request User Agent: ', request.user_agent
     # print 'Request User Agent Platform: ', request.user_agent.platform
     # print 'Request User Agent Browser: ', request.user_agent.browser
@@ -446,8 +446,8 @@ def ldhap():
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
-    print 'snps: ' + snps
-    print 'pop: ' + pop
+    print('snps: ' + snps)
+    print('pop: ' + pop)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -455,7 +455,7 @@ def ldhap():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
-            print 'request: ' + str(reference)
+            print('request: ' + str(reference))
             snplst = tmp_dir + 'snps' + reference + '.txt'
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
@@ -469,7 +469,7 @@ def ldhap():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        print 'request: ' + str(reference)
+        print('request: ' + str(reference))
         snplst = tmp_dir + 'snps' + reference + '.txt'
         with open(snplst, 'w') as f:
             f.write(snps.lower())
@@ -504,7 +504,7 @@ def ldhap():
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
 def ldmatrix():
-    print 'Execute ldmatrix.'
+    print('Execute ldmatrix.')
     # differentiate POST or GET request
     if request.method == 'POST':
         # POST REQUEST
@@ -532,9 +532,9 @@ def ldmatrix():
         reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
-    print 'snps: ' + snps
-    print 'pop: ' + pop
-    print 'r2_d: ' + r2_d
+    print('snps: ' + snps)
+    print('pop: ' + pop)
+    print('r2_d: ' + r2_d)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -542,7 +542,7 @@ def ldmatrix():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
-            print 'request: ' + str(reference)
+            print('request: ' + str(reference))
             snplst = tmp_dir + 'snps' + str(reference) + '.txt'
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
@@ -556,7 +556,7 @@ def ldmatrix():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        print 'request: ' + str(reference)            
+        print('request: ' + str(reference)) 
         snplst = tmp_dir + 'snps' + str(reference) + '.txt'
         with open(snplst, 'w') as f:
             f.write(snps.lower())
@@ -593,14 +593,14 @@ def ldmatrix():
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
 def ldpair():
-    print 'Execute ldpair.'
+    print('Execute ldpair.')
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
-    print 'var1: ' + var1
-    print 'var2: ' + var2
-    print 'pop: ' + pop
+    print('var1: ' + var1)
+    print('var2: ' + var2)
+    print('pop: ' + pop)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -608,7 +608,7 @@ def ldpair():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
-            print 'request: ' + str(reference)
+            print('request: ' + str(reference))
             try:
                 out_json = calculate_pair(var1, var2, pop, web, reference)
             except:
@@ -619,7 +619,7 @@ def ldpair():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        print 'request: ' + str(reference)
+        print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
@@ -647,16 +647,16 @@ def ldpair():
 @app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
 @requires_token
 def ldpop():
-    print 'Execute ldpop.'
+    print('Execute ldpop.')
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
-    print 'var1: ' + var1
-    print 'var2: ' + var2
-    print 'pop: ' + pop
-    print 'r2_d: ' + r2_d
+    print('var1: ' + var1)
+    print('var2: ' + var2)
+    print('pop: ' + pop)
+    print('r2_d: ' + r2_d)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -664,7 +664,7 @@ def ldpop():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
-            print 'request: ' + str(reference)
+            print('request: ' + str(reference))
             try:
                 out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
             except:
@@ -675,7 +675,7 @@ def ldpop():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        print 'request: ' + str(reference)
+        print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
@@ -703,14 +703,14 @@ def ldpop():
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 @requires_token
 def ldproxy():
-    print 'Execute ldproxy.'
+    print('Execute ldproxy.')
     var = request.args.get('var', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
-    print 'var: ' + var
-    print 'pop: ' + pop
-    print 'r2_d: ' + r2_d
+    print('var: ' + var)
+    print('pop: ' + pop)
+    print('r2_d: ' + r2_d)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -718,7 +718,7 @@ def ldproxy():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
-            print 'request: ' + str(reference)
+            print('request: ' + str(reference))
             try:
                 out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
             except:
@@ -729,7 +729,7 @@ def ldproxy():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        print 'request: ' + str(reference)
+        print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
@@ -758,13 +758,13 @@ def ldproxy():
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
 def snpchip():
-    print "Execute snpchip."
+    print("Execute snpchip.")
     data = json.loads(request.stream.read())
     snps = data['snps']
     platforms = data['platforms']
     token = request.args.get('token', False)
-    print 'snps: ' + snps
-    print 'platforms: ' + platforms
+    print('snps: ' + snps)
+    print('platforms: ' + platforms)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -772,7 +772,7 @@ def snpchip():
         if request.user_agent.browser is not None:
             web = True
             reference = str(data['reference'])
-            print 'request: ' + reference
+            print('request: ' + reference)
             snplst = tmp_dir + 'snps' + reference + '.txt'
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
@@ -787,7 +787,7 @@ def snpchip():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
-        print 'request: ' + reference
+        print('request: ' + reference)
         snplst = tmp_dir + 'snps' + reference + '.txt'
         with open(snplst, 'w') as f:
             f.write(snps.lower())
@@ -820,17 +820,17 @@ def snpchip():
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
 def snpclip():
-    print 'Execute snpclip.'
+    print('Execute snpclip.')
     data = json.loads(request.stream.read())
     snps = data['snps']
     pop = data['pop']
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
-    print 'snps: ' + snps
-    print 'pop: ' + pop
-    print 'r2_threshold: ' + r2_threshold
-    print 'maf_threshold: ' + maf_threshold
+    print('snps: ' + snps)
+    print('pop: ' + pop)
+    print('r2_threshold: ' + r2_threshold)
+    print('maf_threshold: ' + maf_threshold)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
