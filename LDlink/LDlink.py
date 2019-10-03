@@ -468,7 +468,7 @@ def ldhap():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         print('request: ' + str(reference))
         snplst = tmp_dir + 'snps' + reference + '.txt'
         with open(snplst, 'w') as f:
@@ -555,7 +555,7 @@ def ldmatrix():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         print('request: ' + str(reference)) 
         snplst = tmp_dir + 'snps' + str(reference) + '.txt'
         with open(snplst, 'w') as f:
@@ -618,7 +618,7 @@ def ldpair():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
@@ -674,7 +674,7 @@ def ldpop():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
@@ -728,7 +728,7 @@ def ldproxy():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
@@ -786,7 +786,7 @@ def snpchip():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         print('request: ' + reference)
         snplst = tmp_dir + 'snps' + reference + '.txt'
         with open(snplst, 'w') as f:
@@ -878,7 +878,7 @@ def snpclip():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + `random.randint(0, 10000)`
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snpfile = str(tmp_dir + 'snps' + reference + '.txt')
         snplist = snps.splitlines()
         with open(snpfile, 'w') as f:
