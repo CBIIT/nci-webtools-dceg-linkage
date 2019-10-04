@@ -547,7 +547,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	else:
 		threads=4
 
-	block=len(assoc_coords)/threads
+	block=len(assoc_coords)//threads
 	commands=[]
 	print("Create LDassoc_sub subprocesses")
 	for i in range(threads):
