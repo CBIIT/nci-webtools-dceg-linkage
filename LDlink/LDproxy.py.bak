@@ -77,8 +77,8 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
             return snp
         else:
             snp_info_lst = get_rsnum(snp)
-            print("snp_info_lst")
-            print(snp_info_lst)
+            print "snp_info_lst"
+            print snp_info_lst
             if snp_info_lst != None:
                 if len(snp_info_lst) > 1:
                     var_id = "rs" + snp_info_lst[0]['id']
@@ -120,7 +120,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     if snp_coord == None:
         output["error"] = snp + " is not in dbSNP build " + dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+        print >> out_json, json_output
         out_json.close()
         return("", "")
 
@@ -133,7 +133,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
+            print >> out_json, json_output
             out_json.close()
             return("", "")
 
@@ -168,7 +168,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     if len(vcf) == 0:
         output["error"] = snp + " is not in 1000G reference panel."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+        print >> out_json, json_output
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
@@ -183,7 +183,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         if geno == []:
             output["error"] = snp + " is not in 1000G reference panel."
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
+            print >> out_json, json_output
             out_json.close()
             subprocess.call("rm " + tmp_dir + "pops_" +
                             request + ".txt", shell=True)
@@ -203,7 +203,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     if "," in geno[3] or "," in geno[4]:
         output["error"] = snp + " is not a biallelic variant."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+        print >> out_json, json_output
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
@@ -228,7 +228,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         output["error"] = snp + \
             " is monoallelic in the " + pop + " population."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+        print >> out_json, json_output
         out_json.close()
         subprocess.call("rm " + tmp_dir + "pops_" +
                         request + ".txt", shell=True)
@@ -241,7 +241,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     if coord1 < 0:
         coord1 = 0
     coord2 = int(snp_coord['position']) + window
-    print("")
+    print ""
 
     # Calculate proxy LD statistics in parallel
     threads = 4
@@ -312,7 +312,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     outfile = open(tmp_dir + "proxy" + request + ".txt", "w")
     header = ["RS_Number", "Coord", "Alleles", "MAF", "Distance",
               "Dprime", "R2", "Correlated_Alleles", "RegulomeDB", "Function"]
-    print("\t".join(header), file=outfile)
+    print >> outfile, "\t".join(header)
 
     ucsc_track = {}
     ucsc_track["header"] = ["chr", "pos", "rsid", "stat"]
@@ -333,7 +333,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     temp = [query_snp["RS"], query_snp["Coord"], query_snp["Alleles"], query_snp["MAF"], str(query_snp["Dist"]), str(
             query_snp["Dprime"]), str(query_snp["R2"]), query_snp["Corr_Alleles"], query_snp["RegulomeDB"], query_snp["Function"]]
-    print("\t".join(temp), file=outfile)
+    print >> outfile, "\t".join(temp)
 
     chr, pos = query_snp["Coord"].split(':')
     if r2_d == "r2":
@@ -388,7 +388,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
             temp = [proxy_info["RS"], proxy_info["Coord"], proxy_info["Alleles"], proxy_info["MAF"], str(proxy_info["Dist"]), str(
                     proxy_info["Dprime"]), str(proxy_info["R2"]), proxy_info["Corr_Alleles"], proxy_info["RegulomeDB"], proxy_info["Function"]]
-            print("\t".join(temp), file=outfile)
+            print >> outfile, "\t".join(temp)
 
             chr, pos = proxy_info["Coord"].split(':')
             if r2_d == "r2":
@@ -410,91 +410,91 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
                 ucsc_track["0.0-0.2"].append(temp2)
 
     track = open(tmp_dir + "track" + request + ".txt", "w")
-    print("browser position chr" + \
-        str(snp_coord['chromosome']) + ":" + str(coord1) + "-" + str(coord2), file=track)
-    print("", file=track)
+    print >> track, "browser position chr" + \
+        str(snp_coord['chromosome']) + ":" + str(coord1) + "-" + str(coord2)
+    print >> track, ""
 
     if r2_d == "r2":
-        print("track type=bedGraph name=\"R2 Plot\" description=\"Plot of R2 values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar maxHeightPixels=60", file=track)
+        print >> track, "track type=bedGraph name=\"R2 Plot\" description=\"Plot of R2 values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar maxHeightPixels=60"
     else:
-        print("track type=bedGraph name=\"D Prime Plot\" description=\"Plot of D prime values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar maxHeightPixels=60", file=track)
+        print >> track, "track type=bedGraph name=\"D Prime Plot\" description=\"Plot of D prime values\" color=50,50,50 visibility=full alwaysZero=on graphType=bar maxHeightPixels=60"
 
-    print("\t".join(
-        [str(ucsc_track["query_snp"][i]) for i in [0, 1, 1, 3]]), file=track)
+    print >> track, "\t".join(
+        [str(ucsc_track["query_snp"][i]) for i in [0, 1, 1, 3]])
     if len(ucsc_track["0.8-1.0"]) > 0:
         for var in ucsc_track["0.8-1.0"]:
-            print("\t".join([str(var[i]) for i in [0, 1, 1, 3]]), file=track)
+            print >> track, "\t".join([str(var[i]) for i in [0, 1, 1, 3]])
     if len(ucsc_track["0.6-0.8"]) > 0:
         for var in ucsc_track["0.6-0.8"]:
-            print("\t".join([str(var[i]) for i in [0, 1, 1, 3]]), file=track)
+            print >> track, "\t".join([str(var[i]) for i in [0, 1, 1, 3]])
     if len(ucsc_track["0.4-0.6"]) > 0:
         for var in ucsc_track["0.4-0.6"]:
-            print("\t".join([str(var[i]) for i in [0, 1, 1, 3]]), file=track)
+            print >> track, "\t".join([str(var[i]) for i in [0, 1, 1, 3]])
     if len(ucsc_track["0.2-0.4"]) > 0:
         for var in ucsc_track["0.2-0.4"]:
-            print("\t".join([str(var[i]) for i in [0, 1, 1, 3]]), file=track)
+            print >> track, "\t".join([str(var[i]) for i in [0, 1, 1, 3]])
     if len(ucsc_track["0.0-0.2"]) > 0:
         for var in ucsc_track["0.0-0.2"]:
-            print("\t".join([str(var[i]) for i in [0, 1, 1, 3]]), file=track)
-    print("", file=track)
+            print >> track, "\t".join([str(var[i]) for i in [0, 1, 1, 3]])
+    print >> track, ""
 
-    print("track type=bed name=\"" + snp + \
-        "\" description=\"Query Variant: " + snp + "\" color=108,108,255", file=track)
-    print("\t".join([ucsc_track["query_snp"][i]
-                               for i in [0, 1, 1, 2]]), file=track)
-    print("", file=track)
+    print >> track, "track type=bed name=\"" + snp + \
+        "\" description=\"Query Variant: " + snp + "\" color=108,108,255"
+    print >> track, "\t".join([ucsc_track["query_snp"][i]
+                               for i in [0, 1, 1, 2]])
+    print >> track, ""
 
     if len(ucsc_track["0.8-1.0"]) > 0:
         if r2_d == "r2":
-            print("track type=bed name=\"0.8<R2<=1.0\" description=\"Proxy Variants with 0.8<R2<=1.0\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.8<R2<=1.0\" description=\"Proxy Variants with 0.8<R2<=1.0\" color=198,129,0"
         else:
-            print("track type=bed name=\"0.8<D'<=1.0\" description=\"Proxy Variants with 0.8<D'<=1.0\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.8<D'<=1.0\" description=\"Proxy Variants with 0.8<D'<=1.0\" color=198,129,0"
         for var in ucsc_track["0.8-1.0"]:
-            print("\t".join([var[i] for i in [0, 1, 1, 2]]), file=track)
-        print("", file=track)
+            print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
+        print >> track, ""
 
     if len(ucsc_track["0.6-0.8"]) > 0:
         if r2_d == "r2":
-            print("track type=bed name=\"0.6<R2<=0.8\" description=\"Proxy Variants with 0.6<R2<=0.8\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.6<R2<=0.8\" description=\"Proxy Variants with 0.6<R2<=0.8\" color=198,129,0"
         else:
-            print("track type=bed name=\"0.6<D'<=0.8\" description=\"Proxy Variants with 0.6<D'<=0.8\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.6<D'<=0.8\" description=\"Proxy Variants with 0.6<D'<=0.8\" color=198,129,0"
         for var in ucsc_track["0.6-0.8"]:
-            print("\t".join([var[i] for i in [0, 1, 1, 2]]), file=track)
-        print("", file=track)
+            print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
+        print >> track, ""
 
     if len(ucsc_track["0.4-0.6"]) > 0:
         if r2_d == "r2":
-            print("track type=bed name=\"0.4<R2<=0.6\" description=\"Proxy Variants with 0.4<R2<=0.6\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.4<R2<=0.6\" description=\"Proxy Variants with 0.4<R2<=0.6\" color=198,129,0"
         else:
-            print("track type=bed name=\"0.4<D'<=0.6\" description=\"Proxy Variants with 0.4<D'<=0.6\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.4<D'<=0.6\" description=\"Proxy Variants with 0.4<D'<=0.6\" color=198,129,0"
         for var in ucsc_track["0.4-0.6"]:
-            print("\t".join([var[i] for i in [0, 1, 1, 2]]), file=track)
-        print("", file=track)
+            print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
+        print >> track, ""
 
     if len(ucsc_track["0.2-0.4"]) > 0:
         if r2_d == "r2":
-            print("track type=bed name=\"0.2<R2<=0.4\" description=\"Proxy Variants with 0.2<R2<=0.4\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.2<R2<=0.4\" description=\"Proxy Variants with 0.2<R2<=0.4\" color=198,129,0"
         else:
-            print("track type=bed name=\"0.2<D'<=0.4\" description=\"Proxy Variants with 0.2<D'<=0.4\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.2<D'<=0.4\" description=\"Proxy Variants with 0.2<D'<=0.4\" color=198,129,0"
         for var in ucsc_track["0.2-0.4"]:
-            print("\t".join([var[i] for i in [0, 1, 1, 2]]), file=track)
-        print("", file=track)
+            print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
+        print >> track, ""
 
     if len(ucsc_track["0.0-0.2"]) > 0:
         if r2_d == "r2":
-            print("track type=bed name=\"0.0<R2<=0.2\" description=\"Proxy Variants with 0.0<R2<=0.2\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.0<R2<=0.2\" description=\"Proxy Variants with 0.0<R2<=0.2\" color=198,129,0"
         else:
-            print("track type=bed name=\"0.0<D'<=0.2\" description=\"Proxy Variants with 0.0<D'<=0.2\" color=198,129,0", file=track)
+            print >> track, "track type=bed name=\"0.0<D'<=0.2\" description=\"Proxy Variants with 0.0<D'<=0.2\" color=198,129,0"
         for var in ucsc_track["0.0-0.2"]:
-            print("\t".join([var[i] for i in [0, 1, 1, 2]]), file=track)
-        print("", file=track)
+            print >> track, "\t".join([var[i] for i in [0, 1, 1, 2]])
+        print >> track, ""
 
     output["aaData"] = rows
     output["proxy_snps"] = proxies
 
     # Output JSON and text file
     json_output = json.dumps(output, sort_keys=True, indent=2)
-    print(json_output, file=out_json)
+    print >> out_json, json_output
     out_json.close()
 
     outfile.close()
@@ -584,7 +584,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     xr = Range1d(start=coord1 / 1000000.0 - whitespace,
                  end=coord2 / 1000000.0 + whitespace)
     yr = Range1d(start=-0.03, end=1.03)
-    sup_2 = "\u00B2"
+    sup_2 = u"\u00B2"
 
     proxy_plot = figure(
         title="Proxies for " + snp + " in " + pop,
@@ -834,12 +834,12 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     # Print run time statistics
     pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
-    print("\nNumber of Individuals: " + str(len(pop_list)))
+    print "\nNumber of Individuals: " + str(len(pop_list))
 
-    print("SNPs in Region: " + str(len(out_prox)))
+    print "SNPs in Region: " + str(len(out_prox))
 
     duration = time.time() - start_time
-    print("Run time: " + str(duration) + " seconds\n")
+    print "Run time: " + str(duration) + " seconds\n"
 
     # Remove temporary files
     # subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
@@ -870,7 +870,7 @@ def main():
         web = sys.argv[4]
         r2_d = sys.argv[5]
     else:
-        print("Correct useage is: LDproxy.py snp populations request (optional: r2_d)")
+        print "Correct useage is: LDproxy.py snp populations request (optional: r2_d)"
         sys.exit()
 
     # Run function
@@ -885,28 +885,28 @@ def main():
     except KeyError:
         head = ["RS_Number", "Coord", "Alleles", "MAF", "Distance", "Dprime",
                 "R2", "Correlated_Alleles", "RegulomeDB", "Functional_Class"]
-        print("\t".join(head))
+        print "\t".join(head)
         temp = [json_dict["query_snp"]["RS"], json_dict["query_snp"]["Coord"], json_dict["query_snp"]["Alleles"], json_dict["query_snp"]["MAF"], str(json_dict["query_snp"]["Dist"]), str(
                 json_dict["query_snp"]["Dprime"]), str(json_dict["query_snp"]["R2"]), json_dict["query_snp"]["Corr_Alleles"], json_dict["query_snp"]["RegulomeDB"], json_dict["query_snp"]["Function"]]
-        print("\t".join(temp))
+        print "\t".join(temp)
         for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
             temp = [json_dict["proxy_snps"][k]["RS"], json_dict["proxy_snps"][k]["Coord"], json_dict["proxy_snps"][k]["Alleles"], json_dict["proxy_snps"][k]["MAF"], str(json_dict["proxy_snps"][k]["Dist"]), str(
                     json_dict["proxy_snps"][k]["Dprime"]), str(json_dict["proxy_snps"][k]["R2"]), json_dict["proxy_snps"][k]["Corr_Alleles"], json_dict["proxy_snps"][k]["RegulomeDB"], json_dict["proxy_snps"][k]["Function"]]
-            print("\t".join(temp))
-        print("")
+            print "\t".join(temp)
+        print ""
 
     else:
-        print("")
-        print(json_dict["error"])
-        print("")
+        print ""
+        print json_dict["error"]
+        print ""
 
     try:
         json_dict["warning"]
     except KeyError:
-        print("")
+        print ""
     else:
-        print("WARNING: " + json_dict["warning"] + "!")
-        print("")
+        print "WARNING: " + json_dict["warning"] + "!"
+        print ""
 
 
 if __name__ == "__main__":
