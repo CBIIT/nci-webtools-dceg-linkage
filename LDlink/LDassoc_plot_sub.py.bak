@@ -550,7 +550,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     whitespace=0.01
     xr=Range1d(start=coord1/1000000.0-whitespace, end=coord2/1000000.0+whitespace)
     yr=Range1d(start=-0.03, end=max(y)*1.03)
-    sup_2="\u00B2"
+    sup_2=u"\u00B2"
 
     assoc_plot=figure(
                 title="P-values and Regional LD for "+snp+" in "+pop,
@@ -925,7 +925,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
-    print("Bokeh high quality image export complete!")
+    print "Bokeh high quality image export complete!"
 
     # Return plot output
     return None
