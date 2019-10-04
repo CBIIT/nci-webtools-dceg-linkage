@@ -193,6 +193,8 @@ def calculate_hap(snplst, pop, request, web):
     # cur_chr.close()
     # conn_chr.close()
 
+    print("SNP COORDS", snp_coords)
+
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
             dbsnp_version + ": " + ", ".join(warn)
