@@ -287,6 +287,8 @@ def calculate_hap(snplst, pop, request, web):
     pos_lst = []
 
     for g in range(h+1, len(vcf)):
+        print("GENO RAW", vcf[g])
+        print("GENO DECODED", vcf[g].decode('utf-8'))
         geno = vcf[g].decode('utf-8').strip().split()
         if geno[1] not in snp_pos:
             if "warning" in output:
