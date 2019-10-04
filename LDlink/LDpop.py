@@ -178,7 +178,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # display superpopulation and all subpopulations
     if "ALL" in pop_split:
         # pop_split.remove("ALL")
-        pop_split = pop_split + pop_groups["ALL"] + pop_groups.keys()
+        pop_split = pop_split + pop_groups["ALL"] + list(pop_groups.keys())
         pop_split = list(set(pop_split)) # unique elements
     else:
         if "AFR" in pop_split:
@@ -320,8 +320,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = proc2_h.stdout.readlines()[0].strip().split()
 
-    rs1_dict = dict(zip(head1, geno1))
-    rs2_dict = dict(zip(head2, geno2))
+    rs1_dict = dict(list(zip(head1, geno1)))
+    rs2_dict = dict(list(zip(head2, geno2)))
 
     # if snp1 != rs1_dict["ID"]:
     #     if "warning" in output:
@@ -426,9 +426,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 hap[pop][hap2] += 1
 
     # Remove missing haplotypes
-    pops = hap.keys()
+    pops = list(hap.keys())
     for pop in pops:
-        keys = hap[pop].keys()
+        keys = list(hap[pop].keys())
         for key in keys:
             if "." in key:
                 hap[pop].pop(key, None)
@@ -475,8 +475,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 rs2_dict["REF"] : str(pop_freqs["ref_freq_snp2"][pops]) + "%", \
                 rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"
             }, 
-            "D'" : matrix_values[pops]["D_prime"] if isinstance(matrix_values[pops]["D_prime"], basestring) else round(float(matrix_values[pops]["D_prime"]), 4), \
-            "R2" : matrix_values[pops]["r2"] if isinstance(matrix_values[pops]["r2"], basestring) else round(float(matrix_values[pops]["r2"]), 4)
+            "D'" : matrix_values[pops]["D_prime"] if isinstance(matrix_values[pops]["D_prime"], str) else round(float(matrix_values[pops]["D_prime"]), 4), \
+            "R2" : matrix_values[pops]["r2"] if isinstance(matrix_values[pops]["r2"], str) else round(float(matrix_values[pops]["r2"]), 4)
         }
     
     # print json.dumps(output)
@@ -659,10 +659,10 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     rs1_map_data = []
     rs2_map_data = []
     rs1_rs2_LD_map_data = []
-    print output.keys()
+    print(list(output.keys()))
     # populate table data
-    for key in output.keys():
-        if key in pop_order.keys():
+    for key in list(output.keys()):
+        if key in list(pop_order.keys()):
             # print key, "parse for table"
             key_order = pop_order[key]
             key_pop = output[key]['Population']
@@ -675,12 +675,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             key_R_2 = output[key]['R2']
             # set up data for ldpair link
             ldpair_pops = [key]
-            if key in pop_groups.keys():
+            if key in list(pop_groups.keys()):
                 ldpair_pops = pop_groups[key]
             ldpair_data = [snp1, snp2, "%2B".join(ldpair_pops)]
             table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
             # populate map data
-            if key not in pop_groups.keys():
+            if key not in list(pop_groups.keys()):
                 rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
                 rs1_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq])
                 rs2_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs2_allele_freq])
