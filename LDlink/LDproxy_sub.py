@@ -178,7 +178,7 @@ al = "("+new_alleles[0]+"/"+new_alleles[1]+")"
 
 
 # Import Window around SNP
-vcf = csv.reader(proc.stdout.readlines(), dialect="excel-tab")
+vcf = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
 
 # Loop past file information and find header
 head = next(vcf, None)

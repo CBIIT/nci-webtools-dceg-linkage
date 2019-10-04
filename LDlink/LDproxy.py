@@ -155,7 +155,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
 
     tabix_snp_h = "tabix -H {0} | grep CHROM".format(vcf_file)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-    head = proc_h.stdout.readlines()[0].strip().split()
+    head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
         vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
@@ -283,7 +283,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     out_prox = []
     for i in range(len(out_raw)):
         for j in range(len(out_raw[i])):
-            col = out_raw[i][j].strip().split("\t")
+            col = out_raw[i][j].decode('utf-8').strip().split("\t")
             col[6] = int(col[6])
             col[7] = float(col[7])
             col[8] = float(col[8])
