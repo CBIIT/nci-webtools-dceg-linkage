@@ -230,12 +230,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
-    vcf1 = proc1.stdout.readlines()
+    vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
     vcf_rs2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
-    vcf2 = proc2.stdout.readlines()
+    vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
     # Check if SNPs are in 1000G reference panel
     # SNP1
@@ -314,11 +314,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # Get headers
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    head1 = proc1_h.stdout.readlines()[0].strip().split()
+    head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
     tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_rs2)
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    head2 = proc2_h.stdout.readlines()[0].strip().split()
+    head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 
     rs1_dict = dict(list(zip(head1, geno1)))
     rs2_dict = dict(list(zip(head2, geno2)))
