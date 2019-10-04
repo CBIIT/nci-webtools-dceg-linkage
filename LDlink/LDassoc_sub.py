@@ -146,7 +146,7 @@ def get_coords(db, rsid):
 
 
 # Import SNP VCF files
-vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+vcf = [x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
 geno = vcf[0].strip().split()
 
 new_alleles = set_alleles(geno[3], geno[4])
@@ -158,7 +158,7 @@ al = "("+new_alleles[0]+"/"+new_alleles[1]+")"
 
 
 # Import Window around SNP
-vcf = csv.reader(proc.stdout.readlines(), dialect="excel-tab")
+vcf = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
 
 # Loop past file information and find header
 head = next(vcf, None)

@@ -389,14 +389,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 			tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
 			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-			head=proc_h.stdout.readlines()[0].strip().split()
+			head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
 			tabix_snp="tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
 			subprocess.call(tabix_snp, shell=True)
 
 
 			# Check lowest P SNP is in the 1000G population and not monoallelic
-			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+			vcf=[x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
 
 			if len(vcf)==0:
 				if "warning" in output:
@@ -460,14 +460,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 		tabix_snp_h="tabix -H {0} | grep CHROM".format(vcf_file)
 		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-		head=proc_h.stdout.readlines()[0].strip().split()
+		head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
 		tabix_snp="tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf")
 		subprocess.call(tabix_snp, shell=True)
 
 
 		# Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
-		vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+		vcf=[x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
 
 		if len(vcf)==0:
 			output["error"]=snp+" is not in 1000G reference panel."
@@ -914,7 +914,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
 	subprocess.call(tabix_recomb, shell=True)
 	filename=tmp_dir+"recomb_"+request+".txt"
-	recomb_raw=open(filename).readlines()
+	recomb_raw=[x.decode('utf-8') for x in open(filename).readlines()]
 	recomb_x=[]
 	recomb_y=[]
 	for i in range(len(recomb_raw)):
@@ -980,7 +980,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 		subprocess.call(tabix_gene, shell=True)
 		filename=tmp_dir+"genes_"+request+".txt"
-		genes_raw=open(filename).readlines()
+		genes_raw=[x.decode('utf-8') for x in open(filename).readlines()]
 
 		genes_plot_start=[]
 		genes_plot_end=[]
@@ -1131,7 +1131,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
 		subprocess.call(tabix_gene_c, shell=True)
 		filename_c=tmp_dir+"genes_c_"+request+".txt"
-		genes_c_raw=open(filename_c).readlines()
+		genes_c_raw=[x.decode('utf-8') for x in open(filename_c).readlines()]
 
 		genes_c_plot_start=[]
 		genes_c_plot_end=[]
