@@ -258,7 +258,9 @@ def calculate_hap(snplst, pop, request, web):
         return(a1_n, a2_n)
 
     # Import SNP VCF files
-    vcf = proc.stdout.readlines()
+    print("VCF RAW", proc.stdout.readlines())
+    vcf = proc.stdout.decode('utf-8').readlines()
+    print("VCF DECODED", vcf)
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
@@ -289,9 +291,9 @@ def calculate_hap(snplst, pop, request, web):
     pos_lst = []
 
     for g in range(h+1, len(vcf)):
-        print("GENO RAW", vcf[g])
-        print("GENO DECODED", vcf[g].decode('utf-8'))
-        geno = vcf[g].decode('utf-8').strip().split()
+        # print("GENO RAW", vcf[g])
+        # print("GENO DECODED", vcf[g].decode('utf-8'))
+        geno = vcf[g].strip().split()
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
