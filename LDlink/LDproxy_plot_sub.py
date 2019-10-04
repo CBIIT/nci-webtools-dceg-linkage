@@ -175,7 +175,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     # Calculate proxy LD statistics in parallel
     threads = 4
-    block = (2 * window) / 4
+    block = (2 * window) // 4
     commands = []
     for i in range(threads):
         if i == min(range(threads)) and i == max(range(threads)):
