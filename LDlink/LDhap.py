@@ -24,9 +24,9 @@ def calculate_hap(snplst, pop, request, web):
     # snp_dir = config['data']['snp_dir']
     # snp_chr_dir = config['data']['snp_chr_dir']
     # snp_pos_offset = config['data']['snp_pos_offset']
-    dbsnp_version = config['data']['dbsnp_version'].decode('utf-8')
-    pop_dir = config['data']['pop_dir'].decode('utf-8')
-    vcf_dir = config['data']['vcf_dir'].decode('utf-8')
+    dbsnp_version = config['data']['dbsnp_version']
+    pop_dir = config['data']['pop_dir']
+    vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
 
