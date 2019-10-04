@@ -48,7 +48,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = proc.stdout.readlines()
+    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -160,7 +160,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         return(a1_n, a2_n)
 
     # Import SNP VCF files
-    vcf = proc.stdout.readlines()
+    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     h = 0
     while vcf[h][0:2] == "##":
