@@ -258,8 +258,7 @@ def calculate_hap(snplst, pop, request, web):
         return(a1_n, a2_n)
 
     # Import SNP VCF files
-    print("VCF RAW", proc.stdout.readlines())
-    vcf = proc.stdout.decode('utf-8').readlines()
+    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
     print("VCF DECODED", vcf)
 
     # Make sure there are genotype data in VCF file
