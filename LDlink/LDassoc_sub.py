@@ -146,7 +146,7 @@ def get_coords(db, rsid):
 
 
 # Import SNP VCF files
-vcf = [x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
+vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 geno = vcf[0].strip().split()
 
 new_alleles = set_alleles(geno[3], geno[4])

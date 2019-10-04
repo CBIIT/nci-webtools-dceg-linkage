@@ -278,7 +278,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
             # Check lowest P SNP is in the 1000G population and not monoallelic from LDassoc.py output file
-            vcf=[x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
+            vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
             if len(vcf)==0:
                 continue
@@ -329,7 +329,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
 
         # Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
-        vcf=[x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
+        vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
         if len(vcf)==0:
             subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)

@@ -396,7 +396,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 
 			# Check lowest P SNP is in the 1000G population and not monoallelic
-			vcf=[x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
+			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
 			if len(vcf)==0:
 				if "warning" in output:
@@ -467,7 +467,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 
 		# Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
-		vcf=[x.decode('utf-8') for x in open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()]
+		vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
 		if len(vcf)==0:
 			output["error"]=snp+" is not in 1000G reference panel."
