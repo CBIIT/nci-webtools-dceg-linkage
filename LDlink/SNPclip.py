@@ -75,7 +75,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = proc.stdout.readlines()
+    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -284,7 +284,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     # Import SNP VCF file
     hap_dict = {}
-    vcf = proc.stdout.readlines()
+    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
