@@ -584,7 +584,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	out_prox=[]
 	for i in range(len(out_raw)):
 		for j in range(len(out_raw[i])):
-			col=out_raw[i][j].strip().split("\t")
+			col=out_raw[i][j].decode('utf-8').strip().split("\t")
 			col[6]=int(col[6])
 			col[7]=float(col[7])
 			col[8]=float(col[8])
