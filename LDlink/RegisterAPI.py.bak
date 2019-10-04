@@ -29,7 +29,7 @@ def smtp_send(smtp, email_account, email, packet):
     # retries twice upon failure (often connection timeout)
     try:
         smtp_debug = smtp.sendmail("NCILDlinkWebAdmin@mail.nih.gov", email, packet.as_string())
-        print(smtp_debug)
+        print smtp_debug
         smtp.quit()
     except Exception:
         smtp.quit()
@@ -43,7 +43,7 @@ def smtp_send(smtp, email_account, email, packet):
 
 # email user token
 def emailUser(email, token, expiration, firstname, token_expiration, email_account, url_root):
-    print("sending message registered")
+    print "sending message registered"
     new_url_root = url_root.replace('http://', 'https://')
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token"
@@ -60,7 +60,7 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
 
 # email user when their token is blocked
 def emailUserBlocked(email, email_account, url_root):
-    print("sending message blocked")
+    print "sending message blocked"
     new_url_root = url_root.replace('http://', 'https://')
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Blocked"
@@ -77,7 +77,7 @@ def emailUserBlocked(email, email_account, url_root):
 
 # email user when their token is unblocked
 def emailUserUnblocked(email, email_account):
-    print("sending message unblocked")
+    print "sending message unblocked"
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Unblocked"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
@@ -98,7 +98,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
     api_superuser_token = getToken(api_superuser)
-    print("sending message justification")
+    print "sending message justification"
     new_url_root = url_root.replace('http://', 'https://')
     bool_blocked = ""
     if blocked == "1":
