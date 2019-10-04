@@ -193,7 +193,7 @@ def calculate_hap(snplst, pop, request, web):
     # cur_chr.close()
     # conn_chr.close()
 
-    print("SNP COORDS", snp_coords)
+    # print("SNP COORDS", snp_coords)
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
@@ -259,7 +259,7 @@ def calculate_hap(snplst, pop, request, web):
 
     # Import SNP VCF files
     vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
-    print("VCF DECODED", vcf)
+    # print("VCF DECODED", vcf)
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
@@ -356,6 +356,7 @@ def calculate_hap(snplst, pop, request, web):
             count0 = 0
             count1 = 0
             for i in range(len(index)):
+                print("geno[index[i]]", geno[index[i]])
                 if geno[index[i]] == "0|0":
                     hap1[i].append(a1)
                     hap2[i].append(a1)
