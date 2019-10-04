@@ -278,6 +278,9 @@ def calculate_hap(snplst, pop, request, web):
         if head[i] in pop_ids:
             index.append(i)
 
+    print("HEAD", head)
+    print("INDEX", index)
+
     hap1 = [[]]
     for i in range(len(index)-1):
         hap1.append([])
@@ -293,6 +296,7 @@ def calculate_hap(snplst, pop, request, web):
         # print("GENO RAW", vcf[g])
         # print("GENO DECODED", vcf[g].decode('utf-8'))
         geno = vcf[g].strip().split()
+        print("GENO", geno)
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
