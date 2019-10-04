@@ -572,6 +572,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
+	print("out_raw", out_raw)
 	pool.close()
 	pool.join()
 
