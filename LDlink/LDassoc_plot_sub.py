@@ -416,7 +416,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     out_prox=[]
     for i in range(len(out_raw)):
         for j in range(len(out_raw[i])):
-            col=out_raw[i][j].strip().split("\t")
+            col=out_raw[i][j].decode('utf-8').strip().split("\t")
             col[6]=int(col[6])
             col[7]=float(col[7])
             col[8]=float(col[8])
@@ -565,7 +565,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Add recombination rate from LDassoc.py output file
     filename=tmp_dir+"recomb_"+request+".txt"
-    recomb_raw=[x.decode('utf-8') for x in open(filename).readlines()]
+    recomb_raw=open(filename).readlines()
     recomb_x=[]
     recomb_y=[]
     for i in range(len(recomb_raw)):
@@ -630,7 +630,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     if myargs['transcript']==True:
         # Get genes from LDassoc.py output file
         filename=tmp_dir+"genes_"+request+".txt"
-        genes_raw=[x.decode('utf-8') for x in open(filename).readlines()]
+        genes_raw=open(filename).readlines()
 
         genes_plot_start=[]
         genes_plot_end=[]
@@ -780,7 +780,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     else:
         # Get genes from LDassoc.py output file
         filename_c=tmp_dir+"genes_c_"+request+".txt"
-        genes_c_raw=[x.decode('utf-8') for x in open(filename_c).readlines()]
+        genes_c_raw=open(filename_c).readlines()
 
         genes_c_plot_start=[]
         genes_c_plot_end=[]

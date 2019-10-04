@@ -915,7 +915,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	tabix_recomb="tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
 	subprocess.call(tabix_recomb, shell=True)
 	filename=tmp_dir+"recomb_"+request+".txt"
-	recomb_raw=[x.decode('utf-8') for x in open(filename).readlines()]
+	recomb_raw=open(filename).readlines()
 	recomb_x=[]
 	recomb_y=[]
 	for i in range(len(recomb_raw)):
@@ -981,7 +981,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		tabix_gene="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_dir, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 		subprocess.call(tabix_gene, shell=True)
 		filename=tmp_dir+"genes_"+request+".txt"
-		genes_raw=[x.decode('utf-8') for x in open(filename).readlines()]
+		genes_raw=open(filename).readlines()
 
 		genes_plot_start=[]
 		genes_plot_end=[]
@@ -1132,7 +1132,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		tabix_gene_c="tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_dir, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
 		subprocess.call(tabix_gene_c, shell=True)
 		filename_c=tmp_dir+"genes_c_"+request+".txt"
-		genes_c_raw=[x.decode('utf-8') for x in open(filename_c).readlines()]
+		genes_c_raw=open(filename_c).readlines()
 
 		genes_c_plot_start=[]
 		genes_c_plot_end=[]
