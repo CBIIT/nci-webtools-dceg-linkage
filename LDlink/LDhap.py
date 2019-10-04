@@ -21,9 +21,6 @@ def calculate_hap(snplst, pop, request, web):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    # snp_dir = config['data']['snp_dir']
-    # snp_chr_dir = config['data']['snp_chr_dir']
-    # snp_pos_offset = config['data']['snp_pos_offset']
     dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
@@ -37,15 +34,12 @@ def calculate_hap(snplst, pop, request, web):
     # Create JSON output
     output = {}
 
-    # Open SNP list file
+    # Open Inputted SNPs list file
     snps_raw = open(snplst).readlines()
     if len(snps_raw) > 30:
         output["error"] = "Maximum variant list is 30 RS numbers or coordinates. Your list contains " + \
             str(len(snps_raw))+" entries."
         return(json.dumps(output, sort_keys=True, indent=2))
-
-    print("PRINT SNP LIST RAW ##########################")
-    print("snps raw", snps_raw)
 
     # Remove duplicate RS numbers and cast to lower case
     snps = []
@@ -53,9 +47,6 @@ def calculate_hap(snplst, pop, request, web):
         snp = snp_raw.lower().strip().split()
         if snp not in snps:
             snps.append(snp)
-
-    print("PRINT SNP LIST ##########################")
-    print("snps", snps)
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -74,16 +65,6 @@ def calculate_hap(snplst, pop, request, web):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    # # Connect to snp database
-    # conn = sqlite3.connect(snp_dir)
-    # conn.text_factory = str
-    # cur = conn.cursor()
-
-    # # Connect to snp chr database for genomic coordinates queries
-    # conn_chr = sqlite3.connect(snp_chr_dir)
-    # conn_chr.text_factory = str
-    # cur_chr = conn_chr.cursor()
-
     # Connect to Mongo snp database
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
@@ -96,10 +77,6 @@ def calculate_hap(snplst, pop, request, web):
         query_results = db.dbsnp151.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
-        # rsid = rsid.strip("rs")
-        # t = (rsid,)
-        # cur.execute("SELECT * FROM tbl_"+id[-1]+" WHERE id=?", t)
-        # return cur.fetchone()
 
     # Query genomic coordinates
     def get_rsnum(db, coord):
@@ -109,9 +86,6 @@ def calculate_hap(snplst, pop, request, web):
         query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
-        # t = (pos,)
-        # cur_chr.execute("SELECT * FROM chr_"+chro+" WHERE position=?", t)
-        # return cur_chr.fetchone()
 
     # Replace input genomic coordinates with variant ids (rsids)
     def replace_coords_rsid(db, snp_lst):
@@ -157,8 +131,7 @@ def calculate_hap(snplst, pop, request, web):
         return new_snp_lst
 
     snps = replace_coords_rsid(db, snps)
-    print("SNP INPUT LIST AFTER replace_coords_rsid(db, snps)")
-    print(str(snps))
+    print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
     snp_pos = []
@@ -184,16 +157,6 @@ def calculate_hap(snplst, pop, request, web):
                     warn.append(snp_i[0])
             else:
                 warn.append(snp_i[0])
-
-    # # Close snp connection
-    # cur.close()
-    # conn.close()
-
-    # # Close snp chr connection
-    # cur_chr.close()
-    # conn_chr.close()
-
-    # print("SNP COORDS", snp_coords)
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
@@ -259,7 +222,6 @@ def calculate_hap(snplst, pop, request, web):
 
     # Import SNP VCF files
     vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
-    # print("VCF DECODED", vcf)
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
@@ -278,9 +240,6 @@ def calculate_hap(snplst, pop, request, web):
         if head[i] in pop_ids:
             index.append(i)
 
-    print("HEAD", head)
-    print("INDEX", index)
-
     hap1 = [[]]
     for i in range(len(index)-1):
         hap1.append([])
@@ -293,10 +252,7 @@ def calculate_hap(snplst, pop, request, web):
     pos_lst = []
 
     for g in range(h+1, len(vcf)):
-        # print("GENO RAW", vcf[g])
-        # print("GENO DECODED", vcf[g].decode('utf-8'))
         geno = vcf[g].strip().split()
-        print("GENO", geno)
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
@@ -360,7 +316,6 @@ def calculate_hap(snplst, pop, request, web):
             count0 = 0
             count1 = 0
             for i in range(len(index)):
-                print("geno[index[i]]", geno[index[i]])
                 if geno[index[i]] == "0|0":
                     hap1[i].append(a1)
                     hap2[i].append(a1)
