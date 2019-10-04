@@ -237,7 +237,7 @@ for geno_n in vcf:
 
 
 for i in range(len(out)):
-    print "\t".join(str(j) for j in out[i])
+    print("\t".join(str(j) for j in out[i]))
 
 
 # Close SQLite connections
