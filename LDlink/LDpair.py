@@ -133,7 +133,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = proc.stdout.readlines()
+    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -146,7 +146,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
-    vcf1_offset = proc1_offset.stdout.readlines()
+    vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
 
     # SNP2
     vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
@@ -154,7 +154,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
-    vcf2_offset = proc2_offset.stdout.readlines()
+    vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
 
     vcf1_pos = snp1_coord['position']
     vcf2_pos = snp2_coord['position']
@@ -269,12 +269,12 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
     proc1_h = subprocess.Popen(
         tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    head1 = proc1_h.stdout.readlines()[0].strip().split()
+    head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
     tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_file2)
     proc2_h = subprocess.Popen(
         tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    head2 = proc2_h.stdout.readlines()[0].strip().split()
+    head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 
     # Combine phased genotypes
     geno = {}
