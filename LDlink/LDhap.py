@@ -223,6 +223,8 @@ def calculate_hap(snplst, pop, request, web):
     # Import SNP VCF files
     vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
+    print("VCF", vcf)
+
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
         output["error"] = "No query variants were found in 1000G VCF file"
