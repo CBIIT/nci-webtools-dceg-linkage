@@ -34,7 +34,7 @@ def main():
                     diff = present - locked
                 else:
                     diff = present - dateutil.parser.parse(locked, ignoretz=True)
-                diffMinutes = diff.seconds % 3600 / 60.0
+                diffMinutes = (diff.seconds % 3600) // 60.0
                 # if token is locked for over 15 mins, unlock
                 if diffMinutes > 15.0:
                     unlockTokens.append(user["token"])
