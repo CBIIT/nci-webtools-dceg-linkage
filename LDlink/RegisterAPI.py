@@ -43,13 +43,6 @@ def smtp_send(smtp, email_account, email, packet):
 
 # email user token
 def emailUser(email, token, expiration, firstname, token_expiration, email_account, url_root):
-    print("type email", type(email))
-    print("type token", type(token))
-    print("type expiration", type(expiration))
-    print("type firstname", type(firstname))
-    print("type token_expiration", type(token_expiration))
-    print("type email_account", type(email_account))
-    print("type url_root", type(url_root))
     print("sending message registered")
     new_url_root = url_root.replace('http://', 'https://')
     packet = MIMEMultipart()
