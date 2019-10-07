@@ -359,10 +359,10 @@ def checkUniqueToken(token):
 
 # generate unique access token for each user
 def generateToken():
-    token = binascii.b2a_hex(os.urandom(6))
+    token = binascii.b2a_hex(os.urandom(6)).decode('utf-8')
     # if true, generate another token - make sure example token is not generated
     while(checkUniqueToken(token) or token == "faketoken123"):
-        token = binascii.b2a_hex(os.urandom(6))
+        token = binascii.b2a_hex(os.urandom(6)).decode('utf-8')
     return token
 
 # get current date and time
