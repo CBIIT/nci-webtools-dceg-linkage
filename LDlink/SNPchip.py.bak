@@ -30,8 +30,8 @@ def get_platform_request(web):
         else:
             client = MongoClient('localhost', port)
     except ConnectionFailure:
-        print("MongoDB is down")
-        print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
+        print "MongoDB is down"
+        print "syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth"
         return "Failed to connect to server."
 
     db = client["LDLink"]
@@ -57,7 +57,7 @@ def convert_codeToPlatforms(platform_query, web):
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
         platforms.append(document["platform"])
-    print(platforms)
+    print platforms
     return platforms
 
 
@@ -122,8 +122,8 @@ def calculate_chip(snplst, platform_query, web, request):
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
+                print "snp_info_lst"
+                print snp_info_lst
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -197,7 +197,7 @@ def calculate_chip(snplst, platform_query, web, request):
         output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
             dbsnp_version + ".\n"
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+        print >> out_json, json_output
         out_json.close()
         createOutputFile(request)
         return json_output
@@ -266,7 +266,7 @@ def calculate_chip(snplst, platform_query, web, request):
         output["warning"] = error
     # Output JSON file
     json_output = json.dumps(output, sort_keys=True, indent=2)
-    print(json_output, file=out_json)
+    print >> out_json, json_output
     out_json.close()
     createOutputFile(request)
 
@@ -287,38 +287,38 @@ def createOutputFile(request):
 
     # Header
     header = ["RS Number", "Position (GRCh37)", "Arrays"]
-    print("\t".join(header), file=details_file)
+    print >>details_file, "\t".join(header)
 
     # Body
     for i in range(0, len(rs_dict)):
-        print("\t".join(rs_dict[str(i)]), file=details_file)
+        print >>details_file, "\t".join(rs_dict[str(i)])
 
     # Footer
     try:
         json_dict["warning"]
     except KeyError:
-        print("", file=details_file)
+        print >>details_file, ""
     else:
-        print(json_dict["warning"])
+        print json_dict["warning"]
         if(json_dict["warning"] != ""):
-            print("", file=details_file)
-            print("WARNING: "+json_dict["warning"], file=details_file)
-            print("", file=details_file)
-            print("")
-            print("WARNING: "+json_dict["warning"])
+            print >>details_file, ""
+            print >>details_file, "WARNING: "+json_dict["warning"]
+            print >>details_file, ""
+            print ""
+            print "WARNING: "+json_dict["warning"]
 
     try:
         json_dict["error"]
     except KeyError:
-        print("", file=details_file)
+        print >>details_file, ""
     else:
-        print(json_dict["error"])
+        print json_dict["error"]
         if (json_dict["error"] != ""):
-            print("", file=details_file)
-            print("ERROR: "+json_dict["error"], file=details_file)
-            print("", file=details_file)
-            print("")
-            print("ERROR: "+json_dict["error"])
+            print >>details_file, ""
+            print >>details_file, "ERROR: "+json_dict["error"]
+            print >>details_file, ""
+            print ""
+            print "ERROR: "+json_dict["error"]
 
     details_file.close()
 
@@ -332,7 +332,7 @@ def main():
         platform_query = sys.argv[3]
         request = sys.argv[4]
     else:
-        print("Correct useage is: SNPchip.py false snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\"")
+        print "Correct useage is: SNPchip.py false snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\""
         sys.exit()
 
     # Run function

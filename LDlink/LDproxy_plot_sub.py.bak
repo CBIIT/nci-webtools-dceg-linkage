@@ -64,8 +64,8 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
             return snp
         else:
             snp_info_lst = get_rsnum(db, snp)
-            print("snp_info_lst")
-            print(snp_info_lst)
+            print "snp_info_lst"
+            print snp_info_lst
             if snp_info_lst != None:
                 if len(snp_info_lst) > 1:
                     var_id = "rs" + snp_info_lst[0]['id']
@@ -108,7 +108,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     tabix_snp_h = "tabix -H {0} | grep CHROM".format(vcf_file)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-    head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
+    head = proc_h.stdout.readlines()[0].strip().split()
 
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
         vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
@@ -175,7 +175,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
 
     # Calculate proxy LD statistics in parallel
     threads = 4
-    block = (2 * window) // 4
+    block = (2 * window) / 4
     commands = []
     for i in range(threads):
         if i == min(range(threads)) and i == max(range(threads)):
@@ -213,7 +213,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     out_prox = []
     for i in range(len(out_raw)):
         for j in range(len(out_raw[i])):
-            col = out_raw[i][j].decode('utf-8').strip().split("\t")
+            col = out_raw[i][j].strip().split("\t")
             col[6] = int(col[6])
             col[7] = float(col[7])
             col[8] = float(col[8])
@@ -318,7 +318,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     xr = Range1d(start=coord1 / 1000000.0 - whitespace,
                  end=coord2 / 1000000.0 + whitespace)
     yr = Range1d(start=-0.03, end=1.03)
-    sup_2 = "\u00B2"
+    sup_2 = u"\u00B2"
 
     proxy_plot = figure(
         title="Proxies for " + snp + " in " + pop,

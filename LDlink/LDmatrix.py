@@ -45,7 +45,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         output["error"] = "Maximum variant list is " + str(snp_limit) + " RS numbers. Your list contains " + \
             str(len(snps_raw)) + " entries."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print >> out_json, json_output
+        print(json_output, file=out_json)
         out_json.close()
         return("", "")
 
@@ -65,13 +65,13 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print >> out_json, json_output
+            print(json_output, file=out_json)
             out_json.close()
             return("", "")
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = proc.stdout.readlines()
+    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -106,8 +106,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print "snp_info_lst"
-                print snp_info_lst
+                print("snp_info_lst")
+                print(snp_info_lst)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -175,7 +175,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
             dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print >> out_json, json_output
+        print(json_output, file=out_json)
         out_json.close()
         return("", "")
 
@@ -185,7 +185,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(
                 snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print >> out_json, json_output
+            print(json_output, file=out_json)
             out_json.close()
             return("", "")
 
@@ -235,13 +235,13 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         return(a1_n, a2_n)
 
     # Import SNP VCF files
-    vcf = proc.stdout.readlines()
+    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
         output["error"] = "No query variants were found in 1000G VCF file"
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print >> out_json, json_output
+        print(json_output, file=out_json)
         out_json.close()
         return("", "")
 
@@ -374,7 +374,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
                     hap[hap_k] = 1
 
             # Remove Missing Haplotypes
-            keys = hap.keys()
+            keys = list(hap.keys())
             for key in keys:
                 if "." in key:
                     hap.pop(key, None)
@@ -464,8 +464,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     d_out = open(tmp_dir + "d_prime_" + request + ".txt", "w")
     r_out = open(tmp_dir + "r2_" + request + ".txt", "w")
 
-    print >> d_out, "RS_number" + "\t" + "\t".join(rsnum_lst)
-    print >> r_out, "RS_number" + "\t" + "\t".join(rsnum_lst)
+    print("RS_number" + "\t" + "\t".join(rsnum_lst), file=d_out)
+    print("RS_number" + "\t" + "\t".join(rsnum_lst), file=r_out)
 
     dim = len(ld_matrix)
     for i in range(dim):
@@ -474,8 +474,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         for j in range(dim):
             temp_d.append(str(ld_matrix[i][j][7]))
             temp_r.append(str(ld_matrix[i][j][8]))
-        print >> d_out, "\t".join(temp_d)
-        print >> r_out, "\t".join(temp_r)
+        print("\t".join(temp_d), file=d_out)
+        print("\t".join(temp_r), file=r_out)
 
     # Generate Plot Variables
     out = [j for i in ld_matrix for j in i]
@@ -553,13 +553,13 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
 
-    print "early x", x
+    print("early x", x)
 
     # Generate error if less than two SNPs
     if len(x) < 2:
         output["error"] = "Less than two variants to plot."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print >> out_json, json_output
+        print(json_output, file=out_json)
         out_json.close()
         return("", "")
 
@@ -704,7 +704,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     matrix_plot.axis.major_label_text_font_style = "normal"
     matrix_plot.xaxis.major_label_standoff = 0
 
-    sup_2 = u"\u00B2"
+    sup_2 = "\u00B2"
 
     hover = matrix_plot.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -924,7 +924,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
-    print >> out_json, json_output
+    print(json_output, file=out_json)
     out_json.close()
     return(out_script, out_div)
 
@@ -948,7 +948,7 @@ def main():
         web = sys.argv[4]
         r2_d = sys.argv[5]
     else:
-        print "Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)"
+        print("Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)")
         sys.exit()
 
     # Run function
@@ -962,22 +962,22 @@ def main():
         json_dict["error"]
 
     except KeyError:
-        print "\nOutput saved as: d_prime_" + request + ".txt and r2_" + request + ".txt"
+        print("\nOutput saved as: d_prime_" + request + ".txt and r2_" + request + ".txt")
 
         try:
             json_dict["warning"]
 
         except KeyError:
-            print ""
+            print("")
         else:
-            print ""
-            print "WARNING: " + json_dict["warning"] + "!"
-            print ""
+            print("")
+            print("WARNING: " + json_dict["warning"] + "!")
+            print("")
 
     else:
-        print ""
-        print json_dict["error"]
-        print ""
+        print("")
+        print(json_dict["error"])
+        print("")
 
 
 if __name__ == "__main__":

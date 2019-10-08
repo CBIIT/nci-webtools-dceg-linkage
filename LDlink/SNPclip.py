@@ -49,7 +49,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
             str(max_list)+" RS numbers. Your list contains " + \
             str(len(snps_raw))+" entries."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print >> out_json, json_output
+        print(json_output, file=out_json)
         out_json.close()
         return("", "", "")
 
@@ -69,13 +69,13 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         else:
             output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print >> out_json, json_output
+            print(json_output, file=out_json)
             out_json.close()
             return("", "", "")
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = proc.stdout.readlines()
+    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -110,8 +110,8 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print "snp_info_lst"
-                print snp_info_lst
+                print("snp_info_lst")
+                print(snp_info_lst)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -178,7 +178,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         else:
             output["error"] = "Input list of RS numbers is empty"
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print >> out_json, json_output
+            print(json_output, file=out_json)
             out_json.close()
             return("", "", "")
 
@@ -190,7 +190,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
             dbsnp_version + "."
         json_output = json.dumps(output, sort_keys=True, indent=2)
-        print >> out_json, json_output
+        print(json_output, file=out_json)
         out_json.close()
         return("", "", "")
 
@@ -201,7 +201,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                 str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
                 "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
             json_output = json.dumps(output, sort_keys=True, indent=2)
-            print >> out_json, json_output
+            print(json_output, file=out_json)
             out_json.close()
             return("", "", "")
 
@@ -284,7 +284,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     # Import SNP VCF file
     hap_dict = {}
-    vcf = proc.stdout.readlines()
+    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
@@ -352,11 +352,11 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                         geno[0]+":"+geno[1]+")"
 
                 # try catch this index ... ValueError thrown when rs_query not found in snps
-                print "#####"
-                print "variable rs_query " + rs_query
-                print "variable snps " + str(snps)
-                print "#####"
-                print
+                print("#####")
+                print("variable rs_query " + rs_query)
+                print("variable snps " + str(snps))
+                print("#####")
+                print()
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0]=geno[2]
                 # rsnum=geno[2]
@@ -422,7 +422,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
-    print >> out_json, json_output
+    print(json_output, file=out_json)
     out_json.close()
     return(snps, rsnum_lst, details)
 
@@ -455,7 +455,7 @@ def main():
         r2_threshold = sys.argv[6]
         maf_threshold = sys.argv[7]
     else:
-        print "Correct useage is: SNPclip.py false snplst populations request (optional: r2_threshold maf_threshold)"
+        print("Correct useage is: SNPclip.py false snplst populations request (optional: r2_threshold maf_threshold)")
         sys.exit()
 
     # Run function
@@ -476,24 +476,24 @@ def main():
         # 	print snp
 
         # print ""
-        print "RS Number\tPosition\tAlleles\tDetails"
+        print("RS Number\tPosition\tAlleles\tDetails")
         for snp in snps:
-            print snp[0]+"\t"+"\t".join(details[snp[0]])
+            print(snp[0]+"\t"+"\t".join(details[snp[0]]))
 
         try:
             json_dict["warning"]
 
         except KeyError:
-            print ""
+            print("")
         else:
-            print ""
-            print "WARNING: "+json_dict["warning"]+"!"
-            print ""
+            print("")
+            print("WARNING: "+json_dict["warning"]+"!")
+            print("")
 
     else:
-        print ""
-        print json_dict["error"]
-        print ""
+        print("")
+        print(json_dict["error"])
+        print("")
 
 
 if __name__ == "__main__":

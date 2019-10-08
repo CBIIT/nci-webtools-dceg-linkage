@@ -4,19 +4,26 @@ import json
 import math
 import operator
 import os
-# import sqlite3
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
 import sys
+import collections
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
 
+###########
+# SNPclip #
+###########
 
-# Create LDhap function
-def calculate_hap(snplst, pop, request, web):
+# Create SNPtip function
+
+
+def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.01):
+
+    max_list = 5000
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -32,19 +39,24 @@ def calculate_hap(snplst, pop, request, web):
         os.makedirs(tmp_dir)
 
     # Create JSON output
+    out_json = open(tmp_dir+"clip"+request+".json", "w")
     output = {}
 
-    # Open Inputted SNPs list file
+    # Open SNP list file
     snps_raw = open(snplst).readlines()
-    if len(snps_raw) > 30:
-        output["error"] = "Maximum variant list is 30 RS numbers or coordinates. Your list contains " + \
+    if len(snps_raw) > max_list:
+        output["error"] = "Maximum SNP list is " + \
+            str(max_list)+" RS numbers. Your list contains " + \
             str(len(snps_raw))+" entries."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print >> out_json, json_output
+        out_json.close()
+        return("", "", "")
 
-    # Remove duplicate RS numbers and cast to lower case
+    # Remove duplicate RS numbers
     snps = []
     for snp_raw in snps_raw:
-        snp = snp_raw.lower().strip().split()
+        snp = snp_raw.strip().split()
         if snp not in snps:
             snps.append(snp)
 
@@ -56,11 +68,14 @@ def calculate_hap(snplst, pop, request, web):
             pop_dirs.append(pop_dir+pop_i+".txt")
         else:
             output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            return(json.dumps(output, sort_keys=True, indent=2))
+            json_output = json.dumps(output, sort_keys=True, indent=2)
+            print >> out_json, json_output
+            out_json.close()
+            return("", "", "")
 
     get_pops = "cat " + " ".join(pop_dirs)
     proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    pop_list = proc.stdout.readlines()
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -95,8 +110,8 @@ def calculate_hap(snplst, pop, request, web):
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
+                print "snp_info_lst"
+                print snp_info_lst
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -131,21 +146,19 @@ def calculate_hap(snplst, pop, request, web):
         return new_snp_lst
 
     snps = replace_coords_rsid(db, snps)
-    print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
-    # Find RS numbers and genomic coords in snp database
+
+    # Find RS numbers in snp database
+    details = collections.OrderedDict()
     rs_nums = []
     snp_pos = []
     snp_coords = []
     warn = []
     tabix_coords = ""
     for snp_i in snps:
-        if len(snp_i) > 0:  # Length entire list of snps
-            if len(snp_i[0]) > 2:  # Length of each snp in snps
-                # Check first two charcters are rs and last charcter of each snp
+        if len(snp_i) > 0:
+            if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    print("SNP_COORD")
-                    print(snp_coord)
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord['position'])
@@ -153,19 +166,33 @@ def calculate_hap(snplst, pop, request, web):
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
+                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
                 else:
                     warn.append(snp_i[0])
+                    details[snp_i[0]] = ["NA", "NA",
+                                         "Not an RS number, query removed."]
             else:
                 warn.append(snp_i[0])
+                details[snp_i[0]] = ["NA", "NA",
+                                     "Not an RS number, query removed."]
+        else:
+            output["error"] = "Input list of RS numbers is empty"
+            json_output = json.dumps(output, sort_keys=True, indent=2)
+            print >> out_json, json_output
+            out_json.close()
+            return("", "", "")
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
             dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
+        output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
             dbsnp_version + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print >> out_json, json_output
+        out_json.close()
+        return("", "", "")
 
     # Check SNPs are all on the same chromosome
     for i in range(len(snp_coords)):
@@ -173,27 +200,13 @@ def calculate_hap(snplst, pop, request, web):
             output["error"] = "Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr" + \
                 str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
                 "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
-            return(json.dumps(output, sort_keys=True, indent=2))
+            json_output = json.dumps(output, sort_keys=True, indent=2)
+            print >> out_json, json_output
+            out_json.close()
+            return("", "", "")
 
-    # Check max distance between SNPs
-    distance_bp = []
-    for i in range(len(snp_coords)):
-        distance_bp.append(int(snp_coords[i][2]))
-    distance_max = max(distance_bp)-min(distance_bp)
-    if distance_max > 1000000:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Switch rate errors become more common as distance between query variants increases (Query range = "+str(
-                    distance_max)+" bp)"
-        else:
-            output["warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
-                distance_max)+" bp)"
-
-    # Sort coordinates and make tabix formatted coordinates
-    snp_pos_int = [int(i) for i in snp_pos]
-    snp_pos_int.sort()
-    snp_coord_str = [snp_coords[0][1]+":" +
-                     str(i)+"-"+str(i) for i in snp_pos_int]
+    # Make tabix formatted coordinates
+    snp_coord_str = [snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
@@ -203,6 +216,24 @@ def calculate_hap(snplst, pop, request, web):
     tabix_snps = "tabix -fh {0}{1} | grep -v -e END".format(
         vcf_file, tabix_coords)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+
+    # Make MAF function
+
+    def calc_maf(genos):
+        vals = {"0|0": 0, "0|1": 0, "1|0": 0, "1|1": 0, "0": 0, "1": 0}
+        for i in range(len(genos)):
+            if genos[i] in vals:
+                vals[genos[i]] += 1
+
+        zeros = vals["0|0"]*2+vals["0|1"]+vals["1|0"]+vals["0"]
+        ones = vals["1|1"]*2+vals["0|1"]+vals["1|0"]+vals["1"]
+        total = zeros+ones
+
+        f0 = zeros*1.0/total
+        f1 = ones*1.0/total
+        maf = min(f0, f1)
+
+        return f0, f1, maf
 
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
@@ -220,36 +251,53 @@ def calculate_hap(snplst, pop, request, web):
             a2_n = a2[1:]
         return(a1_n, a2_n)
 
-    # Import SNP VCF files
-    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    # Make R2 function
+    def calc_r2(var1, var2):
+        hap_vals = {"0|0-0|0": 0, "0|0-0|1": 0, "0|0-1|0": 0, "0|0-1|1": 0, "0|1-0|0": 0, "0|1-0|1": 0, "0|1-1|0": 0, "0|1-1|1": 0, "1|0-0|0": 0,
+                    "1|0-0|1": 0, "1|0-1|0": 0, "1|0-1|1": 0, "1|1-0|0": 0, "1|1-0|1": 0, "1|1-1|0": 0, "1|1-1|1": 0, "0-0": 0, "0-1": 0, "1-0": 0, "1-1": 0}
+        for i in range(len(var1)):
+            ind_geno = var1[i]+"-"+var2[i]
+            if ind_geno in hap_vals:
+                hap_vals[ind_geno] += 1
 
-    # Make sure there are genotype data in VCF file
-    if vcf[-1][0:6] == "#CHROM":
-        output["error"] = "No query variants were found in 1000G VCF file"
-        return(json.dumps(output, sort_keys=True, indent=2))
+        A = hap_vals["0|0-0|0"]*2+hap_vals["0|0-0|1"]+hap_vals["0|0-1|0"]+hap_vals["0|1-0|0"] + \
+            hap_vals["0|1-0|1"]+hap_vals["1|0-0|0"] + \
+            hap_vals["1|0-1|0"]+hap_vals["0-0"]
+        B = hap_vals["0|0-0|1"]+hap_vals["0|0-1|0"]+hap_vals["0|0-1|1"]*2+hap_vals["0|1-1|0"] + \
+            hap_vals["0|1-1|1"]+hap_vals["1|0-0|1"] + \
+            hap_vals["1|0-1|1"]+hap_vals["0-1"]
+        C = hap_vals["0|1-0|0"]+hap_vals["0|1-1|0"]+hap_vals["1|0-0|0"]+hap_vals["1|0-0|1"] + \
+            hap_vals["1|1-0|0"]*2+hap_vals["1|1-0|1"] + \
+            hap_vals["1|1-1|0"]+hap_vals["1-0"]
+        D = hap_vals["0|1-0|1"]+hap_vals["0|1-1|1"]+hap_vals["1|0-1|0"]+hap_vals["1|0-1|1"] + \
+            hap_vals["1|1-0|1"]+hap_vals["1|1-1|0"] + \
+            hap_vals["1|1-1|1"]*2+hap_vals["1-1"]
 
+        delta = float(A*D-B*C)
+        Ms = float((A+C)*(B+D)*(A+B)*(C+D))
+        if Ms != 0:
+            r2 = (delta**2)/Ms
+        else:
+            r2 = None
+
+        return(r2)
+
+    # Import SNP VCF file
+    hap_dict = {}
+    vcf = proc.stdout.readlines()
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
 
     head = vcf[h].strip().split()
 
-    # Extract haplotypes
-    index = []
+    # Extract population specific haplotypes
+    pop_index = []
     for i in range(9, len(head)):
         if head[i] in pop_ids:
-            index.append(i)
-
-    hap1 = [[]]
-    for i in range(len(index)-1):
-        hap1.append([])
-    hap2 = [[]]
-    for i in range(len(index)-1):
-        hap2.append([])
+            pop_index.append(i)
 
     rsnum_lst = []
-    allele_lst = []
-    pos_lst = []
 
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
@@ -303,228 +351,149 @@ def calculate_hap(snplst, pop, request, web):
                         ") does not match RS number at 1000G position (chr" + \
                         geno[0]+":"+geno[1]+")"
 
+                # try catch this index ... ValueError thrown when rs_query not found in snps
+                print "#####"
+                print "variable rs_query " + rs_query
+                print "variable snps " + str(snps)
+                print "#####"
+                print
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0]=geno[2]
                 # rsnum=geno[2]
                 snps[indx][0] = rs_query
                 rsnum = rs_query
+                # try:
+                # 	indx=[i[0] for i in snps].index(rs_query)
+                # 	snps[indx][0]=geno[2]
+                # 	rsnum=geno[2]
+                # except ValueError:
+                # 	print("List does not contain value:")
+                # 	print "#####"
+                # 	print "variable rs_query " + rs_query
+                # 	print "variable snps " + str(snps)
+                # 	print "#####"
             else:
                 continue
 
+        details[rsnum] = ["chr"+geno[0]+":"+geno[1]]
+
         if "," not in geno[3] and "," not in geno[4]:
-            a1, a2 = set_alleles(geno[3], geno[4])
-            count0 = 0
-            count1 = 0
-            for i in range(len(index)):
-                if geno[index[i]] == "0|0":
-                    hap1[i].append(a1)
-                    hap2[i].append(a1)
-                    count0 += 2
-                elif geno[index[i]] == "0|1":
-                    hap1[i].append(a1)
-                    hap2[i].append(a2)
-                    count0 += 1
-                    count1 += 1
-                elif geno[index[i]] == "1|0":
-                    hap1[i].append(a2)
-                    hap2[i].append(a1)
-                    count0 += 1
-                    count1 += 1
-                elif geno[index[i]] == "1|1":
-                    hap1[i].append(a2)
-                    hap2[i].append(a2)
-                    count1 += 2
-                elif geno[index[i]] == "0":
-                    hap1[i].append(a1)
-                    hap2[i].append(".")
-                    count0 += 1
-                elif geno[index[i]] == "1":
-                    hap1[i].append(a2)
-                    hap2[i].append(".")
-                    count1 += 1
-                else:
-                    hap1[i].append(".")
-                    hap2[i].append(".")
-
-            rsnum_lst.append(rsnum)
-
-            position = "chr"+geno[0]+":"+geno[1]
-            pos_lst.append(position)
-
-            f0 = round(float(count0)/(count0+count1), 4)
-            f1 = round(float(count1)/(count0+count1), 4)
-            if f0 >= f1:
-                alleles = a1+"="+str(round(f0, 3))+", " + \
-                    a2+"="+str(round(f1, 3))
+            temp_genos = []
+            for i in range(len(pop_index)):
+                temp_genos.append(geno[pop_index[i]])
+            f0, f1, maf = calc_maf(temp_genos)
+            a0, a1 = set_alleles(geno[3], geno[4])
+            details[rsnum].append(
+                a0+"="+str(round(f0, 3))+", "+a1+"="+str(round(f1, 3)))
+            if maf_threshold <= maf:
+                hap_dict[rsnum] = [temp_genos]
+                rsnum_lst.append(rsnum)
             else:
-                alleles = a2+"="+str(round(f1, 3))+", " + \
-                    a1+"="+str(round(f0, 3))
-            allele_lst.append(alleles)
-
-    haps = {}
-    for i in range(len(index)):
-        h1 = "_".join(hap1[i])
-        h2 = "_".join(hap2[i])
-        if h1 in haps:
-            haps[h1] += 1
+                details[rsnum].append(
+                    "Variant MAF is "+str(round(maf, 4))+", variant removed.")
         else:
-            haps[h1] = 1
+            details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
+            details[rsnum].append("Variant is not biallelic, variant removed.")
 
-        if h2 in haps:
-            haps[h2] += 1
-        else:
-            haps[h2] = 1
+    for i in rs_nums:
+        if i not in rsnum_lst:
+            if i not in details:
+                index_i = rs_nums.index(i)
+                details[i] = ["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-" +
+                              snp_coords[index_i][2], "NA", "Variant not in 1000G VCF file, variant removed."]
 
-    # Remove Missing Haplotypes
-    keys = list(haps.keys())
-    for key in keys:
-        if "." in key:
-            haps.pop(key, None)
+    # Thin the SNPs
+    # sup_2=u"\u00B2"
+    sup_2 = "2"
+    i = 0
+    while i < len(rsnum_lst):
+        details[rsnum_lst[i]].append("Variant kept.")
+        remove_list = []
+        for j in range(i+1, len(rsnum_lst)):
+            r2 = calc_r2(hap_dict[rsnum_lst[i]][0], hap_dict[rsnum_lst[j]][0])
+            if r2_threshold <= r2:
+                snp = rsnum_lst[j]
+                details[snp].append("Variant in LD with "+rsnum_lst[i] +
+                                    " (R"+sup_2+"="+str(round(r2, 4))+"), variant removed.")
+                remove_list.append(snp)
+        for snp in remove_list:
+            rsnum_lst.remove(snp)
+        i += 1
 
-    # Sort results
-    results = []
-    for hap in haps:
-        temp = [hap, haps[hap]]
-        results.append(temp)
-
-    total_haps = sum(haps.values())
-
-    results_sort1 = sorted(results, key=operator.itemgetter(0))
-    results_sort2 = sorted(
-        results_sort1, key=operator.itemgetter(1), reverse=True)
-
-    # Generate JSON output
-    digits = len(str(len(results_sort2)))
-    haps_out = {}
-    for i in range(len(results_sort2)):
-        hap_info = {}
-        hap_info["Haplotype"] = results_sort2[i][0]
-        hap_info["Count"] = results_sort2[i][1]
-        hap_info["Frequency"] = round(float(results_sort2[i][1])/total_haps, 4)
-        haps_out["haplotype_"+(digits-len(str(i+1)))*"0"+str(i+1)] = hap_info
-    output["haplotypes"] = haps_out
-
-    digits = len(str(len(rsnum_lst)))
-    snps_out = {}
-    for i in range(len(rsnum_lst)):
-        snp_info = {}
-        snp_info["RS"] = rsnum_lst[i]
-        snp_info["Alleles"] = allele_lst[i]
-        snp_info["Coord"] = pos_lst[i]
-        snps_out["snp_"+(digits-len(str(i+1)))*"0"+str(i+1)] = snp_info
-    output["snps"] = snps_out
-
-    # Create SNP File
-    snp_out = open(tmp_dir+"snps_"+request+".txt", "w")
-    print("RS_Number\tPosition (hg19)\tAllele Frequency", file=snp_out)
-    for k in sorted(output["snps"].keys()):
-        rs_k = output["snps"][k]["RS"]
-        coord_k = output["snps"][k]["Coord"]
-        alleles_k0 = output["snps"][k]["Alleles"].strip(" ").split(",")
-        alleles_k1 = alleles_k0[0]+"0"*(7-len(str(alleles_k0[0]))) + \
-            ","+alleles_k0[1]+"0"*(8-len(str(alleles_k0[1])))
-        temp_k = [rs_k, coord_k, alleles_k1]
-        print("\t".join(temp_k), file=snp_out)
-    snp_out.close()
-
-    # Create Haplotype File
-    hap_out = open(tmp_dir+"haplotypes_"+request+".txt", "w")
-    print("Haplotype\tCount\tFrequency", file=hap_out)
-    for k in sorted(output["haplotypes"].keys()):
-        hap_k = output["haplotypes"][k]["Haplotype"]
-        count_k = str(output["haplotypes"][k]["Count"])
-        freq_k = str(output["haplotypes"][k]["Frequency"])
-        temp_k = [hap_k, count_k, freq_k]
-        print("\t".join(temp_k), file=hap_out)
-    hap_out.close()
-
-    # Return JSON output
-    return(json.dumps(output, sort_keys=True, indent=2))
+    # Return output
+    json_output = json.dumps(output, sort_keys=True, indent=2)
+    print >> out_json, json_output
+    out_json.close()
+    return(snps, rsnum_lst, details)
 
 
 def main():
     import json
     import sys
+    tmp_dir = "./tmp/"
 
-    # Import LDLink options
-    if len(sys.argv) == 4:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
-        web = sys.argv[4]
+    # Import SNPclip options
+    if len(sys.argv) == 5:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        r2_threshold = 0.10
+        maf_threshold = 0.01
+    elif len(sys.argv) == 6:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        r2_threshold = sys.argv[5]
+        maf_threshold = 0.01
+    elif len(sys.argv) == 7:
+        web = sys.argv[1]
+        snplst = sys.argv[3]
+        pop = sys.argv[4]
+        request = sys.argv[5]
+        r2_threshold = sys.argv[6]
+        maf_threshold = sys.argv[7]
     else:
-        print("Correct useage is: LDLink.py snplst populations request false")
+        print "Correct useage is: SNPclip.py false snplst populations request (optional: r2_threshold maf_threshold)"
         sys.exit()
 
     # Run function
-    out_json = calculate_hap(snplst, pop, request, web)
+    snps, thin_list, details = calculate_clip(
+        snplst, pop, request, web, r2_threshold, maf_threshold)
 
     # Print output
-    json_dict = json.loads(out_json)
+    with open(tmp_dir+"clip"+request+".json") as f:
+        json_dict = json.load(f)
 
     try:
         json_dict["error"]
 
     except KeyError:
-        hap_lst = []
-        hap_count = []
-        hap_freq = []
-        for k in sorted(json_dict["haplotypes"].keys()):
-            hap_lst.append(json_dict["haplotypes"][k]["Haplotype"])
-            hap_count.append(
-                " "*(6-len(str(json_dict["haplotypes"][k]["Count"])))+str(json_dict["haplotypes"][k]["Count"]))
-            hap_freq.append(str(json_dict["haplotypes"][k]["Frequency"])+"0"*(
-                6-len(str(json_dict["haplotypes"][k]["Frequency"]))))
+        #print ""
+        # print "LD Thinned SNP list ("+pop+"):"
+        # for snp in thin_list:
+        # 	print snp
 
-        # Only print haplotypes >1 percent frequency
-        freq_count = 0
-        for i in range(len(hap_freq)):
-            if float(hap_freq[i]) >= 0.01:
-                freq_count += 1
-
-        hap_snp = []
-        for i in range(len(hap_lst[0].split("_"))):
-            temp = []
-            for j in range(freq_count):  # use "len(hap_lst)" for all haplotypes
-                temp.append(hap_lst[j].split("_")[i])
-            hap_snp.append(temp)
-
-        print("")
-        print("RS Number     Coordinates      Allele Frequency      Common Haplotypes (>1%)")
-        print("")
-        counter = 0
-        for k in sorted(json_dict["snps"].keys()):
-            rs_k = json_dict["snps"][k]["RS"]+" " * \
-                (11-len(str(json_dict["snps"][k]["RS"])))
-            coord_k = json_dict["snps"][k]["Coord"]+" " * \
-                (14-len(str(json_dict["snps"][k]["Coord"])))
-            alleles_k0 = json_dict["snps"][k]["Alleles"].strip(" ").split(",")
-            alleles_k1 = alleles_k0[0]+"0"*(7-len(str(alleles_k0[0]))) + \
-                ","+alleles_k0[1]+"0"*(8-len(str(alleles_k0[1])))
-            temp_k = [rs_k, coord_k, alleles_k1,
-                      "   "+"      ".join(hap_snp[counter])]
-            print("   ".join(temp_k))
-            counter += 1
-
-        print("")
-        print("                                         Count: " + \
-            " ".join(hap_count[0:freq_count]))
-        print("                                     Frequency: " + \
-            " ".join(hap_freq[0:freq_count]))
+        # print ""
+        print "RS Number\tPosition\tAlleles\tDetails"
+        for snp in snps:
+            print snp[0]+"\t"+"\t".join(details[snp[0]])
 
         try:
             json_dict["warning"]
+
         except KeyError:
-            print("")
+            print ""
         else:
-            print("")
-            print("WARNING: "+json_dict["warning"]+"!")
-            print("")
+            print ""
+            print "WARNING: "+json_dict["warning"]+"!"
+            print ""
 
     else:
-        print("")
-        print(json_dict["error"])
-        print("")
+        print ""
+        print json_dict["error"]
+        print ""
 
 
 if __name__ == "__main__":
