@@ -265,13 +265,11 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         commands.append(command)
 
     processes = [subprocess.Popen(
-        command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE) for command in commands]
+        command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
     # collect output in parallel
     def get_output(process):
-        stdout, stderr = process.communicate()
-        print("stderr", stderr)
-        return stdout[0].splitlines()
+        return process.communicate()[0].splitlines()
 
     if not hasattr(threading.current_thread(), "_children"):
         threading.current_thread()._children = weakref.WeakKeyDictionary()
