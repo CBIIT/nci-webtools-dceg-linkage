@@ -1264,7 +1264,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if web:
 			# Open thread for high quality image exports
 			print("Open thread for high quality image exports.")
-			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
