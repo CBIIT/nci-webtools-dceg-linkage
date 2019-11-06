@@ -386,7 +386,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     else:
         threads=4
 
-    block=len(assoc_coords)/threads
+    block=len(assoc_coords)//threads
     commands=[]
     for i in range(threads):
         if i==min(range(threads)) and i==max(range(threads)):
