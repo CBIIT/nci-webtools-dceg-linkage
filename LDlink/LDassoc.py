@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import yaml
 import csv
 import json
@@ -552,13 +552,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	print("Create LDassoc_sub subprocesses")
 	for i in range(threads):
 		if i==min(range(threads)) and i==max(range(threads)):
-			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
+			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
 		elif i==min(range(threads)):
-			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
+			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
 		elif i==max(range(threads)):
-			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
+			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
 		else:
-			command="python LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
+			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
 		commands.append(command)
 
 
@@ -1122,7 +1122,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if web:
 			# Open thread for high quality image exports
 			print("Open thread for high quality image exports.")
-			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1264,7 +1264,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if web:
 			# Open thread for high quality image exports
 			print("Open thread for high quality image exports.")
-			command = "python LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import yaml
 import json
 import math
@@ -907,7 +907,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python LDmatrix_plot_sub.py " + \
+        command = "python3 LDmatrix_plot_sub.py " + \
             snplst + " " + pop + " " + request + " " + r2_d
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 

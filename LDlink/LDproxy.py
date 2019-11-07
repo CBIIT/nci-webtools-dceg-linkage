@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import yaml
 import csv
 import json
@@ -249,18 +249,18 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     commands = []
     for i in range(threads):
         if i == min(range(threads)) and i == max(range(threads)):
-            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + \
+            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord2) + " " + request + " " + str(i)
         elif i == min(range(threads)):
-            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + \
+            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord1 + block) + " " + request + " " + str(i)
         elif i == max(range(threads)):
-            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(
+            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(
                 coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
         else:
-            command = "python LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
+            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
                 block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
         commands.append(command)
 
@@ -818,7 +818,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
+        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
