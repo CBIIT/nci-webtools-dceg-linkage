@@ -1,6 +1,3 @@
-LDlink/SNP_Query_logininfo.txt
-LDlink/sftp-config-alt.json
-
 #Python compiled files
 *.pyc
 
@@ -22,3 +19,4 @@ chromedriver*
 
 data/
 LDlink/tmp/
+LDlink/SNP_Query_loginInfo.ini
