@@ -16,8 +16,12 @@ import yaml
 
 start_time = time.time()  # measure script's run time
 
-# Ensure tmp directory exists
-tmp_dir = "./tmp/"
+# Load variables from config file
+with open('config.yml', 'r') as c:
+    config = yaml.load(c)
+ldtrait_src = config['data']['ldtrait_src']
+tmp_dir = config['data']['tmp_dir']
+
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
@@ -29,6 +33,9 @@ ldtrait_src = config['data']['ldtrait_src']
 # download daily update of GWAS Catalog
 def downloadGWASCatalog():
     filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
+    if (os.path.isfile(tmp_dir + filename)):
+        print("Latest GWAS catalog already downloaded, deleting existing...")
+        os.remove(tmp_dir + filename)
     r = requests.get(ldtrait_src, allow_redirects=True)
     with open(tmp_dir + filename, 'wb') as f:
         f.write(r.content)

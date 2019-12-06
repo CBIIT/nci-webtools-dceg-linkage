@@ -7,7 +7,7 @@
 	<meta name="generator" content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="LDlink is a suite of web-based applications designed to easily and efficiently interrogate linkage disequilibrium in population groups." />
-	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDpop, LDproxy, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
+	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDpop, LDproxy, LDtrait, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
 	<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 	<link rel="/LDlink/shortcut icon" href="LD.ico">
 	<!-- DAP code -->
@@ -73,6 +73,10 @@
 					<li>
 						<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
 					</li>
+					<!-- TRAIT -->
+					<li>
+						<a id="ldtrait-tab-anchor" href="#ldtrait-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease">LDtrait</a>
+					</li>
 					<!-- CHIP -->
 					<li>
 						<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
@@ -136,6 +140,9 @@
 					<b><a class="anchor-link" dest="ldproxy">LDproxy</a></b>: Interactively explore proxy and putatively
 					functional variants for a query variant. Input is an RS number and a
 					population group.<br>
+
+					<b><a class="anchor-link" dest="ldtrait">LDtrait</a></b>: Search if a list of variants (or variants in LD with those variants) 
+					have previously been associated with a trait or disease<br>
 
 					<b><a class="anchor-link" dest="snpchip">SNPchip</a></b>: Find commercial genotyping platforms for variants.
 					Input is a list of variant RS numbers (one per line) and desired arrays.<br>
@@ -1446,6 +1453,182 @@
 					</div>
 				</div>
 			</div>
+
+			<!-- LDtrait -->
+			<div class="tab-pane fade" id="ldtrait-tab">
+				<!-- LDtrait INPUTS-->
+				<div class="container-fluid">
+					<div class="row" style="padding-top: 10px;">
+						<!-- LDtrait FORM -->
+						<form id="ldtraitForm" class="ldlinkForm">
+							<div class="form-group">
+								<div class="col-sm-2">
+								<textarea id="ldtrait-file-snp-numbers" placeholder="RS Numbers or Genomic Coordinates" class="form-control"
+									title="Enter list of RS numbers or Genomic Coordinates (one per line)" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									required></textarea>
+								</div>
+							</div>
+							
+							<div class="col-sm-3">
+								<div class="input-group">
+									<label for="ldtrait-file-label" style="display:none;">Upload RS File</label>
+									<input type="text" id="ldtrait-file-label" readonly placeholder="Upload file with variants" class="readonly-input-text">
+									<label for="ldtrait-file" style="display:none;">Browse for RS File</label>
+									<span class="btn btn-default btn-file btn-snp">Browse
+										<input type="file" id="ldtrait-file">
+									</span>
+									<a id="ldtrait-browse-set-none" style="position:relative;" href="#" data-toggle="popover" trigger="manual"
+										data-placement="right" data-content="Please upload a file."></a>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-2">
+									<a id="ldtrait-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
+											codes</span></a>
+									<label for="ldtrait-population-codes" style="display: none;">Please Select a population</label>
+									<select id="ldtrait-population-codes" multiple="multiple" name="populations">
+									</select>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-2">
+									<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
+										<label class="btn btn-default active" id="ldtrait_ld_r2">
+											<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
+										</label>
+										<label class="btn btn-default" id="ldtrait_ld_d">
+											<input type="radio" autocomplete="off" name="options"> D'
+										</label>
+									</div>
+								</div>
+							</div>
+
+							<div class="col-sm-2">
+								<div id="ldtrait-thresholds">
+									<div>Threshold</div>
+									<div class="input-group">
+										<label id="ldtrait_r2_d_threshold_label" for="ldtrait_r2_d_threshold">R<sup>2</sup>:</label>
+										<input id="ldtrait_r2_d_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
+											title="Threshold must be a number between 0 and 1" required>
+									</div>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-1">
+									<input type="submit" id="ldtrait" value="Calculate" class="btn btn-default calculate" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<hr>
+					<div id="ldtrait-loading">
+						<img src="calculating_LD.gif" alt="loading icon" class="loading">
+					</div>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldtrait-message">
+							<div class="panel panel-danger">
+								<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldtrait-message-content"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldtrait-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldtrait-message-warning-content">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ldtrait CONTAINER -->
+				<div class="jumbotron">
+					<div class="container-fluid" id="ldtrait-results-container">
+						<div id="ldtrait-table-container" class="row">
+							<div class="col-md-2 ldtrait-table-scroller">
+								<table id="ldtrait-table-thin" class="table table-striped table-chip">
+									<caption>Variants in LD with GWAS Catalog</caption>
+									<thead>
+										<tr>
+											<th>RS Number</th>
+										</tr>
+									</thead>
+									<tbody id="ldtrait-snp-list"></tbody>
+								</table>
+								<a id="ldtrait-warnings-button" title="View details.">Variants not in LD with GWAS Catalog</a>
+							</div>
+
+							<div class="col-md-10 ldtrait-table-scroller" id="ldtrait-detail">
+
+								<!-- Detail message -->
+								<table id="ldtrait-details" class="table table-striped table-chip">
+									<caption id="ldtrait-detail-title">Details for rs1234</caption>
+									<thead>
+										<tr>
+											<th class="ldtrait-table-trait-column">Trait</th>
+											<th>RS Number</th>
+											<th>Position</th>
+											<th class="ldtrait-table-details-column">Details</th>
+										</tr>
+									</thead>
+									<tbody data-bind="foreach: details">
+										<tr>
+											<td class="ldtrait-table-trait-column" data-bind="text: trait"></td>
+											<td data-bind="html: rs_number_link"></td>
+											<td data-bind="html: position_link"></td>
+											<td class="ldtrait-table-details-column" data-bind="text: comment"></td>
+										</tr>
+									</tbody>
+								</table>
+
+								<!-- SNPs with warnings -->
+								<table id="ldtrait-warnings" class="table table-striped table-chip">
+									<caption>Variants not in LD with GWAS Catalog</caption>
+									<thead>
+										<tr>
+											<th class="ldtrait-table-trait-column">Trait</th>
+											<th>RS Number</th>
+											<th>Position</th>
+											<th class="ldtrait-table-details-column">Details</th>
+										</tr>
+									</thead>
+									<tbody data-bind="foreach: warnings" style="border: 1px solid #ccc;">
+										<tr>
+											<td class="ldtrait-table-trait-column" data-bind="text: trait"></td>
+											<td data-bind="html: rs_number_link"></td>
+											<td data-bind="html: position_link"></td>
+											<td class="ldtrait-table-details-column" data-bind="text: comment"></td>
+										</tr>
+									</tbody>
+								</table>
+
+								<!-- Initial Message -->
+								<div id="ldtrait-initial-message">Click a variant on the left to view details.</div>
+
+							</div>
+						</div>
+						<div class="row">
+							<div id="ldtrait-links-container">
+								<span>
+									<a target="trait_variants_annotated" id="ldtrait-variants-annotated-link" href="yahoo.com">Download GWAS Catalog annotated variant list</a>
+								</span>
+								<!-- &nbsp;&nbsp;&nbsp;&nbsp; -->
+								<!-- <span>
+									<a target="snp_details" id="ldtrait-details-link" href="yahoo.com">Download Thinned Variant List with Details</a>
+								</span> -->
+							</div>
+						</div>
+					</div>
+				</div> <!-- jumbotron -->
+			</div>
+			<!--  END OF ldtrait -->
 
 			<!-- SNPclip -->
 			<div class="tab-pane fade" id="snpclip-tab">

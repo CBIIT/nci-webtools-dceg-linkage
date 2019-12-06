@@ -25,6 +25,7 @@ from pandas import DataFrame
 from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
+from LDtrait import calculate_trait
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -105,6 +106,8 @@ def getModule(fullPath):
         return "LDpop"
     elif "ldproxy" in fullPath:
         return "LDproxy"
+    elif "ldtrait" in fullPath:
+        return "LDtrait"
     elif "snpchip" in fullPath:
         return "SNPchip"
     elif "snpclip" in fullPath:
@@ -752,6 +755,121 @@ def ldproxy():
             toggleLocked(token, 0)
             return sendTraceback(None)
     return out_script + "\n " + out_div
+
+# Web and API route for LDtrait
+@app.route('/LDlinkRest/ldtrait', methods=['POST'])
+@app.route('/LDlinkRestWeb/ldtrait', methods=['POST'])
+@requires_token
+def ldtrait():
+    print('Execute ldtrait.')
+    data = json.loads(request.stream.read())
+    snps = data['snps']
+    pop = data['pop']
+    r2_d = data['r2_d']
+    r2_d_threshold = data['r2_d_threshold']
+    token = request.args.get('token', False)
+    print('snps: ' + snps)
+    print('pop: ' + pop)
+    print('r2_d: ' + r2_d)
+    print('r2_d_threshold: ' + r2_d_threshold)
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        if request.user_agent.browser is not None:
+            web = True
+            reference = str(data['reference'])
+            snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+            snplist = snps.splitlines()
+            with open(snpfile, 'w') as f:
+                for s in snplist:
+                    s = s.lstrip()
+                    if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                        f.write(s.lower() + '\n')
+            try:
+                trait = {}
+                # snplst, pop, request, web, r2_d, threshold
+                (snps, snp_list, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
+                trait["snp_list"] = snp_list
+                trait["details"] = details
+                trait["snps"] = snps
+                trait["filtered"] = collections.OrderedDict()
+                with open(tmp_dir + "trait" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                if "error" in json_dict:
+                    trait["error"] = json_dict["error"]
+                else:
+                    for snp in snps:
+                        trait["filtered"][snp[0]] = details[snp[0]]
+                    if "warning" in json_dict:
+                        trait["warning"] = json_dict["warning"]
+                with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+                    for rs_number in snp_list:
+                        f.write(rs_number + '\n')
+                with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    if(type(details) is collections.OrderedDict):
+                        for snp in snps:
+                            f.write("Query Variant: " + snp[0] + "\n")
+                            f.write("Trait\tRS Number\tPosition\tDetails\n")
+                            for matched_gwas in details[snp[0]]:
+                                f.write("\t".join(matched_gwas[1:]) + "\n")
+                            f.write("\n")
+                            f.write("\n")
+                out_json = json.dumps(trait, sort_keys=False)
+                print("LDTRAIT OUT_JSON", out_json)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+        snplist = snps.splitlines()
+        with open(snpfile, 'w') as f:
+            for s in snplist:
+                s = s.lstrip()
+                if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                    f.write(s.lower() + '\n')
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            (snps, snp_list, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
+            with open(tmp_dir + "trait" + reference + ".json") as f:
+                json_dict = json.load(f)
+            with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                if(type(details) is collections.OrderedDict):
+                    for snp in snps:
+                        f.write("Query Variant: " + snp[0] + "\n")
+                        f.write("Trait\tRS Number\tPosition\tDetails\n")
+                        for matched_gwas in details[snp[0]]:
+                            f.write("\t".join(matched_gwas[1:]) + "\n")
+                        f.write("\n")
+                        f.write("\n")
+            # display api out
+            try:
+                # unlock token then display api output
+                resultFile = "./tmp/details" + reference + ".txt"
+                with open(resultFile, "r") as fp:
+                    content = fp.read()
+                with open(tmp_dir + "trait" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                    if "error" in json_dict:
+                        toggleLocked(token, 0)
+                        return sendTraceback(json_dict["error"])
+                toggleLocked(token, 0)
+                return content
+            except:
+                # unlock token then display error message
+                toggleLocked(token, 0)
+                return sendTraceback(None)
+        except:
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
+    return current_app.response_class(out_json, mimetype='application/json')
+
 
 # Web and API route for SNPchip
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])

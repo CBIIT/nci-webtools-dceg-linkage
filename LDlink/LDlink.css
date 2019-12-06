@@ -595,9 +595,53 @@ hr.header {
 	width:100px;
 	font-weight:bold;
 }
-/* #snpclip-thresholds > div:not(:first-child) {
-	padding-bottom:1px;
-} */
+
+#ldtrait-thresholds {
+	width:130px;
+	margin-left:10px;
+	position: relative;
+	top:-17px;
+}
+
+#ldtrait-thresholds > div > label {
+	width:40px;
+}
+
+#ldtrait-thresholds > div > input {
+	width:50px;
+}
+
+#ldtrait-thresholds > div:first-child {
+	width:100px;
+	font-weight:bold;
+}
+
+#ldtrait-snp-list {
+	/*width:175px; */
+	float:left;
+	max-height: 400px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+}
+
+#ldtrait-snp-list > a {
+	text-decoration: underline;
+	color: #428bca;
+}
+
+#ldtrait-detail {
+/*	border:1px solid #333; */
+	float:left;
+	padding:10px;
+}
+
+#ldtrait-warning {
+	float:left;
+	padding:10px;
+}
 #snpclip-snp-list {
 	/*width:175px; */
 	float:left;
@@ -635,6 +679,39 @@ table.table-chip > thead > tr > th {
 table.table-chip > tbody {
     border:1px solid #ccc;
 }
+
+table#ldtrait-table-thin > tbody {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+table#ldtrait-table-thin > tbody > tr > td {
+  padding: 8px 20px 8px 10px;
+}
+
+.ldtrait-table-trait-column {
+  width: 200px !important;
+}
+
+/* .ldtrait-table-details-column {
+} */
+
+#ldtrait-initial-message {
+  font-weight:bold;
+  font-size:110%;
+  margin-top:50px;
+}
+
+#ldtrait-table-container {
+  min-height:580px;
+}
+
+.ldtrait-table-scroller {
+  overflow-y:auto;
+  max-height:575px;
+  padding-top:10px;
+}
+
 table#snpclip-table-thin > tbody {
     max-height: 400px;
     overflow-y: auto;
@@ -763,6 +840,9 @@ table#snpchip-thinned-list > thead > tr {
 #snp_chip_list {
 	padding-left:60px;
 }
+#ldtrait-links-container {
+	padding-top:30px;
+}
 #snpclip-links-container {
 	padding-top:30px;
 }
@@ -773,6 +853,10 @@ table#snpchip-thinned-list > thead > tr {
 	min-width:145px;
 }
 #snpclip-thresholds > div.input-group {
+	display:block;
+}
+
+#ldtrait-thresholds > div.input-group {
 	display:block;
 }
 
