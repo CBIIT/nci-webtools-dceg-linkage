@@ -482,6 +482,21 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # print json.dumps(output)
 
     location_data = {
+        "AFR" : {
+            "location": "African"
+        },
+        "AMR" : {
+            "location": "Ad Mixed American"
+        },
+        "EAS" : {
+            "location": "East Asian"
+        },
+        "EUR" : {
+            "location": "European"
+        },
+        "SAS" : {
+            "location": "South Asian"
+        },
         "YRI": {
             "location": "Yoruba in Ibadan, Nigeria",
             "superpopulation": "AFR",
@@ -706,9 +721,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         output_table["error"] = output["error"]
     # Generate output file
     with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
-        ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'"]) + "\n")
+        ldpop_out.write("\t".join(["Population", "Abbrev", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'"]) + "\n")
+        print("output_table", output_table)
+        print('output_table["aaData"]', output_table["aaData"])
         for row in output_table["aaData"]:
-            ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
+            ldpop_out.write(str(location_data[row[0]]["location"] + "\t" + row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
         if "error" in output_table:
             ldpop_out.write("\n")
             ldpop_out.write(output_table["error"])
