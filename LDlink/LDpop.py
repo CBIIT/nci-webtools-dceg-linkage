@@ -695,7 +695,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             ldpair_pops = [key]
             if key in list(pop_groups.keys()):
                 ldpair_pops = pop_groups[key]
-            ldpair_data = [snp1, snp2, "%2B".join(ldpair_pops)]
+            ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
             table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
             # populate map data
             if key not in list(pop_groups.keys()):
