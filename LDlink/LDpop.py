@@ -483,8 +483,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             }, 
             "D'" : matrix_values[pops]["D_prime"] if isinstance(matrix_values[pops]["D_prime"], str) else round(float(matrix_values[pops]["D_prime"]), 4), \
             "R2" : matrix_values[pops]["r2"] if isinstance(matrix_values[pops]["r2"], str) else round(float(matrix_values[pops]["r2"]), 4), \
-            "chisq" : matrix_values[pops]["chisq"] if isinstance(matrix_values[pops]["chisq"], str) else float(matrix_values[pops]["chisq"]), \
-            "p" : matrix_values[pops]["p"] if isinstance(matrix_values[pops]["p"], str) else float(matrix_values[pops]["p"])
+            "chisq" : matrix_values[pops]["chisq"] if isinstance(matrix_values[pops]["chisq"], str) else round(float(matrix_values[pops]["chisq"]), 4), \
+            "p" : matrix_values[pops]["p"] if isinstance(matrix_values[pops]["p"], str) else round(float(matrix_values[pops]["p"]), 4)
         }
     
     # print json.dumps(output)
