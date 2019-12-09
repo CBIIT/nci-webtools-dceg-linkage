@@ -482,6 +482,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # print json.dumps(output)
 
     location_data = {
+        "ALL" : {
+            "location": "All Populations"
+        },
         "AFR" : {
             "location": "African"
         },
