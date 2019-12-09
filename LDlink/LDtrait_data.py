@@ -54,7 +54,7 @@ def main():
     # Connect to Mongo snp database
     if instance == "web":
         # contents = open("/analysistools/public_html/apps/LDlink/app/SNP_Query_loginInfo.ini").read().split('\n')
-        contents = open("./SNP_Query_loginInfo.ini").read().split('\n')
+        contents = open("./SNP_Query_loginInfo_test.ini").read().split('\n')
         username = 'ncianalysis_api'
         password = contents[1].split('=')[1]
         port = int(contents[2].split('=')[1])
@@ -88,7 +88,9 @@ def main():
         for line in lines:
             values = line.strip().split('\t')
             if len(values[23]) > 0:
+                # find chr, pos in dbsnp using rsid
                 record = dbsnp.find_one({"id": values[23]})
+                # if found, add to chr, pos to record
                 if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
                     values.append(str(record["chromosome"]))
                     values.append(int(record["position"]))
