@@ -286,7 +286,7 @@ describe('LDlink Smoke Test', function() {
         const exportPlotButton = By.css('[id="ldproxy-menu1"]');
         await driver.wait(until.elementLocated(exportPlotButton), 20000);
         const exportPlotButtonElement = driver.findElement(exportPlotButton);
-        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 30000);
+        await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 180000);
         // assert if Proxy Results table is present
         console.log('[assert if Proxy Results table is present]');
         const proxyResultsRSQuery = By.xpath('//*[@id="new-ldproxy"]/tbody/tr[1]/td[1]/a');

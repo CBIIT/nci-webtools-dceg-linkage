@@ -451,9 +451,15 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 matrix_values[pop]["D_prime"] = abs(matrix_values[pop]["delta"] / min((matrix_values[pop]["A"] + matrix_values[pop]["C"]) * (matrix_values[pop]["C"] + matrix_values[pop]["D"]), (matrix_values[pop]["A"] + matrix_values[pop]["B"]) * (matrix_values[pop]["B"] + matrix_values[pop]["D"])))
             # R2
             matrix_values[pop]["r2"]= (matrix_values[pop]["delta"]**2) / matrix_values[pop]["Ms"]
+            num = (matrix_values[pop]["A"] + matrix_values[pop]["B"] + matrix_values[pop]["C"] + matrix_values[pop]["D"]) * (matrix_values[pop]["A"] * matrix_values[pop]["D"] - matrix_values[pop]["B"] * matrix_values[pop]["C"])**2
+            denom = matrix_values[pop]["Ms"]
+            matrix_values[pop]["chisq"] = num / denom
+            matrix_values[pop]["p"] = 2 * (1 - (0.5 * (1 + math.erf(matrix_values[pop]["chisq"] **0.5 / 2**0.5))))
         else:
             matrix_values[pop]["D_prime"] = "NA"
             matrix_values[pop]["r2"] = "NA"
+            matrix_values[pop]["chisq"] = "NA"
+            matrix_values[pop]["p"] = "NA"
     
     for pops in sample_size_dict:    
         output[pops] = {
@@ -476,12 +482,32 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
                 rs2_dict["ALT"] : str(pop_freqs["alt_freq_snp2"][pops]) + "%"
             }, 
             "D'" : matrix_values[pops]["D_prime"] if isinstance(matrix_values[pops]["D_prime"], str) else round(float(matrix_values[pops]["D_prime"]), 4), \
-            "R2" : matrix_values[pops]["r2"] if isinstance(matrix_values[pops]["r2"], str) else round(float(matrix_values[pops]["r2"]), 4)
+            "R2" : matrix_values[pops]["r2"] if isinstance(matrix_values[pops]["r2"], str) else round(float(matrix_values[pops]["r2"]), 4), \
+            "chisq" : matrix_values[pops]["chisq"] if isinstance(matrix_values[pops]["chisq"], str) else round(float(matrix_values[pops]["chisq"]), 4), \
+            "p" : matrix_values[pops]["p"] if isinstance(matrix_values[pops]["p"], str) else round(float(matrix_values[pops]["p"]), 4)
         }
     
     # print json.dumps(output)
 
     location_data = {
+        "ALL" : {
+            "location": "All Populations"
+        },
+        "AFR" : {
+            "location": "African"
+        },
+        "AMR" : {
+            "location": "Ad Mixed American"
+        },
+        "EAS" : {
+            "location": "East Asian"
+        },
+        "EUR" : {
+            "location": "European"
+        },
+        "SAS" : {
+            "location": "South Asian"
+        },
         "YRI": {
             "location": "Yoruba in Ibadan, Nigeria",
             "superpopulation": "AFR",
@@ -675,10 +701,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             key_R_2 = output[key]['R2']
             # set up data for ldpair link
             ldpair_pops = [key]
+            key_chisq = output[key]['chisq']
+            key_p = output[key]['p']
             if key in list(pop_groups.keys()):
                 ldpair_pops = pop_groups[key]
-            ldpair_data = [snp1, snp2, "%2B".join(ldpair_pops)]
-            table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data])
+            ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+            table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data, key_chisq, key_p])
             # populate map data
             if key not in list(pop_groups.keys()):
                 rs1_rs2_LD_map_data.append([key, location_data[key]["location"], location_data[key]["superpopulation"], location_data[key]["latitude"], location_data[key]["longitude"], key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime])
@@ -706,9 +734,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         output_table["error"] = output["error"]
     # Generate output file
     with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
-        ldpop_out.write("\t".join(["Population", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'"]) + "\n")
+        ldpop_out.write("\t".join(["Population", "Abbrev", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'", "Chisq", "P"]) + "\n")
+        print("output_table", output_table)
+        print('output_table["aaData"]', output_table["aaData"])
         for row in output_table["aaData"]:
-            ldpop_out.write(str(row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\n")
+            ldpop_out.write(str(location_data[row[0]]["location"] + "\t" + row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\n")
         if "error" in output_table:
             ldpop_out.write("\n")
             ldpop_out.write(output_table["error"])
