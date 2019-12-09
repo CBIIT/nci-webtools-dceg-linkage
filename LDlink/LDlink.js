@@ -3388,6 +3388,7 @@ function updateLDpop() {
         // console.log(data);
         if (displayError(id, data) == false) {
             $('#' + id + '-results-container').show();
+            console.log("LDpop data", data);
             RefreshTable('#new-ldpop', data);
             $("#ldpop_rs1").text(data.inputs.rs1 + " Allele Freq");
             $("#ldpop_rs2").text(data.inputs.rs2 + " Allele Freq");
