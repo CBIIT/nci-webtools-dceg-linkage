@@ -104,6 +104,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
 
     snp1 = replace_coord_rsid(db, snp1)
     snp2 = replace_coord_rsid(db, snp2)
+
+    snp1_ldpair = snp1
+    snp2_ldpair = snp2
     
     snp1_coord = get_chrom_coords(db, snp1)
     snp2_coord = get_chrom_coords(db, snp2)
@@ -705,7 +708,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
             key_p = output[key]['p']
             if key in list(pop_groups.keys()):
                 ldpair_pops = pop_groups[key]
-            ldpair_data = [snp1_input, snp2_input, "%2B".join(ldpair_pops)]
+            ldpair_data = [snp1_ldpair, snp2_ldpair, "%2B".join(ldpair_pops)]
             table_data.append([key_order, key_pop, key_N, key_rs1_allele_freq, key_rs2_allele_freq, key_R_2, key_D_prime, ldpair_data, key_chisq, key_p])
             # populate map data
             if key not in list(pop_groups.keys()):
