@@ -293,7 +293,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
-    print("##### SNPCLIP DETAILS: #####")
+    print("##### LDTRAIT DETAILS: #####")
     print(details)
     return (sanitized_query_snps, thinned_list, details)
 
