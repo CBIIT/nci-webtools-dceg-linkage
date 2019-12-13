@@ -793,28 +793,28 @@ def ldtrait():
                 trait["snp_list"] = snp_list
                 trait["details"] = details
                 trait["snps"] = snps
-                trait["filtered"] = collections.OrderedDict()
+                # trait["filtered"] = collections.OrderedDict()
                 with open(tmp_dir + "trait" + reference + ".json") as f:
                     json_dict = json.load(f)
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    for snp in snps:
-                        trait["filtered"][snp[0]] = details[snp[0]]
+                    # for snp in snps:
+                    #     trait["filtered"][snp[0]] = details[snp[0]]
                     if "warning" in json_dict:
                         trait["warning"] = json_dict["warning"]
                 with open('tmp/snp_list' + reference + '.txt', 'w') as f:
                     for rs_number in snp_list:
                         f.write(rs_number + '\n')
-                with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
-                    if(type(details) is collections.OrderedDict):
-                        for snp in snps:
-                            f.write("Query Variant: " + snp[0] + "\n")
-                            f.write("Trait\tRS Number\tPosition\tDetails\n")
-                            for matched_gwas in details[snp[0]]:
-                                f.write("\t".join(matched_gwas[1:]) + "\n")
-                            f.write("\n")
-                            f.write("\n")
+                # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                #     if(type(details) is collections.OrderedDict):
+                #         for snp in snps:
+                #             f.write("Query Variant: " + snp[0] + "\n")
+                #             f.write("Trait\tRS Number\tPosition\tDetails\n")
+                #             for matched_gwas in details[snp[0]]:
+                #                 f.write("\t".join(matched_gwas[1:]) + "\n")
+                #             f.write("\n")
+                #             f.write("\n")
                 out_json = json.dumps(trait, sort_keys=False)
                 print("LDTRAIT OUT_JSON", out_json)
             except:
@@ -836,30 +836,31 @@ def ldtrait():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             (snps, snp_list, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
-            with open(tmp_dir + "trait" + reference + ".json") as f:
-                json_dict = json.load(f)
-            with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
-                if(type(details) is collections.OrderedDict):
-                    for snp in snps:
-                        f.write("Query Variant: " + snp[0] + "\n")
-                        f.write("Trait\tRS Number\tPosition\tDetails\n")
-                        for matched_gwas in details[snp[0]]:
-                            f.write("\t".join(matched_gwas[1:]) + "\n")
-                        f.write("\n")
-                        f.write("\n")
+            # with open(tmp_dir + "trait" + reference + ".json") as f:
+            #     json_dict = json.load(f)
+            # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+            #     if(type(details) is collections.OrderedDict):
+            #         for snp in snps:
+            #             f.write("Query Variant: " + snp[0] + "\n")
+            #             f.write("Trait\tRS Number\tPosition\tDetails\n")
+            #             for matched_gwas in details[snp[0]]:
+            #                 f.write("\t".join(matched_gwas[1:]) + "\n")
+            #             f.write("\n")
+            #             f.write("\n")
             # display api out
             try:
                 # unlock token then display api output
-                resultFile = "./tmp/details" + reference + ".txt"
-                with open(resultFile, "r") as fp:
-                    content = fp.read()
-                with open(tmp_dir + "trait" + reference + ".json") as f:
-                    json_dict = json.load(f)
-                    if "error" in json_dict:
-                        toggleLocked(token, 0)
-                        return sendTraceback(json_dict["error"])
+                # resultFile = "./tmp/details" + reference + ".txt"
+                # with open(resultFile, "r") as fp:
+                #     content = fp.read()
+                # with open(tmp_dir + "trait" + reference + ".json") as f:
+                #     json_dict = json.load(f)
+                #     if "error" in json_dict:
+                #         toggleLocked(token, 0)
+                #         return sendTraceback(json_dict["error"])
                 toggleLocked(token, 0)
-                return content
+                return sendTraceback("API access for LDtrait not implemented yet.")
+                # return content
             except:
                 # unlock token then display error message
                 toggleLocked(token, 0)

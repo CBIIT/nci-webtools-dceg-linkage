@@ -267,7 +267,7 @@ $(document).ready(function() {
 
     var new_trait_data = {
         "aaData": [
-            ["systolic blood pressure","rs773430","chr1:113536047","Variant found in GWAS catalog within window."],
+            ["cognitive function measurement","rs77052120","chr1:110765398","Variant found in GWAS catalog within window."],
         ]
     };
     
@@ -2240,47 +2240,47 @@ function populateLDtraitWarnings(data) {
     // });
 
     // $.each(data.filtered, function( index, value ){
-    $.each(data.filtered, function( values_index, values ){
-        $.each(values, function( value_index, value ) {
+    // $.each(data.filtered, function( values_index, values ){
+    //     $.each(values, function( value_index, value ) {
 
-            var filtered = {
-                rs_number_query: value[0],
-                trait: value[1],
-                rs_number: value[2],
-                position: value[3],
-                comment: value[4],
-                rs_number_link: anchorRSnumber(value[2]),
-                position_link: anchorRSposition(value[3], values_index)
-            };
+    //         var filtered = {
+    //             rs_number_query: value[0],
+    //             trait: value[1],
+    //             rs_number: value[2],
+    //             position: value[3],
+    //             comment: value[4],
+    //             rs_number_link: anchorRSnumber(value[2]),
+    //             position_link: anchorRSposition(value[3], values_index)
+    //         };
 
-            if(filtered.comment != undefined) {
-                // if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
-                if(!filtered.comment.includes("Variant found")) {
-                    // Place message on the warning table.
-                    // console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
-                    ldtraitData.warnings.push(filtered);
+    //         if(filtered.comment != undefined) {
+    //             // if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
+    //             if(!filtered.comment.includes("Variant found")) {
+    //                 // Place message on the warning table.
+    //                 // console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
+    //                 ldtraitData.warnings.push(filtered);
 
-                    // Remove rs_numbers with warnings from thinned snp_list
-                    var index = data.snp_list.indexOf(filtered.rs_number);
-                    if (index > -1) {
-                        data.snp_list.splice(index, 1);
-                    }   
+    //                 // Remove rs_numbers with warnings from thinned snp_list
+    //                 var index = data.snp_list.indexOf(filtered.rs_number);
+    //                 if (index > -1) {
+    //                     data.snp_list.splice(index, 1);
+    //                 }   
                     
-                }
-            } else {
-                // console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
-                // console.log(JSON.stringify(filtered));
-                ldtraitData.warnings.push(filtered);
+    //             }
+    //         } else {
+    //             // console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
+    //             // console.log(JSON.stringify(filtered));
+    //             ldtraitData.warnings.push(filtered);
 
-                // Remove rs_numbers with warnings from thinned snp_list
-                var index = data.snp_list.indexOf(filtered.rs_number);
-                if (index > -1) {
-                    data.snp_list.splice(index, 1);
-                }   
+    //             // Remove rs_numbers with warnings from thinned snp_list
+    //             var index = data.snp_list.indexOf(filtered.rs_number);
+    //             if (index > -1) {
+    //                 data.snp_list.splice(index, 1);
+    //             }   
                 
-            }
-        });
-    });
+    //         }
+    //     });
+    // });
 
     //console.log("Warning Data");
     //console.dir(ldtraitData.warnings);
@@ -2358,52 +2358,8 @@ function loadLDtraitDetails(data, rs_number) {
     console.log("ldTraitRaw", data);
     console.log("rs_number", rs_number);
 
-    ldtraitData.details =[];
-    /*
-    console.log("Here is the rs_number to populate");
-    console.log("rs_number: "+rs_number);
-    console.dir(data.details);
-    console.log("find key for the rs_number");
-    console.log("Found one::::");
-    console.dir(data.details[rs_number]);
-    */
-    var found = false;
-    // var match = 'Variant in LD with ' + rs_number;
-
-    $.each(data.details, function( values_index, values ){
-        $.each(values, function( value_index, value ) {
-            var detail = {
-                rs_number_query: value[0],
-                trait: value[1],
-                rs_number: value[2],
-                position: value[3],
-                comment: value[4],
-                rs_number_link: anchorRSnumber(value[2]),
-                position_link: anchorRSposition(value[3], values_index)
-            };
-            if(detail.rs_number_query == rs_number) {
-                found = true;
-            }
-            if(found) {
-                ldtraitData.details.push(detail);
-                // if(detail.comment != undefined) {
-                //     if((detail.rs_number == rs_number && detail.comment.includes("Variant kept.")) ||
-                //         detail.comment.includes(match)) {
-                //         ldtraitData.details.push(detail);
-                //     } 
-                // } 
-                // else {
-                //     console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
-                //     // console.log(JSON.stringify(detail));
-                //     ldtraitData.warnings.push(detail);
-                // }
-            }
-        });
-    });
-
-    //console.dir(ldtraitData);
-    //console.log(JSON.stringify(ldtraitData));
-    ko.mapping.fromJS(ldtraitData, ldtraitModel);
+    RefreshTable('#new-ldtrait', data.details[rs_number]);
+    
     $('#ldtrait-detail-title').text("Details for " + rs_number);
 }
 

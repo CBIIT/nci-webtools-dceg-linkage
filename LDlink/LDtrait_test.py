@@ -36,7 +36,7 @@ def get_gwas_fields(query_snp, found):
     matched_gwas = []
     for record in found:
         matched_record = []
-        matched_record.append(query_snp)
+        # matched_record.append(query_snp)
         matched_record.append(record["MAPPED_TRAIT"])
         matched_record.append("rs" + record["SNP_ID_CURRENT"])
         matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
@@ -94,7 +94,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             if snp not in sanitized_query_snps:
                 sanitized_query_snps.append([snp])
 
-    print("remove duplicates & sanitize", sanitized_query_snps) 
+    # print("remove duplicates & sanitize", sanitized_query_snps) 
 
 
     # Select desired ancestral populations
@@ -193,7 +193,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
 
     # find genomic coords of query snps in dbsnp 
     # query_snp_details = []
-    details = collections.OrderedDict()
+    # details = collections.OrderedDict()
+    details = {}
     rs_nums = []
     snp_pos = []
     snp_coords = []
@@ -211,12 +212,12 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
                 else:
                     # Generate warning if query variant is not found in dbsnp
                     warn.append(snp_i[0])
-                    details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
+                    # details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
             else:
                 # Generate warning if query variant is not a genomic position or rs number
                 warn.append(snp_i[0])
-                details[snp_i[0]] = ["NA", "NA",
-                                        "Not an RS number, query removed."]
+                # details[snp_i[0]] = ["NA", "NA",
+                #                         "Not an RS number, query removed."]
         else:
             # Generate error for empty query variant
             output["error"] = "Input list of RS numbers is empty"
@@ -225,9 +226,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             out_json.close()
             return("", "", "")
 
-    print("rs_nums", rs_nums)
-    print("snp_pos", snp_pos)
-    print("snp_coords", snp_coords)
+    # print("rs_nums", rs_nums)
+    # print("snp_pos", snp_pos)
+    # print("snp_coords", snp_coords)
     print("warn", warn)
 
     # generate warnings for query variants not found in dbsnp
@@ -279,12 +280,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     window = 2000000
     # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
-        print(snp_coord)
+        # print(snp_coord)
         found = get_window_variants(db, snp_coord[1], snp_coord[2], window)
-        print("found: " + str(len(found)))
+        # print("found: " + str(len(found)))
         if found is not None:
             thinned_list.append(snp_coord[0])
-            details[snp_coord[0]] = get_gwas_fields(snp_coord[0], found)
+            details[snp_coord[0]] = {
+                "aaData": get_gwas_fields(snp_coord[0], found)
+            }
             # out_json["found"][query_snp["rsnum"]] = get_gwas_fields(found)
         # else:
             # out_json["not_found"].append(query_snp["rsnum"])
@@ -295,8 +298,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
-    print("##### LDTRAIT DETAILS: #####")
-    print(details)
+    # print("##### LDTRAIT DETAILS: #####")
+    # print(details)
     return (sanitized_query_snps, thinned_list, details)
 
 
@@ -313,7 +316,7 @@ def main():
     (thinned_list, sanitized_query_snps, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)
     print("snp_list", thinned_list)
     print("snps", sanitized_query_snps)
-    # print("details", details)
+    print("details", json.dumps(details))
     # print "out_json", pretty_print_json(out_json)
 
 if __name__ == "__main__":
