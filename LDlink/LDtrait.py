@@ -34,7 +34,7 @@ def get_gwas_fields(query_snp, found):
     matched_gwas = []
     for record in found:
         matched_record = []
-        # matched_record.append(query_snp)
+        matched_record.append(query_snp)
         matched_record.append(record["MAPPED_TRAIT"])
         matched_record.append("rs" + record["SNP_ID_CURRENT"])
         matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))

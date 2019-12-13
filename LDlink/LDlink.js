@@ -757,7 +757,7 @@ function createProxyTable() {
 function createTraitTable() {
 
     var ldtraitTable = $('#new-ldtrait').DataTable( {
-        // "aaSorting": [],  /* Disable initial sort */
+        "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
         "bJQueryUI": false,  // ThemeRoller
         "bLengthChange": true,
@@ -768,17 +768,10 @@ function createTraitTable() {
         "bProcessing": false,
         "deferRender": false,
         "columnDefs": [
-            // {
-            //     "render": function ( data, type, row ) {
-            //         // Provide link to LDpair in final row
-            //         return ldpop_ldpair_results_link(data, type, row);
-            //     },
-            //     "targets": 6
-            // },
             { 
-                className: "dt-head-center", 
-                className: "dt-body-center",
-                "targets": [ 0, 1, 2, 3 ] 
+                className: "dt-head-left", 
+                className: "dt-body-left",
+                "targets": [ 0, 1, 2, 3, 4 ] 
             }
         ]
     });
