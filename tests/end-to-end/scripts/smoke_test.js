@@ -201,10 +201,10 @@ describe('LDlink Smoke Test', function() {
         const resultsTable = By.xpath('//*[@id="ldpair-results-container"]/table[1]');
         const resultsTableElement = driver.findElement(resultsTable);
         await driver.wait(until.elementIsVisible(resultsTableElement), 20000);
-        const resultsLinkageEquilibrium = By.xpath('//*[@id="ldpair-results-container"]/div/div');
+        const resultsLinkageEquilibrium = By.xpath('//*[@id="ldpair-results-container"]/div/div[1]');
         const resultsLinkageEquilibriumElement = driver.findElement(resultsLinkageEquilibrium);
         const resultsLinkageEquilibriumElementText = await resultsLinkageEquilibriumElement.getText();
-        resultsLinkageEquilibriumElementText.should.contain('rs2280548 and rs6984900 are in linkage equilibrium');
+        resultsLinkageEquilibriumElementText.should.contain('rs2280548(G) allele is correlated with rs6984900(C) allele');
     });
 
     it('should display LDpop results from a sample RS pair query', async function() {
