@@ -249,14 +249,31 @@ $(document).ready(function() {
     createAssocTable();
     createPopTable();
     createProxyTable();
-    var new_assoc_data = {"aaData":
-    [
-    ["rs75563749","chr7","24958977","(C/T)","0.2037",-726,"0.234","0.234","C-C","0.0", "7","HaploReg link","NA"],
-    ["rs95696732","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","T-T","0.0","7","HaploReg link","NA"]]};
+    createTraitTable();
+    var new_assoc_data = {
+        "aaData": [
+            ["rs75563749","chr7","24958977","(C/T)","0.2037",-726,"0.234","0.234","C-C","0.0", "7","HaploReg link","NA"],
+            ["rs95696732","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","T-T","0.0","7","HaploReg link","NA"]
+        ]
+    };
 
-    var new_proxy_data = {"aaData": [["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],[".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]]};
+    var new_proxy_data = {
+        "aaData": [
+            ["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
+            ["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
+            [".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]
+        ]
+    };
+
+    var new_trait_data = {
+        "aaData": [
+            ["systolic blood pressure","rs773430","chr1:113536047","Variant found in GWAS catalog within window."],
+        ]
+    };
+    
     RefreshTable('#new-ldassoc', new_assoc_data);
     RefreshTable('#new-ldproxy', new_proxy_data);
+    RefreshTable('#new-ldtrait', new_trait_data);
 
     $('[data-toggle="popover"]').popover();
 
@@ -732,6 +749,37 @@ function createProxyTable() {
                 "targets": 10
             },
             { className: "dt-body-center", "targets": [ 1, 9, 10 ] }
+        ]
+    });
+
+}
+
+function createTraitTable() {
+
+    var ldtraitTable = $('#new-ldtrait').DataTable( {
+        // "aaSorting": [],  /* Disable initial sort */
+        "bPaginate": true,
+        "bJQueryUI": false,  // ThemeRoller
+        "bLengthChange": true,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bAutoWidth": true,
+        "bProcessing": false,
+        "deferRender": false,
+        "columnDefs": [
+            // {
+            //     "render": function ( data, type, row ) {
+            //         // Provide link to LDpair in final row
+            //         return ldpop_ldpair_results_link(data, type, row);
+            //     },
+            //     "targets": 6
+            // },
+            { 
+                className: "dt-head-center", 
+                className: "dt-body-center",
+                "targets": [ 0, 1, 2, 3 ] 
+            }
         ]
     });
 
