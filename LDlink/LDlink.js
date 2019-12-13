@@ -265,15 +265,15 @@ $(document).ready(function() {
         ]
     };
 
-    var new_trait_data = {
-        "aaData": [
-            ["cognitive function measurement","rs77052120","chr1:110765398","Variant found in GWAS catalog within window."],
-        ]
-    };
+    // var new_trait_data = {
+    //     "aaData": [
+    //         ["cognitive function measurement","rs77052120","chr1:110765398","Variant found in GWAS catalog within window."],
+    //     ]
+    // };
     
     RefreshTable('#new-ldassoc', new_assoc_data);
     RefreshTable('#new-ldproxy', new_proxy_data);
-    RefreshTable('#new-ldtrait', new_trait_data);
+    // RefreshTable('#new-ldtrait', new_trait_data);
 
     $('[data-toggle="popover"]').popover();
 

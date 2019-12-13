@@ -358,46 +358,23 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Find Correlated Alleles
     if r2 > 0.1 and r2 != "NA":
 
-        # Expected Cell Counts
-        eA = (A + B) * (A + C) / N
-        eB = (B + A) * (B + D) / N
-        eC = (C + A) * (C + D) / N
-        eD = (D + C) * (D + B) / N
-
-        # Calculate Deltas
-        dA = (A - eA)**2
-        dB = (B - eB)**2
-        dC = (C - eC)**2
-        dD = (D - eD)**2
-        dmax = max(dA, dB, dC, dD)
-
-        if dA == dB == dC == dD:
-            if tmax == A or tmax == D:
+        Ac=hap[sorted(hap)[0]]
+        Bc=hap[sorted(hap)[1]]
+        Cc=hap[sorted(hap)[2]]
+        Dc=hap[sorted(hap)[3]]
+        
+        if (Ac*Dc)/(Bc*Cc)>1:
                 corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-                corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
+                        0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
+                corr2 = snp1 + "(" + sorted(hap)[3].split("_")[
+                        0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
                 corr_alleles = [corr1, corr2]
-            else:
-                corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
-                corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-                corr_alleles = [corr1, corr2]
-        elif dmax == dA or dmax == dD:
-            corr1 = snp1 + "(" + sorted(hap)[0].split("_")[0] + ") allele is correlated with " + \
-                snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-            corr2 = snp1 + "(" + sorted(hap)[2].split("_")[0] + ") allele is correlated with " + \
-                snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
-            corr_alleles = [corr1, corr2]
         else:
-            corr1 = snp1 + "(" + sorted(hap)[0].split("_")[0] + ") allele is correlated with " + \
-                snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
-            corr2 = snp1 + "(" + sorted(hap)[2].split("_")[0] + ") allele is correlated with " + \
-                snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-            corr_alleles = [corr1, corr2]
-    else:
-        corr_alleles = [snp1 + " and " + snp2 + " are in linkage equilibrium"]
+                corr1 = snp1 + "(" + sorted(hap)[1].split("_")[
+                        0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
+                corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
+                        0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
+                corr_alleles = [corr1, corr2]
 
     # Create JSON output
     snp_1 = {}
