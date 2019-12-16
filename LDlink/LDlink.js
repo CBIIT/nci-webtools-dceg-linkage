@@ -759,6 +759,7 @@ function createTraitTable() {
     var ldtraitTable = $('#new-ldtrait').DataTable( {
         "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
+        "sScrollY": "600px",
         "bJQueryUI": false,  // ThemeRoller
         "bLengthChange": true,
         "bFilter": true,
@@ -961,12 +962,13 @@ function setupLDtraitControls() {
         $('#ldtrait-snp-list').show();
         $('#ldtrait-initial-message').hide();
         loadLDtraitDetails(ldTraitRaw, rs_number);
-        $('#ldtrait-details').show();
+        // $('#ldtrait-details').show();
         $('#ldtrait-warnings').hide();
         $('#ldtrait-initial-message').hide();
     });
     $('#ldtrait-warnings-button').click( function() {
-        $('#ldtrait-details').hide();
+        // $('#ldtrait-details').hide();
+        $('#new-ldtrait').hide();
         $('#ldtrait-initial-message').hide();
         $('#ldtrait-warnings').show();
     });
@@ -1781,7 +1783,8 @@ function updateLDtrait() {
     };
 
     //Show inital message
-    $('#ldtrait-details').hide();
+    // $('#ldtrait-details').hide();
+    $('#new-ldtrait').hide();
     $('#ldtrait-warnings').hide();
     $('#ldtrait-initial-message').show();
 
@@ -1810,6 +1813,7 @@ function updateLDtrait() {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
+            $("#new-ldtrait_filter").after($("#ldtrait-detail-title"));
             initTrait(data);
         }
     });
@@ -2351,8 +2355,10 @@ function loadLDtraitDetails(data, rs_number) {
     console.log("ldTraitRaw", data);
     console.log("rs_number", rs_number);
 
+    // $('#new-ldtrait').show();
     RefreshTable('#new-ldtrait', data.details[rs_number]);
-    
+    $('#new-ldtrait').show();
+
     $('#ldtrait-detail-title').text("Details for " + rs_number);
 }
 
@@ -2412,6 +2418,7 @@ function initTrait(data) {
     populateLDtraitWarnings(data);
     // populateSNPlist(data);
     //loadSNPdetails(data, rs_number);
+
     if(ldtraitData.warnings.length == 0) {
         $('#ldtrait-warnings-button').hide();
     } else {

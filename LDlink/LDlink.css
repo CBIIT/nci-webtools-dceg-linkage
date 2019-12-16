@@ -708,8 +708,8 @@ table#ldtrait-table-thin > tbody > tr > td {
 }
 
 .ldtrait-table-scroller {
-  overflow-y:auto;
-  max-height:575px;
+  /* overflow-y:auto;
+  max-height:575px; */
   padding-top:10px;
 }
 
