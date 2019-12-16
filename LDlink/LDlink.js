@@ -2364,7 +2364,7 @@ function initTrait(data) {
     ldTraitRaw = data;
 
     // populateLDtraitWarnings(data);
-    // populateSNPlist(data);
+    populateSNPlistLDtrait(data);
     //loadSNPdetails(data, rs_number);
 
     if(data.details.warnings && data.details.warnings.length > 0) {
