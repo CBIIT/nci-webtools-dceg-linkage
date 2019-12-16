@@ -288,18 +288,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             details[snp_coord[0]] = {	
                 "aaData": get_gwas_fields(snp_coord[0], found)	
             }
-            # out_json["found"][query_snp["rsnum"]] = get_gwas_fields(found)
-        # else:
-            # out_json["not_found"].append(query_snp["rsnum"])
-
-    # return (thinned_list, sanitized_query_snps, out_json)
-
+            
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
-    # print("##### LDTRAIT DETAILS: #####")
-    # print(details)
     return (sanitized_query_snps, thinned_list, details)
 
 
