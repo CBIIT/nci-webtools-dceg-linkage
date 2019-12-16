@@ -968,7 +968,7 @@ function setupLDtraitControls() {
     });
     $('#ldtrait-warnings-button').click( function() {
         // $('#ldtrait-details').hide();
-        $('#new-ldtrait').hide();
+        $('#new-ldtrait_wrapper').hide();
         $('#ldtrait-initial-message').hide();
         $('#ldtrait-warnings').show();
     });
@@ -2356,7 +2356,7 @@ function loadLDtraitDetails(data, rs_number) {
 
     // $('#new-ldtrait').show();
     RefreshTable('#new-ldtrait', data.details[rs_number]);
-    $('#new-ldtrait').show();
+    $('#new-ldtrait_wrapper').show();
 
     $('#ldtrait-detail-title').text("Details for " + rs_number);
 }
