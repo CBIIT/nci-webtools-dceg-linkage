@@ -12,30 +12,30 @@ var populations={AFR:{fullName:"African",subPopulations:{YRI:"Yoruba in Ibadan, 
 var ldPairData={corr_alleles:["rs2720460(A) allele is correlated with rs11733615(C) allele","rs2720460(G) allele is correlated with rs11733615(T) allele"],haplotypes:{hap1:{alleles:"AC",count:"155",frequency:"0.686"},hap2:{alleles:"GC",count:"40",frequency:"0.177"},hap3:{alleles:"GT",count:"29",frequency:"0.128"},hap4:{alleles:"AT",count:"2",frequency:"0.009"}},snp1:{allele_1:{allele:"A",count:"157",frequency:"0.695"},allele_2:{allele:"G",count:"69",frequency:"0.305"},coord:"chr4:104054686",rsnum:"rs2720460"},snp2:{allele_1:{allele:"C",count:"195",frequency:"0.863"},allele_2:{allele:"T",count:"31",frequency:"0.137"},coord:"chr4:104157164",rsnum:"rs11733615"},statistics:{chisq:"67.271",d_prime:"0.9071",p:"0.0",r2:"0.2977"},two_by_two:{cells:{c11:"155",c12:"2",c21:"40",c22:"29"},total:"old - 227"}};
 var ldhapData={footer:[{Count:127,Frequency:.588,Haplotype:"GCATGGCGTTGGGG"},{Count:40,Frequency:.1852,Haplotype:"GGGGAGCGTTGGGG"},{Count:23,Frequency:.1065,Haplotype:"GCGGAGCGTTGGGG"},{Count:11,Frequency:.0509,Haplotype:"TGGGAGCGTTGGGG"},{Count:8,Frequency:.037,Haplotype:"GCATAGCGTTGGGG"},{Count:7,Frequency:.0324,Haplotype:"TGGGGATAGCAAAG"}],rows:[{Alleles:"G=0.917, T=0.083",Coord:"chr4:104050980",RS:"rs2720457",Haplotypes:["G","G","G","T","G","T"]},{Alleles:"C=0.732, G=0.269",Coord:"chr4:104052963",RS:"rs2720458",Haplotypes:["C","G","C","G","C","G"]},{Alleles:"A=0.625, G=0.375",Coord:"chr4:104055748",RS:"rs2720461",Haplotypes:["A","G","G","G","A","G"]},{Alleles:"T=0.625, G=0.375",Coord:"chr4:104056210",RS:"rs2720462",Haplotypes:["T","G","G","G","T","G"]},{Alleles:"G=0.62, A=0.38",Coord:"chr4:104052068",RS:"rs7661201",Haplotypes:["G","A","A","A","A","G"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104055722",RS:"rs2623063",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"C=0.968, T=0.032",Coord:"chr4:104057121",RS:"rs2623062",Haplotypes:["C","C","C","C","C","T"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104057248",RS:"rs2720463",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"T=0.968, G=0.032",Coord:"chr4:104057887",RS:"rs2711901",Haplotypes:["T","T","T","T","T","G"]},{Alleles:"T=0.968, C=0.032",Coord:"chr4:104051132",RS:"rs2623082",Haplotypes:["T","T","T","T","T","C"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104058596",RS:"rs2711900",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050510",RS:"rs2720456",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=0.968, A=0.032",Coord:"chr4:104050326",RS:"rs2720455",Haplotypes:["G","G","G","G","G","A"]},{Alleles:"G=1.0, A=0.0",Coord:"chr4:104059542",RS:"rs2243682",Haplotypes:["G","G","G","G","G","G"]}]};
 var ldassocData=[{RS_Number:"rs75563749",Coord:"chr3:171031233",Alleles:"(A/T)",MAF:.1983,Distance:348304,Dprime:.0512,R2:.0021,Correlated_Alleles:"= , =",RegulomeDB:6,Functional_Class:"NA"},{RS_Number:"rs76189435",Coord:"chr3:170980080",Alleles:"(C/G)",MAF:.0527,Distance:-51153,Dprime:.622,R2:.0871,Correlated_Alleles:"= , =",RegulomeDB:"2b",Functional_Class:"NA"},{RS_Number:"rs76140932",Coord:"chr3:170980434",Alleles:"(A/G)",MAF:.0539,Distance:-50799,Dprime:.6073,R2:.085,Correlated_Alleles:"= , =",RegulomeDB:"2b",Functional_Class:"NA"},{RS_Number:"rs76735261",Coord:"chr3:170981252",Alleles:"(G/C)",MAF:.0539,Distance:-49981,Dprime:.6073,R2:.085,Correlated_Alleles:"= , =",RegulomeDB:5,Functional_Class:"NA"},{RS_Number:"rs1158564",Coord:"chr3:171002654",Alleles:"(A/G)",MAF:.4439,Distance:-28579,Dprime:.866,R2:.2324,Correlated_Alleles:"A=A,G=T",RegulomeDB:"2b",Functional_Class:"NA"},{RS_Number:"rs4894756",Coord:"chr3:171002036",Alleles:"(G/A)",MAF:.3806,Distance:-29197,Dprime:.8732,R2:.3069,Correlated_Alleles:"G=A,A=T",RegulomeDB:4,Functional_Class:"NA"},{RS_Number:"rs200296423",Coord:"chr3:170969849",Alleles:"(TGCG/-)",MAF:.0475,Distance:-61384,Dprime:.5965,R2:.0718,Correlated_Alleles:"= , =",RegulomeDB:".",Functional_Class:"NA"},{RS_Number:"rs377580557",Coord:"chr3:171001114",Alleles:"(TTTTCTC/-)",MAF:.0445,Distance:-30119,Dprime:.67,R2:.0846,Correlated_Alleles:"= , =",RegulomeDB:".",Functional_Class:"NA"},{RS_Number:"rs377580557",Coord:"chr3:171001114",Alleles:"(TTTTCTC/-)",MAF:.0445,Distance:-30119,Dprime:.67,R2:.0846,Correlated_Alleles:"= , =",RegulomeDB:".",Functional_Class:"NA"},{RS_Number:"rs6444976",Coord:"chr3:171002143",Alleles:"(G/C)",MAF:.3808,Distance:-29090,Dprime:.8731,R2:.3066,Correlated_Alleles:"G=A,C=T",RegulomeDB:4,Functional_Class:"NA"},{RS_Number:"rs13090306",Coord:"chr3:170969666",Alleles:"(A/C)",MAF:.4163,Distance:-61567,Dprime:.5359,R2:.0996,Correlated_Alleles:"= , =",RegulomeDB:5,Functional_Class:"NA"}];
-var ldtraitData = {
-    "warnings": [
-        {
-            "rs_number_query": "rs2182115",
-            "rs_number": "rs116705532", 
-            "trait": "interleukin 4 measurement",
-            "position": "chr1:113705169", 
-            "comment": "Variant not found in GWAS catalog within window.", 
-            "rs_number_link": "<a>rs116705532</a>", 
-            "position_link": "<a>chr1:113705169</a>"
-        }
-    ],
-    "details": [ 
-        {   
-            "rs_number_query": "rs2182115",
-            "rs_number": "rs773430", 
-            "trait": "systolic blood pressure",
-            "position": "chr1:113536047", 
-            "comment": "Variant found in GWAS catalog within window.", 
-            "rs_number_link": "<a>rs773430</a>", 
-            "position_link": "<a>chr1:113536047</a>"
-        }
-    ]
-};
+// var ldtraitData = {
+//     "warnings": [
+//         {
+//             "rs_number_query": "rs2182115",
+//             "rs_number": "rs116705532", 
+//             "trait": "interleukin 4 measurement",
+//             "position": "chr1:113705169", 
+//             "comment": "Variant not found in GWAS catalog within window.", 
+//             "rs_number_link": "<a>rs116705532</a>", 
+//             "position_link": "<a>chr1:113705169</a>"
+//         }
+//     ],
+//     "details": [ 
+//         {   
+//             "rs_number_query": "rs2182115",
+//             "rs_number": "rs773430", 
+//             "trait": "systolic blood pressure",
+//             "position": "chr1:113536047", 
+//             "comment": "Variant found in GWAS catalog within window.", 
+//             "rs_number_link": "<a>rs773430</a>", 
+//             "position_link": "<a>chr1:113536047</a>"
+//         }
+//     ]
+// };
 var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]};
 var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
 var snpchipReverseLookup = [];
@@ -249,7 +249,8 @@ $(document).ready(function() {
     createAssocTable();
     createPopTable();
     createProxyTable();
-    createTraitTable();
+    createTraitDetailsTable();
+    createTraitWarningsTable();
     var new_assoc_data = {
         "aaData": [
             ["rs75563749","chr7","24958977","(C/T)","0.2037",-726,"0.234","0.234","C-C","0.0", "7","HaploReg link","NA"],
@@ -273,7 +274,6 @@ $(document).ready(function() {
     
     RefreshTable('#new-ldassoc', new_assoc_data);
     RefreshTable('#new-ldproxy', new_proxy_data);
-    // RefreshTable('#new-ldtrait', new_trait_data);
 
     $('[data-toggle="popover"]').popover();
 
@@ -284,8 +284,8 @@ $(document).ready(function() {
             .getElementById('ldpair-results-container'));
     ko.applyBindings(ldhapModel, document
             .getElementById('ldhap-results-container'));
-    ko.applyBindings(ldtraitModel, document
-        .getElementById('ldtrait-results-container'));
+    // ko.applyBindings(ldtraitModel, document
+    //     .getElementById('ldtrait-results-container'));
     ko.applyBindings(snpclipModel, document
             .getElementById('snpclip-results-container'));
     ko.applyBindings(snpchipModel, document
@@ -754,9 +754,9 @@ function createProxyTable() {
 
 }
 
-function createTraitTable() {
+function createTraitDetailsTable() {
 
-    var ldtraitTable = $('#new-ldtrait').DataTable( {
+    var ldtraitDetailsTable = $('#new-ldtrait').DataTable( {
         "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
         // "sScrollY": "600px",
@@ -773,6 +773,31 @@ function createTraitTable() {
                 className: "dt-head-left", 
                 className: "dt-body-left",
                 "targets": [ 0, 1, 2, 3, 4 ] 
+            }
+        ]
+    });
+
+}
+
+function createTraitWarningsTable() {
+
+    var ldtraitWarningsTable = $('#new-ldtrait-warnings').DataTable( {
+        "aaSorting": [],  /* Disable initial sort */
+        "bPaginate": true,
+        // "sScrollY": "600px",
+        "bJQueryUI": false,  // ThemeRoller
+        "bLengthChange": true,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bAutoWidth": true,
+        "bProcessing": false,
+        "deferRender": false,
+        "columnDefs": [
+            { 
+                className: "dt-head-left", 
+                className: "dt-body-left",
+                "targets": [ 0, 1, 2, 3] 
             }
         ]
     });
@@ -955,22 +980,19 @@ function checkSelectAllCheckbox() {
 }
 
 function setupLDtraitControls() {
-    //('#ldtrait').attr('disabled', false); // Remove this. (only need for testing)
     $('#ldtrait-snp-list').on('click', "a", function(e) {
         //console.log("clicking on link");
         var rs_number = e.target.id;
         $('#ldtrait-snp-list').show();
         $('#ldtrait-initial-message').hide();
         loadLDtraitDetails(ldTraitRaw, rs_number);
-        // $('#ldtrait-details').show();
-        $('#ldtrait-warnings').hide();
+        $('#new-ldtrait-warnings_wrapper').hide();
         $('#ldtrait-initial-message').hide();
     });
     $('#ldtrait-warnings-button').click( function() {
-        // $('#ldtrait-details').hide();
         $('#new-ldtrait_wrapper').hide();
+        loadLDtraitWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
-        $('#ldtrait-warnings').show();
     });
 }
 
@@ -1033,7 +1055,7 @@ function showFFWarning() {
 //var ldproxyModel = ko.mapping.fromJS(ldProxyData);
 var ldpairModel = ko.mapping.fromJS(ldPairData);
 var ldhapModel = ko.mapping.fromJS(ldhapData);
-var ldtraitModel = ko.mapping.fromJS(ldtraitData);
+// var ldtraitModel = ko.mapping.fromJS(ldtraitData);
 var snpclipModel = ko.mapping.fromJS(snpclipData);
 var snpchipModel = ko.mapping.fromJS(snpchipData);
 
@@ -1785,7 +1807,7 @@ function updateLDtrait() {
     //Show inital message
     // $('#ldtrait-details').hide();
     $('#new-ldtrait_wrapper').hide();
-    $('#ldtrait-warnings').hide();
+    $('#new-ldtrait-warnings_wrapper').hide();
     $('#ldtrait-initial-message').show();
 
     //Update href on
@@ -2200,98 +2222,19 @@ function anchorRSposition(coord, rs_number) {
     //}
 }
 
-function populateLDtraitWarnings(data) {
+// function populateLDtraitWarnings(data) {
 
-    ldtraitData.warnings = [];
+//     if(data.details.warnings && data.details.warnings.length == 0) {
+//         $('#ldtrait-warning').hide();
+//     } else {
+//         $('#ldtrait-warning').show();
+//     }
+//     ko.mapping.fromJS(ldtraitData, ldtraitModel);
 
-    // $.each(data.details, function( values_index, values ){
-    //     $.each(values, function( value_index, value ) {
-    //         var detail = {
-    //             rs_number_query: value[0],
-    //             trait: value[1],
-    //             rs_number: value[2],
-    //             position: value[3],
-    //             comment: value[4],
-    //             rs_number_link: anchorRSnumber(values_index),
-    //             position_link: anchorRSposition(value[0], values_index)
-    //         };
-    //         if(detail.rs_number_query == rs_number) {
-    //             found = true;
-    //         }
-    //         if(found) {
-    //             ldtraitData.details.push(detail);
-    //             // if(detail.comment != undefined) {
-    //             //     if((detail.rs_number == rs_number && detail.comment.includes("Variant kept.")) ||
-    //             //         detail.comment.includes(match)) {
-    //             //         ldtraitData.details.push(detail);
-    //             //     } 
-    //             // } 
-    //             // else {
-    //             //     console.log("detail.comment is UNDEFINED " + detail.rs_numbers);
-    //             //     // console.log(JSON.stringify(detail));
-    //             //     ldtraitData.warnings.push(detail);
-    //             // }
-    //         }
-    //     });
-    // });
+//     // Populate Thinned SNP List after rs_numbers that triggered warnings are removed
+//     populateSNPlistLDtrait(data);
 
-    // $.each(data.filtered, function( index, value ){
-    // $.each(data.filtered, function( values_index, values ){
-    //     $.each(values, function( value_index, value ) {
-
-    //         var filtered = {
-    //             rs_number_query: value[0],
-    //             trait: value[1],
-    //             rs_number: value[2],
-    //             position: value[3],
-    //             comment: value[4],
-    //             rs_number_link: anchorRSnumber(value[2]),
-    //             position_link: anchorRSposition(value[3], values_index)
-    //         };
-
-    //         if(filtered.comment != undefined) {
-    //             // if(!filtered.comment.includes("Variant kept.") && !filtered.comment.includes("Variant in LD")) {
-    //             if(!filtered.comment.includes("Variant found")) {
-    //                 // Place message on the warning table.
-    //                 // console.log("Push to warnings: " + filtered.rs_number + " " + filtered.comment);
-    //                 ldtraitData.warnings.push(filtered);
-
-    //                 // Remove rs_numbers with warnings from thinned snp_list
-    //                 var index = data.snp_list.indexOf(filtered.rs_number);
-    //                 if (index > -1) {
-    //                     data.snp_list.splice(index, 1);
-    //                 }   
-                    
-    //             }
-    //         } else {
-    //             // console.log("filtered.comment is UNDEFINED " + filtered.rs_number);
-    //             // console.log(JSON.stringify(filtered));
-    //             ldtraitData.warnings.push(filtered);
-
-    //             // Remove rs_numbers with warnings from thinned snp_list
-    //             var index = data.snp_list.indexOf(filtered.rs_number);
-    //             if (index > -1) {
-    //                 data.snp_list.splice(index, 1);
-    //             }   
-                
-    //         }
-    //     });
-    // });
-
-    //console.log("Warning Data");
-    //console.dir(ldtraitData.warnings);
-
-    if(ldtraitData.warnings.length == 0) {
-        $('#ldtrait-warning').hide();
-    } else {
-        $('#ldtrait-warning').show();
-    }
-    ko.mapping.fromJS(ldtraitData, ldtraitModel);
-
-    // Populate Thinned SNP List after rs_numbers that triggered warnings are removed
-    populateSNPlistLDtrait(data);
-
-}
+// }
 
 function populateSNPwarnings(data) {
 
@@ -2354,11 +2297,17 @@ function loadLDtraitDetails(data, rs_number) {
     console.log("ldTraitRaw", data);
     console.log("rs_number", rs_number);
 
-    // $('#new-ldtrait').show();
     RefreshTable('#new-ldtrait', data.details[rs_number]);
     $('#new-ldtrait_wrapper').show();
 
     $('#ldtrait-detail-title').text("Details for " + rs_number);
+}
+
+function loadLDtraitWarnings(data) {
+    console.log("ldTraitRaw", data);
+
+    RefreshTable('#new-ldtrait-warnings', data.details.warnings);
+    $('#new-ldtrait-warnings_wrapper').show();
 }
 
 function loadSNPdetails(data, rs_number) {
@@ -2414,14 +2363,14 @@ function initTrait(data) {
 
     ldTraitRaw = data;
 
-    populateLDtraitWarnings(data);
+    // populateLDtraitWarnings(data);
     // populateSNPlist(data);
     //loadSNPdetails(data, rs_number);
 
-    if(ldtraitData.warnings.length == 0) {
-        $('#ldtrait-warnings-button').hide();
-    } else {
+    if(data.details.warnings && data.details.warnings.length > 0) {
         $('#ldtrait-warnings-button').show();
+    } else {
+        $('#ldtrait-warnings-button').hide();
     }
 }
 

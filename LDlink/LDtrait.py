@@ -196,6 +196,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     snp_pos = []
     snp_coords = []
     warn = []
+    warnings = []
     for snp_i in sanitized_query_snps:
         if (len(snp_i) > 0 and len(snp_i[0]) > 2):
             if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
@@ -209,11 +210,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
                 else:
                     # Generate warning if query variant is not found in dbsnp
                     warn.append(snp_i[0])
-                    # details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
+                    warnings.append([snp_i[0], "NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
             else:
                 # Generate warning if query variant is not a genomic position or rs number
                 warn.append(snp_i[0])
-                # details[snp_i[0]] = ["NA", "NA", "Not an RS number, query removed."]
+                warnings.append([snp_i[0], "NA", "NA", "Not a valid SNP, query removed."])
         else:
             # Generate error for empty query variant
             output["error"] = "Input list of RS numbers is empty"
@@ -226,6 +227,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     # print("snp_pos", snp_pos)
     # print("snp_coords", snp_coords)
     print("warn", warn)
+    details["warnings"] = {
+        "aaData": warnings
+    }
 
     # generate warnings for query variants not found in dbsnp
     if warn != []:
