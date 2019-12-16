@@ -759,7 +759,7 @@ function createTraitTable() {
     var ldtraitTable = $('#new-ldtrait').DataTable( {
         "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
-        "sScrollY": "600px",
+        // "sScrollY": "600px",
         "bJQueryUI": false,  // ThemeRoller
         "bLengthChange": true,
         "bFilter": true,
@@ -1784,7 +1784,7 @@ function updateLDtrait() {
 
     //Show inital message
     // $('#ldtrait-details').hide();
-    $('#new-ldtrait').hide();
+    $('#new-ldtrait_wrapper').hide();
     $('#ldtrait-warnings').hide();
     $('#ldtrait-initial-message').show();
 
@@ -1813,7 +1813,6 @@ function updateLDtrait() {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
-            $("#new-ldtrait_filter").after($("#ldtrait-detail-title"));
             initTrait(data);
         }
     });
