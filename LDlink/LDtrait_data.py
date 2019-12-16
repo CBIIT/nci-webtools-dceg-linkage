@@ -84,6 +84,8 @@ def main():
             values.append("NA")
             document = dict(list(zip(headers, values)))
             # check if orginal gwas row has populated rs number column
+            # check field: "SNP_ID_CURRENT"
+            # To-do: check field "SNPS" (with possible merged RSIDs and genomic coords)
             if len(values[23]) > 0:
                 # find chr, pos in dbsnp using rsid
                 record = dbsnp.find_one({"id": values[23]})
