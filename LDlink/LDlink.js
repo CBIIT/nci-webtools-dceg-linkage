@@ -2367,7 +2367,7 @@ function initTrait(data) {
     populateSNPlistLDtrait(data);
     //loadSNPdetails(data, rs_number);
 
-    if(data.details.warnings && data.details.warnings.length > 0) {
+    if(data.details.warnings && data.details.aaData.warnings.length > 0) {
         $('#ldtrait-warnings-button').show();
     } else {
         $('#ldtrait-warnings-button').hide();
