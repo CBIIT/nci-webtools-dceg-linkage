@@ -15,8 +15,8 @@ filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps_" + datetime.today().strftime('%Y-%m-%d') + ".json"
 
 # Load variables from config file
-# with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as c:
-with open('config.yml', 'r') as c:
+with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as c:
+# with open('config.yml', 'r') as c:
     config = yaml.load(c)
 ldtrait_src = config['data']['ldtrait_src']
 tmp_dir = config['data']['tmp_dir']
@@ -46,8 +46,8 @@ def main():
     # client = MongoClient('mongodb://' + username + ':' + password + '@localhost/LDLink', port)
     # Connect to Mongo snp database
     if instance == "web":
-        # contents = open("/analysistools/public_html/apps/LDlink/app/SNP_Query_loginInfo.ini").read().split('\n')
-        contents = open("./SNP_Query_loginInfo_test.ini").read().split('\n')
+        contents = open("/analysistools/public_html/apps/LDlink/app/SNP_Query_loginInfo.ini").read().split('\n')
+        # contents = open("./SNP_Query_loginInfo_test.ini").read().split('\n')
         username = 'ncianalysis_api'
         password = contents[1].split('=')[1]
         port = int(contents[2].split('=')[1])
