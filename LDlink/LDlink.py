@@ -801,9 +801,9 @@ def ldtrait():
                 else:
                     if "warning" in json_dict:
                         trait["warning"] = json_dict["warning"]
-                with open('tmp/snp_list' + reference + '.txt', 'w') as f:
-                    for rs_number in query_snps:
-                        f.write(rs_number + '\n')
+                # with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+                #     for rs_number in query_snps:
+                #         f.write(rs_number + '\n')
                 # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
                 #     if(type(details) is collections.OrderedDict):
                 #         for snp in snps:

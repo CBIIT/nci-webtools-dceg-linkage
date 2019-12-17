@@ -318,7 +318,6 @@ def main():
     print("query_snps", sanitized_query_snps)	
     print("thinned_snps", thinned_list)
     print("details", json.dumps(details))
-    # print "out_json", pretty_print_json(out_json)
 
 if __name__ == "__main__":
     main()
