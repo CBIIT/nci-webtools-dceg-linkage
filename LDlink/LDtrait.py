@@ -336,7 +336,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     thinned_list = []
 
     # establish low/high window for each query snp
-    window = 2000000
+    window = 2000000 # 2Mb = 2,000,000 Bp
     # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
         # print(snp_coord)

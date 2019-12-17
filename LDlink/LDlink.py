@@ -799,22 +799,25 @@ def ldtrait():
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    if "warning" in json_dict:
-                        trait["warning"] = json_dict["warning"]
+                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                        for snp in thinned_snps:
+                            f.write("Query Variant: " + snp + "\n")
+                            f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
+                            for matched_gwas in details[snp].aaData:
+                                f.write("\t".join(matched_gwas) + "\n")
+                            f.write("\n")
+                            f.write("\n")
+                        if "warning" in json_dict:
+                            trait["warning"] = json_dict["warning"]
+                            f.write("Warning(s):\n")
+                            f.write(trait["warning"])
+
                 # with open('tmp/snp_list' + reference + '.txt', 'w') as f:
                 #     for rs_number in query_snps:
                 #         f.write(rs_number + '\n')
-                # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
-                #     if(type(details) is collections.OrderedDict):
-                #         for snp in snps:
-                #             f.write("Query Variant: " + snp[0] + "\n")
-                #             f.write("Trait\tRS Number\tPosition\tDetails\n")
-                #             for matched_gwas in details[snp[0]]:
-                #                 f.write("\t".join(matched_gwas[1:]) + "\n")
-                #             f.write("\n")
-                #             f.write("\n")
+                
+
                 out_json = json.dumps(trait, sort_keys=False)
-                print("LDTRAIT OUT_JSON", out_json)
             except:
                 return sendTraceback(None)
         else:
@@ -845,6 +848,21 @@ def ldtrait():
             #                 f.write("\t".join(matched_gwas[1:]) + "\n")
             #             f.write("\n")
             #             f.write("\n")
+            with open(tmp_dir + "trait" + reference + ".json") as f:
+                json_dict = json.load(f)
+            # if "error" in json_dict:
+            #     trait["error"] = json_dict["error"]
+            # else:
+            #     if "warning" in json_dict:
+            #         trait["warning"] = json_dict["warning"]
+            with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                for snp in thinned_snps:
+                    f.write("Query Variant: " + snp + "\n")
+                    f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
+                    for matched_gwas in details[snp].aaData:
+                        f.write("\t".join(matched_gwas) + "\n")
+                    f.write("\n")
+                    f.write("\n")
             # display api out
             try:
                 # unlock token then display api output
@@ -856,6 +874,12 @@ def ldtrait():
                 #     if "error" in json_dict:
                 #         toggleLocked(token, 0)
                 #         return sendTraceback(json_dict["error"])
+                if "error" in json_dict:
+                    toggleLocked(token, 0)
+                    return sendTraceback(json_dict["error"])
+                # else:
+                #     if "warning" in json_dict:
+                #         trait["warning"] = json_dict["warning"]
                 toggleLocked(token, 0)
                 return sendTraceback("API access for LDtrait not implemented yet.")
                 # return content
