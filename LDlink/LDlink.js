@@ -743,13 +743,13 @@ function createTraitDetailsTable() {
         "bProcessing": false,
         "deferRender": false,
         "columnDefs": [
-            // {
-            //     "render": function ( data, type, row ) {
-            //         // Provide link to LDpair in final row
-            //         return ldtrait_ldpair_results_link(data, type, row);
-            //     },
-            //     "targets": 6
-            // },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    return ldtrait_ldpair_results_link(data, type, row);
+                },
+                "targets": 6
+            },
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair in final row

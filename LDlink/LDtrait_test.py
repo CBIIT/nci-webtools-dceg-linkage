@@ -30,7 +30,7 @@ def get_window_variants(db, chromosome, position, window):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-def get_gwas_fields(query_snp, found):
+def get_gwas_fields(query_snp, found, pops):
     matched_gwas = []
     for record in found:
         matched_record = []
@@ -49,7 +49,7 @@ def get_gwas_fields(query_snp, found):
         # D'
         matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
         # LDpair (Link)
-        matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
+        matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(pops)])
         # Risk Allele
         matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
         # Effect Size (95% CI)
@@ -308,7 +308,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         if found is not None:
             thinned_list.append(snp_coord[0])
             details[snp_coord[0]] = {
-                "aaData": get_gwas_fields(snp_coord[0], found)
+                "aaData": get_gwas_fields(snp_coord[0], found, pops)
             }
             # out_json["found"][query_snp["rsnum"]] = get_gwas_fields(found)
         # else:
