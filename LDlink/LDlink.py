@@ -802,9 +802,9 @@ def ldtrait():
                     with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
                         for snp in thinned_snps:
                             f.write("Query Variant: " + snp + "\n")
-                            f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
+                            f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                             for matched_gwas in details[snp]["aaData"]:
-                                f.write("\t".join(matched_gwas) + "\n")
+                                f.write("\t".join([element for i, element in enumerate(matched_gwas) if i not in {6, 10}]) + "\n")
                             f.write("\n")
                             f.write("\n")
                         if "warning" in json_dict:
