@@ -789,22 +789,20 @@ def ldtrait():
             try:
                 trait = {}
                 # snplst, pop, request, web, r2_d, threshold
-                (snps, snp_list, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
-                trait["snp_list"] = snp_list
+                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
+                trait["query_snps"] = query_snps
+                trait["thinned_snps"] = thinned_snps
                 trait["details"] = details
-                trait["snps"] = snps
-                # trait["filtered"] = collections.OrderedDict()
+
                 with open(tmp_dir + "trait" + reference + ".json") as f:
                     json_dict = json.load(f)
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    # for snp in snps:
-                    #     trait["filtered"][snp[0]] = details[snp[0]]
                     if "warning" in json_dict:
                         trait["warning"] = json_dict["warning"]
                 with open('tmp/snp_list' + reference + '.txt', 'w') as f:
-                    for rs_number in snp_list:
+                    for rs_number in query_snps:
                         f.write(rs_number + '\n')
                 # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
                 #     if(type(details) is collections.OrderedDict):
@@ -826,7 +824,7 @@ def ldtrait():
         web = False
         reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snpfile = str(tmp_dir + 'snps' + reference + '.txt')
-        snplist = snps.splitlines()
+        snplist = thinned_snps.splitlines()
         with open(snpfile, 'w') as f:
             for s in snplist:
                 s = s.lstrip()
@@ -835,7 +833,7 @@ def ldtrait():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (snps, snp_list, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
+            (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
             # with open(tmp_dir + "trait" + reference + ".json") as f:
             #     json_dict = json.load(f)
             # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:

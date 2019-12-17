@@ -314,9 +314,9 @@ def main():
     r2_d_threshold = 0.15
 
     # Run function
-    (thinned_list, sanitized_query_snps, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)
-    print("snp_list", thinned_list)
-    print("snps", sanitized_query_snps)
+    (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)	
+    print("query_snps", sanitized_query_snps)	
+    print("thinned_snps", thinned_list)
     print("details", json.dumps(details))
     # print "out_json", pretty_print_json(out_json)
 
