@@ -803,7 +803,7 @@ def ldtrait():
                         for snp in thinned_snps:
                             f.write("Query Variant: " + snp + "\n")
                             f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
-                            for matched_gwas in details[snp].aaData:
+                            for matched_gwas in details[snp]["aaData"]:
                                 f.write("\t".join(matched_gwas) + "\n")
                             f.write("\n")
                             f.write("\n")
@@ -855,14 +855,14 @@ def ldtrait():
             # else:
             #     if "warning" in json_dict:
             #         trait["warning"] = json_dict["warning"]
-            with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
-                for snp in thinned_snps:
-                    f.write("Query Variant: " + snp + "\n")
-                    f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
-                    for matched_gwas in details[snp].aaData:
-                        f.write("\t".join(matched_gwas) + "\n")
-                    f.write("\n")
-                    f.write("\n")
+            # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+            #     for snp in thinned_snps:
+            #         f.write("Query Variant: " + snp + "\n")
+            #         f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
+            #         for matched_gwas in details[snp].aaData:
+            #             f.write("\t".join(matched_gwas) + "\n")
+            #         f.write("\n")
+            #         f.write("\n")
             # display api out
             try:
                 # unlock token then display api output
