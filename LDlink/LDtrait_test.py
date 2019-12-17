@@ -30,6 +30,44 @@ def get_window_variants(db, chromosome, position, window):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
+def expandSelectedPopulationGroups(pops):
+    expandedPops = pops
+    pop_groups = {
+        "ALL": ["ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"],
+        "AFR": ["YRI", "LWK", "GWD", "MSL", "ESN", "ASW", "ACB"],
+        "AMR": ["MXL", "PUR", "CLM", "PEL"],
+        "EAS": ["CHB", "JPT", "CHS", "CDX", "KHV"],
+        "EUR": ["CEU", "TSI", "FIN", "GBR" , "IBS"],
+        "SAS": ["GIH", "PJL", "BEB", "STU" , "ITU"]
+    }
+    if "ALL" in pops:
+        expandedPops.remove("ALL")
+        expandedPops = pop_groups["ALL"]
+        expandedPops = list(set(expandedPops)) # unique elements
+        return expandedPops
+    else:
+        if "AFR" in pops:
+            expandedPops.remove("AFR")
+            expandedPops = expandedPops + pop_groups["AFR"]
+            expandedPops = list(set(expandedPops)) # unique elements
+        if "AMR" in pops:
+            expandedPops.remove("AMR")
+            expandedPops = expandedPops + pop_groups["AMR"]
+            expandedPops = list(set(expandedPops)) # unique elements
+        if "EAS" in pops:
+            expandedPops.remove("EAS")
+            expandedPops = expandedPops + pop_groups["EAS"]
+            expandedPops = list(set(expandedPops)) # unique elements
+        if "EUR" in pops:
+            expandedPops.remove("EUR")
+            expandedPops = expandedPops + pop_groups["EUR"]
+            expandedPops = list(set(expandedPops)) # unique elements
+        if "SAS" in pops:
+            expandedPops.remove("SAS")
+            expandedPops = expandedPops + pop_groups["SAS"]
+            expandedPops = list(set(expandedPops)) # unique elements
+    return expandedPops
+
 def get_gwas_fields(query_snp, found, pops):
     matched_gwas = []
     for record in found:
@@ -308,7 +346,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         if found is not None:
             thinned_list.append(snp_coord[0])
             details[snp_coord[0]] = {
-                "aaData": get_gwas_fields(snp_coord[0], found, pops)
+                "aaData": get_gwas_fields(snp_coord[0], found, expandSelectedPopulationGroups(pops))
             }
             # out_json["found"][query_snp["rsnum"]] = get_gwas_fields(found)
         # else:
