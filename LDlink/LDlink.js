@@ -743,10 +743,24 @@ function createTraitDetailsTable() {
         "bProcessing": false,
         "deferRender": false,
         "columnDefs": [
+            // {
+            //     "render": function ( data, type, row ) {
+            //         // Provide link to LDpair in final row
+            //         return ldtrait_ldpair_results_link(data, type, row);
+            //     },
+            //     "targets": 6
+            // },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair in final row
+                    return ldtrait_gwas_catalog_link(data, type, row);
+                },
+                "targets": 10
+            },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] 
             }
         ]
     });
@@ -1075,6 +1089,30 @@ function ldpop_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    return link;
+}
+
+function ldtrait_ldpair_results_link(data, type, row) {
+    // parse data
+    // console.log(data);
+    var snp1 = data[0];
+    var snp2 = data[1];
+    var pops = data[2];
+    var server = window.location.origin + '/?tab=ldpair';
+    var params = {
+        var1: snp1,
+        var2: snp2,
+        pop: pops
+    };
+    var href = server + '&' + $.param(params);
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    return link;
+}
+
+function ldtrait_gwas_catalog_link(data, type, row) {
+    var rsid = data;
+    var href = 'https://www.ebi.ac.uk/gwas/variants/' + rsid;
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
     return link;
 }

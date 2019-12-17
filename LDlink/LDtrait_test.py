@@ -34,11 +34,32 @@ def get_gwas_fields(query_snp, found):
     matched_gwas = []
     for record in found:
         matched_record = []
-        matched_record.append(query_snp)
-        matched_record.append(record["DISEASE/TRAIT"])
-        matched_record.append("rs" + record["SNP_ID_CURRENT"])
+        # Query SNP
+        # matched_record.append(query_snp)
+        # GWAS Trait
+        matched_record.append(record["DISEASE/TRAIT"]) 
+        # RS Number
+        matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
+        # Position
         matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
-        matched_record.append("Variant found in GWAS catalog within window.")
+        # Alleles
+        matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
+        # R2
+        matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
+        # D'
+        matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
+        # LDpair (Link)
+        matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
+        # Risk Allele
+        matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
+        # Effect Size (95% CI)
+        matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
+        # P-value
+        matched_record.append(record["P-VALUE"] if ("P-VALUE" in record and len(record["P-VALUE"]) > 0) else "NA")
+        # GWAS Catalog (Link)
+        matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
+        # Details
+        # matched_record.append("Variant found in GWAS catalog within window.")
         matched_gwas.append(matched_record)
     return matched_gwas
 
