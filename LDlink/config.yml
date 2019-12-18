@@ -1,7 +1,9 @@
 data:
   dbsnp_version: '151'
-  pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
-  vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
+  # pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
+  pop_dir: '/Users/jiangk3/Desktop/dev/nci-webtools-dceg-linkage/data/1000G/Phase3/samples/'
+  # vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
+  vcf_dir: '/Users/jiangk3/Desktop/dev/nci-webtools-dceg-linkage/data/1000G/Phase3/genotypes/ALL.chr'
   reg_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/regulomedb/regulomedb.db'
   gene_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene.txt.gz'
   gene_c_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/refGene/sorted_refGene_collapsed_3.txt.gz'

@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import yaml
 import json
+import copy
 # import math
 # import operator
 import os
@@ -14,6 +15,13 @@ contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
 port = int(contents[2].split('=')[1])
+
+# Set data directories using config.yml
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+dbsnp_version = config['data']['dbsnp_version']
+pop_dir = config['data']['pop_dir']
+vcf_dir = config['data']['vcf_dir']
 
 
 def pretty_print_json(obj):
@@ -31,7 +39,7 @@ def get_window_variants(db, chromosome, position, window):
     return query_results_sanitized
 
 def expandSelectedPopulationGroups(pops):
-    expandedPops = pops
+    expandedPops = copy.deepcopy(pops)
     pop_groups = {
         "ALL": ["ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"],
         "AFR": ["YRI", "LWK", "GWD", "MSL", "ESN", "ASW", "ACB"],
@@ -68,9 +76,38 @@ def expandSelectedPopulationGroups(pops):
             expandedPops = list(set(expandedPops)) # unique elements
     return expandedPops
 
-def get_gwas_fields(query_snp, found, pops):
+def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
+    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pop_ids)
+    print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops)
+
+    # Extract 1000 Genomes phased genotypes
+
+    # SNP1
+    vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+        vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
+    proc1_offset = subprocess.Popen(
+        tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
+    vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
+
+    # SNP2
+    vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+        vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
+    proc2_offset = subprocess.Popen(
+        tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
+    vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
+
+    vcf1_pos = snp1_coord['position']
+    vcf2_pos = snp2_coord['position']
+    vcf1 = vcf1_offset
+    vcf2 = vcf2_offset
+
+
+def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids):
     matched_gwas = []
     for record in found:
+        get_ld_stats(query_snp, {"chromosome": query_snp_chr, "position": query_snp_pos}, "rs" + record["SNP_ID_CURRENT"],{"chromosome": record["chromosome_grch37"], "position": record["position_grch37"]}, pops, pop_ids)
         matched_record = []
         # Query SNP
         # matched_record.append(query_snp)
@@ -87,7 +124,7 @@ def get_gwas_fields(query_snp, found, pops):
         # D'
         matched_record.append(record["ALLELES"] if ("ALLELES" in record and len(record["ALLELES"]) > 0) else "NA")
         # LDpair (Link)
-        matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(pops)])
+        matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(expandSelectedPopulationGroups(pops))])
         # Risk Allele
         matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
         # Effect Size (95% CI)
@@ -108,12 +145,12 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     # snp limit
     max_list = 250
 
-    # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
-    dbsnp_version = config['data']['dbsnp_version']
-    pop_dir = config['data']['pop_dir']
-    vcf_dir = config['data']['vcf_dir']
+    # # Set data directories using config.yml
+    # with open('config.yml', 'r') as f:
+    #     config = yaml.load(f)
+    # dbsnp_version = config['data']['dbsnp_version']
+    # pop_dir = config['data']['pop_dir']
+    # vcf_dir = config['data']['vcf_dir']
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
@@ -159,8 +196,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     pop_dirs = []
     for pop_i in pops:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            # pop_dirs.append(pop_dir+pop_i+".txt")
-            pop_dirs.append(tmp_dir+pop_i+".txt")
+            pop_dirs.append(pop_dir+pop_i+".txt")
         else:
             output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -286,7 +322,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     # print("rs_nums", rs_nums)
     # print("snp_pos", snp_pos)
     # print("snp_coords", snp_coords)
-    print("warn", warn)
+    # print("warn", warn)
     details["warnings"] = {
         "aaData": warnings
     }
@@ -345,8 +381,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         # print("found: " + str(len(found)))
         if found is not None:
             thinned_list.append(snp_coord[0])
+            # Calculate LD statistics of variant pairs ?in parallel?
+            # get_ld_stats()
             details[snp_coord[0]] = {
-                "aaData": get_gwas_fields(snp_coord[0], found, expandSelectedPopulationGroups(pops))
+                "aaData": get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids)
+                # "aaData": get_gwas_fields(snp_coord[0], found, expandSelectedPopulationGroups(pops))
             }
             # out_json["found"][query_snp["rsnum"]] = get_gwas_fields(found)
         # else:
@@ -374,9 +413,9 @@ def main():
 
     # Run function
     (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)	
-    print("query_snps", sanitized_query_snps)	
-    print("thinned_snps", thinned_list)
-    print("details", json.dumps(details))
+    # print("query_snps", sanitized_query_snps)	
+    # print("thinned_snps", thinned_list)
+    # print("details", json.dumps(details))
 
 if __name__ == "__main__":
     main()
