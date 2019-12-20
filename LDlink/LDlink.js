@@ -734,7 +734,7 @@ function createTraitDetailsTable() {
         "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
         // "sScrollY": "600px",
-        xScrollX: "100%",
+        // xScrollX: "100%",
         "bJQueryUI": false,  // ThemeRoller
         "bLengthChange": true,
         "bFilter": true,
@@ -746,14 +746,35 @@ function createTraitDetailsTable() {
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
-                    // Provide link to LDpair in final row
+                    // Round R2 float to 4 decimal places
+                    return parseFloat(data).toFixed(4);
+                },
+                "targets": 4
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Round D' float to 4 decimal places
+                    return parseFloat(data).toFixed(4);
+                },
+                "targets": 5
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Round P-value float to 4 decimal places
+                    return parseFloat(data).toFixed(4);
+                },
+                "targets": 9
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair 
                     return ldtrait_ldpair_results_link(data, type, row);
                 },
                 "targets": 6
             },
             {
                 "render": function ( data, type, row ) {
-                    // Provide link to LDpair in final row
+                    // Provide link to gwas catalog
                     return ldtrait_gwas_catalog_link(data, type, row);
                 },
                 "targets": 10
