@@ -357,38 +357,43 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
     # print("output", output)
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo):	    
-    matched_gwas = []
+    matched_snps = []
+    problematic_snps = []
     for record in found:
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
-        matched_record = []
-        # Query SNP
-        # matched_record.append(query_snp)
-        # GWAS Trait
-        matched_record.append(record["DISEASE/TRAIT"]) 
-        # RS Number
-        matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
-        # Position
-        matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
-        # Alleles	
-        matched_record.append(ld["corr_alleles"])	
-        # R2	
-        matched_record.append(ld["r2"])	
-        # D'	
-        matched_record.append(ld["D_prime"])	
-        # LDpair (Link)	
-        matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(expandSelectedPopulationGroups(pops))])
-        # Risk Allele
-        matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
-        # Effect Size (95% CI)
-        matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
-        # P-value
-        matched_record.append(ld["p"])
-        # GWAS Catalog (Link)
-        matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
-        # Details
-        # matched_record.append("Variant found in GWAS catalog within window.")
-        matched_gwas.append(matched_record)
-    return matched_gwas
+        if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
+            matched_record = []
+            # Query SNP
+            # matched_record.append(query_snp)
+            # GWAS Trait
+            matched_record.append(record["DISEASE/TRAIT"]) 
+            # RS Number
+            matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
+            # Position
+            matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
+            # Alleles	
+            matched_record.append(ld["corr_alleles"])	
+            # R2	
+            matched_record.append(ld["r2"])	
+            # D'	
+            matched_record.append(ld["D_prime"])	
+            # LDpair (Link)	
+            matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(expandSelectedPopulationGroups(pops))])
+            # Risk Allele
+            matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
+            # Effect Size (95% CI)
+            matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
+            # P-value
+            matched_record.append(ld["p"])
+            # GWAS Catalog (Link)
+            matched_record.append("rs" + record["SNP_ID_CURRENT"])
+            # Details
+            # matched_record.append("Variant found in GWAS catalog within window.")
+            matched_snps.append(matched_record)
+        else:
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
+            problematic_snps.append(problematic_record)
+    return (matched_snps, problematic_snps)
 
 # Create LDtrait function
 # def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
@@ -558,11 +563,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
                 else:
                     # Generate warning if query variant is not found in dbsnp
                     warn.append(snp_i[0])
-                    warnings.append([snp_i[0], "NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
+                    warnings.append([snp_i[0], "NA", "NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
             else:
                 # Generate warning if query variant is not a genomic position or rs number
                 warn.append(snp_i[0])
-                warnings.append([snp_i[0], "NA", "NA", "Not a valid SNP, query removed."])
+                warnings.append([snp_i[0], "NA", "NA", "NA", "Not a valid SNP, query removed."])
         else:
             # Generate error for empty query variant
             output["error"] = "Input list of RS numbers is empty"
@@ -571,13 +576,10 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             out_json.close()
             return("", "", "")
 
-    # print("rs_nums", rs_nums)
-    # print("snp_pos", snp_pos)
-    # print("snp_coords", snp_coords)
-    print("warn", warn)
-    details["warnings"] = {
-        "aaData": warnings
-    }
+    # print("warn", warn)
+    # details["warnings"] = {
+    #     "aaData": warnings
+    # }
 
     # generate warnings for query variants not found in dbsnp
     if warn != []:
@@ -639,10 +641,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
-            	
-            # details[snp_coord[0]] = {	
-            #     "aaData": get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids)	
-            # }	
         # else:	
             # out_json["not_found"].append(query_snp["rsnum"])	
             
@@ -669,9 +667,15 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         	
     # print("ldInfo", ldInfo)	
     for snp_coord in snp_coords:	
+        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo)	
         details[snp_coord[0]] = {	
-            "aaData": get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo)	
-        }	
+            "aaData": matched_snps
+        }
+        warnings += problematic_snps
+
+    details["warnings"] = {
+        "aaData": warnings
+    }
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)

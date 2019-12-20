@@ -797,7 +797,7 @@ function createTraitWarningsTable() {
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3] 
+                "targets": [ 0, 1, 2, 3, 4] 
             }
         ]
     });
