@@ -327,10 +327,15 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         chisq = num / denom	
         p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))	
     else:	
-        D_prime = "NA"	
-        r2 = "NA"	
-        # chisq = "NA"	
-        p = "NA"	
+        output["error"].append("Variant MAF is 0.0, variant removed.")	
+        return {	
+            "r2": "NA",	
+            "D_prime": "NA",	
+            "p": "NA",	
+            "corr_alleles": "NA",	
+            "output": output	
+        }		
+
     Ac=hap[sorted(hap)[0]]	
     Bc=hap[sorted(hap)[1]]	
     Cc=hap[sorted(hap)[2]]	
