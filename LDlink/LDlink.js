@@ -746,36 +746,14 @@ function createTraitDetailsTable() {
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
-                    // Round R2 float to 4 decimal places
+                    // Round floats to 4 decimal places 
                     if (typeof data === 'string' || data instanceof String) {
                         return data;
                     } else {
                         return parseFloat(data).toFixed(4);
                     }
                 },
-                "targets": 4
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Round D' float to 4 decimal places
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
-                        return parseFloat(data).toFixed(4);
-                    }
-                },
-                "targets": 5
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Round P-value float to 4 decimal places
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
-                        return parseFloat(data).toFixed(4);
-                    }
-                },
-                "targets": 9
+                "targets": [ 4, 5, 7, 8, 9 ]
             },
             {
                 "render": function ( data, type, row ) {
