@@ -734,6 +734,7 @@ function createTraitDetailsTable() {
         "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
         // "sScrollY": "600px",
+        xScrollX: "100%",
         "bJQueryUI": false,  // ThemeRoller
         "bLengthChange": true,
         "bFilter": true,
