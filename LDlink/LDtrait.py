@@ -76,8 +76,6 @@ def expandSelectedPopulationGroups(pops):
     return expandedPops
 
 def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):	
-    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pop_ids)	
-    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops)	
     # errors/warnings encountered	
     output = {	
         "error": [],	
@@ -349,8 +347,10 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         corr1 = sorted(hap)[1].split("_")[0] + "=" + sorted(hap)[1].split("_")[1]	
         corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]	
         corr_alleles = str(corr1) + ", " + str(corr2)	
-    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])	
+
+    print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])	
     # return(r2, D_prime, p, corr_alleles, output)	
+
     return {	
         "r2": r2,	
         "D_prime": D_prime,	
@@ -358,8 +358,6 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         "corr_alleles": corr_alleles,	
         "output": output	
     }	
-    # print("r2=", r2, "D_prime=", D_prime, "P=", p)	
-    # print("output", output)
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo):	    
     matched_snps = []

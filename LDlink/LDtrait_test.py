@@ -77,9 +77,6 @@ def expandSelectedPopulationGroups(pops):
     return expandedPops
 
 def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
-    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pop_ids)
-    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops)
-
     # errors/warnings encountered
     output = {
         "error": [],
@@ -384,7 +381,7 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]
         corr_alleles = str(corr1) + ", " + str(corr2)
 
-    # print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])
+    print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])
     # return(r2, D_prime, p, corr_alleles, output)
 
     return {
@@ -395,10 +392,7 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         "output": output
     }
 
-    # print("r2=", r2, "D_prime=", D_prime, "P=", p)
-    # print("output", output)
-
-def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo):	    
+def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
     problematic_snps = []
     for record in found:
@@ -431,6 +425,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
             matched_record.append("rs" + record["SNP_ID_CURRENT"])
             # Details
             # matched_record.append("Variant found in GWAS catalog within window.")
+            print("matched_record", matched_record)
             matched_snps.append(matched_record)
         else:
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
@@ -709,14 +704,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             ldInfo[variantPair[0]][variantPair[3]] = ld	
         
     # print("ldInfo", ldInfo)
-
-    for snp_coord in snp_coords:
-        details[snp_coord[0]] = {
-            "aaData": get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo)
-        }
-
     for snp_coord in snp_coords:	
-        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo)	
+        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)	
         details[snp_coord[0]] = {	
             "aaData": matched_snps
         }
