@@ -837,56 +837,23 @@ def ldtrait():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold))
-            # with open(tmp_dir + "trait" + reference + ".json") as f:
-            #     json_dict = json.load(f)
-            # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
-            #     if(type(details) is collections.OrderedDict):
-            #         for snp in snps:
-            #             f.write("Query Variant: " + snp[0] + "\n")
-            #             f.write("Trait\tRS Number\tPosition\tDetails\n")
-            #             for matched_gwas in details[snp[0]]:
-            #                 f.write("\t".join(matched_gwas[1:]) + "\n")
-            #             f.write("\n")
-            #             f.write("\n")
             with open(tmp_dir + "trait" + reference + ".json") as f:
                 json_dict = json.load(f)
-            # if "error" in json_dict:
-            #     trait["error"] = json_dict["error"]
-            # else:
-            #     if "warning" in json_dict:
-            #         trait["warning"] = json_dict["warning"]
-            # with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
-            #     for snp in thinned_snps:
-            #         f.write("Query Variant: " + snp + "\n")
-            #         f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\tGWAS Catalog\n")
-            #         for matched_gwas in details[snp].aaData:
-            #             f.write("\t".join(matched_gwas) + "\n")
-            #         f.write("\n")
-            #         f.write("\n")
-            # display api out
-            try:
-                # unlock token then display api output
-                # resultFile = "./tmp/details" + reference + ".txt"
-                # with open(resultFile, "r") as fp:
-                #     content = fp.read()
-                # with open(tmp_dir + "trait" + reference + ".json") as f:
-                #     json_dict = json.load(f)
-                #     if "error" in json_dict:
-                #         toggleLocked(token, 0)
-                #         return sendTraceback(json_dict["error"])
-                if "error" in json_dict:
+            if "error" in json_dict:
+                # display api out w/ error
+                toggleLocked(token, 0)
+                sendTraceback(json_dict["error"])
+            else:
+                # display api out
+                try:
+                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'r') as fp:
+                        content = fp.read()
                     toggleLocked(token, 0)
-                    return sendTraceback(json_dict["error"])
-                # else:
-                #     if "warning" in json_dict:
-                #         trait["warning"] = json_dict["warning"]
-                toggleLocked(token, 0)
-                return sendTraceback("API access for LDtrait not implemented yet.")
-                # return content
-            except:
-                # unlock token then display error message
-                toggleLocked(token, 0)
-                return sendTraceback(None)
+                    return content
+                except:
+                    # unlock token then display error message
+                    toggleLocked(token, 0)
+                    return sendTraceback(None)
         except:
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
