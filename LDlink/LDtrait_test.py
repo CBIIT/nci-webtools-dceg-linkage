@@ -398,35 +398,43 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     for record in found:
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
-            matched_record = []
-            # Query SNP
-            # matched_record.append(query_snp)
-            # GWAS Trait
-            matched_record.append(record["DISEASE/TRAIT"]) 
-            # RS Number
-            matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
-            # Position
-            matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
-            # Alleles	
-            matched_record.append(ld["corr_alleles"])	
-            # R2	
-            matched_record.append(ld["r2"])	
-            # D'	
-            matched_record.append(ld["D_prime"])	
-            # LDpair (Link)	
-            matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(expandSelectedPopulationGroups(pops))])
-            # Risk Allele
-            matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
-            # Effect Size (95% CI)
-            matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
-            # P-value
-            matched_record.append(ld["p"])
-            # GWAS Catalog (Link)
-            matched_record.append("rs" + record["SNP_ID_CURRENT"])
-            # Details
-            # matched_record.append("Variant found in GWAS catalog within window.")
-            print("matched_record", matched_record)
-            matched_snps.append(matched_record)
+            if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
+                matched_record = []
+                # Query SNP
+                # matched_record.append(query_snp)
+                # GWAS Trait
+                matched_record.append(record["DISEASE/TRAIT"]) 
+                # RS Number
+                matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
+                # Position
+                matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
+                # Alleles	
+                matched_record.append(ld["corr_alleles"])	
+                # R2	
+                matched_record.append(ld["r2"])	
+                # D'	
+                matched_record.append(ld["D_prime"])	
+                # LDpair (Link)	
+                matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(expandSelectedPopulationGroups(pops))])
+                # Risk Allele
+                matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
+                # Effect Size (95% CI)
+                matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
+                # P-value
+                matched_record.append(ld["p"])
+                # GWAS Catalog (Link)
+                matched_record.append("rs" + record["SNP_ID_CURRENT"])
+                # Details
+                # matched_record.append("Variant found in GWAS catalog within window.")
+                print("matched_record", matched_record)
+                matched_snps.append(matched_record)
+            else: 
+                if (r2_d == "r2"):
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
+                    problematic_snps.append(problematic_record)
+                else:
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
+                    problematic_snps.append(problematic_record)
         else:
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
             problematic_snps.append(problematic_record)
