@@ -679,7 +679,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         	
     # print("ldInfo", ldInfo)	
     for snp_coord in snp_coords:	
-        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo)	
+        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)	
         details[snp_coord[0]] = {	
             "aaData": matched_snps
         }
