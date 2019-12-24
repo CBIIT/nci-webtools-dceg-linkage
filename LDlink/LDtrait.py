@@ -409,7 +409,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
 
 # Create LDtrait function
 # def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
-def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
+def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     # snp limit
     max_list = 250
@@ -703,7 +703,7 @@ def main():
     request = 8888
     web = False
     r2_d = "r2"
-    r2_d_threshold = 0.15
+    r2_d_threshold = 0.01
 
     # Run function
     (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)
