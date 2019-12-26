@@ -75,7 +75,19 @@ def expandSelectedPopulationGroups(pops):
             expandedPops = list(set(expandedPops)) # unique elements
     return expandedPops
 
-def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):	
+def get_ld_stats(variantPair, pops, pop_ids):	
+    # parse ld pair array parameter input
+    snp1 = variantPair[0]
+    snp1_coord = {
+        "chromosome": variantPair[1], 
+        "position": variantPair[2]
+    }
+    snp2 = variantPair[3]
+    snp2_coord = {
+        "chromosome": variantPair[4], 
+        "position": variantPair[5]
+    }
+
     # errors/warnings encountered	
     output = {	
         "error": [],	
@@ -101,7 +113,7 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
     vcf2_pos = snp2_coord['position']	
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	
-    
+
     # SNP1	
     if len(vcf1) == 0:	
         output["error"].append(snp1 + " is not in 1000G reference panel.")	
@@ -655,8 +667,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     # print("ldPairsUnique", len(ldPairsUnique))	
     ldInfo = {}	
     for variantPair in ldPairsUnique:	
-        # print("variantPair:", variantPair)	
-        ld = get_ld_stats(variantPair[0], {"chromosome": variantPair[1], "position": variantPair[2]}, variantPair[3],{"chromosome": variantPair[4], "position": variantPair[5]}, pops, pop_ids)	
+        print("variantPair:", variantPair)	
+        ld = get_ld_stats(variantPair, pops, pop_ids)	
         # print("ld", ld)	
         # ld = {	
         #     "r2": "NA",	

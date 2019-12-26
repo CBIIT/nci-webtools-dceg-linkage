@@ -9,7 +9,11 @@ import collections
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
+from multiprocessing import Pool
 import sys
+import numpy as np
+from timeit import default_timer as timer
+
 # contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
 username = contents[0].split('=')[1]
@@ -76,321 +80,350 @@ def expandSelectedPopulationGroups(pops):
             expandedPops = list(set(expandedPops)) # unique elements
     return expandedPops
 
-def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
-    # errors/warnings encountered
-    output = {
-        "error": [],
-        "warning": []
-    }
-    # Extract 1000 Genomes phased genotypes
-
-    # SNP1
-    vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
-    proc1_offset = subprocess.Popen(
-        tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
-    vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
-
-    # SNP2
-    vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
-    proc2_offset = subprocess.Popen(
-        tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
-    vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
-
-    vcf1_pos = snp1_coord['position']
-    vcf2_pos = snp2_coord['position']
-    vcf1 = vcf1_offset
-    vcf2 = vcf2_offset
-
-    # SNP1
-    if len(vcf1) == 0:
-        output["error"].append(snp1 + " is not in 1000G reference panel.")
-        # return(json.dumps(output, sort_keys=True, indent=2))
-        return {
-            "r2": "NA",
-            "D_prime": "NA",
-            "p": "NA",
-            "corr_alleles": "NA",
-            "output": output
+def get_ld_stats(threadCommandArgs):
+    print("kicked")
+    lds = []
+    variantPairs = threadCommandArgs[0]
+    # print("variantPair", variantPair)
+    pop_ids = threadCommandArgs[1]
+    thread = threadCommandArgs[2]
+    for variantPair in variantPairs:
+        print("thread", thread, "variantPair", variantPair)
+        # parse ld pair array parameter input
+        snp1 = variantPair[0]
+        snp1_coord = {
+            "chromosome": variantPair[1], 
+            "position": variantPair[2]
         }
-    elif len(vcf1) > 1:
-        geno1 = []
-        for i in range(len(vcf1)):
-            if vcf1[i].strip().split()[2] == snp1:
-                geno1 = vcf1[i].strip().split()
-        if geno1 == []:
+        snp2 = variantPair[3]
+        snp2_coord = {
+            "chromosome": variantPair[4], 
+            "position": variantPair[5]
+        }
+        # errors/warnings encountered
+        output = {
+            "error": [],
+            "warning": []
+        }
+        # Extract 1000 Genomes phased genotypes
+        # SNP1
+        vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+        tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+            vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
+        proc1_offset = subprocess.Popen(
+            tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
+        vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
+
+        # SNP2
+        vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+        tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+            vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
+        proc2_offset = subprocess.Popen(
+            tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
+        vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
+
+        vcf1_pos = snp1_coord['position']
+        vcf2_pos = snp2_coord['position']
+        vcf1 = vcf1_offset
+        vcf2 = vcf2_offset
+
+        # SNP1
+        if len(vcf1) == 0:
             output["error"].append(snp1 + " is not in 1000G reference panel.")
             # return(json.dumps(output, sort_keys=True, indent=2))
-            return {
+            lds.append( {
                 "r2": "NA",
                 "D_prime": "NA",
                 "p": "NA",
                 "corr_alleles": "NA",
                 "output": output
-            }
-    else:
-        geno1 = vcf1[0].strip().split()
+            } )
+            continue
+        elif len(vcf1) > 1:
+            geno1 = []
+            for i in range(len(vcf1)):
+                if vcf1[i].strip().split()[2] == snp1:
+                    geno1 = vcf1[i].strip().split()
+            if geno1 == []:
+                output["error"].append(snp1 + " is not in 1000G reference panel.")
+                # return(json.dumps(output, sort_keys=True, indent=2))
+                lds.append( {
+                    "r2": "NA",
+                    "D_prime": "NA",
+                    "p": "NA",
+                    "corr_alleles": "NA",
+                    "output": output
+                } )
+                continue
+        else:
+            geno1 = vcf1[0].strip().split()
 
-    if geno1[2] != snp1:
-        output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+")")
-        snp1 = geno1[2]
+        if geno1[2] != snp1:
+            output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+")")
+            snp1 = geno1[2]
 
-    if "," in geno1[3] or "," in geno1[4]:
-        output["error"].append(snp1 + " is not a biallelic variant.")
-        # return(json.dumps(output, sort_keys=True, indent=2))
-        return {
-            "r2": "NA",
-            "D_prime": "NA",
-            "p": "NA",
-            "corr_alleles": "NA",
-            "output": output
+        if "," in geno1[3] or "," in geno1[4]:
+            output["error"].append(snp1 + " is not a biallelic variant.")
+            # return(json.dumps(output, sort_keys=True, indent=2))
+            lds.append( {
+                "r2": "NA",
+                "D_prime": "NA",
+                "p": "NA",
+                "corr_alleles": "NA",
+                "output": output
+            } )
+            continue
+
+        if len(geno1[3]) == 1 and len(geno1[4]) == 1:
+            snp1_a1 = geno1[3]
+            snp1_a2 = geno1[4]
+        elif len(geno1[3]) == 1 and len(geno1[4]) > 1:
+            snp1_a1 = "-"
+            snp1_a2 = geno1[4][1:]
+        elif len(geno1[3]) > 1 and len(geno1[4]) == 1:
+            snp1_a1 = geno1[3][1:]
+            snp1_a2 = "-"
+        elif len(geno1[3]) > 1 and len(geno1[4]) > 1:
+            snp1_a1 = geno1[3][1:]
+            snp1_a2 = geno1[4][1:]
+
+        allele1 = {
+            "0|0": [snp1_a1, snp1_a1], 
+            "0|1": [snp1_a1, snp1_a2], 
+            "1|0": [snp1_a2, snp1_a1], 
+            "1|1": [snp1_a2, snp1_a2], 
+            "0": [snp1_a1, "."], 
+            "1": [snp1_a2, "."], 
+            "./.": [".", "."], 
+            ".": [".", "."]
         }
 
-    if len(geno1[3]) == 1 and len(geno1[4]) == 1:
-        snp1_a1 = geno1[3]
-        snp1_a2 = geno1[4]
-    elif len(geno1[3]) == 1 and len(geno1[4]) > 1:
-        snp1_a1 = "-"
-        snp1_a2 = geno1[4][1:]
-    elif len(geno1[3]) > 1 and len(geno1[4]) == 1:
-        snp1_a1 = geno1[3][1:]
-        snp1_a2 = "-"
-    elif len(geno1[3]) > 1 and len(geno1[4]) > 1:
-        snp1_a1 = geno1[3][1:]
-        snp1_a2 = geno1[4][1:]
-
-    allele1 = {
-        "0|0": [snp1_a1, snp1_a1], 
-        "0|1": [snp1_a1, snp1_a2], 
-        "1|0": [snp1_a2, snp1_a1], 
-        "1|1": [snp1_a2, snp1_a2], 
-        "0": [snp1_a1, "."], 
-        "1": [snp1_a2, "."], 
-        "./.": [".", "."], 
-        ".": [".", "."]
-    }
-
-    # SNP2
-    if len(vcf2) == 0:
-        output["error"].append(snp2 + " is not in 1000G reference panel.")
-        # return(json.dumps(output, sort_keys=True, indent=2))
-        return {
-            "r2": "NA",
-            "D_prime": "NA",
-            "p": "NA",
-            "corr_alleles": "NA",
-            "output": output
-        }
-    elif len(vcf2) > 1:
-        geno2 = []
-        for i in range(len(vcf2)):
-            if vcf2[i].strip().split()[2] == snp2:
-                geno2 = vcf2[i].strip().split()
-        if geno2 == []:
+        # SNP2
+        if len(vcf2) == 0:
             output["error"].append(snp2 + " is not in 1000G reference panel.")
             # return(json.dumps(output, sort_keys=True, indent=2))
-            return {
+            lds.append( {
                 "r2": "NA",
                 "D_prime": "NA",
                 "p": "NA",
                 "corr_alleles": "NA",
                 "output": output
-            }
-    else:
-        geno2 = vcf2[0].strip().split()
-
-    if geno2[2] != snp2:
-        output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + ")")
-        snp2 = geno2[2]
-
-    if "," in geno2[3] or "," in geno2[4]:
-        output["error"].append(snp2 + " is not a biallelic variant.")
-        # return(json.dumps(output, sort_keys=True, indent=2))
-        return {
-            "r2": "NA",
-            "D_prime": "NA",
-            "p": "NA",
-            "corr_alleles": "NA",
-            "output": output
-        }
-
-    if len(geno2[3]) == 1 and len(geno2[4]) == 1:
-        snp2_a1 = geno2[3]
-        snp2_a2 = geno2[4]
-    elif len(geno2[3]) == 1 and len(geno2[4]) > 1:
-        snp2_a1 = "-"
-        snp2_a2 = geno2[4][1:]
-    elif len(geno2[3]) > 1 and len(geno2[4]) == 1:
-        snp2_a1 = geno2[3][1:]
-        snp2_a2 = "-"
-    elif len(geno2[3]) > 1 and len(geno2[4]) > 1:
-        snp2_a1 = geno2[3][1:]
-        snp2_a2 = geno2[4][1:]
-
-    allele2 = {
-        "0|0": [snp2_a1, snp2_a1], 
-        "0|1": [snp2_a1, snp2_a2], 
-        "1|0": [snp2_a2, snp2_a1], 
-        "1|1": [snp2_a2, snp2_a2], 
-        "0": [snp2_a1, "."], 
-        "1": [snp2_a2, "."], 
-        "./.": [".", "."], 
-        ".": [".", "."]
-    }
-
-    # print(allele1)
-    # print(allele2)
-
-    # print("geno1[1]", geno1[1], "vcf1_pos", vcf1_pos)
-    # print("geno2[1]", geno2[1], "vcf2_pos", vcf2_pos)
-
-    if geno1[1] != vcf1_pos:
-        output["error"].append("VCF File does not match variant coordinates for SNP1.")
-        # return(json.dumps(output, sort_keys=True, indent=2))
-        return {
-            "r2": "NA",
-            "D_prime": "NA",
-            "p": "NA",
-            "corr_alleles": "NA",
-            "output": output
-        }
-
-    if geno2[1] != vcf2_pos:
-        output["error"].append("VCF File does not match variant coordinates for SNP2.")
-        # return(json.dumps(output, sort_keys=True, indent=2))
-        return {
-            "r2": "NA",
-            "D_prime": "NA",
-            "p": "NA",
-            "corr_alleles": "NA",
-            "output": output
-        }
-
-    # print("output", output)
-
-    # Get headers
-    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
-    proc1_h = subprocess.Popen(
-        tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
-
-    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_file2)
-    proc2_h = subprocess.Popen(
-        tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
-
-    # Combine phased genotypes
-    geno = {}
-    for i in range(9, len(head1)):
-        geno[head1[i]] = [allele1[geno1[i]], ".."]
-
-    for i in range(9, len(head2)):
-        if head2[i] in geno:
-            geno[head2[i]][1] = allele2[geno2[i]]
-
-    # print("geno", geno)
-
-    # Extract haplotypes
-    hap = {}
-    for ind in pop_ids:
-        if ind in geno:
-            hap1 = geno[ind][0][0] + "_" + geno[ind][1][0]
-            hap2 = geno[ind][0][1] + "_" + geno[ind][1][1]
-            if hap1 in hap:
-                hap[hap1] += 1
-            else:
-                hap[hap1] = 1
-
-            if hap2 in hap:
-                hap[hap2] += 1
-            else:
-                hap[hap2] = 1
-
-    # Remove missing haplotypes
-    keys = list(hap.keys())
-    for key in keys:
-        if "." in key:
-            hap.pop(key, None)
-
-    # Check all haplotypes are present
-    if len(hap) != 4:
-        snp1_a = [snp1_a1, snp1_a2]
-        snp2_a = [snp2_a1, snp2_a2]
-        haps = [snp1_a[0] + "_" + snp2_a[0], snp1_a[0] + "_" + snp2_a[1],
-                snp1_a[1] + "_" + snp2_a[0], snp1_a[1] + "_" + snp2_a[1]]
-        for i in haps:
-            if i not in hap:
-                hap[i] = 0
-
-    # print("hap", hap)
-
-    # Sort haplotypes
-    A = hap[sorted(hap)[0]]
-    B = hap[sorted(hap)[1]]
-    C = hap[sorted(hap)[2]]
-    D = hap[sorted(hap)[3]]
-    # N = A + B + C + D
-    # tmax = max(A, B, C, D)
-
-    hap1 = sorted(hap, key=hap.get, reverse=True)[0]
-    hap2 = sorted(hap, key=hap.get, reverse=True)[1]
-    # hap3 = sorted(hap, key=hap.get, reverse=True)[2]
-    # hap4 = sorted(hap, key=hap.get, reverse=True)[3]
-
-    delta = float(A * D - B * C)
-    Ms = float((A + C) * (B + D) * (A + B) * (C + D))
-    # print("Ms=", Ms)
-    if Ms != 0:
-        # D prime
-        if delta < 0:
-            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))
+            } )
+            continue
+        elif len(vcf2) > 1:
+            geno2 = []
+            for i in range(len(vcf2)):
+                if vcf2[i].strip().split()[2] == snp2:
+                    geno2 = vcf2[i].strip().split()
+            if geno2 == []:
+                output["error"].append(snp2 + " is not in 1000G reference panel.")
+                # return(json.dumps(output, sort_keys=True, indent=2))
+                lds.append( {
+                    "r2": "NA",
+                    "D_prime": "NA",
+                    "p": "NA",
+                    "corr_alleles": "NA",
+                    "output": output
+                } )
+                continue
         else:
-            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
-        # R2
-        r2 = (delta**2) / Ms
-        # P-value
-        num = (A + B + C + D) * (A * D - B * C)**2
-        denom = Ms
-        chisq = num / denom
-        p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))
-    else:
-        output["error"].append("Variant MAF is 0.0, variant removed.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "corr_alleles": "NA",	
-            "output": output	
-        }	
+            geno2 = vcf2[0].strip().split()
 
-    Ac=hap[sorted(hap)[0]]
-    Bc=hap[sorted(hap)[1]]
-    Cc=hap[sorted(hap)[2]]
-    Dc=hap[sorted(hap)[3]]
-    corr_alleles = "NA"
+        if geno2[2] != snp2:
+            output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + ")")
+            snp2 = geno2[2]
 
-    if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
-        corr1 = sorted(hap)[0].split("_")[0] + "=" + sorted(hap)[0].split("_")[1]
-        corr2 = sorted(hap)[3].split("_")[0] + "=" + sorted(hap)[3].split("_")[1]
-        corr_alleles = str(corr1) + ", " + str(corr2)
-    else:
-        corr1 = sorted(hap)[1].split("_")[0] + "=" + sorted(hap)[1].split("_")[1]
-        corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]
-        corr_alleles = str(corr1) + ", " + str(corr2)
+        if "," in geno2[3] or "," in geno2[4]:
+            output["error"].append(snp2 + " is not a biallelic variant.")
+            # return(json.dumps(output, sort_keys=True, indent=2))
+            lds.append( {
+                "r2": "NA",
+                "D_prime": "NA",
+                "p": "NA",
+                "corr_alleles": "NA",
+                "output": output
+            } )
+            continue
 
-    print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])
-    # return(r2, D_prime, p, corr_alleles, output)
+        if len(geno2[3]) == 1 and len(geno2[4]) == 1:
+            snp2_a1 = geno2[3]
+            snp2_a2 = geno2[4]
+        elif len(geno2[3]) == 1 and len(geno2[4]) > 1:
+            snp2_a1 = "-"
+            snp2_a2 = geno2[4][1:]
+        elif len(geno2[3]) > 1 and len(geno2[4]) == 1:
+            snp2_a1 = geno2[3][1:]
+            snp2_a2 = "-"
+        elif len(geno2[3]) > 1 and len(geno2[4]) > 1:
+            snp2_a1 = geno2[3][1:]
+            snp2_a2 = geno2[4][1:]
 
-    return {
-        "r2": r2,
-        "D_prime": D_prime,
-        "p": p,
-        "corr_alleles": corr_alleles,
-        "output": output
-    }
+        allele2 = {
+            "0|0": [snp2_a1, snp2_a1], 
+            "0|1": [snp2_a1, snp2_a2], 
+            "1|0": [snp2_a2, snp2_a1], 
+            "1|1": [snp2_a2, snp2_a2], 
+            "0": [snp2_a1, "."], 
+            "1": [snp2_a2, "."], 
+            "./.": [".", "."], 
+            ".": [".", "."]
+        }
+
+        # print(allele1)
+        # print(allele2)
+
+        # print("geno1[1]", geno1[1], "vcf1_pos", vcf1_pos)
+        # print("geno2[1]", geno2[1], "vcf2_pos", vcf2_pos)
+
+        if geno1[1] != vcf1_pos:
+            output["error"].append("VCF File does not match variant coordinates for SNP1.")
+            # return(json.dumps(output, sort_keys=True, indent=2))
+            lds.append( {
+                "r2": "NA",
+                "D_prime": "NA",
+                "p": "NA",
+                "corr_alleles": "NA",
+                "output": output
+            } )
+            continue
+
+        if geno2[1] != vcf2_pos:
+            output["error"].append("VCF File does not match variant coordinates for SNP2.")
+            # return(json.dumps(output, sort_keys=True, indent=2))
+            lds.append( {
+                "r2": "NA",
+                "D_prime": "NA",
+                "p": "NA",
+                "corr_alleles": "NA",
+                "output": output
+            } )
+            continue
+
+        # print("output", output)
+
+        # Get headers
+        tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
+        proc1_h = subprocess.Popen(
+            tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
+        head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
+
+        tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_file2)
+        proc2_h = subprocess.Popen(
+            tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
+        head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
+
+        # Combine phased genotypes
+        geno = {}
+        for i in range(9, len(head1)):
+            geno[head1[i]] = [allele1[geno1[i]], ".."]
+
+        for i in range(9, len(head2)):
+            if head2[i] in geno:
+                geno[head2[i]][1] = allele2[geno2[i]]
+
+        # print("geno", geno)
+
+        # Extract haplotypes
+        hap = {}
+        for ind in pop_ids:
+            if ind in geno:
+                hap1 = geno[ind][0][0] + "_" + geno[ind][1][0]
+                hap2 = geno[ind][0][1] + "_" + geno[ind][1][1]
+                if hap1 in hap:
+                    hap[hap1] += 1
+                else:
+                    hap[hap1] = 1
+
+                if hap2 in hap:
+                    hap[hap2] += 1
+                else:
+                    hap[hap2] = 1
+
+        # Remove missing haplotypes
+        keys = list(hap.keys())
+        for key in keys:
+            if "." in key:
+                hap.pop(key, None)
+
+        # Check all haplotypes are present
+        if len(hap) != 4:
+            snp1_a = [snp1_a1, snp1_a2]
+            snp2_a = [snp2_a1, snp2_a2]
+            haps = [snp1_a[0] + "_" + snp2_a[0], snp1_a[0] + "_" + snp2_a[1],
+                    snp1_a[1] + "_" + snp2_a[0], snp1_a[1] + "_" + snp2_a[1]]
+            for i in haps:
+                if i not in hap:
+                    hap[i] = 0
+
+        # print("hap", hap)
+
+        # Sort haplotypes
+        A = hap[sorted(hap)[0]]
+        B = hap[sorted(hap)[1]]
+        C = hap[sorted(hap)[2]]
+        D = hap[sorted(hap)[3]]
+        # N = A + B + C + D
+        # tmax = max(A, B, C, D)
+
+        hap1 = sorted(hap, key=hap.get, reverse=True)[0]
+        hap2 = sorted(hap, key=hap.get, reverse=True)[1]
+        # hap3 = sorted(hap, key=hap.get, reverse=True)[2]
+        # hap4 = sorted(hap, key=hap.get, reverse=True)[3]
+
+        delta = float(A * D - B * C)
+        Ms = float((A + C) * (B + D) * (A + B) * (C + D))
+        # print("Ms=", Ms)
+        if Ms != 0:
+            # D prime
+            if delta < 0:
+                D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))
+            else:
+                D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
+            # R2
+            r2 = (delta**2) / Ms
+            # P-value
+            num = (A + B + C + D) * (A * D - B * C)**2
+            denom = Ms
+            chisq = num / denom
+            p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))
+        else:
+            output["error"].append("Variant MAF is 0.0, variant removed.")	
+            lds.append( {	
+                "r2": "NA",	
+                "D_prime": "NA",	
+                "p": "NA",	
+                "corr_alleles": "NA",	
+                "output": output	
+            } )
+            continue
+
+        Ac=hap[sorted(hap)[0]]
+        Bc=hap[sorted(hap)[1]]
+        Cc=hap[sorted(hap)[2]]
+        Dc=hap[sorted(hap)[3]]
+        corr_alleles = "NA"
+
+        if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
+            corr1 = sorted(hap)[0].split("_")[0] + "=" + sorted(hap)[0].split("_")[1]
+            corr2 = sorted(hap)[3].split("_")[0] + "=" + sorted(hap)[3].split("_")[1]
+            corr_alleles = str(corr1) + ", " + str(corr2)
+        else:
+            corr1 = sorted(hap)[1].split("_")[0] + "=" + sorted(hap)[1].split("_")[1]
+            corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]
+            corr_alleles = str(corr1) + ", " + str(corr2)
+
+        print("thread", thread, " ", snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", [r2, D_prime, p, output])
+        # return(r2, D_prime, p, corr_alleles, output)
+
+        lds.append({
+            "r2": r2,
+            "D_prime": D_prime,
+            "p": p,
+            "corr_alleles": corr_alleles,
+            "output": output
+        })
+    # print("lds length", len(lds))
+    return lds
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
@@ -426,7 +459,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_record.append("rs" + record["SNP_ID_CURRENT"])
                 # Details
                 # matched_record.append("Variant found in GWAS catalog within window.")
-                print("matched_record", matched_record)
+                # print("matched_record", matched_record)
                 matched_snps.append(matched_record)
             else: 
                 if (r2_d == "r2"):
@@ -644,24 +677,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             out_json.close()
             return("", "", "")
 
-    
-
-
-    # # search dbsnp for snp's genomic coordinates
-    # for snp in sanitized_query_snps:
-    #     snp_info = get_coords(db, snp[0])
-    #     if snp_info is not None:
-    #         query_snp_details.append({
-    #             "rsnum": snp[0],
-    #             "chromosome": str(snp_info["chromosome"]),
-    #             "position": int(snp_info["position"])
-    #         })
-    #     # else:
-    #     #     out_json["not_found"].append(snp)
-    
-    # print "query_snp_details", pretty_print_json(query_snp_details)
-    # print
-
     thinned_list = []
 
     # establish low/high window for each query snp
@@ -682,13 +697,42 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
         # else:	
             # out_json["not_found"].append(query_snp["rsnum"])	
 
-    ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
-    # print("ldPairsUnique", ldPairsUnique)
-    # print("ldPairsUnique", len(ldPairsUnique))
     ldInfo = {}	
+
+    ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
+
+    # print("ldPairsUnique", ldPairsUnique)
+    print("ldPairsUnique", len(ldPairsUnique))
+
+    print("##### START MULTITHREADING LD CALCULATIONS #####")
+    start = timer()
+
+    # leverage multiprocessing to calculate all LDpairs
+    threads = 1
+    splitLDPairsUnique = np.array_split(ldPairsUnique, threads)
+    threadCommands = []
+    for thread in range(threads):
+        threadCommands.append([splitLDPairsUnique[thread].tolist(), pop_ids, thread])
+    print("threadCommands", threadCommands)
+    with Pool(processes=threads) as pool:
+        ldResultsPool = pool.map(get_ld_stats, threadCommands)
+        # print("ldResultsPool", len(ldResultsPool))
+    # pool = Pool(threads)
+    # out_raw = pool.map(get_ld_stats, threadCommands)
+    # pool.close()
+    # pool.join()
+    # print("outRaw", out_raw)
+
+
+    end = timer()
+    print("TIME ELAPSED:", str(end - start) + "(s)")
+    print("##### END MULTITHREADING LD CALCULATIONS #####")
+
+    print("ldResultsPool", len(ldResultsPool))
+
     for variantPair in ldPairsUnique:	
-        # print("variantPair:", variantPair)	
-        ld = get_ld_stats(variantPair[0], {"chromosome": variantPair[1], "position": variantPair[2]}, variantPair[3],{"chromosome": variantPair[4], "position": variantPair[5]}, pops, pop_ids)	
+        print("variantPair:", variantPair)	
+        ld = get_ld_stats(variantPair, pop_ids)	
         # print("ld", ld)	
         # ld = {	
         #     "r2": "NA",	
@@ -733,9 +777,9 @@ def main():
 
     # Run function
     (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)	
-    print("query_snps", sanitized_query_snps)	
-    print("thinned_snps", thinned_list)
-    print("details", json.dumps(details))
+    # print("query_snps", sanitized_query_snps)	
+    # print("thinned_snps", thinned_list)
+    # print("details", json.dumps(details))
 
 if __name__ == "__main__":
     main()
