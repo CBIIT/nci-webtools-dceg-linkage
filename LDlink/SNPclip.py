@@ -170,11 +170,11 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                 else:
                     warn.append(snp_i[0])
                     details[snp_i[0]] = ["NA", "NA",
-                                         "Not an RS number, query removed."]
+                                         "Not a RS number, query removed."]
             else:
                 warn.append(snp_i[0])
                 details[snp_i[0]] = ["NA", "NA",
-                                     "Not an RS number, query removed."]
+                                     "Not a RS number, query removed."]
         else:
             output["error"] = "Input list of RS numbers is empty"
             json_output = json.dumps(output, sort_keys=True, indent=2)

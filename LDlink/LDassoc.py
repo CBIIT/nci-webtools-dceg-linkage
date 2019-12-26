@@ -84,7 +84,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
 
 		else:
-			output["error"]="--origin ("+myargs.origin+") is not an RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
+			output["error"]="--origin ("+myargs.origin+") is not a RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()

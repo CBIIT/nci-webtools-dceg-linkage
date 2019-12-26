@@ -142,13 +142,13 @@ def calculate_pull(snplst, request):
                             dbsnp_version + ", SNP removed."
                 else:
                     warn.append(snp_i[0])
-                    details[snp_i[0]] = "Not an RS number, query removed."
+                    details[snp_i[0]] = "Not a RS number, query removed."
             else:
                 warn.append(snp_i[0])
-                details[snp_i[0]] = "Not an RS number, query removed."
+                details[snp_i[0]] = "Not a RS number, query removed."
         else:
             warn.append(snp_i[0])
-            details[snp_i[0]] = "Not an RS number, query removed."
+            details[snp_i[0]] = "Not a RS number, query removed."
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
