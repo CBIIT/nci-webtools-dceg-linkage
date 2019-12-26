@@ -844,6 +844,18 @@ def ldtrait():
                 toggleLocked(token, 0)
                 sendTraceback(json_dict["error"])
             else:
+                with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    for snp in thinned_snps:
+                        f.write("Query Variant: " + snp + "\n")
+                        f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
+                        for matched_gwas in details[snp]["aaData"]:
+                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 10}]) + "\n")
+                        f.write("\n")
+                        f.write("\n")
+                    if "warning" in json_dict:
+                        trait["warning"] = json_dict["warning"]
+                        f.write("Warning(s):\n")
+                        f.write(trait["warning"])
                 # display api out
                 try:
                     with open('tmp/trait_variants_annotated' + reference + '.txt', 'r') as fp:
@@ -1016,6 +1028,7 @@ def snpclip():
                     json_dict = json.load(f)
                     if "error" in json_dict:
                         toggleLocked(token, 0)
+                        print("ERROR", json_dict["error"])
                         return sendTraceback(json_dict["error"])
                 toggleLocked(token, 0)
                 return content
