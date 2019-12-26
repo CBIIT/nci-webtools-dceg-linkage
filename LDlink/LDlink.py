@@ -827,7 +827,7 @@ def ldtrait():
         web = False
         reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snpfile = str(tmp_dir + 'snps' + reference + '.txt')
-        snplist = thinned_snps.splitlines()
+        snplist = snps.splitlines()
         with open(snpfile, 'w') as f:
             for s in snplist:
                 s = s.lstrip()
