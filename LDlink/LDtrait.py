@@ -430,14 +430,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     out_json = open(tmp_dir + "trait" + str(request) + ".json", "w")
     output = {}
 
-    # initialize output dict -> json
-    # out_json = {
-    #     "found": {},
-    #     "not_found": [],
-    #     "populations": pop
-    # }
-
-
     # open snps file
     with open(snplst, 'r') as fp:
         snps_raw = fp.readlines()

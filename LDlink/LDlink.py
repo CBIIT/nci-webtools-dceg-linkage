@@ -811,12 +811,6 @@ def ldtrait():
                             trait["warning"] = json_dict["warning"]
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
-
-                # with open('tmp/snp_list' + reference + '.txt', 'w') as f:
-                #     for rs_number in query_snps:
-                #         f.write(rs_number + '\n')
-                
-
                 out_json = json.dumps(trait, sort_keys=False)
             except:
                 return sendTraceback(None)
@@ -842,7 +836,7 @@ def ldtrait():
             if "error" in json_dict:
                 # display api out w/ error
                 toggleLocked(token, 0)
-                sendTraceback(json_dict["error"])
+                return sendTraceback(json_dict["error"])
             else:
                 with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
                     for snp in thinned_snps:
@@ -1028,7 +1022,6 @@ def snpclip():
                     json_dict = json.load(f)
                     if "error" in json_dict:
                         toggleLocked(token, 0)
-                        print("ERROR", json_dict["error"])
                         return sendTraceback(json_dict["error"])
                 toggleLocked(token, 0)
                 return content
