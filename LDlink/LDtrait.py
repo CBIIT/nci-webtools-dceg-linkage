@@ -96,10 +96,12 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
     proc2_offset = subprocess.Popen(	
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
+
     vcf1_pos = snp1_coord['position']	
     vcf2_pos = snp2_coord['position']	
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	
+    
     # SNP1	
     if len(vcf1) == 0:	
         output["error"].append(snp1 + " is not in 1000G reference panel.")	

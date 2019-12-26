@@ -398,7 +398,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     for record in found:
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
-            # if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
+            if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
                 matched_record = []
                 # Query SNP
                 # matched_record.append(query_snp)
@@ -428,13 +428,13 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # matched_record.append("Variant found in GWAS catalog within window.")
                 print("matched_record", matched_record)
                 matched_snps.append(matched_record)
-            # else: 
-            #     if (r2_d == "r2"):
-            #         problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
-            #         problematic_snps.append(problematic_record)
-            #     else:
-            #         problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
-            #         problematic_snps.append(problematic_record)
+            else: 
+                if (r2_d == "r2"):
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
+                    problematic_snps.append(problematic_record)
+                else:
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
+                    problematic_snps.append(problematic_record)
         else:
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
             problematic_snps.append(problematic_record)
@@ -462,14 +462,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     # Create JSON output for warnings and errors
     out_json = open(tmp_dir + "trait" + str(request) + ".json", "w")
     output = {}
-
-    # initialize output dict -> json
-    # out_json = {
-    #     "found": {},
-    #     "not_found": [],
-    #     "populations": pop
-    # }
-
 
     # open snps file
     with open(snplst, 'r') as fp:
