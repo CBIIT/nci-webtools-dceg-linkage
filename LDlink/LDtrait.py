@@ -9,7 +9,11 @@ import collections
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
+from multiprocessing import Pool
 import sys
+import numpy as np	
+from timeit import default_timer as timer
+
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
@@ -21,10 +25,6 @@ with open('config.yml', 'r') as f:
 dbsnp_version = config['data']['dbsnp_version']	
 pop_dir = config['data']['pop_dir']	
 vcf_dir = config['data']['vcf_dir']
-
-
-# def pretty_print_json(obj):
-#     return json.dumps(obj, sort_keys = True, indent = 4, separators = (',', ': '))
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
@@ -75,7 +75,19 @@ def expandSelectedPopulationGroups(pops):
             expandedPops = list(set(expandedPops)) # unique elements
     return expandedPops
 
-def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):	
+def get_ld_stats(variantPair, pop_ids):	
+    # parse ld pair array parameter input
+    snp1 = variantPair[0]
+    snp1_coord = {
+        "chromosome": variantPair[1], 
+        "position": variantPair[2]
+    }
+    snp2 = variantPair[3]
+    snp2_coord = {
+        "chromosome": variantPair[4], 
+        "position": variantPair[5]
+    }
+
     # errors/warnings encountered	
     output = {	
         "error": [],	
@@ -96,19 +108,20 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
     proc2_offset = subprocess.Popen(	
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
+
     vcf1_pos = snp1_coord['position']	
     vcf2_pos = snp2_coord['position']	
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	
+
     # SNP1	
     if len(vcf1) == 0:	
         output["error"].append(snp1 + " is not in 1000G reference panel.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     elif len(vcf1) > 1:	
@@ -118,12 +131,11 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
                 geno1 = vcf1[i].strip().split()	
         if geno1 == []:	
             output["error"].append(snp1 + " is not in 1000G reference panel.")	
-            # return(json.dumps(output, sort_keys=True, indent=2))	
             return {	
                 "r2": "NA",	
                 "D_prime": "NA",	
                 "p": "NA",	
-                "corr_alleles": "NA",	
+                "alleles": "NA",	
                 "output": output	
             }	
     else:	
@@ -133,12 +145,11 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         snp1 = geno1[2]	
     if "," in geno1[3] or "," in geno1[4]:	
         output["error"].append(snp1 + " is not a biallelic variant.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     if len(geno1[3]) == 1 and len(geno1[4]) == 1:	
@@ -166,12 +177,11 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
     # SNP2	
     if len(vcf2) == 0:	
         output["error"].append(snp2 + " is not in 1000G reference panel.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     elif len(vcf2) > 1:	
@@ -181,12 +191,11 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
                 geno2 = vcf2[i].strip().split()	
         if geno2 == []:	
             output["error"].append(snp2 + " is not in 1000G reference panel.")	
-            # return(json.dumps(output, sort_keys=True, indent=2))	
             return {	
                 "r2": "NA",	
                 "D_prime": "NA",	
                 "p": "NA",	
-                "corr_alleles": "NA",	
+                "alleles": "NA",	
                 "output": output	
             }	
     else:	
@@ -196,12 +205,11 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         snp2 = geno2[2]	
     if "," in geno2[3] or "," in geno2[4]:	
         output["error"].append(snp2 + " is not a biallelic variant.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     if len(geno2[3]) == 1 and len(geno2[4]) == 1:	
@@ -226,31 +234,26 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         "./.": [".", "."], 	
         ".": [".", "."]	
     }	
-    # print(allele1)	
-    # print(allele2)	
-    # print("geno1[1]", geno1[1], "vcf1_pos", vcf1_pos)	
-    # print("geno2[1]", geno2[1], "vcf2_pos", vcf2_pos)	
+    
     if geno1[1] != vcf1_pos:	
         output["error"].append("VCF File does not match variant coordinates for SNP1.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     if geno2[1] != vcf2_pos:	
         output["error"].append("VCF File does not match variant coordinates for SNP2.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
-    # print("output", output)	
+
     # Get headers	
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)	
     proc1_h = subprocess.Popen(	
@@ -267,7 +270,7 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
     for i in range(9, len(head2)):	
         if head2[i] in geno:	
             geno[head2[i]][1] = allele2[geno2[i]]	
-    # print("geno", geno)	
+
     # Extract haplotypes	
     hap = {}	
     for ind in pop_ids:	
@@ -282,6 +285,7 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
                 hap[hap2] += 1	
             else:	
                 hap[hap2] = 1	
+
     # Remove missing haplotypes	
     keys = list(hap.keys())	
     for key in keys:	
@@ -296,72 +300,89 @@ def get_ld_stats(snp1, snp1_coord,  snp2, snp2_coord, pops, pop_ids):
         for i in haps:	
             if i not in hap:	
                 hap[i] = 0	
-    # print("hap", hap)	
-    # Sort haplotypes	
-    A = hap[sorted(hap)[0]]	
-    B = hap[sorted(hap)[1]]	
-    C = hap[sorted(hap)[2]]	
-    D = hap[sorted(hap)[3]]	
-    # N = A + B + C + D	
-    # tmax = max(A, B, C, D)	
-    hap1 = sorted(hap, key=hap.get, reverse=True)[0]	
-    hap2 = sorted(hap, key=hap.get, reverse=True)[1]	
-    # hap3 = sorted(hap, key=hap.get, reverse=True)[2]	
-    # hap4 = sorted(hap, key=hap.get, reverse=True)[3]	
-    delta = float(A * D - B * C)	
-    Ms = float((A + C) * (B + D) * (A + B) * (C + D))	
-    # print("Ms=", Ms)	
-    if Ms != 0:	
-        # D prime	
-        if delta < 0:	
-            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))	
-        else:	
-            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))	
-        # R2	
-        r2 = (delta**2) / Ms	
-        # P-value	
-        num = (A + B + C + D) * (A * D - B * C)**2	
-        denom = Ms	
-        chisq = num / denom	
-        p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))	
-    else:	
+
+    # Sort haplotypes
+    A = hap[sorted(hap)[0]]
+    B = hap[sorted(hap)[1]]
+    C = hap[sorted(hap)[2]]
+    D = hap[sorted(hap)[3]]
+    N = A + B + C + D
+    # tmax = max(A, B, C, D)
+
+    hap1 = sorted(hap, key=hap.get, reverse=True)[0]
+    hap2 = sorted(hap, key=hap.get, reverse=True)[1]
+    # hap3 = sorted(hap, key=hap.get, reverse=True)[2]
+    # hap4 = sorted(hap, key=hap.get, reverse=True)[3]
+
+    delta = float(A * D - B * C)
+    Ms = float((A + C) * (B + D) * (A + B) * (C + D))
+    # print("Ms=", Ms)
+    if Ms != 0:
+        # D prime
+        if delta < 0:
+            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))
+        else:
+            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
+        # R2
+        r2 = (delta**2) / Ms
+        # P-value
+        num = (A + B + C + D) * (A * D - B * C)**2
+        denom = Ms
+        chisq = num / denom
+        p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))
+    else:
         output["error"].append("Variant MAF is 0.0, variant removed.")	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
-        }		
+        }
 
-    Ac=hap[sorted(hap)[0]]	
-    Bc=hap[sorted(hap)[1]]	
-    Cc=hap[sorted(hap)[2]]	
-    Dc=hap[sorted(hap)[3]]	
-    corr_alleles = "NA"	
-    if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):	
-        corr1 = sorted(hap)[0].split("_")[0] + "=" + sorted(hap)[0].split("_")[1]	
-        corr2 = sorted(hap)[3].split("_")[0] + "=" + sorted(hap)[3].split("_")[1]	
-        corr_alleles = str(corr1) + ", " + str(corr2)	
-    else:	
-        corr1 = sorted(hap)[1].split("_")[0] + "=" + sorted(hap)[1].split("_")[1]	
-        corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]	
-        corr_alleles = str(corr1) + ", " + str(corr2)	
+    allele1 = str(sorted(hap)[0].split("_")[1])
+    allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
 
-    print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])	
-    # return(r2, D_prime, p, corr_alleles, output)	
+    allele2 = str(sorted(hap)[1].split("_")[1])
+    allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
 
-    return {	
-        "r2": r2,	
-        "D_prime": D_prime,	
-        "p": p,	
-        "corr_alleles": corr_alleles,	
-        "output": output	
-    }	
+    alleles = ", ".join(["=".join([allele1, allele1_freq]),"=".join([allele2, allele2_freq])])
+
+    return {
+        "r2": r2,
+        "D_prime": D_prime,
+        "p": p,
+        "alleles": alleles,
+        "output": output
+    }
+
+def get_ld_stats_sub(threadCommandArgs):	
+    variantPairs = threadCommandArgs[0]	
+    pop_ids = threadCommandArgs[1]	
+    thread = threadCommandArgs[2]	
+    print("thread " + str(thread) + " kicked")	
+    ldInfoSubset = {}	
+    for variantPair in variantPairs:		
+        ld = get_ld_stats(variantPair, pop_ids)		
+        # print("thread", thread, "variantPair", variantPair, "ld", ld)		
+        # ld = {		
+        #     "r2": "NA",		
+        #     "D_prime": "NA",		
+        #     "p": "NA",		
+        #     "output": []		
+        # }		
+        # store LD calculation results in a object		
+        if variantPair[0] not in ldInfoSubset:		
+            ldInfoSubset[variantPair[0]] = {}		
+            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
+        else:		
+            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
+    return ldInfoSubset	
+
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
-    problematic_snps = []
+    window_problematic_snps = []
     for record in found:
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
@@ -376,7 +397,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # Position
                 matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
                 # Alleles	
-                matched_record.append(ld["corr_alleles"])	
+                matched_record.append(ld["alleles"])	
                 # R2	
                 matched_record.append(ld["r2"])	
                 # D'	
@@ -393,33 +414,27 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_record.append("rs" + record["SNP_ID_CURRENT"])
                 # Details
                 # matched_record.append("Variant found in GWAS catalog within window.")
-                print("matched_record", matched_record)
+                # print("matched_record", matched_record)
                 matched_snps.append(matched_record)
             else: 
                 if (r2_d == "r2"):
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
-                    problematic_snps.append(problematic_record)
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
+                    window_problematic_snps.append(problematic_record)
                 else:
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
-                    problematic_snps.append(problematic_record)
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
+                    window_problematic_snps.append(problematic_record)
         else:
-            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
-            problematic_snps.append(problematic_record)
-    return (matched_snps, problematic_snps)
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            window_problematic_snps.append(problematic_record)
+    return (matched_snps, window_problematic_snps)
 
 # Create LDtrait function
-# def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
 def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
-
+    print("##### START LD TRAIT CALCULATION #####")	
+    start = timer()
+    
     # snp limit
     max_list = 250
-
-    # # Set data directories using config.yml
-    # with open('config.yml', 'r') as f:
-    #     config = yaml.load(f)
-    # dbsnp_version = config['data']['dbsnp_version']
-    # pop_dir = config['data']['pop_dir']
-    # vcf_dir = config['data']['vcf_dir']
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
@@ -449,8 +464,19 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             if snp not in sanitized_query_snps:
                 sanitized_query_snps.append([snp])
 
-    # print("remove duplicates & sanitize", sanitized_query_snps) 
-
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
+    db = client["LDLink"]
+    # Check if gwas_catalog collection in MongoDB exists, if not, display error
+    if "gwas_catalog" not in db.list_collection_names():
+        output["error"] = "GWAS Catalog database is currently being updated. Please check back later."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -471,16 +497,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
-
-    # print "pop_ids", pop_ids
-
-
-    # Connect to Mongo snp database
-    if web:
-        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
-    else:
-        client = MongoClient('localhost', port)
-    db = client["LDLink"]
 
     # Get genomic coordinates from rs number from dbsnp151
     def get_coords(db, rsid):
@@ -553,7 +569,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     snp_pos = []
     snp_coords = []
     warn = []
-    warnings = []
+    windowWarnings = []
+    queryWarnings = []
     for snp_i in sanitized_query_snps:
         if (len(snp_i) > 0 and len(snp_i[0]) > 2):
             if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
@@ -567,11 +584,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
                 else:
                     # Generate warning if query variant is not found in dbsnp
                     warn.append(snp_i[0])
-                    warnings.append([snp_i[0], "NA", "NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
+                    queryWarnings.append([snp_i[0], "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
             else:
                 # Generate warning if query variant is not a genomic position or rs number
                 warn.append(snp_i[0])
-                warnings.append([snp_i[0], "NA", "NA", "NA", "Not a valid SNP, query removed."])
+                queryWarnings.append([snp_i[0], "NA", "Not a valid SNP, variant removed."])
         else:
             # Generate error for empty query variant
             output["error"] = "Input list of RS numbers is empty"
@@ -579,11 +596,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             print(json_output, file=out_json)
             out_json.close()
             return("", "", "")
-
-    # print("warn", warn)
-    # details["warnings"] = {
-    #     "aaData": warnings
-    # }
 
     # generate warnings for query variants not found in dbsnp
     if warn != []:
@@ -610,26 +622,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             out_json.close()
             return("", "", "")
 
-    
-
-
-    # # search dbsnp for snp's genomic coordinates
-    # for snp in sanitized_query_snps:
-    #     snp_info = get_coords(db, snp[0])
-    #     if snp_info is not None:
-    #         query_snp_details.append({
-    #             "rsnum": snp[0],
-    #             "chromosome": str(snp_info["chromosome"]),
-    #             "position": int(snp_info["position"])
-    #         })
-    #     # else:
-    #     #     out_json["not_found"].append(snp)
-    
-    # print "query_snp_details", pretty_print_json(query_snp_details)
-    # print
-
     thinned_list = []
 
+    print("##### FIND GWAS VARIANTS IN WINDOW #####")	
     # establish low/high window for each query snp
     window = 2000000 # 2Mb = 2,000,000 Bp
     found = []	
@@ -645,46 +640,70 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
-        # else:	
-            # out_json["not_found"].append(query_snp["rsnum"])	
+        else:	
+            queryWarnings.append([snp_coord[0], "NA", "No variants found within window, variant removed."])
             
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
     # print("ldPairsUnique", ldPairsUnique)	
     # print("ldPairsUnique", len(ldPairsUnique))	
+    print("##### BEGIN MULTITHREADING LD CALCULATIONS #####")	
+    # start = timer()	
+    # leverage multiprocessing to calculate all LDpairs	
+    threads = 4	
+    splitLDPairsUnique = np.array_split(ldPairsUnique, threads)	
+    getLDStatsArgs = []	
+    for thread in range(threads):	
+        getLDStatsArgs.append([splitLDPairsUnique[thread].tolist(), pop_ids, thread])	
+    # print("getLDStatsArgs", getLDStatsArgs)	
+    with Pool(processes=threads) as pool:	
+        ldInfoSubsets = pool.map(get_ld_stats_sub, getLDStatsArgs)	
+       	
+    # end = timer()	
+    # print("TIME ELAPSED:", str(end - start) + "(s)")	
+    print("##### END MULTITHREADING LD CALCULATIONS #####")	
+    # print("ldInfoSubsets", json.dumps(ldInfoSubsets))	
+    # print("ldInfoSubsets length ", len(ldInfoSubsets))	
+    # merge all ldInfo Pool subsets into one ldInfo object	
     ldInfo = {}	
-    for variantPair in ldPairsUnique:	
-        # print("variantPair:", variantPair)	
-        ld = get_ld_stats(variantPair[0], {"chromosome": variantPair[1], "position": variantPair[2]}, variantPair[3],{"chromosome": variantPair[4], "position": variantPair[5]}, pops, pop_ids)	
-        # print("ld", ld)	
-        # ld = {	
-        #     "r2": "NA",	
-        #     "D_prime": "NA",	
-        #     "p": "NA",	
-        #     "output": []	
-        # }	
-        # store LD calculation results in a object	
-        if variantPair[0] not in ldInfo:	
-            ldInfo[variantPair[0]] = {}	
-            ldInfo[variantPair[0]][variantPair[3]] = ld	
-        else:	
-            ldInfo[variantPair[0]][variantPair[3]] = ld	
+    for ldInfoSubset in ldInfoSubsets:	
+        for key in ldInfoSubset.keys():	
+            if key not in ldInfo.keys():	
+                ldInfo[key] = {}	
+                ldInfo[key] = ldInfoSubset[key]	
+            else:	
+                for subsetKey in ldInfoSubset[key].keys():	
+                    ldInfo[key][subsetKey] = ldInfoSubset[key][subsetKey]	
+    # print("ldInfo", json.dumps(ldInfo))
         	
     # print("ldInfo", ldInfo)	
     for snp_coord in snp_coords:	
-        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)	
-        details[snp_coord[0]] = {	
-            "aaData": matched_snps
-        }
-        warnings += problematic_snps
+        print("snp_coord", snp_coord)
+        (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
+        
+        windowWarnings += window_problematic_snps
+        if (len(matched_snps) > 0):
+            details[snp_coord[0]] = {	
+                "aaData": matched_snps
+            }
+        else:
+            # remove from thinned_list
+            thinned_list.remove(snp_coord[0])
+            queryWarnings.append([snp_coord[0], "NA", "No variants in LD found within window, variant removed."]) 
 
-    details["warnings"] = {
-        "aaData": warnings
+    details["windowWarnings"] = {
+        "aaData": windowWarnings
+    }
+    details["queryWarnings"] = {
+        "aaData": queryWarnings
     }
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
+    end = timer()	
+    print("TIME ELAPSED:", str(end - start) + "(s)")	
+    print("##### LDTRAIT COMPLETE #####")
     return (sanitized_query_snps, thinned_list, details)
 
 

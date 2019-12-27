@@ -1562,8 +1562,10 @@
 									</thead>
 									<tbody id="ldtrait-snp-list"></tbody>
 								</table>
-								<a id="ldtrait-warnings-button" title="View details.">Variants with Warnings</a>
-								<!-- <a id="ldtrait-warnings-button" title="View details.">Variants not in LD with GWAS Catalog</a> -->
+								<a id="ldtrait-query-warnings-button" title="View details.">Query Variants with Warnings</a>
+								<br />
+								<br />
+								<a id="ldtrait-window-warnings-button" title="View details.">Variants not in LD with GWAS Catalog</a>
 							</div>
 
 							<div class="col-md-10 ldtrait-table-scroller" id="ldtrait-detail">
@@ -1575,7 +1577,7 @@
 										<tr>
 											<!-- <th class="dt-head-left dt-body-left">Query RS Number</th> -->
 											<th class="dt-head-left dt-body-left">GWAS Trait</th>
-											<th class="dt-head-left dt-body-left">GWAS SNP</th>
+											<th class="dt-head-left dt-body-left">RS Number</th>
 											<th class="dt-head-left dt-body-left">Position (GRCh37)</th>
 											<th class="dt-head-left dt-body-left">Alleles</th>
 											<th class="dt-head-left dt-body-left">R<sup>2</sup></th>
@@ -1590,15 +1592,27 @@
 									</thead>
 								</table>
 
-								<!-- SNPs with warnings -->
-								<table id="new-ldtrait-warnings" class="table display compact">
-									<caption id="ldtrait-warnings-title">Variants With Warnings</caption>
+								<!-- Window variants with warnings -->
+								<table id="new-ldtrait-window-warnings" class="table display compact">
+									<caption id="ldtrait-window-warnings-title">Variants not in LD with GWAS Catalog</caption>
 									<thead>
 										<tr>
-											<th class="dt-head-left dt-body-left">Query SNP</th>
-											<th class="dt-head-left dt-body-left">GWAS SNP</th>
+											<th class="dt-head-left dt-body-left">Query Variant</th>
+											<th class="dt-head-left dt-body-left">GWAS Variant</th>
 											<th class="dt-head-left dt-body-left">Position</th>
 											<th class="dt-head-left dt-body-left">Trait</th>
+											<th class="dt-head-left dt-body-left">Details</th>
+										</tr>
+									</thead>
+								</table>
+
+								<!-- Query variants with warnings -->
+								<table id="new-ldtrait-query-warnings" class="table display compact">
+									<caption id="ldtrait-query-warnings-title">Query Variants with Warnings</caption>
+									<thead>
+										<tr>
+											<th class="dt-head-left dt-body-left">Query Variant</th>
+											<th class="dt-head-left dt-body-left">Position</th>
 											<th class="dt-head-left dt-body-left">Details</th>
 										</tr>
 									</thead>

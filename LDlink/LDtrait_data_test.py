@@ -63,7 +63,7 @@ def main():
         gwas_catalog = db.gwas_catalog
         gwas_catalog.drop()
     else: 
-        gwas_catalog = db.gwas_catalog
+        gwas_catalog_tmp = db.gwas_catalog_tmp
 
     # read and insert downloaded file
     with open(tmp_dir + filename) as f:
@@ -91,7 +91,7 @@ def main():
                 if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
                     document["chromosome_grch37"] = str(record["chromosome"])
                     document["position_grch37"] = int(record["position"])
-                    gwas_catalog.insert_one(document)
+                    gwas_catalog_tmp.insert_one(document)
                 else:
                     document["err_msg"] = "Genomic coordinates not found in dbSNP."
                     errSNPs.append(document)
@@ -109,8 +109,10 @@ def main():
     print("GWAS catalog inserted into MongoDB.")
 
     print("Indexing GWAS catalog Mongo collection...")
-    gwas_catalog.create_index([("chromosome_grch37", ASCENDING), ("position_grch37", ASCENDING)])
+    gwas_catalog_tmp.create_index([("chromosome_grch37", ASCENDING), ("position_grch37", ASCENDING)])
     print("Indexing completed.")
+    print("Rename gwas_catalog_tmp collection to gwas_catalog")
+    gwas_catalog_tmp.rename("gwas_catalog")
     print(("Completion time:\t--- %s minutes ---" % str(((time.time() - start_time) / 60.0))))
 
 if __name__ == "__main__":
