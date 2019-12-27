@@ -468,8 +468,19 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             if snp not in sanitized_query_snps:
                 sanitized_query_snps.append([snp])
 
-    # print("remove duplicates & sanitize", sanitized_query_snps) 
-
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
+    db = client["LDLink"]
+    # Check if gwas_catalog collection in MongoDB exists, if not, display error
+    if "gwas_catalog" not in db.list_collection_names():
+        output["error"] = "The GWAS Catalog database is currently being updated. Please check back later."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -490,16 +501,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
-
-    # print "pop_ids", pop_ids
-
-
-    # Connect to Mongo snp database
-    if web:
-        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
-    else:
-        client = MongoClient('localhost', port)
-    db = client["LDLink"]
 
     # Get genomic coordinates from rs number from dbsnp151
     def get_coords(db, rsid):

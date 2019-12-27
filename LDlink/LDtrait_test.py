@@ -416,9 +416,12 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     matched_snps = []
     problematic_snps = []
     for record in found:
+        print("found", "rs" + record["SNP_ID_CURRENT"])
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
+            print("reached 1")
             if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
+                print("reached 2")
                 matched_record = []
                 # Query SNP
                 # matched_record.append(query_snp)
@@ -448,16 +451,22 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # matched_record.append("Variant found in GWAS catalog within window.")
                 # print("matched_record", matched_record)
                 matched_snps.append(matched_record)
+                print("YES")
             else: 
+                print("reached 3")
                 if (r2_d == "r2"):
                     problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
                     problematic_snps.append(problematic_record)
+                    print("NO")
                 else:
                     problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
                     problematic_snps.append(problematic_record)
+                    print("NO")
         else:
+            print("reached 5")
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
             problematic_snps.append(problematic_record)
+            print("NO")
     return (matched_snps, problematic_snps)
 
 # Create LDtrait function
@@ -467,13 +476,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     start = timer()
     # snp limit
     max_list = 250
-
-    # # Set data directories using config.yml
-    # with open('config.yml', 'r') as f:
-    #     config = yaml.load(f)
-    # dbsnp_version = config['data']['dbsnp_version']
-    # pop_dir = config['data']['pop_dir']
-    # vcf_dir = config['data']['vcf_dir']
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
@@ -503,8 +505,19 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             if snp not in sanitized_query_snps:
                 sanitized_query_snps.append([snp])
 
-    # print("remove duplicates & sanitize", sanitized_query_snps) 
-
+    # Connect to Mongo snp database
+    if web:
+        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
+    else:
+        client = MongoClient('localhost', port)
+    db = client["LDLink"]
+    # Check if gwas_catalog collection in MongoDB exists, if not, display error
+    if "gwas_catalog" not in db.list_collection_names():
+        output["error"] = "The GWAS Catalog database is currently being updated. Please check back later."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -525,16 +538,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
-
-    # print "pop_ids", pop_ids
-
-
-    # Connect to Mongo snp database
-    if web:
-        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
-    else:
-        client = MongoClient('localhost', port)
-    db = client["LDLink"]
 
     # Get genomic coordinates from rs number from dbsnp151
     def get_coords(db, rsid):
@@ -726,7 +729,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     # print("ldInfo", json.dumps(ldInfo))
 
     for snp_coord in snp_coords:	
-        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)	
+        print("snp_coord", snp_coord)
+        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
+        # print("matched_snps", matched_snps)	
         details[snp_coord[0]] = {	
             "aaData": matched_snps
         }
@@ -753,13 +758,13 @@ def main():
     request = 8888
     web = False
     r2_d = "r2"
-    r2_d_threshold = 0.15
+    r2_d_threshold = 0.01
 
     # Run function
     (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)	
     # print("query_snps", sanitized_query_snps)	
     # print("thinned_snps", thinned_list)
-    # print("details", json.dumps(details))
+    print("details", json.dumps(details))
 
 if __name__ == "__main__":
     main()
