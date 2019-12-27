@@ -9,7 +9,11 @@ import collections
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
+from multiprocessing import Pool
 import sys
+import numpy as np	
+from timeit import default_timer as timer
+
 contents = open("SNP_Query_loginInfo.ini").read().split('\n')
 username = contents[0].split('=')[1]
 password = contents[1].split('=')[1]
@@ -21,10 +25,6 @@ with open('config.yml', 'r') as f:
 dbsnp_version = config['data']['dbsnp_version']	
 pop_dir = config['data']['pop_dir']	
 vcf_dir = config['data']['vcf_dir']
-
-
-# def pretty_print_json(obj):
-#     return json.dumps(obj, sort_keys = True, indent = 4, separators = (',', ': '))
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
@@ -75,7 +75,7 @@ def expandSelectedPopulationGroups(pops):
             expandedPops = list(set(expandedPops)) # unique elements
     return expandedPops
 
-def get_ld_stats(variantPair, pops, pop_ids):	
+def get_ld_stats(variantPair, pop_ids):	
     # parse ld pair array parameter input
     snp1 = variantPair[0]
     snp1_coord = {
@@ -117,7 +117,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
     # SNP1	
     if len(vcf1) == 0:	
         output["error"].append(snp1 + " is not in 1000G reference panel.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
@@ -132,7 +131,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
                 geno1 = vcf1[i].strip().split()	
         if geno1 == []:	
             output["error"].append(snp1 + " is not in 1000G reference panel.")	
-            # return(json.dumps(output, sort_keys=True, indent=2))	
             return {	
                 "r2": "NA",	
                 "D_prime": "NA",	
@@ -147,7 +145,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
         snp1 = geno1[2]	
     if "," in geno1[3] or "," in geno1[4]:	
         output["error"].append(snp1 + " is not a biallelic variant.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
@@ -180,7 +177,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
     # SNP2	
     if len(vcf2) == 0:	
         output["error"].append(snp2 + " is not in 1000G reference panel.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
@@ -195,7 +191,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
                 geno2 = vcf2[i].strip().split()	
         if geno2 == []:	
             output["error"].append(snp2 + " is not in 1000G reference panel.")	
-            # return(json.dumps(output, sort_keys=True, indent=2))	
             return {	
                 "r2": "NA",	
                 "D_prime": "NA",	
@@ -210,7 +205,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
         snp2 = geno2[2]	
     if "," in geno2[3] or "," in geno2[4]:	
         output["error"].append(snp2 + " is not a biallelic variant.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
@@ -240,13 +234,9 @@ def get_ld_stats(variantPair, pops, pop_ids):
         "./.": [".", "."], 	
         ".": [".", "."]	
     }	
-    # print(allele1)	
-    # print(allele2)	
-    # print("geno1[1]", geno1[1], "vcf1_pos", vcf1_pos)	
-    # print("geno2[1]", geno2[1], "vcf2_pos", vcf2_pos)	
+    
     if geno1[1] != vcf1_pos:	
         output["error"].append("VCF File does not match variant coordinates for SNP1.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
@@ -256,7 +246,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
         }	
     if geno2[1] != vcf2_pos:	
         output["error"].append("VCF File does not match variant coordinates for SNP2.")	
-        # return(json.dumps(output, sort_keys=True, indent=2))	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
@@ -264,7 +253,7 @@ def get_ld_stats(variantPair, pops, pop_ids):
             "corr_alleles": "NA",	
             "output": output	
         }	
-    # print("output", output)	
+
     # Get headers	
     tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)	
     proc1_h = subprocess.Popen(	
@@ -281,7 +270,7 @@ def get_ld_stats(variantPair, pops, pop_ids):
     for i in range(9, len(head2)):	
         if head2[i] in geno:	
             geno[head2[i]][1] = allele2[geno2[i]]	
-    # print("geno", geno)	
+
     # Extract haplotypes	
     hap = {}	
     for ind in pop_ids:	
@@ -296,6 +285,7 @@ def get_ld_stats(variantPair, pops, pop_ids):
                 hap[hap2] += 1	
             else:	
                 hap[hap2] = 1	
+
     # Remove missing haplotypes	
     keys = list(hap.keys())	
     for key in keys:	
@@ -310,7 +300,7 @@ def get_ld_stats(variantPair, pops, pop_ids):
         for i in haps:	
             if i not in hap:	
                 hap[i] = 0	
-    # print("hap", hap)	
+
     # Sort haplotypes	
     A = hap[sorted(hap)[0]]	
     B = hap[sorted(hap)[1]]	
@@ -362,9 +352,6 @@ def get_ld_stats(variantPair, pops, pop_ids):
         corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]	
         corr_alleles = str(corr1) + ", " + str(corr2)	
 
-    print(snp1, " ", snp1_coord, " ", snp2, " ", snp2_coord, " ", pops, " ", [r2, D_prime, p, output])	
-    # return(r2, D_prime, p, corr_alleles, output)	
-
     return {	
         "r2": r2,	
         "D_prime": D_prime,	
@@ -372,6 +359,30 @@ def get_ld_stats(variantPair, pops, pop_ids):
         "corr_alleles": corr_alleles,	
         "output": output	
     }	
+
+def get_ld_stats_sub(threadCommandArgs):	
+    variantPairs = threadCommandArgs[0]	
+    pop_ids = threadCommandArgs[1]	
+    thread = threadCommandArgs[2]	
+    print("thread " + str(thread) + " kicked")	
+    ldInfoSubset = {}	
+    for variantPair in variantPairs:		
+        ld = get_ld_stats(variantPair, pop_ids)		
+        # print("thread", thread, "variantPair", variantPair, "ld", ld)		
+        # ld = {		
+        #     "r2": "NA",		
+        #     "D_prime": "NA",		
+        #     "p": "NA",		
+        #     "output": []		
+        # }		
+        # store LD calculation results in a object		
+        if variantPair[0] not in ldInfoSubset:		
+            ldInfoSubset[variantPair[0]] = {}		
+            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
+        else:		
+            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
+    return ldInfoSubset	
+
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
@@ -407,7 +418,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_record.append("rs" + record["SNP_ID_CURRENT"])
                 # Details
                 # matched_record.append("Variant found in GWAS catalog within window.")
-                print("matched_record", matched_record)
+                # print("matched_record", matched_record)
                 matched_snps.append(matched_record)
             else: 
                 if (r2_d == "r2"):
@@ -422,18 +433,12 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     return (matched_snps, problematic_snps)
 
 # Create LDtrait function
-# def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
 def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
-
+    print("##### START LD TRAIT CALCULATION #####")	
+    start = timer()
+    
     # snp limit
     max_list = 250
-
-    # # Set data directories using config.yml
-    # with open('config.yml', 'r') as f:
-    #     config = yaml.load(f)
-    # dbsnp_version = config['data']['dbsnp_version']
-    # pop_dir = config['data']['pop_dir']
-    # vcf_dir = config['data']['vcf_dir']
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
@@ -624,26 +629,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             out_json.close()
             return("", "", "")
 
-    
-
-
-    # # search dbsnp for snp's genomic coordinates
-    # for snp in sanitized_query_snps:
-    #     snp_info = get_coords(db, snp[0])
-    #     if snp_info is not None:
-    #         query_snp_details.append({
-    #             "rsnum": snp[0],
-    #             "chromosome": str(snp_info["chromosome"]),
-    #             "position": int(snp_info["position"])
-    #         })
-    #     # else:
-    #     #     out_json["not_found"].append(snp)
-    
-    # print "query_snp_details", pretty_print_json(query_snp_details)
-    # print
-
     thinned_list = []
 
+    print("##### FIND GWAS VARIANTS IN WINDOW #####")	
     # establish low/high window for each query snp
     window = 2000000 # 2Mb = 2,000,000 Bp
     found = []	
@@ -665,23 +653,34 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
     # print("ldPairsUnique", ldPairsUnique)	
     # print("ldPairsUnique", len(ldPairsUnique))	
+    print("##### BEGIN MULTITHREADING LD CALCULATIONS #####")	
+    # start = timer()	
+    # leverage multiprocessing to calculate all LDpairs	
+    threads = 4	
+    splitLDPairsUnique = np.array_split(ldPairsUnique, threads)	
+    getLDStatsArgs = []	
+    for thread in range(threads):	
+        getLDStatsArgs.append([splitLDPairsUnique[thread].tolist(), pop_ids, thread])	
+    # print("getLDStatsArgs", getLDStatsArgs)	
+    with Pool(processes=threads) as pool:	
+        ldInfoSubsets = pool.map(get_ld_stats_sub, getLDStatsArgs)	
+       	
+    # end = timer()	
+    # print("TIME ELAPSED:", str(end - start) + "(s)")	
+    print("##### END MULTITHREADING LD CALCULATIONS #####")	
+    # print("ldInfoSubsets", json.dumps(ldInfoSubsets))	
+    # print("ldInfoSubsets length ", len(ldInfoSubsets))	
+    # merge all ldInfo Pool subsets into one ldInfo object	
     ldInfo = {}	
-    for variantPair in ldPairsUnique:	
-        print("variantPair:", variantPair)	
-        ld = get_ld_stats(variantPair, pops, pop_ids)	
-        # print("ld", ld)	
-        # ld = {	
-        #     "r2": "NA",	
-        #     "D_prime": "NA",	
-        #     "p": "NA",	
-        #     "output": []	
-        # }	
-        # store LD calculation results in a object	
-        if variantPair[0] not in ldInfo:	
-            ldInfo[variantPair[0]] = {}	
-            ldInfo[variantPair[0]][variantPair[3]] = ld	
-        else:	
-            ldInfo[variantPair[0]][variantPair[3]] = ld	
+    for ldInfoSubset in ldInfoSubsets:	
+        for key in ldInfoSubset.keys():	
+            if key not in ldInfo.keys():	
+                ldInfo[key] = {}	
+                ldInfo[key] = ldInfoSubset[key]	
+            else:	
+                for subsetKey in ldInfoSubset[key].keys():	
+                    ldInfo[key][subsetKey] = ldInfoSubset[key][subsetKey]	
+    # print("ldInfo", json.dumps(ldInfo))
         	
     # print("ldInfo", ldInfo)	
     for snp_coord in snp_coords:	
@@ -699,6 +698,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
+    end = timer()	
+    print("TIME ELAPSED:", str(end - start) + "(s)")	
+    print("##### LDTRAIT COMPLETE #####")
     return (sanitized_query_snps, thinned_list, details)
 
 
