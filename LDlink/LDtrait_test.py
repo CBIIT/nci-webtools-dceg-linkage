@@ -416,12 +416,9 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     matched_snps = []
     problematic_snps = []
     for record in found:
-        print("found", "rs" + record["SNP_ID_CURRENT"])
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
-            print("reached 1")
             if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
-                print("reached 2")
                 matched_record = []
                 # Query SNP
                 # matched_record.append(query_snp)
@@ -451,26 +448,19 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # matched_record.append("Variant found in GWAS catalog within window.")
                 # print("matched_record", matched_record)
                 matched_snps.append(matched_record)
-                print("YES")
             else: 
-                print("reached 3")
                 if (r2_d == "r2"):
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
                     problematic_snps.append(problematic_record)
-                    print("NO")
                 else:
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
                     problematic_snps.append(problematic_record)
-                    print("NO")
         else:
-            print("reached 5")
-            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "NA", "NA", " ".join(ld["output"]["error"])]
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
             problematic_snps.append(problematic_record)
-            print("NO")
     return (matched_snps, problematic_snps)
 
 # Create LDtrait function
-# def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
 def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     print("##### START LD TRAIT CALCULATION #####")
     start = timer()
@@ -513,7 +503,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     db = client["LDLink"]
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():
-        output["error"] = "The GWAS Catalog database is currently being updated. Please check back later."
+        output["error"] = "GWAS Catalog database is currently being updated. Please check back later."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
