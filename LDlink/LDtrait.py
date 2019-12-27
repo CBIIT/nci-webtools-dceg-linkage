@@ -121,7 +121,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     elif len(vcf1) > 1:	
@@ -135,7 +135,7 @@ def get_ld_stats(variantPair, pop_ids):
                 "r2": "NA",	
                 "D_prime": "NA",	
                 "p": "NA",	
-                "corr_alleles": "NA",	
+                "alleles": "NA",	
                 "output": output	
             }	
     else:	
@@ -149,7 +149,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     if len(geno1[3]) == 1 and len(geno1[4]) == 1:	
@@ -181,7 +181,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     elif len(vcf2) > 1:	
@@ -195,7 +195,7 @@ def get_ld_stats(variantPair, pop_ids):
                 "r2": "NA",	
                 "D_prime": "NA",	
                 "p": "NA",	
-                "corr_alleles": "NA",	
+                "alleles": "NA",	
                 "output": output	
             }	
     else:	
@@ -209,7 +209,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     if len(geno2[3]) == 1 and len(geno2[4]) == 1:	
@@ -241,7 +241,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
     if geno2[1] != vcf2_pos:	
@@ -250,7 +250,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }	
 
@@ -301,64 +301,60 @@ def get_ld_stats(variantPair, pop_ids):
             if i not in hap:	
                 hap[i] = 0	
 
-    # Sort haplotypes	
-    A = hap[sorted(hap)[0]]	
-    B = hap[sorted(hap)[1]]	
-    C = hap[sorted(hap)[2]]	
-    D = hap[sorted(hap)[3]]	
-    # N = A + B + C + D	
-    # tmax = max(A, B, C, D)	
-    hap1 = sorted(hap, key=hap.get, reverse=True)[0]	
-    hap2 = sorted(hap, key=hap.get, reverse=True)[1]	
-    # hap3 = sorted(hap, key=hap.get, reverse=True)[2]	
-    # hap4 = sorted(hap, key=hap.get, reverse=True)[3]	
-    delta = float(A * D - B * C)	
-    Ms = float((A + C) * (B + D) * (A + B) * (C + D))	
-    # print("Ms=", Ms)	
-    if Ms != 0:	
-        # D prime	
-        if delta < 0:	
-            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))	
-        else:	
-            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))	
-        # R2	
-        r2 = (delta**2) / Ms	
-        # P-value	
-        num = (A + B + C + D) * (A * D - B * C)**2	
-        denom = Ms	
-        chisq = num / denom	
-        p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))	
-    else:	
+    # Sort haplotypes
+    A = hap[sorted(hap)[0]]
+    B = hap[sorted(hap)[1]]
+    C = hap[sorted(hap)[2]]
+    D = hap[sorted(hap)[3]]
+    N = A + B + C + D
+    # tmax = max(A, B, C, D)
+
+    hap1 = sorted(hap, key=hap.get, reverse=True)[0]
+    hap2 = sorted(hap, key=hap.get, reverse=True)[1]
+    # hap3 = sorted(hap, key=hap.get, reverse=True)[2]
+    # hap4 = sorted(hap, key=hap.get, reverse=True)[3]
+
+    delta = float(A * D - B * C)
+    Ms = float((A + C) * (B + D) * (A + B) * (C + D))
+    # print("Ms=", Ms)
+    if Ms != 0:
+        # D prime
+        if delta < 0:
+            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))
+        else:
+            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
+        # R2
+        r2 = (delta**2) / Ms
+        # P-value
+        num = (A + B + C + D) * (A * D - B * C)**2
+        denom = Ms
+        chisq = num / denom
+        p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))
+    else:
         output["error"].append("Variant MAF is 0.0, variant removed.")	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
-        }		
+        }
 
-    Ac=hap[sorted(hap)[0]]	
-    Bc=hap[sorted(hap)[1]]	
-    Cc=hap[sorted(hap)[2]]	
-    Dc=hap[sorted(hap)[3]]	
-    corr_alleles = "NA"	
-    if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):	
-        corr1 = sorted(hap)[0].split("_")[0] + "=" + sorted(hap)[0].split("_")[1]	
-        corr2 = sorted(hap)[3].split("_")[0] + "=" + sorted(hap)[3].split("_")[1]	
-        corr_alleles = str(corr1) + ", " + str(corr2)	
-    else:	
-        corr1 = sorted(hap)[1].split("_")[0] + "=" + sorted(hap)[1].split("_")[1]	
-        corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]	
-        corr_alleles = str(corr1) + ", " + str(corr2)	
+    allele1 = str(sorted(hap)[0].split("_")[1])
+    allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
 
-    return {	
-        "r2": r2,	
-        "D_prime": D_prime,	
-        "p": p,	
-        "corr_alleles": corr_alleles,	
-        "output": output	
-    }	
+    allele2 = str(sorted(hap)[1].split("_")[1])
+    allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
+
+    alleles = ", ".join(["=".join([allele1, allele1_freq]),"=".join([allele2, allele2_freq])])
+
+    return {
+        "r2": r2,
+        "D_prime": D_prime,
+        "p": p,
+        "alleles": alleles,
+        "output": output
+    }
 
 def get_ld_stats_sub(threadCommandArgs):	
     variantPairs = threadCommandArgs[0]	
@@ -401,7 +397,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # Position
                 matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
                 # Alleles	
-                matched_record.append(ld["corr_alleles"])	
+                matched_record.append(ld["alleles"])	
                 # R2	
                 matched_record.append(ld["r2"])	
                 # D'	

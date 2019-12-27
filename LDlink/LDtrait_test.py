@@ -123,7 +123,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",
             "D_prime": "NA",
             "p": "NA",
-            "corr_alleles": "NA",
+            "alleles": "NA",
             "output": output
         } 
     elif len(vcf1) > 1:
@@ -138,7 +138,7 @@ def get_ld_stats(variantPair, pop_ids):
                 "r2": "NA",
                 "D_prime": "NA",
                 "p": "NA",
-                "corr_alleles": "NA",
+                "alleles": "NA",
                 "output": output
             }
     else:
@@ -155,7 +155,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",
             "D_prime": "NA",
             "p": "NA",
-            "corr_alleles": "NA",
+            "alleles": "NA",
             "output": output
         }
 
@@ -191,7 +191,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",
             "D_prime": "NA",
             "p": "NA",
-            "corr_alleles": "NA",
+            "alleles": "NA",
             "output": output
         }
     elif len(vcf2) > 1:
@@ -206,7 +206,7 @@ def get_ld_stats(variantPair, pop_ids):
                 "r2": "NA",
                 "D_prime": "NA",
                 "p": "NA",
-                "corr_alleles": "NA",
+                "alleles": "NA",
                 "output": output
             }
     else:
@@ -223,7 +223,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",
             "D_prime": "NA",
             "p": "NA",
-            "corr_alleles": "NA",
+            "alleles": "NA",
             "output": output
         }
 
@@ -258,7 +258,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",
             "D_prime": "NA",
             "p": "NA",
-            "corr_alleles": "NA",
+            "alleles": "NA",
             "output": output
         }
 
@@ -269,7 +269,7 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",
             "D_prime": "NA",
             "p": "NA",
-            "corr_alleles": "NA",
+            "alleles": "NA",
             "output": output
         }
 
@@ -332,7 +332,7 @@ def get_ld_stats(variantPair, pop_ids):
     B = hap[sorted(hap)[1]]
     C = hap[sorted(hap)[2]]
     D = hap[sorted(hap)[3]]
-    # N = A + B + C + D
+    N = A + B + C + D
     # tmax = max(A, B, C, D)
 
     hap1 = sorted(hap, key=hap.get, reverse=True)[0]
@@ -362,30 +362,23 @@ def get_ld_stats(variantPair, pop_ids):
             "r2": "NA",	
             "D_prime": "NA",	
             "p": "NA",	
-            "corr_alleles": "NA",	
+            "alleles": "NA",	
             "output": output	
         }
 
-    Ac=hap[sorted(hap)[0]]
-    Bc=hap[sorted(hap)[1]]
-    Cc=hap[sorted(hap)[2]]
-    Dc=hap[sorted(hap)[3]]
-    corr_alleles = "NA"
+    allele1 = str(sorted(hap)[0].split("_")[1])
+    allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
 
-    if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
-        corr1 = sorted(hap)[0].split("_")[0] + "=" + sorted(hap)[0].split("_")[1]
-        corr2 = sorted(hap)[3].split("_")[0] + "=" + sorted(hap)[3].split("_")[1]
-        corr_alleles = str(corr1) + ", " + str(corr2)
-    else:
-        corr1 = sorted(hap)[1].split("_")[0] + "=" + sorted(hap)[1].split("_")[1]
-        corr2 = sorted(hap)[2].split("_")[0] + "=" + sorted(hap)[2].split("_")[1]
-        corr_alleles = str(corr1) + ", " + str(corr2)
+    allele2 = str(sorted(hap)[1].split("_")[1])
+    allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
+
+    alleles = ", ".join(["=".join([allele1, allele1_freq]),"=".join([allele2, allele2_freq])])
 
     return {
         "r2": r2,
         "D_prime": D_prime,
         "p": p,
-        "corr_alleles": corr_alleles,
+        "alleles": alleles,
         "output": output
     }
 
@@ -429,7 +422,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # Position
                 matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
                 # Alleles	
-                matched_record.append(ld["corr_alleles"])	
+                matched_record.append(ld["alleles"])	
                 # R2	
                 matched_record.append(ld["r2"])	
                 # D'	
