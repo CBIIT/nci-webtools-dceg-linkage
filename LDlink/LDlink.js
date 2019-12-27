@@ -1025,7 +1025,7 @@ function setupLDtraitControls() {
     $('#ldtrait-query-warnings-button').click( function() {
         $('#new-ldtrait_wrapper').hide();
         $('#new-ldtrait-window-warnings_wrapper').hide();
-        loadLDtraitWarnings(ldTraitRaw);
+        loadLDtraitQueryWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
     });
 }
