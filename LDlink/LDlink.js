@@ -226,7 +226,8 @@ $(document).ready(function() {
     createPopTable();
     createProxyTable();
     createTraitDetailsTable();
-    createTraitWarningsTable();
+    createTraitWindowWarningsTable();
+    createTraitQueryWarningsTable();
     var new_assoc_data = {
         "aaData": [
             ["rs75563749","chr7","24958977","(C/T)","0.2037",-726,"0.234","0.234","C-C","0.0", "7","HaploReg link","NA"],
@@ -779,9 +780,9 @@ function createTraitDetailsTable() {
 
 }
 
-function createTraitWarningsTable() {
+function createTraitWindowWarningsTable() {
 
-    var ldtraitWarningsTable = $('#new-ldtrait-warnings').DataTable( {
+    var ldtraitWindowWarningsTable = $('#new-ldtrait-window-warnings').DataTable( {
         "aaSorting": [],  /* Disable initial sort */
         "bPaginate": true,
         // "sScrollY": "600px",
@@ -798,6 +799,31 @@ function createTraitWarningsTable() {
                 className: "dt-head-left", 
                 className: "dt-body-left",
                 "targets": [ 0, 1, 2, 3, 4] 
+            }
+        ]
+    });
+
+}
+
+function createTraitQueryWarningsTable() {
+
+    var ldtraitQueryWarningsTable = $('#new-ldtrait-query-warnings').DataTable( {
+        "aaSorting": [],  /* Disable initial sort */
+        "bPaginate": true,
+        // "sScrollY": "600px",
+        "bJQueryUI": false,  // ThemeRoller
+        "bLengthChange": true,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bAutoWidth": true,
+        "bProcessing": false,
+        "deferRender": false,
+        "columnDefs": [
+            { 
+                className: "dt-head-left", 
+                className: "dt-body-left",
+                "targets": [ 0, 1, 2 ] 
             }
         ]
     });
@@ -986,11 +1012,19 @@ function setupLDtraitControls() {
         $('#ldtrait-snp-list').show();
         $('#ldtrait-initial-message').hide();
         loadLDtraitDetails(ldTraitRaw, rs_number);
-        $('#new-ldtrait-warnings_wrapper').hide();
+        $('#new-ldtrait-window-warnings_wrapper').hide();
+        $('#new-ldtrait-query-warnings_wrapper').hide();
         $('#ldtrait-initial-message').hide();
     });
-    $('#ldtrait-warnings-button').click( function() {
+    $('#ldtrait-window-warnings-button').click( function() {
         $('#new-ldtrait_wrapper').hide();
+        $('#new-ldtrait-query-warnings_wrapper').hide();
+        loadLDtraitWindowWarnings(ldTraitRaw);
+        $('#ldtrait-initial-message').hide();
+    });
+    $('#ldtrait-query-warnings-button').click( function() {
+        $('#new-ldtrait_wrapper').hide();
+        $('#new-ldtrait-window-warnings_wrapper').hide();
         loadLDtraitWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
     });
@@ -1828,7 +1862,8 @@ function updateLDtrait() {
 
     //Show inital message
     $('#new-ldtrait_wrapper').hide();
-    $('#new-ldtrait-warnings_wrapper').hide();
+    $('#new-ldtrait-window-warnings_wrapper').hide();
+    $('#new-ldtrait-query-warnings_wrapper').hide();
     $('#ldtrait-initial-message').show();
 
     //Update href on
@@ -2310,11 +2345,18 @@ function loadLDtraitDetails(data, rs_number) {
     $('#ldtrait-detail-title').text("Details for " + rs_number);
 }
 
-function loadLDtraitWarnings(data) {
+function loadLDtraitWindowWarnings(data) {
     console.log("ldTraitRaw", data);
 
-    RefreshTable('#new-ldtrait-warnings', data.details.warnings);
-    $('#new-ldtrait-warnings_wrapper').show();
+    RefreshTable('#new-ldtrait-window-warnings', data.details.windowWarnings);
+    $('#new-ldtrait-window-warnings_wrapper').show();
+}
+
+function loadLDtraitQueryWarnings(data) {
+    console.log("ldTraitRaw", data);
+
+    RefreshTable('#new-ldtrait-query-warnings', data.details.queryWarnings);
+    $('#new-ldtrait-query-warnings_wrapper').show();
 }
 
 function loadSNPdetails(data, rs_number) {
@@ -2372,10 +2414,16 @@ function initTrait(data) {
 
     populateSNPlistLDtrait(data);
 
-    if(data.details.warnings && data.details.warnings.aaData.length > 0) {
-        $('#ldtrait-warnings-button').show();
+    if(data.details.windowWarnings && data.details.windowWarnings.aaData.length > 0) {
+        $('#ldtrait-window-warnings-button').show();
     } else {
-        $('#ldtrait-warnings-button').hide();
+        $('#ldtrait-window-warnings-button').hide();
+    }
+
+    if(data.details.queryWarnings && data.details.queryWarnings.aaData.length > 0) {
+        $('#ldtrait-query-warnings-button').show();
+    } else {
+        $('#ldtrait-query-warnings-button').hide();
     }
 }
 

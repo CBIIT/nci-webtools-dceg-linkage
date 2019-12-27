@@ -414,7 +414,7 @@ def get_ld_stats_sub(threadCommandArgs):
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
-    problematic_snps = []
+    window_problematic_snps = []
     for record in found:
         ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
@@ -451,14 +451,14 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
             else: 
                 if (r2_d == "r2"):
                     problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
-                    problematic_snps.append(problematic_record)
+                    window_problematic_snps.append(problematic_record)
                 else:
                     problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
-                    problematic_snps.append(problematic_record)
+                    window_problematic_snps.append(problematic_record)
         else:
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
-            problematic_snps.append(problematic_record)
-    return (matched_snps, problematic_snps)
+            window_problematic_snps.append(problematic_record)
+    return (matched_snps, window_problematic_snps)
 
 # Create LDtrait function
 def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
@@ -600,7 +600,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     snp_pos = []
     snp_coords = []
     warn = []
-    warnings = []
+    windowWarnings = []
+    queryWarnings = []
     for snp_i in sanitized_query_snps:
         if (len(snp_i) > 0 and len(snp_i[0]) > 2):
             if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
@@ -614,11 +615,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
                 else:
                     # Generate warning if query variant is not found in dbsnp
                     warn.append(snp_i[0])
-                    warnings.append([snp_i[0], "NA", "NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
+                    queryWarnings.append([snp_i[0], "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."])
             else:
                 # Generate warning if query variant is not a genomic position or rs number
                 warn.append(snp_i[0])
-                warnings.append([snp_i[0], "NA", "NA", "NA", "Not a valid SNP, query removed."])
+                queryWarnings.append([snp_i[0], "NA", "Not a valid SNP, variant removed."])
         else:
             # Generate error for empty query variant
             output["error"] = "Input list of RS numbers is empty"
@@ -626,12 +627,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             print(json_output, file=out_json)
             out_json.close()
             return("", "", "")
-
-    
-    # print("warn", warn)
-    # details["warnings"] = {
-    #     "aaData": warnings
-    # }
 
     # generate warnings for query variants not found in dbsnp
     if warn != []:
@@ -675,8 +670,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
-        # else:	
-            # out_json["not_found"].append(query_snp["rsnum"])	
+        else:
+            queryWarnings.append([snp_coord[0], "NA", "No variants found within window, variant removed."])
 
     # ldInfo = {}	
 
@@ -720,15 +715,23 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     for snp_coord in snp_coords:	
         print("snp_coord", snp_coord)
-        (matched_snps, problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
-        # print("matched_snps", matched_snps)	
-        details[snp_coord[0]] = {	
-            "aaData": matched_snps
-        }
-        warnings += problematic_snps
+        (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
+        
+        windowWarnings += window_problematic_snps
+        if (len(matched_snps) > 0):
+            details[snp_coord[0]] = {	
+                "aaData": matched_snps
+            }
+        else:
+            # remove from thinned_list
+            thinned_list.remove(snp_coord[0])
+            queryWarnings.append([snp_coord[0], "NA", "No variants in LD found within window, variant removed."]) 
 
-    details["warnings"] = {
-        "aaData": warnings
+    details["windowWarnings"] = {
+        "aaData": windowWarnings
+    }
+    details["queryWarnings"] = {
+        "aaData": queryWarnings
     }
 
     # Return output
