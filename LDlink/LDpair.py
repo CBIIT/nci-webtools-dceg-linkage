@@ -356,24 +356,25 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         p = "NA"
 
     # Find Correlated Alleles
-    if r2 > 0.1 and r2 != "NA":
-        Ac=hap[sorted(hap)[0]]
-        Bc=hap[sorted(hap)[1]]
-        Cc=hap[sorted(hap)[2]]
-        Dc=hap[sorted(hap)[3]]
+    # if r2 > 0.1 and r2 != "NA":
+    Ac=hap[sorted(hap)[0]]
+    Bc=hap[sorted(hap)[1]]
+    Cc=hap[sorted(hap)[2]]
+    Dc=hap[sorted(hap)[3]]
 
-        if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
-            corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-            corr2 = snp1 + "(" + sorted(hap)[3].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
-            corr_alleles = [corr1, corr2]
-        else:
-            corr1 = snp1 + "(" + sorted(hap)[1].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
-            corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
-            corr_alleles = [corr1, corr2]
+    # if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
+    if (Ac*Dc)/(Bc*Cc)>1:
+        corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
+                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
+        corr2 = snp1 + "(" + sorted(hap)[3].split("_")[
+                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
+        corr_alleles = [corr1, corr2]
+    else:
+        corr1 = snp1 + "(" + sorted(hap)[1].split("_")[
+                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
+        corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
+                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
+        corr_alleles = [corr1, corr2]
 
     # Create JSON output
     snp_1 = {}
