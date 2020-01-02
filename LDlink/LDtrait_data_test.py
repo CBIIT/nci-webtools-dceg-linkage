@@ -58,10 +58,10 @@ def main():
     dbsnp = db.dbsnp151
 
     # if gwas_catalog collection already exists, delete 
-    if "gwas_catalog" in db.list_collection_names():
+    if "gwas_catalog_tmp" in db.list_collection_names():
         print("Collection 'gwas_catalog' already exists. Dropping...")
-        gwas_catalog = db.gwas_catalog
-        gwas_catalog.drop()
+        gwas_catalog_tmp = db.gwas_catalog_tmp
+        gwas_catalog_tmp.drop()
     else: 
         gwas_catalog_tmp = db.gwas_catalog_tmp
 
@@ -111,6 +111,11 @@ def main():
     print("Indexing GWAS catalog Mongo collection...")
     gwas_catalog_tmp.create_index([("chromosome_grch37", ASCENDING), ("position_grch37", ASCENDING)])
     print("Indexing completed.")
+    # if gwas_catalog collection already exists, delete 
+    if "gwas_catalog" in db.list_collection_names():
+        print("Collection 'gwas_catalog' already exists. Dropping...")
+        gwas_catalog = db.gwas_catalog
+        gwas_catalog.drop()
     print("Rename gwas_catalog_tmp collection to gwas_catalog")
     gwas_catalog_tmp.rename("gwas_catalog")
     print(("Completion time:\t--- %s minutes ---" % str(((time.time() - start_time) / 60.0))))
