@@ -356,7 +356,8 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         p = "NA"
 
     # Find Correlated Alleles
-    if str(r2) != "NA" and float(r2) > 0.1:
+    print("R2", r2)
+    if r2 != "NA" and r2 > 0.1:
         Ac=hap[sorted(hap)[0]]
         Bc=hap[sorted(hap)[1]]
         Cc=hap[sorted(hap)[2]]

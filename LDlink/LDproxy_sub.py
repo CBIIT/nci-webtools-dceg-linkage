@@ -92,7 +92,7 @@ def LD_calcs(hap, allele, allele_n):
 
         # Find Correlated Alleles
         equiv = "="
-        if r2 > 0.1:
+        if float(r2) > 0.1:
 
             # Expected Cell Counts
             eA = (A+B)*(A+C)/N

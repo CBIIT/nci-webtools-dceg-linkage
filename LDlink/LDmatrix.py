@@ -410,7 +410,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
                 r2 = round((delta**2) / Ms, 3)
 
                 # Find Correlated Alleles
-                if r2 > 0.1:
+                if float(r2) > 0.1:
                     N = A + B + C + D
                     # Expected Cell Counts
                     eA = (A + B) * (A + C) / N
