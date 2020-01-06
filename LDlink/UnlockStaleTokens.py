@@ -24,7 +24,7 @@ def main():
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)

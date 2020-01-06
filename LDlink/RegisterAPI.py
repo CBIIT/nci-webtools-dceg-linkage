@@ -133,7 +133,7 @@ def getEmailRecord(email, env):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -147,7 +147,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -176,7 +176,7 @@ def logAccess(token, module):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
@@ -202,7 +202,7 @@ def blockUser(email, url_root):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -225,7 +225,7 @@ def unblockUser(email):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -247,7 +247,7 @@ def unlockUser(email):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -268,7 +268,7 @@ def unlockAllUsers():
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -283,7 +283,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -310,7 +310,7 @@ def checkToken(token, token_expiration, token_expiration_days):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
@@ -339,7 +339,7 @@ def getToken(email):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -361,7 +361,7 @@ def checkBlocked(token):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
@@ -386,7 +386,7 @@ def checkLocked(token):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
@@ -418,7 +418,7 @@ def toggleLocked(token, lock):
             contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         else: 
             contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-        username = contents[0].split('=')[1]
+        username = 'ncianalysis_api'
         password = contents[1].split('=')[1]
         port = int(contents[2].split('=')[1])
         client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
@@ -436,7 +436,7 @@ def checkBlockedEmail(email, env):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -460,7 +460,7 @@ def checkUniqueToken(token):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -584,7 +584,7 @@ def getStats(startdatetime, enddatetime, top):
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -698,7 +698,7 @@ def getLockedUsers():
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
@@ -722,7 +722,7 @@ def getBlockedUsers():
         contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     else: 
         contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = contents[0].split('=')[1]
+    username = 'ncianalysis_api'
     password = contents[1].split('=')[1]
     port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
