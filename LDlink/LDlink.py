@@ -276,18 +276,20 @@ def api_blocked_users():
 
 # Copy output files from tools' tmp directory to apache tmp directory
 @app.route('/')
-def copy_output_files(reference):
-    # copy_output_files
-    apache_root = "/analysistools/"
-    # check if URL contains the keyword sandbox
-    if 'sandbox' in request.url_root:
-        apache_root = "/analysistools-sandbox/"
-    apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
-    # Ensure apache tmp directory exists
-    if not os.path.exists(apache_tmp_dir):
-        os.makedirs(apache_tmp_dir)
-    # copy *<reference_no>.* to htodocs
-    os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
+def root():
+    return app.send_static_file('index.html')
+# def copy_output_files(reference):
+#     # copy_output_files
+#     apache_root = "/analysistools/"
+#     # check if URL contains the keyword sandbox
+#     if 'sandbox' in request.url_root:
+#         apache_root = "/analysistools-sandbox/"
+#     apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
+#     # Ensure apache tmp directory exists
+#     if not os.path.exists(apache_tmp_dir):
+#         os.makedirs(apache_tmp_dir)
+#     # copy *<reference_no>.* to htodocs
+#     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
 
 # Ping route for API and Web instances
 @app.route('/LDlinkRest/ping/', strict_slashes=False)

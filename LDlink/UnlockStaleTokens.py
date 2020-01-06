@@ -4,10 +4,10 @@ import dateutil.parser
 import yaml
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-contents = open("/analysistools/public_html/apps/LDlink/app/SNP_Query_loginInfo.ini").read().split('\n')
-username = 'ncianalysis_api'
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("/analysistools/public_html/apps/LDlink/app/SNP_Query_loginInfo.ini").read().split('\n')
+# username = 'ncianalysis_api'
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 # get current date and time
 def getDatetime():
@@ -18,7 +18,15 @@ def getDatetime():
 def main():
     with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
     users = db.api_users

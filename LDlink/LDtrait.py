@@ -14,14 +14,15 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as f:	
     config = yaml.load(f)	
+env = config['env']
 dbsnp_version = config['data']['dbsnp_version']	
 pop_dir = config['data']['pop_dir']	
 vcf_dir = config['data']['vcf_dir']
@@ -465,6 +466,13 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
                 sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     if web:
         client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
     else:

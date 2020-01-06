@@ -1,3 +1,4 @@
+env: 'local'
 data:
   dbsnp_version: '151'
   # pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'

@@ -15,16 +15,26 @@ import operator
 import os
 import json
 import sys
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 
 def get_platform_request(web):
 
     try:
+        with open('config.yml', 'r') as c:
+            config = yaml.load(c)
+        env = config['env']
         # Connect to Mongo snp database
+        if env == 'local':
+            contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+        else: 
+            contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+        username = contents[0].split('=')[1]
+        password = contents[1].split('=')[1]
+        port = int(contents[2].split('=')[1])
         if web:
             client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
         else:

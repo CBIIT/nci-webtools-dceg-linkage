@@ -11,10 +11,10 @@ import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = 'ncianalysis_api'
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = 'ncianalysis_api'
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 # blocked users attribute: 0=false, 1=true
 
@@ -93,8 +93,6 @@ def emailUserUnblocked(email, email_account):
 
 # email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
     api_superuser_token = getToken(api_superuser)
@@ -130,14 +128,28 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     return out_json
 
 # check if user email record exists
-def getEmailRecord(email):
+def getEmailRecord(email, env):
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
     emailRecord = users.find_one({"email": email})
     return emailRecord
 
-def insertUser(firstname, lastname, email, institution, token, registered, blocked):
+def insertUser(firstname, lastname, email, institution, token, registered, blocked, env):
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     user = {
@@ -157,8 +169,16 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 def logAccess(token, module):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
+    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     accessed = getDatetime()
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
     log = {
@@ -173,10 +193,18 @@ def logAccess(token, module):
 def blockUser(email, url_root):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     email_account = config['api']['email_account']
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -188,10 +216,18 @@ def blockUser(email, url_root):
 def unblockUser(email):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     email_account = config['api']['email_account']
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -201,9 +237,19 @@ def unblockUser(email):
 
 # sets locked attribute of user to 0=false
 def unlockUser(email):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    env = config['env']
     out_json = {
         "message": "Email user (" + email + ")'s token access has been unlocked."
     }
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -215,6 +261,16 @@ def unlockAllUsers():
     out_json = {
         "message": "All tokens have been unlocked."
     }
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    env = config['env']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -222,7 +278,14 @@ def unlockAllUsers():
     return out_json
 
 # update record only if email's token is expired and user re-registers
-def updateRecord(firstname, lastname, email, institution, token, registered, blocked):
+def updateRecord(firstname, lastname, email, institution, token, registered, blocked, env):
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     user = {
@@ -241,7 +304,15 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 def checkToken(token, token_expiration, token_expiration_days):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
+    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -261,6 +332,16 @@ def checkToken(token, token_expiration, token_expiration_days):
 
 # given email, return token
 def getToken(email):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    env = config['env']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -274,7 +355,15 @@ def getToken(email):
 def checkBlocked(token):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
+    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -291,7 +380,15 @@ def checkBlocked(token):
 def checkLocked(token):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
+    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -310,12 +407,20 @@ def checkLocked(token):
 def toggleLocked(token, lock):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     if "restrict_concurrency" in config['api']:
         restrict_concurrency = config['api']['restrict_concurrency']
     else: 
         restrict_concurrency = True
     if restrict_concurrency:
+        if env == 'local':
+            contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+        else: 
+            contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+        username = contents[0].split('=')[1]
+        password = contents[1].split('=')[1]
+        port = int(contents[2].split('=')[1])
         client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
         db = client["LDLink"]
         users = db.api_users
@@ -326,7 +431,14 @@ def toggleLocked(token, lock):
             users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
-def checkBlockedEmail(email):
+def checkBlockedEmail(email, env):
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -341,6 +453,16 @@ def checkBlockedEmail(email):
 
 # check if token is already in db
 def checkUniqueToken(token):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    env = config['env']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -370,17 +492,18 @@ def getExpiration(registered, token_expiration_days):
 def register_user(firstname, lastname, email, institution, reference, url_root):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     token_expiration = bool(config['api']['token_expiration'])
     token_expiration_days = config['api']['token_expiration_days']
     email_account = config['api']['email_account']
     out_json = {}
     # by default, users are not blocked
     blocked = 0
-    record = getEmailRecord(email)
+    record = getEmailRecord(email, env)
     # print record
     # if email record exists, do not insert to db
     if record != None:
-        if checkBlockedEmail(record["email"]):
+        if checkBlockedEmail(record["email"], env):
             registered = record["registered"]
             format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
             out_json = {
@@ -418,7 +541,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
                 expiration = getExpiration(registered, token_expiration_days)
                 format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
                 format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-                updateRecord(firstname, lastname, email, institution, token, registered, blocked)
+                updateRecord(firstname, lastname, email, institution, token, registered, blocked, env)
                 out_json = {
                     "message": "Thank you for registering to use the LDlink API.",
                     "firstname": firstname,
@@ -437,7 +560,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
         expiration = getExpiration(registered, token_expiration_days)
         format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
         format_expiration = expiration.strftime("%Y-%m-%d %H:%M:%S")
-        insertUser(firstname, lastname, email, institution, token, registered, blocked)
+        insertUser(firstname, lastname, email, institution, token, registered, blocked, env)
         out_json = {
             "message": "Thank you for registering to use the LDlink API.",
             "firstname": firstname,
@@ -454,6 +577,16 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
 def getStats(startdatetime, enddatetime, top):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    env = config['env']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -558,6 +691,16 @@ def getStats(startdatetime, enddatetime, top):
 
 # returns stats of api users with locked tokens
 def getLockedUsers():
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    env = config['env']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users
@@ -572,6 +715,16 @@ def getLockedUsers():
 
 # returns stats of api users with blocked tokens
 def getBlockedUsers():
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    env = config['env']
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/LDLink', port)
     db = client["LDLink"]
     users = db.api_users

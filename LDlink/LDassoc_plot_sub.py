@@ -11,10 +11,10 @@ from bson import json_util, ObjectId
 import subprocess
 from multiprocessing.dummy import Pool
 from math import log10
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 
 # LDassoc subprocess to export bokeh to high quality images in the background
@@ -23,6 +23,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     gene_dir2 = config['data']['gene_dir2']
     vcf_dir = config['data']['vcf_dir']
 
@@ -48,6 +49,13 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             snp=myargsOrigin
 
             # Connect to Mongo snp database
+            if env == 'local':
+                contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+            else: 
+                contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+            username = contents[0].split('=')[1]
+            password = contents[1].split('=')[1]
+            port = int(contents[2].split('=')[1])
             client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
             db = client["LDLink"]
 

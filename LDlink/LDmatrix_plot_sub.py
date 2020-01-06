@@ -8,10 +8,10 @@ import os
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
@@ -20,6 +20,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
 
@@ -54,6 +55,13 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
     db = client["LDLink"]
 
