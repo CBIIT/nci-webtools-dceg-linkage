@@ -56,8 +56,18 @@ def get_platform_request(web):
 
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    env = config['env']
     platforms = []
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
     else:
@@ -76,6 +86,7 @@ def calculate_chip(snplst, platform_query, web, request):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
     dbsnp_version = config['data']['dbsnp_version']
 
     tmp_dir = "./tmp/"
@@ -103,6 +114,13 @@ def calculate_chip(snplst, platform_query, web, request):
             snps.append(snp)
 
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     if web:
         client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
     else:

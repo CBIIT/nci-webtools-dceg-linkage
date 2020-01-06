@@ -93,6 +93,8 @@ def emailUserUnblocked(email, email_account):
 
 # email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
     api_superuser_token = getToken(api_superuser)
