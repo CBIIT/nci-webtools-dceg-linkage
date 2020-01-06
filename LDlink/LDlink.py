@@ -345,7 +345,10 @@ def upload():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    example_dir = config['data']['example_dir']
+    example_filepath = example_dir + 'prostate_example.txt'
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -374,6 +377,9 @@ def snpchip_platforms():
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     print("Execute ldassoc.")
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    example_dir = config['data']['example_dir']
     myargs = argparse.Namespace()
     myargs.window = None
     filename = secure_filename(request.args.get('filename', False))
@@ -388,7 +394,7 @@ def ldassoc():
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+        filename = example_dir + 'prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
