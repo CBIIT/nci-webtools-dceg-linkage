@@ -24,6 +24,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	with open('config.yml', 'r') as f:
 		config = yaml.load(f)
 	env = config['env']
+	api_mongo_addr = config['api']['api_mongo_addr']
 	dbsnp_version = config['data']['dbsnp_version']
 	gene_dir = config['data']['gene_dir']
 	gene_c_dir = config['data']['gene_c_dir']
@@ -63,12 +64,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			# Connect to Mongo snp database
 			if env == 'local':
 				contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+				mongo_host = api_mongo_addr
 			else: 
 				contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+				mongo_host = 'localhost'
 			username = contents[0].split('=')[1]
 			password = contents[1].split('=')[1]
 			port = int(contents[2].split('=')[1])
-			client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+			client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
 			db = client["LDLink"]
 
 			def get_coords_var(db, rsid):
