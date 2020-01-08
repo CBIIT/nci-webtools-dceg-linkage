@@ -7,10 +7,10 @@ import json
 from pymongo import MongoClient, ASCENDING
 from pymongo.errors import ConnectionFailure
 import time
+from timeit import default_timer as timer
 import yaml
 
-
-start_time = time.time()  # measure script's run time
+start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps_" + datetime.today().strftime('%Y-%m-%d') + ".json"
 
@@ -118,7 +118,8 @@ def main():
         gwas_catalog.drop()
     print("Rename gwas_catalog_tmp collection to gwas_catalog")
     gwas_catalog_tmp.rename("gwas_catalog")
-    print(("Completion time:\t--- %s minutes ---" % str(((time.time() - start_time) / 60.0))))
+    end_time = timer()
+    print(("Completion time:\t--- %s minutes ---" % str(((end_time - start_time) / 60.0))))
 
 if __name__ == "__main__":
     main()
