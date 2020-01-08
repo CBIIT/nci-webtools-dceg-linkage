@@ -1870,6 +1870,8 @@ function updateLDtrait() {
     //Set file links
     $("#ldtrait-variants-annotated-link").attr('href', 'tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
     $("#ldtrait-variants-annotated-link").attr('target', 'trait_variants_annotated' + ldInputs.reference);
+    $("#ldtrait-variants-problematic-link").attr('href', 'tmp/ldtrait_error_snps.json');
+    $("#ldtrait-variants-problematic-link").attr('target', 'ldtrait_error_snps');
     // $("#ldtrait-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
     // $("#ldtrait-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
