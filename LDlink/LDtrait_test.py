@@ -664,7 +664,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             for record in found:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
         else:
-            queryWarnings.append([snp_coord[0], "NA", "No variants found within window, variant removed."])
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
 
     # ldInfo = {}	
 
@@ -718,7 +718,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
         else:
             # remove from thinned_list
             thinned_list.remove(snp_coord[0])
-            queryWarnings.append([snp_coord[0], "NA", "No variants in LD found within window, variant removed."]) 
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."])
 
     details["windowWarnings"] = {
         "aaData": windowWarnings
@@ -726,6 +726,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
+
+    # Check if thinned list is empty, if it is, display error
+    if len(thinned_list) < 1:
+        output["error"] = "No variants in LD with GWAS Catalog."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
