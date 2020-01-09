@@ -6,10 +6,10 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 import yaml
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 snp = sys.argv[1]
 chr = sys.argv[2]
@@ -20,6 +20,8 @@ process = sys.argv[5]
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
+env = config['env']
+api_mongo_addr = config['api']['api_mongo_addr']
 pop_dir = config['data']['pop_dir']
 vcf_dir = config['data']['vcf_dir']
 reg_dir = config['data']['reg_dir']
@@ -88,7 +90,7 @@ def LD_calcs(hap, allele, allele_n):
 
         # Find Correlated Alleles
         equiv = "="
-        if r2 > 0.1:
+        if float(r2) > 0.1:
 
             # Expected Cell Counts
             eA = (A+B)*(A+C)/N
@@ -134,7 +136,16 @@ def get_regDB(chr, pos):
 
 
 # Connect to Mongo snp database
-client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+if env == 'local':
+    contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+    mongo_host = api_mongo_addr
+else: 
+    contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+    mongo_host = 'localhost'
+username = contents[0].split('=')[1]
+password = contents[1].split('=')[1]
+port = int(contents[2].split('=')[1])
+client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
 db = client["LDLink"]
 
 

@@ -1,5 +1,7 @@
+env: 'local'
 data:
   dbsnp_version: '151'
+  example_dir: '/local/content/analysistools/public_html/apps/LDlink/data/example/'
   pop_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/samples/'
   vcf_dir: '/local/content/analysistools/public_html/apps/LDlink/data/1000G/Phase3/genotypes/ALL.chr'
   reg_dir: '/local/content/analysistools/public_html/apps/LDlink/data/sqlite/regulomedb/regulomedb.db'

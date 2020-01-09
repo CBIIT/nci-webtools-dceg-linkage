@@ -8,10 +8,10 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 import time
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 # Create LDpair function
 
@@ -24,6 +24,8 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
+    api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
@@ -38,10 +40,22 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     output = {}
 
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+        mongo_host = api_mongo_addr
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+        mongo_host = 'localhost'
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     if web:
-        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+        client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
     else:
-        client = MongoClient('localhost', port)
+        if env == 'local':
+            client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+        else:
+            client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -356,25 +370,28 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         p = "NA"
 
     # Find Correlated Alleles
-    # if r2 > 0.1 and r2 != "NA":
-    Ac=hap[sorted(hap)[0]]
-    Bc=hap[sorted(hap)[1]]
-    Cc=hap[sorted(hap)[2]]
-    Dc=hap[sorted(hap)[3]]
+    if str(r2) != "NA" and float(r2) > 0.1:
+        Ac=hap[sorted(hap)[0]]
+        Bc=hap[sorted(hap)[1]]
+        Cc=hap[sorted(hap)[2]]
+        Dc=hap[sorted(hap)[3]]
 
-    # if (Ac*Dc)/(Bc*Cc)>1:
-    if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
-        corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
-                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-        corr2 = snp1 + "(" + sorted(hap)[3].split("_")[
-                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
-        corr_alleles = [corr1, corr2]
+        if ((Ac*Dc) / max((Bc*Cc), 0.01) > 1):
+            corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
+                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
+            corr2 = snp1 + "(" + sorted(hap)[3].split("_")[
+                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
+            corr_alleles = [corr1, corr2]
+        else:
+            corr1 = snp1 + "(" + sorted(hap)[1].split("_")[
+                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
+            corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
+                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
+            corr_alleles = [corr1, corr2]
     else:
-        corr1 = snp1 + "(" + sorted(hap)[1].split("_")[
-                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
-        corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
-                0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
-        corr_alleles = [corr1, corr2]
+        corr_alleles = [snp1 + " and " + snp2 + " are in linkage equilibrium"]
+        
+    
 
     # Create JSON output
     snp_1 = {}

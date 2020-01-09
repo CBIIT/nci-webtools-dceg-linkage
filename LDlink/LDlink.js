@@ -1852,6 +1852,15 @@ function updateLDtrait() {
         $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
     }
 
+    var estimateSeconds = snps.split("\n").length * 10;
+    console.log("estimate seconds", estimateSeconds);
+    var estimateMinutes = estimateSeconds / 60;
+    if (estimateSeconds < 60) {
+        $('#ldtrait-estimate-loading').text(estimateSeconds + " seconds");
+    } else {
+        $('#ldtrait-estimate-loading').text(estimateMinutes.toFixed(2) + " minute(s)");
+    }
+
     var ldInputs = {
         snps : snps,
         pop : population.join("+"),
@@ -1870,6 +1879,8 @@ function updateLDtrait() {
     //Set file links
     $("#ldtrait-variants-annotated-link").attr('href', 'tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
     $("#ldtrait-variants-annotated-link").attr('target', 'trait_variants_annotated' + ldInputs.reference);
+    $("#ldtrait-variants-problematic-link").attr('href', 'tmp/ldtrait_error_snps.json');
+    $("#ldtrait-variants-problematic-link").attr('target', 'ldtrait_error_snps');
     // $("#ldtrait-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
     // $("#ldtrait-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 

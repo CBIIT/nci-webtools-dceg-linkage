@@ -11,10 +11,10 @@ import time
 import threading
 import weakref
 from multiprocessing.dummy import Pool
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 # LDproxy subprocess to export bokeh to high quality images in the background
 
@@ -24,6 +24,8 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
+    api_mongo_addr = config['api']['api_mongo_addr']
     vcf_dir = config['data']['vcf_dir']
 
     tmp_dir = "./tmp/"
@@ -40,7 +42,16 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
     # Find coordinates (GRCh37/hg19) for SNP RS number
     
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+        mongo_host = api_mongo_addr
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+        mongo_host = 'localhost'
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
+    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):

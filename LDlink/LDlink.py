@@ -276,18 +276,26 @@ def api_blocked_users():
 
 # Copy output files from tools' tmp directory to apache tmp directory
 @app.route('/')
-def copy_output_files(reference):
-    # copy_output_files
-    apache_root = "/analysistools/"
-    # check if URL contains the keyword sandbox
-    if 'sandbox' in request.url_root:
-        apache_root = "/analysistools-sandbox/"
-    apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
-    # Ensure apache tmp directory exists
-    if not os.path.exists(apache_tmp_dir):
-        os.makedirs(apache_tmp_dir)
-    # copy *<reference_no>.* to htodocs
-    os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
+def root():
+    return app.send_static_file('index.html')
+    # with open('config.yml', 'r') as c:
+    #     config = yaml.load(c)
+    # env = config['env']
+    # if env == "local":
+        # return app.send_static_file('index.html')
+    # else:
+    #     # def copy_output_files(reference):
+    #     # copy_output_files
+    #     apache_root = "/analysistools/"
+    #     # check if URL contains the keyword sandbox
+    #     if 'sandbox' in request.url_root:
+    #         apache_root = "/analysistools-sandbox/"
+    #     apache_tmp_dir = apache_root + "public_html/apps/LDlink/tmp/"
+    #     # Ensure apache tmp directory exists
+    #     if not os.path.exists(apache_tmp_dir):
+    #         os.makedirs(apache_tmp_dir)
+    #     # copy *<reference_no>.* to htodocs
+    #     os.system("cp " + tmp_dir + "*" + reference + ".* " + apache_tmp_dir)
 
 # Ping route for API and Web instances
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
@@ -343,7 +351,10 @@ def upload():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    example_filepath = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    example_dir = config['data']['example_dir']
+    example_filepath = example_dir + 'prostate_example.txt'
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -372,6 +383,9 @@ def snpchip_platforms():
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     print("Execute ldassoc.")
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    example_dir = config['data']['example_dir']
     myargs = argparse.Namespace()
     myargs.window = None
     filename = secure_filename(request.args.get('filename', False))
@@ -386,7 +400,7 @@ def ldassoc():
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = '/local/content/analysistools/public_html/apps/LDlink/data/example/prostate_example.txt'
+        filename = example_dir + 'prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
@@ -800,13 +814,11 @@ def ldtrait():
                     trait["error"] = json_dict["error"]
                 else:
                     with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                        f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                         for snp in thinned_snps:
-                            f.write("Query Variant: " + snp + "\n")
-                            f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                             for matched_gwas in details[snp]["aaData"]:
+                                f.write(snp + "\t")
                                 f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 10}]) + "\n")
-                            f.write("\n")
-                            f.write("\n")
                         if "warning" in json_dict:
                             trait["warning"] = json_dict["warning"]
                             f.write("Warning(s):\n")
@@ -839,13 +851,11 @@ def ldtrait():
                 return sendTraceback(json_dict["error"])
             else:
                 with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                     for snp in thinned_snps:
-                        f.write("Query Variant: " + snp + "\n")
-                        f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                         for matched_gwas in details[snp]["aaData"]:
+                            f.write(snp + "\t")
                             f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 10}]) + "\n")
-                        f.write("\n")
-                        f.write("\n")
                     if "warning" in json_dict:
                         trait["warning"] = json_dict["warning"]
                         f.write("Warning(s):\n")

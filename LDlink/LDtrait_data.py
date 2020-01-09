@@ -7,12 +7,13 @@ import json
 from pymongo import MongoClient, ASCENDING
 from pymongo.errors import ConnectionFailure
 import time
+from timeit import default_timer as timer
 import yaml
 
 
-start_time = time.time()  # measure script's run time
+start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
-errFilename = "ldtrait_error_snps_" + datetime.today().strftime('%Y-%m-%d') + ".json"
+errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
 with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as c:
@@ -56,6 +57,11 @@ def main():
         client = MongoClient('localhost')
     db = client["LDLink"]
     dbsnp = db.dbsnp151
+
+    # delete old errer SNPs file if there is one
+    if (os.path.isfile(tmp_dir + errFilename)):
+        print("Deleting existing error SNPs file...")
+        os.remove(tmp_dir + errFilename)
 
     # if gwas_catalog collection already exists, delete 
     if "gwas_catalog_tmp" in db.list_collection_names():
@@ -120,7 +126,10 @@ def main():
         gwas_catalog.drop()
     print("Rename gwas_catalog_tmp collection to gwas_catalog")
     gwas_catalog_tmp.rename("gwas_catalog")
-    print(("Completion time:\t--- %s minutes ---" % str(((time.time() - start_time) / 60.0))))
-
+    if (os.path.isfile(tmp_dir + filename)):
+        print("Deleting raw data file: " + filename)
+        os.remove(tmp_dir + filename)
+    end_time = timer()
+    print(("Completion time:\t--- %s minutes ---" % str(((end_time - start_time) / 60.0))))
 if __name__ == "__main__":
     main()

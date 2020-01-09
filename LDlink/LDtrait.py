@@ -14,14 +14,16 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as f:	
     config = yaml.load(f)	
+env = config['env']
+api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 pop_dir = config['data']['pop_dir']	
 vcf_dir = config['data']['vcf_dir']
@@ -465,10 +467,22 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
                 sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+        mongo_host = api_mongo_addr
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+        mongo_host = 'localhost'
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     if web:
-        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/admin', port)
+        client = MongoClient('mongodb://' + username + ':' + password + '@'+mongo_host+'/admin', port)
     else:
-        client = MongoClient('localhost', port)
+        if env == 'local':
+            client = MongoClient('mongodb://' + username + ':' + password + '@'+mongo_host+'/admin', port)
+        else:
+            client = MongoClient('localhost', port)
     db = client["LDLink"]
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():
@@ -641,7 +655,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             for record in found:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
         else:	
-            queryWarnings.append([snp_coord[0], "NA", "No variants found within window, variant removed."])
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
             
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
     # print("ldPairsUnique", ldPairsUnique)	
@@ -688,7 +702,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
         else:
             # remove from thinned_list
             thinned_list.remove(snp_coord[0])
-            queryWarnings.append([snp_coord[0], "NA", "No variants in LD found within window, variant removed."]) 
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
 
     details["windowWarnings"] = {
         "aaData": windowWarnings
@@ -696,6 +710,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
+
+    # Check if thinned list is empty, if it is, display error
+    if len(thinned_list) < 1:
+        output["error"] = "No variants in LD with GWAS Catalog."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)

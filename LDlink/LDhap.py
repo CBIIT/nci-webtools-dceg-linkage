@@ -9,10 +9,10 @@ from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
 import sys
-contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
+# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+# username = contents[0].split('=')[1]
+# password = contents[1].split('=')[1]
+# port = int(contents[2].split('=')[1])
 
 
 # Create LDhap function
@@ -21,6 +21,8 @@ def calculate_hap(snplst, pop, request, web):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
+    env = config['env']
+    api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
@@ -66,10 +68,22 @@ def calculate_hap(snplst, pop, request, web):
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
+    if env == 'local':
+        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
+        mongo_host = api_mongo_addr
+    else: 
+        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
+        mongo_host = 'localhost'
+    username = contents[0].split('=')[1]
+    password = contents[1].split('=')[1]
+    port = int(contents[2].split('=')[1])
     if web:
-        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
+        client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
     else:
-        client = MongoClient('localhost', port)
+        if env == 'local':
+            client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+        else:
+            client = MongoClient('localhost', port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):

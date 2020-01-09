@@ -1527,6 +1527,7 @@
 					<hr>
 					<div id="ldtrait-loading">
 						<img src="calculating_LD.gif" alt="loading icon" class="loading">
+						Estimated calculation time: <span id="ldtrait-estimate-loading">_</span>
 					</div>
 					<!-- Message ERROR -->
 					<div class="row">
@@ -1623,16 +1624,18 @@
 
 							</div>
 						</div>
-						<div class="row">
-							<div id="ldtrait-links-container">
-								<span>
-									<a target="trait_variants_annotated" id="ldtrait-variants-annotated-link" href="yahoo.com">Download GWAS Catalog annotated variant list</a>
-								</span>
-								<!-- &nbsp;&nbsp;&nbsp;&nbsp; -->
-								<!-- <span>
-									<a target="snp_details" id="ldtrait-details-link" href="yahoo.com">Download Thinned Variant List with Details</a>
-								</span> -->
-							</div>
+						<div id="ldtrait-links-container">
+							<span>
+								<a target="trait_variants_annotated" id="ldtrait-variants-annotated-link" href="yahoo.com">Download GWAS Catalog annotated variant list</a>
+							</span>
+							&nbsp;&nbsp;&nbsp;&nbsp;
+							<span>
+								<a target="trait_variants_problematic" id="ldtrait-variants-problematic-link" href="yahoo.com">Download problematic GWAS Catalog entries file</a>
+							</span>
+							<!-- &nbsp;&nbsp;&nbsp;&nbsp; -->
+							<!-- <span>
+								<a target="snp_details" id="ldtrait-details-link" href="yahoo.com">Download Thinned Variant List with Details</a>
+							</span> -->
 						</div>
 					</div>
 				</div> <!-- jumbotron -->
@@ -2191,7 +2194,7 @@
 						</pre>
 						<p><i>Note: GET request can support up to 300 SNPs.</i></p>
 						<pre class="apiaccess-examples">
-							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?&token=faketoken123'
+							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?token=faketoken123'
 						</pre>
 						<p><i>Note: POST request can support up to 1,000 SNPs.</i></p>
 					</p>
