@@ -381,6 +381,21 @@ def get_ld_stats_sub(threadCommandArgs):
             ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
     return ldInfoSubset	
 
+def castFloat(val):
+    try:
+        val_float = float(val)
+        return val_float
+    except ValueError:
+        return val
+
+def findRangeString(val):
+    start = '['
+    end = ']'
+    result = val[val.find(start)+len(start):val.rfind(end)]
+    if len(result) > 0:
+        return result
+    else:
+        return "NA"
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
@@ -409,7 +424,9 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # Risk Allele
                 matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
                 # Effect Size (95% CI)
-                matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
+                matched_record.append(findRangeString(record["95% CI (TEXT)"]) if ("95% CI (TEXT)" in record and len(record["95% CI (TEXT)"]) > 0) else "NA")
+                # Beta or OR
+                matched_record.append(castFloat(record["OR or BETA"]) if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
                 # P-value
                 matched_record.append(ld["p"])
                 # GWAS Catalog (Link)

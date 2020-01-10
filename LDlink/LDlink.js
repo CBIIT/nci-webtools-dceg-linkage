@@ -754,7 +754,7 @@ function createTraitDetailsTable() {
                         return parseFloat(data).toFixed(4);
                     }
                 },
-                "targets": [ 4, 5, 7, 8, 9 ]
+                "targets": [ 4, 5, 7, 9, 10 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -768,12 +768,12 @@ function createTraitDetailsTable() {
                     // Provide link to gwas catalog
                     return ldtrait_gwas_catalog_link(data, type, row);
                 },
-                "targets": 10
+                "targets": 11
             },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
             }
         ]
     });
