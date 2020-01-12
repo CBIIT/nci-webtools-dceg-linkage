@@ -448,7 +448,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     return (matched_snps, window_problematic_snps)
 
 # Create LDtrait function
-def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
+def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     print("##### START LD TRAIT CALCULATION #####")	
     start = timer()
     
@@ -657,7 +657,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
     # establish low/high window for each query snp
-    window = 2000000 # 2Mb = 2,000,000 Bp
+    window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     found = []	
     # calculate and store LD info for all LD pairs	
     ldPairs = []
@@ -753,7 +753,7 @@ def main():
     request = 8888
     web = False
     r2_d = "r2"
-    r2_d_threshold = 0.01
+    r2_d_threshold = 0.1
 
     # Run function
     (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)
