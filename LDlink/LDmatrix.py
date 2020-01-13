@@ -523,6 +523,33 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         corA.append(corr)
         xpos.append(pos1)
         ypos.append(pos2)
+        sqrti = math.floor(math.sqrt(len(out)))
+        if sqrti == 0:
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("red")
+            box_trans.append(r2)
+        elif i%sqrti < i//sqrti and r2 != "NA":
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("blue")
+            box_trans.append(abs(D_prime))
+        elif i%sqrti > i//sqrti and D_prime != "NA":
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("red")
+            box_trans.append(r2)
+        elif i%sqrti == i//sqrti and D_prime != "NA":
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("purple")
+            box_trans.append(r2)
+        else:
+            D.append("NA")
+            R.append("NA")
+            box_color.append("gray")
+            box_trans.append(0.1)
+            '''
         if r2_d == "r2" and r2 != "NA":
             D.append(str(round(float(D_prime), 4)))
             R.append(str(round(float(r2), 4)))
@@ -538,7 +565,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             R.append("NA")
             box_color.append("blue")
             box_trans.append(0.1)
-
+'''
     # Import plotting modules
     from collections import OrderedDict
     from bokeh.embed import components, file_html
