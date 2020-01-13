@@ -58,14 +58,14 @@ def main():
     db = client["LDLink"]
     dbsnp = db.dbsnp151
 
-    # delete old errer SNPs file if there is one
+    # delete old error SNPs file if there is one
     if (os.path.isfile(tmp_dir + errFilename)):
         print("Deleting existing error SNPs file...")
         os.remove(tmp_dir + errFilename)
 
     # if gwas_catalog collection already exists, delete 
     if "gwas_catalog_tmp" in db.list_collection_names():
-        print("Collection 'gwas_catalog' already exists. Dropping...")
+        print("Collection 'gwas_catalog_tmp' already exists. Dropping...")
         gwas_catalog_tmp = db.gwas_catalog_tmp
         gwas_catalog_tmp.drop()
     else: 
@@ -82,7 +82,7 @@ def main():
         lines = lines[1:]
         print("Finding genomics coordinates from dbsnp and inserting to MongoDB collection...")
         no_dbsnp_match = 0
-        problematic_gwas_variants = 0
+        missing_field = 0
         errSNPs = []
         for line in lines:
             values = line.strip().split('\t')
@@ -92,9 +92,9 @@ def main():
             # check if orginal gwas row has populated rs number column
             # check field: "SNP_ID_CURRENT"
             # To-do: check field "SNPS" (with possible merged RSIDs and genomic coords)
-            if len(values[23]) > 0:
+            if len(document['SNP_ID_CURRENT']) > 0:
                 # find chr, pos in dbsnp using rsid
-                record = dbsnp.find_one({"id": values[23]})
+                record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
                 # if found in dbsnp, add to chr, pos to record
                 if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
                     document["chromosome_grch37"] = str(record["chromosome"])
@@ -107,13 +107,13 @@ def main():
             else:
                 document["err_msg"] = "SNP missing valid RSID."
                 errSNPs.append(document)
-                problematic_gwas_variants += 1
+                missing_field += 1
         with open(tmp_dir + errFilename, 'a') as errFile:
             json.dump(errSNPs, errFile)
 
-    print("Problematic GWAS variants:", problematic_gwas_variants)
+    print("Problematic GWAS variants:", missing_field)
     print("Genomic position not found in dbSNP:", no_dbsnp_match)
-    print("===== Total # variants w/ no GRCh37 genomic positions:", problematic_gwas_variants + no_dbsnp_match)
+    print("===== Total # variants w/ no GRCh37 genomic positions:", missing_field + no_dbsnp_match)
     print("GWAS catalog inserted into MongoDB.")
 
     print("Indexing GWAS catalog Mongo collection...")

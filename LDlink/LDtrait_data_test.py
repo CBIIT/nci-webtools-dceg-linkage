@@ -12,8 +12,7 @@ import yaml
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
-errMissingFile = "ldtrait_error_missing_snps.json"
-errMismatchFile = "ldtrait_error_mismatch_snps.json"
+errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
 # with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as c:
@@ -59,19 +58,14 @@ def main():
     db = client["LDLink"]
     dbsnp = db.dbsnp151
 
-    # delete old error missing SNPs file if there is one
-    if (os.path.isfile(tmp_dir + errMissingFile)):
+    # delete old error SNPs file if there is one
+    if (os.path.isfile(tmp_dir + errFilename)):
         print("Deleting existing error SNPs file...")
-        os.remove(tmp_dir + errMissingFile)
-
-    # delete old error mismatch SNPs file if there is one
-    if (os.path.isfile(tmp_dir + errMismatchFile)):
-        print("Deleting existing error SNPs file...")
-        os.remove(tmp_dir + errMismatchFile)
+        os.remove(tmp_dir + errFilename)
 
     # if gwas_catalog collection already exists, delete 
     if "gwas_catalog_tmp" in db.list_collection_names():
-        print("Collection 'gwas_catalog' already exists. Dropping...")
+        print("Collection 'gwas_catalog_tmp' already exists. Dropping...")
         gwas_catalog_tmp = db.gwas_catalog_tmp
         gwas_catalog_tmp.drop()
     else: 
@@ -89,37 +83,34 @@ def main():
         print("Finding genomics coordinates from dbsnp and inserting to MongoDB collection...")
         no_dbsnp_match = 0
         missing_field = 0
-        errMissing = []
-        errMismatch = []
+        errSNPs = []
         for line in lines:
             values = line.strip().split('\t')
             values.append("NA")
             values.append("NA")
             document = dict(list(zip(headers, values)))
             # check if orginal gwas row has populated rs number column
-            if len(document['SNPS']) > 0:
+            if len(document['SNP_ID_CURRENT']) > 0:
                 # find chr, pos in dbsnp using rsid
                 # trim off non-numeric
-                record = dbsnp.find_one({"id": document['SNPS'].replace("rs", "")})
+                record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
                 # if found in dbsnp, add to chr, pos to record
                 if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
                     document["chromosome_grch37"] = str(record["chromosome"])
                     document["position_grch37"] = int(record["position"])
                     gwas_catalog_tmp.insert_one(document)
                 else:
-                    print("MISMATCH", document['SNPS'], "  ->  ", document['STRONGEST SNP-RISK ALLELE'])
+                    print("MISMATCH", document['SNP_ID_CURRENT'])
                     document["err_msg"] = "Genomic coordinates not found in dbSNP."
-                    errMismatch.append(document)
+                    errSNPs.append(document)
                     no_dbsnp_match += 1
             else:
-                print("MISSING", document['SNPS'])
+                print("MISSING", document['SNP_ID_CURRENT'])
                 document["err_msg"] = "Row missing SNP value."
-                errMissing.append(document)
+                errSNPs.append(document)
                 missing_field += 1
-        with open(tmp_dir + errMissingFile, 'a') as eFMissing:
-            json.dump(errMissing, eFMissing)
-        with open(tmp_dir + errMismatchFile, 'a') as eFMismatch:
-            json.dump(errMismatch, eFMismatch)
+        with open(tmp_dir + errFilename, 'a') as eFMissing:
+            json.dump(errSNPs, eFMissing)
 
     print("Rows missing SNP value:", missing_field)
     print("Rows not found in dbSNP:", no_dbsnp_match)

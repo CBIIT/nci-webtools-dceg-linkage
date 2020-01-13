@@ -226,7 +226,6 @@ $(document).ready(function() {
     createPopTable();
     createProxyTable();
     createTraitDetailsTable();
-    createTraitWindowWarningsTable();
     createTraitQueryWarningsTable();
     var new_assoc_data = {
         "aaData": [
@@ -751,7 +750,15 @@ function createTraitDetailsTable() {
                     if (typeof data === 'string' || data instanceof String) {
                         return data;
                     } else {
-                        return parseFloat(data).toFixed(4);
+                        if (parseFloat(data) == 1.0) {
+                            return "1.0";
+                        } else if (parseFloat(data) == 0.0) {
+                            return "0.0";
+                        } else if (parseFloat(data) <= 0.0001) {
+                            return "<0.0001"
+                        } else {
+                            return parseFloat(data).toFixed(4);
+                        }
                     }
                 },
                 "targets": [ 4, 5, 7, 9, 10 ]
@@ -774,31 +781,6 @@ function createTraitDetailsTable() {
                 className: "dt-head-left", 
                 className: "dt-body-left",
                 "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
-            }
-        ]
-    });
-
-}
-
-function createTraitWindowWarningsTable() {
-
-    var ldtraitWindowWarningsTable = $('#new-ldtrait-window-warnings').DataTable( {
-        "aaSorting": [],  /* Disable initial sort */
-        "bPaginate": true,
-        // "sScrollY": "600px",
-        "bJQueryUI": false,  // ThemeRoller
-        "bLengthChange": true,
-        "bFilter": true,
-        "bSort": true,
-        "bInfo": true,
-        "bAutoWidth": true,
-        "bProcessing": false,
-        "deferRender": false,
-        "columnDefs": [
-            { 
-                className: "dt-head-left", 
-                className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4] 
             }
         ]
     });
@@ -1012,19 +994,11 @@ function setupLDtraitControls() {
         $('#ldtrait-snp-list').show();
         $('#ldtrait-initial-message').hide();
         loadLDtraitDetails(ldTraitRaw, rs_number);
-        $('#new-ldtrait-window-warnings_wrapper').hide();
         $('#new-ldtrait-query-warnings_wrapper').hide();
-        $('#ldtrait-initial-message').hide();
-    });
-    $('#ldtrait-window-warnings-button').click( function() {
-        $('#new-ldtrait_wrapper').hide();
-        $('#new-ldtrait-query-warnings_wrapper').hide();
-        loadLDtraitWindowWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
     });
     $('#ldtrait-query-warnings-button').click( function() {
         $('#new-ldtrait_wrapper').hide();
-        $('#new-ldtrait-window-warnings_wrapper').hide();
         loadLDtraitQueryWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
     });
@@ -1852,8 +1826,8 @@ function updateLDtrait() {
         $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
     }
 
-    var estimateSeconds = snps.split("\n").length * 10;
-    console.log("estimate seconds", estimateSeconds);
+    var estimateSeconds = snps.split("\n").length * 4;
+    // console.log("estimate seconds", estimateSeconds);
     var estimateMinutes = estimateSeconds / 60;
     if (estimateSeconds < 60) {
         $('#ldtrait-estimate-loading').text(estimateSeconds + " seconds");
@@ -1871,7 +1845,6 @@ function updateLDtrait() {
 
     //Show inital message
     $('#new-ldtrait_wrapper').hide();
-    $('#new-ldtrait-window-warnings_wrapper').hide();
     $('#new-ldtrait-query-warnings_wrapper').hide();
     $('#ldtrait-initial-message').show();
 
@@ -1879,8 +1852,6 @@ function updateLDtrait() {
     //Set file links
     $("#ldtrait-variants-annotated-link").attr('href', 'tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
     $("#ldtrait-variants-annotated-link").attr('target', 'trait_variants_annotated' + ldInputs.reference);
-    $("#ldtrait-variants-problematic-link").attr('href', 'tmp/ldtrait_error_snps.json');
-    $("#ldtrait-variants-problematic-link").attr('target', 'ldtrait_error_snps');
     // $("#ldtrait-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
     // $("#ldtrait-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
@@ -1897,7 +1868,7 @@ function updateLDtrait() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
-        console.log(data);
+        // console.log(data);
         if (displayError(id, jsonObj) == false) {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
@@ -2347,8 +2318,8 @@ function populateSNPwarnings(data) {
 }
 
 function loadLDtraitDetails(data, rs_number) {
-    console.log("ldTraitRaw", data);
-    console.log("rs_number", rs_number);
+    // console.log("ldTraitRaw", data);
+    // console.log("rs_number", rs_number);
 
     RefreshTable('#new-ldtrait', data.details[rs_number]);
     $('#new-ldtrait_wrapper').show();
@@ -2356,15 +2327,8 @@ function loadLDtraitDetails(data, rs_number) {
     $('#ldtrait-detail-title').text("Details for " + rs_number);
 }
 
-function loadLDtraitWindowWarnings(data) {
-    console.log("ldTraitRaw", data);
-
-    RefreshTable('#new-ldtrait-window-warnings', data.details.windowWarnings);
-    $('#new-ldtrait-window-warnings_wrapper').show();
-}
-
 function loadLDtraitQueryWarnings(data) {
-    console.log("ldTraitRaw", data);
+    // console.log("ldTraitRaw", data);
 
     RefreshTable('#new-ldtrait-query-warnings', data.details.queryWarnings);
     $('#new-ldtrait-query-warnings_wrapper').show();
@@ -2424,12 +2388,6 @@ function initTrait(data) {
     ldTraitRaw = data;
 
     populateSNPlistLDtrait(data);
-
-    if(data.details.windowWarnings && data.details.windowWarnings.aaData.length > 0) {
-        $('#ldtrait-window-warnings-button').show();
-    } else {
-        $('#ldtrait-window-warnings-button').hide();
-    }
 
     if(data.details.queryWarnings && data.details.queryWarnings.aaData.length > 0) {
         $('#ldtrait-query-warnings-button').show();
