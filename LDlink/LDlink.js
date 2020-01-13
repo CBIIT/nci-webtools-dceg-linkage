@@ -750,7 +750,15 @@ function createTraitDetailsTable() {
                     if (typeof data === 'string' || data instanceof String) {
                         return data;
                     } else {
-                        return parseFloat(data).toFixed(4);
+                        if (parseFloat(data) == 1.0) {
+                            return "1.0";
+                        } else if (parseFloat(data) == 0.0) {
+                            return "0.0";
+                        } else if (parseFloat(data) <= 0.0001) {
+                            return "<0.0001"
+                        } else {
+                            return parseFloat(data).toFixed(4);
+                        }
                     }
                 },
                 "targets": [ 4, 5, 7, 9, 10 ]
@@ -1818,7 +1826,7 @@ function updateLDtrait() {
         $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
     }
 
-    var estimateSeconds = snps.split("\n").length * 10;
+    var estimateSeconds = snps.split("\n").length * 2;
     console.log("estimate seconds", estimateSeconds);
     var estimateMinutes = estimateSeconds / 60;
     if (estimateSeconds < 60) {
@@ -1844,8 +1852,6 @@ function updateLDtrait() {
     //Set file links
     $("#ldtrait-variants-annotated-link").attr('href', 'tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
     $("#ldtrait-variants-annotated-link").attr('target', 'trait_variants_annotated' + ldInputs.reference);
-    $("#ldtrait-variants-problematic-link").attr('href', 'tmp/ldtrait_error_snps.json');
-    $("#ldtrait-variants-problematic-link").attr('target', 'ldtrait_error_snps');
     // $("#ldtrait-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
     // $("#ldtrait-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
