@@ -482,7 +482,7 @@
 	</p>
 	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' threshold</u>
 		- set threshold for LD pruning. Any variants within -/+ 500 Kb window and
-		R<sup>2</sup> or D' less than the threshold is removed. Value needs to be in the
+		R<sup>2</sup> or D' less than the threshold will be removed. Value needs to be in the
 		range 0 to 1. Default value is 0.1.
 	</p>
 	<p style="margin-left: 80px;"> <strong>Output:</strong>
@@ -502,9 +502,8 @@
 	</p>
 	<p style="margin-left: 120px;"><u>Variants with Warnings</u>
 		- output table that appears when a variant produces a warning in LDtrait. Common reasons
-		for a variant to be on the warning list include when it is not a valid RS Number or genomic coordinate or if it is not found in the 1000G reference VCF file.
-		Details are provided on genomic position and why the variant was included
-		or excluded from the thinned variant list.
+		for a variant to be on the warning list are if the variant is not found in dbSNP or if no variants in LD are found within window of the GWAS Catalog.
+		Details are provided on genomic position and why the variant was excluded from the thinned variant list.
 	</p>
 	<p style="margin-left: 120px;"><u>Download GWAS Catalog annotated variant list</u>
 		- download a text file in tab-delimited format that lists all thinned query variant RS numbers and their respective GWAS Catalog results.
