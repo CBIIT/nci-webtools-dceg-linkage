@@ -129,7 +129,7 @@ def requires_token(f):
         elif env == 'prod':
             url_root = 'https://ldlink.nci.nih.gov/'
         else:
-            url_root = 'https://ldlink' + env + '.nci.nih.gov/'
+            url_root = 'https://ldlink-' + env + '.nci.nih.gov/'
         require_token = bool(config['api']['require_token'])
         token_expiration = bool(config['api']['token_expiration'])
         token_expiration_days = config['api']['token_expiration_days']
