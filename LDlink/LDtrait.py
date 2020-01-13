@@ -600,7 +600,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     snp_pos = []
     snp_coords = []
     warn = []
-    windowWarnings = []
+    # windowWarnings = []
     queryWarnings = []
     for snp_i in sanitized_query_snps:
         if (len(snp_i) > 0 and len(snp_i[0]) > 2):
@@ -711,7 +711,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         print("snp_coord", snp_coord)
         (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
         
-        windowWarnings += window_problematic_snps
+        # windowWarnings += window_problematic_snps
         if (len(matched_snps) > 0):
             details[snp_coord[0]] = {	
                 "aaData": matched_snps
@@ -721,9 +721,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
             thinned_list.remove(snp_coord[0])
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
 
-    details["windowWarnings"] = {
-        "aaData": windowWarnings
-    }
+    # details["windowWarnings"] = {
+    #     "aaData": windowWarnings
+    # }
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
