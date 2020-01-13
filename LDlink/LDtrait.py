@@ -453,7 +453,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     start = timer()
     
     # snp limit
-    max_list = 250
+    max_list = 100
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
