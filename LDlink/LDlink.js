@@ -1827,7 +1827,7 @@ function updateLDtrait() {
     }
 
     var estimateSeconds = snps.split("\n").length * 3;
-    console.log("estimate seconds", estimateSeconds);
+    // console.log("estimate seconds", estimateSeconds);
     var estimateMinutes = estimateSeconds / 60;
     if (estimateSeconds < 60) {
         $('#ldtrait-estimate-loading').text(estimateSeconds + " seconds");
@@ -1868,7 +1868,7 @@ function updateLDtrait() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
-        console.log(data);
+        // console.log(data);
         if (displayError(id, jsonObj) == false) {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
@@ -2318,8 +2318,8 @@ function populateSNPwarnings(data) {
 }
 
 function loadLDtraitDetails(data, rs_number) {
-    console.log("ldTraitRaw", data);
-    console.log("rs_number", rs_number);
+    // console.log("ldTraitRaw", data);
+    // console.log("rs_number", rs_number);
 
     RefreshTable('#new-ldtrait', data.details[rs_number]);
     $('#new-ldtrait_wrapper').show();
@@ -2328,7 +2328,7 @@ function loadLDtraitDetails(data, rs_number) {
 }
 
 function loadLDtraitQueryWarnings(data) {
-    console.log("ldTraitRaw", data);
+    // console.log("ldTraitRaw", data);
 
     RefreshTable('#new-ldtrait-query-warnings', data.details.queryWarnings);
     $('#new-ldtrait-query-warnings_wrapper').show();
