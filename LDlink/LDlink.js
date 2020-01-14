@@ -1826,7 +1826,7 @@ function updateLDtrait() {
         $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
     }
 
-    var estimateSeconds = snps.split("\n").length * 4;
+    var estimateSeconds = snps.split("\n").length * 5;
     // console.log("estimate seconds", estimateSeconds);
     var estimateMinutes = estimateSeconds / 60;
     if (estimateSeconds < 60) {
