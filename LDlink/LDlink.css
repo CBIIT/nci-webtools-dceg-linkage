@@ -328,8 +328,13 @@ img.graph-legend {
 #ldproxy-legend {
 	width: 700px;
 }
-#ldmatrix-legend {
-	width: 390px;
+#ldmatrix-legend-r2 {
+  width: 390px;
+  display:inline-block;
+}
+#ldmatrix-legend-d {
+  width: 390px;
+  display:inline-block;
 }
 .ldproxy-link {
   display:block;

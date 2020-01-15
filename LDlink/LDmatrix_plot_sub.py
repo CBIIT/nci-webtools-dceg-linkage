@@ -143,7 +143,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
     snp_coord_str = [snp_coords[0][1] + ":" +
-                     str(i) + "-" + str(i) for i in snp_pos_int]
+                    str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
@@ -371,9 +371,9 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
             corr_f = match
 
             ld_matrix[i][j] = [snp1, snp2, allele1,
-                               allele2, corr, pos1, pos2, D_prime, r2]
+                            allele2, corr, pos1, pos2, D_prime, r2]
             ld_matrix[j][i] = [snp2, snp1, allele2,
-                               allele1, corr_f, pos2, pos1, D_prime, r2]
+                            allele1, corr_f, pos2, pos1, D_prime, r2]
 
     # Generate Plot Variables
     out = [j for i in ld_matrix for j in i]
@@ -401,6 +401,33 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         corA.append(corr)
         xpos.append(pos1)
         ypos.append(pos2)
+        sqrti = math.floor(math.sqrt(len(out)))
+        if sqrti == 0:
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("red")
+            box_trans.append(r2)
+        elif i%sqrti < i//sqrti and r2 != "NA":
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("blue")
+            box_trans.append(abs(D_prime))
+        elif i%sqrti > i//sqrti and D_prime != "NA":
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("red")
+            box_trans.append(r2)
+        elif i%sqrti == i//sqrti and D_prime != "NA":
+            D.append(str(round(float(D_prime), 4)))
+            R.append(str(round(float(r2), 4)))
+            box_color.append("purple")
+            box_trans.append(r2)
+        else:
+            D.append("NA")
+            R.append("NA")
+            box_color.append("gray")
+            box_trans.append(0.1)
+        '''
         if r2_d == "r2" and r2 != "NA":
             D.append(str(round(float(D_prime), 4)))
             R.append(str(round(float(r2), 4)))
@@ -416,7 +443,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
             R.append("NA")
             box_color.append("blue")
             box_trans.append(0.1)
-
+        '''
     # Import plotting modules
     from collections import OrderedDict
     from bokeh.embed import components, file_html
@@ -498,18 +525,18 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     threshold = 70
     if len(snps) < threshold:
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
-                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                            x_range=xr, y_range=list(reversed(rsnum_lst)),
+                            h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+                            tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     else:
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                            x_range=xr, y_range=list(reversed(rsnum_lst)),
+                            h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+                            tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
 
     matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
-                     color="box_color", alpha="box_trans", line_color=None)
+                    color="box_color", alpha="box_trans", line_color=None)
 
     matrix_plot.grid.grid_line_color = None
     matrix_plot.axis.axis_line_color = None
@@ -536,19 +563,19 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     # Connector Plot
     if len(snps) < threshold:
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
-                           x_range=xr, y_range=yr2, border_fill_color='white',
-                           title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                           plot_width=800, plot_height=90, tools="xpan,tap")
+                        x_range=xr, y_range=yr2, border_fill_color='white',
+                        title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
+                        plot_width=800, plot_height=90, tools="xpan,tap")
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
         connector.text(x2, y4, text=snp_id_plot, alpha=1, angle=pi / 2,
-                       text_font_size="8pt", text_baseline="middle", text_align="left")
+                    text_font_size="8pt", text_baseline="middle", text_align="left")
     else:
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
-                           x_range=xr, y_range=yr3, border_fill_color='white',
-                           title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                           plot_width=800, plot_height=30, tools="xpan,tap")
+                        x_range=xr, y_range=yr3, border_fill_color='white',
+                        title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
+                        plot_width=800, plot_height=30, tools="xpan,tap")
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
@@ -577,10 +604,10 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     # Rug Plot
     rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
-                 title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
-                 plot_width=800, plot_height=50, tools="hover,xpan,tap")
+                title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
+                plot_width=800, plot_height=50, tools="hover,xpan,tap")
     rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
-             dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
+            dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
 
     hover = rug.select(dict(type=HoverTool))
     hover.tooltips = OrderedDict([
@@ -682,9 +709,9 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         plot_h_pix = 150 + (len(lines) - 2) * 50
 
     gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
-                       x_range=xr, y_range=yr2, border_fill_color='white',
-                       title="", h_symmetry=False, v_symmetry=False, logo=None,
-                       plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                    x_range=xr, y_range=yr2, border_fill_color='white',
+                    title="", h_symmetry=False, v_symmetry=False, logo=None,
+                    plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
     # if len(genes_raw) <= max_genes:
     gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -732,15 +759,15 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     # Concatenate svgs
     sg.Figure("21.59cm", svg_height,
-              sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
-              sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
-              ).save(tmp_dir + "matrix_plot_" + request + ".svg")
+            sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
+            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+            ).save(tmp_dir + "matrix_plot_" + request + ".svg")
 
     sg.Figure("107.95cm", svg_height_scaled,
-              sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
-              sg.SVG(tmp_dir + "gene_plot_1_" + request +
-                     ".svg").scale(5).move(0, 3600)
-              ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
+            sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
+            sg.SVG(tmp_dir + "gene_plot_1_" + request +
+                    ".svg").scale(5).move(0, 3600)
+            ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
 
     # Export to PDF
     subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "matrix_plot_" +

@@ -58,7 +58,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	if myargs.origin!=None:
 		# Find coordinates (GRCh37/hg19) for SNP RS number
-		if myargs.origin[0:2]=="rs":
+		if myargs.origin[0:2]=="rs" or region == 'variant':
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
@@ -79,9 +79,25 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				query_results = db.dbsnp151.find_one({"id": rsid})
 				query_results_sanitized = json.loads(json_util.dumps(query_results))
 				return query_results_sanitized
+			def get_coords_var_coords(db,chromosome,position):
+				query_results = db.dbsnp151.find_one({"chromosome": chromosome, "position": position})
+				query_results_sanitized = json.loads(json_util.dumps(query_results))
+				return query_results_sanitized
+
 
 			# Find RS number in snp database
-			var_coord=get_coords_var(db, snp)
+			print('SNP: ', snp)
+			print('db: ', db)
+			var_coord = {}
+			if(snp[0:2]=='rs'):
+				var_coord=get_coords_var(db, snp)
+			else:
+				coordinates = snp.strip('chr')
+				c = coordinates.split(':')[0]
+				p = coordinates.split(':')[1]
+				var_coord=get_coords_var_coords(db,c,p)
+			print('coord: ', var_coord)
+			print('chromosome: ', var_coord['chromosome'])
 
 			if var_coord==None:
 				output["error"]=snp+" is not in dbSNP build " + dbsnp_version + "."
@@ -89,7 +105,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				print(json_output, file=out_json)
 				out_json.close()
 				return("","")
-
 		elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
 			snp=myargs.origin
 			var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
@@ -329,9 +344,12 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	assoc_dict={}
 	assoc_list=[]
 	# print "[ldassoc debug] iterate through uploaded file"
+	print ("file: ", file)#
+	print("chromosome: ", chromosome)
 	with open(file) as fp:
 		for line_num, line in enumerate(fp, 1):
 			col = line.strip().split()
+			
 			if len(col)==len_head:
 				if col[chr_index].strip("chr")==chromosome:
 					try:
@@ -339,6 +357,12 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 					except ValueError:
 						continue
 					else:
+						#print("coord1: ", coord1)
+						#print("coord2: ", coord2)
+						#for x in range(len(col)):
+							#print (col[x], ",")
+						#print(col[pos_index])
+						#print("middle: ", col[pos_index])
 						if coord1<=int(col[pos_index])<=coord2:
 							try:
 								float(col[p_index])
@@ -583,7 +607,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
-	print("out_raw", out_raw)
+	#print("out_raw", out_raw)
 	pool.close()
 	pool.join()
 

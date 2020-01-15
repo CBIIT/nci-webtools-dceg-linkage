@@ -190,6 +190,10 @@
 					Machiela MJ, Chanock SJ. LDassoc: an online tool for interactively exploring genome-wide
 					association study results and prioritizing variants for functional investigation. <i>Bioinformatics</i>. 2017 Sept
 					12. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" title="PubMed" target="_blank">28968746</a>.
+					<br />
+					<br />
+					Alexander TA, Machiela MJ. LDpop: an interactive online tool to calculate and visualize geographic LD patterns.
+					BMC Bioinformatics. 2020 Jan 10. PMID: <a href="https://www.ncbi.nlm.nih.gov/pubmed?linkname=pubmed_pubmed&from_uid=31924160" title="PubMed" target="_blank">31924160</a>.
 				</p>
 
 				<p> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell"
@@ -773,7 +777,7 @@
 							</div>
 							<div class="form-group">
 								<!-- COLUMN4 - sm-2 -->
-								<div class="col-sm-2 col-sm-offset-1">
+								<!-- <div class="col-sm-2 col-sm-offset-1">
 									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
 										<label id="matrix_color_r2" class="btn btn-default active">
 											<input type="radio" name="options" autocomplete="off" checked> R<sup>2</sup>
@@ -782,7 +786,7 @@
 											<input type="radio" name="options" autocomplete="off"> D'
 										</label>
 									</div>
-								</div>
+								</div> -->
 							</div>
 							<div class="form-group">
 								<!-- COLUMN5 - sm-2 -->
@@ -824,8 +828,11 @@
 							<div class="col-md-11 col-md-offset-1 overflowx">
 								<div id="ldmatrix-bokeh-graph"></div>
 								<br />
-								<div>
-									<img id="ldmatrix-legend" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend">
+								<div style = "margin:auto">
+									<div style="width:800px;margin:auto;">
+										<img id="ldmatrix-legend-r2" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend">
+										<img id="ldmatrix-legend-d" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend">
+									</div>
 								</div>
 							</div>
 							<div class="col-md-11 col-md-offset-1" id="ldmatrix-download-links">
