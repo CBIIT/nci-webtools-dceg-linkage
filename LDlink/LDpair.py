@@ -370,14 +370,13 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         p = "NA"
 
     # Find Correlated Alleles
-    print("R2", r2)
     if str(r2) != "NA" and float(r2) > 0.1:
         Ac=hap[sorted(hap)[0]]
         Bc=hap[sorted(hap)[1]]
         Cc=hap[sorted(hap)[2]]
         Dc=hap[sorted(hap)[3]]
 
-        if ((Bc*Cc) != 0) and ((Ac*Dc) / (Bc*Cc) > 1):
+        if ((Ac*Dc) / max((Bc*Cc), 0.01) > 1):
             corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
                     0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
             corr2 = snp1 + "(" + sorted(hap)[3].split("_")[

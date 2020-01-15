@@ -381,12 +381,27 @@ def get_ld_stats_sub(threadCommandArgs):
             ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
     return ldInfoSubset	
 
+def castFloat(val):
+    try:
+        val_float = float(val)
+        return val_float
+    except ValueError:
+        return val
+
+def findRangeString(val):
+    start = '['
+    end = ']'
+    result = val[val.find(start)+len(start):val.rfind(end)]
+    if len(result) > 0:
+        return result
+    else:
+        return "NA"
 
 def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
     matched_snps = []
     window_problematic_snps = []
     for record in found:
-        ld = ldInfo[query_snp]["rs" + record["SNP_ID_CURRENT"]]
+        ld = ldInfo.get(query_snp).get("rs" + record["SNP_ID_CURRENT"])
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
             if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
                 matched_record = []
@@ -409,7 +424,9 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # Risk Allele
                 matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
                 # Effect Size (95% CI)
-                matched_record.append(record["OR or BETA"] if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
+                matched_record.append(findRangeString(record["95% CI (TEXT)"]) if ("95% CI (TEXT)" in record and len(record["95% CI (TEXT)"]) > 0) else "NA")
+                # Beta or OR
+                matched_record.append(castFloat(record["OR or BETA"]) if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
                 # P-value
                 matched_record.append(ld["p"])
                 # GWAS Catalog (Link)
@@ -431,12 +448,12 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     return (matched_snps, window_problematic_snps)
 
 # Create LDtrait function
-def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
+def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
     print("##### START LD TRAIT CALCULATION #####")	
     start = timer()
     
     # snp limit
-    max_list = 250
+    max_list = 100
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
@@ -583,7 +600,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
     snp_pos = []
     snp_coords = []
     warn = []
-    windowWarnings = []
+    # windowWarnings = []
     queryWarnings = []
     for snp_i in sanitized_query_snps:
         if (len(snp_i) > 0 and len(snp_i[0]) > 2):
@@ -640,26 +657,26 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
 
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
     # establish low/high window for each query snp
-    window = 2000000 # 2Mb = 2,000,000 Bp
-    found = []	
+    window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
+    found = {}	
     # calculate and store LD info for all LD pairs	
     ldPairs = []
     # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
         # print(snp_coord)
-        found = get_window_variants(db, snp_coord[1], snp_coord[2], window)
-        # print("found: " + str(len(found)))
-        if found is not None:
+        found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window)
+        # print("found", snp_coord[0], len(found[snp_coord[0]]))
+        if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
             # Calculate LD statistics of variant pairs ?in parallel?	
-            for record in found:	
+            for record in found[snp_coord[0]]:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
         else:	
-            queryWarnings.append([snp_coord[0], "NA", "No variants found within window, variant removed."])
-            
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
+                
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
     # print("ldPairsUnique", ldPairsUnique)	
-    # print("ldPairsUnique", len(ldPairsUnique))	
+    print("ldPairsUnique", len(ldPairsUnique))	
     print("##### BEGIN MULTITHREADING LD CALCULATIONS #####")	
     # start = timer()	
     # leverage multiprocessing to calculate all LDpairs	
@@ -687,14 +704,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
             else:	
                 for subsetKey in ldInfoSubset[key].keys():	
                     ldInfo[key][subsetKey] = ldInfoSubset[key][subsetKey]	
+
     # print("ldInfo", json.dumps(ldInfo))
         	
-    # print("ldInfo", ldInfo)	
     for snp_coord in snp_coords:	
-        print("snp_coord", snp_coord)
-        (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
+        # print("snp_coord", snp_coord)
+        (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found[snp_coord[0]], pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
         
-        windowWarnings += window_problematic_snps
+        # windowWarnings += window_problematic_snps
         if (len(matched_snps) > 0):
             details[snp_coord[0]] = {	
                 "aaData": matched_snps
@@ -702,14 +719,22 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.01):
         else:
             # remove from thinned_list
             thinned_list.remove(snp_coord[0])
-            queryWarnings.append([snp_coord[0], "NA", "No variants in LD found within window, variant removed."]) 
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
 
-    details["windowWarnings"] = {
-        "aaData": windowWarnings
-    }
+    # details["windowWarnings"] = {
+    #     "aaData": windowWarnings
+    # }
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
+
+    # Check if thinned list is empty, if it is, display error
+    if len(thinned_list) < 1:
+        output["error"] = "No variants in LD with GWAS Catalog."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -728,7 +753,7 @@ def main():
     request = 8888
     web = False
     r2_d = "r2"
-    r2_d_threshold = 0.01
+    r2_d_threshold = 0.1
 
     # Run function
     (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)

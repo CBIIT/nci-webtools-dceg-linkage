@@ -310,7 +310,11 @@ img.loading {
 	max-height:10%;
 	display: block;
 	margin-left: auto;
-    margin-right: auto;
+  margin-right: auto;
+}
+
+#ldtrait-loading {
+  text-align: center;
 }
 
 img.graph-legend {

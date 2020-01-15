@@ -123,10 +123,14 @@ def requires_token(f):
         # Set data directories using config.yml
         with open('config.yml', 'r') as c:
             config = yaml.load(c)
+        env = config['env']
+        if env == 'local':
+            url_root = 'http://localhost:5000/'
+        elif env == 'prod':
+            url_root = 'https://ldlink.nci.nih.gov/'
+        else:
+            url_root = 'https://ldlink-' + env + '.nci.nih.gov/'
         require_token = bool(config['api']['require_token'])
-        url_root = request.url_root
-        new_url_root = url_root.replace('http://', 'https://')
-        # api_access_dir = config['api']['api_access_dir']
         token_expiration = bool(config['api']['token_expiration'])
         token_expiration_days = config['api']['token_expiration_days']
         if ("LDlinkRestWeb" not in request.full_path):
@@ -134,11 +138,11 @@ def requires_token(f):
             if require_token:
                 # Check if token argument is missing in api call
                 if 'token' not in request.args:
-                    return sendTraceback('API token missing. Please register using the API Access tab: ' + new_url_root + '?tab=apiaccess')
+                    return sendTraceback('API token missing. Please register using the API Access tab: ' + url_root + '?tab=apiaccess')
                 token = request.args['token']
                 # Check if token is valid
                 if checkToken(token, token_expiration, token_expiration_days) is False or token is None:
-                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + new_url_root + '?tab=apiaccess')
+                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + url_root + '?tab=apiaccess')
                 # Check if token is blocked
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
@@ -814,13 +818,11 @@ def ldtrait():
                     trait["error"] = json_dict["error"]
                 else:
                     with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                        f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
-                            f.write("Query Variant: " + snp + "\n")
-                            f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                             for matched_gwas in details[snp]["aaData"]:
-                                f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 10}]) + "\n")
-                            f.write("\n")
-                            f.write("\n")
+                                f.write(snp + "\t")
+                                f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 11}]) + "\n")
                         if "warning" in json_dict:
                             trait["warning"] = json_dict["warning"]
                             f.write("Warning(s):\n")
@@ -853,13 +855,11 @@ def ldtrait():
                 return sendTraceback(json_dict["error"])
             else:
                 with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
-                        f.write("Query Variant: " + snp + "\n")
-                        f.write("GWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tP-value\n")
                         for matched_gwas in details[snp]["aaData"]:
-                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 10}]) + "\n")
-                        f.write("\n")
-                        f.write("\n")
+                            f.write(snp + "\t")
+                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 11}]) + "\n")
                     if "warning" in json_dict:
                         trait["warning"] = json_dict["warning"]
                         f.write("Warning(s):\n")
