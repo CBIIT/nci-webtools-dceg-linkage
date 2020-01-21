@@ -86,7 +86,7 @@ body {
 }
 
 .navbar-nav li.active a {
-  background: #337AB7 !important;
+  background: #2D6A9F !important;
 }
 
 .navbar-nav>li a:hover {
@@ -639,7 +639,7 @@ hr.header {
 
 #ldtrait-snp-list > a {
 	text-decoration: underline;
-	color: #428bca;
+	color: #2D6A9F;
 }
 
 #ldtrait-detail {
@@ -664,7 +664,7 @@ hr.header {
 }
 #snpclip-snp-list > a {
 	text-decoration: underline;
-	color: #428bca;
+	color: #2D6A9F;
 }
 #snpclip-detail {
 /*	border:1px solid #333; */
