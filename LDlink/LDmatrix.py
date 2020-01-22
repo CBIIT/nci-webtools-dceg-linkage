@@ -549,23 +549,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             R.append("NA")
             box_color.append("gray")
             box_trans.append(0.1)
-            '''
-        if r2_d == "r2" and r2 != "NA":
-            D.append(str(round(float(D_prime), 4)))
-            R.append(str(round(float(r2), 4)))
-            box_color.append("red")
-            box_trans.append(r2)
-        elif r2_d == "d" and D_prime != "NA":
-            D.append(str(round(float(D_prime), 4)))
-            R.append(str(round(float(r2), 4)))
-            box_color.append("red")
-            box_trans.append(abs(D_prime))
-        else:
-            D.append("NA")
-            R.append("NA")
-            box_color.append("blue")
-            box_trans.append(0.1)
-'''
     # Import plotting modules
     from collections import OrderedDict
     from bokeh.embed import components, file_html
