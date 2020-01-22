@@ -86,7 +86,7 @@ body {
 }
 
 .navbar-nav li.active a {
-  background: #337AB7 !important;
+  background: #2D6A9F !important;
 }
 
 .navbar-nav>li a:hover {
@@ -328,8 +328,13 @@ img.graph-legend {
 #ldproxy-legend {
 	width: 700px;
 }
-#ldmatrix-legend {
-	width: 390px;
+#ldmatrix-legend-r2 {
+  width: 390px;
+  display:inline-block;
+}
+#ldmatrix-legend-d {
+  width: 390px;
+  display:inline-block;
 }
 .ldproxy-link {
   display:block;
@@ -634,7 +639,7 @@ hr.header {
 
 #ldtrait-snp-list > a {
 	text-decoration: underline;
-	color: #428bca;
+	color: #2D6A9F;
 }
 
 #ldtrait-detail {
@@ -659,7 +664,7 @@ hr.header {
 }
 #snpclip-snp-list > a {
 	text-decoration: underline;
-	color: #428bca;
+	color: #2D6A9F;
 }
 #snpclip-detail {
 /*	border:1px solid #333; */

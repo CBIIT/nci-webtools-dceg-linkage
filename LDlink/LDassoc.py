@@ -80,7 +80,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				query_results_sanitized = json.loads(json_util.dumps(query_results))
 				return query_results_sanitized
 
-			# Find RS number in snp database
 			var_coord=get_coords_var(db, snp)
 
 			if var_coord==None:
@@ -89,10 +88,10 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				print(json_output, file=out_json)
 				out_json.close()
 				return("","")
-
 		elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
 			snp=myargs.origin
-			var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
+			#var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
+			var_coord = {'chromosome':myargs.origin.split(":")[0].strip("chr"), 'position':myargs.origin.split(":")[1]}
 
 		else:
 			output["error"]="--origin ("+myargs.origin+") is not a RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
@@ -329,9 +328,12 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	assoc_dict={}
 	assoc_list=[]
 	# print "[ldassoc debug] iterate through uploaded file"
+	print ("file: ", file)#
+	#print("chromosome: ", chromosome)
 	with open(file) as fp:
 		for line_num, line in enumerate(fp, 1):
 			col = line.strip().split()
+			
 			if len(col)==len_head:
 				if col[chr_index].strip("chr")==chromosome:
 					try:
@@ -339,6 +341,12 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 					except ValueError:
 						continue
 					else:
+						#print("coord1: ", coord1)
+						#print("coord2: ", coord2)
+						#for x in range(len(col)):
+							#print (col[x], ",")
+						#print(col[pos_index])
+						#print("middle: ", col[pos_index])
 						if coord1<=int(col[pos_index])<=coord2:
 							try:
 								float(col[p_index])
@@ -583,7 +591,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
-	print("out_raw", out_raw)
+	#print("out_raw", out_raw)
 	pool.close()
 	pool.join()
 
