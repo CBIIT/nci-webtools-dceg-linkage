@@ -58,7 +58,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	if myargs.origin!=None:
 		# Find coordinates (GRCh37/hg19) for SNP RS number
-		if myargs.origin[0:2]=="rs" or region == 'variant':
+		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
@@ -79,25 +79,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				query_results = db.dbsnp151.find_one({"id": rsid})
 				query_results_sanitized = json.loads(json_util.dumps(query_results))
 				return query_results_sanitized
-			def get_coords_var_coords(db,chromosome,position):
-				query_results = db.dbsnp151.find_one({"chromosome": chromosome, "position": position})
-				query_results_sanitized = json.loads(json_util.dumps(query_results))
-				return query_results_sanitized
 
-
-			# Find RS number in snp database
-			print('SNP: ', snp)
-			print('db: ', db)
-			var_coord = {}
-			if(snp[0:2]=='rs'):
-				var_coord=get_coords_var(db, snp)
-			else:
-				coordinates = snp.strip('chr')
-				c = coordinates.split(':')[0]
-				p = coordinates.split(':')[1]
-				var_coord=get_coords_var_coords(db,c,p)
-			print('coord: ', var_coord)
-			print('chromosome: ', var_coord['chromosome'])
+			var_coord=get_coords_var(db, snp)
 
 			if var_coord==None:
 				output["error"]=snp+" is not in dbSNP build " + dbsnp_version + "."
@@ -107,7 +90,8 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 				return("","")
 		elif myargs.origin.split(":")[0].strip("chr") in chrs and len(myargs.origin.split(":"))==2:
 			snp=myargs.origin
-			var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
+			#var_coord=[None,myargs.origin.split(":")[0].strip("chr"),myargs.origin.split(":")[1]]
+			var_coord = {'chromosome':myargs.origin.split(":")[0].strip("chr"), 'position':myargs.origin.split(":")[1]}
 
 		else:
 			output["error"]="--origin ("+myargs.origin+") is not a RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
@@ -345,7 +329,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	assoc_list=[]
 	# print "[ldassoc debug] iterate through uploaded file"
 	print ("file: ", file)#
-	print("chromosome: ", chromosome)
+	#print("chromosome: ", chromosome)
 	with open(file) as fp:
 		for line_num, line in enumerate(fp, 1):
 			col = line.strip().split()
