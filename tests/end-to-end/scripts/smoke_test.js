@@ -155,7 +155,7 @@ describe('LDlink Smoke Test', function() {
         await driver.wait(until.elementIsEnabled(exportPlotButtonElement), 20000);
         // assert if LDmatrix R2 legend is present
         console.log('[assert if LDmatrix R2 legend is present]');
-        const legend = By.css('[id="ldmatrix-legend"]');
+        const legend = By.css('[id="ldmatrix-legend-r2"]');
         await driver.wait(until.elementLocated(legend), 20000);
         const legendElement = driver.findElement(legend);
         const legendSrc = await legendElement.getAttribute('src');
