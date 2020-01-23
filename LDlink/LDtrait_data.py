@@ -92,20 +92,25 @@ def main():
             # check if orginal gwas row has populated rs number column
             # check field: "SNP_ID_CURRENT"
             # To-do: check field "SNPS" (with possible merged RSIDs and genomic coords)
-            if len(document['SNP_ID_CURRENT']) > 0:
-                # find chr, pos in dbsnp using rsid
-                record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
-                # if found in dbsnp, add to chr, pos to record
-                if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
-                    document["chromosome_grch37"] = str(record["chromosome"])
-                    document["position_grch37"] = int(record["position"])
-                    gwas_catalog_tmp.insert_one(document)
+            if 'SNP_ID_CURRENT' in document:
+                if len(document['SNP_ID_CURRENT']) > 0:
+                    # find chr, pos in dbsnp using rsid
+                    record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
+                    # if found in dbsnp, add to chr, pos to record
+                    if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
+                        document["chromosome_grch37"] = str(record["chromosome"])
+                        document["position_grch37"] = int(record["position"])
+                        gwas_catalog_tmp.insert_one(document)
+                    else:
+                        document["err_msg"] = "Genomic coordinates not found in dbSNP."
+                        errSNPs.append(document)
+                        no_dbsnp_match += 1
                 else:
-                    document["err_msg"] = "Genomic coordinates not found in dbSNP."
+                    document["err_msg"] = "SNP missing valid RSID."
                     errSNPs.append(document)
-                    no_dbsnp_match += 1
+                    missing_field += 1
             else:
-                document["err_msg"] = "SNP missing valid RSID."
+                document["err_msg"] = "GWAS Catalog entry missing SNP_ID_CURRENT key."
                 errSNPs.append(document)
                 missing_field += 1
         with open(tmp_dir + errFilename, 'a') as errFile:
