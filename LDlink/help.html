@@ -467,9 +467,8 @@
 		- this can either
 		be entered one per line in the text entry box or uploaded as a file
 		that contains a list of RS numbers in the first column. A maximum of
-		250 variant RS numbers are permitted. All input variants must be on the same
-		chromosome and match a bi-allelic variant. The text
-		entry field is automatically filled with the contents of the uploaded
+		50 variant RS numbers are permitted. All input variants must match a bi-allelic variant. 
+		The text entry field is automatically filled with the contents of the uploaded
 		file.
 	</p>
 	<p style="margin-left: 120px;"><u>Reference
@@ -487,11 +486,10 @@
 	</p>
 	<p style="margin-left: 80px;"> <strong>Output:</strong>
 	</p>
-	<p style="margin-left: 120px;"><u>LD Thinned Variant List</u>
-		- a list of LD pruned variants based on the specified LDtrait parameters. Each variant in the
-		list is a clickable link that brings up a detailed table showing other variants that
-		are in a -/+ 500 KB window and in linkage disequilibirum with the variant. Variants are ordered by input order, so
-		to force a variant to be in the LD thinned list it should be at the top of the input list.
+	<p style="margin-left: 120px;"><u>Variants in LD with GWAS Catalog</u>
+		- a list of queried variants in LD with a variant reported in the GWAS Catalog. Each variant in the
+		list is a clickable link that brings up a detailed table showing disease-associated variants that
+		are in a -/+ 500 KB window and in linkage disequilibirum with the variant.
 	</p>
 	<p style="margin-left: 120px;"><u>Details Tables</u>
 		- output table that appears when a variant in the thinned variant list is clicked.

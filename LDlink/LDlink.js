@@ -16,6 +16,7 @@ var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752
 var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
 var snpchipReverseLookup = [];
 var ldTraitRaw;
+var ldTraitSort;
 var ldClipRaw;
 var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
 
@@ -339,10 +340,20 @@ $(document).ready(function() {
     $("#ldtrait_ld_r2").click(function(e){
         console.log("R2");
         $("#ldtrait_r2_d_threshold_label").html("R<sup>2</sup>:");
+        // $(document).ready(function() {
+        // $('#new-ldtrait').DataTable( {
+        //     "order": [[ 3, "desc" ]]
+        // } );
+        // } );
     });
     $("#ldtrait_ld_d").click(function(e){
         console.log("D");
         $("#ldtrait_r2_d_threshold_label").html("D':");
+        // $(document).ready(function() {
+        // $('#new-ldtrait').DataTable( {
+        //     "order": [[ 4, "desc" ]]
+        // } );
+        // } );
     });
 });
 
@@ -743,6 +754,7 @@ function createTraitDetailsTable() {
         "bAutoWidth": true,
         "bProcessing": false,
         "deferRender": false,
+        // "order": [[ 4, "desc" ]], //Order desc on R2
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
@@ -761,7 +773,36 @@ function createTraitDetailsTable() {
                         }
                     }
                 },
-                "targets": [ 4, 5, 7, 9, 10 ]
+                "targets": [ 4, 5, 8 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Round floats to 3 decimal places if string can be parsed to float
+                    if (!isNaN(parseFloat(data))) {
+                        return parseFloat(data).toFixed(3);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": [ 7 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Round floats to 4 decimal places 
+                    if (typeof data === 'string' || data instanceof String) {
+                        return data;
+                    } else {
+                        if (parseFloat(data) == 1.0) {
+                            return "1.0";
+                        } else if (parseFloat(data) == 0.0) {
+                            return "0.0";
+                        } else {
+                            var val = parseFloat(data).toExponential(0).split("e");
+                            return val[0] + "x10" + val[1].sup();
+                        }
+                    }
+                },
+                "targets": [ 10 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -993,7 +1034,7 @@ function setupLDtraitControls() {
         var rs_number = e.target.id;
         $('#ldtrait-snp-list').show();
         $('#ldtrait-initial-message').hide();
-        loadLDtraitDetails(ldTraitRaw, rs_number);
+        loadLDtraitDetails(ldTraitRaw, rs_number, ldTraitSort);
         $('#new-ldtrait-query-warnings_wrapper').hide();
         $('#ldtrait-initial-message').hide();
     });
@@ -1068,6 +1109,24 @@ var snpchipModel = ko.mapping.fromJS(snpchipData);
 function RefreshTable(tableId, json) {
     table = $(tableId).dataTable();
     oSettings = table.fnSettings();
+    table.fnClearTable(this);
+    for (var i = 0; i < json.aaData.length; i++) {
+      table.oApi._fnAddData(oSettings, json.aaData[i]);
+    }
+    oSettings.aiDisplay = oSettings.aiDisplayMaster.slice();
+    table.fnDraw();
+}
+
+function RefreshTableSort(tableId, json, sort) {
+    var sortCol;
+    if (sort == "r2") {
+        sortCol = 4;
+    } else {
+        sortCol = 5;
+    }
+    table = $(tableId).dataTable();
+    oSettings = table.fnSettings();
+    table.fnSort([[sortCol, 'desc']]);
     table.fnClearTable(this);
     for (var i = 0; i < json.aaData.length; i++) {
       table.oApi._fnAddData(oSettings, json.aaData[i]);
@@ -1820,10 +1879,20 @@ function updateLDtrait() {
 
     if($('#ldtrait_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
-        $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_R2.png');
+        // $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_R2.png');
+        // $(document).ready(function() {
+            // $('#new-ldtrait').DataTable( {
+            //     "order": [[ 4, "desc" ]]
+            // } );
+        // } );
     } else {
         r2_d = 'd';  // i.e. Dprime
-        $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
+        // $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
+        // $(document).ready(function() {
+            // $('#new-ldtrait').DataTable( {
+            //     "order": [[ 5, "desc" ]]
+            // } );
+        // } );
     }
 
     var estimateSeconds = snps.split("\n").length * 5;
@@ -1873,7 +1942,7 @@ function updateLDtrait() {
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
-            initTrait(data);
+            initTrait(data, r2_d);
         }
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -2317,11 +2386,11 @@ function populateSNPwarnings(data) {
 
 }
 
-function loadLDtraitDetails(data, rs_number) {
+function loadLDtraitDetails(data, rs_number, sort) {
     // console.log("ldTraitRaw", data);
     // console.log("rs_number", rs_number);
 
-    RefreshTable('#new-ldtrait', data.details[rs_number]);
+    RefreshTableSort('#new-ldtrait', data.details[rs_number], sort);
     $('#new-ldtrait_wrapper').show();
 
     $('#ldtrait-detail-title').text("Details for " + rs_number);
@@ -2383,9 +2452,10 @@ function loadSNPdetails(data, rs_number) {
     $('#snpclip-detail-title').text("Details for "+rs_number);
 }
 
-function initTrait(data) {
+function initTrait(data, r2_d) {
 
     ldTraitRaw = data;
+    ldTraitSort = r2_d;
 
     populateSNPlistLDtrait(data);
 
