@@ -39,8 +39,8 @@ def main():
     instance = sys.argv[1]
 
     print("Downloading GWAS catalog...")
-    # filename = downloadGWASCatalog()
-    filename = 'gwas_catalog_2020-01-09.tsv'
+    filename = downloadGWASCatalog()
+    # filename = 'gwas_catalog_2020-01-09.tsv'
     print(filename + " downloaded.")
 
     # client = MongoClient('mongodb://localhost/LDLink')
@@ -90,23 +90,28 @@ def main():
             values.append("NA")
             document = dict(list(zip(headers, values)))
             # check if orginal gwas row has populated rs number column
-            if len(document['SNP_ID_CURRENT']) > 0:
-                # find chr, pos in dbsnp using rsid
-                # trim off non-numeric
-                record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
-                # if found in dbsnp, add to chr, pos to record
-                if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
-                    document["chromosome_grch37"] = str(record["chromosome"])
-                    document["position_grch37"] = int(record["position"])
-                    gwas_catalog_tmp.insert_one(document)
+            if 'SNP_ID_CURRENT' in document:
+                if len(document['SNP_ID_CURRENT']) > 0:
+                    # find chr, pos in dbsnp using rsid
+                    # trim off non-numeric
+                    record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
+                    # if found in dbsnp, add to chr, pos to record
+                    if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
+                        document["chromosome_grch37"] = str(record["chromosome"])
+                        document["position_grch37"] = int(record["position"])
+                        gwas_catalog_tmp.insert_one(document)
+                    else:
+                        print("MISMATCH", document['SNP_ID_CURRENT'])
+                        document["err_msg"] = "Genomic coordinates not found in dbSNP."
+                        errSNPs.append(document)
+                        no_dbsnp_match += 1
                 else:
-                    print("MISMATCH", document['SNP_ID_CURRENT'])
-                    document["err_msg"] = "Genomic coordinates not found in dbSNP."
+                    print("MISSING", document['SNP_ID_CURRENT'])
+                    document["err_msg"] = "Row missing SNP value."
                     errSNPs.append(document)
-                    no_dbsnp_match += 1
+                    missing_field += 1
             else:
-                print("MISSING", document['SNP_ID_CURRENT'])
-                document["err_msg"] = "Row missing SNP value."
+                document["err_msg"] = "GWAS Catalog entry missing SNP_ID_CURRENT key."
                 errSNPs.append(document)
                 missing_field += 1
         with open(tmp_dir + errFilename, 'a') as eFMissing:
@@ -127,9 +132,9 @@ def main():
         gwas_catalog.drop()
     print("Rename gwas_catalog_tmp collection to gwas_catalog")
     gwas_catalog_tmp.rename("gwas_catalog")
-    # if (os.path.isfile(tmp_dir + filename)):
-    #     print("Deleting raw data file: " + filename)
-    #     os.remove(tmp_dir + filename)
+    if (os.path.isfile(tmp_dir + filename)):
+        print("Deleting raw data file: " + filename)
+        os.remove(tmp_dir + filename)
     end_time = timer()
     print(("Completion time:\t--- %s minutes ---" % str(((end_time - start_time) / 60.0))))
 
