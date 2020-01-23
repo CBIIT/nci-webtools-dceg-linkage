@@ -423,10 +423,10 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_record.append([query_snp, "rs" + record["SNP_ID_CURRENT"], "%2B".join(expandSelectedPopulationGroups(pops))])
                 # Risk Allele
                 matched_record.append(record["RISK ALLELE FREQUENCY"] if ("RISK ALLELE FREQUENCY" in record and len(record["RISK ALLELE FREQUENCY"]) > 0) else "NA")
-                # Effect Size (95% CI)
-                matched_record.append(findRangeString(record["95% CI (TEXT)"]) if ("95% CI (TEXT)" in record and len(record["95% CI (TEXT)"]) > 0) else "NA")
                 # Beta or OR
                 matched_record.append(castFloat(record["OR or BETA"]) if ("OR or BETA" in record and len(record["OR or BETA"]) > 0) else "NA")
+                # Effect Size (95% CI)
+                matched_record.append(findRangeString(record["95% CI (TEXT)"]) if ("95% CI (TEXT)" in record and len(record["95% CI (TEXT)"]) > 0) else "NA")
                 # P-value
                 matched_record.append(ld["p"])
                 # GWAS Catalog (Link)
@@ -641,17 +641,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
         print(json_output, file=out_json)
         out_json.close()
         return("", "", "")
-
-    # Check SNPs are all on the same chromosome
-    for i in range(len(snp_coords)):
-        if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr" + \
-                str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
-                "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
 
     thinned_list = []
 
