@@ -68,7 +68,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 query_results = db.dbsnp151.find_one({"id": rsid})
                 query_results_sanitized = json.loads(json_util.dumps(query_results))
                 return query_results_sanitized
-                
+
             # Find RS number in snp database
             var_coord=get_coords_var(db, snp)
 
@@ -80,7 +80,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             snp=myargsOrigin
             #var_coord=[None,myargsOrigin.split(":")[0].strip("chr"),myargsOrigin.split(":")[1]]
             var_coord = {'chromosome':myargsOrigin.split(":")[0].strip("chr"), 'position':myargsOrigin.split(":")[1]}
-
         else:
             return None
             

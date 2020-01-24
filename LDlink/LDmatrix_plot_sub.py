@@ -729,27 +729,35 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     # Change output backend to SVG temporarily for headless export
     # Will be changed back to canvas in LDlink.js
     matrix_plot.output_backend = "svg"
+    connector.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
     export_svgs(matrix_plot, filename=tmp_dir +
                 "matrix_plot_1_" + request + ".svg")
+    export_svgs(connector, filename=tmp_dir +
+                "connector_1_" + request + ".svg")
+    export_svgs(rug, filename=tmp_dir +
+                "rug_1_" + request + ".svg")
     export_svgs(gene_plot, filename=tmp_dir +
                 "gene_plot_1_" + request + ".svg")
 
     # 1 pixel = 0.0264583333 cm
-    svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
-    svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
+    svg_height = str(25.00 + (0.0264583333 * plot_h_pix)) + "cm"
+    svg_height_scaled = str(110.00 + (0.1322916665 * plot_h_pix)) + "cm"
 
     # Concatenate svgs
     sg.Figure("21.59cm", svg_height,
             sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg"),
-            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(0, 720)
+            sg.SVG(tmp_dir + "connector_1_" + request + ".svg").scale(.97).move(0, 700),
+            sg.SVG(tmp_dir + "rug_1_" + request + ".svg").scale(.97).move(0, 790),
+            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(.97).move(0, 840)
             ).save(tmp_dir + "matrix_plot_" + request + ".svg")
 
     sg.Figure("107.95cm", svg_height_scaled,
             sg.SVG(tmp_dir + "matrix_plot_1_" + request + ".svg").scale(5),
-            sg.SVG(tmp_dir + "gene_plot_1_" + request +
-                    ".svg").scale(5).move(0, 3600)
+            sg.SVG(tmp_dir + "connector_1_" + request + ".svg").scale(4.85).move(0, 3500),
+            sg.SVG(tmp_dir + "rug_1_" + request + ".svg").scale(4.85).move(0, 3930),
+            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(4.85).move(0, 4160)
             ).save(tmp_dir + "matrix_plot_scaled_" + request + ".svg")
 
     # Export to PDF
