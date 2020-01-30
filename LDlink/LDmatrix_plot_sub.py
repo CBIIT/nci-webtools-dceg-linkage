@@ -791,6 +791,10 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                     request + ".svg", shell=True)
     subprocess.call("rm " + tmp_dir + "gene_plot_1_" +
                     request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "rug_1_" +
+                    request + ".svg", shell=True)
+    subprocess.call("rm " + tmp_dir + "connector_1_" +
+                    request + ".svg", shell=True)
     # Remove scaled SVG file after it is converted to png and jpeg
     subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" +
                     request + ".svg", shell=True)
