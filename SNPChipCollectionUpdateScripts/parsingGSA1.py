@@ -16,7 +16,7 @@ with open('GSA-24v1-0_C1.csv') as csv_file:
             print(row)
         if(line_count >= 8 and len(row) > 10):
             temp = {}
-            temp['platform'] = 'Illumina Global Screening Array version 1'
+            temp['platform'] = 'Illumina Global Screening version 1'
             temp['chr'] = row[9]
             pos = row[10]
 

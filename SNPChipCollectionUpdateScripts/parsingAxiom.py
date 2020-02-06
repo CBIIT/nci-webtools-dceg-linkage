@@ -16,7 +16,7 @@ with open('Axiom_UKB_WCSG.na34.annot.csv') as csv_file:
             print(row)
         if(line_count >= 20 and len(row) > 5):
             temp = {}
-            temp['platform'] = 'Affymetrix Axiom UK Biobank Array'
+            temp['platform'] = 'Affymetrix Axiom UK Biobank'
             temp['chr'] = row[4]
             pos = row[5]
             if(collections.find_one({'pos':pos})!=None):
