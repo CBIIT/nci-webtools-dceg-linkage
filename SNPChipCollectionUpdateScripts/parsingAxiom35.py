@@ -16,7 +16,7 @@ with open('Axiom_PMRA.na35.annot.csv') as csv_file:
             print(row)
         if(line_count >= 20 and len(row) > 5):
             temp = {}
-            temp['platform'] = 'Affymetrix Axiom Precision Medicine Research Array'
+            temp['platform'] = 'Affymetrix Axiom Precision Medicine Research'
             temp['chr'] = row[4]
             pos = row[5]
             if(collections.find_one({'pos':pos})!=None):

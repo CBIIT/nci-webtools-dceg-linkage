@@ -20,7 +20,7 @@ with open('Multi-EthnicGlobal_D1.csv') as csv_file:
         #this is where the data starts, change based on file
         if(line_count >= 8 and len(row) > 10):
             temp = {}
-            temp['platform'] = 'Illumina Multi-Ethnic Global Array'
+            temp['platform'] = 'Illumina Multi-Ethnic Global'
             temp['chr'] = row[9]
             pos = row[10]
             if(collections.find_one({'pos':pos})!=None):
