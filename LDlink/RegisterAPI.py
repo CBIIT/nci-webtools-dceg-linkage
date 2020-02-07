@@ -625,6 +625,7 @@ def getStats(startdatetime, enddatetime, top):
     log = db.api_log
     # get number of registered users in total
     numUsers = users.count()
+    numCalls = log.count()
     # join api_log and api_users by foreign key to retrieve user info per api_log record
     pipeline = [
         { 
@@ -652,14 +653,14 @@ def getStats(startdatetime, enddatetime, top):
         { 
             "$group": { 
                 "_id": "$userinfo", 
-                "#_total_api_calls": { 
+                "#_api_calls": { 
                     "$sum": 1 
                 } 
             } 
         }, 
         { 
             "$sort": { 
-                "#_total_api_calls": -1 
+                "#_api_calls": -1 
             } 
         }
     ]
@@ -717,6 +718,7 @@ def getStats(startdatetime, enddatetime, top):
     users_json_sanitized = json.loads(json_util.dumps(users_json))
     out_json = {
         "#_registered_users": numUsers,
+        "#_total_api_calls": numCalls,
         "users": users_json_sanitized
     }
     return out_json
