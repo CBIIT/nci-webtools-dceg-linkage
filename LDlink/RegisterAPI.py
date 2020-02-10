@@ -652,14 +652,14 @@ def getStats(startdatetime, enddatetime, top):
         { 
             "$group": { 
                 "_id": "$userinfo", 
-                "#_total_api_calls": { 
+                "#_api_calls": { 
                     "$sum": 1 
                 } 
             } 
         }, 
         { 
             "$sort": { 
-                "#_total_api_calls": -1 
+                "#_api_calls": -1 
             } 
         }
     ]
@@ -715,8 +715,12 @@ def getStats(startdatetime, enddatetime, top):
     users_json = log.aggregate(pipeline)
     # santize string to be returned as proper json
     users_json_sanitized = json.loads(json_util.dumps(users_json))
+    numCalls = 0
+    for user in users_json_sanitized:
+        numCalls += int(user['#_api_calls'])
     out_json = {
         "#_registered_users": numUsers,
+        "#_total_api_calls": numCalls,
         "users": users_json_sanitized
     }
     return out_json
