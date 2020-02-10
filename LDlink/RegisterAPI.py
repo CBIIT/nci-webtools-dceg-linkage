@@ -717,7 +717,7 @@ def getStats(startdatetime, enddatetime, top):
     users_json_sanitized = json.loads(json_util.dumps(users_json))
     numCalls = 0
     for user in users_json_sanitized:
-        sum_calls += user['#_api_calls']
+        numCalls += int(user['#_api_calls'])
     out_json = {
         "#_registered_users": numUsers,
         "#_total_api_calls": numCalls,
