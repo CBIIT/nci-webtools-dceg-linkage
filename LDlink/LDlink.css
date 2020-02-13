@@ -86,7 +86,7 @@ body {
 }
 
 .navbar-nav li.active a {
-  background: #2D6A9F !important;
+  background: #2D6A9F;
 }
 
 .navbar-nav>li a:hover {
@@ -123,14 +123,15 @@ html body .footer {
   margin-bottom: 200px;
   padding-top: 20px;
   padding-bottom: 20px;
-  padding-left: 25px;
-  padding-right: 25px;
+  padding-left: 0px;
+  padding-right: 0px;
   width: 100%;
   min-height: 600px;
   /* height: 100%; */
   -webkit-overflow-scrolling: touch;
   background: white;
-  border-width: 0 1px 1px 1px;
+  /*border-width: 0 1px 1px 1px;*/
+  border-width: 0 0px 0px 0px;
   border-style: solid;
   border-color: #d9d9d9;
   border-radius: 6px;
@@ -1119,4 +1120,82 @@ input:checked + .slider:before {
 
 #new-ldpop_filter {
   float: left !important;
+}
+
+
+.dropbtn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 16px;
+  font-size: 16px;
+  border: none;
+  cursor: pointer;
+}
+
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  background-color:black;
+  z-index: 1;
+  width:100%;
+}
+
+.dropdown-text {
+  background-color:black !important;
+  display:block;
+  width:100%;
+  text-decoration: none;
+  padding: 5px 5px;
+}
+
+.dropdown.active .dropdown-text{
+  display:block;
+}
+
+.dropdown-text:hover {
+  background-color:black !important;
+  text-decoration: none !important;
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+.dropdown:hover .dropbtn {
+  background-color: #3e8e41;
+}
+
+.card{
+  width:100%;
+}
+.card:hover{
+  text-decoration:none;
+}
+
+.card-title{
+  background-color:#133a55; 
+  height:50px; 
+  padding:8px 0;
+}
+
+.card-body{
+  background-color:white;
+  height:108px;
+  padding: 20px 20px 0 20px;
+}
+.card-body p{
+  margin:0;
+}
+.card-outside{
+  display:inline-block; 
+  width: 33%; 
+  height:158px; 
+  padding:0px 20px;
+  margin: 10px 0;
+  text-decoration:none;
 }

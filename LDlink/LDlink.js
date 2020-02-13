@@ -218,6 +218,7 @@ $(document).ready(function() {
 
     });
 
+
     setupLDtraitControls();
     setupSNPclipControls();
     setupSNPchipControls();
