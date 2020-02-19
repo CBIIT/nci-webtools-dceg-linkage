@@ -19,7 +19,8 @@ var ldTraitRaw;
 var ldTraitSort;
 var ldClipRaw;
 var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
-
+var homeStartBox = 0;
+var newsList = [];
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -38,7 +39,22 @@ $(document).ready(function() {
 
     // Load news text from news.html to news-container div
     $.get("news.html", function (data) {
-        $("#news-container").append(data);
+        console.log(data.split("<p>"));
+        let tmpData = data.split("<p>")
+        let i = 0;
+        newsList = [];
+        
+        for (i = 1; i < tmpData.length; i++){
+            let toPush = "<p>" + tmpData[i];
+            newsList.push(toPush);
+            console.log(toPush)
+
+        }
+
+        $("#news-card-1").html(newsList[0]);
+        $("#news-card-2").html(newsList[1]);
+        $("#news-card-3").html(newsList[2]);
+        //$("#news-container").append(data);
     });
     
     $('#progressbar').progressbar();
@@ -4295,3 +4311,43 @@ function readCookie(name) {
 function eraseCookie(name) {
     createCookie(name,"",-1);
 }
+
+$("#news-right-arrow").on('click',  function() {
+    if($("#news-right-arrow").hasClass("enabled-news-scroller")){
+
+        homeStartBox += 1;
+        $("#news-card-1").html(newsList[homeStartBox]);
+        $("#news-card-2").html(newsList[homeStartBox+1]);
+        $("#news-card-3").html(newsList[homeStartBox+2]);
+        console.log(newsList.length)
+        if(homeStartBox + 3 >= newsList.length){
+            $("#news-right-arrow").removeClass("enabled-news-scroller")
+            $("#news-right-arrow").addClass("disabled-news-scroller")
+        }
+        if($("#news-left-arrow").hasClass("disabled-news-scroller")){
+            $("#news-left-arrow").addClass("enabled-news-scroller")
+            $("#news-left-arrow").removeClass("disabled-news-scroller")
+        }
+    }
+    console.log(JSON.stringify(newsList))
+});
+
+$("#news-left-arrow").on('click',  function() {
+    if($("#news-left-arrow").hasClass("enabled-news-scroller")){
+
+        homeStartBox -= 1;
+        $("#news-card-1").html(newsList[homeStartBox]);
+        $("#news-card-2").html(newsList[homeStartBox+1]);
+        $("#news-card-3").html(newsList[homeStartBox+2]);
+        console.log(newsList.length)
+        if(homeStartBox <= 0){
+            $("#news-left-arrow").removeClass("enabled-news-scroller")
+            $("#news-left-arrow").addClass("disabled-news-scroller")
+        }
+        if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+            $("#news-right-arrow").addClass("enabled-news-scroller")
+            $("#news-right-arrow").removeClass("disabled-news-scroller")
+        }
+    }
+    console.log(JSON.stringify(newsList))
+});

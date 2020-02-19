@@ -97,7 +97,7 @@
 					<div class="text-center" style = "padding:20px">
 						<h2 style="color:white; margin:0px">Linkage Disequilibrium Tools</h2>
 					</div>
-					<div style="max-width:1200px; min-height:130px; margin:auto">
+					<div style="max-width:1300px; min-height:130px; margin:auto">
 						<div class = "card-outside">
 						<a class="card anchor-link"  dest="ldassoc">
 							<div class="text-center card-title">
@@ -131,8 +131,7 @@
 					</div>
 				</div>
 				
-					<div style="max-width:1200px; min-height:130px; margin:auto">
-						
+					<div style="max-width:1300px; min-height:130px; margin:auto">  
 						<div class = "card-outside">
 						<a class="card anchor-link"  dest="ldpair">
 							<div class="text-center card-title">
@@ -167,7 +166,7 @@
 					</div>
 					
 					</div>
-					<div style="max-width:1200px; min-height:130px; margin:auto">
+					<div style="max-width:1300px; min-height:130px; margin:auto">
 						<div class = "card-outside">
 						<a class="card anchor-link"  dest="ldtrait">
 							<div class="text-center card-title">
@@ -197,55 +196,54 @@
 							<div class="card-body">
 								<p>Prune a list of variants by linkage disequilibrium.</p>
 								<p>&nbsp;</p>
+								<p>&nbsp;</p>
 							</div>
 						</a>
 					</div>
 					</div>
 				</div>
-				<p style="margin-left: 40px;">
-
-					<b><a class="anchor-link" dest="ldassoc">LDassoc</a></b>: Interactively visualize association p-value results
-					and linkage disequilibrium patterns for a genomic region of interest.
-					Input is a tab or space delimited association output file and a population
-					group.<br>
-
-					<b><a class="anchor-link" dest="ldhap">LDhap</a></b>: Calculate population specific haplotype
-					frequencies of all haplotypes observed for a list of query variants.
-					Input is a list of variant RS numbers (one per line) and a population
-					group.<br>
-
-					<b><a class="anchor-link" dest="ldmatrix">LDmatrix</a></b>: Create an interactive heatmap matrix of pairwise
-					linkage disequilibrium statistics. Input is a list of variant
-					RS numbers (one per line) and a population group.<br>
-
-					<b><a class="anchor-link" dest="ldpair">LDpair</a></b>: Investigate correlated alleles for a pair of variants in
-					high LD. Input is two RS numbers and a population group.<br>
-
-					<b><a class="anchor-link" dest="ldpop">LDpop</a></b>: Investigate allele frequencies and linkage disequilibrium patterns 
-					across 1000G populations. Input is two RS numbers and populations of interest.<br>
-
-					<b><a class="anchor-link" dest="ldproxy">LDproxy</a></b>: Interactively explore proxy and putatively
-					functional variants for a query variant. Input is a RS number and a
-					population group.<br>
-
-					<b><a class="anchor-link" dest="ldtrait">LDtrait</a></b>: Search if a list of variants (or variants in LD with those variants) 
-					have previously been associated with a trait or disease. Input is a list of variant RS numbers (one per line) and a population
-					group.<br>
-
-					<b><a class="anchor-link" dest="snpchip">SNPchip</a></b>: Find commercial genotyping platforms for variants.
-					Input is a list of variant RS numbers (one per line) and desired arrays.<br>
-
-					<b><a class="anchor-link" dest="snpclip">SNPclip</a></b>: Prune a list of variants by linkage disequilibrium.
-					Input is a list of variant RS numbers (one per line) and a population
-					group.<br>
-
-				</p>
+				
 
 				<!-- News and Updates content text can be updated from separate news.html file -->
+				</br>
+				</br>
 				<div class="row">
-					<h4 class="col-sm-offset-1">News and Updates</h4>
-					<div id="news-container" class="well col-sm-10 col-sm-offset-1 whats_new" tabindex="0"></div>
+						<h2 class="text-center" style="color:black">What's New</h4>
+					</div>
+
+				<div id="news-left-arrow" class="news-scroller disabled-news-scroller"><p style="text-align:center; vertical-align: middle; line-height:158px; font-size:48px;">&lsaquo;</p></div>
+				<div style="display:inline-block; width: 90%">
+					<div class = "news-card-outside">
+						<div class="card anchor-link"  dest="ldhap">
+							<div class="news-card-left">
+							</div>
+							<div id="news-card-1" class="news-card-body">
+							</div>
+						</div>
+					</div>
+					<div class = "news-card-outside">
+						<div class="card anchor-link"  dest="ldhap">
+							<div class="news-card-left">
+							</div>
+							<div id="news-card-2" class="news-card-body">
+							</div>
+						</div>
+					</div>
+					<div class = "news-card-outside">
+						<div class="card anchor-link"  dest="ldhap">
+							<div class="news-card-left" >
+							</div>
+							<div id="news-card-3" class="news-card-body">
+							</div>
+						</div>
+					</div>
 				</div>
+				<div id="news-right-arrow" class = "news-scroller enabled-news-scroller" style="float:right;"><p style="text-align:center; vertical-align: middle; line-height:158px; font-size:48px;">&rsaquo;</p></div>
+
+				<div class = "news-and-citations">
+				
+				<br/>
+			<br/>
 
 				<!-- Ad for LDlinkR -->
 				<div class="row">
@@ -268,40 +266,30 @@
 					</div>
 				</div>
 				<br/>
-				<p><b>Citations</b>:</p>
-				<p> 	
-					Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="LDlink PubMed link" target="_blank" alt="LDlink PubMed article link">LDlink a web-based application for exploring population-specific
-					haplotype structure and linking correlated alleles of possible functional variants.</a> <i>Bioinformatics</i>. 2015
-					Jul 2.
-				</p>
-				<p>
-					Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" title="LDassoc PubMed link" target="_blank" alt="LDassoc PubMed article link">LDassoc: an online tool for interactively exploring genome-wide
-					association study results and prioritizing variants for functional investigation.</a> <i>Bioinformatics</i>. 2017 Sept
-					12.
-				</p>
-				<p>	
-					Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" title="LDpop PubMed link" target="_blank" alt="LDpop PubMed article link">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> 
-					BMC <i>Bioinformatics</i>. 2020 Jan 10. 
-				</p>
-
-				<p> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell"
+				<h2><b>Credits</b></h2>
+				<p style = "font-size:18px"> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell"
 					 title="Mitchell Machiela Biography" target="_blank" alt="Link to Machiela's biography">Mitchell Machiela</a> in collaboration
 					with NCI's Center for Biomedical Informatics and Information
 					Technology (CBIIT). Support comes from the Division of Cancer
 					Epidemiology and Genetics Informatics Tool Challenge.</p>
 
-				<p> 
+				<p style = "font-size:18px"> 
 					LDlink is available under the <a href="license.txt" target="_blank" alt="Link to MIT license">MIT license</a>, an <a href="https://opensource.org" target="_blank" alt="Link to open source initiative">Open Source Initiative</a> approved license.
 				</p>
 
-				<p> Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top"
+				<p style = "font-size:18px"> Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top"
 					 title="Support">email</a>.
 				</p>
 				<p id="ldlink_version"></p>
+				<button type="button" class="left-button" style="display:inline-block">Click Me!</button> 
+				<div class="middle-Stuff" style="display:inline-block">Click Me!</div> 
+				<button type="button" class="right-button" style="display:inline-block">Click Me!</button> 
+
+			</div>
 			</div>
 
 			<!-- LDassoc -->
-			<div class="tab-pane fade" id="ldassoc-tab">
+			<div class="tab-pane fade not-home" id="ldassoc-tab">
 				<!-- ldassoc INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -663,7 +651,7 @@
 				</div>
 			</div>
 			<!-- LDhap -->
-			<div class="tab-pane fade" id="ldhap-tab">
+			<div class="tab-pane fade not-home" id="ldhap-tab">
 				<!-- LDhap INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -814,7 +802,7 @@
 			</div>
 
 			<!-- LDmatrix -->
-			<div class="tab-pane fade" id="ldmatrix-tab">
+			<div class="tab-pane fade not-home" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -934,7 +922,7 @@
 			</div>
 
 			<!-- LDpair -->
-			<div class="tab-pane fade" id="ldpair-tab">
+			<div class="tab-pane fade not-home" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
@@ -1115,7 +1103,7 @@
 			</div>
 
 			<!-- LDpop -->
-			<div class="tab-pane fade" id="ldpop-tab">
+			<div class="tab-pane fade not-home" id="ldpop-tab">
 				<!-- LDpop INPUTS-->
 
 				<div class="row" style="padding-top: 10px;">
@@ -1189,7 +1177,7 @@
 				</div>
 				
 				<div class="tab-content ldpop-map-content">
-					<div id="ldpop-map1" class="tab-pane fade in active">
+					<div id="ldpop-map1" class="tab-pane fade not-home in active">
 						<div class="row">
 							<div class="col-md-4 dropdown"></div>
 							<h3 align="center" class="col-md-4 ldpop-map1-title" style="white-space: nowrap;">rs#1 rs#2 LD</h3>
@@ -1212,7 +1200,7 @@
 						</div>
 						<div id="map1" class="map-item center-align"></div>
 					</div>
-					<div id="ldpop-map2" class="tab-pane fade">
+					<div id="ldpop-map2" class="tab-pane fade not-home">
 						<div class="row">
 							<div class="col-md-4 dropdown"></div>
 							<h3 align="center" class="col-md-4 ldpop-map2-title" style="white-space: nowrap;">rs#1 Allele Frequency</h3>
@@ -1235,7 +1223,7 @@
 						</div>
 						<div id="map2" class="map-item center-align"></div>
 					</div>
-					<div id="ldpop-map3" class="tab-pane fade">
+					<div id="ldpop-map3" class="tab-pane fade not-home">
 						<div class="row">
 							<div class="col-md-4 dropdown"></div>
 							<h3 align="center" class="col-md-4 ldpop-map3-title" style="white-space: nowrap;">rs#2 Allele Frequency</h3>
@@ -1306,7 +1294,7 @@
 						</div>
 						
 						<div class="tab-content ldpop-map-content">
-							<div id="ldpop-map1" class="tab-pane fade in active">
+							<div id="ldpop-map1" class="tab-pane fade not-home in active">
 								<div class="row">
 									<div class="col-md-4 dropdown"></div>
 									<h3 align="center" class="col-md-4 ldpop-map1-title" style="white-space: nowrap;">rs#1 rs#2 LD</h3>
@@ -1329,7 +1317,7 @@
 								</div>
 								<div id="map1" class="map-item center-align"></div>
 							</div>
-							<div id="ldpop-map2" class="tab-pane fade">
+							<div id="ldpop-map2" class="tab-pane fade not-home">
 								<div class="row">
 									<div class="col-md-4 dropdown"></div>
 									<h3 align="center" class="col-md-4 ldpop-map2-title" style="white-space: nowrap;">rs#1 Allele Frequency</h3>
@@ -1352,7 +1340,7 @@
 								</div>
 								<div id="map2" class="map-item center-align"></div>
 							</div>
-							<div id="ldpop-map3" class="tab-pane fade">
+							<div id="ldpop-map3" class="tab-pane fade not-home">
 								<div class="row">
 									<div class="col-md-4 dropdown"></div>
 									<h3 align="center" class="col-md-4 ldpop-map3-title" style="white-space: nowrap;">rs#2 Allele Frequency</h3>
@@ -1403,7 +1391,7 @@
 			</div>
 
 			<!-- LDproxy -->
-			<div class="tab-pane fade" id="ldproxy-tab">
+			<div class="tab-pane fade not-home" id="ldproxy-tab">
 				<!-- LDproxy INPUTS-->
 				<div class="row" style="padding-top: 10px;">
 					<div class="alert alert-danger ffWarning">You are using a
@@ -1551,7 +1539,7 @@
 			</div>
 
 			<!-- LDtrait -->
-			<div class="tab-pane fade" id="ldtrait-tab">
+			<div class="tab-pane fade not-home" id="ldtrait-tab">
 				<!-- LDtrait INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -1715,7 +1703,7 @@
 			<!--  END OF ldtrait -->
 
 			<!-- SNPclip -->
-			<div class="tab-pane fade" id="snpclip-tab">
+			<div class="tab-pane fade not-home" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -1876,7 +1864,7 @@
 			<!--  END OF snpclip -->
 
 			<!-- SNPchip -->
-			<div class="tab-pane fade" id="snpchip-tab">
+			<div class="tab-pane fade not-home" id="snpchip-tab">
 				<!-- SNPchip INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
@@ -2060,7 +2048,7 @@
 			<!--  END OF snpchip -->
 
 			<!-- API Access -->
-			<div class="tab-pane fade" id="apiaccess-tab">
+			<div class="tab-pane fade not-home" id="apiaccess-tab">
 				<div class="container-fluid">
 					<div class="text-center">
 						<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programmatic Access!</h2>
@@ -2289,7 +2277,7 @@
 			</div>
 
 			<!-- Help -->
-			<div class="tab-pane fade" id="help-tab">
+			<div class="tab-pane fade not-home" id="help-tab">
 			</div>
 		</div>
 	</div>
