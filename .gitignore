@@ -19,4 +19,5 @@ chromedriver*
 
 data/
 LDlink/tmp/
+LDlink/config.yml
 LDlink/SNP_Query_loginInfo_test.ini
