@@ -251,12 +251,6 @@ def calculate_chip(snplst, platform_query, web, request):
         else:
             snp_coords_sort[i][1] = str(snp_coords_sort[i][1])
 
-    # Connect to Mongo snp database
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@localhost/admin', mongo_port)
-    else:
-        client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
     platformcount = 0
     count = 0
     platform_NOT = []
