@@ -14,10 +14,6 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 
-# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-# username = contents[0].split('=')[1]
-# password = contents[1].split('=')[1]
-# port = int(contents[2].split('=')[1])
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as f:	
@@ -27,6 +23,9 @@ api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 pop_dir = config['data']['pop_dir']	
 vcf_dir = config['data']['vcf_dir']
+mongo_username = config['database']['mongo_user_readonly']
+mongo_password = config['database']['mongo_password']
+mongo_port = config['database']['mongo_port']
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
@@ -485,21 +484,16 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1):
 
     # Connect to Mongo snp database
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = contents[0].split('=')[1]
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
     if web:
-        client = MongoClient('mongodb://' + username + ':' + password + '@'+mongo_host+'/admin', port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
     else:
         if env == 'local':
-            client = MongoClient('mongodb://' + username + ':' + password + '@'+mongo_host+'/admin', port)
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
         else:
-            client = MongoClient('localhost', port)
+            client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():

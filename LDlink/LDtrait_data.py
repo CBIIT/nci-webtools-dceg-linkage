@@ -21,6 +21,9 @@ with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as c:
     config = yaml.load(c)
 ldtrait_src = config['data']['ldtrait_src']
 tmp_dir = config['data']['tmp_dir']
+mongo_username = config['database']['mongo_user_api']
+mongo_password = config['database']['mongo_password']
+mongo_port = config['database']['mongo_port']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -43,16 +46,9 @@ def main():
     filename = downloadGWASCatalog()
     print(filename + " downloaded.")
 
-    # client = MongoClient('mongodb://localhost/LDLink')
-    # client = MongoClient('mongodb://' + username + ':' + password + '@localhost/LDLink', port)
     # Connect to Mongo snp database
     if instance == "web":
-        contents = open("/analysistools/public_html/apps/LDlink/app/SNP_Query_loginInfo.ini").read().split('\n')
-        # contents = open("./SNP_Query_loginInfo_test.ini").read().split('\n')
-        username = 'ncianalysis_api'
-        password = contents[1].split('=')[1]
-        port = int(contents[2].split('=')[1])
-        client = MongoClient('mongodb://' + username + ':' + password + '@localhost/LDLink', port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@localhost/LDLink', mongo_port)
     else:
         client = MongoClient('localhost')
     db = client["LDLink"]
