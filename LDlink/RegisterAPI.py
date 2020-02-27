@@ -11,10 +11,6 @@ import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
-# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-# username = 'ncianalysis_api'
-# password = contents[1].split('=')[1]
-# port = int(contents[2].split('=')[1])
 
 # blocked users attribute: 0=false, 1=true
 
@@ -131,32 +127,33 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
 
 # check if user email record exists
 def getEmailRecord(email, env, api_mongo_addr):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     emailRecord = users.find_one({"email": email})
     return emailRecord
 
 def insertUser(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     user = {
         "firstname": firstname,
@@ -175,17 +172,13 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 def logAccess(token, module):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     accessed = getDatetime()
-    if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
-    else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
     log = {
         "token": token,
@@ -202,19 +195,18 @@ def blockUser(email, url_root):
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     email_account = config['api']['email_account']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
@@ -228,19 +220,17 @@ def unblockUser(email):
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     email_account = config['api']['email_account']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
@@ -253,19 +243,18 @@ def unlockUser(email):
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     out_json = {
         "message": "Email user (" + email + ")'s token access has been unlocked."
     }
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     users.find_one_and_update({"email": email}, { "$set": {"locked": 0}})
@@ -280,16 +269,15 @@ def unlockAllUsers():
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     users.update_many({}, { "$set": {"locked": 0}})
@@ -297,16 +285,17 @@ def unlockAllUsers():
 
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+    
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     user = {
         "firstname": firstname,
@@ -324,16 +313,13 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 def checkToken(token, token_expiration, token_expiration_days):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
-    if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
-    else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
+    
+    client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -356,16 +342,15 @@ def getToken(email):
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"email": email})
@@ -378,16 +363,12 @@ def getToken(email):
 def checkBlocked(token):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
-    if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
-    else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
+    client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -403,16 +384,12 @@ def checkBlocked(token):
 def checkLocked(token):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
-    if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
-    else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
+    client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -430,21 +407,17 @@ def checkLocked(token):
 def toggleLocked(token, lock):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+    
     if "restrict_concurrency" in config['api']:
         restrict_concurrency = config['api']['restrict_concurrency']
     else: 
         restrict_concurrency = True
     if restrict_concurrency:
-        if env == 'local':
-            contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
-        else: 
-            contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-        username = 'ncianalysis_api'
-        password = contents[1].split('=')[1]
-        port = int(contents[2].split('=')[1])
-        client = MongoClient('mongodb://'+username+':'+password+'@'+api_mongo_addr+'/LDLink', port)
+        client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
         db = client["LDLink"]
         users = db.api_users
         if lock == 1:
@@ -455,16 +428,17 @@ def toggleLocked(token, lock):
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email, env, api_mongo_addr):
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"email": email})
@@ -482,16 +456,15 @@ def checkUniqueToken(token):
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+    
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
@@ -610,16 +583,15 @@ def getStats(startdatetime, enddatetime, top):
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     log = db.api_log
@@ -731,16 +703,15 @@ def getLockedUsers():
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     locked_users_json = users.find({"locked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "locked": 1,  "_id": 0 })
@@ -758,16 +729,15 @@ def getBlockedUsers():
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = 'ncianalysis_api'
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/LDLink', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
     blocked_users_json = users.find({"blocked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "blocked": 1,  "_id": 0 })
