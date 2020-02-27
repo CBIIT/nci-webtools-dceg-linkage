@@ -1266,7 +1266,7 @@ input:checked + .slider:before {
 .news-card-outside{
   display:inline-block; 
   width: 33%; 
-  height:158px; 
+  height:198px; 
   padding:0px 20px;
   margin: 10px 0;
   text-decoration:none;
@@ -1276,14 +1276,14 @@ input:checked + .slider:before {
 .news-card-left{
   background-color:#133a55; 
   display:inline-block;
-  height:158px;
+  height:198px;
   width:8%;
   vertical-align:top;
 }
 .news-card-body{
   background-color:white;
   display: inline-block;
-  height:158px;
+  height:198px;
   width:90%;
   padding: 20px 20px 0 20px;
   vertical-align:top;
@@ -1299,7 +1299,7 @@ input:checked + .slider:before {
 }
 
 .news-scroller{background-color:#1b486b; 
-  height:158px; 
+  height:198px; 
   width:3%;
   color:white; 
   display:inline-block; 
