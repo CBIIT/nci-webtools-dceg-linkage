@@ -6,10 +6,6 @@ from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
 import sys
-# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-# username = contents[0].split('=')[1]
-# password = contents[1].split('=')[1]
-# port = int(contents[2].split('=')[1])
 
 web = sys.argv[1]
 snp = sys.argv[2]
@@ -28,9 +24,11 @@ api_mongo_addr = config['api']['api_mongo_addr']
 pop_dir = config['data']['pop_dir']
 vcf_dir = config['data']['vcf_dir']
 reg_dir = config['data']['reg_dir']
+mongo_username = config['database']['mongo_user_readonly']
+mongo_password = config['database']['mongo_password']
+mongo_port = config['database']['mongo_port']
 
 tmp_dir = "./tmp/"
-
 
 # Get population ids
 pop_list = open(tmp_dir+"pops_"+request+".txt").readlines()
@@ -40,13 +38,11 @@ for i in range(len(pop_list)):
 
 pop_ids = list(set(ids))
 
-
 # Get VCF region
 vcf_file = vcf_dir+chr+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
     vcf_file, chr, start, stop)
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
-
 
 # Define function to calculate LD metrics
 def set_alleles(a1, a2):
@@ -63,7 +59,6 @@ def set_alleles(a1, a2):
         a1_n = a1[1:]
         a2_n = a2[1:]
     return(a1_n, a2_n)
-
 
 def LD_calcs(hap, allele, allele_n):
     # Extract haplotypes
@@ -135,7 +130,6 @@ con.row_factory = sqlite3.Row
 con.text_factory = str
 curr = con.cursor()
 
-
 def get_regDB(chr, pos):
     t = (pos,)
     curr.execute("SELECT * FROM "+chr+" WHERE position=?", t)
@@ -145,33 +139,25 @@ def get_regDB(chr, pos):
     else:
         return a[1]
 
-
 # Connect to Mongo snp database
 if env == 'local':
-    contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
     mongo_host = api_mongo_addr
 else: 
-    contents = open("SNP_Query_loginInfo.ini").read().split('\n')
     mongo_host = 'localhost'
-username = contents[0].split('=')[1]
-password = contents[1].split('=')[1]
-port = int(contents[2].split('=')[1])
 if web == "True":
-    client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
 else:
     if env == 'local':
-        client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        client = MongoClient('localhost', port)
+        client = MongoClient('localhost', mongo_port)
 db = client["LDLink"]
-
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
     query_results = db.dbsnp151.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
-
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()

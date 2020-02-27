@@ -15,10 +15,6 @@ import operator
 import os
 import json
 import sys
-# contents = open("SNP_Query_loginInfo.ini").read().split('\n')
-# username = contents[0].split('=')[1]
-# password = contents[1].split('=')[1]
-# port = int(contents[2].split('=')[1])
 
 
 def get_platform_request(web):
@@ -28,23 +24,22 @@ def get_platform_request(web):
             config = yaml.load(c)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
+        mongo_username = config['database']['mongo_user_readonly']
+        mongo_password = config['database']['mongo_password']
+        mongo_port = config['database']['mongo_port']
+
         # Connect to Mongo snp database
         if env == 'local':
-            contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
             mongo_host = api_mongo_addr
         else: 
-            contents = open("SNP_Query_loginInfo.ini").read().split('\n')
             mongo_host = 'localhost'
-        username = contents[0].split('=')[1]
-        password = contents[1].split('=')[1]
-        port = int(contents[2].split('=')[1])
         if web:
-            client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
         else:
             if env == 'local':
-                client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
             else:
-                client = MongoClient('localhost', port)
+                client = MongoClient('localhost', mongo_port)
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -66,24 +61,22 @@ def convert_codeToPlatforms(platform_query, web):
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_readonly']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
     platforms = []
     # Connect to Mongo snp database
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = contents[0].split('=')[1]
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
     if web:
-        client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
         if env == 'local':
-            client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
-            client = MongoClient('localhost', port)
+            client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
@@ -101,6 +94,9 @@ def calculate_chip(snplst, platform_query, web, request):
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
+    mongo_username = config['database']['mongo_user_readonly']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
 
     tmp_dir = "./tmp/"
 
@@ -128,21 +124,16 @@ def calculate_chip(snplst, platform_query, web, request):
 
     # Connect to Mongo snp database
     if env == 'local':
-        contents = open("SNP_Query_loginInfo_test.ini").read().split('\n')
         mongo_host = api_mongo_addr
     else: 
-        contents = open("SNP_Query_loginInfo.ini").read().split('\n')
         mongo_host = 'localhost'
-    username = contents[0].split('=')[1]
-    password = contents[1].split('=')[1]
-    port = int(contents[2].split('=')[1])
     if web:
-        client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
         if env == 'local':
-            client = MongoClient('mongodb://'+username+':'+password+'@'+mongo_host+'/admin', port)
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
-            client = MongoClient('localhost', port)
+            client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):
@@ -260,12 +251,6 @@ def calculate_chip(snplst, platform_query, web, request):
         else:
             snp_coords_sort[i][1] = str(snp_coords_sort[i][1])
 
-    # Connect to Mongo snp database
-    if web:
-        client = MongoClient('mongodb://'+username+':'+password+'@localhost/admin', port)
-    else:
-        client = MongoClient('localhost', port)
-    db = client["LDLink"]
     platformcount = 0
     count = 0
     platform_NOT = []
