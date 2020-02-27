@@ -39,22 +39,23 @@ $(document).ready(function() {
 
     // Load news text from news.html to news-container div
     $.get("news.html", function (data) {
-        console.log(data.split("<p>"));
         let tmpData = data.split("<p>")
         let i = 0;
-        newsList = [];
+        var newsHTMLList = [];
         
         for (i = 1; i < tmpData.length; i++){
             let toPush = "<p>" + tmpData[i];
-            newsList.push(toPush);
-            console.log(toPush)
-
+            newsHTMLList.push(toPush);
         }
+        newsList.push("<p>Interested in accessing LDlink's API using R? <br> <br>Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
+        newsList.push("<p>Bogged down organizing authors and affiliations on journal title pages for large studies? <br> <br>Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
+        newsList.push(newsHTMLList[0].replace("<br>","") + "<p>(details on <a id=\"version-history-link\">version history</a>)</p>");
 
         $("#news-card-1").html(newsList[0]);
         $("#news-card-2").html(newsList[1]);
-        $("#news-card-3").html(newsList[2]);
-        //$("#news-container").append(data);
+        $("#news-card-3").html(newsList[2].replace("<br>","") );
+        testResize();
+        $("#news-container").append(data);
     });
     
     $('#progressbar').progressbar();
@@ -219,7 +220,8 @@ $(document).ready(function() {
     updateVersion(ldlink_version);
     //addValidators();
     $('#ldlink-tabs').on('click', 'a', function(e) {
-        //console.warn("You clicked a tab");
+        console.warn("You clicked a tab");
+        setupTabs();
         //console.info("Check for an attribute called data-url");
         //If data-url use that.
         var currentTab = e.target.id.substr(0, e.target.id.search('-'));
@@ -309,6 +311,7 @@ $(document).ready(function() {
 
     $(".anchor-link").on('click', function(e) { 
         var tab = $(this).attr('dest');
+        console.log("click")
         $('#' + tab + '-tab-anchor').click();
     });
 
@@ -875,6 +878,7 @@ function setupTabs() {
     $.each(modules, function(key, id) {
         $("#"+id+"-tab-anchor").removeClass('active');
     });
+    console.log('setup');
     $("#home-tab-anchor").removeClass('active');
     $("#help-tab-anchor").removeClass('active');
     $("#apiaccess-tab-anchor").removeClass('active');
@@ -901,7 +905,7 @@ function setupTabs() {
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
     if(currentTab.search('access')>=0) currentTab = 'apiaccess';
-
+    console.log(currentTab)
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
 
@@ -4314,32 +4318,43 @@ function eraseCookie(name) {
 
 $("#news-right-arrow").on('click',  function() {
     if($("#news-right-arrow").hasClass("enabled-news-scroller")){
-
-        homeStartBox += 1;
-        $("#news-card-1").html(newsList[homeStartBox]);
-        $("#news-card-2").html(newsList[homeStartBox+1]);
-        $("#news-card-3").html(newsList[homeStartBox+2]);
-        console.log(newsList.length)
-        if(homeStartBox + 3 >= newsList.length){
-            $("#news-right-arrow").removeClass("enabled-news-scroller")
-            $("#news-right-arrow").addClass("disabled-news-scroller")
+        if($('#news-card-outside-2').css("display") != "none"){
+            homeStartBox += 1;
+            $("#news-card-1").html(newsList[homeStartBox]);
+            $("#news-card-2").html(newsList[homeStartBox+1]);
+            $("#news-card-3").html(newsList[homeStartBox+2]);
+            if(homeStartBox + 3 >= newsList.length){
+                $("#news-right-arrow").removeClass("enabled-news-scroller")
+                $("#news-right-arrow").addClass("disabled-news-scroller")
+            }
+            if($("#news-left-arrow").hasClass("disabled-news-scroller")){
+                $("#news-left-arrow").addClass("enabled-news-scroller")
+                $("#news-left-arrow").removeClass("disabled-news-scroller")
+            }
         }
-        if($("#news-left-arrow").hasClass("disabled-news-scroller")){
-            $("#news-left-arrow").addClass("enabled-news-scroller")
-            $("#news-left-arrow").removeClass("disabled-news-scroller")
+        else{
+            if(homeStartBox < newsList.length-1){
+                homeStartBox += 1;
+                $("#news-card-1").html(newsList[homeStartBox]);
+                if(homeStartBox >= newsList.length - 1){
+                    $("#news-right-arrow").removeClass("enabled-news-scroller")
+                    $("#news-right-arrow").addClass("disabled-news-scroller")
+                }
+                if($("#news-left-arrow").hasClass("disabled-news-scroller")){
+                    $("#news-left-arrow").addClass("enabled-news-scroller")
+                    $("#news-left-arrow").removeClass("disabled-news-scroller")
+                }
+            }
         }
     }
-    console.log(JSON.stringify(newsList))
 });
 
 $("#news-left-arrow").on('click',  function() {
     if($("#news-left-arrow").hasClass("enabled-news-scroller")){
-
         homeStartBox -= 1;
         $("#news-card-1").html(newsList[homeStartBox]);
         $("#news-card-2").html(newsList[homeStartBox+1]);
         $("#news-card-3").html(newsList[homeStartBox+2]);
-        console.log(newsList.length)
         if(homeStartBox <= 0){
             $("#news-left-arrow").removeClass("enabled-news-scroller")
             $("#news-left-arrow").addClass("disabled-news-scroller")
@@ -4349,5 +4364,93 @@ $("#news-left-arrow").on('click',  function() {
             $("#news-right-arrow").removeClass("disabled-news-scroller")
         }
     }
-    console.log(JSON.stringify(newsList))
+});
+
+
+/*
+$(".dropdown-nav").on('click mouseover', function() {
+    if($(".dropdown-nav .dropdown-content").css("display") == "block"){
+        $(".dropdown-nav .dropdown-content").css("display", "none") 
+    }
+    else{
+        $(".dropdown-nav .dropdown-content").css("display", "block") 
+    }
+})*/
+/*
+$("html").on('click',function(e){
+    console.log(e.target.id)
+    if($(".dropdown-nav:hover .dropdown-content").css("display") == "none" && e.target.id != "LD-tools-expandable"){
+        $(".dropdown-nav:hover .dropdown-content").css("display", "block") 
+    }
+})*/
+/*
+$('.dropdown-toggle').click(function(e) {
+    if ($(document).width() > 768) {
+      e.preventDefault();
+  
+      var url = $(this).attr('href');
+  
+         
+      if (url !== '#') {
+      
+        window.location.href = url;
+      }
+  
+    }
+  });*/
+
+function testResize(){
+    console.log("resized");
+    if($('#news-card-outside-2').css('display') == "none"){
+        console.log(homeStartBox)
+        console.log(newsList.length)
+        if(homeStartBox < newsList.length - 1){
+            console.log("does not exxist")
+            if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+                $("#news-right-arrow").addClass("enabled-news-scroller")
+                $("#news-right-arrow").removeClass("disabled-news-scroller")
+            }
+        }
+    }
+    if($('#news-card-outside-2').css('display') != "none"){
+        console.log("exists")
+        if(homeStartBox > newsList.length - 3){
+            homeStartBox = newsList.length - 3;
+        }
+        console.log(homeStartBox)
+        if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+            $("#news-right-arrow").addClass("enabled-news-scroller")
+            $("#news-right-arrow").removeClass("disabled-news-scroller")
+        }
+        $("#news-card-1").html(newsList[homeStartBox]);
+        $("#news-card-2").html(newsList[homeStartBox+1]);
+        $("#news-card-3").html(newsList[homeStartBox+2]);
+        if(homeStartBox + 3 >= newsList.length){
+            $("#news-right-arrow").removeClass("enabled-news-scroller")
+            $("#news-right-arrow").addClass("disabled-news-scroller")
+        }
+
+        if(homeStartBox == 0 && $("#news-left-arrow").hasClass("enabled-news-scroller")){
+            console.log("here")
+            $("#news-left-arrow").removeClass("enabled-news-scroller")
+            $("#news-left-arrow").addClass("disabled-news-scroller")
+        }
+    }
+}
+
+
+$("#version-history-link").on('click',  function() {
+    console.log("HELLO");
+    $('#help-tab-anchor').click();
+});
+
+
+var timeout = false, // holder for timeout id
+delay = 250; // delay after event is "complete" to run callback
+
+window.addEventListener('resize', function() {
+    // clear the timeout
+    clearTimeout(timeout);
+    // start timing for event "completion"
+    timeout = setTimeout(testResize, delay);
 });
