@@ -83,6 +83,11 @@ body {
 /* Create yellow bar on active nav button */
 .navbar-nav li.active {
   border-bottom: 4px solid #F5AB35;
+  background-color:grey;
+}
+
+.dropdown-menu li.active {
+  background-color:lightgrey;
 }
 
 .navbar-nav li.active a {
@@ -90,7 +95,15 @@ body {
 }
 
 .navbar-nav>li a:hover {
-  background: grey !important;
+  background: grey ;
+}
+
+.navbar-nav>li div:hover {
+  background: grey ;
+}
+
+.dropdown-menu>li a:hover{
+  background: lightgrey !important;
 }
 
 .instructions {
@@ -1171,7 +1184,6 @@ input:checked + .slider:before {
 }
 
 .dropdown-text {
-  background-color:white !important;
   display:block;
   width:100%;
   text-decoration: none;
@@ -1183,7 +1195,6 @@ input:checked + .slider:before {
 }
 */
 .dropdown-text:hover {
-  background-color:black !important;
   text-decoration: none !important;
 }
 .dropdown-nav:hover .dropdown-content {
@@ -1396,4 +1407,13 @@ input:checked + .slider:before {
   .card-row{
     min-height:50px;
   }
+}
+
+.dropdown-menu > .active > a, .dropdown-menu > .active > a:focus, .dropdown-menu > .active > a:hover{
+  background-image:none;
+  background-color:lightgrey;
+}
+
+.active-drop{
+  border-bottom: 4px solid #F5AB35;
 }
