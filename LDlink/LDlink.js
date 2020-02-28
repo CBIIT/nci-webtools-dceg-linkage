@@ -57,7 +57,7 @@ $(document).ready(function() {
         console.log(newsList)
         testResize();
         $("#version-link").on('click',function(){
-             
+            window.scrollTo(0,0);
             console.log("Hello!");
             $('#version-tab-anchor').click();
             console.log($("#news-link").html());
