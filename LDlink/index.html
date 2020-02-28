@@ -169,7 +169,7 @@
 					</li>
 					<!--Version history-->
 					<li>
-						<a id="version-history-tab-anchor" href="#version-history-tab" data-toggle="tab">Version History</a>
+						<a id="version-tab-anchor" href="#version-tab" data-toggle="tab">Version History</a>
 					</li>
 					<!-- HELP -->
 					<li>
@@ -186,15 +186,15 @@
 			<div class="tab-pane fade" id="home-tab">
 
 				<div class="text-center">
-					<h2><img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"></h2>
+					<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h2>
 				</div>
 				<div class="text-center" style = "max-width:1200px; margin:auto;">
-						<p>Welcome to LDlink! LDlink is a suite of web-based applications designed to
+						<p>LDlink is a suite of web-based applications designed to
 								easily and efficiently interrogate linkage disequilibrium in
 								population groups. Each included application is specialized for querying and displaying unique aspects of linkage disequilibrium.</p>
 				</div>
 				
-				<div style="width:100%; background-color:#1f496f; padding-bottom:20px; padding-top:20px">
+				<div style="width:100%; background-color:#536e84; padding-bottom:20px; padding-top:20px">
 					<div class="card-row">
 						<div class = "card-outside">
 						<a class="card anchor-link"  dest="ldassoc">
@@ -367,7 +367,7 @@
 			<div class="tab-pane fade not-home" id="ldassoc-tab">
 				<!-- ldassoc INPUTS-->
 				<div class="container-fluid">
-					<h2>LDassoc</h2>
+					<h2 class="text-center">LDassoc</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- ldassoc FORM -->
 						<form id="ldassocForm" class="ldlinkForm">
@@ -730,7 +730,7 @@
 			<div class="tab-pane fade not-home" id="ldhap-tab">
 				<!-- LDhap INPUTS-->
 				<div class="container-fluid">
-					<h2>LDhap</h2>
+					<h2 class="text-center">LDhap</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDHap FORM -->
 						<form id="ldhapForm" class="ldlinkForm">
@@ -882,7 +882,7 @@
 			<div class="tab-pane fade not-home" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
-					<h2>LDmatrix</h2>
+					<h2 class="text-center">LDmatrix</h2>
 					<div class="row" style="padding-top: 10px;">
 						<div class="alert alert-danger ffWarning">You are using
 							a version of Firefox that does not render tool tips properly in the
@@ -1002,7 +1002,7 @@
 			<!-- LDpair -->
 			<div class="tab-pane fade not-home" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
-				<h2>LDpair</h2>
+				<h2 class="text-center">LDpair</h2>
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-sm-11">
 						<!-- FORM 4 LDPair -->
@@ -1183,7 +1183,7 @@
 			<!-- LDpop -->
 			<div class="tab-pane fade not-home" id="ldpop-tab">
 				<!-- LDpop INPUTS-->
-				<h2>LDpop</h2>
+				<h2 class="text-center">LDpop</h2>
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-sm-11">
 						<!-- FORM 4 LDpop -->
@@ -1471,7 +1471,7 @@
 			<!-- LDproxy -->
 			<div class="tab-pane fade not-home" id="ldproxy-tab">
 				<!-- LDproxy INPUTS-->
-				<h2>LDproxy</h2>
+				<h2 class="text-center">LDproxy</h2>
 				<div class="row" style="padding-top: 10px;">
 					<div class="alert alert-danger ffWarning">You are using a
 						version of Firefox that does not render tool tips properly in the
@@ -1621,7 +1621,7 @@
 			<div class="tab-pane fade not-home" id="ldtrait-tab">
 				<!-- LDtrait INPUTS-->
 				<div class="container-fluid">
-					<h2>LDtrait</h2>
+					<h2 class="text-center">LDtrait</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDtrait FORM -->
 						<form id="ldtraitForm" class="ldlinkForm">
@@ -1786,7 +1786,7 @@
 			<div class="tab-pane fade not-home" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
 				<div class="container-fluid">
-					<h2>SNPclip</h2>
+					<h2 class="text-center">SNPclip</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPclip FORM -->
 						<form id="snpclipForm" class="ldlinkForm">
@@ -1948,7 +1948,7 @@
 			<div class="tab-pane fade not-home" id="snpchip-tab">
 				<!-- SNPchip INPUTS-->
 				<div class="container-fluid">
-					<h2>SNPchip</h2>
+					<h2 class="text-center">SNPchip</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPchip FORM -->
 						<form id="snpchipForm" class="ldlinkForm">
@@ -2362,6 +2362,7 @@
 				<div class="container-fluid">
 					<div class="text-center">
 						<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">  Citations!</h2>
+						<p>Thank you for using LDlink! If you use LDlink in any publication please cite the LDlink manuscript and any relevant module publications:</p>
 					</div>
 				</br>
 					<div style="padding-left:20px; padding-right:20px;">
@@ -2379,15 +2380,11 @@
 						Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" title="LDpop PubMed link" target="_blank" alt="LDpop PubMed article link">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> 
 						BMC <i>Bioinformatics</i>. 2020 Jan 10. 
 					</p>
-					<p> Machiela MJ, Chanock SJ. LDlink a web-based application for exploring population-specific
-							haplotype structure and linking correlated alleles of possible functional variants. <i>Bioinformatics</i>.
-							2015 Jul 2. PMID: <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="PubMed">26139635</a>.
-						</p>
 						</div>
 				</div>
 			</div>
 
-			<div class="tab-pane fade not-home" id="version-history-tab">
+			<div class="tab-pane fade not-home" id="version-tab">
 					<div class="container-fluid">
 						<div class="text-center">
 							<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">  Version History!</h2>
@@ -2452,7 +2449,7 @@
 			<ul class="list-inline">
 				NIH ... Turning Discovery Into Health<sup>&reg;</sup>
 			</ul>
-			<!-- Social media icons -->
+			<!-- Social media icons 
 			<div class="navbar-text social" style="float:right;">SHARE
 				<a href="http://www.facebook.com/sharer.php?u=http://analysistools.nci.nih.gov/LDlink&t=LDlink: an interactive suite of web-based applications designed to easily and efficiently explore linkage disequilibrium in population groups"
 					target="facebook"><i class="fa fa-lg fa-facebook"></i><span class="sr-only">Facebook</span></a>
@@ -2463,6 +2460,7 @@
 				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i
 						class="fa fa-lg fa-linkedin"></i><span class="sr-only">linkedin</span></a>
 			</div>
+		-->
 		</div>
 	</div>
 

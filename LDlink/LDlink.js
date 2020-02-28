@@ -49,17 +49,17 @@ $(document).ready(function() {
         }
         newsList.push("<p>Interested in accessing LDlink's API using R? <br> <br>Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
         newsList.push("<p>Bogged down organizing authors and affiliations on journal title pages for large studies? <br> <br>Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
-        newsList.push(newsHTMLList[0].replace("<br>","") + "<p style=\"margin-bottom:0px\">(See <a id=\"version-history-link\" >version history</a>)</p>");
+        newsList.push(newsHTMLList[0].replace("<br>","") + "<p style=\"margin-bottom:0px\">(See <a id=\"version-link\" >version history</a>)</p>");
 
         $("#news-card-1").html(newsList[0]);
         $("#news-card-2").html(newsList[1]);
         $("#news-card-3").html(newsList[2].replace("<br>","") );
         console.log(newsList)
         testResize();
-        $("#version-history-link").on('click',function(){
+        $("#version-link").on('click',function(){
              
             console.log("Hello!");
-            $('#version-history-tab-anchor').click();
+            $('#version-tab-anchor').click();
             console.log($("#news-link").html());
             
             //$("#news-link").click();

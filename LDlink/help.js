@@ -20,13 +20,13 @@ var ldTraitSort;
 var ldClipRaw;
 var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
 var homeStartBox = 0;
-
+/*
 $(document).ready(function() {
     $.get("news.html", function (data) {
         $("#news-container").append(data);
     });
 });
-
+*/
 
 $("#news-link").on('click',function(){
     console.log( $("#news-container").offset())
