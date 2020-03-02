@@ -319,34 +319,16 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                 r2 = round((delta**2) / Ms, 3)
 
                 # Find Correlated Alleles
-                if float(r2) > 0.1:
-                    N = A + B + C + D
-                    # Expected Cell Counts
-                    eA = (A + B) * (A + C) / N
-                    eB = (B + A) * (B + D) / N
-                    eC = (C + A) * (C + D) / N
-                    eD = (D + C) * (D + B) / N
+                if str(r2) != "NA" and float(r2) > 0.1:
+                    Ac=hap[sorted(hap)[0]]
+                    Bc=hap[sorted(hap)[1]]
+                    Cc=hap[sorted(hap)[2]]
+                    Dc=hap[sorted(hap)[3]]
 
-                    # Calculate Deltas
-                    dA = (A - eA)**2
-                    dB = (B - eB)**2
-                    dC = (C - eC)**2
-                    dD = (D - eD)**2
-                    dmax = max(dA, dB, dC, dD)
-
-                    if dA == dB == dC == dD:
-                        if tmax == dA or tmax == dD:
-                            match = sorted(hap)[0][
-                                0] + "=" + sorted(hap)[0][1] + "," + sorted(hap)[2][0] + "=" + sorted(hap)[1][1]
-                        else:
-                            match = sorted(hap)[0][
-                                0] + "=" + sorted(hap)[1][1] + "," + sorted(hap)[2][0] + "=" + sorted(hap)[0][1]
-                    elif dmax == dA or dmax == dD:
-                        match = sorted(hap)[0][
-                            0] + "=" + sorted(hap)[0][1] + "," + sorted(hap)[2][0] + "=" + sorted(hap)[1][1]
+                    if ((Ac*Dc) / max((Bc*Cc), 0.01) > 1):
+                        match = sorted(hap)[0][0] + "=" + sorted(hap)[0][1] + "," + sorted(hap)[3][0] + "=" + sorted(hap)[3][1]
                     else:
-                        match = sorted(hap)[0][
-                            0] + "=" + sorted(hap)[1][1] + "," + sorted(hap)[2][0] + "=" + sorted(hap)[0][1]
+                        match = sorted(hap)[1][0] + "=" + sorted(hap)[1][1] + "," + sorted(hap)[2][0] + "=" + sorted(hap)[2][1]
                 else:
                     match = "  =  ,  =  "
             else:
