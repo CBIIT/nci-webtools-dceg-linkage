@@ -87,30 +87,19 @@ def LD_calcs(hap, allele, allele_n):
         # R2
         r2 = (delta**2)/Ms
 
-        # Find Correlated Alleles
         equiv = "="
-        if float(r2) > 0.1:
+       
+        # Find Correlated Alleles
+        if str(r2) != "NA" and float(r2) > 0.1:
+            Ac=hap[sorted(hap)[0]]
+            Bc=hap[sorted(hap)[1]]
+            Cc=hap[sorted(hap)[2]]
+            Dc=hap[sorted(hap)[3]]
 
-            # Expected Cell Counts
-            eA = (A+B)*(A+C)/N
-            eB = (B+A)*(B+D)/N
-            eC = (C+A)*(C+D)/N
-            eD = (D+C)*(D+B)/N
-
-            # Calculate Deltas
-            dA = (A-eA)**2
-            dB = (B-eB)**2
-            dC = (C-eC)**2
-            dD = (D-eD)**2
-            dmax = max(dA, dB, dC, dD)
-
-            if dmax == dA or dmax == dD:
-                match = allele_n["0"]+equiv+allele["0"] + \
-                    ","+allele_n["1"]+equiv+allele["1"]
+            if ((Ac*Dc) / max((Bc*Cc), 0.01) > 1):
+                match = allele_n[sorted(hap)[0][0]] + equiv + allele[sorted(hap)[0][1]] + "," + allele_n[sorted(hap)[3][0]] + equiv + allele[sorted(hap)[3][1]]
             else:
-                match = allele_n["1"]+equiv+allele["0"] + \
-                    ","+allele_n["0"]+equiv+allele["1"]
-
+                match = allele_n[sorted(hap)[1][0]] + equiv + allele[sorted(hap)[1][1]] + "," + allele_n[sorted(hap)[2][0]] + equiv + allele[sorted(hap)[2][1]]
         else:
             match = "NA"
 
