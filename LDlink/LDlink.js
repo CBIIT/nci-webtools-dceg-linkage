@@ -47,8 +47,8 @@ $(document).ready(function() {
             let toPush = "<p>" + tmpData[i];
             newsHTMLList.push(toPush);
         }
-        newsList.push("<p><b>Interested in accessing LDlink's API using R?</b> <br> <br>Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
-        newsList.push("<p><b>Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br> <br>Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
+        newsList.push("<p><b>LDlinkR</b><br style=\"margin-bottom:5px;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
+        newsList.push("<p><b>Author Arranger</b><br style=\"margin-bottom:5px;\">Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
         newsList.push(newsHTMLList[0].replace("<br>","") + "<p style=\"margin-bottom:0px\">(See <a id=\"version-link\" >version history</a>)</p>");
 
         $("#news-card-1").html(newsList[0]);
