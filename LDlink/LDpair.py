@@ -371,16 +371,12 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         Dc=hap[sorted(hap)[3]]
 
         if ((Ac*Dc) / max((Bc*Cc), 0.01) > 1):
-            corr1 = snp1 + "(" + sorted(hap)[0].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
-            corr2 = snp1 + "(" + sorted(hap)[3].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
+            corr1 = snp1 + "(" + sorted(hap)[0].split("_")[0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[0].split("_")[1] + ") allele"
+            corr2 = snp1 + "(" + sorted(hap)[3].split("_")[0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[3].split("_")[1] + ") allele"
             corr_alleles = [corr1, corr2]
         else:
-            corr1 = snp1 + "(" + sorted(hap)[1].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
-            corr2 = snp1 + "(" + sorted(hap)[2].split("_")[
-                    0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
+            corr1 = snp1 + "(" + sorted(hap)[1].split("_")[0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[1].split("_")[1] + ") allele"
+            corr2 = snp1 + "(" + sorted(hap)[2].split("_")[0] + ") allele is correlated with " + snp2 + "(" + sorted(hap)[2].split("_")[1] + ") allele"
             corr_alleles = [corr1, corr2]
     else:
         corr_alleles = [snp1 + " and " + snp2 + " are in linkage equilibrium"]
