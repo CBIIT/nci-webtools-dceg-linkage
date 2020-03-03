@@ -47,16 +47,36 @@ $(document).ready(function() {
             let toPush = "<p>" + tmpData[i];
             newsHTMLList.push(toPush);
         }
+
+        let lastNews = "";
+        let versionNews=newsHTMLList[0].replace("<br>","");
+        let numFound = 0;
+        for(let i = 0; i < 3; i++){
+            if(versionNews.indexOf("</li>") != -1){
+                lastNews += versionNews.substring(0, versionNews.indexOf("</li>") + 5);
+                versionNews = versionNews.substring(versionNews.indexOf("</li>") + 6);
+                numFound += 1;
+            }
+            else{
+                i = 3;
+            }
+        }
+        if(numFound == 3){
+            lastNews += "<li> <a class=\"version-link\" >Show more</a></li>"
+        }
+        lastNews += "</ul>"
+        console.log(lastNews);
+
         newsList.push("<p><b style=\"margin-bottom:12px;\">LDlinkR</b><br style=\"margin-bottom:12px;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
         newsList.push("<p><b style=\"margin-bottom:12px;\">AuthorArranger</b><br style=\"margin-bottom:12px;\">Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
-        newsList.push(newsHTMLList[0].replace("<br>","") + "<p style=\"margin-bottom:0px\">(See <a id=\"version-link\" >version history</a>)</p>");
+        newsList.push(lastNews + "<p style=\"margin-bottom:0px\">(See <a class=\"version-link\" >version history</a>)</p>");
 
         $("#news-card-1").html(newsList[0]);
         $("#news-card-2").html(newsList[1]);
         $("#news-card-3").html(newsList[2].replace("<br>","") );
         console.log(newsList)
         testResize();
-        $("#version-link").on('click',function(){
+        $(".version-link").on('click',function(){
             window.scrollTo(0,0);
             console.log("Hello!");
             $('#version-tab-anchor').click();
@@ -929,10 +949,10 @@ function setupTabs() {
         }
     });
     if(found == true){
-        $(".dropdown-toggle").addClass("active-drop")
+        $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
     }
     else{
-        $(".dropdown-toggle").removeClass("active-drop")
+        $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
     }
     
     if(typeof url.inputs !="undefined") {
@@ -4494,10 +4514,10 @@ function clearTabs(currentTab){
     console.log("found: " + found);
     if(found == true){
         console.log()
-        $(".dropdown-toggle").addClass("active-drop")
+        $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
     }
     else{
-        $(".dropdown-toggle").removeClass("active-drop")
+        $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
     }
     
 }
