@@ -1233,11 +1233,12 @@ input:checked + .slider:before {
 }
 .card-body p{
   margin:0;
+  color:#566473;
 }
 .card-outside{
   transition: all 0.4s ease-in-out;
   display:inline-block; 
-  width: 33%; 
+  width: 33%;
   height:168px; 
   padding:0px 20px;
   margin: 10px 0;
@@ -1421,4 +1422,8 @@ input:checked + .slider:before {
 .navbar .navbar-nav .open .dropdown-menu > .active > a{
   background-image:none;
   background-color:lightgrey;
+}
+
+.card:hover .card-body p{
+  color: #337ab7;
 }
