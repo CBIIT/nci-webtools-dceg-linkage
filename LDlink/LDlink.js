@@ -4395,6 +4395,16 @@ $("#news-right-arrow").on('click',  function() {
             }
         }
     }
+    $(".version-link").on('click',function(){
+        window.scrollTo(0,0);
+        console.log("Hello!");
+        $('#version-tab-anchor').click();
+        console.log($("#news-link").html());
+        
+        //$("#news-link").click();
+        
+        //$("#news-link").click();
+    });
 });
 
 $("#news-left-arrow").on('click',  function() {
@@ -4412,6 +4422,16 @@ $("#news-left-arrow").on('click',  function() {
             $("#news-right-arrow").removeClass("disabled-news-scroller")
         }
     }
+    $(".version-link").on('click',function(){
+        window.scrollTo(0,0);
+        console.log("Hello!");
+        $('#version-tab-anchor').click();
+        console.log($("#news-link").html());
+        
+        //$("#news-link").click();
+        
+        //$("#news-link").click();
+    });
 });
 
 
@@ -4449,7 +4469,7 @@ $('.dropdown-toggle').click(function(e) {
 
 function testResize(){
     console.log("resized");
-    //if became smaller
+    //if became smalle
     if($('#news-card-outside-2').css('display') == "none"){
         console.log(homeStartBox)
         console.log(newsList.length)
@@ -4485,6 +4505,16 @@ function testResize(){
             $("#news-left-arrow").addClass("disabled-news-scroller")
         }
     }
+    $(".version-link").on('click',function(){
+        window.scrollTo(0,0);
+        console.log("Hello!");
+        $('#version-tab-anchor').click();
+        console.log($("#news-link").html());
+        
+        //$("#news-link").click();
+        
+        //$("#news-link").click();
+    });
 }
 
 
