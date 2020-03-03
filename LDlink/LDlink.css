@@ -1417,3 +1417,8 @@ input:checked + .slider:before {
 .active-drop{
   border-bottom: 4px solid #F5AB35;
 }
+
+.navbar .navbar-nav .open .dropdown-menu > .active > a{
+  background-image:none;
+  background-color:lightgrey;
+}
