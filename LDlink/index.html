@@ -32,10 +32,10 @@
 	<h1 class="sr-only sr-only-focusable">L D link Webtool</h1>
 
 	<!-- Header -->
-	<div class="header" style="background-color: #2A71A5;">
+	<div class="header" style="background-color: #F8F9FA;">
 		<div class="container">
 			<a href="http://dceg.cancer.gov/" target="_blank">
-				<img class="mw-100" height="90" src="dceg-logo-inverted.svg" alt="Division of Cancer Epidemiology &amp; Genetics"><span
+				<img class="mw-100" height="90" src="dceg-logo.svg" alt="Division of Cancer Epidemiology &amp; Genetics"><span
 				 class="sr-only">NCI National Cancer Institute</span>
 			</a>
 		</div>
@@ -49,154 +49,301 @@
 					<li class="nav nav-item mr-4">
 						<a id="home-tab-anchor" href="#home-tab" data-toggle="tab">Home</a>
 					</li>
-					<!-- ASSOC -->
-					<li>
-						<a id="ldassoc-tab-anchor" href="#ldassoc-tab" data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
-					</li>
-					<!-- HAP -->
-					<li>
-						<a id="ldhap-tab-anchor" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
-					</li>
-					<!-- MATRIX -->
-					<li>
-						<a id="ldmatrix-tab-anchor" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a>
-					</li>
-					<!-- PAIR -->
-					<li>
-						<a id="ldpair-tab-anchor" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
-					</li>
-					<!-- POP -->
-					<li>
-						<a id="ldpop-tab-anchor" href="#ldpop-tab" data-toggle="tab" title="Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations">LDpop</a>
-					</li>
-					<!-- PROXY -->
-					<li>
-						<a id="ldproxy-tab-anchor" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
-					</li>
-					<!-- TRAIT -->
-					<li>
-						<a id="ldtrait-tab-anchor" href="#ldtrait-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.">LDtrait</a>
-					</li>
-					<!-- CHIP -->
-					<li>
-						<a id="snpchip-tab-anchor" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
-					</li>
-					<!-- CLIP -->
-					<li>
-						<a id="snpclip-tab-anchor" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium">SNPclip</a>
+					<!-- LD Tools -->
+					<li class = "dropdown-nav">
+						
+						<!--
+							<a class = "dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								LD tools
+							</a>
+							<div class="dropdown-menu">
+								<a class="dropdown-item" style="color:black !important;">test</a>
+							</div>-
+
+							<a class="dropdown-menu" id="ldtools-tab-anchor" href="#" data-toggle="tab" title="List LD tools">LD tools</a>
+							<div class="dropdown-content">
+								<a id="ldassoc-tab-anchor" class="dropdown-text" href="#ldassoc-tab"  data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
+								<a id="ldhap-tab-anchor" class="dropdown-text" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
+								<a id="ldmatrix-tab-anchor" class="dropdown-text" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a>
+								<a id="ldpair-tab-anchor" class="dropdown-text" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
+								<a id="ldpop-tab-anchor" class="dropdown-text" href="#ldpop-tab" data-toggle="tab" title="Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations">LDpop</a>
+								<a id="ldproxy-tab-anchor" class="dropdown-text" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
+								<a id="ldtrait-tab-anchor" class="dropdown-text" href="#ldtrait-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.">LDtrait</a>
+								<a id="snpchip-tab-anchor" class="dropdown-text" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
+								<a id="snpclip-tab-anchor" class="dropdown-text" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium">SNPclip</a>
+							</div>-->
+							<!--
+							<div class="nav-div">LD tools <span class="caret"></span></div>
+							<div class="dropdown-content" style="margin-top:4px;">
+									<div style="width:450px; background-color:#a3abb0; padding-bottom:20px; padding-top:20px;">
+										<div style="width:400px; margin:auto">
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+												<a class="text-center anchor-link"  dest="ldassoc">
+													<h2 style="color:black; margin:0px; font-size: 16px;">LDassoc</h2>
+												</a>
+											</div>
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+												<a class="text-center anchor-link"  dest="ldassoc">
+													<h2 style="color:black; margin:0px; font-size: 16px;">LDhap</h2>
+												</a>
+											</div>
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+												<a class="text-center anchor-link"  dest="ldassoc">
+													<h2 style="color:black; margin:0px; font-size: 16px;">LDmatrix</h2>
+												</a>
+											</div>
+										</div>
+										
+											<div style="max-width:400px; margin:auto">  
+													<div class = "nav-dropdown-link nav-dropdown-link-inside">
+															<a class="text-center anchor-link"  dest="ldassoc">
+														<h2 style="color:black; margin:0px; font-size: 16px;">LDpair</h2>
+												</a>
+											</div>
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+													<a class="text-center anchor-link"  dest="ldassoc">
+														<h2 style="color:black; margin:0px;  font-size: 16px;">LDpop</h2>
+												</a>
+											</div>
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+													<a class="text-center anchor-link"  dest="ldassoc">
+														<h2 style="color:black; margin:0px;  font-size: 16px;">ldproxy</h2>
+												</a>
+											</div>
+											
+											</div>
+											<div style="max-width:400px; margin:auto">
+													<div class = "nav-dropdown-link nav-dropdown-link-inside">
+															<a class="text-center anchor-link"  dest="ldassoc">
+														<h2 style="color:black; margin:0px; font-size: 16px;">LDtrait</h2>
+												</a>
+											</div>
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+													<a class="text-center anchor-link"  dest="ldassoc">
+														<h2 style="color:black; margin:0px; font-size: 16px;">SNPchip</h2>
+												</a>
+											</div>
+											<div class = "nav-dropdown-link nav-dropdown-link-inside">
+													<a class="text-center anchor-link"  dest="ldassoc">
+														<h2 style="color:black; margin:0px; font-size: 16px;">SNPclip</h2>
+												</a>
+											</div>
+											</div>
+										</div>
+									-->
+										<!--
+								<a id="ldassoc-tab-anchor" class="dropdown-text" href="#ldassoc-tab"  data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
+								<a id="ldhap-tab-anchor" class="dropdown-text" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
+								<a id="ldmatrix-tab-anchor" class="dropdown-text" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics">LDmatrix</a>
+								<a id="ldpair-tab-anchor" class="dropdown-text" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants">LDpair</a>
+								<a id="ldpop-tab-anchor" class="dropdown-text" href="#ldpop-tab" data-toggle="tab" title="Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations">LDpop</a>
+								<a id="ldproxy-tab-anchor" class="dropdown-text" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants">LDproxy</a>
+								<a id="ldtrait-tab-anchor" class="dropdown-text" href="#ldtrait-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.">LDtrait</a>
+								<a id="snpchip-tab-anchor" class="dropdown-text" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants">SNPchip</a>
+								<a id="snpclip-tab-anchor" class="dropdown-text" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium">SNPclip</a>
+										-->
+							<!--</div>-->
+							
+							<div class="nav-div dropdown-toggle" type="button" data-toggle="dropdown">LD Tools
+							<span class="caret"></span></div>
+							<ul class="dropdown-menu" style="overflow:hidden; background-color:white;">
+								<li><a id="ldassoc-tab-anchor" class="dropdown-text" href="#ldassoc-tab"  data-toggle="tab" title="Calculate LDassoc" style="color:black !important;">LDassoc</a></li>
+								<li><a id="ldhap-tab-anchor" class="dropdown-text" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies" style="color:black !important;">LDhap</a></li>
+								<li><a id="ldmatrix-tab-anchor" class="dropdown-text" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics" style="color:black !important;">LDmatrix</a></li>
+								<li><a id="ldpair-tab-anchor" class="dropdown-text" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants" style="color:black !important;">LDpair</a></li>
+								<li><a id="ldpop-tab-anchor" class="dropdown-text" href="#ldpop-tab" data-toggle="tab" title="Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations"  style="color:black !important;">LDpop</a></li>
+								<li><a id="ldproxy-tab-anchor" class="dropdown-text" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants" style="color:black !important;">LDproxy</a></li>
+								<li><a id="ldtrait-tab-anchor" class="dropdown-text" href="#ldtrait-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease." style="color:black !important;">LDtrait</a></li>
+								<li><a id="snpchip-tab-anchor" class="dropdown-text" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants" style="color:black !important;">SNPchip</a></li>
+								<li><a id="snpclip-tab-anchor" class="dropdown-text" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium" style="color:black !important;">SNPclip</a></li>
+							</ul>
+						
 					</li>
 					<!-- API ACCESS -->
 					<li>
 						<a id="apiaccess-tab-anchor" href="#apiaccess-tab" data-toggle="tab" title="Register email to receive API token">API Access</a>
 					</li>
+					<!-- Citations -->
+					<li>
+						<a id="citations-tab-anchor" href="#citations-tab" data-toggle="tab">Citations</a>
+					</li>
+					<!--Version history-->
+					<li>
+						<a id="version-tab-anchor" href="#version-tab" data-toggle="tab">Version History</a>
+					</li>
 					<!-- HELP -->
 					<li>
-						<a id="help-tab-anchor" href="#help-tab" data-toggle="tab">Help</a>
+						<a id="help-tab-anchor" href="#help-tab" data-toggle="tab">Documentation</a>
 					</li>
 				</ul>
 		</div>
 	</nav>
 
 	<!-- Main content -->
-	<div id="main-container" class="container theme-showcase" role="main">
+	<div id="main-container" role="main">
 		<!-- Tab Content -->
 		<div id="content" class="tab-content">
 			<div class="tab-pane fade" id="home-tab">
 
 				<div class="text-center">
-					<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom">!</h2>
+					<h2>Welcome to <img src="LDlink_logo_small_clear.png" alt="LDlink" style="vertical-align:bottom"></h2>
+				</div>
+				<div class="text-center" style = "max-width:1200px; margin:auto;">
+						<p>LDlink is a suite of web-based applications designed to
+								easily and efficiently interrogate linkage disequilibrium in
+								population groups. Each included application is specialized for querying and displaying unique aspects of linkage disequilibrium.</p>
 				</div>
 				
-				<p>LDlink is a suite of web-based applications designed to
-					easily and efficiently interrogate linkage disequilibrium in
-					population groups. All population genotype data originates from
-					Phase 3 (Version 5) of the 1000 Genomes Project and variant RS numbers are indexed
-					based on dbSNP 151. Where coordinates are specified, GRCh37/hg19 is used.
-					Only bi-allelic variants are permitted as input. LDlink includes the following
-					modules:<br></p>
-
-				<p style="margin-left: 40px;">
-
-					<b><a class="anchor-link" dest="ldassoc">LDassoc</a></b>: Interactively visualize association p-value results
-					and linkage disequilibrium patterns for a genomic region of interest.
-					Input is a tab or space delimited association output file and a population
-					group.<br>
-
-					<b><a class="anchor-link" dest="ldhap">LDhap</a></b>: Calculate population specific haplotype
-					frequencies of all haplotypes observed for a list of query variants.
-					Input is a list of variant RS numbers (one per line) and a population
-					group.<br>
-
-					<b><a class="anchor-link" dest="ldmatrix">LDmatrix</a></b>: Create an interactive heatmap matrix of pairwise
-					linkage disequilibrium statistics. Input is a list of variant
-					RS numbers (one per line) and a population group.<br>
-
-					<b><a class="anchor-link" dest="ldpair">LDpair</a></b>: Investigate correlated alleles for a pair of variants in
-					high LD. Input is two RS numbers and a population group.<br>
-
-					<b><a class="anchor-link" dest="ldpop">LDpop</a></b>: Investigate allele frequencies and linkage disequilibrium patterns 
-					across 1000G populations. Input is two RS numbers and populations of interest.<br>
-
-					<b><a class="anchor-link" dest="ldproxy">LDproxy</a></b>: Interactively explore proxy and putatively
-					functional variants for a query variant. Input is a RS number and a
-					population group.<br>
-
-					<b><a class="anchor-link" dest="ldtrait">LDtrait</a></b>: Search if a list of variants (or variants in LD with those variants) 
-					have previously been associated with a trait or disease. Input is a list of variant RS numbers (one per line) and a population
-					group.<br>
-
-					<b><a class="anchor-link" dest="snpchip">SNPchip</a></b>: Find commercial genotyping platforms for variants.
-					Input is a list of variant RS numbers (one per line) and desired arrays.<br>
-
-					<b><a class="anchor-link" dest="snpclip">SNPclip</a></b>: Prune a list of variants by linkage disequilibrium.
-					Input is a list of variant RS numbers (one per line) and a population
-					group.<br>
-
-				</p>
-
+				<div style="width:100%; background-color:#536e84; padding-bottom:20px; padding-top:20px">
+					<div class="card-row">
+						<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldassoc">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px; font-size: 24px;">LDassoc</h2>
+							</div>
+							<div class="card-body">
+								<p>Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.</p>
+							</div>
+						</a>
+						</div>
+						<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldhap">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px; font-size: 24px;">LDhap</h2>
+							</div>
+							<div class="card-body">
+								<p>Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants.</p>
+							</div>
+						</a>
+					</div>
+					<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldmatrix">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px; font-size: 24px;">LDmatrix</h2>
+							</div>
+							<div class="card-body">
+								<p>Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics.</p>
+							</div>
+						</a>
+					</div>
+				</div>
+				
+					<div class="card-row">  
+						<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldpair">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px; font-size: 24px;">LDpair</h2>
+							</div>
+							<div class="card-body">
+								<p>Investigate correlated alleles for a pair of variants in high LD.</p>
+							</div>
+						</a>
+					</div>
+					<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldpop">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px;  font-size: 24px;">LDpop</h2>
+							</div>
+							<div class="card-body">
+								<p>Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations.</p>
+							</div>
+						</a>
+					</div>
+					<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldproxy">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px;  font-size: 24px;">LDproxy</h2>
+							</div>
+							<div class="card-body">
+								<p>Interactively explore proxy and putatively functional variants for a query variant. </p>
+							</div>
+						</a>
+					</div>
+					
+					</div>
+					<div class = "card-row">
+						<div class = "card-outside">
+						<a class="card anchor-link"  dest="ldtrait">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px; font-size: 24px;">LDtrait</h2>
+							</div>
+							<div class="card-body">
+								<p>Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.</p>
+							</div>
+						</a>
+					</div>
+					<div class = "card-outside">
+						<a class="card anchor-link"  dest="snpchip">
+							<div class="text-center card-title">
+								<h2 style="color:white; margin:0px; font-size: 24px;">SNPchip</h2>
+							</div>
+							<div class="card-body">
+								<p>Find commercial genotyping platforms for variants.</p>
+							</div>
+						</a>
+					</div>
+					<div class = "card-outside">
+						<a class="card anchor-link"  dest="snpclip">
+							<div class="text-center card-title" >
+								<h2 style="color:white; margin:0px; font-size: 24px;">SNPclip</h2>
+							</div>
+							<div class="card-body">
+								<p>Prune a list of variants by linkage disequilibrium.</p>
+							</div>
+						</a>
+					</div>
+					</div>
+				</div>
+				
 				<!-- News and Updates content text can be updated from separate news.html file -->
-				<div class="row">
-					<h4 class="col-sm-offset-1">News and Updates</h4>
-					<div id="news-container" class="well col-sm-10 col-sm-offset-1 whats_new" tabindex="0"></div>
-				</div>
-
-				<!-- Ad for LDlinkR -->
-				<div class="row">
-					<div class="col-sm-10 col-sm-offset-1 ldlinkr_ad">
-						<i>
-							Interested in accessing LDlink's API using R? <br>
-							Check out the new LDlinkR package now available on <a href="https://cran.r-project.org/web/packages/LDlinkR/index.html" title="LDlinkR CRAN" target="_blank">CRAN</a>.
-						</i>
+				</br>
+				</br>
+				
+				<h2 class="text-center" style="color:#566473">What's New</h4>
+					
+				<div class="container">
+				<div id="news-left-arrow" class="news-scroller disabled-news-scroller"><p style="text-align:center; vertical-align: middle; line-height:198px; font-size:48px;">&lsaquo;</p></div>
+				<div style="display:inline-block; width: 92%; margin:auto">
+					<div id="news-card-outside-1" class = "news-card-outside">
+						<div class="card">
+							<div class="news-card-left">
+								<div class = "news-titles" style="font-size:32px;">
+								</div>
+							</div>
+							<div id="news-card-1" class="news-card-body">
+							</div>
+						</div>
+					</div>
+					<div id="news-card-outside-2" class = "news-card-outside">
+						<div class="card">
+							<div class="news-card-left">
+							</div>
+							<div id="news-card-2" class="news-card-body">
+							</div>
+						</div>
+					</div>
+					<div id="news-card-outside-3" class = "news-card-outside">
+						<div class="card">
+							<div class="news-card-left" >
+							</div>
+							<div class="news-card-body">
+								<div id="news-card-3">
+								</div>
+								
+							</div>
+						</div>
 					</div>
 				</div>
-
-				<!-- Ad for AuthorArranger -->
-				<div class="row">
-					<div class="col-sm-10 col-sm-offset-1 authorarranger_ad">
-						<i>
-							Bogged down organizing authors and affiliations on journal title pages for large studies? <br>
-							Check out <a href="https://authorarranger.nci.nih.gov/" title="Author Arranger" target="_blank">AuthorArranger</a>
-							and conquer title pages in seconds!
-						</i>
-					</div>
-				</div>
+				<div id="news-right-arrow" class = "news-scroller disabled-news-scroller" style="float:right;"><p style="text-align:center; vertical-align: middle; line-height:198px; font-size:48px;">&rsaquo;</p></div>
+			</div>
+				<div class = "container">
+				
 				<br/>
-				<p><b>Citations</b>:</p>
-				<p> 	
-					Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="LDlink PubMed link" target="_blank" alt="LDlink PubMed article link">LDlink a web-based application for exploring population-specific
-					haplotype structure and linking correlated alleles of possible functional variants.</a> <i>Bioinformatics</i>. 2015
-					Jul 2.
-				</p>
-				<p>
-					Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" title="LDassoc PubMed link" target="_blank" alt="LDassoc PubMed article link">LDassoc: an online tool for interactively exploring genome-wide
-					association study results and prioritizing variants for functional investigation.</a> <i>Bioinformatics</i>. 2017 Sept
-					12.
-				</p>
-				<p>	
-					Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" title="LDpop PubMed link" target="_blank" alt="LDpop PubMed article link">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> 
-					BMC <i>Bioinformatics</i>. 2020 Jan 10. 
-				</p>
+			<br/>
 
+				
+				<br/>
+				<p style="font-size: 18px"><b>Credits</b></p>
 				<p> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell"
 					 title="Mitchell Machiela Biography" target="_blank" alt="Link to Machiela's biography">Mitchell Machiela</a> in collaboration
 					with NCI's Center for Biomedical Informatics and Information
@@ -211,12 +358,16 @@
 					 title="Support">email</a>.
 				</p>
 				<p id="ldlink_version"></p>
+				
+
+			</div>
 			</div>
 
 			<!-- LDassoc -->
-			<div class="tab-pane fade" id="ldassoc-tab">
+			<div class="tab-pane fade not-home" id="ldassoc-tab">
 				<!-- ldassoc INPUTS-->
 				<div class="container-fluid">
+					<h2 class="text-center">LDassoc Tool</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- ldassoc FORM -->
 						<form id="ldassocForm" class="ldlinkForm">
@@ -576,9 +727,10 @@
 				</div>
 			</div>
 			<!-- LDhap -->
-			<div class="tab-pane fade" id="ldhap-tab">
+			<div class="tab-pane fade not-home" id="ldhap-tab">
 				<!-- LDhap INPUTS-->
 				<div class="container-fluid">
+					<h2 class="text-center">LDhap Tool</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDHap FORM -->
 						<form id="ldhapForm" class="ldlinkForm">
@@ -727,9 +879,10 @@
 			</div>
 
 			<!-- LDmatrix -->
-			<div class="tab-pane fade" id="ldmatrix-tab">
+			<div class="tab-pane fade not-home" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
+					<h2 class="text-center">LDmatrix Tool</h2>
 					<div class="row" style="padding-top: 10px;">
 						<div class="alert alert-danger ffWarning">You are using
 							a version of Firefox that does not render tool tips properly in the
@@ -847,9 +1000,9 @@
 			</div>
 
 			<!-- LDpair -->
-			<div class="tab-pane fade" id="ldpair-tab">
+			<div class="tab-pane fade not-home" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
-
+				<h2 class="text-center">LDpair Tool</h2>
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-sm-11">
 						<!-- FORM 4 LDPair -->
@@ -1028,9 +1181,9 @@
 			</div>
 
 			<!-- LDpop -->
-			<div class="tab-pane fade" id="ldpop-tab">
+			<div class="tab-pane fade not-home" id="ldpop-tab">
 				<!-- LDpop INPUTS-->
-
+				<h2 class="text-center">LDpop Tool</h2>
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-sm-11">
 						<!-- FORM 4 LDpop -->
@@ -1102,7 +1255,7 @@
 				</div>
 				
 				<div class="tab-content ldpop-map-content">
-					<div id="ldpop-map1" class="tab-pane fade in active">
+					<div id="ldpop-map1" class="tab-pane fade not-home in active">
 						<div class="row">
 							<div class="col-md-4 dropdown"></div>
 							<h3 align="center" class="col-md-4 ldpop-map1-title" style="white-space: nowrap;">rs#1 rs#2 LD</h3>
@@ -1125,7 +1278,7 @@
 						</div>
 						<div id="map1" class="map-item center-align"></div>
 					</div>
-					<div id="ldpop-map2" class="tab-pane fade">
+					<div id="ldpop-map2" class="tab-pane fade not-home">
 						<div class="row">
 							<div class="col-md-4 dropdown"></div>
 							<h3 align="center" class="col-md-4 ldpop-map2-title" style="white-space: nowrap;">rs#1 Allele Frequency</h3>
@@ -1148,7 +1301,7 @@
 						</div>
 						<div id="map2" class="map-item center-align"></div>
 					</div>
-					<div id="ldpop-map3" class="tab-pane fade">
+					<div id="ldpop-map3" class="tab-pane fade not-home">
 						<div class="row">
 							<div class="col-md-4 dropdown"></div>
 							<h3 align="center" class="col-md-4 ldpop-map3-title" style="white-space: nowrap;">rs#2 Allele Frequency</h3>
@@ -1219,7 +1372,7 @@
 						</div>
 						
 						<div class="tab-content ldpop-map-content">
-							<div id="ldpop-map1" class="tab-pane fade in active">
+							<div id="ldpop-map1" class="tab-pane fade not-home in active">
 								<div class="row">
 									<div class="col-md-4 dropdown"></div>
 									<h3 align="center" class="col-md-4 ldpop-map1-title" style="white-space: nowrap;">rs#1 rs#2 LD</h3>
@@ -1242,7 +1395,7 @@
 								</div>
 								<div id="map1" class="map-item center-align"></div>
 							</div>
-							<div id="ldpop-map2" class="tab-pane fade">
+							<div id="ldpop-map2" class="tab-pane fade not-home">
 								<div class="row">
 									<div class="col-md-4 dropdown"></div>
 									<h3 align="center" class="col-md-4 ldpop-map2-title" style="white-space: nowrap;">rs#1 Allele Frequency</h3>
@@ -1265,7 +1418,7 @@
 								</div>
 								<div id="map2" class="map-item center-align"></div>
 							</div>
-							<div id="ldpop-map3" class="tab-pane fade">
+							<div id="ldpop-map3" class="tab-pane fade not-home">
 								<div class="row">
 									<div class="col-md-4 dropdown"></div>
 									<h3 align="center" class="col-md-4 ldpop-map3-title" style="white-space: nowrap;">rs#2 Allele Frequency</h3>
@@ -1316,8 +1469,9 @@
 			</div>
 
 			<!-- LDproxy -->
-			<div class="tab-pane fade" id="ldproxy-tab">
+			<div class="tab-pane fade not-home" id="ldproxy-tab">
 				<!-- LDproxy INPUTS-->
+				<h2 class="text-center">LDproxy Tool</h2>
 				<div class="row" style="padding-top: 10px;">
 					<div class="alert alert-danger ffWarning">You are using a
 						version of Firefox that does not render tool tips properly in the
@@ -1464,9 +1618,10 @@
 			</div>
 
 			<!-- LDtrait -->
-			<div class="tab-pane fade" id="ldtrait-tab">
+			<div class="tab-pane fade not-home" id="ldtrait-tab">
 				<!-- LDtrait INPUTS-->
 				<div class="container-fluid">
+					<h2 class="text-center">LDtrait Tool</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDtrait FORM -->
 						<form id="ldtraitForm" class="ldlinkForm">
@@ -1628,9 +1783,10 @@
 			<!--  END OF ldtrait -->
 
 			<!-- SNPclip -->
-			<div class="tab-pane fade" id="snpclip-tab">
+			<div class="tab-pane fade not-home" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
 				<div class="container-fluid">
+					<h2 class="text-center">SNPclip Tool</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPclip FORM -->
 						<form id="snpclipForm" class="ldlinkForm">
@@ -1789,9 +1945,10 @@
 			<!--  END OF snpclip -->
 
 			<!-- SNPchip -->
-			<div class="tab-pane fade" id="snpchip-tab">
+			<div class="tab-pane fade not-home" id="snpchip-tab">
 				<!-- SNPchip INPUTS-->
 				<div class="container-fluid">
+					<h2 class="text-center">SNPchip Tool</h2>
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPchip FORM -->
 						<form id="snpchipForm" class="ldlinkForm">
@@ -1973,10 +2130,10 @@
 			<!--  END OF snpchip -->
 
 			<!-- API Access -->
-			<div class="tab-pane fade" id="apiaccess-tab">
+			<div class="tab-pane fade not-home" id="apiaccess-tab">
 				<div class="container-fluid">
 					<div class="text-center">
-						<h2>Welcome to <img src="LDlink_logo_small.png" alt="LDlink" style="vertical-align:bottom"> Programmatic Access!</h2>
+						<h2><img src="LDlink_logo_small_clear.png" alt="LDlink" style="vertical-align:bottom"> API Access</h2>
 					</div>
 					<p>
 						LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers 
@@ -2201,8 +2358,49 @@
 				</div>
 			</div>
 
+			<div class="tab-pane fade not-home" id="citations-tab">
+				<div class="container-fluid">
+					<div class="text-center">
+						<h2><img src="LDlink_logo_small_clear.png" alt="LDlink" style="vertical-align:bottom"> Citations</h2>
+						<p>Thank you for using LDlink! If you use LDlink in any publication please cite the LDlink manuscript and any relevant module publications:</p>
+					</div>
+				</br>
+					<div style="padding-left:20px; padding-right:20px;">
+					<p> 	
+						Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=26139635" title="LDlink PubMed link" target="_blank" alt="LDlink PubMed article link">LDlink: a web-based application for exploring population-specific
+						haplotype structure and linking correlated alleles of possible functional variants.</a> <i>Bioinformatics</i>. 2015
+						Jul 2.
+					</p>
+					<p>
+						Machiela MJ, Chanock SJ. <a href="http://www.ncbi.nlm.nih.gov/pubmed/?term=28968746" title="LDassoc PubMed link" target="_blank" alt="LDassoc PubMed article link">LDassoc: an online tool for interactively exploring genome-wide
+						association study results and prioritizing variants for functional investigation.</a> <i>Bioinformatics</i>. 2017 Sept
+						12.
+					</p>
+					<p>	
+						Alexander TA, Machiela MJ. <a href="https://www.ncbi.nlm.nih.gov/pubmed/?term=31924160" title="LDpop PubMed link" target="_blank" alt="LDpop PubMed article link">LDpop: an interactive online tool to calculate and visualize geographic LD patterns.</a> 
+						<i>BMC Bioinformatics</i>. 2020 Jan 10. 
+					</p>
+					<p>
+							Myers TA, Chanock SJ, Machiela MJ. LDlinkR: An R Package for Rapidly Calculating Linkage Disequilibrium Statistics in Diverse Populations.
+							<i>Front. Genet</i>. 2020 Feb 28.
+					</p>
+						</div>
+				</div>
+			</div>
+
+			<div class="tab-pane fade not-home" id="version-tab">
+					<div class="container-fluid">
+						<div class="text-center">
+							<h2><img src="LDlink_logo_small_clear.png" alt="LDlink" style="vertical-align:bottom">  Version History</h2>
+						</div>
+					</br>
+						<div id="news-container" style="padding-left:20px; padding-right:20px;">
+						</div>
+					</div>
+				</div>
+	
 			<!-- Help -->
-			<div class="tab-pane fade" id="help-tab">
+			<div class="tab-pane fade not-home" id="help-tab">
 			</div>
 		</div>
 	</div>
@@ -2255,7 +2453,7 @@
 			<ul class="list-inline">
 				NIH ... Turning Discovery Into Health<sup>&reg;</sup>
 			</ul>
-			<!-- Social media icons -->
+			<!-- Social media icons 
 			<div class="navbar-text social" style="float:right;">SHARE
 				<a href="http://www.facebook.com/sharer.php?u=http://analysistools.nci.nih.gov/LDlink&t=LDlink: an interactive suite of web-based applications designed to easily and efficiently explore linkage disequilibrium in population groups"
 					target="facebook"><i class="fa fa-lg fa-facebook"></i><span class="sr-only">Facebook</span></a>
@@ -2266,6 +2464,7 @@
 				<a href="http://www.linkedin.com/shareArticle?mini=true&url=http://analysistools.nci.nih.gov/LDlink" target="linkedin"><i
 						class="fa fa-lg fa-linkedin"></i><span class="sr-only">linkedin</span></a>
 			</div>
+		-->
 		</div>
 	</div>
 
