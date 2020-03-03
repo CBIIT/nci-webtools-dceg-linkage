@@ -51,19 +51,20 @@ $(document).ready(function() {
         let lastNews = "";
         let versionNews=newsHTMLList[0].replace("<br>","");
         let numFound = 0;
-        for(let i = 0; i < 3; i++){
+        for(let i = 0; i < 2; i++){
             if(versionNews.indexOf("</li>") != -1){
                 lastNews += versionNews.substring(0, versionNews.indexOf("</li>") + 5);
                 versionNews = versionNews.substring(versionNews.indexOf("</li>") + 6);
                 numFound += 1;
             }
             else{
-                i = 3;
+                i = 2;
             }
         }
-        if(numFound == 3){
+        if(versionNews.indexOf("</li>") != -1){
             lastNews += "<li> <a class=\"version-link\" >Show more</a></li>"
         }
+        lastNews = lastNews.substring(0, lastNews.indexOf("<ul>") + 3) + " style=\"padding-left:10px\"" + lastNews.substring(lastNews.indexOf("<ul>") + 3);
         lastNews += "</ul>"
         console.log(lastNews);
 
