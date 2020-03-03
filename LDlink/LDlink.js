@@ -19,7 +19,8 @@ var ldTraitRaw;
 var ldTraitSort;
 var ldClipRaw;
 var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
-
+var homeStartBox = 0;
+var newsList = [];
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -38,6 +39,53 @@ $(document).ready(function() {
 
     // Load news text from news.html to news-container div
     $.get("news.html", function (data) {
+        let tmpData = data.split("<p>")
+        let i = 0;
+        var newsHTMLList = [];
+        
+        for (i = 1; i < tmpData.length; i++){
+            let toPush = "<p>" + tmpData[i];
+            newsHTMLList.push(toPush);
+        }
+
+        let lastNews = "";
+        let versionNews=newsHTMLList[0].replace("<br>","");
+        let numFound = 0;
+        for(let i = 0; i < 3; i++){
+            if(versionNews.indexOf("</li>") != -1){
+                lastNews += versionNews.substring(0, versionNews.indexOf("</li>") + 5);
+                versionNews = versionNews.substring(versionNews.indexOf("</li>") + 6);
+                numFound += 1;
+            }
+            else{
+                i = 3;
+            }
+        }
+        if(numFound == 3){
+            lastNews += "<li> <a class=\"version-link\" >Show more</a></li>"
+        }
+        lastNews += "</ul>"
+        console.log(lastNews);
+
+        newsList.push("<p><b style=\"margin-bottom:12px;\">LDlinkR</b><br style=\"margin-bottom:12px;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
+        newsList.push("<p><b style=\"margin-bottom:12px;\">AuthorArranger</b><br style=\"margin-bottom:12px;\">Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
+        newsList.push(lastNews + "<p style=\"margin-bottom:0px\">(See <a class=\"version-link\" >version history</a>)</p>");
+
+        $("#news-card-1").html(newsList[0]);
+        $("#news-card-2").html(newsList[1]);
+        $("#news-card-3").html(newsList[2].replace("<br>","") );
+        console.log(newsList)
+        testResize();
+        $(".version-link").on('click',function(){
+            window.scrollTo(0,0);
+            console.log("Hello!");
+            $('#version-tab-anchor').click();
+            console.log($("#news-link").html());
+            
+            //$("#news-link").click();
+            
+            //$("#news-link").click();
+        });
         $("#news-container").append(data);
     });
     
@@ -203,10 +251,13 @@ $(document).ready(function() {
     updateVersion(ldlink_version);
     //addValidators();
     $('#ldlink-tabs').on('click', 'a', function(e) {
-        //console.warn("You clicked a tab");
+        console.warn("You clicked a tab");
+        
         //console.info("Check for an attribute called data-url");
         //If data-url use that.
         var currentTab = e.target.id.substr(0, e.target.id.search('-'));
+        console.log('currentTab: ' + currentTab)
+        clearTabs(currentTab);
         //console.log(currentTab);
         var last_url_params = $("#"+currentTab+"-tab-anchor").attr("data-url-params");
         //console.log("last_url_params: "+last_url_params);
@@ -216,7 +267,9 @@ $(document).ready(function() {
             window.history.pushState({},'', "?"+last_url_params);
         }
 
+        
     });
+    
 
     setupLDtraitControls();
     setupSNPclipControls();
@@ -290,8 +343,9 @@ $(document).ready(function() {
         }, 500);
     });
 
-    $(".anchor-link").on('click', function(e) { 
+    $(".anchor-link").on('click', function(e) {
         var tab = $(this).attr('dest');
+        console.log("click")
         $('#' + tab + '-tab-anchor').click();
     });
 
@@ -856,8 +910,9 @@ function createTraitQueryWarningsTable() {
 function setupTabs() {
     //Clear the active tab on a reload
     $.each(modules, function(key, id) {
-        $("#"+id+"-tab-anchor").removeClass('active');
+        $("#"+id+"-tab-anchor").parent().removeClass('active');
     });
+    console.log('setup');
     $("#home-tab-anchor").removeClass('active');
     $("#help-tab-anchor").removeClass('active');
     $("#apiaccess-tab-anchor").removeClass('active');
@@ -884,10 +939,22 @@ function setupTabs() {
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
     if(currentTab.search('access')>=0) currentTab = 'apiaccess';
-
+    console.log(currentTab)
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
-
+    let found = false;
+    $.each(modules, function(key, id) {
+        if(id==currentTab && id!="apiaccess"){
+            found = true;
+        }
+    });
+    if(found == true){
+        $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
+    }
+    else{
+        $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
+    }
+    
     if(typeof url.inputs !="undefined") {
         //console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
         updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
@@ -4293,4 +4360,194 @@ function readCookie(name) {
 
 function eraseCookie(name) {
     createCookie(name,"",-1);
+}
+
+$("#news-right-arrow").on('click',  function() {
+    if($("#news-right-arrow").hasClass("enabled-news-scroller")){
+        console.log(homeStartBox)
+        if($('#news-card-outside-2').css("display") != "none"){
+            homeStartBox += 1;
+            $("#news-card-1").html(newsList[homeStartBox]);
+            $("#news-card-2").html(newsList[homeStartBox+1]);
+            $("#news-card-3").html(newsList[homeStartBox+2]);
+            if(homeStartBox + 3 >= newsList.length){
+                $("#news-right-arrow").removeClass("enabled-news-scroller")
+                $("#news-right-arrow").addClass("disabled-news-scroller")
+            }
+            if($("#news-left-arrow").hasClass("disabled-news-scroller")){
+                $("#news-left-arrow").addClass("enabled-news-scroller")
+                $("#news-left-arrow").removeClass("disabled-news-scroller")
+            }
+        }
+        else{
+            console.log(newsList)
+            if(homeStartBox < newsList.length-1){
+                homeStartBox += 1;
+                $("#news-card-1").html(newsList[homeStartBox]);
+                if(homeStartBox >= newsList.length - 1){
+                    $("#news-right-arrow").removeClass("enabled-news-scroller")
+                    $("#news-right-arrow").addClass("disabled-news-scroller")
+                }
+                if($("#news-left-arrow").hasClass("disabled-news-scroller")){
+                    $("#news-left-arrow").addClass("enabled-news-scroller")
+                    $("#news-left-arrow").removeClass("disabled-news-scroller")
+                }
+            }
+        }
+    }
+    $(".version-link").on('click',function(){
+        window.scrollTo(0,0);
+        console.log("Hello!");
+        $('#version-tab-anchor').click();
+        console.log($("#news-link").html());
+        
+        //$("#news-link").click();
+        
+        //$("#news-link").click();
+    });
+});
+
+$("#news-left-arrow").on('click',  function() {
+    if($("#news-left-arrow").hasClass("enabled-news-scroller")){
+        homeStartBox -= 1;
+        $("#news-card-1").html(newsList[homeStartBox]);
+        $("#news-card-2").html(newsList[homeStartBox+1]);
+        $("#news-card-3").html(newsList[homeStartBox+2]);
+        if(homeStartBox <= 0){
+            $("#news-left-arrow").removeClass("enabled-news-scroller")
+            $("#news-left-arrow").addClass("disabled-news-scroller")
+        }
+        if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+            $("#news-right-arrow").addClass("enabled-news-scroller")
+            $("#news-right-arrow").removeClass("disabled-news-scroller")
+        }
+    }
+    $(".version-link").on('click',function(){
+        window.scrollTo(0,0);
+        console.log("Hello!");
+        $('#version-tab-anchor').click();
+        console.log($("#news-link").html());
+        
+        //$("#news-link").click();
+        
+        //$("#news-link").click();
+    });
+});
+
+
+/*
+$(".dropdown-nav").on('click mouseover', function() {
+    if($(".dropdown-nav .dropdown-content").css("display") == "block"){
+        $(".dropdown-nav .dropdown-content").css("display", "none") 
+    }
+    else{
+        $(".dropdown-nav .dropdown-content").css("display", "block") 
+    }
+})*/
+/*
+$("html").on('click',function(e){
+    console.log(e.target.id)
+    if($(".dropdown-nav:hover .dropdown-content").css("display") == "none" && e.target.id != "LD-tools-expandable"){
+        $(".dropdown-nav:hover .dropdown-content").css("display", "block") 
+    }
+})*/
+/*
+$('.dropdown-toggle').click(function(e) {
+    if ($(document).width() > 768) {
+      e.preventDefault();
+  
+      var url = $(this).attr('href');
+  
+         
+      if (url !== '#') {
+      
+        window.location.href = url;
+      }
+  
+    }
+  });*/
+
+function testResize(){
+    console.log("resized");
+    //if became smalle
+    if($('#news-card-outside-2').css('display') == "none"){
+        console.log(homeStartBox)
+        console.log(newsList.length)
+        if(homeStartBox < newsList.length - 1){
+            console.log("does not exxist")
+            if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+                $("#news-right-arrow").addClass("enabled-news-scroller")
+                $("#news-right-arrow").removeClass("disabled-news-scroller")
+            }
+        }
+    }
+    if($('#news-card-outside-2').css('display') != "none"){
+        console.log("exists")
+        if(homeStartBox > newsList.length - 3){
+            homeStartBox = newsList.length - 3;
+        }
+        console.log(homeStartBox)
+        if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+            $("#news-right-arrow").addClass("enabled-news-scroller")
+            $("#news-right-arrow").removeClass("disabled-news-scroller")
+        }
+        $("#news-card-1").html(newsList[homeStartBox]);
+        $("#news-card-2").html(newsList[homeStartBox+1]);
+        $("#news-card-3").html(newsList[homeStartBox+2]);
+        if(homeStartBox + 3 >= newsList.length){
+            $("#news-right-arrow").removeClass("enabled-news-scroller")
+            $("#news-right-arrow").addClass("disabled-news-scroller")
+        }
+
+        if(homeStartBox == 0 && $("#news-left-arrow").hasClass("enabled-news-scroller")){
+            console.log("here")
+            $("#news-left-arrow").removeClass("enabled-news-scroller")
+            $("#news-left-arrow").addClass("disabled-news-scroller")
+        }
+    }
+    $(".version-link").on('click',function(){
+        window.scrollTo(0,0);
+        console.log("Hello!");
+        $('#version-tab-anchor').click();
+        console.log($("#news-link").html());
+        
+        //$("#news-link").click();
+        
+        //$("#news-link").click();
+    });
+}
+
+
+
+
+
+var timeout = false, // holder for timeout id
+delay = 250; // delay after event is "complete" to run callback
+
+window.addEventListener('resize', function() {
+    // clear the timeout
+    clearTimeout(timeout);
+    // start timing for event "completion"
+    timeout = setTimeout(testResize, delay);
+});
+
+function clearTabs(currentTab){
+    let found = false;
+    $.each(modules, function(key, id) {
+        if(id!=currentTab){
+            $("#"+id+"-tab-anchor").parent().removeClass('active');
+        }
+        else if(id!="apiaccess"){
+            found = true;
+        }
+    });
+    console.log("found: " + found);
+    if(found == true){
+        console.log()
+        $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
+    }
+    else{
+        $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
+    }
+    
 }
