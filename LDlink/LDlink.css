@@ -86,8 +86,9 @@ body {
   background-color:grey;
 }
 
-.dropdown-menu li.active {
+.navbar-nav .dropdown-menu li.active {
   background-color:lightgrey;
+  border-bottom: none;
 }
 
 .navbar-nav li.active a {
@@ -102,7 +103,7 @@ body {
   background: grey ;
 }
 
-.dropdown-menu>li a:hover{
+.navbar-nav .dropdown-menu>li a:hover{
   background: lightgrey !important;
 }
 
@@ -1267,8 +1268,8 @@ input:checked + .slider:before {
 .news-card-outside{
   display:inline-block; 
   width: 33%; 
-  height:220px; 
-  padding:0px 20px;
+  height:240px; 
+  padding:0px 10px;
   margin: 10px 0;
   text-decoration:none;
   vertical-align:top;
@@ -1277,16 +1278,16 @@ input:checked + .slider:before {
 .news-card-left{
   background-color:#133a55; 
   display:inline-block;
-  height:220px;
+  height:240px;
   width:8%;
   vertical-align:top;
 }
 .news-card-body{
   background-color:white;
   display: inline-block;
-  height:220px;
+  height:240px;
   width:90%;
-  padding: 20px 20px 0 20px;
+  padding: 20px 10px 0 10px;
   vertical-align:top;
   overflow:auto;
 }
@@ -1300,7 +1301,7 @@ input:checked + .slider:before {
 }
 
 .news-scroller{background-color:#1b486b; 
-  height:220px; 
+  height:240px; 
   width:3%;
   color:white; 
   display:inline-block; 
@@ -1410,7 +1411,7 @@ input:checked + .slider:before {
   }
 }
 
-.dropdown-menu > .active > a, .dropdown-menu > .active > a:focus, .dropdown-menu > .active > a:hover{
+.navbar-nav  .dropdown-menu > .active > a, .navbar-nav  .dropdown-menu > .active > a:focus, .navbar-nav  .dropdown-menu > .active > a:hover{
   background-image:none;
   background-color:lightgrey;
 }
@@ -1426,4 +1427,10 @@ input:checked + .slider:before {
 
 .card:hover .card-body p{
   color: #337ab7;
+}
+
+.tab-content li {
+
+  font-size: 16px;
+
 }
