@@ -66,9 +66,9 @@ $(document).ready(function() {
         }
         lastNews = lastNews.substring(0, lastNews.indexOf("<ul>") + 3) + " style=\"padding-left:10px; margin-bottom:0;\"" + lastNews.substring(lastNews.indexOf("<ul>") + 3);
         console.log(lastNews);
-
-        newsList.push("<p><b style=\"margin-bottom:12px;\">LDlinkR</b><br style=\"margin-bottom:12px;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
-        newsList.push("<p><b style=\"margin-bottom:12px;\">AuthorArranger</b><br style=\"margin-bottom:12px;\">Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
+        
+        newsList.push("<p><b style=\"margin-bottom:12px;\">LDlinkR</b><br></p><div style=\"height:4px;\"/><p style=\"margin:0;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
+        newsList.push("<p><b style=\"margin-bottom:12px;\">AuthorArranger</b><br></p><div style=\"height:4px;\"/><p>Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
         newsList.push(lastNews + "<p style=\"margin-bottom:0px; margin-top:10px;\">(See <a class=\"version-link\" >Version History</a>)</p>");
 
         $("#news-card-1").html(newsList[0]);
