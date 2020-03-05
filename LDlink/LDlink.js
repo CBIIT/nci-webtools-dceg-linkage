@@ -32,6 +32,7 @@ Object.size = function(obj) {
 
 
 $(document).ready(function() {
+
     // Close URL change alert banner after 5 seconds
     $("#url-alert").delay(5000).slideUp(600, function() {
         $(this).alert('close');
@@ -65,7 +66,7 @@ $(document).ready(function() {
             lastNews += "</ul> <a class=\"version-link\" >Show more...</a>"
         }
         lastNews = lastNews.substring(0, lastNews.indexOf("<ul>") + 3) + " style=\"padding-left:10px; margin-bottom:0;\"" + lastNews.substring(lastNews.indexOf("<ul>") + 3);
-        console.log(lastNews);
+        // console.log(lastNews);
         
         newsList.push("<p><b>LDlinkR</b><br></p><div style=\"height:4px;\"/><p style=\"margin:0;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
         newsList.push("<p><b>AuthorArranger</b><br></p><div style=\"height:4px;\"/><p>Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
@@ -74,7 +75,7 @@ $(document).ready(function() {
         $("#news-card-1").html(newsList[0]);
         $("#news-card-2").html(newsList[1]);
         $("#news-card-3").html(newsList[2].replace("<br>","") );
-        console.log(newsList)
+        // console.log(newsList)
         testResize();
         $(".version-link").on('click',function(){
             window.scrollTo(0,0);
@@ -251,12 +252,12 @@ $(document).ready(function() {
     updateVersion(ldlink_version);
     //addValidators();
     $('#ldlink-tabs').on('click', 'a', function(e) {
-        console.warn("You clicked a tab");
+        // console.warn("You clicked a tab");
         
         //console.info("Check for an attribute called data-url");
         //If data-url use that.
         var currentTab = e.target.id.substr(0, e.target.id.search('-'));
-        console.log('currentTab: ' + currentTab)
+        // console.log('currentTab: ' + currentTab)
         clearTabs(currentTab);
         //console.log(currentTab);
         var last_url_params = $("#"+currentTab+"-tab-anchor").attr("data-url-params");
@@ -350,6 +351,7 @@ $(document).ready(function() {
     });
 
     setupTabs();
+
     autoCalculate();
     createFileSelectEvent();
     createEnterEvent();
@@ -912,7 +914,7 @@ function setupTabs() {
     $.each(modules, function(key, id) {
         $("#"+id+"-tab-anchor").parent().removeClass('active');
     });
-    console.log('setup');
+
     $("#home-tab-anchor").removeClass('active');
     $("#help-tab-anchor").removeClass('active');
     $("#apiaccess-tab-anchor").removeClass('active');
@@ -939,7 +941,7 @@ function setupTabs() {
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
     if(currentTab.search('access')>=0) currentTab = 'apiaccess';
-    console.log(currentTab)
+    // console.log(currentTab)
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
     let found = false;
@@ -959,7 +961,6 @@ function setupTabs() {
         //console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
         updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
     }
-
 }
 
 function refreshPopulation(pop, id) {
@@ -4468,7 +4469,7 @@ $('.dropdown-toggle').click(function(e) {
   });*/
 
 function testResize(){
-    console.log("resized");
+    // console.log("resized");
     //if became smalle
     if($('#news-card-outside-2').css('display') == "none"){
         console.log("1 box")
@@ -4482,7 +4483,7 @@ function testResize(){
     }
     else if($('#news-card-outside-3').css('display') == 'none' && $('#news-card-outside-2').css('display') != 'none'){
         
-        console.log("2 boxes")
+        // console.log("2 boxes")
         if(homeStartBox > newsList.length - 2){
             homeStartBox = newsList.length - 2;
         }
@@ -4503,7 +4504,7 @@ function testResize(){
         }
     }
     else if($('#news-card-outside-2').css('display') != "none"){
-        console.log("3 boxes")
+        // console.log("3 boxes")
         if(homeStartBox > newsList.length - 3){
             homeStartBox = newsList.length - 3;
         }
@@ -4550,6 +4551,10 @@ window.addEventListener('resize', function() {
     timeout = setTimeout(testResize, delay);
 });
 
+window.addEventListener('popstate', function(e) {
+    this.location.reload();
+});
+
 function clearTabs(currentTab){
     let found = false;
     $.each(modules, function(key, id) {
@@ -4560,9 +4565,9 @@ function clearTabs(currentTab){
             found = true;
         }
     });
-    console.log("found: " + found);
+    // console.log("found: " + found);
     if(found == true){
-        console.log()
+        // console.log()
         $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
     }
     else{
