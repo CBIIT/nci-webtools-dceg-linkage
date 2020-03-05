@@ -1457,7 +1457,7 @@ input:checked + .slider:before {
     height: 170px;
   }
   .card-outside{
-    width:31%;
+    width:32.8%;
   }
 
 }
