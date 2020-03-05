@@ -1208,7 +1208,7 @@ input:checked + .slider:before {
 }
 
 
-@media only screen and (min-width: 768px) {
+@media only screen and (min-width: 767px) {
   .dropdown-nav:hover .dropdown-menu{
     display:block;
   }
@@ -1229,8 +1229,8 @@ input:checked + .slider:before {
 
 .card-body{
   background-color:white;
-  height:88px;
-  padding: 10px 20px 0 20px;
+  height:115px;
+  padding: 20px 20px 0 20px;
 }
 .card-body p{
   margin:0;
@@ -1240,7 +1240,7 @@ input:checked + .slider:before {
   transition: all 0.4s ease-in-out;
   display:inline-block; 
   width: 33%;
-  height:128px; 
+  height:155px; 
   padding:0px 20px;
   margin: 10px 0;
   text-decoration:none;
@@ -1300,15 +1300,20 @@ input:checked + .slider:before {
   cursor:pointer;
 }
 
-.news-scroller{background-color:#1b486b; 
+.news-scroller{
+  background-color:#1b486b; 
   height:240px; 
   width:3%;
   color:white; 
-  display:inline-block; 
+  display:none; 
   vertical-align:top; 
   margin-top:10px; 
 }
-
+.news-row{
+  display:inline-block; 
+  width: 100%; 
+  margin:auto
+}
 #home-tab{
   width:100%;
 }
@@ -1367,7 +1372,7 @@ input:checked + .slider:before {
   margin-right:10px;
   border-radius: 8px;
 }
-
+/*
 @media only screen and (max-width: 900px){
   #news-card-outside-3{
     display:none;
@@ -1379,13 +1384,50 @@ input:checked + .slider:before {
     width: 98%;
   }
 }
+*/
+@media only screen and (max-width: 768px){
+  #news-card-outside-3{
+    display:none;
+  }
+  #news-card-outside-2{
+    display:none;
+  }
+  .news-card-outside{
+    width: 98%;
+  }
+  .news-scroller{
+    display:inline-block;
+  }
+  .news-row{
+    width:92%;
+  }
+}
+
+@media only screen and (max-width: 992px){
+  #news-card-outside-3{
+    display:none;
+  }
+  #news-card-outside-2{
+    width:49%;
+  }
+  .news-card-outside{
+    min-width: 49%;
+  }
+  .news-scroller{
+    display:inline-block;
+  }
+  .news-row{
+    width:92%;
+  }
+}
 
 @media only screen and (max-width: 1160px){
   .card-outside{
-    height: 148px;
+    height: 185px;
   }
   .card-body{
-    height: 108px;
+    height: 145px;
+    padding-top:10px;
   }
 }
 /*
@@ -1409,10 +1451,10 @@ input:checked + .slider:before {
 @media only screen and (max-width: 930px) {
 
   .card-outside{
-    height: 208px;
+    height: 210px;
   }
   .card-body{
-    height: 168px;
+    height: 170px;
   }
   .card-outside{
     width:31%;

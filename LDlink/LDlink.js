@@ -4471,8 +4471,7 @@ function testResize(){
     console.log("resized");
     //if became smalle
     if($('#news-card-outside-2').css('display') == "none"){
-        console.log(homeStartBox)
-        console.log(newsList.length)
+        console.log("1 box")
         if(homeStartBox < newsList.length - 1){
             console.log("does not exxist")
             if($("#news-right-arrow").hasClass("disabled-news-scroller")){
@@ -4481,12 +4480,33 @@ function testResize(){
             }
         }
     }
-    if($('#news-card-outside-2').css('display') != "none"){
-        console.log("exists")
+    else if($('#news-card-outside-3').css('display') == 'none' && $('#news-card-outside-2').css('display') != 'none'){
+        
+        console.log("2 boxes")
+        if(homeStartBox > newsList.length - 2){
+            homeStartBox = newsList.length - 2;
+        }
+        if($("#news-right-arrow").hasClass("disabled-news-scroller")){
+            $("#news-right-arrow").addClass("enabled-news-scroller")
+            $("#news-right-arrow").removeClass("disabled-news-scroller")
+        }
+        $("#news-card-1").html(newsList[homeStartBox]);
+        $("#news-card-2").html(newsList[homeStartBox+1]);
+        if(homeStartBox + 2 >= newsList.length){
+            $("#news-right-arrow").removeClass("enabled-news-scroller")
+            $("#news-right-arrow").addClass("disabled-news-scroller")
+        }
+
+        if(homeStartBox == 0 && $("#news-left-arrow").hasClass("enabled-news-scroller")){
+            $("#news-left-arrow").removeClass("enabled-news-scroller")
+            $("#news-left-arrow").addClass("disabled-news-scroller")
+        }
+    }
+    else if($('#news-card-outside-2').css('display') != "none"){
+        console.log("3 boxes")
         if(homeStartBox > newsList.length - 3){
             homeStartBox = newsList.length - 3;
         }
-        console.log(homeStartBox)
         if($("#news-right-arrow").hasClass("disabled-news-scroller")){
             $("#news-right-arrow").addClass("enabled-news-scroller")
             $("#news-right-arrow").removeClass("disabled-news-scroller")
@@ -4500,7 +4520,6 @@ function testResize(){
         }
 
         if(homeStartBox == 0 && $("#news-left-arrow").hasClass("enabled-news-scroller")){
-            console.log("here")
             $("#news-left-arrow").removeClass("enabled-news-scroller")
             $("#news-left-arrow").addClass("disabled-news-scroller")
         }
