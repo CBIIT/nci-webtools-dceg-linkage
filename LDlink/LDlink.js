@@ -4552,7 +4552,9 @@ window.addEventListener('resize', function() {
 });
 
 window.addEventListener('popstate', function(e) {
-    this.location.reload();
+    if (e.state) {
+        this.location.reload();
+    }
 });
 
 function clearTabs(currentTab){
