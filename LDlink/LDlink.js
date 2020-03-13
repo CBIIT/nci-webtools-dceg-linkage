@@ -1108,6 +1108,7 @@ function setupLDtraitControls() {
         loadLDtraitQueryWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
     });
+    initTraitTimestamp();
 }
 
 function calculateChipTotals() {
@@ -2529,6 +2530,28 @@ function initTrait(data, r2_d) {
     } else {
         $('#ldtrait-query-warnings-button').hide();
     }
+}
+
+function initTraitTimestamp() {
+    var id = "ldtrait";
+    var url = restServerUrl + "/ldtrait_timestamp";
+    var ajaxRequest = $.ajax({
+        type : 'GET',
+        url : url,
+        contentType : 'application/json' // JSON
+    });
+    ajaxRequest.success(function(data) {
+        if (displayError(id, data) == false) {
+            var datetime = new Date(JSON.parse(data).$date);
+            var date = datetime.toLocaleDateString("en-US");
+            var time = datetime.toLocaleTimeString("en-US", {hour: '2-digit', minute:'2-digit'});
+            var timezone =  datetime.toString().match(/([A-Z]+[\+-][0-9]+)/)[1];
+            $('#ldtrait-timestamp').text(date + ", " + time + " (" + timezone + ")");
+        }
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
 }
 
 function initClip(data) {

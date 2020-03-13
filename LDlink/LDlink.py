@@ -25,7 +25,7 @@ from pandas import DataFrame
 from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
-from LDtrait import calculate_trait
+from LDtrait import calculate_trait, get_ldtrait_timestamp
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -379,6 +379,21 @@ def snpchip_platforms():
         # API REQUEST
         web = False
     return get_platform_request(web)
+
+# Route to retrieve timestamp from last LDtrait data update
+@app.route('/LDlinkRest/ldtrait_timestamp', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldtrait_timestamp', methods=['GET'])
+def ldtrait_timestamp():
+    print("Retrieve LDtrait Timestamp")
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+    else:
+        # API REQUEST
+        web = False
+    return get_ldtrait_timestamp(web)
 
 ### LDLink Main Module Routes ###
 
