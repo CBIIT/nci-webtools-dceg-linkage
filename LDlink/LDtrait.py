@@ -7,6 +7,7 @@ import math
 import os
 import collections
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
 import subprocess
 from multiprocessing import Pool
@@ -26,6 +27,40 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+
+def get_ldtrait_timestamp(web):
+    try:
+        with open('config.yml', 'r') as c:
+            config = yaml.load(c)
+        env = config['env']
+        api_mongo_addr = config['api']['api_mongo_addr']
+        mongo_username = config['database']['mongo_user_readonly']
+        mongo_password = config['database']['mongo_password']
+        mongo_port = config['database']['mongo_port']
+
+        # Connect to Mongo snp database
+        if env == 'local':
+            mongo_host = api_mongo_addr
+        else: 
+            mongo_host = 'localhost'
+        if web:
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+        else:
+            if env == 'local':
+                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+            else:
+                client = MongoClient('localhost', mongo_port)
+    except ConnectionFailure:
+        print("MongoDB is down")
+        print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
+        return "Failed to connect to server."
+
+    db = client["LDLink"]
+    for document in db.gwas_catalog.find().sort("_id", -1).limit(1):
+        object_id_datetime = document.get('_id').generation_time
+    json_output = json.dumps(object_id_datetime, default=json_util.default, sort_keys=True, indent=2)
+    return json_output
+
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
