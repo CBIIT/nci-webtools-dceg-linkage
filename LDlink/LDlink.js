@@ -849,11 +849,16 @@ function createTraitDetailsTable() {
                             } else if (floatData === 0.0) {
                                 return "0.0";
                             } else {
-                                var val = floatData.toExponential(0).split('e');
+                                var val = floatData.toExponential(0).split(/E/i);
                                 return val[0] + "x10" + val[1].sup();
                             }
                         } else {
-                            return data;
+                            if (floatData === 0.0 && (data.includes("E") || data.includes("e"))) {
+                                var val = data.split(/E/i);
+                                return val[0] + "x10" + val[1].sup();
+                            } else {
+                                return data;
+                            }
                         }
                     } else {
                         return data;

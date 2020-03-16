@@ -417,7 +417,7 @@ def castFloat(val):
         return val
 
 def findRangeString(val):
-    result = re.sub(r"\[*\]*[a-zA-Z]*", "", val)
+    result = re.sub(r"\[*\]*[a-zA-Z]*\s*", "", val)
     if len(result) > 0:
         return result
     else:
