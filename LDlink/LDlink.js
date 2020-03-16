@@ -63,14 +63,14 @@ $(document).ready(function() {
             }
         }
         if(versionNews.indexOf("</li>") != -1){
-            lastNews += "</ul> <a class=\"version-link\" >Show more...</a>"
+            lastNews += "</ul> <a class=\"version-link\">Show more...</a>"
         }
         lastNews = lastNews.substring(0, lastNews.indexOf("<ul>") + 3) + " style=\"padding-left:10px; margin-bottom:0;\"" + lastNews.substring(lastNews.indexOf("<ul>") + 3);
         // console.log(lastNews);
         
         newsList.push("<p><b>LDlinkR</b><br></p><div style=\"height:4px;\"/><p style=\"margin:0;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
         newsList.push("<p><b>AuthorArranger</b><br></p><div style=\"height:4px;\"/><p>Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
-        newsList.push(lastNews + "<p style=\"margin-bottom:0px; margin-top:5px;\">(See <a class=\"version-link\" >Version History</a>)</p>");
+        newsList.push(lastNews + "<p style=\"margin-bottom:0px; margin-top:5px;\">(See <a class=\"version-link\">Version History</a>)</p>");
 
         $("#news-card-1").html(newsList[0]);
         $("#news-card-2").html(newsList[1]);
@@ -78,14 +78,8 @@ $(document).ready(function() {
         // console.log(newsList)
         testResize();
         $(".version-link").on('click',function(){
-            window.scrollTo(0,0);
-            console.log("Hello!");
             $('#version-tab-anchor').click();
-            console.log($("#news-link").html());
-            
-            //$("#news-link").click();
-            
-            //$("#news-link").click();
+            window.scrollTo(0,0);
         });
         $("#news-container").append(data);
     });
@@ -342,12 +336,14 @@ $(document).ready(function() {
         setTimeout(function() {
             window.location = tab;
         }, 500);
+        window.scrollTo(0,0);
     });
 
     $(".anchor-link").on('click', function(e) {
         var tab = $(this).attr('dest');
         console.log("click")
         $('#' + tab + '-tab-anchor').click();
+        window.scrollTo(0,0);
     });
 
     setupTabs();
@@ -845,17 +841,27 @@ function createTraitDetailsTable() {
             {
                 "render": function ( data, type, row ) {
                     // Round floats to 4 decimal places 
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
-                        if (parseFloat(data) == 1.0) {
-                            return "1.0";
-                        } else if (parseFloat(data) == 0.0) {
-                            return "0.0";
+                    if (type === 'display') {
+                        var floatData  = parseFloat(data);
+                        if (data != "NA" && floatData) {
+                            if (floatData === 1.0) {
+                                return "1.0";
+                            } else if (floatData === 0.0) {
+                                return "0.0";
+                            } else {
+                                var val = floatData.toExponential(0).split(/E/i);
+                                return val[0] + "x10" + val[1].sup();
+                            }
                         } else {
-                            var val = parseFloat(data).toExponential(0).split("e");
-                            return val[0] + "x10" + val[1].sup();
+                            if (floatData === 0.0 && (data.includes("E") || data.includes("e"))) {
+                                var val = data.split(/E/i);
+                                return val[0] + "x10" + val[1].sup();
+                            } else {
+                                return data;
+                            }
                         }
+                    } else {
+                        return data;
                     }
                 },
                 "targets": [ 10 ]
@@ -930,6 +936,7 @@ function setupTabs() {
         currentTab = url.tab.toLowerCase();
     } else {
         currentTab = 'home';
+        window.history.pushState({},'', "?tab=home");
     }
     if(currentTab.search('assoc')>=0) currentTab = 'ldassoc';
     if(currentTab.search('hap')>=0) currentTab = 'ldhap';
@@ -941,7 +948,7 @@ function setupTabs() {
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
     if(currentTab.search('access')>=0) currentTab = 'apiaccess';
-    // console.log(currentTab)
+    // console.log("currentTab", currentTab);
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
     let found = false;
@@ -1111,6 +1118,7 @@ function setupLDtraitControls() {
         loadLDtraitQueryWarnings(ldTraitRaw);
         $('#ldtrait-initial-message').hide();
     });
+    initTraitTimestamp();
 }
 
 function calculateChipTotals() {
@@ -2532,6 +2540,28 @@ function initTrait(data, r2_d) {
     } else {
         $('#ldtrait-query-warnings-button').hide();
     }
+}
+
+function initTraitTimestamp() {
+    var id = "ldtrait";
+    var url = restServerUrl + "/ldtrait_timestamp";
+    var ajaxRequest = $.ajax({
+        type : 'GET',
+        url : url,
+        contentType : 'application/json' // JSON
+    });
+    ajaxRequest.success(function(data) {
+        if (displayError(id, data) == false) {
+            var datetime = new Date(JSON.parse(data).$date);
+            var date = datetime.toLocaleDateString("en-US");
+            var time = datetime.toLocaleTimeString("en-US", {hour: '2-digit', minute:'2-digit'});
+            var timezone =  datetime.toString().match(/([A-Z]+[\+-][0-9]+)/)[1];
+            $('#ldtrait-timestamp').text(date + ", " + time + " (" + timezone + ")");
+        }
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
 }
 
 function initClip(data) {
@@ -4396,16 +4426,6 @@ $("#news-right-arrow").on('click',  function() {
             }
         }
     }
-    $(".version-link").on('click',function(){
-        window.scrollTo(0,0);
-        console.log("Hello!");
-        $('#version-tab-anchor').click();
-        console.log($("#news-link").html());
-        
-        //$("#news-link").click();
-        
-        //$("#news-link").click();
-    });
 });
 
 $("#news-left-arrow").on('click',  function() {
@@ -4423,16 +4443,6 @@ $("#news-left-arrow").on('click',  function() {
             $("#news-right-arrow").removeClass("disabled-news-scroller")
         }
     }
-    $(".version-link").on('click',function(){
-        window.scrollTo(0,0);
-        console.log("Hello!");
-        $('#version-tab-anchor').click();
-        console.log($("#news-link").html());
-        
-        //$("#news-link").click();
-        
-        //$("#news-link").click();
-    });
 });
 
 
@@ -4525,16 +4535,6 @@ function testResize(){
             $("#news-left-arrow").addClass("disabled-news-scroller")
         }
     }
-    $(".version-link").on('click',function(){
-        window.scrollTo(0,0);
-        console.log("Hello!");
-        $('#version-tab-anchor').click();
-        console.log($("#news-link").html());
-        
-        //$("#news-link").click();
-        
-        //$("#news-link").click();
-    });
 }
 
 

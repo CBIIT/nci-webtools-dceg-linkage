@@ -6,7 +6,9 @@ import copy
 import math
 import os
 import collections
+import re
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
 import subprocess
 from multiprocessing import Pool
@@ -26,6 +28,40 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+
+def get_ldtrait_timestamp(web):
+    try:
+        with open('config.yml', 'r') as c:
+            config = yaml.load(c)
+        env = config['env']
+        api_mongo_addr = config['api']['api_mongo_addr']
+        mongo_username = config['database']['mongo_user_readonly']
+        mongo_password = config['database']['mongo_password']
+        mongo_port = config['database']['mongo_port']
+
+        # Connect to Mongo snp database
+        if env == 'local':
+            mongo_host = api_mongo_addr
+        else: 
+            mongo_host = 'localhost'
+        if web:
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+        else:
+            if env == 'local':
+                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+            else:
+                client = MongoClient('localhost', mongo_port)
+    except ConnectionFailure:
+        print("MongoDB is down")
+        print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
+        return "Failed to connect to server."
+
+    db = client["LDLink"]
+    for document in db.gwas_catalog.find().sort("_id", -1).limit(1):
+        object_id_datetime = document.get('_id').generation_time
+    json_output = json.dumps(object_id_datetime, default=json_util.default, sort_keys=True, indent=2)
+    return json_output
+
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
@@ -326,17 +362,11 @@ def get_ld_stats(variantPair, pop_ids):
             D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
         # R2
         r2 = (delta**2) / Ms
-        # P-value
-        num = (A + B + C + D) * (A * D - B * C)**2
-        denom = Ms
-        chisq = num / denom
-        p = 2 * (1 - (0.5 * (1 + math.erf(chisq**0.5 / 2**0.5))))
     else:
         output["error"].append("Variant MAF is 0.0, variant removed.")	
         return {	
             "r2": "NA",	
             "D_prime": "NA",	
-            "p": "NA",	
             "alleles": "NA",	
             "output": output	
         }
@@ -352,7 +382,6 @@ def get_ld_stats(variantPair, pop_ids):
     return {
         "r2": r2,
         "D_prime": D_prime,
-        "p": p,
         "alleles": alleles,
         "output": output
     }
@@ -388,9 +417,7 @@ def castFloat(val):
         return val
 
 def findRangeString(val):
-    start = '['
-    end = ']'
-    result = val[val.find(start)+len(start):val.rfind(end)]
+    result = re.sub(r"\[*\]*[a-zA-Z]*\s*", "", val)
     if len(result) > 0:
         return result
     else:
@@ -427,7 +454,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # Effect Size (95% CI)
                 matched_record.append(findRangeString(record["95% CI (TEXT)"]) if ("95% CI (TEXT)" in record and len(record["95% CI (TEXT)"]) > 0) else "NA")
                 # P-value
-                matched_record.append(ld["p"])
+                matched_record.append(record["P-VALUE"] if ("P-VALUE" in record and len(record["P-VALUE"]) > 0) else "NA")
                 # GWAS Catalog (Link)
                 matched_record.append("rs" + record["SNP_ID_CURRENT"])
                 # Details
