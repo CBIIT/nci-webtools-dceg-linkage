@@ -60,7 +60,7 @@
 								<a class="dropdown-item" style="color:black !important;">test</a>
 							</div>-
 
-							<a class="dropdown-menu" id="ldtools-tab-anchor" href="#" data-toggle="tab" title="List LD tools">LD tools</a>
+							<a class="dropdown-menu" id="ldtools-tab-anchor"  data-toggle="tab" title="List LD tools">LD tools</a>
 							<div class="dropdown-content">
 								<a id="ldassoc-tab-anchor" class="dropdown-text" href="#ldassoc-tab"  data-toggle="tab" title="Calculate LDassoc">LDassoc</a>
 								<a id="ldhap-tab-anchor" class="dropdown-text" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies">LDhap</a>
@@ -399,7 +399,7 @@
 													<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
 												</div>
 											</div>
-											<a id="ldassoc-browse-set-none" style="position:relative" href="#" data-toggle="popover" trigger="manual"
+											<a id="ldassoc-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
 											 data-placement="bottom" data-content="Please upload a file."></a>
 										</div>
 
@@ -419,11 +419,11 @@
 													 style="width:250px;">Select Chromosome
 														<span class="caret"></span></button>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="chromosomeColumn">
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
 														<li role="presentation" class="divider"></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
 													</ul>
 												</div>
 												<!--
@@ -436,11 +436,11 @@
 														Position
 														<span class="caret"></span></button>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
 														<li role="presentation" class="divider"></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
 													</ul>
 												</div>
 												<div id="assoc-p-value" class="dropdown">
@@ -448,11 +448,11 @@
 														P-value
 														<span class="caret"></span></button>
 													<ul class="dropdown-menu" role="menu" aria-labelledby="menu1">
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">BP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">SNP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">A1</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
 														<li role="presentation" class="divider"></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" href="#">A2</a></li>
+														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
 													</ul>
 												</div>
 											</div>
@@ -462,28 +462,28 @@
 								<div class="ldassoc-flex-item2">
 									<div class="form-group">
 										<div class="col-sm-3" style="width:275px;">
-											<a id="ldassoc-region-codes-zero" style="position:relative;left:155px;top:17px" href="#" data-toggle="popover"
+											<a id="ldassoc-region-codes-zero" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 											 trigger="manual" data-placement="right" data-content="Please select a region."></a>
 											<div id="assoc-region" class="dropdown">
 												<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu1" data-toggle="dropdown"
 												 style="width:155px;">Select Region<span class="caret"></span></button>
 												<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="menu1">
-													<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Gene</a></li>
-													<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Region</a></li>
-													<li role="presentation"><a role="menuitem" tabindex="-1" href="#">Variant</a></li>
+													<li role="presentation"><a role="menuitem" tabindex="-1" >Gene</a></li>
+													<li role="presentation"><a role="menuitem" tabindex="-1" >Region</a></li>
+													<li role="presentation"><a role="menuitem" tabindex="-1" >Variant</a></li>
 												</ul>
 											</div>
 											<!-- region = Gene -->
 											<div id="region-gene-container" class="form-inline" style="display
 										:none;">
-												<a id="ldassoc-region-gene-name" style="position:relative;left:155px;top:17px" href="#" data-toggle="popover"
+												<a id="ldassoc-region-gene-name" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
 													<label for="region-gene-name" style="display:none;">Gene Name</label>
 													<input type="text" id="region-gene-name" class="form-control" placeholder="Gene Name" pattern="(^[A-Za-z0-9\-]+$)">
 												</div>
 												<div class="form-group">
-													<a id="ldassoc-region-gene-bp" style="position:relative;left:95px;top:5px" href="#" data-toggle="popover"
+													<a id="ldassoc-region-gene-bp" style="position:relative;left:95px;top:5px"  data-toggle="popover"
 													 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
 													<label for="region-gene-base-pair-window">&plusmn;</label>
 													<input id="region-gene-base-pair-window" class="form-control" value="100000" type="text" pattern="^\d+$"
@@ -497,14 +497,14 @@
 											</div>
 											<!-- region = Region -->
 											<div id="region-region-container" class="form-inline" style="display:none;">
-												<a id="ldassoc-region-region-start" style="position:relative;left:155px;top:17px" href="#" data-toggle="popover"
+												<a id="ldassoc-region-region-start" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div>
 													<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in GRCh37</label>
 													<input type="text" id="region-region-start-coord" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37"
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
-												<a id="ldassoc-region-region-end" style="position:relative;left:155px;top:17px" href="#" data-toggle="popover"
+												<a id="ldassoc-region-region-end" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
 												<div>
 													<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
@@ -519,14 +519,14 @@
 											</div>
 											<!-- region = Variant -->
 											<div id="region-variant-container" class="form-inline" style="display:none;">
-												<a id="ldassoc-variant-index-pop" style="position:relative;left:155px;top:17px" href="#" data-toggle="popover"
+												<a id="ldassoc-variant-index-pop" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
 													<label for="region-variant-index" style="display:none;">RS Number or Genomic Coordinate (optional)</label>
 													<input type="text" id="region-variant-index" class="form-control" style="width:225px" placeholder="RS Number or Genomic Coordinate" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div class="form-group">
-													<a id="ldassoc-variant-bp-pop" style="position:relative;left:95px;top:5px" href="#" data-toggle="popover"
+													<a id="ldassoc-variant-bp-pop" style="position:relative;left:95px;top:5px"  data-toggle="popover"
 													 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
 													<label for="region-variant-base-pair-window">&plusmn;</label>
 													<input id="region-variant-base-pair-window" class="form-control" value="500000" type="text" pattern="^\d+$"
@@ -539,7 +539,7 @@
 								<div class="ldassoc-flex-item3">
 									<div class="form-group">
 										<div class="ldassoc-population-col" style="width:190px;">
-											<a id="ldassoc-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+											<a id="ldassoc-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 											 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldassoc
 													population codes</span></a>
 											<label for="ldassoc-population-codes" style="display: none;">Populations</label>
@@ -751,14 +751,14 @@
 									<span class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="ldhap-file">
 									</span>
-									<a id="ldhap-browse-set-none" style="position:relative;" href="#" data-toggle="popover" trigger="manual"
+									<a id="ldhap-browse-set-none" style="position:relative;"  data-toggle="popover" trigger="manual"
 									 data-placement="right" data-content="Please upload a file."></a>
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-4">
-									<a id="ldhap-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldhap-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldhap
 											population codes</span></a>
 									<label for="ldhap-population-codes" style="display: none;">Populations</label>
@@ -895,15 +895,15 @@
 							<div class="form-group">
 								<!-- COLUMN 1 - sm-2 -->
 								<div class="col-sm-2">
-									<!-- <a id="ldmatrix-file-snp-warning" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<!-- <a id="ldmatrix-file-snp-warning" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please enter 300 variants or less. For larger queries, use API access."><span class="sr-only">SNP limit warning</span></a> -->
 									<textarea id="ldmatrix-file-snp-numbers" placeholder="RS Numbers or Genomic Coordinates" class="form-control"
 									 title="Enter list of RS Numbers or Genomic Coordinates (one per line)" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required></textarea>
-									 <!-- <a id="ldmatrix-file-snp-warning" style="position:relative; bottom: 25px;" href="#" data-toggle="popover"
+									 <!-- <a id="ldmatrix-file-snp-warning" style="position:relative; bottom: 25px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please enter 300 variants or less. For larger queries, use API access."><span class="sr-only">SNP limit warning</span></a> -->
 								</div>
-								<a id="ldmatrix-file-snp-warning" style="position:relative; top: 25px; left: 188px;" href="#" data-toggle="popover"
+								<a id="ldmatrix-file-snp-warning" style="position:relative; top: 25px; left: 188px;"  data-toggle="popover"
 								 trigger="manual" data-placement="right" data-content="Please enter 300 variants or less. For larger queries, use API access."><span class="sr-only">SNP limit warning</span></a>
 								<!-- COLUMN2 - sm-3 -->
 								<div class="col-sm-3">
@@ -915,7 +915,7 @@
 										<span class="btn btn-default btn-file btn-snp">Browse
 											<input type="file" id="ldmatrix-file">
 										</span>
-										<a id="ldmatrix-browse-set-none" style="position:relative;" href="#" data-toggle="popover" trigger="manual"
+										<a id="ldmatrix-browse-set-none" style="position:relative;"  data-toggle="popover" trigger="manual"
 										 data-placement="right" data-content="Please upload a file."></a>
 									</div>
 								</div>
@@ -923,7 +923,7 @@
 							<div class="form-group">
 								<!-- COLUMN3 - sm-2 -->
 								<div class="col-sm-2">
-									<a id="ldmatrix-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldmatrix-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
 									<label for="ldmatrix-population-codes" style="display: none;">Populations</label>
@@ -1029,7 +1029,7 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
-									<a id="ldpair-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldpair-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
 									<label for="ldpair-population-codes" style="display: none;">Populations</label>
@@ -1079,9 +1079,9 @@
 								<tr>
 									<td></td>
 									<td></td>
-									<td colspan="2" class="cell-center"><a id="snp2-rsnum" data-bind="text: snp2.rsnum" href="#" title="Cluster Report:"
+									<td colspan="2" class="cell-center"><a id="snp2-rsnum" data-bind="text: snp2.rsnum"  title="Cluster Report:"
 										 target="LDPair-snp2-rsnum"><span class="sr-only">Cluster Report</span></a><br /> <a id="snp2-coord"
-										 data-bind="text: snp2.coord" href="#" title="Genome Browser" target="LDPair-snp2-coord"><span class="sr-only">Genome
+										 data-bind="text: snp2.coord"  title="Genome Browser" target="LDPair-snp2-coord"><span class="sr-only">Genome
 												Browser</span>
 										</a></td>
 									<td></td>
@@ -1099,9 +1099,9 @@
 								<!-- Row 2 -->
 								<tr>
 									<td class="cell-center" rowspan="2" style="vertical-align: middle">
-										<a id="snp1-rsnum" data-bind="text: snp1.rsnum" href="#" title="Cluster Report:" target="LDPair-snp1-rsnum"><span
+										<a id="snp1-rsnum" data-bind="text: snp1.rsnum"  title="Cluster Report:" target="LDPair-snp1-rsnum"><span
 											 class="sr-only">Cluster Report</span></a><br />
-										<a id="snp1-coord" data-bind="text: snp1.coord" href="#" title="Genome Browser" target="LDPair-snp1-coord"><span
+										<a id="snp1-coord" data-bind="text: snp1.coord"  title="Genome Browser" target="LDPair-snp1-coord"><span
 											 class="sr-only">Genome Browser</span></a>
 									</td>
 									<td class="cell-center" data-bind="text: snp1.allele_1.allele"></td>
@@ -1212,7 +1212,7 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<a id="ldpop-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldpop-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
 									<label for="ldpop-population-codes" style="display: none;">Populations</label>
@@ -1272,11 +1272,11 @@
 									</button>
 									<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
 										<li role="presentation">
-											<a role="menuitem" id="ldpop-LD-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+											<a role="menuitem" id="ldpop-LD-downloadPNG" class="text-center" tabindex="-1" >PNG</a>
 										</li>
 										<li role="presentation" class="divider"></li>
 										<li role="presentation">
-											<a role="menuitem" id="ldpop-LD-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+											<a role="menuitem" id="ldpop-LD-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a>
 										</li>
 									</ul>
 								</div>
@@ -1295,11 +1295,11 @@
 									</button>
 									<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
 										<li role="presentation">
-											<a role="menuitem" id="ldpop-AFvar1-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+											<a role="menuitem" id="ldpop-AFvar1-downloadPNG" class="text-center" tabindex="-1" >PNG</a>
 										</li>
 										<li role="presentation" class="divider"></li>
 										<li role="presentation">
-											<a role="menuitem" id="ldpop-AFvar1-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+											<a role="menuitem" id="ldpop-AFvar1-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a>
 										</li>
 									</ul>
 								</div>
@@ -1318,11 +1318,11 @@
 									</button>
 									<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
 										<li role="presentation">
-											<a role="menuitem" id="ldpop-AFvar2-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+											<a role="menuitem" id="ldpop-AFvar2-downloadPNG" class="text-center" tabindex="-1" >PNG</a>
 										</li>
 										<li role="presentation" class="divider"></li>
 										<li role="presentation">
-											<a role="menuitem" id="ldpop-AFvar2-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+											<a role="menuitem" id="ldpop-AFvar2-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a>
 										</li>
 									</ul>
 								</div>
@@ -1389,11 +1389,11 @@
 											</button>
 											<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
 												<li role="presentation">
-													<a role="menuitem" id="ldpop-LD-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+													<a role="menuitem" id="ldpop-LD-downloadPNG" class="text-center" tabindex="-1" >PNG</a>
 												</li>
 												<li role="presentation" class="divider"></li>
 												<li role="presentation">
-													<a role="menuitem" id="ldpop-LD-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+													<a role="menuitem" id="ldpop-LD-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a>
 												</li>
 											</ul>
 										</div>
@@ -1412,11 +1412,11 @@
 											</button>
 											<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
 												<li role="presentation">
-													<a role="menuitem" id="ldpop-AFvar1-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+													<a role="menuitem" id="ldpop-AFvar1-downloadPNG" class="text-center" tabindex="-1" >PNG</a>
 												</li>
 												<li role="presentation" class="divider"></li>
 												<li role="presentation">
-													<a role="menuitem" id="ldpop-AFvar1-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+													<a role="menuitem" id="ldpop-AFvar1-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a>
 												</li>
 											</ul>
 										</div>
@@ -1435,11 +1435,11 @@
 											</button>
 											<ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;">
 												<li role="presentation">
-													<a role="menuitem" id="ldpop-AFvar2-downloadPNG" class="text-center" tabindex="-1" href="#">PNG</a>
+													<a role="menuitem" id="ldpop-AFvar2-downloadPNG" class="text-center" tabindex="-1" >PNG</a>
 												</li>
 												<li role="presentation" class="divider"></li>
 												<li role="presentation">
-													<a role="menuitem" id="ldpop-AFvar2-downloadJPEG" class="text-center" tabindex="-1" href="#">JPEG</a>
+													<a role="menuitem" id="ldpop-AFvar2-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a>
 												</li>
 											</ul>
 										</div>
@@ -1497,10 +1497,10 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-4">
-									<a id="ldproxy-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldproxy-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
-									<a id="ldproxy-population-codes-popover" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldproxy-population-codes-popover" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Warning: Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources."><span
 										 class="sr-only">Warning: Selecting 2 or more sub-populations at a time significantly slows down query time
 											and ties up limited system resources.</span></a>
@@ -1651,14 +1651,14 @@
 									<span class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="ldtrait-file">
 									</span>
-									<a id="ldtrait-browse-set-none" style="position:relative;" href="#" data-toggle="popover" trigger="manual"
+									<a id="ldtrait-browse-set-none" style="position:relative;"  data-toggle="popover" trigger="manual"
 										data-placement="right" data-content="Please upload a file."></a>
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-2">
-									<a id="ldtrait-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+									<a id="ldtrait-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
 									<label for="ldtrait-population-codes" style="display: none;">Please Select a population</label>
@@ -1820,12 +1820,12 @@
 									<span class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="snpclip-file">
 									</span>
-									<a id="snpclip-browse-set-none" style="position:relative;" href="#" data-toggle="popover" trigger="manual"
+									<a id="snpclip-browse-set-none" style="position:relative;"  data-toggle="popover" trigger="manual"
 									 data-placement="right" data-content="Please upload a file."></a>
 								</div>
 							</div>
 							<div class="form-group col-sm-3">
-								<a id="snpclip-population-codes-zero" style="position:relative;left:180px;" href="#" data-toggle="popover"
+								<a id="snpclip-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 								 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 										codes</span></a>
 								<label for="snpclip-population-codes" style="display: none;">Please Select a population</label>
@@ -1986,7 +1986,7 @@
 									<span class="btn btn-default btn-file btn-snp">Browse
 										<input type="file" id="snpchip-file">
 									</span>
-									<a id="snpchip-browse-set-none" style="position:relative;" href="#" data-toggle="popover" trigger="manual"
+									<a id="snpchip-browse-set-none" style="position:relative;"  data-toggle="popover" trigger="manual"
 									 data-placement="right" data-content="Please upload a file."></a>
 								</div>
 							</div>
@@ -2297,7 +2297,7 @@
 											</label>
 											<div class="form-group">
 												<label for="apiblocked-justification">Justification<span style="color:red">*</span></label>
-												<a id="apiblocked-justification-warning" style="position:relative; left:250px; top:60px;" href="#" data-toggle="popover"
+												<a id="apiblocked-justification-warning" style="position:relative; left:250px; top:60px;"  data-toggle="popover"
 													trigger="manual" data-placement="bottom" data-content=""></a>
 												<textarea id="apiblocked-justification" placeholder="Please provide reason for misuse and describe intended purpose. &#10;Include estimated # of API calls if possible. (max. 500 characters)"
 													class="form-control" title="Please describe your intended use and give estimated number of API calls."
