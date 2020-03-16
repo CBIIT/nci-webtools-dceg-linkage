@@ -841,17 +841,22 @@ function createTraitDetailsTable() {
             {
                 "render": function ( data, type, row ) {
                     // Round floats to 4 decimal places 
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
-                        if (parseFloat(data) == 1.0) {
-                            return "1.0";
-                        } else if (parseFloat(data) == 0.0) {
-                            return "0.0";
+                    if (type === 'display') {
+                        var floatData  = parseFloat(data);
+                        if (data != "NA" && floatData) {
+                            if (floatData === 1.0) {
+                                return "1.0";
+                            } else if (floatData === 0.0) {
+                                return "0.0";
+                            } else {
+                                var val = floatData.toExponential(0).split('e');
+                                return val[0] + "x10" + val[1].sup();
+                            }
                         } else {
-                            var val = parseFloat(data).toExponential(0).split("e");
-                            return val[0] + "x10" + val[1].sup();
+                            return data;
                         }
+                    } else {
+                        return data;
                     }
                 },
                 "targets": [ 10 ]
