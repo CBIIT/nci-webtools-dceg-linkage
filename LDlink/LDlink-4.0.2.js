@@ -39,7 +39,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news.html", function (data) {
+    $.get("news-4.0.2.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];

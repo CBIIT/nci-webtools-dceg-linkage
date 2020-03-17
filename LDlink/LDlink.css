@@ -887,9 +887,9 @@ table#snpchip-thinned-list > thead > tr {
 #snp_chip_list {
 	padding-left:60px;
 }
-#ldtrait-links-container {
+/* #ldtrait-links-container {
 	padding-top:30px;
-}
+} */
 #snpclip-links-container {
 	padding-top:30px;
 }
