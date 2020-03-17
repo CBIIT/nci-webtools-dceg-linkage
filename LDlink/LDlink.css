@@ -91,9 +91,9 @@ body {
   border-bottom: none;
 }
 
-.navbar-nav li.active a {
-  /*background: #2D6A9F;*/
-}
+/* .navbar-nav li.active a {
+  background: #2D6A9F;
+} */
 
 .navbar-nav>li a:hover {
   background: grey ;
@@ -887,9 +887,9 @@ table#snpchip-thinned-list > thead > tr {
 #snp_chip_list {
 	padding-left:60px;
 }
-#ldtrait-links-container {
+/* #ldtrait-links-container {
 	padding-top:30px;
-}
+} */
 #snpclip-links-container {
 	padding-top:30px;
 }
