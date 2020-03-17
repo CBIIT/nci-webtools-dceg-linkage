@@ -1477,7 +1477,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help.html');
+    $('#help-tab').load('help-4.0.2.html');
 }
 
 function calculate(e) {
