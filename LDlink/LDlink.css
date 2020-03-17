@@ -91,9 +91,9 @@ body {
   border-bottom: none;
 }
 
-.navbar-nav li.active a {
-  /*background: #2D6A9F;*/
-}
+/* .navbar-nav li.active a {
+  background: #2D6A9F;
+} */
 
 .navbar-nav>li a:hover {
   background: grey ;
