@@ -281,7 +281,7 @@ def api_blocked_users():
 # Copy output files from tools' tmp directory to apache tmp directory
 @app.route('/')
 def root():
-    return app.send_static_file('index.html')
+    return app.send_static_file('index-4.0.2.html')
     # with open('config.yml', 'r') as c:
     #     config = yaml.load(c)
     # env = config['env']

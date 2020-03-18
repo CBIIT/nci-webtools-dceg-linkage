@@ -6,7 +6,7 @@
 # create hash for parameters
 declare -A parameters=( [gmap_key]= )
 valid=true
-filename=index.html
+filename=index-4.0.2.html
 
 # assign arguments to parameters
 while true; do
