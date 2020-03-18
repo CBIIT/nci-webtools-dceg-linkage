@@ -332,9 +332,6 @@ $(document).ready(function() {
 
     $(".help-anchor-link").on('click', function(e) { 
         var tab = e.target.hash;
-        if (tab === undefined) {
-            tab = e.target.alt;
-        }
         $('#help-tab-anchor').click();
         setTimeout(function() {
             window.location = tab;
