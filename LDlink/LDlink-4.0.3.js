@@ -39,7 +39,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-4.0.2.html", function (data) {
+    $.get("news-4.0.3.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -1480,7 +1480,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-4.0.2.html');
+    $('#help-tab').load('help-4.0.3.html');
 }
 
 function calculate(e) {
@@ -3968,7 +3968,7 @@ function buildPopulationDropdown(elementId) {
     $('#' + elementId).multiselect({
         enableClickableOptGroups : true,
         buttonWidth : '180px',
-        maxHeight : 500,
+        maxHeight : 400,
         buttonClass : 'btn btn-default btn-ldlink-multiselect',
         includeSelectAllOption : true,
         dropRight : false,
