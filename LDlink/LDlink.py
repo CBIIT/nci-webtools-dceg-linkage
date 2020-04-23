@@ -800,7 +800,7 @@ def ldtrait():
     pop = data['pop']
     r2_d = data['r2_d']
     r2_d_threshold = data['r2_d_threshold']
-    window = data['window'].replace(',', '')
+    window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('pop: ' + pop)
