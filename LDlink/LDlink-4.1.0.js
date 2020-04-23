@@ -1941,6 +1941,7 @@ function updateLDtrait() {
     var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
     var population = getPopulationCodes(id+'-population-codes');
     var r2_d;
+    var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
 
     if($('#ldtrait_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
@@ -1948,7 +1949,8 @@ function updateLDtrait() {
         r2_d = 'd';  // i.e. Dprime
     }
 
-    var estimateSeconds = snps.split("\n").length * 5;
+    var estimateWindowSizeMultiplier = window / 500000.0;
+    var estimateSeconds = Math.round((snps.split("\n").length * 5 * estimateWindowSizeMultiplier));
     // console.log("estimate seconds", estimateSeconds);
     var estimateMinutes = estimateSeconds / 60;
     if (estimateSeconds < 60) {
@@ -1962,7 +1964,7 @@ function updateLDtrait() {
         pop : population.join("+"),
         r2_d: r2_d,
         r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
-        window: $("#"+id+"-bp-window").val(),
+        window: window,
         reference : Math.floor(Math.random() * (99999 - 10000 + 1))
     };
 
