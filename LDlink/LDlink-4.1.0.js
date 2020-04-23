@@ -1528,7 +1528,7 @@ function updateData(id) {
             }
             break;
         case 'ldtrait':
-            if(isPopulationSet(id)) {
+            if(isPopulationSet(id) && validateLDtraitBasePairWindow()) {
                 $('#'+id+"-loading").show();
                 updateLDtrait();
             }
@@ -1962,6 +1962,7 @@ function updateLDtrait() {
         pop : population.join("+"),
         r2_d: r2_d,
         r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
+        window: $("#"+id+"-bp-window").val(),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1))
     };
 
@@ -4156,6 +4157,7 @@ $(document).ready(function() {
     $('#ldhap-file-snp-numbers').keyup(validateTextarea);
     $('#ldmatrix-file-snp-numbers').keyup(validateTextarea);
     $('#ldtrait-file-snp-numbers').keyup(validateTextarea);
+    $('#ldtrait-bp-window').keyup(validateLDtraitBasePairWindow);
     $('#snpchip-file-snp-numbers').keyup(validateTextarea);
     $('#snpclip-file-snp-numbers').keyup(validateTextarea);
     $('#region-gene-base-pair-window').keyup(validateBasePairWindows);
@@ -4221,6 +4223,25 @@ function validateIndex() {
         $(textarea).attr('title', errorMsg);
     } else {
         $(textarea).removeAttr('title');
+    }
+}
+
+function validateLDtraitBasePairWindow() {
+    var errorMsg = "Value must be a number between 0 and 1,000,000";
+    var textarea = "#ldtrait-bp-window";
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
+    var currentValue = $(textarea).val();
+    var currentValueNoCommas = currentValue.replace(/\,/g, '');
+    var hasError = !currentValue.match(pattern) || (currentValueNoCommas < 0 || currentValueNoCommas > 1000000);
+    console.log('hasError', hasError);
+    $(textarea).toggleClass('error', hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+        return false;
+    } else {
+        // $(textarea).removeAttr('title');
+        return true;
     }
 }
 
