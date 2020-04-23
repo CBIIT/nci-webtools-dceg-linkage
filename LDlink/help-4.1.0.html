@@ -476,9 +476,14 @@
 		- select if desired output is pruned from a threshold based on estimated R<sup>2</sup> or D'.
 	</p>
 	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' threshold</u>
-		- set threshold for LD pruning. Any variants within -/+ 500 Kb window and
+		- set threshold for LD pruning. Any variants within -/+ of the specified genomic window and
 		R<sup>2</sup> or D' less than the threshold will be removed. Value needs to be in the
 		range 0 to 1. Default value is 0.1.
+	</p>
+	<p style="margin-left: 120px;"><u>Window size</u>
+		- set genomic window size for LD pruning. 
+		Specify a value greater than or equal to zero and less than or equal to 1,000,000bp. 
+		Default value is -/+ 500,000bp.
 	</p>
 	<p style="margin-left: 80px;"> <strong>Output:</strong>
 	</p>
