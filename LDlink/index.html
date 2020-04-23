@@ -23,7 +23,7 @@
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
 	<link rel="stylesheet" href="/common/css/style.css">
 	<link rel="stylesheet" href="/common/css/social.css">
-	<link rel="stylesheet" href="LDlink-4.0.3.css">
+	<link rel="stylesheet" href="LDlink-4.1.0.css">
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
@@ -1668,7 +1668,7 @@
 							</div>
 
 							<div class="form-group">
-								<div class="col-sm-2">
+								<div class="col-sm-2" style="width: 120px;">
 									<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
 										<label class="btn btn-default active" id="ldtrait_ld_r2">
 											<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
@@ -1676,18 +1676,26 @@
 										<label class="btn btn-default" id="ldtrait_ld_d">
 											<input type="radio" autocomplete="off" name="options"> D'
 										</label>
-									</div>
+									</div>	
 								</div>
 							</div>
 
-							<div class="col-sm-2">
+							<div class="col-sm-2" style="margin-right: 30px">
 								<div id="ldtrait-thresholds">
-									<div>Threshold</div>
-									<div class="input-group">
+									<div class="row">Thresholds</div>
+									<div class="input-group row">
 										<label id="ldtrait_r2_d_threshold_label" for="ldtrait_r2_d_threshold">R<sup>2</sup>:</label>
 										<input id="ldtrait_r2_d_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
 											title="Threshold must be a number between 0 and 1" required>
 									</div>
+									<div style="clear:both;"></div>
+									<div class="input-group row" style="min-width: 200px;">
+										<label id="ldtrait-bp-window-label" for="ldtrait-bp-window" style="width: 10px">&plusmn;</label>
+										<input id="ldtrait-bp-window" value="500000" type="text" pattern="^[\d]+,?[\d]+,?[\d]+$"
+											style="width: 70px;" title="Value must be a number between 500,000 and 1,000,000" required/>
+										<span>base pair window</span>
+									</div>
+									<div style="clear:both;"></div>
 								</div>
 							</div>
 
@@ -2518,7 +2526,7 @@
 	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
-	<script type="text/javascript" src="LDlink-4.0.3.js"></script>
+	<script type="text/javascript" src="LDlink-4.1.0.js"></script>
 	<script type="text/javascript" src="/common/js/purify.js"></script>
 	<script type="text/javascript" src="/common/js/bootstrap-multiselect.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js"></script>

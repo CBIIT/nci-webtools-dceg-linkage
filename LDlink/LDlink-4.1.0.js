@@ -1,4 +1,4 @@
-var ldlink_version = "Version 4.0";
+var ldlink_version = "Version 4.1";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -39,7 +39,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-4.0.3.html", function (data) {
+    $.get("news-4.1.0.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -391,20 +391,10 @@ $(document).ready(function() {
     $("#ldtrait_ld_r2").click(function(e){
         console.log("R2");
         $("#ldtrait_r2_d_threshold_label").html("R<sup>2</sup>:");
-        // $(document).ready(function() {
-        // $('#new-ldtrait').DataTable( {
-        //     "order": [[ 3, "desc" ]]
-        // } );
-        // } );
     });
     $("#ldtrait_ld_d").click(function(e){
         console.log("D");
         $("#ldtrait_r2_d_threshold_label").html("D':");
-        // $(document).ready(function() {
-        // $('#new-ldtrait').DataTable( {
-        //     "order": [[ 4, "desc" ]]
-        // } );
-        // } );
     });
 });
 
@@ -1477,7 +1467,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-4.0.3.html');
+    $('#help-tab').load('help-4.1.0.html');
 }
 
 function calculate(e) {
@@ -1954,20 +1944,8 @@ function updateLDtrait() {
 
     if($('#ldtrait_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
-        // $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_R2.png');
-        // $(document).ready(function() {
-            // $('#new-ldtrait').DataTable( {
-            //     "order": [[ 4, "desc" ]]
-            // } );
-        // } );
     } else {
         r2_d = 'd';  // i.e. Dprime
-        // $("#ldpop-ld-legend-img").attr('src', 'LDpop_legend_Dprime.png');
-        // $(document).ready(function() {
-            // $('#new-ldtrait').DataTable( {
-            //     "order": [[ 5, "desc" ]]
-            // } );
-        // } );
     }
 
     var estimateSeconds = snps.split("\n").length * 5;
