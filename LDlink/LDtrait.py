@@ -490,6 +490,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
     out_json = open(tmp_dir + "trait" + str(request) + ".json", "w")
     output = {}
 
+    # Validate window size is between 0 and 1,000,000
+    if window < 0 or window > 1000000:
+        output["error"] = "Window value must be a number between 0 and 1,000,000."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
+
     # open snps file
     with open(snplst, 'r') as fp:
         snps_raw = fp.readlines()
