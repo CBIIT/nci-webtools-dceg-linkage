@@ -4235,14 +4235,12 @@ function validateLDtraitBasePairWindow() {
     var currentValue = $(textarea).val();
     var currentValueNoCommas = currentValue.replace(/\,/g, '');
     var hasError = !currentValue.match(pattern) || (currentValueNoCommas < 0 || currentValueNoCommas > 1000000);
-    console.log('hasError', hasError);
     $(textarea).toggleClass('error', hasError);
     $(textarea).toggleClass('ok', !hasError);
     if (hasError) {
         $(textarea).attr('title', errorMsg);
         return false;
     } else {
-        // $(textarea).removeAttr('title');
         return true;
     }
 }

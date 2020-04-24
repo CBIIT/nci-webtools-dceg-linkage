@@ -1690,9 +1690,9 @@
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" style="min-width: 200px;">
-										<label id="ldtrait-bp-window-label" for="ldtrait-bp-window" style="width: 10px">&plusmn;</label>
-										<input id="ldtrait-bp-window" value="500000" type="text" pattern="^(\d+|\d{1,3}(,\d{3})*)(\.\d+)?$"
-											style="width: 70px;" title="Value must be a number between 0 and 1,000,000" required/>
+										<label id="ldtrait-bp-window-label" for="ldtrait-bp-window" style="width: 5px">&plusmn;</label>
+										<input id="ldtrait-bp-window" value="500000" type="number" pattern="^(\d+|\d{1,3}(,\d{3})*)(\.\d+)?$"
+											min="0" max="1000000" style="width: 75px;" title="Value must be a number between 0 and 1,000,000" required/>
 										<span>base pair window</span>
 									</div>
 									<div style="clear:both;"></div>
