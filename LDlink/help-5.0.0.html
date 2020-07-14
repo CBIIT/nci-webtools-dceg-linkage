@@ -38,6 +38,7 @@
 				Fit</strong></a></p>
 	<p style="margin-left: 40px;"> <a href="#Modules"><strong>Modules</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDassoc"><strong>LDassoc</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDexpress"><strong>LDexpress</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDhap"><strong>LDhap</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDmatrix"><strong>LDmatrix</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDpair"><strong>LDpair</strong></a></p>
@@ -147,7 +148,7 @@
 	<br>
 	<p> <strong><a name="Modules"></a>Modules</strong>
 	</p>
-	<p>LDlink consists of nine modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDhap">LDhap</a>,
+	<p>LDlink consists of ten modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDexpress">LDexpress</a>, <a href="#LDhap">LDhap</a>,
 		<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>, <a href="#LDpop">LDpop</a>, 
 		<a href="#LDproxy">LDproxy</a>, <a href="#LDtrait">LDtrait</a>, <a href="#SNPchip">SNPchip</a>,
 		and <a href="#SNPclip">SNPclip</a>. Each module can be
@@ -220,6 +221,65 @@
 	<p style="margin-left: 120px;"><u>Download association data for all
 			variants</u> - download a
 		file with information on all variants within the plotting region.
+	</p>
+	<br>
+
+
+	
+	<p style="margin-left: 40px;"> <strong><a name="LDexpress"></a><span style="text-decoration: underline;">LDexpress</span></strong>
+		- Search if a list of variants (or variants in LD with those variants) ... 
+		Trait and disease data is updated nightly from the <a href="https://www.ebi.ac.uk/gwas/docs/file-downloads" target="_blank">GWAS Catalog</a>. 
+		Problematic data entries in the GWAS Catalog can be browsed <a href="./tmp/ldtrait_error_snps.json" target="_blank">here</a>.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>List of RS numbers</u>
+		- this can either
+		be entered one per line in the text entry box or uploaded as a file
+		that contains a list of RS numbers in the first column. A maximum of
+		50 variant RS numbers or chromosomal coordinates (GRCh37) are permitted. All input variants must match a bi-allelic variant. 
+		The text entry field is automatically filled with the contents of the uploaded
+		file.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference
+			population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+		- select if desired output is pruned from a threshold based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' threshold</u>
+		- set threshold for LD pruning. Any variants within -/+ of the specified genomic window and
+		R<sup>2</sup> or D' less than the threshold will be removed. Value needs to be in the
+		range 0 to 1. Default value is 0.1.
+	</p>
+	<p style="margin-left: 120px;"><u>Window size</u>
+		- set genomic window size for LD pruning. 
+		Specify a value greater than or equal to zero and less than or equal to 1,000,000bp. 
+		Default value is -/+ 500,000bp.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>Variants in LD with GWAS Catalog</u>
+		- a list of queried variants in LD with a variant reported in the GWAS Catalog. Each variant in the
+		list is a clickable link that brings up a detailed table showing disease-associated variants that
+		are in a -/+ 500 KB window and in linkage disequilibirum with the variant.
+	</p>
+	<p style="margin-left: 120px;"><u>Details Tables</u>
+		- output table that appears when a variant in the variant list is clicked.
+		Details are provided on GWAS trait, genomic position, alleles, R<sup>2</sup>, D', Effect Size (95% CI), Beta or OR, and P-value. 
+		External links lead to the variant pair in
+		<a href="https://ldlink.nci.nih.gov/?tab=ldpair" target="_blank">LDpair</a>
+		and result variant in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">GWAS Catalog</a>.
+	</p>
+	<p style="margin-left: 120px;"><u>Variants with Warnings</u>
+		- output table that appears when a variant produces a warning in LDtrait. Common reasons
+		for a variant to be on the warning list are if the variant is not found in dbSNP or if no variants in LD are found within window of the GWAS Catalog.
+		Details are provided on genomic position and why the variant was excluded from the variant list.
+	</p>
+	<p style="margin-left: 120px;"><u>Download GWAS Catalog annotated variant list</u>
+		- download a text file in tab-delimited format that lists all query variant RS numbers and their respective GWAS Catalog results.
 	</p>
 	<br>
 

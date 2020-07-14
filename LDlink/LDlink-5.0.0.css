@@ -350,6 +350,10 @@ img.loading {
   margin-right: auto;
 }
 
+#ldexpress-loading {
+  text-align: center;
+}
+
 #ldtrait-loading {
   text-align: center;
 }
@@ -643,6 +647,53 @@ hr.header {
 	font-weight:bold;
 }
 
+#ldexpress-thresholds {
+	width:130px;
+	margin-left:10px;
+	position: relative;
+	top:-17px;
+}
+
+#ldexpress-thresholds > div > label {
+	width:40px;
+}
+
+#ldexpress-thresholds > div > input {
+	width:50px;
+}
+
+#ldexpress-thresholds > div:first-child {
+	width:100px;
+	font-weight:bold;
+}
+
+#ldexpress-snp-list {
+	/*width:175px; */
+	float:left;
+	max-height: 400px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	border-top: 1px solid #ccc;
+	border-left: 1px solid #ccc;
+	border-right: 1px solid #ccc;
+}
+
+#ldexpress-snp-list > a {
+	text-decoration: underline;
+	color: #2D6A9F;
+}
+
+#ldexpress-detail {
+/*	border:1px solid #333; */
+	float:left;
+	padding:10px;
+}
+
+#ldexpress-warning {
+	float:left;
+	padding:10px;
+}
+
 #ldtrait-thresholds {
 	width:130px;
 	margin-left:10px;
@@ -689,6 +740,7 @@ hr.header {
 	float:left;
 	padding:10px;
 }
+
 #snpclip-snp-list {
 	/*width:175px; */
 	float:left;
@@ -725,6 +777,38 @@ table.table-chip > thead > tr > th {
 
 table.table-chip > tbody {
     border:1px solid #ccc;
+}
+
+table#ldexpress-table-thin > tbody {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+table#ldexpress-table-thin > tbody > tr > td {
+  padding: 8px 20px 8px 10px;
+}
+
+.ldexpress-table-express-column {
+  width: 200px !important;
+}
+
+/* .ldexpress-table-details-column {
+} */
+
+#ldexpress-initial-message {
+  font-weight:bold;
+  font-size:110%;
+  margin-top:50px;
+}
+
+#ldexpress-table-container {
+  min-height:580px;
+}
+
+.ldexpress-table-scroller {
+  /* overflow-y:auto;
+  max-height:575px; */
+  padding-top:10px;
 }
 
 table#ldtrait-table-thin > tbody {
@@ -865,21 +949,26 @@ fieldset#columnBcheckbox > div.row {
 	font-family: "Lucida Grande",Verdana,Arial,sans-serif;
 	font-size: smaller;
 }
+
 table.snpchip-table > thead > tr:first-child {
 	height: 121px;
 	border-top: 1px solid #ccc;
 }
+
 table.snpchip-table > thead > tr:first-child > th {
 	text-align:center;
 	border-bottom: 0px;
 }
+
 table.snpchip-table > thead > tr:nth-child(2) > th {
 	padding-left:2px;
 	padding-right:10px;
 }
+
 table.snpchip-table {
 	margin-bottom:30px;
 }
+
 table#snpchip-thinned-list > thead > tr {
 	border-top: 1px solid #ccc;
 }
@@ -887,19 +976,24 @@ table#snpchip-thinned-list > thead > tr {
 #snp_chip_list {
 	padding-left:60px;
 }
-/* #ldtrait-links-container {
-	padding-top:30px;
-} */
+
 #snpclip-links-container {
 	padding-top:30px;
 }
+
 #ldpair-snp1, #ldpair-snp2 {
 	min-width:145px;
 }
+
 #ldpop-snp1, #ldpop-snp2 {
 	min-width:145px;
 }
+
 #snpclip-thresholds > div.input-group {
+	display:block;
+}
+
+#ldexpress-thresholds > div.input-group {
 	display:block;
 }
 
@@ -910,12 +1004,15 @@ table#snpchip-thinned-list > thead > tr {
 textarea:valid, .ok {
     color: #555;
 }
+
 textarea:invalid, .error {
     color: red;
 }
+
 .panel-body > h1 {
 	font-size: 1.7em;
 }
+
 /* Testing */
 @media screen and (max-width: 767px) {
   .dataTables_wrapper .dataTables_info,
@@ -925,6 +1022,7 @@ textarea:invalid, .error {
   .dataTables_wrapper .dataTables_paginate {
     margin-top: 0.5em; }
 }
+
 @media screen and (max-width: 640px) {
   .dataTables_wrapper .dataTables_length,
   .dataTables_wrapper .dataTables_filter {
@@ -933,6 +1031,7 @@ textarea:invalid, .error {
   .dataTables_wrapper .dataTables_filter {
     margin-top: 0.5em; }
 }
+
 .dropzone {
 	width: 200px;
 	height: 100px;
@@ -941,9 +1040,11 @@ textarea:invalid, .error {
 	margin: 10pt;
 	overflow: hidden;
 }
+
 .no-bullet {
 	list-style: none;
 }
+
 .vertical-text {
 	-webkit-transform: rotate(90deg);
 	    -ms-transform: rotate(90deg);
@@ -953,15 +1054,19 @@ textarea:invalid, .error {
 	        transform-origin: left top 0;
 	color:#800000;
 }
+
 .vertical-text {
 	float: left;
 }
+
 .dropdown-toggle {
 	text-align:left;
 }
+
 #ldassocForm button.dropdown-toggle {
 	color:#800000;
 }
+
 #region-gene-container > div *, #region-region-container > div *, #region-variant-container > div * {
 	margin-top:5px;
 	white-space:nowrap;

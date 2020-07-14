@@ -7,7 +7,7 @@
 	<meta name="generator" content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="LDlink is a suite of web-based applications designed to easily and efficiently interrogate linkage disequilibrium in population groups." />
-	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDpair, LDpop, LDproxy, LDtrait, LDhap, LDmatrix, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
+	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDassoc, LDexpress, LDhap, LDmatrix, LDpair, LDpop, LDproxy, LDtrait, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
 	<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 	<link rel="/LDlink/shortcut icon" href="LD.ico">
 	<!-- DAP code -->
@@ -23,7 +23,7 @@
 	<link rel="stylesheet" href="https://cdn.datatables.net/1.10.8/css/jquery.dataTables.min.css">
 	<link rel="stylesheet" href="/common/css/style.css">
 	<link rel="stylesheet" href="/common/css/social.css">
-	<link rel="stylesheet" href="LDlink-4.1.0.css">
+	<link rel="stylesheet" href="LDlink-5.0.0.css">
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
@@ -148,6 +148,7 @@
 							<span class="caret"></span></div>
 							<ul class="dropdown-menu" style="overflow:hidden; background-color:white;">
 								<li><a id="ldassoc-tab-anchor" class="dropdown-text" href="#ldassoc-tab"  data-toggle="tab" title="Calculate LDassoc" style="color:black !important;">LDassoc</a></li>
+								<li><a id="ldexpress-tab-anchor" class="dropdown-text" href="#ldexpress-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) ..." style="color:black !important;">LDexpress</a></li>
 								<li><a id="ldhap-tab-anchor" class="dropdown-text" href="#ldhap-tab" data-toggle="tab" title="Calculate population specific haplotype frequencies" style="color:black !important;">LDhap</a></li>
 								<li><a id="ldmatrix-tab-anchor" class="dropdown-text" href="#ldmatrix-tab" data-toggle="tab" title="Matrix of pairwise linkage disequilibrium statistics" style="color:black !important;">LDmatrix</a></li>
 								<li><a id="ldpair-tab-anchor" class="dropdown-text" href="#ldpair-tab" data-toggle="tab" title="Investigate correlated alleles for a pair of variants" style="color:black !important;">LDpair</a></li>
@@ -724,6 +725,192 @@
 					</div>
 				</div>
 			</div>
+			
+			<!-- LDexpress -->
+			<div class="tab-pane fade not-home" id="ldexpress-tab">
+				<!-- LDtrait INPUTS-->
+				<div class="container-fluid">
+					<h2 class="text-center">LDexpress Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDexpress" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
+					<p class="text-center">Search if a list of variants (or variants in LD with those variants) ...</p>
+					<hr style="margin-top:0">
+					<div class="row" style="padding-top: 10px;">
+						<!-- LDexpress FORM -->
+						<form id="ldexpressForm" class="ldlinkForm">
+							<div class="form-group">
+								<div class="col-sm-2">
+								<textarea id="ldexpress-file-snp-numbers" placeholder="RS Numbers or Genomic Coordinates" class="form-control"
+									title="Enter list of RS numbers or Genomic Coordinates (one per line)" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									required></textarea>
+								</div>
+							</div>
+							
+							<div class="col-sm-3">
+								<div class="input-group">
+									<label for="ldexpress-file-label" style="display:none;">Upload RS File</label>
+									<input type="text" id="ldexpress-file-label" readonly placeholder="Upload file with variants" class="readonly-input-text">
+									<label for="ldexpress-file" style="display:none;">Browse for RS File</label>
+									<span class="btn btn-default btn-file btn-snp">Browse
+										<input type="file" id="ldexpress-file">
+									</span>
+									<a id="ldexpress-browse-set-none" style="position:relative;"  data-toggle="popover" trigger="manual"
+										data-placement="right" data-content="Please upload a file."></a>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-2">
+									<a id="ldexpress-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
+									trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
+											codes</span></a>
+									<label for="ldexpress-population-codes" style="display: none;">Please Select a population</label>
+									<select id="ldexpress-population-codes" multiple="multiple" name="populations">
+									</select>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-2" style="width: 120px;">
+									<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
+										<label class="btn btn-default active" id="ldexpress_ld_r2">
+											<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
+										</label>
+										<label class="btn btn-default" id="ldexpress_ld_d">
+											<input type="radio" autocomplete="off" name="options"> D'
+										</label>
+									</div>	
+								</div>
+							</div>
+
+							<div class="col-sm-2" style="margin-right: 30px">
+								<div id="ldexpress-thresholds">
+									<div class="row">Thresholds</div>
+									<div class="input-group row">
+										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup>:</label>
+										<input id="ldexpress_r2_d_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
+											title="Threshold must be a number between 0 and 1" required>
+									</div>
+									<div style="clear:both;"></div>
+									<div class="input-group row" style="min-width: 200px;">
+										<label id="ldexpress-bp-window-label" for="ldexpress-bp-window" style="width: 5px">&plusmn;</label>
+										<input id="ldexpress-bp-window" value="500000" type="number" pattern="^(\d+|\d{1,3}(,\d{3})*)(\.\d+)?$"
+											min="0" max="1000000" style="width: 75px;" title="Value must be a number between 0 and 1,000,000" required/>
+										<span>base pair window</span>
+									</div>
+									<div style="clear:both;"></div>
+								</div>
+							</div>
+
+							<div class="form-group">
+								<div class="col-sm-1">
+									<input type="submit" id="ldexpress" value="Calculate" class="btn btn-default calculate" />
+								</div>
+							</div>
+						</form>
+					</div>
+					<!-- <div class="row" style="padding-top: 10px;">
+						<div style="float: left;">
+							<i>GWAS Catalog last updated on <span id="ldexpress-timestamp">...</span></i>
+						</div>
+					</div> -->
+					<hr>
+					<div id="ldexpress-loading">
+						<img src="calculating_LD.gif" alt="loading icon" class="loading">
+						Estimated calculation time: <span id="ldexpress-estimate-loading">_</span>
+					</div>
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldexpress-message">
+							<div class="panel panel-danger">
+								<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldexpress-message-content"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldexpress-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldexpress-message-warning-content">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ldexpress CONTAINER -->
+				<div class="jumbotron">
+					<div class="container-fluid" id="ldexpress-results-container">
+						<div id="ldexpress-table-container" class="row">
+							<div class="col-md-2 ldexpress-table-scroller">
+								<table id="ldexpress-table-thin" class="table table-striped table-chip">
+									<caption>Variants in LD with GWAS Catalog</caption>
+									<thead>
+										<tr>
+											<th>RS Number</th>
+										</tr>
+									</thead>
+									<tbody id="ldexpress-snp-list"></tbody>
+								</table>
+								<a id="ldexpress-query-warnings-button" title="View details.">Variants with Warnings</a>
+							</div>
+
+							<div class="col-md-10 ldexpress-table-scroller" id="ldexpress-detail">
+
+								<!-- SNP and Trait Details -->
+								<table id="new-ldexpress" class="table display compact">
+									<caption id="ldexpress-detail-title">Details for rs1234</caption>
+									<thead>
+										<tr>
+											<!-- <th class="dt-head-left dt-body-left">Query RS Number</th> -->
+											<th class="dt-head-left dt-body-left">GWAS Trait</th>
+											<th class="dt-head-left dt-body-left">RS Number</th>
+											<th class="dt-head-left dt-body-left">Position (GRCh37)</th>
+											<th class="dt-head-left dt-body-left">Alleles</th>
+											<th class="dt-head-left dt-body-left">R<sup>2</sup></th>
+											<th class="dt-head-left dt-body-left">D'</th>
+											<th class="dt-head-left dt-body-left">LDpair</th>
+											<th class="dt-head-left dt-body-left">Risk Allele Frequency</th>
+											<th class="dt-head-left dt-body-left">Beta or OR</th>
+											<th class="dt-head-left dt-body-left">Effect Size (95% CI)</th>
+											<th class="dt-head-left dt-body-left">P-value</th>
+											<th class="dt-head-left dt-body-left">GWAS Catalog</th>
+											<!-- <th class="dt-head-left dt-body-left">Details</th> -->
+										</tr>
+									</thead>
+								</table>
+
+								<!-- Query variants with warnings -->
+								<table id="new-ldexpress-query-warnings" class="table display compact">
+									<caption id="ldexpress-query-warnings-title">Query Variants with Warnings</caption>
+									<thead>
+										<tr>
+											<th class="dt-head-left dt-body-left">Variant</th>
+											<th class="dt-head-left dt-body-left">Position</th>
+											<th class="dt-head-left dt-body-left">Details</th>
+										</tr>
+									</thead>
+								</table>
+
+								<!-- Initial Message -->
+								<div id="ldexpress-initial-message">Click a variant on the left to view details.</div>
+
+							</div>
+						</div>
+						<div id="ldexpress-links-container">
+							<span>
+								<a target="trait_variants_annotated" id="ldexpress-variants-annotated-link" href="yahoo.com">Download GWAS Catalog annotated variant list</a>
+							</span>
+						</div>
+					</div>
+					<!-- <div class="row" style="padding-left: 30px;">
+						<div style="float: left;">
+							<i>GWAS Catalog last updated on <span id="ldexpress-timestamp">...</span></i>
+						</div>
+					</div> -->
+				</div> <!-- jumbotron -->
+			</div>
+			<!--  END OF ldexpress -->
+
 			<!-- LDhap -->
 			<div class="tab-pane fade not-home" id="ldhap-tab">
 				<!-- LDhap INPUTS-->
@@ -2526,7 +2713,7 @@
 	<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.1.0/knockout-min.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/knockout.mapping/2.4.1/knockout.mapping.min.js"></script>
-	<script type="text/javascript" src="LDlink-4.1.0.js"></script>
+	<script type="text/javascript" src="LDlink-5.0.0.js"></script>
 	<script type="text/javascript" src="/common/js/purify.js"></script>
 	<script type="text/javascript" src="/common/js/bootstrap-multiselect.js"></script>
 	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-browser/0.0.7/jquery.browser.min.js"></script>

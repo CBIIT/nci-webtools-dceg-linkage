@@ -26,6 +26,7 @@ from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
 from LDtrait import calculate_trait, get_ldtrait_timestamp
+from LDexpress import calculate_express
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -96,7 +97,9 @@ def read_csv_headers(example_filepath):
 
 # Get module name from request path for API logs collection in MongoDB 
 def getModule(fullPath):
-    if "ldhap" in fullPath:
+    if "ldexpress" in fullPath:
+        return "LDexpress"
+    elif "ldhap" in fullPath:
         return "LDhap"
     elif "ldmatrix" in fullPath:
         return "LDmatrix"
@@ -468,6 +471,114 @@ def ldassoc():
         web = False
         # PROGRAMMATIC ACCESS NOT AVAILABLE
     return sendJSON(out_json)
+
+# Web and API route for LDexpress
+@app.route('/LDlinkRest/ldexpress', methods=['POST'])
+@app.route('/LDlinkRestWeb/ldexpress', methods=['POST'])
+@requires_token
+def ldexpress():
+    print('Execute ldexpress.')
+    data = json.loads(request.stream.read())
+    snps = data['snps']
+    pop = data['pop']
+    r2_d = data['r2_d']
+    r2_d_threshold = data['r2_d_threshold']
+    window = data['window'].replace(',', '') if 'window' in data else '500000'
+    token = request.args.get('token', False)
+    print('snps: ' + snps)
+    print('pop: ' + pop)
+    print('r2_d: ' + r2_d)
+    print('r2_d_threshold: ' + r2_d_threshold)
+    print('window: ' + window)
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        if request.user_agent.browser is not None:
+            web = True
+            reference = str(data['reference'])
+            snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+            snplist = snps.splitlines()
+            with open(snpfile, 'w') as f:
+                for s in snplist:
+                    s = s.lstrip()
+                    if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                        f.write(s.lower() + '\n')
+            try:
+                trait = {}
+                # snplst, pop, request, web, r2_d, threshold
+                (query_snps, thinned_snps, details) = calculate_express(snpfile, pop, reference, web, r2_d, float(r2_d_threshold), int(window))
+                trait["query_snps"] = query_snps
+                trait["thinned_snps"] = thinned_snps
+                trait["details"] = details
+
+                with open(tmp_dir + "trait" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                if "error" in json_dict:
+                    trait["error"] = json_dict["error"]
+                else:
+                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                        f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                        for snp in thinned_snps:
+                            for matched_gwas in details[snp]["aaData"]:
+                                f.write(snp + "\t")
+                                f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 11}]) + "\n")
+                        if "warning" in json_dict:
+                            trait["warning"] = json_dict["warning"]
+                            f.write("Warning(s):\n")
+                            f.write(trait["warning"])
+                out_json = json.dumps(trait, sort_keys=False)
+            except:
+                return sendTraceback(None)
+        else:
+            return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
+    else:
+        # API REQUEST
+        web = False
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        snpfile = str(tmp_dir + 'snps' + reference + '.txt')
+        snplist = snps.splitlines()
+        with open(snpfile, 'w') as f:
+            for s in snplist:
+                s = s.lstrip()
+                if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
+                    f.write(s.lower() + '\n')
+        try:
+            # lock token preventing concurrent requests
+            toggleLocked(token, 1)
+            (query_snps, thinned_snps, details) = calculate_express(snpfile, pop, reference, web, r2_d, float(r2_d_threshold), int(window))
+            with open(tmp_dir + "trait" + reference + ".json") as f:
+                json_dict = json.load(f)
+            if "error" in json_dict:
+                # display api out w/ error
+                toggleLocked(token, 0)
+                return sendTraceback(json_dict["error"])
+            else:
+                with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                    for snp in thinned_snps:
+                        for matched_gwas in details[snp]["aaData"]:
+                            f.write(snp + "\t")
+                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 11}]) + "\n")
+                    if "warning" in json_dict:
+                        trait["warning"] = json_dict["warning"]
+                        f.write("Warning(s):\n")
+                        f.write(trait["warning"])
+                # display api out
+                try:
+                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'r') as fp:
+                        content = fp.read()
+                    toggleLocked(token, 0)
+                    return content
+                except:
+                    # unlock token then display error message
+                    toggleLocked(token, 0)
+                    return sendTraceback(None)
+        except:
+            # unlock token if internal error w/ calculation
+            toggleLocked(token, 0)
+            return sendTraceback(None)
+    return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDhap
 @app.route('/LDlinkRest/ldhap', methods=['GET'])

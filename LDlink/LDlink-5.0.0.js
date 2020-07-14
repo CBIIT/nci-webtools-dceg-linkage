@@ -1,4 +1,4 @@
-var ldlink_version = "Version 4.1";
+var ldlink_version = "Version 5.0";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -15,10 +15,12 @@ var ldassocData=[{RS_Number:"rs75563749",Coord:"chr3:171031233",Alleles:"(A/T)",
 var snpclipData = {"warnings":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}],"details":[{"rs_number":"rs12980602","position":"chr19:39752820","alleles":"T=0.763, C=0.237","comment":"SNP kept","rs_number_link":"<a>rs12980602</a>","position_link":"<a>chr19:39752820</a>"},{"rs_number":"rs35963157","position":"chr19:39745695","alleles":"-=0.338, C=0.662","comment":"SNP in LD with rs11322783 (R2=0.1887), SNP removed","rs_number_link":"<a>rs35963157</a>","position_link":"<a>chr19:39745695</a>"}]};
 var snpchipData = {"snpchip":[{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=505066\" target=\"rs_number_rs505066\">rs505066</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A96882421-96882921&snp142=pack&hgFind.matches=rs505066\" target=\"coord_chr1:96882671\">96882671</a>","map":["&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=4478775\" target=\"rs_number_rs4478775\">rs4478775</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177769847-177770347&snp142=pack&hgFind.matches=rs4478775\" target=\"coord_chr1:177770097\">177770097</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=561634\" target=\"rs_number_rs561634\">rs561634</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A177895513-177896013&snp142=pack&hgFind.matches=rs561634\" target=\"coord_chr1:177895763\">177895763</a>","map":["&nbsp;","X","&nbsp;","X","&nbsp;","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X","X","X","X","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","&nbsp;","X"]},{"rs_number":"<a href=\"http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=2820292\" target=\"rs_number_rs2820292\">rs2820292</a>","chromosome":"1","position":"<a href=\"http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&position=chr1%3A201784037-201784537&snp142=pack&hgFind.matches=rs2820292\" target=\"coord_chr1:201784287\">201784287</a>","map":["X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X","X"]}],"headers":[{"code":"A_AFR","platform":"Affymetrix Axiom GW AFR"},{"code":"A_ASI","platform":"Affymetrix Axiom GW ASI"},{"code":"A_EAS","platform":"Affymetrix Axiom GW EAS"},{"code":"A_EUR","platform":"Affymetrix Axiom GW EUR"},{"code":"A_Hu","platform":"Affymetrix Axiom GW Hu"},{"code":"A_Hu-CHB","platform":"Affymetrix Axiom GW Hu-CHB"},{"code":"A_LAT","platform":"Affymetrix Axiom GW LAT"},{"code":"A_Onco","platform":"Affymetrix OncoScan"},{"code":"A_OncoCNV","platform":"Affymetrix OncoScan CNV"},{"code":"A_SNP6.0","platform":"Affymetrix SNP 6.0"},{"code":"I_CardioMetab","platform":"Illumina Cardio-MetaboChip"},{"code":"I_1M-D","platform":"Illumina Human1M-Duov3"},{"code":"I_1M","platform":"Illumina Human1Mv1"},{"code":"I_Exon510S","platform":"Illumina HumanExon510Sv1"},{"code":"I_O1S-8","platform":"Illumina HumanOmni1S-8v1"},{"code":"I_O2.5-4","platform":"Illumina HumanOmni2.5-4v1"},{"code":"I_O2.5-8","platform":"Illumina HumanOmni2.5-8v1.2"},{"code":"I_O2.5E-8v1","platform":"Illumina HumanOmni2.5Exome-8v1"},{"code":"I_O2.5E-8v1.1","platform":"Illumina HumanOmni2.5Exome-8v1.1"},{"code":"I_O2.5E-8v1.2","platform":"Illumina HumanOmni2.5Exome-8v1.2"},{"code":"I_O5-4","platform":"Illumina HumanOmni5-4v1"},{"code":"I_O5E-4","platform":"Illumina HumanOmni5Exome-4v1"},{"code":"I_ME-Global-8","platform":"Illumina Infinium Multi-Ethnic Global-8"}]};
 var snpchipReverseLookup = [];
+var ldExpressRaw;
+var ldExpressSort;
 var ldTraitRaw;
 var ldTraitSort;
 var ldClipRaw;
-var modules = [ "ldassoc", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
+var modules = [ "ldassoc", "ldexpress", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
 var homeStartBox = 0;
 var newsList = [];
 
@@ -39,7 +41,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-4.1.0.html", function (data) {
+    $.get("news-5.0.0.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -265,7 +267,7 @@ $(document).ready(function() {
         
     });
     
-
+    setupLDexpressControls();
     setupLDtraitControls();
     setupSNPclipControls();
     setupSNPchipControls();
@@ -274,6 +276,8 @@ $(document).ready(function() {
     createAssocTable();
     createPopTable();
     createProxyTable();
+    createExpressDetailsTable();
+    createExpressQueryWarningsTable();
     createTraitDetailsTable();
     createTraitQueryWarningsTable();
     var new_assoc_data = {
@@ -385,6 +389,16 @@ $(document).ready(function() {
         e.preventDefault();
         // console.log("ldpop variant 2 allele freq map export jpeg");
         exportMap(3, "AF", "jpeg");
+    });
+
+    // LDexpress change R2/D' threshold label
+    $("#ldexpress_ld_r2").click(function(e){
+        console.log("R2");
+        $("#ldexpress_r2_d_threshold_label").html("R<sup>2</sup>:");
+    });
+    $("#ldexpress_ld_d").click(function(e){
+        console.log("D");
+        $("#ldexpress_r2_d_threshold_label").html("D':");
     });
 
     // LDtrait change R2/D' threshold label
@@ -780,6 +794,129 @@ function createProxyTable() {
 
 }
 
+function createExpressDetailsTable() {
+
+    var ldexpressDetailsTable = $('#new-ldexpress').DataTable( {
+        "aaSorting": [],  /* Disable initial sort */
+        "bPaginate": true,
+        // "sScrollY": "600px",
+        // xScrollX: "100%",
+        "bJQueryUI": false,  // ThemeRoller
+        "bLengthChange": true,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bAutoWidth": true,
+        "bProcessing": false,
+        "deferRender": false,
+        // "order": [[ 4, "desc" ]], //Order desc on R2
+        "columnDefs": [
+            {
+                "render": function ( data, type, row ) {
+                    // Round floats to 4 decimal places 
+                    if (typeof data === 'string' || data instanceof String) {
+                        return data;
+                    } else {
+                        if (parseFloat(data) == 1.0) {
+                            return "1.0";
+                        } else if (parseFloat(data) == 0.0) {
+                            return "0.0";
+                        } else if (parseFloat(data) <= 0.0001) {
+                            return "<0.0001"
+                        } else {
+                            return parseFloat(data).toFixed(4);
+                        }
+                    }
+                },
+                "targets": [ 4, 5, 8 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Round floats to 3 decimal places if string can be parsed to float
+                    if (!isNaN(parseFloat(data))) {
+                        return parseFloat(data).toFixed(3);
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": [ 7 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Round floats to 4 decimal places 
+                    if (type === 'display') {
+                        var floatData  = parseFloat(data);
+                        if (data != "NA" && floatData) {
+                            if (floatData === 1.0) {
+                                return "1.0";
+                            } else if (floatData === 0.0) {
+                                return "0.0";
+                            } else {
+                                var val = floatData.toExponential(0).split(/E/i);
+                                return val[0] + "x10" + val[1].sup();
+                            }
+                        } else {
+                            if (floatData === 0.0 && (data.includes("E") || data.includes("e"))) {
+                                var val = data.split(/E/i);
+                                return val[0] + "x10" + val[1].sup();
+                            } else {
+                                return data;
+                            }
+                        }
+                    } else {
+                        return data;
+                    }
+                },
+                "targets": [ 10 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair 
+                    return ldexpress_ldpair_results_link(data, type, row);
+                },
+                "targets": 6
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to gwas catalog
+                    return ldexpress_gwas_catalog_link(data, type, row);
+                },
+                "targets": 11
+            },
+            { 
+                className: "dt-head-left", 
+                className: "dt-body-left",
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
+            }
+        ]
+    });
+}
+
+function createExpressQueryWarningsTable() {
+
+    var ldexpressQueryWarningsTable = $('#new-ldexpress-query-warnings').DataTable( {
+        "aaSorting": [],  /* Disable initial sort */
+        "bPaginate": true,
+        // "sScrollY": "600px",
+        "bJQueryUI": false,  // ThemeRoller
+        "bLengthChange": true,
+        "bFilter": true,
+        "bSort": true,
+        "bInfo": true,
+        "bAutoWidth": true,
+        "bProcessing": false,
+        "deferRender": false,
+        "columnDefs": [
+            { 
+                className: "dt-head-left", 
+                className: "dt-body-left",
+                "targets": [ 0, 1, 2 ] 
+            }
+        ]
+    });
+
+}
+
 function createTraitDetailsTable() {
 
     var ldtraitDetailsTable = $('#new-ldtrait').DataTable( {
@@ -876,7 +1013,6 @@ function createTraitDetailsTable() {
             }
         ]
     });
-
 }
 
 function createTraitQueryWarningsTable() {
@@ -928,6 +1064,7 @@ function setupTabs() {
         window.history.pushState({},'', "?tab=home");
     }
     if(currentTab.search('assoc')>=0) currentTab = 'ldassoc';
+    if(currentTab.search('express')>=0) currentTab = 'ldexpress';
     if(currentTab.search('hap')>=0) currentTab = 'ldhap';
     if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
     if(currentTab.search('pair')>=0) currentTab = 'ldpair';
@@ -1092,6 +1229,24 @@ function checkSelectAllCheckbox() {
 
 }
 
+function setupLDexpressControls() {
+    $('#ldexpress-snp-list').on('click', "a", function(e) {
+        //console.log("clicking on link");
+        var rs_number = e.target.id;
+        $('#ldexpress-snp-list').show();
+        $('#ldexpress-initial-message').hide();
+        loadLDexpressDetails(ldExpressRaw, rs_number, ldExpressSort);
+        $('#new-ldexpress-query-warnings_wrapper').hide();
+        $('#ldexpress-initial-message').hide();
+    });
+    $('#ldexpress-query-warnings-button').click( function() {
+        $('#new-ldexpress_wrapper').hide();
+        loadLDexpressQueryWarnings(ldExpressRaw);
+        $('#ldexpress-initial-message').hide();
+    });
+    // initExpressTimestamp();
+}
+
 function setupLDtraitControls() {
     $('#ldtrait-snp-list').on('click', "a", function(e) {
         //console.log("clicking on link");
@@ -1233,6 +1388,30 @@ function ldpop_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    return link;
+}
+
+function ldexpress_ldpair_results_link(data, type, row) {
+    // parse data
+    // console.log(data);
+    var snp1 = data[0];
+    var snp2 = data[1];
+    var pops = data[2];
+    var server = window.location.origin + '/?tab=ldpair';
+    var params = {
+        var1: snp1,
+        var2: snp2,
+        pop: pops
+    };
+    var href = server + '&' + $.param(params);
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    return link;
+}
+
+function ldexpress_gwas_catalog_link(data, type, row) {
+    var rsid = data;
+    var href = 'https://www.ebi.ac.uk/gwas/variants/' + rsid;
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
     return link;
 }
@@ -1467,7 +1646,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-4.1.0.html');
+    $('#help-tab').load('help-5.0.0.html');
 }
 
 function calculate(e) {
@@ -1495,6 +1674,12 @@ function updateData(id) {
             if(isBrowseSet(id) && isRegionSet(id) && areRegionDetailsSet(id) && isPopulationSet(id)) {
                 $('#'+id+"-loading").show();
                 updateLDassoc();
+            }
+            break;
+        case 'ldexpress':
+            if(isPopulationSet(id) && validateLDexpressBasePairWindow()) {
+                $('#'+id+"-loading").show();
+                updateLDexpress();
             }
             break;
         case 'ldhap':
@@ -1934,6 +2119,83 @@ function explodeLegalArray(entities) {
     return output;
 }
 
+function updateLDexpress() {
+    var id = "ldexpress";
+
+    var $btn = $('#' + id).button('loading');
+    var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
+    var population = getPopulationCodes(id+'-population-codes');
+    var r2_d;
+    var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
+
+    if($('#ldexpress_ld_r2').hasClass('active')) {
+        r2_d = 'r2'; // i.e. R2
+    } else {
+        r2_d = 'd';  // i.e. Dprime
+    }
+
+    var estimateWindowSizeMultiplier = window / 500000.0;
+    var estimateSeconds = Math.round((snps.split("\n").length * 5 * estimateWindowSizeMultiplier));
+    // console.log("estimate seconds", estimateSeconds);
+    var estimateMinutes = estimateSeconds / 60;
+    if (estimateSeconds < 60) {
+        $('#ldexpress-estimate-loading').text(estimateSeconds + " seconds");
+    } else {
+        $('#ldexpress-estimate-loading').text(estimateMinutes.toFixed(2) + " minute(s)");
+    }
+
+    var ldInputs = {
+        snps : snps,
+        pop : population.join("+"),
+        r2_d: r2_d,
+        r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
+        window: window,
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+    };
+
+    //Show inital message
+    $('#new-ldexpress_wrapper').hide();
+    $('#new-ldexpress-query-warnings_wrapper').hide();
+    $('#ldexpress-initial-message').show();
+
+    //Update href on
+    //Set file links
+    $("#ldexpress-variants-annotated-link").attr('href', 'tmp/express_variants_annotated' + ldInputs.reference + '.txt');
+    $("#ldexpress-variants-annotated-link").attr('target', 'express_variants_annotated' + ldInputs.reference);
+    // $("#ldexpress-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
+    // $("#ldexpress-details-link").attr('target', 'snp_details_'+ldInputs.reference);
+
+    // Set populations on LDThinned
+    //$('.ldexpress-populations').empty().append(explodeLegalArray(population));
+
+    var url = restServerUrl + "/ldexpress";
+    var ajaxRequest = $.ajax({
+        type : 'POST',
+        url : url,
+        data : JSON.stringify(ldInputs),
+        contentType : 'application/json' // JSON
+    });
+    ajaxRequest.success(function(data) {
+        //data is returned as a string representation of JSON instead of JSON obj
+        var jsonObj=data;
+        // console.log(data);
+        if (displayError(id, jsonObj) == false) {
+            $('#' + id + '-results-container').show();
+            $('#' + id + '-links-container').show();
+            $('#'+id+"-loading").hide();
+            initExpress(data, r2_d);
+        }
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
+    ajaxRequest.always(function() {
+        $btn.button('reset');
+    });
+
+    hideLoadingIcon(ajaxRequest, id);
+}
+
 function updateLDtrait() {
     var id = "ldtrait";
 
@@ -2303,6 +2565,25 @@ function checkAlert(elementId, message, type, displayResults) {
     }
 }
 
+function populateSNPlistLDexpress(data) {
+    //clear out the list
+    $("#ldexpress-snp-list").empty();
+    //Add the clipped list
+    $.each(data.thinned_snps, function( index, value ){
+        $("#ldexpress-snp-list").append(
+            $("<tr>").append(
+                $("<td>").append(
+                    $("<a>")
+                        .attr('id', value)
+                        .attr('title', 'View details.')
+                        .append(value)
+                    )
+                )
+            )
+    });
+
+}
+
 function populateSNPlistLDtrait(data) {
     //clear out the list
     $("#ldtrait-snp-list").empty();
@@ -2442,6 +2723,23 @@ function populateSNPwarnings(data) {
 
 }
 
+function loadLDexpressDetails(data, rs_number, sort) {
+    // console.log("ldExpressRaw", data);
+    // console.log("rs_number", rs_number);
+
+    RefreshTableSort('#new-ldexpress', data.details[rs_number], sort);
+    $('#new-ldexpress_wrapper').show();
+
+    $('#ldexpress-detail-title').text("Details for " + rs_number);
+}
+
+function loadLDexpressQueryWarnings(data) {
+    // console.log("ldExpressRaw", data);
+
+    RefreshTable('#new-ldexpress-query-warnings', data.details.queryWarnings);
+    $('#new-ldexpress-query-warnings_wrapper').show();
+}
+
 function loadLDtraitDetails(data, rs_number, sort) {
     // console.log("ldTraitRaw", data);
     // console.log("rs_number", rs_number);
@@ -2506,6 +2804,20 @@ function loadSNPdetails(data, rs_number) {
     //console.log(JSON.stringify(snpclipData));
     ko.mapping.fromJS(snpclipData, snpclipModel);
     $('#snpclip-detail-title').text("Details for "+rs_number);
+}
+
+function initExpress(data, r2_d) {
+
+    ldExpressRaw = data;
+    ldExpressSort = r2_d;
+
+    populateSNPlistLDexpress(data);
+
+    if(data.details.queryWarnings && data.details.queryWarnings.aaData.length > 0) {
+        $('#ldexpress-query-warnings-button').show();
+    } else {
+        $('#ldexpress-query-warnings-button').hide();
+    }
 }
 
 function initTrait(data, r2_d) {
@@ -4158,6 +4470,8 @@ function addValidators() {
 $(document).ready(function() {
     $('#ldhap-file-snp-numbers').keyup(validateTextarea);
     $('#ldmatrix-file-snp-numbers').keyup(validateTextarea);
+    $('#ldexpress-file-snp-numbers').keyup(validateTextarea);
+    $('#ldexpress-bp-window').keyup(validateLDexpressBasePairWindow);
     $('#ldtrait-file-snp-numbers').keyup(validateTextarea);
     $('#ldtrait-bp-window').keyup(validateLDtraitBasePairWindow);
     $('#snpchip-file-snp-numbers').keyup(validateTextarea);
@@ -4225,6 +4539,23 @@ function validateIndex() {
         $(textarea).attr('title', errorMsg);
     } else {
         $(textarea).removeAttr('title');
+    }
+}
+
+function validateLDexpressBasePairWindow() {
+    var errorMsg = "Value must be a number between 0 and 1,000,000";
+    var textarea = "#ldexpress-bp-window";
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
+    var currentValue = $(textarea).val();
+    var currentValueNoCommas = currentValue.replace(/\,/g, '');
+    var hasError = !currentValue.match(pattern) || (currentValueNoCommas < 0 || currentValueNoCommas > 1000000);
+    $(textarea).toggleClass('error', hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+        return false;
+    } else {
+        return true;
     }
 }
 
