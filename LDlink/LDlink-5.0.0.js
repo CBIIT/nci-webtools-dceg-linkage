@@ -393,21 +393,21 @@ $(document).ready(function() {
 
     // LDexpress change R2/D' threshold label
     $("#ldexpress_ld_r2").click(function(e){
-        console.log("R2");
+        // console.log("R2");
         $("#ldexpress_r2_d_threshold_label").html("R<sup>2</sup> &ge;");
     });
     $("#ldexpress_ld_d").click(function(e){
-        console.log("D");
+        // console.log("D");
         $("#ldexpress_r2_d_threshold_label").html("D' &ge;");
     });
 
     // LDtrait change R2/D' threshold label
     $("#ldtrait_ld_r2").click(function(e){
-        console.log("R2");
+        // console.log("R2");
         $("#ldtrait_r2_d_threshold_label").html("R<sup>2</sup>:");
     });
     $("#ldtrait_ld_d").click(function(e){
-        console.log("D");
+        // console.log("D");
         $("#ldtrait_r2_d_threshold_label").html("D':");
     });
 });
@@ -4946,7 +4946,7 @@ function testResize(){
     if($('#news-card-outside-2').css('display') == "none"){
         console.log("1 box")
         if(homeStartBox < newsList.length - 1){
-            console.log("does not exxist")
+            // console.log("does not exxist")
             if($("#news-right-arrow").hasClass("disabled-news-scroller")){
                 $("#news-right-arrow").addClass("enabled-news-scroller")
                 $("#news-right-arrow").removeClass("disabled-news-scroller")

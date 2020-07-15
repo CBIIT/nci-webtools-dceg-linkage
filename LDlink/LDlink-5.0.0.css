@@ -1348,8 +1348,9 @@ input:checked + .slider:before {
   height:155px; 
   padding:0px 20px;
   margin: 10px 0;
-  text-decoration:none;
-  vertical-align:top;
+  text-decoration: none;
+  vertical-align: top;
+  text-align: left;
 }
 
 .card-outside:hover{
@@ -1552,7 +1553,8 @@ input:checked + .slider:before {
 .card-row{
   max-width:1300px;
   min-height:130px;
-  margin:auto
+  margin:auto;
+  text-align: center;
 }
 @media only screen and (max-width: 930px) {
 
