@@ -26,7 +26,7 @@ from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
 from LDtrait import calculate_trait, get_ldtrait_timestamp
-from LDexpress import calculate_express
+from LDexpress import calculate_express, get_ldexpress_tissues
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -368,6 +368,21 @@ def ldassoc_example():
     }
     return json.dumps(example)
 
+# Route to retrieve LDexpress tissue info
+@app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldexpress_tissues', methods=['GET'])
+def ldexpress_tissues():
+    print("Retrieve LDexpress Tissues")
+    web = False
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+    else:
+        # API REQUEST
+        web = False
+    return get_ldexpress_tissues(web)
+
 # Route to retrieve platform data for SNPchip
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
@@ -517,7 +532,7 @@ def ldexpress():
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
                         f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
@@ -554,7 +569,7 @@ def ldexpress():
                 toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
             else:
-                with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
                     f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
@@ -566,7 +581,7 @@ def ldexpress():
                         f.write(trait["warning"])
                 # display api out
                 try:
-                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'r') as fp:
+                    with open('tmp/express_variants_annotated' + reference + '.txt', 'r') as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     return content

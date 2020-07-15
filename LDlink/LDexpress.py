@@ -7,6 +7,7 @@ import math
 import os
 import collections
 import re
+import requests
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
@@ -28,6 +29,20 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+
+def get_ldexpress_tissues(web):
+    try:
+        PAYLOAD = {
+            "format" : "json",
+            "datasetId": "gtex_v8"
+        }
+        REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
+        r = requests.get(REQUEST_URL, params=PAYLOAD)
+        # print(json.loads(r.text))
+        return json.loads(r.text)
+    except requests.exceptions.HTTPError as err:
+        return "Failed to connect to server."
+    # return json_output
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({

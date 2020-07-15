@@ -325,6 +325,7 @@ $(document).ready(function() {
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
     });
+    // buildTissueDropdown("ldexpress-tissue-codes", {"tissueInfo": [{"tissueSiteDetail": "Adipose - Subcutaneous", "tissueSiteDetailId": "Adipose_Subcutaneous"}]});
     
     $('#apiblocked-loading').hide();
     $('#apiblocked-message').hide();
@@ -394,11 +395,11 @@ $(document).ready(function() {
     // LDexpress change R2/D' threshold label
     $("#ldexpress_ld_r2").click(function(e){
         console.log("R2");
-        $("#ldexpress_r2_d_threshold_label").html("R<sup>2</sup>:");
+        $("#ldexpress_r2_d_threshold_label").html("R<sup>2</sup> &ge;");
     });
     $("#ldexpress_ld_d").click(function(e){
         console.log("D");
-        $("#ldexpress_r2_d_threshold_label").html("D':");
+        $("#ldexpress_r2_d_threshold_label").html("D' &ge;");
     });
 
     // LDtrait change R2/D' threshold label
@@ -1244,7 +1245,7 @@ function setupLDexpressControls() {
         loadLDexpressQueryWarnings(ldExpressRaw);
         $('#ldexpress-initial-message').hide();
     });
-    // initExpressTimestamp();
+    initExpressTissues();
 }
 
 function setupLDtraitControls() {
@@ -2124,7 +2125,9 @@ function updateLDexpress() {
 
     var $btn = $('#' + id).button('loading');
     var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
-    var population = getPopulationCodes(id+'-population-codes');
+    var population = getPopulationCodes(id + '-population-codes');
+    var tissues = $('#'+ id + '-tissue-codes').val();
+    console.log("tissues", tissues);
     var r2_d;
     var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
 
@@ -2832,6 +2835,25 @@ function initTrait(data, r2_d) {
     } else {
         $('#ldtrait-query-warnings-button').hide();
     }
+}
+
+function initExpressTissues() {
+    var id = "ldexpress";
+    var url = restServerUrl + "/ldexpress_tissues";
+    var ajaxRequest = $.ajax({
+        type : 'GET',
+        url : url,
+        contentType : 'application/json' // JSON
+    });
+    ajaxRequest.success(function(data) {
+        if (displayError(id, data) == false) {
+            // ldExpressTissues = data;
+            buildTissueDropdown(id + "-tissue-codes", data);
+        }
+    });
+    ajaxRequest.fail(function(jqXHR, textStatus) {
+        displayCommFail(id, jqXHR, textStatus);
+    });
 }
 
 function initTraitTimestamp() {
@@ -4233,6 +4255,109 @@ function buildPlatformSNPchip(data) {
     $("#selectAllIllumina").prop('checked', true);
     $("#selectAllAffymetrix").prop('checked', true);
     calculateChipTotals();
+}
+
+function buildTissueDropdown(elementId, tissueData) {
+    console.log("reached");
+    // RETRIEVE GTEX API TISSUES
+    // console.log("LDEXPRESS TISSUES", tissueData);
+
+    var htmlText = "";
+    var option = "<option value='TISSUE_VALUE'>TISSUE_NAME</option>\n";
+    for ( var tissue in tissueData.tissueInfo) {
+        var tissueObj = tissueData.tissueInfo[tissue];
+        if ("tissueSiteDetailId" in tissueObj && "tissueSiteDetail" in tissueObj){
+            htmlText += option
+                .replace(/TISSUE_VALUE/g, tissueObj.tissueSiteDetailId)
+                .replace(/TISSUE_NAME/g, tissueObj.tissueSiteDetail);
+        }
+    }
+
+    $('#' + elementId).html(htmlText);
+    //alert(elemtnId);
+    $('#' + elementId).multiselect({
+        enableClickableOptGroups : true,
+        buttonWidth : '180px',
+        maxHeight : 300,
+        buttonClass : 'btn btn-default btn-ldlink-multiselect',
+        includeSelectAllOption : true,
+        dropRight : false,
+        allSelectedText : 'All Tissues',
+        nonSelectedText : 'Select Tissue',
+        numberDisplayed : 1,
+        selectAllText : 'All Tissues',
+        previousOptionLength: 0,
+        // maxPopulationWarn: 2,
+        // maxPopulationWarnTimeout: 5000,
+        // maxPopulationWarnVisible: false,
+
+        // buttonClass: 'btn btn-link',
+        buttonText : function(options, select) {
+            // console.log("elementId: "+elementId);
+            // if(this.previousOptionLength < this.maxPopulationWarn && options.length >= this.maxPopulationWarn) {
+            //     $('#'+elementId+'-popover').popover('show');
+            //     this.maxPopulatinWarnVisible=true;
+            //     setTimeout(function(){
+            //         $('#'+elementId+'-popover').popover('destroy');
+            //         this.maxPopulatinWarnVisible=false;
+            //     }, this.maxPopulationWarnTimeout);
+            // } else {
+            //     //Destory popover if it is currently being displayed.
+            //     if(this.maxPopulatinWarnVisible) {
+            //         $('#'+elementId+'-popover').popover('destroy');
+            //     }
+            // }
+
+            if(options.length>0) {
+                $('#'+elementId+'-zero').popover('hide');
+            }
+            this.previousOptionLength = options.length;
+            if (options.length === 0) {
+                return this.nonSelectedText
+                        + '<span class="caret"></span>';
+            } else if (options.length == $('option', $(select)).length) {
+                return this.allSelectedText
+                        + '<span class="caret"></span>';
+            } else if (options.length > this.numberDisplayed) {
+                return '<span class="badge">' + options.length
+                        + '</span> ' + this.nSelectedText
+                        + '<span class="caret"></span>';
+            } else {
+                var selected = '';
+                options.each(function() {
+                    // var label = $(this).attr('label') :
+                    // $(this).html();
+                    var tissueText = $(this).text().length > 20 ? $(this).text().substring(0, 20) + "..." : $(this).text();
+                    selected += tissueText + '+';
+                });
+
+                return selected.substr(0, selected.length - 1)
+                        + ' <b class="caret"></b>';
+            }
+        },
+        buttonTitle : function(options, select) {
+            if (options.length === 0) {
+                return this.nonSelectedText;
+            } else {
+                var selected = '';
+                options.each(function() {
+                    selected += $(this).text() + '\n';
+                });
+                return selected;
+            }
+        },
+        onChange : function(option, checked) {
+            /*
+            var active_tab = $("#ldlink-tabs li:[class]='active']");
+            console.dir(active_tab);
+            */
+            //alert("You changed the population selection.");
+            //console.log("Option: ")
+            //console.dir(option[0]);
+            //console.log("checked: ")
+            //console.dir(checked);
+        }
+    });
 }
 
 function buildPopulationDropdown(elementId) {

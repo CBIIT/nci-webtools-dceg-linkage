@@ -759,12 +759,22 @@
 
 							<div class="form-group">
 								<div class="col-sm-2">
-									<a id="ldexpress-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
-									trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
-											codes</span></a>
-									<label for="ldexpress-population-codes" style="display: none;">Please Select a population</label>
-									<select id="ldexpress-population-codes" multiple="multiple" name="populations">
-									</select>
+									<div class="row">
+										<a id="ldexpress-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
+										trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
+												codes</span></a>
+										<label for="ldexpress-population-codes" style="display: none;">Please Select a population</label>
+										<select id="ldexpress-population-codes" multiple="multiple" name="populations">
+										</select>
+									</div>
+									<div class="row" style="margin-top: 5px">
+										<a id="ldexpress-tissue-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
+										trigger="manual" data-placement="right" data-content="Please select a tissue."><span class="sr-only">Tissue
+												codes</span></a>
+										<label for="ldexpress-tissue-codes" style="display: none;">Please Select a Tissue</label>
+										<select id="ldexpress-tissue-codes" multiple="multiple" name="tissues">
+										</select>
+									</div>
 								</div>
 							</div>
 
@@ -785,8 +795,14 @@
 								<div id="ldexpress-thresholds">
 									<div class="row">Thresholds</div>
 									<div class="input-group row">
-										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup>:</label>
+										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup> &ge;</label>
 										<input id="ldexpress_r2_d_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
+											title="Threshold must be a number between 0 and 1" required>
+									</div>
+									<div style="clear:both;"></div>
+									<div class="input-group row">
+										<label id="ldexpress_p_threshold_label" for="ldexpress_p_threshold" style="width: 30px">P &nbsp;&lt;</label>
+										<input id="ldexpress_p_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
 											title="Threshold must be a number between 0 and 1" required>
 									</div>
 									<div style="clear:both;"></div>
