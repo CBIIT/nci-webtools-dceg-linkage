@@ -2576,6 +2576,8 @@
 						<code>token=faketoken123</code> with your own registered token.
 					</p>
 
+					<p><a class="help-anchor-link" href="#LDexpress">LDexpress</a><br>
+						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI+CEU", "tissue": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldexpress?token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDhap">LDhap</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDmatrix">LDmatrix</a><br>
