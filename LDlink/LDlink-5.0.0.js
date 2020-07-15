@@ -325,7 +325,6 @@ $(document).ready(function() {
         $('#'+ id + '-message-warning').hide();
         $('#'+ id + "-loading").hide();
     });
-    // buildTissueDropdown("ldexpress-tissue-codes", {"tissueInfo": [{"tissueSiteDetail": "Adipose - Subcutaneous", "tissueSiteDetailId": "Adipose_Subcutaneous"}]});
     
     $('#apiblocked-loading').hide();
     $('#apiblocked-message').hide();
@@ -2849,10 +2848,13 @@ function initExpressTissues() {
         if (displayError(id, data) == false) {
             // ldExpressTissues = data;
             buildTissueDropdown(id + "-tissue-codes", data);
+        } else {
+            buildTissueDropdown("ldexpress-tissue-codes", {});
         }
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
+        buildTissueDropdown("ldexpress-tissue-codes", {});
     });
 }
 
@@ -4258,19 +4260,22 @@ function buildPlatformSNPchip(data) {
 }
 
 function buildTissueDropdown(elementId, tissueData) {
-    console.log("reached");
     // RETRIEVE GTEX API TISSUES
     // console.log("LDEXPRESS TISSUES", tissueData);
 
     var htmlText = "";
-    var option = "<option value='TISSUE_VALUE'>TISSUE_NAME</option>\n";
-    for ( var tissue in tissueData.tissueInfo) {
-        var tissueObj = tissueData.tissueInfo[tissue];
-        if ("tissueSiteDetailId" in tissueObj && "tissueSiteDetail" in tissueObj){
-            htmlText += option
-                .replace(/TISSUE_VALUE/g, tissueObj.tissueSiteDetailId)
-                .replace(/TISSUE_NAME/g, tissueObj.tissueSiteDetail);
+    if (tissueData.tissueInfo) {
+        var option = "<option value='TISSUE_VALUE'>TISSUE_NAME</option>\n";
+        for ( var tissue in tissueData.tissueInfo) {
+            var tissueObj = tissueData.tissueInfo[tissue];
+            if ("tissueSiteDetailId" in tissueObj && "tissueSiteDetail" in tissueObj){
+                htmlText += option
+                    .replace(/TISSUE_VALUE/g, tissueObj.tissueSiteDetailId)
+                    .replace(/TISSUE_NAME/g, tissueObj.tissueSiteDetail);
+            }
         }
+    } else {
+        htmlText += "Error"
     }
 
     $('#' + elementId).html(htmlText);
@@ -4358,6 +4363,9 @@ function buildTissueDropdown(elementId, tissueData) {
             //console.dir(checked);
         }
     });
+    if (!tissueData.tissueInfo) {
+        $('#' + elementId).multiselect("disable");
+    }
 }
 
 function buildPopulationDropdown(elementId) {

@@ -38,11 +38,11 @@ def get_ldexpress_tissues(web):
         }
         REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
         r = requests.get(REQUEST_URL, params=PAYLOAD)
-        # print(json.loads(r.text))
         return json.loads(r.text)
-    except requests.exceptions.HTTPError as err:
-        return "Failed to connect to server."
-    # return json_output
+    except:
+        return {
+            "error": "Failed to retrieve tissues from GTEx Portal server."
+        }
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
