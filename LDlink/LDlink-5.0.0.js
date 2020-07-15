@@ -2847,14 +2847,19 @@ function initExpressTissues() {
     ajaxRequest.success(function(data) {
         if (displayError(id, data) == false) {
             // ldExpressTissues = data;
+            console.log("data", data);
             buildTissueDropdown(id + "-tissue-codes", data);
         } else {
-            buildTissueDropdown("ldexpress-tissue-codes", {});
+            buildTissueDropdown("ldexpress-tissue-codes", data);
         }
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
-        buildTissueDropdown("ldexpress-tissue-codes", {});
+        var errorObj = {
+            "error": "Failed to retrieve tissues from GTEx Portal server."
+        }
+        displayError(id, errorObj)
+        buildTissueDropdown("ldexpress-tissue-codes", "{}");
+        // displayCommFail(id, jqXHR, textStatus);
     });
 }
 
@@ -4260,14 +4265,12 @@ function buildPlatformSNPchip(data) {
 }
 
 function buildTissueDropdown(elementId, tissueData) {
-    // RETRIEVE GTEX API TISSUES
-    // console.log("LDEXPRESS TISSUES", tissueData);
-
+    tissueJSON = JSON.parse(tissueData);
     var htmlText = "";
-    if (tissueData.tissueInfo) {
+    if (tissueJSON.tissueInfo) {
         var option = "<option value='TISSUE_VALUE'>TISSUE_NAME</option>\n";
-        for ( var tissue in tissueData.tissueInfo) {
-            var tissueObj = tissueData.tissueInfo[tissue];
+        for ( var tissue in tissueJSON.tissueInfo) {
+            var tissueObj = tissueJSON.tissueInfo[tissue];
             if ("tissueSiteDetailId" in tissueObj && "tissueSiteDetail" in tissueObj){
                 htmlText += option
                     .replace(/TISSUE_VALUE/g, tissueObj.tissueSiteDetailId)
@@ -4363,7 +4366,7 @@ function buildTissueDropdown(elementId, tissueData) {
             //console.dir(checked);
         }
     });
-    if (!tissueData.tissueInfo) {
+    if (!tissueJSON.tissueInfo) {
         $('#' + elementId).multiselect("disable");
     }
 }

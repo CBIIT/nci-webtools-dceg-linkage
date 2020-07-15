@@ -31,18 +31,20 @@ mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 
 def get_ldexpress_tissues(web):
-    try:
-        PAYLOAD = {
+    PAYLOAD = {
             "format" : "json",
             "datasetId": "gtex_v8"
         }
-        REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
+    REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
+    try:
         r = requests.get(REQUEST_URL, params=PAYLOAD)
-        return json.loads(r.text)
+        responseObj = json.loads(r.text)
     except:
-        return {
+        errorObj = {
             "error": "Failed to retrieve tissues from GTEx Portal server."
         }
+        return json.dumps(json.loads(errorObj))
+    return json.dumps(responseObj)
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
