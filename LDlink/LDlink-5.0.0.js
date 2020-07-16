@@ -2847,7 +2847,6 @@ function initExpressTissues() {
     ajaxRequest.success(function(data) {
         if (displayError(id, data) == false) {
             // ldExpressTissues = data;
-            console.log("data", data);
             buildTissueDropdown(id + "-tissue-codes", data);
         } else {
             buildTissueDropdown("ldexpress-tissue-codes", data);
