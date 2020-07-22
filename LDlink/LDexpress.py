@@ -530,8 +530,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
 
     start = timer()
     
-    # snp limit
-    max_list = 50
+    # SNP limit
+    max_list = 5
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
@@ -550,7 +550,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
         out_json.close()
         return("", "", "")
 
-    # open snps file
+    # Open SNPs file
     with open(snplst, 'r') as fp:
         snps_raw = fp.readlines()
         # Generate error if # of inputted SNPs exceeds limit
@@ -635,10 +635,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
         new_snp_lst = []
         for snp_raw_i in snp_lst:
             if snp_raw_i[0][0:2] == "rs":
-                # print "reached 1", snp_raw_i
                 new_snp_lst.append(snp_raw_i)
             else:
-                # print "reached 2", snp_raw_i
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
@@ -676,9 +674,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     sanitized_query_snps = replace_coords_rsid(db, sanitized_query_snps)
     print("sanitized_query_snps", sanitized_query_snps)
 
-    # find genomic coords of query snps in dbsnp 
-    # query_snp_details = []
-    # details = collections.OrderedDict()
+    # Find genomic coords of query snps in dbsnp 
     details = {}
     rs_nums = []
     snp_pos = []
@@ -712,7 +708,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             out_json.close()
             return("", "", "")
 
-    # generate warnings for query variants not found in dbsnp
+    # Generate warnings for query variants not found in dbsnp
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
             dbsnp_version + ": " + ", ".join(warn)
@@ -737,7 +733,31 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     # # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
         print(snp_coord)
-        found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, pop_ids)
+
+        # Find query SNP geno info
+        
+        # vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+        # tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
+        #     vcf_file, chromosome, position - window, position + window)
+        # proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
+        # # window_snps = [x.decode('utf-8') for x in proc.stdout.readlines()]	
+        # vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
+
+        # Extract query SNP phased genotypes
+        vcf_query_snp_file = vcf_dir + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+
+        tabix_query_snp_h = "tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
+        proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
+        head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
+        print("head", head)
+        
+        tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_query_snp_file, snp_coord[1], snp_coord[2])
+        proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
+        tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()][0].strip().split()
+        print("tabix_query_snp_out", tabix_query_snp_out)
+
+        # found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, pop_ids)
+
         # print("found", snp_coord[0], len(found[snp_coord[0]]))
         # if found[snp_coord[0]] is not None:
         #     thinned_list.append(snp_coord[0])

@@ -1314,19 +1314,19 @@ input:checked + .slider:before {
 
 
 @media only screen and (min-width: 767px) {
-  .dropdown-nav:hover .dropdown-menu{
+  .dropdown-nav:hover .dropdown-menu {
     display:block;
   }
 }
 
-.card{
+.card {
   width: 100%;
 }
-.card:hover{
+.card:hover {
   text-decoration: none;
 }
 
-.card-title{
+.card-title {
   background-color: #133a55; 
   height: 40px; 
   padding: 8px 0;
@@ -1334,21 +1334,25 @@ input:checked + .slider:before {
 
 .card-body{
   background-color:white;
-  height: 100px;
-  padding: 20px 20px 0 20px;
+  height: 110px;
+  padding-top: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
 }
-.card-body p{
+
+.card-body p {
   margin: 0;
   color:#566473;
-  /* font-size: 14px; */
+  font-size: 14px;
 }
-.card-outside{
+
+.card-outside {
   transition: all 0.4s ease-in-out;
   display:inline-block; 
-  width: 40%;
-  height: 140px; 
-  padding: 0px 20px;
+  width: 19%;
+  height: 150px; 
   margin: 10px 0;
+  /* margin-bottom: 10px; */
   text-decoration: none;
   vertical-align: top;
   text-align: left;
