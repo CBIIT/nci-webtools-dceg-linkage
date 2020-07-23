@@ -47,6 +47,59 @@ def get_ldexpress_tissues(web):
         return json.dumps(json.loads(errorObj))
     return json.dumps(responseObj)
 
+def get_query_variant(snp_coord, pop_ids):
+    # Extract query SNP phased genotypes
+    vcf_query_snp_file = vcf_dir + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    tabix_query_snp_h = "tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
+    proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
+    head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
+    print("head length", len(head))
+
+    tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_query_snp_file, snp_coord[1], snp_coord[2])
+    proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
+    tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
+    print("tabix_query_snp_out length", len(tabix_query_snp_out))
+    # Validate error
+    if len(tabix_query_snp_out) == 0:
+        print("ERROR", "len(tabix_query_snp_out) == 0")
+        # handle error: snp + " is not in 1000G reference panel."
+    elif len(tabix_query_snp_out) > 1:
+        geno = []
+        for i in range(len(tabix_query_snp_out)):
+            if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
+                geno = tabix_query_snp_out[i].strip().split()
+        if geno == []:
+            print("ERROR", "geno == []")
+            # handle error: snp + " is not in 1000G reference panel."
+    else:
+        geno = tabix_query_snp_out[0].strip().split()
+    
+    if geno[2] != snp_coord[0]:
+        print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
+        # snp = geno[2]
+
+    if "," in geno[3] or "," in geno[4]:
+        print('handle error: snp + " is not a biallelic variant."')
+
+    index = []
+    for i in range(9, len(head)):
+        if head[i] in pop_ids:
+            index.append(i)
+
+    genotypes = {"0": 0, "1": 0}
+    for i in index:
+        sub_geno = geno[i].split("|")
+        for j in sub_geno:
+            if j in genotypes:
+                genotypes[j] += 1
+            else:
+                genotypes[j] = 1
+
+    if genotypes["0"] == 0 or genotypes["1"] == 0:
+        print('handle error: snp + " is monoallelic in the " + pop + " population."')
+        
+    return(geno)
+
 def get_window_variants(db, chromosome, position, window, pop_ids):
     print("get_window_variants chromosome", chromosome)
     print("get_window_variants position", position)
@@ -732,29 +785,9 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     # ldPairs = []
     # # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
-        print(snp_coord)
-
-        # Find query SNP geno info
-        
-        # vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-        # tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
-        #     vcf_file, chromosome, position - window, position + window)
-        # proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
-        # # window_snps = [x.decode('utf-8') for x in proc.stdout.readlines()]	
-        # vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
-
-        # Extract query SNP phased genotypes
-        vcf_query_snp_file = vcf_dir + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-
-        tabix_query_snp_h = "tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
-        proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
-        head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
-        print("head", head)
-        
-        tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_query_snp_file, snp_coord[1], snp_coord[2])
-        proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
-        tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()][0].strip().split()
-        print("tabix_query_snp_out", tabix_query_snp_out)
+        print("query snp_coord", snp_coord)
+        (geno) = get_query_variant(snp_coord, pop_ids)
+        print("geno[0-4...]", ", ".join(geno[0:5]))
 
         # found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, pop_ids)
 
