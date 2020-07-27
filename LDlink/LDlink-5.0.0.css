@@ -1330,20 +1330,25 @@ input:checked + .slider:before {
   background-color: #133a55; 
   height: 40px; 
   padding: 8px 0;
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .card-body{
   background-color:white;
   height: 110px;
-  padding-top: 10px;
+  padding: 20px;
+  /* padding-top: 10px;
   padding-left: 10px;
-  padding-right: 10px;
+  padding-right: 10px; */
+  margin-right: 5px;
+  margin-left: 5px;
 }
 
 .card-body p {
   margin: 0;
   color:#566473;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .card-outside {
