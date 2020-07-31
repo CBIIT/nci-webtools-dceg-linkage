@@ -19,4 +19,4 @@ chromedriver*
 
 data/
 LDlink/tmp/
-LDlink/config.yml
+LDlink/config.ini

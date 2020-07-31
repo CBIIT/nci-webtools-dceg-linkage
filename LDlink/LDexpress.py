@@ -19,8 +19,8 @@ import numpy as np
 from timeit import default_timer as timer
 
 
-# Set data directories using config.yml	
-with open('config.yml', 'r') as f:	
+# Set data directories using config.ini	
+with open('config.ini', 'r') as f:	
     config = yaml.load(f)	
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
@@ -30,8 +30,9 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+ldexpress_threads = config['performance']['ldexpress_threads']
 
-def get_ldexpress_tissues(web):
+def get_ldexpress_tissues():
     PAYLOAD = {
             "format" : "json",
             "datasetId": "gtex_v8"
@@ -167,8 +168,14 @@ def get_window_variants(db, snp, chromosome, position, window, pop_ids, geno, al
         if head[i] in pop_ids:
             index.append(i)
     vcf_window_snps = list(vcf_window_snps)
-    print(str(snp) + "vcf_window_snps LENGTH", len(vcf_window_snps))
+    print(str(snp) + " vcf_window_snps LENGTH", len(vcf_window_snps))
+
     ###### SPLIT TASK UP INTO 4 PARALLEL THREADS
+    # vcf_window_snps_split = np.array_split(vcf_window_snps, ldexpress_threads)	
+    # for idx, arr in enumerate(vcf_window_snps_split, start=1):
+    #     print("array thread " + str(idx) + " length:", len(arr))
+
+
     # Loop through SNPs
     out = []
     for geno_n in vcf_window_snps:
@@ -536,6 +543,8 @@ def main():
     print("query_snps", sanitized_query_snps)
     print("thinned_snps", thinned_list)
     print("details", json.dumps(details))
+    # print("##### GET GTEx TISSUES #####")
+    # print(get_ldexpress_tissues())
 
 if __name__ == "__main__":
     main()
