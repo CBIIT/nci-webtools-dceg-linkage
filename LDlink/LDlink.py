@@ -120,8 +120,8 @@ def getModule(fullPath):
 def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        # Set data directories using config.yml
-        with open('config.yml', 'r') as c:
+        # Set data directories using config.ini
+        with open('config.ini', 'r') as c:
             config = yaml.load(c)
         env = config['env']
         if env == 'local':
@@ -164,7 +164,7 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        with open('config.yml', 'r') as c:
+        with open('config.ini', 'r') as c:
             config = yaml.load(c)
         api_superuser = config['api']['api_superuser']
         # api_access_dir = config['api']['api_access_dir']
@@ -282,7 +282,7 @@ def api_blocked_users():
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
-    # with open('config.yml', 'r') as c:
+    # with open('config.ini', 'r') as c:
     #     config = yaml.load(c)
     # env = config['env']
     # if env == "local":
@@ -355,7 +355,7 @@ def upload():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    with open('config.yml', 'r') as c:
+    with open('config.ini', 'r') as c:
         config = yaml.load(c)
     example_dir = config['data']['example_dir']
     example_filepath = example_dir + 'prostate_example.txt'
@@ -402,7 +402,7 @@ def ldtrait_timestamp():
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     print("Execute ldassoc.")
-    with open('config.yml', 'r') as c:
+    with open('config.ini', 'r') as c:
         config = yaml.load(c)
     example_dir = config['data']['example_dir']
     myargs = argparse.Namespace()

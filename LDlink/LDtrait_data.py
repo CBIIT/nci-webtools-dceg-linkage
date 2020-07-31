@@ -16,8 +16,8 @@ filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
-with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as c:
-# with open('config.yml', 'r') as c:
+with open('/analysistools/public_html/apps/LDlink/app/config.ini', 'r') as c:
+# with open('config.ini', 'r') as c:
     config = yaml.load(c)
 ldtrait_src = config['data']['ldtrait_src']
 tmp_dir = config['data']['tmp_dir']
