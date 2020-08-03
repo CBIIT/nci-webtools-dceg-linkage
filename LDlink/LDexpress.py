@@ -148,12 +148,27 @@ def LD_calcs(hap, allele, allele_n):
             # "output": output
         }
 
-def get_window_variants(db, snp, chromosome, position, window, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold):
-    print("get_window_variants geno[0-4...]", ", ".join(geno[0:5]))
+def chunkWindow(pos, window, threads):
+    if (pos - window <= 0):
+        minPos = 0
+    else:
+        minPos = pos - window
+    maxPos = pos + window
+    windowRange = maxPos - minPos
+    chunks = []
+    newMin = minPos
+    newMax = 0
+    for _ in range(threads):
+        newMax = newMin + (windowRange / threads)
+        chunks.append([math.ceil(newMin), math.ceil(newMax)])
+        newMin = newMax
+    return chunks
+
+def get_window_variants(snp, chromosome, position, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold):
     # Get VCF region
     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
-        vcf_file, chromosome, position - window, position + window)
+        vcf_file, chromosome, windowMinPos, windowMaxPos)
     proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
     vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
 
@@ -169,12 +184,6 @@ def get_window_variants(db, snp, chromosome, position, window, pop_ids, geno, al
             index.append(i)
     vcf_window_snps = list(vcf_window_snps)
     print(str(snp) + " vcf_window_snps LENGTH", len(vcf_window_snps))
-
-    ###### SPLIT TASK UP INTO 4 PARALLEL THREADS
-    # vcf_window_snps_split = np.array_split(vcf_window_snps, ldexpress_threads)	
-    # for idx, arr in enumerate(vcf_window_snps_split, start=1):
-    #     print("array thread " + str(idx) + " length:", len(arr))
-
 
     # Loop through SNPs
     out = []
@@ -210,6 +219,23 @@ def get_window_variants(db, snp, chromosome, position, window, pop_ids, geno, al
     # print("get_window_variants out", out)
     print("WINDOW SIZE AFTER THRESHOLD", len(out))
     return out
+
+def get_window_variants_sub(threadCommandArgs):
+    windowChunkRange = threadCommandArgs[0]
+    thread = threadCommandArgs[1]	
+    snp = threadCommandArgs[2]
+    chromosome = threadCommandArgs[3]		
+    position = threadCommandArgs[4]
+    pop_ids = threadCommandArgs[5]
+    geno = threadCommandArgs[6]
+    allele = threadCommandArgs[7]
+    r2_d = threadCommandArgs[8]
+    r2_d_threshold = threadCommandArgs[9]
+    p_threshold = threadCommandArgs[10]
+    print("thread " + str(thread) + " kicked")	
+    print("snp chr pos", snp, chromosome, position)
+    print("windowChunkRange", windowChunkRange)
+    return get_window_variants(snp, chromosome, position, windowChunkRange[0], windowChunkRange[1], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold)
 
 def set_alleles(a1, a2):
     if len(a1) == 1 and len(a2) == 1:
@@ -441,8 +467,17 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
         new_alleles = set_alleles(geno[3], geno[4])
         allele = {"0": new_alleles[0], "1": new_alleles[1]}
         # # print("allele", allele)
-
-        found[snp_coord[0]] = get_window_variants(db, snp_coord[0], snp_coord[1], snp_coord[2], window, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold)
+        ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
+        windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
+        print("windowChunkRanges", windowChunkRanges)
+        # found[snp_coord[0]] = []
+        getWindowVariantsArgs = []	
+        for thread in range(ldexpress_threads):	
+            getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], snp_coord[2], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold])	
+        with Pool(processes=ldexpress_threads) as pool:	
+            ldInfoSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
+        # flatten pooled results
+        found[snp_coord[0]] = len([val for sublist in ldInfoSubsets for val in sublist])
 
         # print("found", snp_coord[0], len(found[snp_coord[0]]))
         # if found[snp_coord[0]] is not None:
