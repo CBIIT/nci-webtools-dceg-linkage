@@ -59,7 +59,7 @@ def get_query_variant(snp_coord, pop_ids):
     tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_query_snp_file, snp_coord[1], snp_coord[2])
     proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
     tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
-    print("tabix_query_snp_out length", len(tabix_query_snp_out))
+    # print("tabix_query_snp_out length", len(tabix_query_snp_out))
     # Validate error
     if len(tabix_query_snp_out) == 0:
         print("ERROR", "len(tabix_query_snp_out) == 0")
@@ -148,6 +148,18 @@ def LD_calcs(hap, allele, allele_n):
             # "output": output
         }
 
+def getGTExTissueAPI(snp, tissue_ids):
+    PAYLOAD = {
+        "format" : "json",
+        "snpId": snp,
+        "tissueSiteDetailId": ",".join(tissue_ids),
+        "datasetId": "gtex_v8"
+    }
+    REQUEST_URL = "https://gtexportal.org/rest/v1/association/singleTissueEqtl"
+    r = requests.get(REQUEST_URL, params=PAYLOAD)
+    # print(json.loads(r.text))
+    return (json.loads(r.text), r.url)
+
 def chunkWindow(pos, window, threads):
     if (pos - window <= 0):
         minPos = 0
@@ -164,7 +176,7 @@ def chunkWindow(pos, window, threads):
         newMin = newMax
     return chunks
 
-def get_window_variants(snp, chromosome, position, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold):
+def get_window_variants(snp, chromosome, position, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids):
     # Get VCF region
     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
@@ -183,7 +195,7 @@ def get_window_variants(snp, chromosome, position, windowMinPos, windowMaxPos, p
         if head[i] in pop_ids:
             index.append(i)
     vcf_window_snps = list(vcf_window_snps)
-    print(str(snp) + " vcf_window_snps LENGTH", len(vcf_window_snps))
+    print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
 
     # Loop through SNPs
     out = []
@@ -209,15 +221,27 @@ def get_window_variants(snp, chromosome, position, windowMinPos, windowMaxPos, p
                     bp_n = geno_n[1]
                     rs_n = geno_n[2]
                     geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(bp_n)
-                    temp = [
-                        rs_n, 
-                        geno_n_chr_bp, 
-                        out_stats['r2'], 
-                        out_stats['D_prime']
-                    ]
-                    out.append(temp)
+                    ###### RETRIEVE GTEX TISSUE INFO FROM API ######
+                    (tissue_stats, tissue_url) = getGTExTissueAPI(rs_n, tissue_ids)
+                    if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
+                        for tissue_obj in tissue_stats['singleTissueEqtl']:
+                            # print("tissue_obj", tissue_obj)
+                            if float(tissue_obj['pValue']) < float(p_threshold):
+                                temp = [
+                                    tissue_obj['gencodeId'],
+                                    tissue_obj['geneSymbol'],
+                                    rs_n, 
+                                    geno_n_chr_bp, 
+                                    out_stats['r2'], 
+                                    out_stats['D_prime'],
+                                    tissue_obj['pValue'],
+                                    tissue_obj['nes'],
+                                    tissue_obj['tissueSiteDetailId'],
+                                    tissue_url
+                                ]
+                                out.append(temp)
     # print("get_window_variants out", out)
-    print("WINDOW SIZE AFTER THRESHOLD", len(out))
+    print("WINDOW SIZE AFTER THRESHOLDS & GTEX SEARCH", len(out))
     return out
 
 def get_window_variants_sub(threadCommandArgs):
@@ -232,10 +256,11 @@ def get_window_variants_sub(threadCommandArgs):
     r2_d = threadCommandArgs[8]
     r2_d_threshold = threadCommandArgs[9]
     p_threshold = threadCommandArgs[10]
+    tissue_ids = threadCommandArgs[11]
     print("thread " + str(thread) + " kicked")	
     print("snp chr pos", snp, chromosome, position)
     print("windowChunkRange", windowChunkRange)
-    return get_window_variants(snp, chromosome, position, windowChunkRange[0], windowChunkRange[1], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold)
+    return get_window_variants(snp, chromosome, position, windowChunkRange[0], windowChunkRange[1], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids)
 
 def set_alleles(a1, a2):
     if len(a1) == 1 and len(a2) == 1:
@@ -456,98 +481,41 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
     # establish low/high window for each query snp
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
-    found = {}	
-    # calculate and store LD info for all LD pairs	
-    # ldPairs = []
-    # # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
-        # print("query snp_coord", snp_coord)
         (geno) = get_query_variant(snp_coord, pop_ids)
-        # print("geno[0-4...]", ", ".join(geno[0:5]))
         new_alleles = set_alleles(geno[3], geno[4])
         allele = {"0": new_alleles[0], "1": new_alleles[1]}
-        # # print("allele", allele)
         ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
         windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
-        print("windowChunkRanges", windowChunkRanges)
-        # found[snp_coord[0]] = []
+        # print("windowChunkRanges", windowChunkRanges)
         getWindowVariantsArgs = []	
         for thread in range(ldexpress_threads):	
-            getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], snp_coord[2], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold])	
+            getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], snp_coord[2], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids])	
         with Pool(processes=ldexpress_threads) as pool:	
             ldInfoSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
         # flatten pooled results
-        found[snp_coord[0]] = len([val for sublist in ldInfoSubsets for val in sublist])
-
-        # print("found", snp_coord[0], len(found[snp_coord[0]]))
-        # if found[snp_coord[0]] is not None:
-        #     thinned_list.append(snp_coord[0])
-        #     # Calculate LD statistics of variant pairs ?in parallel?	
-        #     for record in found[snp_coord[0]]:	
-        #         ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
-        # else:	
-        #     queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
-                
-    print("found", found)
-
-    # ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
-    # # print("ldPairsUnique", ldPairsUnique)	
-    # print("ldPairsUnique", len(ldPairsUnique))	
-    # print("##### BEGIN MULTITHREADING LD CALCULATIONS #####")	
-    # # start = timer()	
-    # # leverage multiprocessing to calculate all LDpairs	
-    # threads = 4	
-    # splitLDPairsUnique = np.array_split(ldPairsUnique, threads)	
-    # getLDStatsArgs = []	
-    # for thread in range(threads):	
-    #     getLDStatsArgs.append([splitLDPairsUnique[thread].tolist(), pop_ids, thread])	
-    # # print("getLDStatsArgs", getLDStatsArgs)	
-    # with Pool(processes=threads) as pool:	
-    #     ldInfoSubsets = pool.map(get_ld_stats_sub, getLDStatsArgs)	
-       	
-    # # end = timer()	
-    # # print("TIME ELAPSED:", str(end - start) + "(s)")	
-    # print("##### END MULTITHREADING LD CALCULATIONS #####")	
-    # print("ldInfoSubsets", json.dumps(ldInfoSubsets))	
-    # print("ldInfoSubsets length ", len(ldInfoSubsets))	
-    # merge all ldInfo Pool subsets into one ldInfo object	
-    # ldInfo = {}	
-    # for ldInfoSubset in ldInfoSubsets:	
-    #     for key in ldInfoSubset.keys():	
-    #         if key not in ldInfo.keys():	
-    #             ldInfo[key] = {}	
-    #             ldInfo[key] = ldInfoSubset[key]	
-    #         else:	
-    #             for subsetKey in ldInfoSubset[key].keys():	
-    #                 ldInfo[key][subsetKey] = ldInfoSubset[key][subsetKey]	
-
-    # print("ldInfo", json.dumps(ldInfo))
-        	
-    # for snp_coord in snp_coords:	
-    #     # print("snp_coord", snp_coord)
-    #     (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found[snp_coord[0]], pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
+        matched_snps = [val for sublist in ldInfoSubsets for val in sublist]
+        print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
+        if (len(matched_snps) > 0):
+            details[snp_coord[0]] = {	
+                "aaData": matched_snps
+            }
+            # add snp to thinned_list
+            thinned_list.append(snp_coord[0])
+        else:
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
         
-    #     # windowWarnings += window_problematic_snps
-    #     if (len(matched_snps) > 0):
-    #         details[snp_coord[0]] = {	
-    #             "aaData": matched_snps
-    #         }
-    #     else:
-    #         # remove from thinned_list
-    #         thinned_list.remove(snp_coord[0])
-    #         queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
-
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
 
     # Check if thinned list is empty, if it is, display error
-    # if len(thinned_list) < 1:
-    #     output["error"] = "No variants in LD with GWAS Catalog."
-    #     json_output = json.dumps(output, sort_keys=True, indent=2)
-    #     print(json_output, file=out_json)
-    #     out_json.close()
-    #     return("", "", "")
+    if len(thinned_list) < 1:
+        output["error"] = "No variants in LD with GWAS Catalog."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)

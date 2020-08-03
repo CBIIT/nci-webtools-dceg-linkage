@@ -951,7 +951,7 @@ function createTraitDetailsTable() {
                         }
                     }
                 },
-                "targets": [ 4, 5, 8 ]
+                "targets": [ 4, 5 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -990,26 +990,19 @@ function createTraitDetailsTable() {
                         return data;
                     }
                 },
-                "targets": [ 10 ]
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Provide link to LDpair 
-                    return ldtrait_ldpair_results_link(data, type, row);
-                },
-                "targets": 6
+                "targets": [ 6 ]
             },
             {
                 "render": function ( data, type, row ) {
                     // Provide link to gwas catalog
-                    return ldtrait_gwas_catalog_link(data, type, row);
+                    return ldexpress_GTEx_link(data, type, row);
                 },
-                "targets": 11
+                "targets": 9
             },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] 
             }
         ]
     });
@@ -1429,6 +1422,12 @@ function ldtrait_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    return link;
+}
+
+function ldexpress_GTEx_link(data, type, row) {
+    var href = data
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
     return link;
 }
