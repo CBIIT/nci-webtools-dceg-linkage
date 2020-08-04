@@ -536,7 +536,7 @@ def main():
     r2_d = "r2"
     r2_d_threshold = 0.1
     p_threshold = 0.1
-    window = 50000
+    window = 500000
     tissue = "Adipose_Subcutaneous+Adipose_Visceral_Omentum"
 
     # Run function

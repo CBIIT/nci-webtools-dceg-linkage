@@ -828,7 +828,7 @@ function createExpressDetailsTable() {
                         }
                     }
                 },
-                "targets": [ 4, 5, 8 ]
+                "targets": [ 4, 5 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -867,26 +867,19 @@ function createExpressDetailsTable() {
                         return data;
                     }
                 },
-                "targets": [ 10 ]
-            },
-            {
-                "render": function ( data, type, row ) {
-                    // Provide link to LDpair 
-                    return ldexpress_ldpair_results_link(data, type, row);
-                },
-                "targets": 6
+                "targets": [ 6 ]
             },
             {
                 "render": function ( data, type, row ) {
                     // Provide link to gwas catalog
-                    return ldexpress_gwas_catalog_link(data, type, row);
+                    return ldexpress_GTEx_link(data, type, row);
                 },
-                "targets": 11
+                "targets": 9
             },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] 
             }
         ]
     });
@@ -951,7 +944,7 @@ function createTraitDetailsTable() {
                         }
                     }
                 },
-                "targets": [ 4, 5 ]
+                "targets": [ 4, 5, 8 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -990,19 +983,26 @@ function createTraitDetailsTable() {
                         return data;
                     }
                 },
-                "targets": [ 6 ]
+                "targets": [ 10 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to LDpair 
+                    return ldtrait_ldpair_results_link(data, type, row);
+                },
+                "targets": 6
             },
             {
                 "render": function ( data, type, row ) {
                     // Provide link to gwas catalog
-                    return ldexpress_GTEx_link(data, type, row);
+                    return ldtrait_gwas_catalog_link(data, type, row);
                 },
-                "targets": 9
+                "targets": 11
             },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
             }
         ]
     });
@@ -1385,23 +1385,6 @@ function ldpop_ldpair_results_link(data, type, row) {
     return link;
 }
 
-function ldexpress_ldpair_results_link(data, type, row) {
-    // parse data
-    // console.log(data);
-    var snp1 = data[0];
-    var snp2 = data[1];
-    var pops = data[2];
-    var server = window.location.origin + '/?tab=ldpair';
-    var params = {
-        var1: snp1,
-        var2: snp2,
-        pop: pops
-    };
-    var href = server + '&' + $.param(params);
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
-    return link;
-}
-
 function ldexpress_gwas_catalog_link(data, type, row) {
     var rsid = data;
     var href = 'https://www.ebi.ac.uk/gwas/variants/' + rsid;
@@ -1676,7 +1659,7 @@ function updateData(id) {
             }
             break;
         case 'ldexpress':
-            if(isPopulationSet(id) && validateLDexpressBasePairWindow()) {
+            if(isPopulationSet(id) && isTissueSet(id) && validateLDexpressBasePairWindow()) {
                 $('#'+id+"-loading").show();
                 updateLDexpress();
             }
@@ -1872,13 +1855,25 @@ function areRegionDetailsSet(elementId) {
 }
 
 function isPopulationSet(elementId) {
-    var population =  $('#'+elementId+'-population-codes').val();
+    var population =  $('#' + elementId + '-population-codes').val();
     if(population == null ) {
-        $('#'+elementId+'-population-codes-zero').popover('show');
-        setTimeout(function() { $('#'+elementId+'-population-codes-zero').popover('hide'); }, 4000);
+        $('#' + elementId + '-population-codes-zero').popover('show');
+        setTimeout(function() { $('#' + elementId + '-population-codes-zero').popover('hide'); }, 4000);
         return false;
     } else {
-        $('#'+elementId+'-population-codes-zero').popover('hide');
+        $('#' + elementId + '-population-codes-zero').popover('hide');
+        return true;
+    }
+}
+
+function isTissueSet(elementId) {
+    var tissue =  $('#'+elementId+'-tissue-codes').val();
+    if(tissue == null ) {
+        $('#' + elementId + '-tissue-codes-zero').popover('show');
+        setTimeout(function() { $('#'+elementId+'-tissue-codes-zero').popover('hide'); }, 4000);
+        return false;
+    } else {
+        $('#'+elementId+'-tissue-codes-zero').popover('hide');
         return true;
     }
 }
@@ -2135,21 +2130,23 @@ function updateLDexpress() {
         r2_d = 'd';  // i.e. Dprime
     }
 
-    var estimateWindowSizeMultiplier = window / 500000.0;
-    var estimateSeconds = Math.round((snps.split("\n").length * 5 * estimateWindowSizeMultiplier));
-    // console.log("estimate seconds", estimateSeconds);
-    var estimateMinutes = estimateSeconds / 60;
-    if (estimateSeconds < 60) {
-        $('#ldexpress-estimate-loading').text(estimateSeconds + " seconds");
-    } else {
-        $('#ldexpress-estimate-loading').text(estimateMinutes.toFixed(2) + " minute(s)");
-    }
+    // var estimateWindowSizeMultiplier = window / 500000.0;
+    // var estimateSeconds = Math.round((snps.split("\n").length * 5 * estimateWindowSizeMultiplier));
+    // // console.log("estimate seconds", estimateSeconds);
+    // var estimateMinutes = estimateSeconds / 60;
+    // if (estimateSeconds < 60) {
+    //     $('#ldexpress-estimate-loading').text(estimateSeconds + " seconds");
+    // } else {
+    //     $('#ldexpress-estimate-loading').text(estimateMinutes.toFixed(2) + " minute(s)");
+    // }
 
     var ldInputs = {
-        snps : snps,
-        pop : population.join("+"),
+        snps: snps,
+        pop: population.join("+"),
+        tissue: tissues.join("+"),
         r2_d: r2_d,
-        r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
+        r2_d_threshold: $("#" + id + "_r2_d_threshold").val(),
+        p_threshold: $("#" + id + "_p_threshold").val(),
         window: window,
         reference : Math.floor(Math.random() * (99999 - 10000 + 1))
     };
