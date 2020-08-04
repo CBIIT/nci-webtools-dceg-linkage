@@ -828,7 +828,7 @@ function createExpressDetailsTable() {
                         }
                     }
                 },
-                "targets": [ 4, 5 ]
+                "targets": [ 2, 3 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -867,7 +867,7 @@ function createExpressDetailsTable() {
                         return data;
                     }
                 },
-                "targets": [ 6 ]
+                "targets": [ 8 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -1330,12 +1330,12 @@ function RefreshTable(tableId, json) {
     table.fnDraw();
 }
 
-function RefreshTableSort(tableId, json, sort) {
+function RefreshTableSort(tableId, json, sort, r2Col, dCol) {
     var sortCol;
     if (sort == "r2") {
-        sortCol = 4;
+        sortCol = r2Col;
     } else {
-        sortCol = 5;
+        sortCol = dCol;
     }
     table = $(tableId).dataTable();
     oSettings = table.fnSettings();
@@ -2725,7 +2725,7 @@ function loadLDexpressDetails(data, rs_number, sort) {
     // console.log("ldExpressRaw", data);
     // console.log("rs_number", rs_number);
 
-    RefreshTableSort('#new-ldexpress', data.details[rs_number], sort);
+    RefreshTableSort('#new-ldexpress', data.details[rs_number], sort, 2, 3);
     $('#new-ldexpress_wrapper').show();
 
     $('#ldexpress-detail-title').text("Details for " + rs_number);
@@ -2742,7 +2742,7 @@ function loadLDtraitDetails(data, rs_number, sort) {
     // console.log("ldTraitRaw", data);
     // console.log("rs_number", rs_number);
 
-    RefreshTableSort('#new-ldtrait', data.details[rs_number], sort);
+    RefreshTableSort('#new-ldtrait', data.details[rs_number], sort, 4, 5);
     $('#new-ldtrait_wrapper').show();
 
     $('#ldtrait-detail-title').text("Details for " + rs_number);

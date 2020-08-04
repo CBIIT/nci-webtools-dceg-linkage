@@ -529,7 +529,7 @@ def ldexpress():
                     trait["error"] = json_dict["error"]
                 else:
                     with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
-                        f.write("Query\tGencode ID\tGene Symbol\tRS ID\tPosition\tR2\tD'\tP-value\tEffect Size\tTissue\n")
+                        f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tEffect Size\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
@@ -566,7 +566,7 @@ def ldexpress():
                 return sendTraceback(json_dict["error"])
             else:
                 with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
-                    f.write("Query\tGencode ID\tGene Symbol\tRS ID\tPosition\tR2\tD'\tP-value\tEffect Size\tTissue\n")
+                    f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tEffect Size\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")

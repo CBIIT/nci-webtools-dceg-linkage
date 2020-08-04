@@ -234,15 +234,15 @@ def get_window_variants(snp, chromosome, position, windowMinPos, windowMaxPos, p
                             # print("tissue_obj", tissue_obj)
                             if float(tissue_obj['pValue']) < float(p_threshold):
                                 temp = [
-                                    tissue_obj['gencodeId'],
-                                    tissue_obj['geneSymbol'],
                                     rs_n, 
                                     geno_n_chr_bp, 
                                     out_stats['r2'], 
                                     out_stats['D_prime'],
-                                    tissue_obj['pValue'],
-                                    tissue_obj['nes'],
+                                    tissue_obj['geneSymbol'],
+                                    tissue_obj['gencodeId'],
                                     tissue_obj['tissueSiteDetailId'],
+                                    tissue_obj['nes'],
+                                    tissue_obj['pValue'],
                                     tissue_url
                                 ]
                                 out.append(temp)
