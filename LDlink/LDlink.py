@@ -15,7 +15,7 @@ import time
 import random
 import requests
 import yaml
-from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify, url_for
+from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify
 # from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
 from functools import wraps

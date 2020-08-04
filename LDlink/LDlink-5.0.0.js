@@ -2120,7 +2120,7 @@ function updateLDexpress() {
     var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
     var population = getPopulationCodes(id + '-population-codes');
     var tissues = $('#'+ id + '-tissue-codes').val();
-    console.log("tissues", tissues);
+    // console.log("tissues", tissues);
     var r2_d;
     var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
 

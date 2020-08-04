@@ -49,6 +49,7 @@ def get_ldexpress_tissues():
     return json.dumps(responseObj)
 
 def get_query_variant(snp_coord, pop_ids):
+    queryVariantWarnings = []
     # Extract query SNP phased genotypes
     vcf_query_snp_file = vcf_dir + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_query_snp_h = "tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
@@ -62,25 +63,29 @@ def get_query_variant(snp_coord, pop_ids):
     # print("tabix_query_snp_out length", len(tabix_query_snp_out))
     # Validate error
     if len(tabix_query_snp_out) == 0:
-        print("ERROR", "len(tabix_query_snp_out) == 0")
+        # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
+        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
     elif len(tabix_query_snp_out) > 1:
         geno = []
         for i in range(len(tabix_query_snp_out)):
             if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
                 geno = tabix_query_snp_out[i].strip().split()
         if geno == []:
-            print("ERROR", "geno == []")
+            # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
+            queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
     else:
         geno = tabix_query_snp_out[0].strip().split()
     
     if geno[2] != snp_coord[0]:
-        print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
+        # print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
+        queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + ")."])
         # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
-        print('handle error: snp + " is not a biallelic variant."')
+        # print('handle error: snp + " is not a biallelic variant."')
+        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
 
     index = []
     for i in range(9, len(head)):
@@ -97,9 +102,10 @@ def get_query_variant(snp_coord, pop_ids):
                 genotypes[j] = 1
 
     if genotypes["0"] == 0 or genotypes["1"] == 0:
-        print('handle error: snp + " is monoallelic in the " + pop + " population."')
+        # print('handle error: snp + " is monoallelic in the " + pop + " population."')
+        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
         
-    return(geno)
+    return(geno, queryVariantWarnings)
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
@@ -482,7 +488,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     # establish low/high window for each query snp
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     for snp_coord in snp_coords:
-        (geno) = get_query_variant(snp_coord, pop_ids)
+        (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids)
         new_alleles = set_alleles(geno[3], geno[4])
         allele = {"0": new_alleles[0], "1": new_alleles[1]}
         ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
@@ -506,12 +512,12 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
         
     details["queryWarnings"] = {
-        "aaData": queryWarnings
+        "aaData": queryVariantWarnings + queryWarnings
     }
 
     # Check if thinned list is empty, if it is, display error
     if len(thinned_list) < 1:
-        output["error"] = "No variants in LD with GWAS Catalog."
+        output["error"] = "No variants in LD with GTEx."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
