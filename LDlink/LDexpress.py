@@ -299,7 +299,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     start = timer()
     
     # SNP limit
-    max_list = 5
+    max_list = 20
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"
