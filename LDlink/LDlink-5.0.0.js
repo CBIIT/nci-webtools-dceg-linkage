@@ -1410,7 +1410,7 @@ function ldtrait_ldpair_results_link(data, type, row) {
 }
 
 function ldexpress_GTEx_link(data, type, row) {
-    var href = data
+    var href = 'https://www.gtexportal.org/home/snp/' + data
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
     return link;
 }
