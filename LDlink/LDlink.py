@@ -373,7 +373,14 @@ def ldassoc_example():
 @app.route('/LDlinkRestWeb/ldexpress_tissues', methods=['GET'])
 def ldexpress_tissues():
     print("Retrieve LDexpress Tissues")
-    return get_ldexpress_tissues()
+    # differentiate web or api request
+    if 'LDlinkRestWeb' in request.path:
+        # WEB REQUEST
+        web = True
+    else:
+        # API REQUEST
+        web = False
+    return get_ldexpress_tissues(web)
 
 # Route to retrieve platform data for SNPchip
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])

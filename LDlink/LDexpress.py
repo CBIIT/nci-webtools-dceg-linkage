@@ -32,21 +32,44 @@ mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 ldexpress_threads = config['performance']['ldexpress_threads']
 
-def get_ldexpress_tissues():
-    PAYLOAD = {
-            "format" : "json",
-            "datasetId": "gtex_v8"
-        }
-    REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
+def get_ldexpress_tissues(web):
     try:
-        r = requests.get(REQUEST_URL, params=PAYLOAD)
-        responseObj = json.loads(r.text)
-    except:
-        errorObj = {
-            "error": "Failed to retrieve tissues from GTEx Portal server."
+        with open('config.ini', 'r') as c:
+            config = yaml.load(c)
+        env = config['env']
+        api_mongo_addr = config['api']['api_mongo_addr']
+        mongo_username = config['database']['mongo_user_readonly']
+        mongo_password = config['database']['mongo_password']
+        mongo_port = config['database']['mongo_port']
+
+        # Connect to Mongo snp database
+        if env == 'local':
+            mongo_host = api_mongo_addr
+        else: 
+            mongo_host = 'localhost'
+        if web:
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+        else:
+            if env == 'local':
+                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+            else:
+                client = MongoClient('localhost', mongo_port)
+    except ConnectionFailure:
+        print("MongoDB is down")
+        print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
+        return "Failed to connect to server."
+
+    db = client["LDLink"]
+    if "gtex_tissues" in db.list_collection_names():
+        documents = list(db.gtex_tissues.find())
+        print("documents", documents)
+        tissues = {
+            "tissueInfo": documents
         }
-        return json.dumps(json.loads(errorObj))
-    return json.dumps(responseObj)
+        json_output = json.dumps(tissues, default=json_util.default, sort_keys=True, indent=2)
+        return json_output
+    else:
+        return None
 
 def get_query_variant(snp_coord, pop_ids):
     queryVariantWarnings = []

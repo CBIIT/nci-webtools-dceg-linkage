@@ -20,6 +20,7 @@ var ldExpressSort;
 var ldTraitRaw;
 var ldTraitSort;
 var ldClipRaw;
+var tissueJSON;
 var modules = [ "ldassoc", "ldexpress", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
 var homeStartBox = 0;
 var newsList = [];
@@ -829,6 +830,20 @@ function createExpressDetailsTable() {
                     }
                 },
                 "targets": [ 2, 3 ]
+            },
+            {
+                "render": function ( data, type, row ) {
+                    if (tissueJSON && tissueJSON.tissueInfo) {
+                        // console.log(data, tissueJSON.tissueInfo);
+                        var found = tissueJSON.tissueInfo.filter(obj => obj.tissueSiteDetailId === data)
+                        // console.log(found[0].tissueSiteDetail);
+                        return found.length > 0 ? found[0].tissueSiteDetail : data;
+                    } else {
+                        return data;
+                    }
+                    
+                },
+                "targets": [ 6 ]
             },
             {
                 "render": function ( data, type, row ) {
