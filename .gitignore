@@ -20,3 +20,4 @@ chromedriver*
 data/
 LDlink/tmp/
 LDlink/config.ini
+scripts/LDexpress update/tmp/

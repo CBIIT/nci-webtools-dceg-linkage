@@ -62,7 +62,7 @@ def get_ldexpress_tissues(web):
     db = client["LDLink"]
     if "gtex_tissues" in db.list_collection_names():
         documents = list(db.gtex_tissues.find())
-        print("documents", documents)
+        # print("documents", documents)
         tissues = {
             "tissueInfo": documents
         }
@@ -189,6 +189,22 @@ def getGTExTissueAPI(snp, tissue_ids):
     # print(json.loads(r.text))
     return (json.loads(r.text))
 
+def getGTExTissueMongoDB(db, chromosome, position, tissue_ids):
+    if "gtex_tissue_eqtl" in db.list_collection_names():
+        documents = list(db.gtex_tissue_eqtl.find({
+            "chr_b37": str(chromosome), 
+            "variant_pos_b37": str(position),
+            "tissueSiteDetailId": str(tissue_ids[0])
+        }))
+        # print("documents", documents)
+        tissues = {
+            "singleTissueEqtl": documents
+        }
+        # json_output = json.dumps(tissues, default=json_util.default, sort_keys=True, indent=2)
+        return tissues
+    else:
+        return None
+
 def chunkWindow(pos, window, threads):
     if (pos - window <= 0):
         minPos = 0
@@ -204,12 +220,6 @@ def chunkWindow(pos, window, threads):
         chunks.append([math.ceil(newMin), math.ceil(newMax)])
         newMin = newMax
     return chunks
-
-def filterGTExSNPs(db, chromosome, position):
-    record = db.gtex_snps.find_one({"chr_b37": chromosome, "variant_pos_b37": position})
-    record_sanitized = json.loads(json_util.dumps(record))
-    # print("record_sanitized", record_sanitized)
-    return record_sanitized
 
 def get_window_variants(db, snp, chromosome, position, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids):
     # Get VCF region
@@ -231,8 +241,8 @@ def get_window_variants(db, snp, chromosome, position, windowMinPos, windowMaxPo
             index.append(i)
     vcf_window_snps = list(vcf_window_snps)
     print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
-    gtexAPIRequestCount = 0
-    gtexAPIReturnCount = 0
+    gtexQueryRequestCount = 0
+    gtexQueryReturnCount = 0
     # Loop through SNPs
     out = []
     for geno_n in vcf_window_snps:
@@ -257,34 +267,40 @@ def get_window_variants(db, snp, chromosome, position, windowMinPos, windowMaxPo
                     bp_n = geno_n[1]
                     rs_n = geno_n[2]
                     geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(bp_n)
-                    # foundRecord = filterGTExSNPs(db, chromosome, bp_n)
-                    ###### RETRIEVE GTEX TISSUE INFO FROM API ######
-                    # if (foundRecord != None):
-                    if (True):
-                        gtexAPIRequestCount += 1
-                        (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
-                        if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
-                            gtexAPIReturnCount += 1
-                            for tissue_obj in tissue_stats['singleTissueEqtl']:
-                                # print("tissue_obj", tissue_obj)
-                                if float(tissue_obj['pValue']) < float(p_threshold):
-                                    temp = [
-                                        rs_n, 
-                                        geno_n_chr_bp, 
-                                        out_stats['r2'], 
-                                        out_stats['D_prime'],
-                                        tissue_obj['geneSymbol'],
-                                        tissue_obj['gencodeId'],
-                                        tissue_obj['tissueSiteDetailId'],
-                                        tissue_obj['nes'],
-                                        tissue_obj['pValue'],
-                                        rs_n
-                                    ]
-                                    out.append(temp)
+                    gtexQueryRequestCount += 1
+                    ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB / API ######
+                    (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
+                    ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB / API ######
+                    # print("out_stats", out_stats)
+                    # (tissue_stats) = getGTExTissueMongoDB(db, chromosome, bp_n, tissue_ids)
+                    # print("tissue_stats", tissue_stats)
+                    if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
+                        gtexQueryReturnCount += 1
+                        for tissue_obj in tissue_stats['singleTissueEqtl']:
+                            # print("tissue_obj", tissue_obj)
+                            if float(tissue_obj['pValue']) < float(p_threshold):
+                            # if float(tissue_obj['pval_nominal']) < float(p_threshold):
+                                temp = [
+                                    rs_n, 
+                                    geno_n_chr_bp, 
+                                    out_stats['r2'], 
+                                    out_stats['D_prime'],
+                                    tissue_obj['geneSymbol'],
+                                    # "NA",
+                                    tissue_obj['gencodeId'],
+                                    # tissue_obj['gene_id'],
+                                    tissue_obj['tissueSiteDetailId'],
+                                    tissue_obj['nes'],
+                                    # tissue_obj['slope'],
+                                    tissue_obj['pValue'],
+                                    # tissue_obj['pval_nominal'],
+                                    rs_n
+                                ]
+                                out.append(temp)
     # print("get_window_variants out", out)
     # print("WINDOW SIZE AFTER THRESHOLDS & GTEX SEARCH", len(out))
-    print("# of API requests made (gtexAPIRequestCount)", gtexAPIRequestCount)
-    print("# of API returns (gtexAPIReturnCount)", gtexAPIReturnCount)
+    print("# of gtex queries made (gtexQueryRequestCount)", gtexQueryRequestCount)
+    print("# of gtex queries (gtexQueryReturnCount)", gtexQueryReturnCount)
     return out
 
 def get_window_variants_sub(threadCommandArgs):
