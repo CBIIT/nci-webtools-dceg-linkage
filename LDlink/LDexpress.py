@@ -221,7 +221,7 @@ def chunkWindow(pos, window, threads):
         newMin = newMax
     return chunks
 
-def get_window_variants(db, snp, chromosome, position, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids):
+def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold):
     # Get VCF region
     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
@@ -241,8 +241,6 @@ def get_window_variants(db, snp, chromosome, position, windowMinPos, windowMaxPo
             index.append(i)
     vcf_window_snps = list(vcf_window_snps)
     print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
-    gtexQueryRequestCount = 0
-    gtexQueryReturnCount = 0
     # Loop through SNPs
     out = []
     for geno_n in vcf_window_snps:
@@ -266,41 +264,8 @@ def get_window_variants(db, snp, chromosome, position, windowMinPos, windowMaxPo
                 if ((r2_d == "r2" and out_stats["r2"] >= r2_d_threshold) or (r2_d == "d" and out_stats["D_prime"] >= r2_d_threshold)):
                     bp_n = geno_n[1]
                     rs_n = geno_n[2]
-                    geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(bp_n)
-                    gtexQueryRequestCount += 1
-                    ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB / API ######
-                    (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
-                    ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB / API ######
-                    # print("out_stats", out_stats)
-                    # (tissue_stats) = getGTExTissueMongoDB(db, chromosome, bp_n, tissue_ids)
-                    # print("tissue_stats", tissue_stats)
-                    if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
-                        gtexQueryReturnCount += 1
-                        for tissue_obj in tissue_stats['singleTissueEqtl']:
-                            # print("tissue_obj", tissue_obj)
-                            if float(tissue_obj['pValue']) < float(p_threshold):
-                            # if float(tissue_obj['pval_nominal']) < float(p_threshold):
-                                temp = [
-                                    rs_n, 
-                                    geno_n_chr_bp, 
-                                    out_stats['r2'], 
-                                    out_stats['D_prime'],
-                                    tissue_obj['geneSymbol'],
-                                    # "NA",
-                                    tissue_obj['gencodeId'],
-                                    # tissue_obj['gene_id'],
-                                    tissue_obj['tissueSiteDetailId'],
-                                    tissue_obj['nes'],
-                                    # tissue_obj['slope'],
-                                    tissue_obj['pValue'],
-                                    # tissue_obj['pval_nominal'],
-                                    rs_n
-                                ]
-                                out.append(temp)
-    # print("get_window_variants out", out)
-    # print("WINDOW SIZE AFTER THRESHOLDS & GTEX SEARCH", len(out))
-    print("# of gtex queries made (gtexQueryRequestCount)", gtexQueryRequestCount)
-    print("# of gtex queries (gtexQueryReturnCount)", gtexQueryReturnCount)
+                    out.append([rs_n, chromosome, bp_n, out_stats["r2"], out_stats["D_prime"]])
+                    
     return out
 
 def get_window_variants_sub(threadCommandArgs):
@@ -308,15 +273,68 @@ def get_window_variants_sub(threadCommandArgs):
     thread = threadCommandArgs[1]	
     snp = threadCommandArgs[2]
     chromosome = threadCommandArgs[3]		
-    position = threadCommandArgs[4]
-    pop_ids = threadCommandArgs[5]
-    geno = threadCommandArgs[6]
-    allele = threadCommandArgs[7]
-    r2_d = threadCommandArgs[8]
-    r2_d_threshold = threadCommandArgs[9]
-    p_threshold = threadCommandArgs[10]
-    tissue_ids = threadCommandArgs[11]
-    web = threadCommandArgs[12]
+    pop_ids = threadCommandArgs[4]
+    geno = threadCommandArgs[5]
+    allele = threadCommandArgs[6]
+    r2_d = threadCommandArgs[7]
+    r2_d_threshold = threadCommandArgs[8]
+    print("thread " + str(thread) + " kicked")	
+    print("windowChunkRange", windowChunkRange)
+    return get_window_variants(snp, chromosome, windowChunkRange[0], windowChunkRange[1], pop_ids, geno, allele, r2_d, r2_d_threshold)
+
+def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
+    gtexQueryRequestCount = 0
+    gtexQueryReturnCount = 0
+    out = []
+    for snp in windowSNPs:
+        rs_n = snp[0]
+        chromosome = snp[1]
+        position = snp[2]
+        r2 = snp[3]
+        D_prime = snp[4]
+        geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(position)
+        gtexQueryRequestCount += 1
+        ###### RETRIEVE GTEX TISSUE INFO FROM API ######
+        (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
+        ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB ######
+        # (tissue_stats) = getGTExTissueMongoDB(db, chromosome, bp_n, tissue_ids)
+        # print("tissue_stats", tissue_stats)
+        if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
+            gtexQueryReturnCount += 1
+            for tissue_obj in tissue_stats['singleTissueEqtl']:
+                # print("tissue_obj", tissue_obj)
+                if float(tissue_obj['pValue']) < float(p_threshold):
+                # if float(tissue_obj['pval_nominal']) < float(p_threshold):
+                    temp = [
+                        rs_n, 
+                        geno_n_chr_bp, 
+                        r2, 
+                        D_prime,
+                        tissue_obj['geneSymbol'],
+                        # "NA",
+                        tissue_obj['gencodeId'],
+                        # tissue_obj['gene_id'],
+                        tissue_obj['tissueSiteDetailId'],
+                        tissue_obj['nes'],
+                        # tissue_obj['slope'],
+                        tissue_obj['pValue'],
+                        # tissue_obj['pval_nominal'],
+                        rs_n
+                    ]
+                    out.append(temp)
+    print("get_tissues out length", len(out))
+    print("# of gtex queries made (gtexQueryRequestCount)", gtexQueryRequestCount)
+    print("# of gtex queries returned (gtexQueryReturnCount)", gtexQueryReturnCount)
+    return out
+
+def get_tissues_sub(threadCommandArgs):
+    windowSNPs = threadCommandArgs[0]
+    thread = threadCommandArgs[1]
+    p_threshold = threadCommandArgs[2]
+    tissue_ids = threadCommandArgs[3]
+    web = threadCommandArgs[4]
+    print("thread " + str(thread) + " kicked")	
+    print("thread executing", len(windowSNPs), "gtex mongo queries...")
     # Connect to Mongo snp database
     if env == 'local':
         mongo_host = api_mongo_addr
@@ -330,10 +348,7 @@ def get_window_variants_sub(threadCommandArgs):
         else:
             client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
-    print("thread " + str(thread) + " kicked")	
-    print("snp chr pos", snp, chromosome, position)
-    print("windowChunkRange", windowChunkRange)
-    return get_window_variants(db, snp, chromosome, position, windowChunkRange[0], windowChunkRange[1], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids)
+    return get_tissues(db, windowSNPs, p_threshold, tissue_ids)
 
 def set_alleles(a1, a2):
     if len(a1) == 1 and len(a2) == 1:
@@ -559,15 +574,31 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
         new_alleles = set_alleles(geno[3], geno[4])
         allele = {"0": new_alleles[0], "1": new_alleles[1]}
         ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
+
+        # find query window snps via tabix, calculate LD and apply R2/D' thresholds
         windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
         # print("windowChunkRanges", windowChunkRanges)
         getWindowVariantsArgs = []	
         for thread in range(ldexpress_threads):	
-            getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], snp_coord[2], pop_ids, geno, allele, r2_d, r2_d_threshold, p_threshold, tissue_ids, web])	
+            getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, geno, allele, r2_d, r2_d_threshold])	
         with Pool(processes=ldexpress_threads) as pool:	
-            ldInfoSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
-        # flatten pooled results
-        matched_snps = [val for sublist in ldInfoSubsets for val in sublist]
+            windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
+        # flatten pooled ld window results
+        windowLDSubsetsFlat = [val for sublist in windowLDSubsets for val in sublist]
+        print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
+
+        # find gtex tissues for window snps via mongodb, apply p-value threshold
+        windowLDSubsetsChunks = np.array_split(windowLDSubsetsFlat, ldexpress_threads)
+        getTissuesArgs = []	
+        for thread in range(ldexpress_threads):	
+            getTissuesArgs.append([windowLDSubsetsChunks[thread].tolist(), thread, p_threshold, tissue_ids, web])	
+        with Pool(processes=ldexpress_threads) as pool:	
+            tissueResultsSubsets = pool.map(get_tissues_sub, getTissuesArgs)	
+
+        # flatten tissue results
+        matched_snps = [val for sublist in tissueResultsSubsets for val in sublist]
+        print("matched_snps length", len(matched_snps))
+
         print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
         if (len(matched_snps) > 0):
             details[snp_coord[0]] = {	
