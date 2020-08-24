@@ -297,12 +297,10 @@ def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
         ###### RETRIEVE GTEX TISSUE INFO FROM API ######
         (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
         ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB ######
-        # (tissue_stats) = getGTExTissueMongoDB(db, chromosome, bp_n, tissue_ids)
-        # print("tissue_stats", tissue_stats)
+        # (tissue_stats) = getGTExTissueMongoDB(db, chromosome, position, tissue_ids)
         if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
             gtexQueryReturnCount += 1
             for tissue_obj in tissue_stats['singleTissueEqtl']:
-                # print("tissue_obj", tissue_obj)
                 if float(tissue_obj['pValue']) < float(p_threshold):
                 # if float(tissue_obj['pval_nominal']) < float(p_threshold):
                     temp = [
@@ -334,7 +332,7 @@ def get_tissues_sub(threadCommandArgs):
     tissue_ids = threadCommandArgs[3]
     web = threadCommandArgs[4]
     print("thread " + str(thread) + " kicked")	
-    print("thread executing", len(windowSNPs), "gtex mongo queries...")
+    print("thread executing", len(windowSNPs), "gtex queries...")
     # Connect to Mongo snp database
     if env == 'local':
         mongo_host = api_mongo_addr
