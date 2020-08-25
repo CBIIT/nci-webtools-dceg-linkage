@@ -815,14 +815,13 @@ function createExpressDetailsTable() {
             {
                 "render": function ( data, type, row ) {
                     // Round floats to 4 decimal places 
-                    console.log("data", data)
                     if (!isNaN(parseFloat(data))) {
                         if (parseFloat(data) == 1.0) {
                             return "1.0";
                         } else if (parseFloat(data) == 0.0) {
                             return "0.0";
                         } else if (parseFloat(data) <= 0.0001) {
-                            return "<0.0001"
+                            return "<0.0001";
                         } else {
                             return parseFloat(data).toFixed(4);
                         }
