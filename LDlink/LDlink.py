@@ -26,7 +26,7 @@ from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
 from LDtrait import calculate_trait, get_ldtrait_timestamp
-from LDexpress import calculate_express, get_ldexpress_tissues
+from LDexpress import calculate_express, get_ldexpress_tissues, get_ldexpress_tissues_api
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
@@ -380,7 +380,8 @@ def ldexpress_tissues():
     else:
         # API REQUEST
         web = False
-    return get_ldexpress_tissues(web)
+    # return get_ldexpress_tissues(web)
+    return get_ldexpress_tissues_api()
 
 # Route to retrieve platform data for SNPchip
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])

@@ -32,6 +32,22 @@ mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 ldexpress_threads = config['performance']['ldexpress_threads']
 
+def get_ldexpress_tissues_api():
+    PAYLOAD = {
+            "format" : "json",
+            "datasetId": "gtex_v8"
+        }
+    REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
+    try:
+        r = requests.get(REQUEST_URL, params=PAYLOAD)
+        responseObj = json.loads(r.text)
+    except:
+        errorObj = {
+            "error": "Failed to retrieve tissues from GTEx Portal server."
+        }
+        return json.dumps(json.loads(errorObj))
+    return json.dumps(responseObj)
+
 def get_ldexpress_tissues(web):
     try:
         with open('config.ini', 'r') as c:
