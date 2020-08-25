@@ -19,7 +19,7 @@ for key in "${!parameters[@]}"; do
         [ -z "${parameters[$key]}" ] && echo -e "\e[91m[error]\e[39m missing parameter:\e[93m $key \e[39m" && valid=false
 done
 
-# replace tokens in config.ini file
+# replace tokens in config.yml file
 if [ $valid = true ]; then
 
         for key in "${!parameters[@]}"; do

@@ -20,7 +20,7 @@ import sys
 def get_platform_request(web):
 
     try:
-        with open('config.ini', 'r') as c:
+        with open('config.yml', 'r') as c:
             config = yaml.load(c)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
@@ -57,7 +57,7 @@ def get_platform_request(web):
 
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -88,8 +88,8 @@ def convert_codeToPlatforms(platform_query, web):
 
 def calculate_chip(snplst, platform_query, web, request):
 
-    # Set data directories using config.ini
-    with open('config.ini', 'r') as f:
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']

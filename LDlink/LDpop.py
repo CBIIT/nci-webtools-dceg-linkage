@@ -19,8 +19,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     snp1_input = snp1
     snp2_input = snp2
 
-    # Set data directories using config.ini
-    with open('config.ini', 'r') as f:
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']

@@ -15,8 +15,8 @@ import sys
 
 def allele_freq_per_pop(snp1, snp2, pop):  
    
-    # Set data directories using config.ini
-    #with open('config.ini', 'r') as f:
+    # Set data directories using config.yml
+    #with open('config.yml', 'r') as f:
      #   config = yaml.load(f)
     #snp_dir = config['data']['snp_dir']
     #snp_chr_dir = config['data']['snp_chr_dir']

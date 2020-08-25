@@ -89,7 +89,7 @@ def emailUserUnblocked(email, email_account):
 
 # email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     email_account = config['api']['email_account']
     api_superuser = config['api']['api_superuser']
@@ -127,7 +127,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
 
 # check if user email record exists
 def getEmailRecord(email, env, api_mongo_addr):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
@@ -143,7 +143,7 @@ def getEmailRecord(email, env, api_mongo_addr):
     return emailRecord
 
 def insertUser(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
@@ -170,7 +170,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 
 # log token's api call to api_log table
 def logAccess(token, module):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
@@ -190,7 +190,7 @@ def logAccess(token, module):
 
 # sets blocked attribute of user to 1=true
 def blockUser(email, url_root):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -215,7 +215,7 @@ def blockUser(email, url_root):
 
 # sets blocked attribute of user to 0=false
 def unblockUser(email):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -239,7 +239,7 @@ def unblockUser(email):
 
 # sets locked attribute of user to 0=false
 def unlockUser(email):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -265,7 +265,7 @@ def unlockAllUsers():
     out_json = {
         "message": "All tokens have been unlocked."
     }
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -285,7 +285,7 @@ def unlockAllUsers():
 
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
@@ -311,7 +311,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 
 # check if token is valid when hitting API route and not expired
 def checkToken(token, token_expiration, token_expiration_days):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
@@ -338,7 +338,7 @@ def checkToken(token, token_expiration, token_expiration_days):
 
 # given email, return token
 def getToken(email):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -361,7 +361,7 @@ def getToken(email):
 
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
 def checkBlocked(token):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
@@ -382,7 +382,7 @@ def checkBlocked(token):
 
 # check if token is locked (1=locked, 0=not locked). returns true (1) if token is locked
 def checkLocked(token):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
@@ -405,7 +405,7 @@ def checkLocked(token):
             return False
 
 def toggleLocked(token, lock):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
@@ -428,7 +428,7 @@ def toggleLocked(token, lock):
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email, env, api_mongo_addr):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
@@ -452,7 +452,7 @@ def checkBlockedEmail(email, env, api_mongo_addr):
 
 # check if token is already in db
 def checkUniqueToken(token):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -491,7 +491,7 @@ def getExpiration(registered, token_expiration_days):
 
 # registers new users and emails generated token for WEB
 def register_user(firstname, lastname, email, institution, reference, url_root):
-    with open('config.ini', 'r') as f:
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -579,7 +579,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
 def getStats(startdatetime, enddatetime, top):
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -699,7 +699,7 @@ def getStats(startdatetime, enddatetime, top):
 
 # returns stats of api users with locked tokens
 def getLockedUsers():
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -725,7 +725,7 @@ def getLockedUsers():
 
 # returns stats of api users with blocked tokens
 def getBlockedUsers():
-    with open('config.ini', 'r') as c:
+    with open('config.yml', 'r') as c:
         config = yaml.load(c)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']

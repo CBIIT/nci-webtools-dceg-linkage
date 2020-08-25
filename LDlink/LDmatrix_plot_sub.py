@@ -13,8 +13,8 @@ import subprocess
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
-    # Set data directories using config.ini
-    with open('config.ini', 'r') as f:
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']

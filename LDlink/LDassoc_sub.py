@@ -13,8 +13,8 @@ coords = sys.argv[3]
 request = sys.argv[4]
 process = sys.argv[5]
 
-# Set data directories using config.ini
-with open('config.ini', 'r') as f:
+# Set data directories using config.yml
+with open('config.yml', 'r') as f:
     config = yaml.load(f)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
