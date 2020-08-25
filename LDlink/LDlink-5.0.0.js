@@ -815,9 +815,8 @@ function createExpressDetailsTable() {
             {
                 "render": function ( data, type, row ) {
                     // Round floats to 4 decimal places 
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
+                    console.log("data", data)
+                    if (!isNaN(parseFloat(data))) {
                         if (parseFloat(data) == 1.0) {
                             return "1.0";
                         } else if (parseFloat(data) == 0.0) {
@@ -827,6 +826,8 @@ function createExpressDetailsTable() {
                         } else {
                             return parseFloat(data).toFixed(4);
                         }
+                    } else {
+                        return data;
                     }
                 },
                 "targets": [ 2, 3 ]
@@ -849,7 +850,7 @@ function createExpressDetailsTable() {
                 "render": function ( data, type, row ) {
                     // Round floats to 3 decimal places if string can be parsed to float
                     if (!isNaN(parseFloat(data))) {
-                        return parseFloat(data).toFixed(3);
+                        return parseFloat(data).toFixed(4);
                     } else {
                         return data;
                     }
