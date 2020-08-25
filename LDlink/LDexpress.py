@@ -30,7 +30,6 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
-ldexpress_threads = config['performance']['ldexpress_threads']
 
 def get_ldexpress_tissues_api():
     PAYLOAD = {
@@ -393,6 +392,9 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     print("raw window", window)
 
     start = timer()
+
+    # number of concurrent threads used for capturing SNP windows, LD calculation and GTEx queries
+    ldexpress_threads = 4
     
     # SNP limit
     max_list = 20

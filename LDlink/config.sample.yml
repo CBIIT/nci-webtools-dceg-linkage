@@ -23,5 +23,3 @@ database:
   mongo_user_readonly: '<USERNAME_READ_ONLY>'
   mongo_user_api: '<USERNAME_READ_WRITE>'
   mongo_password: '<PASSWORD>'
-performance:
-  ldexpress_threads: 4
