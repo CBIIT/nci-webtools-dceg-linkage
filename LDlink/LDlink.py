@@ -380,8 +380,8 @@ def ldexpress_tissues():
     else:
         # API REQUEST
         web = False
-    # return get_ldexpress_tissues(web)
-    return get_ldexpress_tissues_api()
+    return get_ldexpress_tissues(web)
+    # return get_ldexpress_tissues_api()
 
 # Route to retrieve platform data for SNPchip
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])

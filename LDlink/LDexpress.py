@@ -311,28 +311,28 @@ def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
         geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(position)
         gtexQueryRequestCount += 1
         ###### RETRIEVE GTEX TISSUE INFO FROM API ######
-        (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
+        # (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
         ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB ######
-        # (tissue_stats) = getGTExTissueMongoDB(db, chromosome, position, tissue_ids)
+        (tissue_stats) = getGTExTissueMongoDB(db, chromosome, position, tissue_ids)
         if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
             gtexQueryReturnCount += 1
             for tissue_obj in tissue_stats['singleTissueEqtl']:
-                if float(tissue_obj['pValue']) < float(p_threshold):
-                # if float(tissue_obj['pval_nominal']) < float(p_threshold):
+                # if float(tissue_obj['pValue']) < float(p_threshold):
+                if float(tissue_obj['pval_nominal']) < float(p_threshold):
                     temp = [
                         rs_n, 
                         geno_n_chr_bp, 
                         r2, 
                         D_prime,
-                        tissue_obj['geneSymbol'],
-                        # "NA",
-                        tissue_obj['gencodeId'],
-                        # tissue_obj['gene_id'],
+                        # tissue_obj['geneSymbol'],
+                        "NA",
+                        # tissue_obj['gencodeId'],
+                        tissue_obj['gene_id'],
                         tissue_obj['tissueSiteDetailId'],
-                        tissue_obj['nes'],
-                        # tissue_obj['slope'],
-                        tissue_obj['pValue'],
-                        # tissue_obj['pval_nominal'],
+                        # tissue_obj['nes'],
+                        tissue_obj['slope'],
+                        # tissue_obj['pValue'],
+                        tissue_obj['pval_nominal'],
                         rs_n
                     ]
                     out.append(temp)
