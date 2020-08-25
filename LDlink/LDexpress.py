@@ -18,7 +18,6 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 
-
 # Set data directories using config.yml	
 with open('config.yml', 'r') as f:	
     config = yaml.load(f)	
@@ -30,22 +29,6 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
-
-def get_ldexpress_tissues_api():
-    PAYLOAD = {
-            "format" : "json",
-            "datasetId": "gtex_v8"
-        }
-    REQUEST_URL = "https://gtexportal.org/rest/v1/dataset/tissueInfo"
-    try:
-        r = requests.get(REQUEST_URL, params=PAYLOAD)
-        responseObj = json.loads(r.text)
-    except:
-        errorObj = {
-            "error": "Failed to retrieve tissues from GTEx Portal server."
-        }
-        return json.dumps(json.loads(errorObj))
-    return json.dumps(responseObj)
 
 def get_ldexpress_tissues(web):
     try:
@@ -206,12 +189,45 @@ def getGTExTissueAPI(snp, tissue_ids):
 
 def getGTExTissueMongoDB(db, chromosome, position, tissue_ids):
     if "gtex_tissue_eqtl" in db.list_collection_names():
-        documents = list(db.gtex_tissue_eqtl.find({
-            "chr_b37": str(chromosome), 
-            "variant_pos_b37": str(position),
-            "tissueSiteDetailId": str(tissue_ids[0])
-        }))
-        # print("documents", documents)
+        tissue_ids_query = []
+        for tissue in tissue_ids:
+            tissue_ids_query.append({
+                "tissueSiteDetailId": tissue
+            })
+        pipeline = [
+            {
+                "$match": {
+                    "tissueSiteDetailId": {
+                        "$in": tissue_ids
+                    },
+                    "chr_b37": str(chromosome),
+                    "variant_pos_b37": str(position)
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "gtex_tissues", 
+                    "localField": "tissueSiteDetailId", 
+                    "foreignField": "tissueSiteDetailId", 
+                    "as": "tissue_info"
+                }
+            },
+            {   
+                '$unwind' : "$tissue_info" 
+            },
+            {   
+                "$project" : {
+                    "gene_id": 1,
+                    "tissueSiteDetailId": 1,
+                    "slope": 1,
+                    "pval_nominal": 1,
+                    "tissueSiteDetail": "$tissue_info.tissueSiteDetail"
+                } 
+            },
+        ]
+
+        documents = list(db.gtex_tissue_eqtl.aggregate(pipeline))
+
         tissues = {
             "singleTissueEqtl": documents
         }
@@ -327,7 +343,7 @@ def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
                         "NA",
                         # tissue_obj['gencodeId'],
                         tissue_obj['gene_id'],
-                        tissue_obj['tissueSiteDetailId'],
+                        tissue_obj['tissueSiteDetail'],
                         # tissue_obj['nes'],
                         tissue_obj['slope'],
                         # tissue_obj['pValue'],

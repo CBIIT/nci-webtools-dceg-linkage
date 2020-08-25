@@ -833,20 +833,6 @@ function createExpressDetailsTable() {
             },
             {
                 "render": function ( data, type, row ) {
-                    if (tissueJSON && tissueJSON.tissueInfo) {
-                        // console.log(data, tissueJSON.tissueInfo);
-                        var found = tissueJSON.tissueInfo.filter(obj => obj.tissueSiteDetailId === data)
-                        // console.log(found[0].tissueSiteDetail);
-                        return found.length > 0 ? found[0].tissueSiteDetail : data;
-                    } else {
-                        return data;
-                    }
-                    
-                },
-                "targets": [ 6 ]
-            },
-            {
-                "render": function ( data, type, row ) {
                     // Round floats to 3 decimal places if string can be parsed to float
                     if (!isNaN(parseFloat(data))) {
                         return parseFloat(data).toFixed(4);
