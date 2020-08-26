@@ -87,6 +87,7 @@ def get_query_variant(snp_coord, pop_ids):
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+        return (None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         geno = []
         for i in range(len(tabix_query_snp_out)):
@@ -96,6 +97,7 @@ def get_query_variant(snp_coord, pop_ids):
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+            return (None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
     
@@ -603,46 +605,49 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     for snp_coord in snp_coords:
         (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids)
-        new_alleles = set_alleles(geno[3], geno[4])
-        allele = {"0": new_alleles[0], "1": new_alleles[1]}
-        ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
+        if (len(queryVariantWarnings) > 0):
+            queryWarnings += queryVariantWarnings
+        if (geno is not None):
+            new_alleles = set_alleles(geno[3], geno[4])
+            allele = {"0": new_alleles[0], "1": new_alleles[1]}
+            ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
 
-        # find query window snps via tabix, calculate LD and apply R2/D' thresholds
-        windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
-        # print("windowChunkRanges", windowChunkRanges)
-        getWindowVariantsArgs = []	
-        for thread in range(ldexpress_threads):	
-            getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, geno, allele, r2_d, r2_d_threshold])	
-        with Pool(processes=ldexpress_threads) as pool:	
-            windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
-        # flatten pooled ld window results
-        windowLDSubsetsFlat = [val for sublist in windowLDSubsets for val in sublist]
-        print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
+            # find query window snps via tabix, calculate LD and apply R2/D' thresholds
+            windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
+            # print("windowChunkRanges", windowChunkRanges)
+            getWindowVariantsArgs = []	
+            for thread in range(ldexpress_threads):	
+                getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, geno, allele, r2_d, r2_d_threshold])	
+            with Pool(processes=ldexpress_threads) as pool:	
+                windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
+            # flatten pooled ld window results
+            windowLDSubsetsFlat = [val for sublist in windowLDSubsets for val in sublist]
+            print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
 
-        # find gtex tissues for window snps via mongodb, apply p-value threshold
-        windowLDSubsetsChunks = np.array_split(windowLDSubsetsFlat, ldexpress_threads)
-        getTissuesArgs = []	
-        for thread in range(ldexpress_threads):	
-            getTissuesArgs.append([windowLDSubsetsChunks[thread].tolist(), thread, p_threshold, tissue_ids, web])	
-        with Pool(processes=ldexpress_threads) as pool:	
-            tissueResultsSubsets = pool.map(get_tissues_sub, getTissuesArgs)	
+            # find gtex tissues for window snps via mongodb, apply p-value threshold
+            windowLDSubsetsChunks = np.array_split(windowLDSubsetsFlat, ldexpress_threads)
+            getTissuesArgs = []	
+            for thread in range(ldexpress_threads):	
+                getTissuesArgs.append([windowLDSubsetsChunks[thread].tolist(), thread, p_threshold, tissue_ids, web])	
+            with Pool(processes=ldexpress_threads) as pool:	
+                tissueResultsSubsets = pool.map(get_tissues_sub, getTissuesArgs)	
 
-        # flatten tissue results
-        matched_snps = [val for sublist in tissueResultsSubsets for val in sublist]
-        print("matched_snps length", len(matched_snps))
+            # flatten tissue results
+            matched_snps = [val for sublist in tissueResultsSubsets for val in sublist]
+            print("matched_snps length", len(matched_snps))
 
-        print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
-        if (len(matched_snps) > 0):
-            details[snp_coord[0]] = {	
-                "aaData": matched_snps
-            }
-            # add snp to thinned_list
-            thinned_list.append(snp_coord[0])
-        else:
-            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
+            print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
+            if (len(matched_snps) > 0):
+                details[snp_coord[0]] = {	
+                    "aaData": matched_snps
+                }
+                # add snp to thinned_list
+                thinned_list.append(snp_coord[0])
+            else:
+                queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
         
     details["queryWarnings"] = {
-        "aaData": queryVariantWarnings + queryWarnings
+        "aaData": queryWarnings
     }
 
     # Check if thinned list is empty, if it is, display error
