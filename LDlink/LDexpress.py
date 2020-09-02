@@ -409,7 +409,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     print("raw p_threshold", p_threshold)
     print("raw window", window)
 
-    start = timer()
+    full_start = timer()
 
     # number of concurrent threads used for capturing SNP windows, LD calculation and GTEx queries
     ldexpress_threads = 4
@@ -604,6 +604,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     # establish low/high window for each query snp
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     for snp_coord in snp_coords:
+        find_window_ld_start = timer()
+
         (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids)
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings
@@ -623,6 +625,11 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             # flatten pooled ld window results
             windowLDSubsetsFlat = [val for sublist in windowLDSubsets for val in sublist]
             print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
+
+            find_window_ld_end = timer()
+            print("FIND WINDOW SNPS AND CALCULATE LD TIME ELAPSED:", str(find_window_ld_end - find_window_ld_start) + "(s)")
+
+            query_window_tissues_start = timer()
 
             # find gtex tissues for window snps via mongodb, apply p-value threshold
             windowLDSubsetsChunks = np.array_split(windowLDSubsetsFlat, ldexpress_threads)
@@ -645,7 +652,10 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
                 thinned_list.append(snp_coord[0])
             else:
                 queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
-        
+
+            query_window_tissues_end = timer()
+            print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
+            
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
@@ -662,8 +672,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
-    end = timer()	
-    print("TIME ELAPSED:", str(end - start) + "(s)")	
+    full_end = timer()	
+    print("TIME ELAPSED:", str(full_end - full_start) + "(s)")	
     print("##### LDEXPRESS COMPLETE #####")
     return (sanitized_query_snps, thinned_list, details)
 
