@@ -171,11 +171,7 @@ def LD_calcs(hap, allele, allele_n):
         #         match = allele[sorted(hap)[1][0]] + equiv + allele_n[sorted(hap)[1][1]] + "," + allele[sorted(hap)[2][0]] + equiv + allele_n[sorted(hap)[2][1]]
         # else:
         #     match = "NA"
-        return {
-            "r2": r2,
-            "D_prime": D_prime,
-            # "output": output
-        }
+        return [r2, D_prime]
 
 def getGTExTissueAPI(snp, tissue_ids):
     PAYLOAD = {
@@ -294,10 +290,10 @@ def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, ge
             out_stats = LD_calcs(hap, allele, allele_n)
             # print("out_stats", out_stats)
             if out_stats != None:
-                if ((r2_d == "r2" and out_stats["r2"] >= r2_d_threshold) or (r2_d == "d" and out_stats["D_prime"] >= r2_d_threshold)):
+                if ((r2_d == "r2" and out_stats[0] >= r2_d_threshold) or (r2_d == "d" and out_stats[1] >= r2_d_threshold)):
                     bp_n = geno_n[1]
                     rs_n = geno_n[2]
-                    out.append([rs_n, chromosome, bp_n, out_stats["r2"], out_stats["D_prime"]])
+                    out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
                     
     return out
 
@@ -655,7 +651,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
 
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
-            
+
     details["queryWarnings"] = {
         "aaData": queryWarnings
     }
