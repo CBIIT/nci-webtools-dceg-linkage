@@ -9,11 +9,14 @@ import collections
 import re
 import requests
 import csv
+import threading
+import weakref
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
 import subprocess
-from multiprocessing import Pool
+# from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 import sys
 import numpy as np	
 from timeit import default_timer as timer
@@ -90,6 +93,7 @@ def get_query_variant(snp_coord, pop_ids, request):
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return (None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
@@ -101,6 +105,7 @@ def get_query_variant(snp_coord, pop_ids, request):
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
             subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
             return (None, queryVariantWarnings)
     else:
@@ -255,94 +260,94 @@ def chunkWindow(pos, window, threads):
         newMin = newMax
     return chunks
 
-def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, r2_d, r2_d_threshold, request):
-    get_window_snps_tabix_start = timer()
+# def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, r2_d, r2_d_threshold, request):
+#     get_window_snps_tabix_start = timer()
 
-    # Import query SNP VCF file
-    tmp_dir = "./tmp/"
-    query_snp_vcf = open(tmp_dir + "snp_no_dups_" + request+".vcf").readlines()
+#     # Import query SNP VCF file
+#     tmp_dir = "./tmp/"
+#     query_snp_vcf = open(tmp_dir + "snp_no_dups_" + request+".vcf").readlines()
 
-    if len(query_snp_vcf) > 1:
-        for i in range(len(query_snp_vcf)):
-            if query_snp_vcf[i].strip().split()[2] == snp:
-                geno = query_snp_vcf[i].strip().split()
-    else:
-        geno = query_snp_vcf[0].strip().split()
+#     if len(query_snp_vcf) > 1:
+#         for i in range(len(query_snp_vcf)):
+#             if query_snp_vcf[i].strip().split()[2] == snp:
+#                 geno = query_snp_vcf[i].strip().split()
+#     else:
+#         geno = query_snp_vcf[0].strip().split()
 
-    new_alleles = set_alleles(geno[3], geno[4])
-    allele = {"0": new_alleles[0], "1": new_alleles[1]}
+#     new_alleles = set_alleles(geno[3], geno[4])
+#     allele = {"0": new_alleles[0], "1": new_alleles[1]}
 
-    # Get VCF region
-    vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
-        vcf_file, chromosome, windowMinPos, windowMaxPos)
-    proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
-    vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
+#     # Get VCF region
+#     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+#     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
+#         vcf_file, chromosome, windowMinPos, windowMaxPos)
+#     proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
+#     vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
 
-    # Loop past file information and find header
-    head = next(vcf_window_snps, None)
-    while head[0][0:2] == "##":
-        head = next(vcf_window_snps, None)
+#     # Loop past file information and find header
+#     head = next(vcf_window_snps, None)
+#     while head[0][0:2] == "##":
+#         head = next(vcf_window_snps, None)
 
-    # Create Index of Individuals in Population
-    index = []
-    for i in range(9, len(head)):
-        if head[i] in pop_ids:
-            index.append(i)
-    vcf_window_snps = list(vcf_window_snps)
-    print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
+#     # Create Index of Individuals in Population
+#     index = []
+#     for i in range(9, len(head)):
+#         if head[i] in pop_ids:
+#             index.append(i)
+#     vcf_window_snps = list(vcf_window_snps)
+#     print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
 
-    get_window_snps_tabix_end = timer()
-    print("FIND WINDOW SNPS:", str(get_window_snps_tabix_end - get_window_snps_tabix_start) + "(s)")
+#     get_window_snps_tabix_end = timer()
+#     print("FIND WINDOW SNPS:", str(get_window_snps_tabix_end - get_window_snps_tabix_start) + "(s)")
 
-    calculate_ld_window_snps_start = timer()
+#     calculate_ld_window_snps_start = timer()
 
-    # Loop through SNPs
-    out = []
-    for geno_n in vcf_window_snps:
-        if "," not in geno_n[3] and "," not in geno_n[4]:
-            new_alleles_n = set_alleles(geno_n[3], geno_n[4])
-            allele_n = {"0": new_alleles_n[0], "1": new_alleles_n[1]}
-            hap = {"00": 0, "01": 0, "10": 0, "11": 0}
-            for i in index:
-                hap0 = geno[i][0]+geno_n[i][0]
-                if hap0 in hap:
-                    hap[hap0] += 1
+#     # Loop through SNPs
+#     out = []
+#     for geno_n in vcf_window_snps:
+#         if "," not in geno_n[3] and "," not in geno_n[4]:
+#             new_alleles_n = set_alleles(geno_n[3], geno_n[4])
+#             allele_n = {"0": new_alleles_n[0], "1": new_alleles_n[1]}
+#             hap = {"00": 0, "01": 0, "10": 0, "11": 0}
+#             for i in index:
+#                 hap0 = geno[i][0]+geno_n[i][0]
+#                 if hap0 in hap:
+#                     hap[hap0] += 1
 
-                if len(geno[i]) == 3 and len(geno_n[i]) == 3:
-                    hap1 = geno[i][2]+geno_n[i][2]
-                    if hap1 in hap:
-                        hap[hap1] += 1
+#                 if len(geno[i]) == 3 and len(geno_n[i]) == 3:
+#                     hap1 = geno[i][2]+geno_n[i][2]
+#                     if hap1 in hap:
+#                         hap[hap1] += 1
 
-            out_stats = LD_calcs(hap, allele, allele_n)
-            # print("out_stats", out_stats)
-            if out_stats != None:
-                if ((r2_d == "r2" and out_stats[0] >= r2_d_threshold) or (r2_d == "d" and out_stats[1] >= r2_d_threshold)):
-                    bp_n = geno_n[1]
-                    rs_n = geno_n[2]
-                    out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
+#             out_stats = LD_calcs(hap, allele, allele_n)
+#             # print("out_stats", out_stats)
+#             if out_stats != None:
+#                 if ((r2_d == "r2" and out_stats[0] >= r2_d_threshold) or (r2_d == "d" and out_stats[1] >= r2_d_threshold)):
+#                     bp_n = geno_n[1]
+#                     rs_n = geno_n[2]
+#                     out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
 
-    calculate_ld_window_snps_end = timer()
-    print("CALCUALTE LD FOR ALL WINDOW SNPS:", str(calculate_ld_window_snps_end - calculate_ld_window_snps_start) + "(s)")
+#     calculate_ld_window_snps_end = timer()
+#     print("CALCUALTE LD FOR ALL WINDOW SNPS:", str(calculate_ld_window_snps_end - calculate_ld_window_snps_start) + "(s)")
                     
-    return out
+#     return out
 
-def get_window_variants_sub(threadCommandArgs):
-    windowChunkRange = threadCommandArgs[0]
-    thread = threadCommandArgs[1]	
-    snp = threadCommandArgs[2]
-    chromosome = threadCommandArgs[3]		
-    pop_ids = threadCommandArgs[4]
-    # geno = threadCommandArgs[5]
-    # allele = threadCommandArgs[6]
-    # r2_d = threadCommandArgs[7]
-    # r2_d_threshold = threadCommandArgs[8]
-    r2_d = threadCommandArgs[5]
-    r2_d_threshold = threadCommandArgs[6]
-    request = threadCommandArgs[7]
-    print("thread " + str(thread) + " kicked")	
-    print("windowChunkRange", windowChunkRange)
-    return get_window_variants(snp, chromosome, windowChunkRange[0], windowChunkRange[1], pop_ids, r2_d, r2_d_threshold, request)
+# def get_window_variants_sub(threadCommandArgs):
+#     windowChunkRange = threadCommandArgs[0]
+#     thread = threadCommandArgs[1]	
+#     snp = threadCommandArgs[2]
+#     chromosome = threadCommandArgs[3]		
+#     pop_ids = threadCommandArgs[4]
+#     # geno = threadCommandArgs[5]
+#     # allele = threadCommandArgs[6]
+#     # r2_d = threadCommandArgs[7]
+#     # r2_d_threshold = threadCommandArgs[8]
+#     r2_d = threadCommandArgs[5]
+#     r2_d_threshold = threadCommandArgs[6]
+#     request = threadCommandArgs[7]
+#     print("thread " + str(thread) + " kicked")	
+#     print("windowChunkRange", windowChunkRange)
+#     return get_window_variants(snp, chromosome, windowChunkRange[0], windowChunkRange[1], pop_ids, r2_d, r2_d_threshold, request)
 
 def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
     gtexQueryRequestCount = 0
@@ -516,9 +521,14 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             out_json.close()
             return("", "", "")
 
-    get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    # get_pops = "cat " + " ".join(pop_dirs)
+    # proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
+    # pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+
+    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
+    subprocess.call(get_pops, shell=True)
+
+    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -643,16 +653,61 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             # allele = {"0": new_alleles[0], "1": new_alleles[1]}
             ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
 
-            # find query window snps via tabix, calculate LD and apply R2/D' thresholds
+            # # find query window snps via tabix, calculate LD and apply R2/D' thresholds
             windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
-            # print("windowChunkRanges", windowChunkRanges)
-            getWindowVariantsArgs = []	
-            for thread in range(ldexpress_threads):	
-                getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, r2_d, r2_d_threshold, str(request)])	
-            with Pool(processes=ldexpress_threads) as pool:	
-                windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
+            print("windowChunkRanges", windowChunkRanges)
+            # getWindowVariantsArgs = []	
+            # for thread in range(ldexpress_threads):	
+            #     getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, r2_d, r2_d_threshold, str(request)])	
+            # with Pool(processes=ldexpress_threads) as pool:	
+            #     windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
+
+            # coord1 = int(snp_coord[2]) - window
+            # if coord1 < 0:
+            #     coord1 = 0
+            # coord2 = int(snp_coord[2]) + window
+            # block = (2 * window) // 4
+            commands = []
+            for thread in range(ldexpress_threads):
+                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[thread][0]), str(windowChunkRanges[thread][1]), str(request), str(thread), str(r2_d), str(r2_d_threshold)])
+                commands.append("python3 LDexpress_sub.py " + getWindowVariantsArgs)
+            # for i in range(ldexpress_threads):
+            #     if i == min(range(ldexpress_threads)) and i == max(range(ldexpress_threads)):
+            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + \
+            #             str(snp_coord[1]) + " " + str(coord1) + " " + \
+            #             str(coord2) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
+            #     elif i == min(range(ldexpress_threads)):
+            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + \
+            #             str(snp_coord[1]) + " " + str(coord1) + " " + \
+            #             str(coord1 + block) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
+            #     elif i == max(range(ldexpress_threads)):
+            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + str(snp_coord[1]) + " " + str(
+            #             coord1 + (block * i) + 1) + " " + str(coord2) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
+            #     else:
+            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + str(snp_coord[1]) + " " + str(coord1 + (
+            #             block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
+            #     commands.append(command)
+
+            print("commands", commands)
+
+            processes = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
+
+            # collect output in parallel
+            def get_output(process):
+                return process.communicate()[0].splitlines()
+
+            if not hasattr(threading.current_thread(), "_children"):
+                threading.current_thread()._children = weakref.WeakKeyDictionary()
+
+            pool = Pool(len(processes))
+            out_raw = pool.map(get_output, processes)
+            pool.close()
+            pool.join()
+
+            # print("out_raw", out_raw)
+
             # flatten pooled ld window results
-            windowLDSubsetsFlat = [val for sublist in windowLDSubsets for val in sublist]
+            windowLDSubsetsFlat = [val.decode('utf-8').strip().split("\t") for sublist in out_raw for val in sublist]
             print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
 
             find_window_ld_end = timer()
@@ -685,6 +740,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
         
+        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
 
     details["queryWarnings"] = {
