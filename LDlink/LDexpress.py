@@ -69,7 +69,8 @@ def get_ldexpress_tissues(web):
     else:
         return None
 
-def get_query_variant(snp_coord, pop_ids):
+def get_query_variant(snp_coord, pop_ids, request):
+    tmp_dir = "./tmp/"
     queryVariantWarnings = []
     # Extract query SNP phased genotypes
     vcf_query_snp_file = vcf_dir + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
@@ -78,15 +79,18 @@ def get_query_variant(snp_coord, pop_ids):
     head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
     # print("head length", len(head))
 
-    tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_query_snp_file, snp_coord[1], snp_coord[2])
-    proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
-    tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
+    tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
+    subprocess.call(tabix_query_snp, shell=True)
+    # proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
+    # tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
+    tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
     # print("tabix_query_snp_out length", len(tabix_query_snp_out))
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return (None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         geno = []
@@ -97,6 +101,7 @@ def get_query_variant(snp_coord, pop_ids):
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
             return (None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
@@ -250,7 +255,23 @@ def chunkWindow(pos, window, threads):
         newMin = newMax
     return chunks
 
-def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, geno, allele, r2_d, r2_d_threshold):
+def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, r2_d, r2_d_threshold, request):
+    get_window_snps_tabix_start = timer()
+
+    # Import query SNP VCF file
+    tmp_dir = "./tmp/"
+    query_snp_vcf = open(tmp_dir + "snp_no_dups_" + request+".vcf").readlines()
+
+    if len(query_snp_vcf) > 1:
+        for i in range(len(query_snp_vcf)):
+            if query_snp_vcf[i].strip().split()[2] == snp:
+                geno = query_snp_vcf[i].strip().split()
+    else:
+        geno = query_snp_vcf[0].strip().split()
+
+    new_alleles = set_alleles(geno[3], geno[4])
+    allele = {"0": new_alleles[0], "1": new_alleles[1]}
+
     # Get VCF region
     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
@@ -270,6 +291,12 @@ def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, ge
             index.append(i)
     vcf_window_snps = list(vcf_window_snps)
     print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
+
+    get_window_snps_tabix_end = timer()
+    print("FIND WINDOW SNPS:", str(get_window_snps_tabix_end - get_window_snps_tabix_start) + "(s)")
+
+    calculate_ld_window_snps_start = timer()
+
     # Loop through SNPs
     out = []
     for geno_n in vcf_window_snps:
@@ -294,6 +321,9 @@ def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, ge
                     bp_n = geno_n[1]
                     rs_n = geno_n[2]
                     out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
+
+    calculate_ld_window_snps_end = timer()
+    print("CALCUALTE LD FOR ALL WINDOW SNPS:", str(calculate_ld_window_snps_end - calculate_ld_window_snps_start) + "(s)")
                     
     return out
 
@@ -303,13 +333,16 @@ def get_window_variants_sub(threadCommandArgs):
     snp = threadCommandArgs[2]
     chromosome = threadCommandArgs[3]		
     pop_ids = threadCommandArgs[4]
-    geno = threadCommandArgs[5]
-    allele = threadCommandArgs[6]
-    r2_d = threadCommandArgs[7]
-    r2_d_threshold = threadCommandArgs[8]
+    # geno = threadCommandArgs[5]
+    # allele = threadCommandArgs[6]
+    # r2_d = threadCommandArgs[7]
+    # r2_d_threshold = threadCommandArgs[8]
+    r2_d = threadCommandArgs[5]
+    r2_d_threshold = threadCommandArgs[6]
+    request = threadCommandArgs[7]
     print("thread " + str(thread) + " kicked")	
     print("windowChunkRange", windowChunkRange)
-    return get_window_variants(snp, chromosome, windowChunkRange[0], windowChunkRange[1], pop_ids, geno, allele, r2_d, r2_d_threshold)
+    return get_window_variants(snp, chromosome, windowChunkRange[0], windowChunkRange[1], pop_ids, r2_d, r2_d_threshold, request)
 
 def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
     gtexQueryRequestCount = 0
@@ -602,12 +635,12 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     for snp_coord in snp_coords:
         find_window_ld_start = timer()
 
-        (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids)
+        (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids, str(request))
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings
         if (geno is not None):
-            new_alleles = set_alleles(geno[3], geno[4])
-            allele = {"0": new_alleles[0], "1": new_alleles[1]}
+            # new_alleles = set_alleles(geno[3], geno[4])
+            # allele = {"0": new_alleles[0], "1": new_alleles[1]}
             ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
 
             # find query window snps via tabix, calculate LD and apply R2/D' thresholds
@@ -615,7 +648,7 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             # print("windowChunkRanges", windowChunkRanges)
             getWindowVariantsArgs = []	
             for thread in range(ldexpress_threads):	
-                getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, geno, allele, r2_d, r2_d_threshold])	
+                getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, r2_d, r2_d_threshold, str(request)])	
             with Pool(processes=ldexpress_threads) as pool:	
                 windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
             # flatten pooled ld window results
@@ -651,6 +684,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
 
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
+        
+        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
 
     details["queryWarnings"] = {
         "aaData": queryWarnings
