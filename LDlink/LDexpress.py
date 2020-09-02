@@ -740,8 +740,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
         
-        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+    subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
 
     details["queryWarnings"] = {
         "aaData": queryWarnings
