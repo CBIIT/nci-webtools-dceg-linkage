@@ -495,19 +495,12 @@ def ldexpress():
     data = json.loads(request.stream.read())
     snps = data['snps']
     pop = data['pop']
-    tissue = data['tissue']
+    tissues = data['tissues']
     r2_d = data['r2_d']
     r2_d_threshold = data['r2_d_threshold']
     p_threshold = data['p_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    print('snps:', snps)
-    print('pop:', pop)
-    print('tissue:', tissue)
-    print('r2_d:', r2_d)
-    print('r2_d_threshold:', r2_d_threshold)
-    print('p_threshold:', p_threshold)
-    print('window:', window)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -515,25 +508,16 @@ def ldexpress():
         if request.user_agent.browser is not None:
             web = True
             reference = str(data['reference'])
-            snpfile = str(tmp_dir + 'snps' + reference + '.txt')
-            snplist = snps.splitlines()
-            with open(snpfile, 'w') as f:
-                for s in snplist:
-                    s = s.lstrip()
-                    if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
-                        f.write(s.lower() + '\n')
+            snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             try:
-                trait = {}
-                # snplst, pop, request, web, r2_d, threshold
-                (query_snps, thinned_snps, details) = calculate_express(snpfile, pop, reference, web, tissue, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
-                trait["query_snps"] = query_snps
-                trait["thinned_snps"] = thinned_snps
-                trait["details"] = details
+                express = {}
+                (query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+                express["query_snps"] = query_snps
+                express["thinned_snps"] = thinned_snps
+                express["details"] = details
 
-                with open(tmp_dir + "express" + reference + ".json") as f:
-                    json_dict = json.load(f)
-                if "error" in json_dict:
-                    trait["error"] = json_dict["error"]
+                if "error" in errors_warnings:
+                    express["error"] = errors_warnings["error"]
                 else:
                     with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
                         f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tEffect Size\tP-value\n")
@@ -541,11 +525,11 @@ def ldexpress():
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
                                 f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {9}]) + "\n")
-                        if "warning" in json_dict:
-                            trait["warning"] = json_dict["warning"]
+                        if "warning" in errors_warnings:
+                            express["warning"] = errors_warnings["warning"]
                             f.write("Warning(s):\n")
-                            f.write(trait["warning"])
-                out_json = json.dumps(trait, sort_keys=False)
+                            f.write(express["warning"])
+                out_json = json.dumps(express, sort_keys=False)
             except:
                 return sendTraceback(None)
         else:
@@ -554,23 +538,17 @@ def ldexpress():
         # API REQUEST
         web = False
         reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
-        snpfile = str(tmp_dir + 'snps' + reference + '.txt')
-        snplist = snps.splitlines()
-        with open(snpfile, 'w') as f:
-            for s in snplist:
-                s = s.lstrip()
-                if(s[:2].lower() == 'rs' or s[:3].lower() == 'chr'):
-                    f.write(s.lower() + '\n')
+        snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, details) = calculate_express(snpfile, pop, reference, web, tissue, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
-            with open(tmp_dir + "express" + reference + ".json") as f:
-                json_dict = json.load(f)
-            if "error" in json_dict:
+            (query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+            # with open(tmp_dir + "express" + reference + ".json") as f:
+            #     json_dict = json.load(f)
+            if "error" in errors:
                 # display api out w/ error
                 toggleLocked(token, 0)
-                return sendTraceback(json_dict["error"])
+                return sendTraceback(errors_warnings["error"])
             else:
                 with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
                     f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tEffect Size\tP-value\n")
@@ -578,10 +556,10 @@ def ldexpress():
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")
                             f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {9}]) + "\n")
-                    if "warning" in json_dict:
-                        trait["warning"] = json_dict["warning"]
+                    if "warning" in errors_warnings:
+                        express["warning"] = errors_warnings["warning"]
                         f.write("Warning(s):\n")
-                        f.write(trait["warning"])
+                        f.write(express["warning"])
                 # display api out
                 try:
                     with open('tmp/express_variants_annotated' + reference + '.txt', 'r') as fp:

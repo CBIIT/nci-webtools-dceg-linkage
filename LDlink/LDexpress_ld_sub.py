@@ -12,7 +12,7 @@ chromosome = sys.argv[3]
 start = sys.argv[4]
 stop = sys.argv[5]
 request = sys.argv[6]
-process = sys.argv[7]
+subprocess_id = sys.argv[7]
 r2_d = sys.argv[8]
 r2_d_threshold = sys.argv[9]
 
@@ -32,7 +32,7 @@ mongo_port = config['database']['mongo_port']
 tmp_dir = "./tmp/"
 
 # Get population ids
-pop_list = open(tmp_dir+"pops_"+request+".txt").readlines()
+pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
 ids = []
 for i in range(len(pop_list)):
     ids.append(pop_list[i].strip())
@@ -155,72 +155,5 @@ for geno_n in vcf:
                 rs_n = geno_n[2]
                 out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
 
-# print("out")
-# print(out)
-
-for i in range(len(out)):
-    print("\t".join(str(j) for j in out[i]))
-
-# def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, r2_d, r2_d_threshold, request):
-
-#     # Import query SNP VCF file
-#     tmp_dir = "./tmp/"
-#     query_snp_vcf = open(tmp_dir + "snp_no_dups_" + request+".vcf").readlines()
-
-#     if len(query_snp_vcf) > 1:
-#         for i in range(len(query_snp_vcf)):
-#             if query_snp_vcf[i].strip().split()[2] == snp:
-#                 geno = query_snp_vcf[i].strip().split()
-#     else:
-#         geno = query_snp_vcf[0].strip().split()
-
-#     new_alleles = set_alleles(geno[3], geno[4])
-#     allele = {"0": new_alleles[0], "1": new_alleles[1]}
-
-#     # Get VCF region
-#     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-#     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
-#         vcf_file, chromosome, windowMinPos, windowMaxPos)
-#     proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
-#     vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
-
-#     # Loop past file information and find header
-#     head = next(vcf_window_snps, None)
-#     while head[0][0:2] == "##":
-#         head = next(vcf_window_snps, None)
-
-#     # Create Index of Individuals in Population
-#     index = []
-#     for i in range(9, len(head)):
-#         if head[i] in pop_ids:
-#             index.append(i)
-#     vcf_window_snps = list(vcf_window_snps)
-#     print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
-
-
-#     # Loop through SNPs
-#     out = []
-#     for geno_n in vcf_window_snps:
-#         if "," not in geno_n[3] and "," not in geno_n[4]:
-#             new_alleles_n = set_alleles(geno_n[3], geno_n[4])
-#             allele_n = {"0": new_alleles_n[0], "1": new_alleles_n[1]}
-#             hap = {"00": 0, "01": 0, "10": 0, "11": 0}
-#             for i in index:
-#                 hap0 = geno[i][0]+geno_n[i][0]
-#                 if hap0 in hap:
-#                     hap[hap0] += 1
-
-#                 if len(geno[i]) == 3 and len(geno_n[i]) == 3:
-#                     hap1 = geno[i][2]+geno_n[i][2]
-#                     if hap1 in hap:
-#                         hap[hap1] += 1
-
-#             out_stats = LD_calcs(hap, allele, allele_n)
-#             # print("out_stats", out_stats)
-#             if out_stats != None:
-#                 if ((r2_d == "r2" and out_stats[0] >= r2_d_threshold) or (r2_d == "d" and out_stats[1] >= r2_d_threshold)):
-#                     bp_n = geno_n[1]
-#                     rs_n = geno_n[2]
-#                     out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
-                    
-#     return out
+for line in out:
+    print("\t".join([str(val) for val in line]))

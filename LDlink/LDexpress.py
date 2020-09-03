@@ -9,13 +9,10 @@ import collections
 import re
 import requests
 import csv
-import threading
-import weakref
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
 import subprocess
-# from multiprocessing import Pool
 from multiprocessing.dummy import Pool
 import sys
 import numpy as np	
@@ -146,105 +143,7 @@ def get_coords(db, rsid):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-def LD_calcs(hap, allele, allele_n):
-    # Extract haplotypes
-    A = hap["00"]
-    B = hap["01"]
-    C = hap["10"]
-    D = hap["11"]
-    # N = A + B + C + D
-    # tmax = max(A, B, C, D)
-    delta = float(A * D - B * C)
-    Ms = float((A + C) * (B + D) * (A + B) * (C + D))
-    # Minor allele frequency
-    # maf_q = min((A + B) / float(N), (C + D) / float(N))
-    # maf_p = min((A + C) / float(N), (B + D) / float(N))
-    if Ms != 0:
-        # D prime
-        if delta < 0:
-            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))
-        else:
-            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
-        # R2
-        r2 = (delta ** 2) / Ms
-        # # Find Correlated Alleles
-        # equiv = "="
-        # # Find Correlated Alleles
-        # if str(r2) != "NA" and float(r2) > 0.1:
-        #     Ac = hap[sorted(hap)[0]]
-        #     Bc = hap[sorted(hap)[1]]
-        #     Cc = hap[sorted(hap)[2]]
-        #     Dc = hap[sorted(hap)[3]]
-        #     if ((Ac * Dc) / max((Bc * Cc), 0.01) > 1):
-        #         match = allele[sorted(hap)[0][0]] + equiv + allele_n[sorted(hap)[0][1]] + "," + allele[sorted(hap)[3][0]] + equiv + allele_n[sorted(hap)[3][1]]
-        #     else:
-        #         match = allele[sorted(hap)[1][0]] + equiv + allele_n[sorted(hap)[1][1]] + "," + allele[sorted(hap)[2][0]] + equiv + allele_n[sorted(hap)[2][1]]
-        # else:
-        #     match = "NA"
-        return [r2, D_prime]
-
-def getGTExTissueAPI(snp, tissue_ids):
-    PAYLOAD = {
-        "format" : "json",
-        "snpId": snp,
-        "tissueSiteDetailId": ",".join(tissue_ids),
-        "datasetId": "gtex_v8"
-    }
-    REQUEST_URL = "https://gtexportal.org/rest/v1/association/singleTissueEqtl"
-    r = requests.get(REQUEST_URL, params=PAYLOAD)
-    # print(json.loads(r.text))
-    return (json.loads(r.text))
-
-def getGTExTissueMongoDB(db, chromosome, position, tissue_ids):
-    if "gtex_tissue_eqtl" in db.list_collection_names():
-        tissue_ids_query = []
-        for tissue in tissue_ids:
-            tissue_ids_query.append({
-                "tissueSiteDetailId": tissue
-            })
-        pipeline = [
-            {
-                "$match": {
-                    "tissueSiteDetailId": {
-                        "$in": tissue_ids
-                    },
-                    "chr_b37": str(chromosome),
-                    "variant_pos_b37": str(position)
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "gtex_tissues", 
-                    "localField": "tissueSiteDetailId", 
-                    "foreignField": "tissueSiteDetailId", 
-                    "as": "tissue_info"
-                }
-            },
-            {   
-                '$unwind' : "$tissue_info" 
-            },
-            {   
-                "$project" : {
-                    "gene_id": 1,
-                    "tissueSiteDetailId": 1,
-                    "slope": 1,
-                    "pval_nominal": 1,
-                    "tissueSiteDetail": "$tissue_info.tissueSiteDetail"
-                } 
-            },
-        ]
-
-        documents = list(db.gtex_tissue_eqtl.aggregate(pipeline))
-
-        tissues = {
-            "singleTissueEqtl": documents
-        }
-        # json_output = json.dumps(tissues, default=json_util.default, sort_keys=True, indent=2)
-        return tissues
-    else:
-        return None
-
-def chunkWindow(pos, window, threads):
+def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):
         minPos = 0
     else:
@@ -254,190 +153,24 @@ def chunkWindow(pos, window, threads):
     chunks = []
     newMin = minPos
     newMax = 0
-    for _ in range(threads):
-        newMax = newMin + (windowRange / threads)
+    for _ in range(num_subprocesses):
+        newMax = newMin + (windowRange / num_subprocesses)
         chunks.append([math.ceil(newMin), math.ceil(newMax)])
         newMin = newMax
     return chunks
 
-# def get_window_variants(snp, chromosome, windowMinPos, windowMaxPos, pop_ids, r2_d, r2_d_threshold, request):
-#     get_window_snps_tabix_start = timer()
-
-#     # Import query SNP VCF file
-#     tmp_dir = "./tmp/"
-#     query_snp_vcf = open(tmp_dir + "snp_no_dups_" + request+".vcf").readlines()
-
-#     if len(query_snp_vcf) > 1:
-#         for i in range(len(query_snp_vcf)):
-#             if query_snp_vcf[i].strip().split()[2] == snp:
-#                 geno = query_snp_vcf[i].strip().split()
-#     else:
-#         geno = query_snp_vcf[0].strip().split()
-
-#     new_alleles = set_alleles(geno[3], geno[4])
-#     allele = {"0": new_alleles[0], "1": new_alleles[1]}
-
-#     # Get VCF region
-#     vcf_file = vcf_dir + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-#     tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
-#         vcf_file, chromosome, windowMinPos, windowMaxPos)
-#     proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
-#     vcf_window_snps = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
-
-#     # Loop past file information and find header
-#     head = next(vcf_window_snps, None)
-#     while head[0][0:2] == "##":
-#         head = next(vcf_window_snps, None)
-
-#     # Create Index of Individuals in Population
-#     index = []
-#     for i in range(9, len(head)):
-#         if head[i] in pop_ids:
-#             index.append(i)
-#     vcf_window_snps = list(vcf_window_snps)
-#     print(str(snp) + " vcf_window_snps RAW LENGTH", len(vcf_window_snps))
-
-#     get_window_snps_tabix_end = timer()
-#     print("FIND WINDOW SNPS:", str(get_window_snps_tabix_end - get_window_snps_tabix_start) + "(s)")
-
-#     calculate_ld_window_snps_start = timer()
-
-#     # Loop through SNPs
-#     out = []
-#     for geno_n in vcf_window_snps:
-#         if "," not in geno_n[3] and "," not in geno_n[4]:
-#             new_alleles_n = set_alleles(geno_n[3], geno_n[4])
-#             allele_n = {"0": new_alleles_n[0], "1": new_alleles_n[1]}
-#             hap = {"00": 0, "01": 0, "10": 0, "11": 0}
-#             for i in index:
-#                 hap0 = geno[i][0]+geno_n[i][0]
-#                 if hap0 in hap:
-#                     hap[hap0] += 1
-
-#                 if len(geno[i]) == 3 and len(geno_n[i]) == 3:
-#                     hap1 = geno[i][2]+geno_n[i][2]
-#                     if hap1 in hap:
-#                         hap[hap1] += 1
-
-#             out_stats = LD_calcs(hap, allele, allele_n)
-#             # print("out_stats", out_stats)
-#             if out_stats != None:
-#                 if ((r2_d == "r2" and out_stats[0] >= r2_d_threshold) or (r2_d == "d" and out_stats[1] >= r2_d_threshold)):
-#                     bp_n = geno_n[1]
-#                     rs_n = geno_n[2]
-#                     out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
-
-#     calculate_ld_window_snps_end = timer()
-#     print("CALCUALTE LD FOR ALL WINDOW SNPS:", str(calculate_ld_window_snps_end - calculate_ld_window_snps_start) + "(s)")
-                    
-#     return out
-
-# def get_window_variants_sub(threadCommandArgs):
-#     windowChunkRange = threadCommandArgs[0]
-#     thread = threadCommandArgs[1]	
-#     snp = threadCommandArgs[2]
-#     chromosome = threadCommandArgs[3]		
-#     pop_ids = threadCommandArgs[4]
-#     # geno = threadCommandArgs[5]
-#     # allele = threadCommandArgs[6]
-#     # r2_d = threadCommandArgs[7]
-#     # r2_d_threshold = threadCommandArgs[8]
-#     r2_d = threadCommandArgs[5]
-#     r2_d_threshold = threadCommandArgs[6]
-#     request = threadCommandArgs[7]
-#     print("thread " + str(thread) + " kicked")	
-#     print("windowChunkRange", windowChunkRange)
-#     return get_window_variants(snp, chromosome, windowChunkRange[0], windowChunkRange[1], pop_ids, r2_d, r2_d_threshold, request)
-
-def get_tissues(db, windowSNPs, p_threshold, tissue_ids):
-    gtexQueryRequestCount = 0
-    gtexQueryReturnCount = 0
-    out = []
-    for snp in windowSNPs:
-        rs_n = snp[0]
-        chromosome = snp[1]
-        position = snp[2]
-        r2 = snp[3]
-        D_prime = snp[4]
-        geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(position)
-        gtexQueryRequestCount += 1
-        ###### RETRIEVE GTEX TISSUE INFO FROM API ######
-        # (tissue_stats) = getGTExTissueAPI(rs_n, tissue_ids)
-        ###### RETRIEVE GTEX TISSUE INFO FROM MONGODB ######
-        (tissue_stats) = getGTExTissueMongoDB(db, chromosome, position, tissue_ids)
-        if tissue_stats != None and len(tissue_stats['singleTissueEqtl']) > 0:
-            gtexQueryReturnCount += 1
-            for tissue_obj in tissue_stats['singleTissueEqtl']:
-                # if float(tissue_obj['pValue']) < float(p_threshold):
-                if float(tissue_obj['pval_nominal']) < float(p_threshold):
-                    temp = [
-                        rs_n, 
-                        geno_n_chr_bp, 
-                        r2, 
-                        D_prime,
-                        # tissue_obj['geneSymbol'],
-                        "NA",
-                        # tissue_obj['gencodeId'],
-                        tissue_obj['gene_id'],
-                        tissue_obj['tissueSiteDetail'],
-                        # tissue_obj['nes'],
-                        tissue_obj['slope'],
-                        # tissue_obj['pValue'],
-                        tissue_obj['pval_nominal'],
-                        rs_n
-                    ]
-                    out.append(temp)
-    print("get_tissues out length", len(out))
-    print("# of gtex queries made (gtexQueryRequestCount)", gtexQueryRequestCount)
-    print("# of gtex queries returned (gtexQueryReturnCount)", gtexQueryReturnCount)
-    return out
-
-def get_tissues_sub(threadCommandArgs):
-    windowSNPs = threadCommandArgs[0]
-    thread = threadCommandArgs[1]
-    p_threshold = threadCommandArgs[2]
-    tissue_ids = threadCommandArgs[3]
-    web = threadCommandArgs[4]
-    print("thread " + str(thread) + " kicked")	
-    print("thread executing", len(windowSNPs), "gtex queries...")
-    # Connect to Mongo snp database
-    if env == 'local':
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local':
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
-    return get_tissues(db, windowSNPs, p_threshold, tissue_ids)
-
-def set_alleles(a1, a2):
-    if len(a1) == 1 and len(a2) == 1:
-        a1_n = a1
-        a2_n = a2
-    elif len(a1) == 1 and len(a2) > 1:
-        a1_n = "-"
-        a2_n = a2[1:]
-    elif len(a1) > 1 and len(a2) == 1:
-        a1_n = a1[1:]
-        a2_n = "-"
-    elif len(a1) > 1 and len(a2) > 1:
-        a1_n = a1[1:]
-        a2_n = a2[1:]
-    return(a1_n, a2_n)
+# collect output in parallel
+def get_output(process):
+    return process.communicate()[0].splitlines()
 
 # Create LDexpress function
-def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
+def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
     print("##### START LD EXPRESS CALCULATION #####")	
     print("raw snplst", snplst)
     print("raw pop", pop)
     print("raw request", request)
     print("raw web", web)
-    print("raw tissue", tissue)
+    print("raw tissues", tissues)
     print("raw r2_d", r2_d)
     print("raw r2_d_threshold", r2_d_threshold)
     print("raw p_threshold", p_threshold)
@@ -445,8 +178,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
 
     full_start = timer()
 
-    # number of concurrent threads used for capturing SNP windows, LD calculation and GTEx queries
-    ldexpress_threads = 4
+    # number of concurrent subprocesses used for capturing SNP windows, LD calculation and GTEx queries
+    num_subprocesses = 4
     
     # SNP limit
     max_list = 20
@@ -456,36 +189,27 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
-    # Create JSON output for warnings and errors
-    out_json = open(tmp_dir + "express" + str(request) + ".json", "w")
-    output = {}
+    errors_warnings = {}
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
-        output["error"] = "Window value must be a number between 0 and 1,000,000."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "", "")
+        errors_warnings["error"] = "Window value must be a number between 0 and 1,000,000."
+        return("", "", "", errors_warnings)
 
-    # Open SNPs file
-    with open(snplst, 'r') as fp:
-        snps_raw = fp.readlines()
-        # Generate error if # of inputted SNPs exceeds limit
-        if len(snps_raw) > max_list:
-            output["error"] = "Maximum SNP list is " + \
+    # Parse SNPs list
+    snps_raw = snplst.split("+")
+    # Generate error if # of inputted SNPs exceeds limit
+    if len(snps_raw) > max_list:
+        errors_warnings["error"] = "Maximum SNP list is " + \
             str(max_list)+" RS numbers. Your list contains " + \
             str(len(snps_raw))+" entries."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
-        # Remove duplicate RS numbers
-        sanitized_query_snps = []
-        for snp_raw in snps_raw:
-            snp = snp_raw.strip()
-            if snp not in sanitized_query_snps:
-                sanitized_query_snps.append([snp])
+        return("", "", "", errors_warnings)
+    # Remove duplicate RS numbers
+    sanitized_query_snps = []
+    for snp_raw in snps_raw:
+        snp = snp_raw.strip()
+        if snp not in sanitized_query_snps:
+            sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
     if env == 'local':
@@ -502,11 +226,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     db = client["LDLink"]
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp151" not in db.list_collection_names():
-        output["error"] = "dbSNP is currently unavailable. Please contact support."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "", "")
+        errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."
+        return("", "", "", errors_warnings)
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -515,11 +236,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
             pop_dirs.append(pop_dir+pop_i+".txt")
         else:
-            output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
+            errors_warnings["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+            return("", "", "", errors_warnings)
 
     # get_pops = "cat " + " ".join(pop_dirs)
     # proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -533,8 +251,8 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    tissue_ids = tissue.split("+")
-    print("tissue_ids", tissue_ids)
+    # tissue_ids = tissue.split("+")
+    # print("tissue_ids", tissue_ids)
 
     # Get rs number from genomic coordinates from dbsnp151
     def get_rsnum(db, coord):
@@ -562,18 +280,18 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
                                 ref_variants.append(snp_info['id'])
                         if len(ref_variants) > 1:
                             var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                            if "warning" in errors_warnings:
+                                errors_warnings["warning"] = errors_warnings["warning"] + \
+                                    ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                                errors_warnings["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                         elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
                             var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                            if "warning" in errors_warnings:
+                                errors_warnings["warning"] = errors_warnings["warning"] + \
+                                    ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                             else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
+                                errors_warnings["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
                         else:
                             var_id = "rs" + ref_variants[0]
                         new_snp_lst.append([var_id])
@@ -617,31 +335,26 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
                 queryWarnings.append([snp_i[0], "NA", "Not a valid SNP, variant removed."])
         else:
             # Generate error for empty query variant
-            output["error"] = "Input list of RS numbers is empty"
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
+            errors_warnings["error"] = "Input list of RS numbers is empty"
+            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+            return("", "", "", errors_warnings)
 
     # Generate warnings for query variants not found in dbsnp
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
+        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
             dbsnp_version + ": " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + "."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "", "")
+        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + dbsnp_version + "."
+        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+        return("", "", "", errors_warnings)
 
     thinned_list = []
 
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
     # establish low/high window for each query snp
-    # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
+    # ex: window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     for snp_coord in snp_coords:
         find_window_ld_start = timer()
 
@@ -649,83 +362,67 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings
         if (geno is not None):
-            # new_alleles = set_alleles(geno[3], geno[4])
-            # allele = {"0": new_alleles[0], "1": new_alleles[1]}
-            ###### SPLIT TASK UP INTO # PARALLEL THREADS ######
+            ###### SPLIT TASK UP INTO # PARALLEL SUBPROCESSES ######
 
-            # # find query window snps via tabix, calculate LD and apply R2/D' thresholds
-            windowChunkRanges = chunkWindow(snp_coord[2], window, ldexpress_threads)
-            print("windowChunkRanges", windowChunkRanges)
-            # getWindowVariantsArgs = []	
-            # for thread in range(ldexpress_threads):	
-            #     getWindowVariantsArgs.append([windowChunkRanges[thread], thread, snp_coord[0], snp_coord[1], pop_ids, r2_d, r2_d_threshold, str(request)])	
-            # with Pool(processes=ldexpress_threads) as pool:	
-            #     windowLDSubsets = pool.map(get_window_variants_sub, getWindowVariantsArgs)
+            # find query window snps via tabix, calculate LD and apply R2/D' thresholds
+            windowChunkRanges = chunkWindow(snp_coord[2], window, num_subprocesses)
+            
+            ld_subprocess_commands = []
+            for subprocess_id in range(num_subprocesses):
+                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold)])
+                ld_subprocess_commands.append("python3 LDexpress_ld_sub.py " + getWindowVariantsArgs)
 
-            # coord1 = int(snp_coord[2]) - window
-            # if coord1 < 0:
-            #     coord1 = 0
-            # coord2 = int(snp_coord[2]) + window
-            # block = (2 * window) // 4
-            commands = []
-            for thread in range(ldexpress_threads):
-                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[thread][0]), str(windowChunkRanges[thread][1]), str(request), str(thread), str(r2_d), str(r2_d_threshold)])
-                commands.append("python3 LDexpress_sub.py " + getWindowVariantsArgs)
-            # for i in range(ldexpress_threads):
-            #     if i == min(range(ldexpress_threads)) and i == max(range(ldexpress_threads)):
-            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + \
-            #             str(snp_coord[1]) + " " + str(coord1) + " " + \
-            #             str(coord2) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
-            #     elif i == min(range(ldexpress_threads)):
-            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + \
-            #             str(snp_coord[1]) + " " + str(coord1) + " " + \
-            #             str(coord1 + block) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
-            #     elif i == max(range(ldexpress_threads)):
-            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + str(snp_coord[1]) + " " + str(
-            #             coord1 + (block * i) + 1) + " " + str(coord2) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
-            #     else:
-            #         command = "python3 LDexpress_sub.py " + str(web) + " " + snp_coord[0] + " " + str(snp_coord[1]) + " " + str(coord1 + (
-            #             block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + str(request) + " " + str(i) + " " + str(r2_d) + " " + str(r2_d_threshold)
-            #     commands.append(command)
-
-            print("commands", commands)
-
-            processes = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
-
+            ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
             # collect output in parallel
-            def get_output(process):
-                return process.communicate()[0].splitlines()
-
-            if not hasattr(threading.current_thread(), "_children"):
-                threading.current_thread()._children = weakref.WeakKeyDictionary()
-
-            pool = Pool(len(processes))
-            out_raw = pool.map(get_output, processes)
+            pool = Pool(len(ld_subprocesses))
+            windowLDSubsets = pool.map(get_output, ld_subprocesses)
             pool.close()
             pool.join()
 
-            # print("out_raw", out_raw)
-
             # flatten pooled ld window results
-            windowLDSubsetsFlat = [val.decode('utf-8').strip().split("\t") for sublist in out_raw for val in sublist]
+            windowLDSubsetsFlat = [val.decode('utf-8').strip().split("\t") for sublist in windowLDSubsets for val in sublist]
             print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
 
             find_window_ld_end = timer()
             print("FIND WINDOW SNPS AND CALCULATE LD TIME ELAPSED:", str(find_window_ld_end - find_window_ld_start) + "(s)")
 
+            # find gtex tissues for window snps via mongodb, apply p-value threshold
+
             query_window_tissues_start = timer()
 
-            # find gtex tissues for window snps via mongodb, apply p-value threshold
-            windowLDSubsetsChunks = np.array_split(windowLDSubsetsFlat, ldexpress_threads)
-            getTissuesArgs = []	
-            for thread in range(ldexpress_threads):	
-                getTissuesArgs.append([windowLDSubsetsChunks[thread].tolist(), thread, p_threshold, tissue_ids, web])	
-            with Pool(processes=ldexpress_threads) as pool:	
-                tissueResultsSubsets = pool.map(get_tissues_sub, getTissuesArgs)	
+            windowLDSubsetsChunks = np.array_split(windowLDSubsetsFlat, num_subprocesses)
 
-            # flatten tissue results
-            matched_snps = [val for sublist in tissueResultsSubsets for val in sublist]
+            for subprocess_id in range(num_subprocesses):
+                with open(tmp_dir + 'express_ld_' + str(subprocess_id) + '_' + str(request) + '.txt', 'w') as snpsLDFile:
+                    for snp_ld_data in windowLDSubsetsChunks[subprocess_id].tolist():
+                        snpsLDFile.write("\t".join(snp_ld_data) + "\n")
+
+            tissues_subprocess_commands = []
+            for subprocess_id in range(num_subprocesses):
+                getTissuesArgs = " ".join([str(web), str(request), str(subprocess_id), str(p_threshold), str(tissues)])
+                tissues_subprocess_commands.append("python3 LDexpress_tissues_sub.py " + getTissuesArgs)
+
+            tissues_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in tissues_subprocess_commands]
+
+            # getTissuesArgs = []	
+            # for subprocess_id in range(num_subprocesses):	
+            #     getTissuesArgs.append([windowLDSubsetsChunks[subprocess_id].tolist(), subprocess_id, p_threshold, tissue_ids, web])	
+            # with Pool(processes=num_subprocesses) as pool:	
+            #     tissueResultsSubsets = pool.map(get_tissues_sub, getTissuesArgs)	
+
+            # collect output in parallel
+            pool = Pool(len(tissues_subprocesses))
+            tissueResultsSubsets = pool.map(get_output, tissues_subprocesses)
+            pool.close()
+            pool.join()
+
+            # flatten pooled tissues results
+            matched_snps = [val.decode('utf-8').strip().split("\t") for sublist in tissueResultsSubsets for val in sublist]
             print("matched_snps length", len(matched_snps))
+
+            # # flatten tissue results
+            # matched_snps = [val for sublist in tissueResultsSubsets for val in sublist]
+            # print("matched_snps length", len(matched_snps))
 
             print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
             if (len(matched_snps) > 0):
@@ -739,9 +436,12 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
 
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
-        
+        # clean up tmp files generated by each query snp
         subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        subprocess.call("rm " + tmp_dir + "express_ld_*_" + str(request) + ".txt", shell=True)
+    # clean up tmp file(s) generated by each calculation
     subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+    
 
     details["queryWarnings"] = {
         "aaData": queryWarnings
@@ -749,20 +449,13 @@ def calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold=0.
 
     # Check if thinned list is empty, if it is, display error
     if len(thinned_list) < 1:
-        output["error"] = "No variants in LD with GTEx."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "", "")
+        errors_warnings["error"] = "No variants in LD with GTEx."
+        return("", "", "", errors_warnings)
 
-    # Return output
-    json_output = json.dumps(output, sort_keys=True, indent=2)
-    print(json_output, file=out_json)
-    out_json.close()
     full_end = timer()	
     print("TIME ELAPSED:", str(full_end - full_start) + "(s)")	
     print("##### LDEXPRESS COMPLETE #####")
-    return (sanitized_query_snps, thinned_list, details)
+    return (sanitized_query_snps, thinned_list, details, errors_warnings)
 
 
 def main():
@@ -775,10 +468,10 @@ def main():
     r2_d_threshold = 0.1
     p_threshold = 0.1
     window = 500000
-    tissue = "Adipose_Subcutaneous+Adipose_Visceral_Omentum"
+    tissues = "Adipose_Subcutaneous+Adipose_Visceral_Omentum"
 
     # Run function
-    (sanitized_query_snps, thinned_list, details) = calculate_express(snplst, pop, request, web, tissue, r2_d, r2_d_threshold, p_threshold, window)
+    (sanitized_query_snps, thinned_list, details, errors_warnings) = calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold, p_threshold, window)
     print()
     print("##### FINAL LDEXPRESS.PY OUT - RETURN TO FRONTEND #####")
     print("query_snps", sanitized_query_snps)

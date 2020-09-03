@@ -2144,7 +2144,7 @@ function updateLDexpress() {
     var ldInputs = {
         snps: snps,
         pop: population.join("+"),
-        tissue: tissues.join("+"),
+        tissues: tissues.join("+"),
         r2_d: r2_d,
         r2_d_threshold: $("#" + id + "_r2_d_threshold").val(),
         p_threshold: $("#" + id + "_p_threshold").val(),
