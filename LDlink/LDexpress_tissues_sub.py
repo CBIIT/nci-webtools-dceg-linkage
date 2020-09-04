@@ -62,13 +62,25 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
             {   
                 '$unwind' : "$tissue_info" 
             },
+            {
+                "$lookup": {
+                    "from": "gtex_genes", 
+                    "localField": "gene_id", 
+                    "foreignField": "gene_id", 
+                    "as": "gene_info"
+                }
+            },
+            {   
+                '$unwind' : "$gene_info" 
+            },
             {   
                 "$project" : {
                     "gene_id": 1,
                     "tissueSiteDetailId": 1,
                     "slope": 1,
                     "pval_nominal": 1,
-                    "tissueSiteDetail": "$tissue_info.tissueSiteDetail"
+                    "tissueSiteDetail": "$tissue_info.tissueSiteDetail",
+                    "gene_name": "$gene_info.gene_name"
                 } 
             },
         ]
@@ -134,7 +146,7 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
                         geno_n_chr_bp, 
                         r2, 
                         D_prime,
-                        tissue_obj['geneSymbol'] if 'geneSymbol' in tissue_obj else "NA",
+                        tissue_obj['gene_name'] if 'gene_name' in tissue_obj else tissue_obj['geneSymbol'],
                         tissue_obj['gene_id'] if 'gene_id' in tissue_obj else tissue_obj['gencodeId'],
                         tissue_obj['tissueSiteDetail'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
                         tissue_obj['slope'] if 'slope' in tissue_obj else tissue_obj['nes'],
