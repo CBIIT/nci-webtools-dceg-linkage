@@ -743,10 +743,12 @@ def ldproxy():
     var = request.args.get('var', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
+    window = request.args.get('window', '500000').replace(',', '')
     token = request.args.get('token', False)
-    print('var: ' + var)
-    print('pop: ' + pop)
-    print('r2_d: ' + r2_d)
+    print('var: ', var)
+    print('pop: ',  pop)
+    print('r2_d: ',  r2_d)
+    print('window: ',  window)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -756,7 +758,7 @@ def ldproxy():
             reference = request.args.get('reference', False)
             print('request: ' + str(reference))
             try:
-                out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+                out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d, int(window))
             except:
                 return sendTraceback(None)
         else:
@@ -769,7 +771,7 @@ def ldproxy():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d)
+            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d, int(window))
             # display api out
             try:
                 # unlock token then display api output
@@ -802,11 +804,11 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    print('snps: ' + snps)
-    print('pop: ' + pop)
-    print('r2_d: ' + r2_d)
-    print('r2_d_threshold: ' + r2_d_threshold)
-    print('window: ' + window)
+    print('snps: ', snps)
+    print('pop: ', pop)
+    print('r2_d: ', r2_d)
+    print('r2_d_threshold: ', r2_d_threshold)
+    print('window: ', window)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:

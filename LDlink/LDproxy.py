@@ -15,7 +15,7 @@ import time
 from multiprocessing.dummy import Pool
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, web, r2_d="r2"):
+def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # trim any whitespace
     snp = snp.lower().strip()
@@ -243,7 +243,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         return("", "")
 
     # Define window of interest around query SNP
-    window = 500000
+    # window = 500000
     coord1 = int(snp_coord['position']) - window
     if coord1 < 0:
         coord1 = 0
@@ -881,7 +881,7 @@ def main():
         sys.exit()
 
     # Run function
-    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d)
+    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d, 500000)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:
