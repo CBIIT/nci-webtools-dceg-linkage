@@ -1,7 +1,7 @@
 import sys
 import os
 import json
-import gzip
+# import gzip
 from timeit import default_timer as timer
 
 def buildRecord(exportFile, gene_id, gene_name):
@@ -32,23 +32,25 @@ def main():
     inserted = 0
     problematic = 0
     # count = 0
-    with gzip.open(filename, 'rb') as f_in, open("tmp/problematic.genes.txt", 'a') as problematicFile, open("tmp/export.genes.json", 'a') as exportFile:
-        # skip first 7 rows in file since they are metadata info
-        for _ in range(7):
+    # with gzip.open(filename, 'rb') as f_in, open("tmp/problematic.genes.txt", 'a') as problematicFile, open("tmp/export.genes.json", 'a') as exportFile:
+    with open(filename, 'r') as f_in, open("tmp/problematic.genes.txt", 'a') as problematicFile, open("tmp/export.genes.json", 'a') as exportFile:
+        # skip first 6 rows in file since they are metadata info
+        for _ in range(6):
             next(f_in)
         for line in f_in:
             # print(line)
-            row = line.decode("utf-8").strip().split('\t')
+            # row = line.decode("utf-8").strip().split('\t')
+            row = line.strip().split('\t')
             if (len(row) >= 3):
                 if (row[2] == "gene"):
                     details = row[8].split(";")
-                    idCol = details[0].split("=")
-                    nameCol = details[3].split("=")
-                    if (len(details) >= 3 and idCol[0] == "ID" and nameCol[0] == "gene_name"):
+                    idCol = details[0].strip().split(" ")
+                    nameCol = details[3].strip().split(" ")
+                    if (len(details) >= 3 and idCol[0] == "gene_id" and nameCol[0] == "gene_name"):
                         # print("row", row)
                         # print("idCol", idCol)
                         # print("nameCol", nameCol)
-                        buildRecord(exportFile, idCol[1], nameCol[1])
+                        buildRecord(exportFile, idCol[1].strip('\"'), nameCol[1].strip('\"'))
                         inserted += 1
                         # count += 1
                         # if count == 5:
