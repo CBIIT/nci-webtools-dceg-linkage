@@ -79,7 +79,7 @@ def LD_calcs(hap, allele, allele_n):
         return [r2, D_prime]
 
 
-# Connect to Mongo snp database
+# Connect to Mongo database
 if env == 'local':
     mongo_host = api_mongo_addr
 else: 
