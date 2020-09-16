@@ -182,7 +182,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     num_subprocesses = 4
     
     # SNP limit
-    max_list = 20
+    max_list = 10
 
     # Ensure tmp directory exists
     tmp_dir = "./tmp/"

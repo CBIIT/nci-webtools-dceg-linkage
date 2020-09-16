@@ -545,7 +545,7 @@ def ldexpress():
             (query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
             # with open(tmp_dir + "express" + reference + ".json") as f:
             #     json_dict = json.load(f)
-            if "error" in errors:
+            if "error" in errors_warnings:
                 # display api out w/ error
                 toggleLocked(token, 0)
                 return sendTraceback(errors_warnings["error"])
