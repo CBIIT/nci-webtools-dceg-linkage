@@ -402,6 +402,8 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
                 getTissuesArgs = " ".join([str(web), str(request), str(subprocess_id), str(p_threshold), str(tissues)])
                 tissues_subprocess_commands.append("python3 LDexpress_tissues_sub.py " + getTissuesArgs)
 
+            print("tissues_subprocess_commands", tissues_subprocess_commands)
+
             tissues_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in tissues_subprocess_commands]
 
             # getTissuesArgs = []	
