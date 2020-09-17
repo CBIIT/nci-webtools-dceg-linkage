@@ -49,6 +49,13 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
 
+    if window < 0 or window > 1000000:
+        output["error"] = "Window value must be a number between 0 and 1,000,000."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
+
     # Connect to Mongo snp database
     if env == 'local':
         mongo_host = api_mongo_addr

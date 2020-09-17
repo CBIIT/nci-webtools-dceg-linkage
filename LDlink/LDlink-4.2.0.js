@@ -2848,8 +2848,6 @@ function updateLDproxy() {
         window: window
     };
 
-    console.log("ldproxyInputs", ldproxyInputs)
-
     updateHistoryURL(id, ldproxyInputs);
 
     //console.log(location.hostname);
