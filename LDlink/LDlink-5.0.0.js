@@ -3165,7 +3165,7 @@ function updateLDproxy() {
     var $btn = $('#' + id).button('loading');
     var population = getPopulationCodes(id+'-population-codes');
     var r2_d;
-    var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
+    var windowSize = $("#" + id + "-bp-window").val().replace(/\,/g, '');
 
     if($('#proxy_color_r2').hasClass('active')) {
         r2_d='r2'; // i.e. R2
@@ -3182,7 +3182,7 @@ function updateLDproxy() {
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
         r2_d : r2_d,
-        window: window
+        window: windowSize
     };
 
     updateHistoryURL(id, ldproxyInputs);

@@ -607,21 +607,23 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 def main():
 
     # Import LDproxy options
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = False
         r2_d = "r2"
-    elif len(sys.argv) == 5:
+        window = sys.argv[3]
+    elif len(sys.argv) == 6:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         r2_d = sys.argv[4]
+        window = sys.argv[5]
     else:
         sys.exit()
 
     # Run function
-    calculate_proxy_svg(snp, pop, request, r2_d)
+    calculate_proxy_svg(snp, pop, request, r2_d, int(window))
 
 
 if __name__ == "__main__":
