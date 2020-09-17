@@ -29,6 +29,7 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldexpress_tissues(web):
     try:
@@ -177,9 +178,6 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     print("raw window", window)
 
     full_start = timer()
-
-    # number of concurrent subprocesses used for capturing SNP windows, LD calculation and GTEx queries
-    num_subprocesses = 4
     
     # SNP limit
     max_list = 10

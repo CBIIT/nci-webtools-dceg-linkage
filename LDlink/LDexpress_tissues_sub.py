@@ -24,6 +24,7 @@ reg_dir = config['data']['reg_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+num_subprocesses = config['performance']['num_subprocesses']
 
 tmp_dir = "./tmp/"
 

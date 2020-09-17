@@ -26,6 +26,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
+    num_subprocesses = config['performance']['num_subprocesses']
 
     tmp_dir = "./tmp/"
 
@@ -179,19 +180,19 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     coord2 = int(snp_coord['position']) + window
 
     # Calculate proxy LD statistics in parallel
-    threads = 4
+    # threads = 4
     block = (2 * window) // 4
     commands = []
-    for i in range(threads):
-        if i == min(range(threads)) and i == max(range(threads)):
+    for i in range(num_subprocesses):
+        if i == min(range(num_subprocesses)) and i == max(range(num_subprocesses)):
             command = "python3 LDproxy_sub.py " + "True " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord2) + " " + request + " " + str(i)
-        elif i == min(range(threads)):
+        elif i == min(range(num_subprocesses)):
             command = "python3 LDproxy_sub.py " + "True " + snp + " " + \
                 snp_coord['chromosome'] + " " + str(coord1) + " " + \
                 str(coord1 + block) + " " + request + " " + str(i)
-        elif i == max(range(threads)):
+        elif i == max(range(num_subprocesses)):
             command = "python3 LDproxy_sub.py " + "True " + snp + " " + snp_coord['chromosome'] + " " + str(
                 coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
         else:

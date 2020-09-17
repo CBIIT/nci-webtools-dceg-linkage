@@ -28,6 +28,7 @@ vcf_dir = config['data']['vcf_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldtrait_timestamp(web):
     try:
@@ -698,13 +699,13 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
     print("##### BEGIN MULTITHREADING LD CALCULATIONS #####")	
     # start = timer()	
     # leverage multiprocessing to calculate all LDpairs	
-    threads = 4	
-    splitLDPairsUnique = np.array_split(ldPairsUnique, threads)	
+    # threads = 4	
+    splitLDPairsUnique = np.array_split(ldPairsUnique, num_subprocesses)	
     getLDStatsArgs = []	
-    for thread in range(threads):	
+    for thread in range(num_subprocesses):	
         getLDStatsArgs.append([splitLDPairsUnique[thread].tolist(), pop_ids, thread])	
     # print("getLDStatsArgs", getLDStatsArgs)	
-    with Pool(processes=threads) as pool:	
+    with Pool(processes=num_subprocesses) as pool:	
         ldInfoSubsets = pool.map(get_ld_stats_sub, getLDStatsArgs)	
        	
     # end = timer()	

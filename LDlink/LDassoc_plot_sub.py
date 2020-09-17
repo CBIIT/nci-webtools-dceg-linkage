@@ -26,6 +26,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
+    num_subprocesses = config['performance']['num_subprocesses']
 
     tmp_dir = "./tmp/"
 
@@ -384,19 +385,19 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
 
     # Calculate proxy LD statistics in parallel
-    if len(assoc_coords)<60:
-        threads=1
-    else:
-        threads=4
+    if len(assoc_coords) < 60:
+        num_subprocesses = 1
+    # else:
+    #     threads=4
 
-    block=len(assoc_coords)//threads
+    block=len(assoc_coords) // num_subprocesses
     commands=[]
-    for i in range(threads):
-        if i==min(range(threads)) and i==max(range(threads)):
+    for i in range(num_subprocesses):
+        if i==min(range(num_subprocesses)) and i==max(range(num_subprocesses)):
             command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
-        elif i==min(range(threads)):
+        elif i==min(range(num_subprocesses)):
             command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
-        elif i==max(range(threads)):
+        elif i==max(range(num_subprocesses)):
             command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
         else:
             command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
