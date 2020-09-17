@@ -4161,7 +4161,7 @@ $(document).ready(function() {
     $('#ldhap-file-snp-numbers').keyup(validateTextarea);
     $('#ldmatrix-file-snp-numbers').keyup(validateTextarea);
     $('#ldtrait-file-snp-numbers').keyup(validateTextarea);
-    $('#ldproxy-bp-window').keyup(validateLDtraitBasePairWindow);
+    $('#ldproxy-bp-window').keyup(validateLDproxyBasePairWindow);
     $('#ldtrait-bp-window').keyup(validateLDtraitBasePairWindow);
     $('#snpchip-file-snp-numbers').keyup(validateTextarea);
     $('#snpclip-file-snp-numbers').keyup(validateTextarea);
