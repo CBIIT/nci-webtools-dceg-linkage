@@ -1,4 +1,4 @@
-var ldlink_version = "Version 4.1";
+var ldlink_version = "Version 4.2";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
