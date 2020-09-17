@@ -1690,7 +1690,7 @@ function updateData(id) {
             }
             break;
         case 'ldproxy':
-            if(isPopulationSet(id)) {
+            if(isPopulationSet(id) && validateLDproxyBasePairWindow()) {
                 $('#'+id+"-loading").show();
                 updateLDproxy();
             }
@@ -3165,6 +3165,7 @@ function updateLDproxy() {
     var $btn = $('#' + id).button('loading');
     var population = getPopulationCodes(id+'-population-codes');
     var r2_d;
+    var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
 
     if($('#proxy_color_r2').hasClass('active')) {
         r2_d='r2'; // i.e. R2
@@ -3180,7 +3181,8 @@ function updateLDproxy() {
         "var" : $('#ldproxy-snp').val(),
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
-        r2_d : r2_d
+        r2_d : r2_d,
+        window: window
     };
 
     updateHistoryURL(id, ldproxyInputs);
@@ -4605,6 +4607,7 @@ $(document).ready(function() {
     $('#ldexpress-file-snp-numbers').keyup(validateTextarea);
     $('#ldexpress-bp-window').keyup(validateLDexpressBasePairWindow);
     $('#ldtrait-file-snp-numbers').keyup(validateTextarea);
+    $('#ldproxy-bp-window').keyup(validateLDproxyBasePairWindow);
     $('#ldtrait-bp-window').keyup(validateLDtraitBasePairWindow);
     $('#snpchip-file-snp-numbers').keyup(validateTextarea);
     $('#snpclip-file-snp-numbers').keyup(validateTextarea);
@@ -4677,6 +4680,23 @@ function validateIndex() {
 function validateLDexpressBasePairWindow() {
     var errorMsg = "Value must be a number between 0 and 1,000,000";
     var textarea = "#ldexpress-bp-window";
+    var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
+    var currentValue = $(textarea).val();
+    var currentValueNoCommas = currentValue.replace(/\,/g, '');
+    var hasError = !currentValue.match(pattern) || (currentValueNoCommas < 0 || currentValueNoCommas > 1000000);
+    $(textarea).toggleClass('error', hasError);
+    $(textarea).toggleClass('ok', !hasError);
+    if (hasError) {
+        $(textarea).attr('title', errorMsg);
+        return false;
+    } else {
+        return true;
+    }
+}
+
+function validateLDproxyBasePairWindow() {
+    var errorMsg = "Value must be a number between 0 and 1,000,000";
+    var textarea = "#ldproxy-bp-window";
     var pattern = new RegExp('^' + $(textarea).attr('pattern') + '$');
     var currentValue = $(textarea).val();
     var currentValueNoCommas = currentValue.replace(/\,/g, '');

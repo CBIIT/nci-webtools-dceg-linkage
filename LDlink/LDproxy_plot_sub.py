@@ -15,7 +15,7 @@ from multiprocessing.dummy import Pool
 # LDproxy subprocess to export bokeh to high quality images in the background
 
 
-def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
+def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -172,7 +172,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2"):
         return None
 
     # Define window of interest around query SNP
-    window = 500000
+    # window = 500000
     coord1 = int(snp_coord['position']) - window
     if coord1 < 0:
         coord1 = 0

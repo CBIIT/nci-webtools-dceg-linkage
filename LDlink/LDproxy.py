@@ -15,7 +15,7 @@ import time
 from multiprocessing.dummy import Pool
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, web, r2_d="r2"):
+def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # trim any whitespace
     snp = snp.lower().strip()
@@ -48,6 +48,13 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Create JSON output
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
+
+    if window < 0 or window > 1000000:
+        output["error"] = "Window value must be a number between 0 and 1,000,000."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
 
     # Connect to Mongo snp database
     if env == 'local':
@@ -243,7 +250,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
         return("", "")
 
     # Define window of interest around query SNP
-    window = 500000
+    # window = 500000
     coord1 = int(snp_coord['position']) - window
     if coord1 < 0:
         coord1 = 0
@@ -825,7 +832,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2"):
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d
+        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d + " " + window
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
@@ -881,7 +888,7 @@ def main():
         sys.exit()
 
     # Run function
-    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d)
+    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d, 500000)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:
