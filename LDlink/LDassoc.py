@@ -10,6 +10,7 @@ from bson import json_util, ObjectId
 import subprocess
 import time
 from multiprocessing.dummy import Pool
+import numpy as np
 
 
 # Create LDproxy function
@@ -561,20 +562,38 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	# else:
 	# 	threads=4
 
-	block=len(assoc_coords) // num_subprocesses
+	# print("######assoc_coords######")
+	# print("assoc_coords length:", len(assoc_coords))
+	# # print("\n".join(assoc_coords))
+	# print("####################")
+
+	# block=len(assoc_coords) // num_subprocesses
+	assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
+	# print(assoc_coords_subset_chunks)
+
 	commands=[]
 	print("Create LDassoc_sub subprocesses")
-	for i in range(num_subprocesses):
-		if i==min(range(num_subprocesses)) and i==max(range(num_subprocesses)):
-			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
-		elif i==min(range(num_subprocesses)):
-			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
-		elif i==max(range(num_subprocesses)):
-			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
-		else:
-			command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
-		commands.append(command)
 
+	for subprocess_id in range(num_subprocesses):
+		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(subprocess_id)])
+		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+
+	# for i in range(num_subprocesses):
+	# 	if i==min(range(num_subprocesses)) and i==max(range(num_subprocesses)):
+	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
+	# 	elif i==min(range(num_subprocesses)):
+	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
+	# 	elif i==max(range(num_subprocesses)):
+	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
+	# 	else:
+	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
+	# 	commands.append(command)
+
+	# print("######COMMANDS######")
+	# parseCommands = [x.split(" ")[4].split("_") for x in commands]
+	# for x in parseCommands:
+	# 	print(len(x))
+	# print("####################")
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 

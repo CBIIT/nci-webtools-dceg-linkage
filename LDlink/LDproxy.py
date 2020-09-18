@@ -13,6 +13,23 @@ import threading
 import weakref
 import time
 from multiprocessing.dummy import Pool
+import math
+
+def chunkWindow(pos, window, num_subprocesses):
+    if (pos - window <= 0):
+        minPos = 0
+    else:
+        minPos = pos - window
+    maxPos = pos + window
+    windowRange = maxPos - minPos
+    chunks = []
+    newMin = minPos
+    newMax = 0
+    for _ in range(num_subprocesses):
+        newMax = newMin + (windowRange / num_subprocesses)
+        chunks.append([math.ceil(newMin), math.ceil(newMax)])
+        newMin = newMax
+    return chunks
 
 # Create LDproxy function
 def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
@@ -261,24 +278,31 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     # Calculate proxy LD statistics in parallel
     # threads = 4
     # block = (2 * window) // 4
-    block = (2 * window) // num_subprocesses
+    # block = (2 * window) // num_subprocesses
+
+    windowChunkRanges = chunkWindow(int(snp_coord['position']), window, num_subprocesses)
+
     commands = []
-    for i in range(num_subprocesses):
-        if i == min(range(num_subprocesses)) and i == max(range(num_subprocesses)):
-            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
-                snp_coord['chromosome'] + " " + str(coord1) + " " + \
-                str(coord2) + " " + request + " " + str(i)
-        elif i == min(range(num_subprocesses)):
-            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
-                snp_coord['chromosome'] + " " + str(coord1) + " " + \
-                str(coord1 + block) + " " + request + " " + str(i)
-        elif i == max(range(num_subprocesses)):
-            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(
-                coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
-        else:
-            command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
-                block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
-        commands.append(command)
+    # for i in range(num_subprocesses):
+    #     if i == min(range(num_subprocesses)) and i == max(range(num_subprocesses)):
+    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
+    #             snp_coord['chromosome'] + " " + str(coord1) + " " + \
+    #             str(coord2) + " " + request + " " + str(i)
+    #     elif i == min(range(num_subprocesses)):
+    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
+    #             snp_coord['chromosome'] + " " + str(coord1) + " " + \
+    #             str(coord1 + block) + " " + request + " " + str(i)
+    #     elif i == max(range(num_subprocesses)):
+    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(
+    #             coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
+    #     else:
+    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
+    #             block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
+    #     commands.append(command)
+
+    for subprocess_id in range(num_subprocesses):
+        getWindowVariantsArgs = " ".join([str(web), str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id)])
+        commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]

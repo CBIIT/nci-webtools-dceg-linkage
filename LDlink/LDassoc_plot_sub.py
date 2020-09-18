@@ -11,6 +11,7 @@ from bson import json_util, ObjectId
 import subprocess
 from multiprocessing.dummy import Pool
 from math import log10
+import numpy as np
 
 
 # LDassoc subprocess to export bokeh to high quality images in the background
@@ -390,19 +391,24 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # else:
     #     threads=4
 
-    block=len(assoc_coords) // num_subprocesses
-    commands=[]
-    for i in range(num_subprocesses):
-        if i==min(range(num_subprocesses)) and i==max(range(num_subprocesses)):
-            command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
-        elif i==min(range(num_subprocesses)):
-            command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
-        elif i==max(range(num_subprocesses)):
-            command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
-        else:
-            command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
-        commands.append(command)
+    assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
 
+    # block=len(assoc_coords) // num_subprocesses
+    commands=[]
+    # for i in range(num_subprocesses):
+    #     if i==min(range(num_subprocesses)) and i==max(range(num_subprocesses)):
+    #         command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
+    #     elif i==min(range(num_subprocesses)):
+    #         command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
+    #     elif i==max(range(num_subprocesses)):
+    #         command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
+    #     else:
+    #         command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
+    #     commands.append(command)
+
+    for subprocess_id in range(num_subprocesses):
+        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(subprocess_id)])
+        commands.append("python3 LDassoc_sub.py " + subprocessArgs)
 
     processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
