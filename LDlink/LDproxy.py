@@ -260,7 +260,8 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # Calculate proxy LD statistics in parallel
     # threads = 4
-    block = (2 * window) // 4
+    # block = (2 * window) // 4
+    block = (2 * window) // num_subprocesses
     commands = []
     for i in range(num_subprocesses):
         if i == min(range(num_subprocesses)) and i == max(range(num_subprocesses)):
