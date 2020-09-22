@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
 import subprocess
-from multiprocessing import Pool
+from multiprocessing.dummy import Pool
 import sys
 import numpy as np	
 from timeit import default_timer as timer
@@ -113,303 +113,6 @@ def expandSelectedPopulationGroups(pops):
             expandedPops = list(set(expandedPops)) # unique elements
     return expandedPops
 
-def get_ld_stats(variantPair, pop_ids):	
-    # parse ld pair array parameter input
-    snp1 = variantPair[0]
-    snp1_coord = {
-        "chromosome": variantPair[1], 
-        "position": variantPair[2]
-    }
-    snp2 = variantPair[3]
-    snp2_coord = {
-        "chromosome": variantPair[4], 
-        "position": variantPair[5]
-    }
-
-    # errors/warnings encountered	
-    output = {	
-        "error": [],	
-        "warning": []	
-    }	
-    # Extract 1000 Genomes phased genotypes	
-    # SNP1	
-    vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"	
-    tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])	
-    proc1_offset = subprocess.Popen(	
-        tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)	
-    vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]	
-    # SNP2	
-    vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"	
-    tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])	
-    proc2_offset = subprocess.Popen(	
-        tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
-    vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
-
-    vcf1_pos = snp1_coord['position']	
-    vcf2_pos = snp2_coord['position']	
-    vcf1 = vcf1_offset	
-    vcf2 = vcf2_offset	
-
-    # SNP1	
-    if len(vcf1) == 0:	
-        output["error"].append(snp1 + " is not in 1000G reference panel.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }	
-    elif len(vcf1) > 1:	
-        geno1 = []	
-        for i in range(len(vcf1)):	
-            if vcf1[i].strip().split()[2] == snp1:	
-                geno1 = vcf1[i].strip().split()	
-        if geno1 == []:	
-            output["error"].append(snp1 + " is not in 1000G reference panel.")	
-            return {	
-                "r2": "NA",	
-                "D_prime": "NA",	
-                "p": "NA",	
-                "alleles": "NA",	
-                "output": output	
-            }	
-    else:	
-        geno1 = vcf1[0].strip().split()	
-    if geno1[2] != snp1:	
-        output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+")")	
-        snp1 = geno1[2]	
-    if "," in geno1[3] or "," in geno1[4]:	
-        output["error"].append(snp1 + " is not a biallelic variant.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }	
-    if len(geno1[3]) == 1 and len(geno1[4]) == 1:	
-        snp1_a1 = geno1[3]	
-        snp1_a2 = geno1[4]	
-    elif len(geno1[3]) == 1 and len(geno1[4]) > 1:	
-        snp1_a1 = "-"	
-        snp1_a2 = geno1[4][1:]	
-    elif len(geno1[3]) > 1 and len(geno1[4]) == 1:	
-        snp1_a1 = geno1[3][1:]	
-        snp1_a2 = "-"	
-    elif len(geno1[3]) > 1 and len(geno1[4]) > 1:	
-        snp1_a1 = geno1[3][1:]	
-        snp1_a2 = geno1[4][1:]	
-    allele1 = {	
-        "0|0": [snp1_a1, snp1_a1], 	
-        "0|1": [snp1_a1, snp1_a2], 	
-        "1|0": [snp1_a2, snp1_a1], 	
-        "1|1": [snp1_a2, snp1_a2], 	
-        "0": [snp1_a1, "."], 	
-        "1": [snp1_a2, "."], 	
-        "./.": [".", "."], 	
-        ".": [".", "."]	
-    }	
-    # SNP2	
-    if len(vcf2) == 0:	
-        output["error"].append(snp2 + " is not in 1000G reference panel.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }	
-    elif len(vcf2) > 1:	
-        geno2 = []	
-        for i in range(len(vcf2)):	
-            if vcf2[i].strip().split()[2] == snp2:	
-                geno2 = vcf2[i].strip().split()	
-        if geno2 == []:	
-            output["error"].append(snp2 + " is not in 1000G reference panel.")	
-            return {	
-                "r2": "NA",	
-                "D_prime": "NA",	
-                "p": "NA",	
-                "alleles": "NA",	
-                "output": output	
-            }	
-    else:	
-        geno2 = vcf2[0].strip().split()	
-    if geno2[2] != snp2:	
-        output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + ")")	
-        snp2 = geno2[2]	
-    if "," in geno2[3] or "," in geno2[4]:	
-        output["error"].append(snp2 + " is not a biallelic variant.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }	
-    if len(geno2[3]) == 1 and len(geno2[4]) == 1:	
-        snp2_a1 = geno2[3]	
-        snp2_a2 = geno2[4]	
-    elif len(geno2[3]) == 1 and len(geno2[4]) > 1:	
-        snp2_a1 = "-"	
-        snp2_a2 = geno2[4][1:]	
-    elif len(geno2[3]) > 1 and len(geno2[4]) == 1:	
-        snp2_a1 = geno2[3][1:]	
-        snp2_a2 = "-"	
-    elif len(geno2[3]) > 1 and len(geno2[4]) > 1:	
-        snp2_a1 = geno2[3][1:]	
-        snp2_a2 = geno2[4][1:]	
-    allele2 = {	
-        "0|0": [snp2_a1, snp2_a1], 	
-        "0|1": [snp2_a1, snp2_a2], 	
-        "1|0": [snp2_a2, snp2_a1], 	
-        "1|1": [snp2_a2, snp2_a2], 	
-        "0": [snp2_a1, "."], 	
-        "1": [snp2_a2, "."], 	
-        "./.": [".", "."], 	
-        ".": [".", "."]	
-    }	
-    
-    if geno1[1] != vcf1_pos:	
-        output["error"].append("VCF File does not match variant coordinates for SNP1.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }	
-    if geno2[1] != vcf2_pos:	
-        output["error"].append("VCF File does not match variant coordinates for SNP2.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "p": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }	
-
-    # Get headers	
-    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)	
-    proc1_h = subprocess.Popen(	
-        tabix_snp1_h, shell=True, stdout=subprocess.PIPE)	
-    head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()	
-    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_file2)	
-    proc2_h = subprocess.Popen(	
-        tabix_snp2_h, shell=True, stdout=subprocess.PIPE)	
-    head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()	
-    # Combine phased genotypes	
-    geno = {}	
-    for i in range(9, len(head1)):	
-        geno[head1[i]] = [allele1[geno1[i]], ".."]	
-    for i in range(9, len(head2)):	
-        if head2[i] in geno:	
-            geno[head2[i]][1] = allele2[geno2[i]]	
-
-    # Extract haplotypes	
-    hap = {}	
-    for ind in pop_ids:	
-        if ind in geno:	
-            hap1 = geno[ind][0][0] + "_" + geno[ind][1][0]	
-            hap2 = geno[ind][0][1] + "_" + geno[ind][1][1]	
-            if hap1 in hap:	
-                hap[hap1] += 1	
-            else:	
-                hap[hap1] = 1	
-            if hap2 in hap:	
-                hap[hap2] += 1	
-            else:	
-                hap[hap2] = 1	
-
-    # Remove missing haplotypes	
-    keys = list(hap.keys())	
-    for key in keys:	
-        if "." in key:	
-            hap.pop(key, None)	
-    # Check all haplotypes are present	
-    if len(hap) != 4:	
-        snp1_a = [snp1_a1, snp1_a2]	
-        snp2_a = [snp2_a1, snp2_a2]	
-        haps = [snp1_a[0] + "_" + snp2_a[0], snp1_a[0] + "_" + snp2_a[1],	
-                snp1_a[1] + "_" + snp2_a[0], snp1_a[1] + "_" + snp2_a[1]]	
-        for i in haps:	
-            if i not in hap:	
-                hap[i] = 0	
-
-    # Sort haplotypes
-    A = hap[sorted(hap)[0]]
-    B = hap[sorted(hap)[1]]
-    C = hap[sorted(hap)[2]]
-    D = hap[sorted(hap)[3]]
-    N = A + B + C + D
-    # tmax = max(A, B, C, D)
-
-    hap1 = sorted(hap, key=hap.get, reverse=True)[0]
-    hap2 = sorted(hap, key=hap.get, reverse=True)[1]
-    # hap3 = sorted(hap, key=hap.get, reverse=True)[2]
-    # hap4 = sorted(hap, key=hap.get, reverse=True)[3]
-
-    delta = float(A * D - B * C)
-    Ms = float((A + C) * (B + D) * (A + B) * (C + D))
-    # print("Ms=", Ms)
-    if Ms != 0:
-        # D prime
-        if delta < 0:
-            D_prime = abs(delta / min((A + C) * (A + B), (B + D) * (C + D)))
-        else:
-            D_prime = abs(delta / min((A + C) * (C + D), (A + B) * (B + D)))
-        # R2
-        r2 = (delta**2) / Ms
-    else:
-        output["error"].append("Variant MAF is 0.0, variant removed.")	
-        return {	
-            "r2": "NA",	
-            "D_prime": "NA",	
-            "alleles": "NA",	
-            "output": output	
-        }
-
-    allele1 = str(sorted(hap)[0].split("_")[1])
-    allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
-
-    allele2 = str(sorted(hap)[1].split("_")[1])
-    allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
-
-    alleles = ", ".join(["=".join([allele1, allele1_freq]),"=".join([allele2, allele2_freq])])
-
-    return {
-        "r2": r2,
-        "D_prime": D_prime,
-        "alleles": alleles,
-        "output": output
-    }
-
-def get_ld_stats_sub(threadCommandArgs):	
-    variantPairs = threadCommandArgs[0]	
-    pop_ids = threadCommandArgs[1]	
-    thread = threadCommandArgs[2]	
-    print("thread " + str(thread) + " kicked")	
-    ldInfoSubset = {}	
-    for variantPair in variantPairs:		
-        ld = get_ld_stats(variantPair, pop_ids)		
-        # print("thread", thread, "variantPair", variantPair, "ld", ld)		
-        # ld = {		
-        #     "r2": "NA",		
-        #     "D_prime": "NA",		
-        #     "p": "NA",		
-        #     "output": []		
-        # }		
-        # store LD calculation results in a object		
-        if variantPair[0] not in ldInfoSubset:		
-            ldInfoSubset[variantPair[0]] = {}		
-            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
-        else:		
-            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
-    return ldInfoSubset	
-
 def castFloat(val):
     try:
         val_float = float(val)
@@ -473,6 +176,10 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
+
+# collect output in parallel
+def get_output(process):
+    return process.communicate()[0].splitlines()
 
 # Create LDtrait function
 def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=500000):
@@ -552,9 +259,10 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
             out_json.close()
             return("", "", "")
 
-    get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
+    subprocess.call(get_pops, shell=True)
+    
+    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -695,36 +403,55 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
                 
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
     # print("ldPairsUnique", ldPairsUnique)	
-    print("ldPairsUnique", len(ldPairsUnique))	
-    print("##### BEGIN MULTITHREADING LD CALCULATIONS #####")	
+    # print("ldPairsUnique length", len(ldPairsUnique))	
+    # print("##### BEGIN MULTIPROCESSING LD CALCULATIONS #####")	
     # start = timer()	
     # leverage multiprocessing to calculate all LDpairs	
-    # threads = 4	
-    splitLDPairsUnique = np.array_split(ldPairsUnique, num_subprocesses)	
-    getLDStatsArgs = []	
-    for thread in range(num_subprocesses):	
-        getLDStatsArgs.append([splitLDPairsUnique[thread].tolist(), pop_ids, thread])	
-    # print("getLDStatsArgs", getLDStatsArgs)	
-    with Pool(processes=num_subprocesses) as pool:	
-        ldInfoSubsets = pool.map(get_ld_stats_sub, getLDStatsArgs)	
-       	
+    splitLDPairsUnique = np.array_split(ldPairsUnique, num_subprocesses)
+
+    # write ld pairs to tmp files to be picked up by ld calculation subprocesses
+    for subprocess_id in range(num_subprocesses):
+        with open(tmp_dir + 'trait_ld_' + str(subprocess_id) + '_' + str(request) + '.txt', 'w') as snpsPairFile:
+            for snps_pair in splitLDPairsUnique[subprocess_id].tolist():
+                snpsPairFile.write("\t".join(snps_pair) + "\n")
+
+    ld_subprocess_commands = []
+    for subprocess_id in range(num_subprocesses):
+        getPairLDArgs = " ".join([str(request), str(subprocess_id)])
+        ld_subprocess_commands.append("python3 LDtrait_ld_sub.py " + getPairLDArgs)
+
+    ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
+    # collect output in parallel
+    pool = Pool(len(ld_subprocesses))
+    ldInfoSubsets = pool.map(get_output, ld_subprocesses)
+    pool.close()
+    pool.join()	
+
+    # flatten pooled ld pair results
+    ldInfoSubsetsFlat = [val.decode('utf-8').strip() for sublist in ldInfoSubsets for val in sublist]
+    
     # end = timer()	
     # print("TIME ELAPSED:", str(end - start) + "(s)")	
-    print("##### END MULTITHREADING LD CALCULATIONS #####")	
-    # print("ldInfoSubsets", json.dumps(ldInfoSubsets))	
+    # print("##### END MULTIPROCESSING LD CALCULATIONS #####")	
+    # print("ldInfoSubsets", ldInfoSubsets)	
     # print("ldInfoSubsets length ", len(ldInfoSubsets))	
     # merge all ldInfo Pool subsets into one ldInfo object	
     ldInfo = {}	
-    for ldInfoSubset in ldInfoSubsets:	
-        for key in ldInfoSubset.keys():	
+    for ldInfoSubset in ldInfoSubsetsFlat:
+        ldInfoSubsetObj = json.loads(ldInfoSubset)
+        for key in ldInfoSubsetObj.keys():	
             if key not in ldInfo.keys():	
                 ldInfo[key] = {}	
-                ldInfo[key] = ldInfoSubset[key]	
+                ldInfo[key] = ldInfoSubsetObj[key]	
             else:	
-                for subsetKey in ldInfoSubset[key].keys():	
-                    ldInfo[key][subsetKey] = ldInfoSubset[key][subsetKey]	
+                for subsetKey in ldInfoSubsetObj[key].keys():	
+                    ldInfo[key][subsetKey] = ldInfoSubsetObj[key][subsetKey]	
 
     # print("ldInfo", json.dumps(ldInfo))
+
+    # clean up tmp file(s) generated by ld pair calculations
+    subprocess.call("rm " + tmp_dir + "trait_ld_*_" + str(request) + ".txt", shell=True)
+    subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
         	
     for snp_coord in snp_coords:	
         # print("snp_coord", snp_coord)
