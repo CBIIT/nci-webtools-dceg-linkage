@@ -2851,7 +2851,7 @@ function initExpressTissues() {
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         var errorObj = {
-            "error": "Failed to retrieve tissues from GTEx Portal server."
+            "error": "Failed to retrieve tissues from database."
         }
         displayError(id, errorObj)
         buildTissueDropdown("ldexpress-tissue-codes", "{}");
