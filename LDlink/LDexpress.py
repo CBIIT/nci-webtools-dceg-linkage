@@ -447,7 +447,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
     # Check if thinned list is empty, if it is, display error
     if len(thinned_list) < 1:
-        errors_warnings["error"] = "No variants in LD with GTEx."
+        errors_warnings["error"] = "No entries in GTEx are identified using the LDexpress search criteria."
         return("", "", "", errors_warnings)
 
     full_end = timer()	

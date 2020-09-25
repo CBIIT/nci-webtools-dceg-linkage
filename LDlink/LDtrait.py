@@ -476,7 +476,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
 
     # Check if thinned list is empty, if it is, display error
     if len(thinned_list) < 1:
-        output["error"] = "No variants in LD with GWAS Catalog."
+        output["error"] = "No entries in the GWAS Catalog are identified using the LDtrait search criteria."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
