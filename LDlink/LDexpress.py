@@ -430,7 +430,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
                 # add snp to thinned_list
                 thinned_list.append(snp_coord[0])
             else:
-                queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
+                queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No entries in GTEx are identified using the LDexpress search criteria."]) 
 
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")

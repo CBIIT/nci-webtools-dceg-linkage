@@ -465,7 +465,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
         else:
             # remove from thinned_list
             thinned_list.remove(snp_coord[0])
-            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants in LD found within window, variant removed."]) 
+            queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No entries in the GWAS Catalog are identified using the LDtrait search criteria."]) 
 
     # details["windowWarnings"] = {
     #     "aaData": windowWarnings
