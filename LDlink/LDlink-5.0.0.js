@@ -840,7 +840,7 @@ function createExpressDetailsTable() {
                         return data;
                     }
                 },
-                "targets": [ 7 ]
+                "targets": [ 9 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -868,19 +868,19 @@ function createExpressDetailsTable() {
                         return data;
                     }
                 },
-                "targets": [ 8 ]
+                "targets": [ 10 ]
             },
             {
                 "render": function ( data, type, row ) {
                     // Provide link to gwas catalog
                     return ldexpress_GTEx_link(data, type, row);
                 },
-                "targets": 9
+                "targets": 11
             },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
             }
         ]
     });

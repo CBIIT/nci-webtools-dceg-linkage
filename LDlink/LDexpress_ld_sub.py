@@ -46,26 +46,23 @@ proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 # Define function to calculate LD metrics
 def set_alleles(a1, a2):
-    if len(a1) == 1 and len(a2) == 1:
+    if len(a1) >= 1:
         a1_n = a1
-        a2_n = a2
-    elif len(a1) == 1 and len(a2) > 1:
+    else:
         a1_n = "-"
-        a2_n = a2[1:]
-    elif len(a1) > 1 and len(a2) == 1:
-        a1_n = a1[1:]
-        a2_n = "-"
-    elif len(a1) > 1 and len(a2) > 1:
-        a1_n = a1[1:]
-        a2_n = a2[1:]
+    if len(a2) >= 1:
+        a2_n = a2
+    else:
+        a2_n = "_"
     return(a1_n, a2_n)
 
-def LD_calcs(hap, allele, allele_n):
+def LD_calcs(hap, allele_n):
     # Extract haplotypes
     A = hap["00"]
     B = hap["01"]
     C = hap["10"]
     D = hap["11"]
+    N = A + B + C + D
     delta = float(A*D-B*C)
     Ms = float((A+C)*(B+D)*(A+B)*(C+D))
     if Ms != 0:
@@ -76,7 +73,13 @@ def LD_calcs(hap, allele, allele_n):
             D_prime = abs(delta/min((A+C)*(C+D), (A+B)*(B+D)))
         # R2
         r2 = (delta**2)/Ms
-        return [r2, D_prime]
+        # Non-effect and Effect Alleles and their Allele Frequencies
+        allele1 = str(allele_n["0"])
+        allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
+
+        allele2 = str(allele_n["1"])
+        allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
+        return [r2, D_prime, "=".join([allele1, allele1_freq]), "=".join([allele2, allele2_freq])]
 
 
 # Connect to Mongo database
@@ -109,14 +112,6 @@ if len(vcf) > 1:
 else:
     geno = vcf[0].strip().split()
 
-new_alleles = set_alleles(geno[3], geno[4])
-allele = {"0": new_alleles[0], "1": new_alleles[1]}
-chr = geno[0]
-bp = geno[1]
-rs = snp
-al = "("+new_alleles[0]+"/"+new_alleles[1]+")"
-
-
 # Import Window around SNP
 vcf = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
 
@@ -148,12 +143,12 @@ for geno_n in vcf:
                 if hap1 in hap:
                     hap[hap1] += 1
 
-        out_stats = LD_calcs(hap, allele, allele_n)
+        out_stats = LD_calcs(hap, allele_n)
         if out_stats != None:
             if ((r2_d == "r2" and out_stats[0] >= float(r2_d_threshold)) or (r2_d == "d" and out_stats[1] >= float(r2_d_threshold))):
                 bp_n = geno_n[1]
                 rs_n = geno_n[2]
-                out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1]])
+                out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1], out_stats[2], out_stats[3]])
 
 for line in out:
     print("\t".join([str(val) for val in line]))

@@ -379,10 +379,10 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
             # flatten pooled ld window results
             windowLDSubsetsFlat = [val.decode('utf-8').strip().split("\t") for sublist in windowLDSubsets for val in sublist]
-            print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
+            # print("windowLDSubsetsFlat length", len(windowLDSubsetsFlat))
 
             find_window_ld_end = timer()
-            print("FIND WINDOW SNPS AND CALCULATE LD TIME ELAPSED:", str(find_window_ld_end - find_window_ld_start) + "(s)")
+            # print("FIND WINDOW SNPS AND CALCULATE LD TIME ELAPSED:", str(find_window_ld_end - find_window_ld_start) + "(s)")
 
             # find gtex tissues for window snps via mongodb, apply p-value threshold
 
@@ -416,13 +416,13 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
             # flatten pooled tissues results
             matched_snps = [val.decode('utf-8').strip().split("\t") for sublist in tissueResultsSubsets for val in sublist]
-            print("matched_snps length", len(matched_snps))
+            # print("matched_snps length", len(matched_snps))
 
             # # flatten tissue results
             # matched_snps = [val for sublist in tissueResultsSubsets for val in sublist]
             # print("matched_snps length", len(matched_snps))
 
-            print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
+            # print("FINAL # RESULTS FOR", snp_coord[0], len(matched_snps))
             if (len(matched_snps) > 0):
                 details[snp_coord[0]] = {	
                     "aaData": matched_snps

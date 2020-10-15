@@ -131,6 +131,8 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
         position = snp[2]
         r2 = snp[3]
         D_prime = snp[4]
+        allele_1 = snp[5]
+        allele_2 = snp[6]
         geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(position)
         gtexQueryRequestCount += 1
         ###### RETRIEVE GTEX TISSUE INFO FROM API ######
@@ -149,6 +151,8 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
                         tissue_obj['gene_name'] if 'gene_name' in tissue_obj else tissue_obj['geneSymbol'] if 'geneSymbol' in tissue_obj else 'NA',
                         tissue_obj['gene_id'] if 'gene_id' in tissue_obj else tissue_obj['gencodeId'],
                         tissue_obj['tissueSiteDetail'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
+                        allele_1,
+                        allele_2,
                         tissue_obj['slope'] if 'slope' in tissue_obj else tissue_obj['nes'],
                         tissue_obj['pval_nominal'] if 'pval_nominal' in tissue_obj else tissue_obj['pValue'],
                         rs_n
