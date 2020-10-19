@@ -823,7 +823,7 @@ function createExpressDetailsTable() {
                         } else if (parseFloat(data) <= 0.0001) {
                             return "<0.0001";
                         } else {
-                            return parseFloat(data).toFixed(4);
+                            return parseFloat(data).toFixed(3);
                         }
                     } else {
                         return data;
@@ -835,7 +835,7 @@ function createExpressDetailsTable() {
                 "render": function ( data, type, row ) {
                     // Round floats to 3 decimal places if string can be parsed to float
                     if (!isNaN(parseFloat(data))) {
-                        return parseFloat(data).toFixed(4);
+                        return parseFloat(data).toFixed(3);
                     } else {
                         return data;
                     }
@@ -941,7 +941,7 @@ function createTraitDetailsTable() {
                         } else if (parseFloat(data) <= 0.0001) {
                             return "<0.0001"
                         } else {
-                            return parseFloat(data).toFixed(4);
+                            return parseFloat(data).toFixed(3);
                         }
                     }
                 },
