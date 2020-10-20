@@ -28,7 +28,7 @@ def chunkWindow(pos, window, num_subprocesses):
     for _ in range(num_subprocesses):
         newMax = newMin + (windowRange / num_subprocesses)
         chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax
+        newMin = newMax + 1
     return chunks
 
 # Create LDproxy function

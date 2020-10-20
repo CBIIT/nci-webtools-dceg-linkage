@@ -157,7 +157,7 @@ def chunkWindow(pos, window, num_subprocesses):
     for _ in range(num_subprocesses):
         newMax = newMin + (windowRange / num_subprocesses)
         chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax
+        newMin = newMax + 1
     return chunks
 
 # collect output in parallel
@@ -368,6 +368,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
             ld_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
                 getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold)])
+                # print("getWindowVariantsArgs", getWindowVariantsArgs)
                 ld_subprocess_commands.append("python3 LDexpress_ld_sub.py " + getWindowVariantsArgs)
 
             ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
