@@ -833,6 +833,13 @@ function createExpressDetailsTable() {
             },
             {
                 "render": function ( data, type, row ) {
+                    // Provide link to gwas catalog
+                    return ldexpress_NCBI_link(data, type, row);
+                },
+                "targets": 4
+            },
+            {
+                "render": function ( data, type, row ) {
                     // Round floats to 3 decimal places if string can be parsed to float
                     if (!isNaN(parseFloat(data))) {
                         return parseFloat(data).toFixed(3);
@@ -1407,6 +1414,12 @@ function ldtrait_ldpair_results_link(data, type, row) {
     };
     var href = server + '&' + $.param(params);
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    return link;
+}
+
+function ldexpress_NCBI_link(data, type, row) {
+    var href = 'https://www.ncbi.nlm.nih.gov/gene/?term=(' + data + '%5BGene+Name%5D)+AND+homo+sapiens%5BOrganism%5D'
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
     return link;
 }
 
