@@ -524,7 +524,7 @@ def ldexpress():
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
-                                f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {11}]) + "\n")
+                                f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
                         if "warning" in errors_warnings:
                             express["warning"] = errors_warnings["warning"]
                             f.write("Warning(s):\n")
@@ -555,7 +555,7 @@ def ldexpress():
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")
-                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {11}]) + "\n")
+                            f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
                     if "warning" in errors_warnings:
                         express["warning"] = errors_warnings["warning"]
                         f.write("Warning(s):\n")

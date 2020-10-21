@@ -150,12 +150,11 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
                         D_prime,
                         tissue_obj['gene_name'] if 'gene_name' in tissue_obj else tissue_obj['geneSymbol'] if 'geneSymbol' in tissue_obj else 'NA',
                         tissue_obj['gene_id'] if 'gene_id' in tissue_obj else tissue_obj['gencodeId'],
-                        tissue_obj['tissueSiteDetail'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
+                        tissue_obj['tissueSiteDetail'] + "__" + tissue_obj['tissueSiteDetailId'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
                         allele_1,
                         allele_2,
-                        tissue_obj['slope'] if 'slope' in tissue_obj else tissue_obj['nes'],
-                        tissue_obj['pval_nominal'] if 'pval_nominal' in tissue_obj else tissue_obj['pValue'],
-                        rs_n
+                        tissue_obj['slope'] + "__" + rs_n if 'slope' in tissue_obj else tissue_obj['nes'],
+                        tissue_obj['pval_nominal'] + "__" + rs_n if 'pval_nominal' in tissue_obj else tissue_obj['pValue']
                     ]
                     out.append(temp)
     # print("get_tissues out length", len(out))

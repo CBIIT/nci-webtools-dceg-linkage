@@ -814,6 +814,13 @@ function createExpressDetailsTable() {
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
+                    // Provide link to gwas catalog
+                    return ldexpress_dbsnp_link(data, type, row);
+                },
+                "targets": 0
+            },
+            {
+                "render": function ( data, type, row ) {
                     // Round floats to 4 decimal places 
                     if (!isNaN(parseFloat(data))) {
                         if (parseFloat(data) == 1.0) {
@@ -833,61 +840,43 @@ function createExpressDetailsTable() {
             },
             {
                 "render": function ( data, type, row ) {
-                    // Provide link to gwas catalog
+                    // Provide link to NCBI
                     return ldexpress_NCBI_link(data, type, row);
                 },
                 "targets": 4
             },
             {
                 "render": function ( data, type, row ) {
-                    // Round floats to 3 decimal places if string can be parsed to float
-                    if (!isNaN(parseFloat(data))) {
-                        return parseFloat(data).toFixed(3);
-                    } else {
-                        return data;
-                    }
+                    // Provide link to Gencode
+                    return ldexpress_Gencode_link(data, type, row);
                 },
-                "targets": [ 9 ]
+                "targets": 5
             },
             {
                 "render": function ( data, type, row ) {
-                    // Round floats to 4 decimal places 
-                    if (type === 'display') {
-                        var floatData  = parseFloat(data);
-                        if (data != "NA" && floatData) {
-                            if (floatData === 1.0) {
-                                return "1.0";
-                            } else if (floatData === 0.0) {
-                                return "0.0";
-                            } else {
-                                var val = floatData.toExponential(0).split(/E/i);
-                                return val[0] + "x10" + val[1].sup();
-                            }
-                        } else {
-                            if (floatData === 0.0 && (data.includes("E") || data.includes("e"))) {
-                                var val = data.split(/E/i);
-                                return val[0] + "x10" + val[1].sup();
-                            } else {
-                                return data;
-                            }
-                        }
-                    } else {
-                        return data;
-                    }
+                    // Provide link to Gencode
+                    return ldexpress_GTEx_tissue_link(data, type, row);
                 },
-                "targets": [ 10 ]
+                "targets": 6
             },
             {
                 "render": function ( data, type, row ) {
-                    // Provide link to gwas catalog
-                    return ldexpress_GTEx_link(data, type, row);
+                    // Provide link to GTEx
+                    return ldexpress_GTEx_effect_size_link(data, type, row);
                 },
-                "targets": 11
+                "targets": 9
+            },
+            {
+                "render": function ( data, type, row ) {
+                    // Provide link to GTEx
+                    return ldexpress_GTEx_pvalue_link(data, type, row);
+                },
+                "targets": 10
             },
             { 
                 className: "dt-head-left", 
                 className: "dt-body-left",
-                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ] 
+                "targets": [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ] 
             }
         ]
     });
@@ -1417,15 +1406,68 @@ function ldtrait_ldpair_results_link(data, type, row) {
     return link;
 }
 
+function ldexpress_Gencode_link(data, type, row) {
+    var href = 'https://ensembl.org/Homo_sapiens/Gene/Summary?g=' + data.split(".")[0];
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
+    return link;
+}
+
 function ldexpress_NCBI_link(data, type, row) {
     var href = 'https://www.ncbi.nlm.nih.gov/gene/?term=(' + data + '%5BGene+Name%5D)+AND+homo+sapiens%5BOrganism%5D'
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
     return link;
 }
 
-function ldexpress_GTEx_link(data, type, row) {
-    var href = 'https://www.gtexportal.org/home/snp/' + data
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+function ldexpress_GTEx_tissue_link(data, type, row) {
+    var href = 'https://www.gtexportal.org/home/eqtls/tissue?tissueName=' + data.split("__")[1];
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
+    return link;
+}
+
+function ldexpress_dbsnp_link(data, type, row) {
+    var href = 'https://www.ncbi.nlm.nih.gov/snp/' + data;
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
+    return link;
+}
+
+function ldexpress_GTEx_effect_size_link(data, type, row) {
+    // Round floats to 3 decimal places if string can be parsed to float
+    if (!isNaN(parseFloat(data.split("__")[0]))) {
+        var display = parseFloat(data.split("__")[0]).toFixed(3);
+    } else {
+        var display = data.split("__")[0];
+    }
+    var href = 'https://www.gtexportal.org/home/snp/' + data.split("__")[1];
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + display + '</a>';
+    return link;
+}
+
+function ldexpress_GTEx_pvalue_link(data, type, row) {
+    // Round floats to 4 decimal places 
+    if (type === 'display') {
+        var floatData  = parseFloat(data.split("__")[0]);
+        if (data.split("__")[0] != "NA" && floatData) {
+            if (floatData === 1.0) {
+                var display = "1.0";
+            } else if (floatData === 0.0) {
+                var display = "0.0";
+            } else {
+                var val = floatData.toExponential(0).split(/E/i);
+                var display = val[0] + "x10" + val[1].sup();
+            }
+        } else {
+            if (floatData === 0.0 && (data.split("__")[0].includes("E") || data.split("__")[0].includes("e"))) {
+                var val = data.split("__")[0].split(/E/i);
+                var display = val[0] + "x10" + val[1].sup();
+            } else {
+                var display = data.split("__")[0];
+            }
+        }
+    } else {
+        var display = data.split("__")[0];
+    }
+    var href = 'https://www.gtexportal.org/home/snp/' + data.split("__")[1];
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + display + '</a>';
     return link;
 }
 
