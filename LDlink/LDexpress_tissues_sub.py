@@ -66,7 +66,7 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
                 "$lookup": {
                     "from": "gtex_genes", 
                     "localField": "gene_id", 
-                    "foreignField": "gene_id", 
+                    "foreignField": "gene_id_v26", 
                     "as": "gene_info"
                 }
             },
@@ -80,7 +80,8 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
                     "slope": 1,
                     "pval_nominal": 1,
                     "tissueSiteDetail": "$tissue_info.tissueSiteDetail",
-                    "gene_name": "$gene_info.gene_name"
+                    "gene_name_v26": "$gene_info.gene_name_v26",
+                    "gene_name_v35": "$gene_info.gene_name_v35"
                 } 
             },
         ]
@@ -148,7 +149,7 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
                         geno_n_chr_bp, 
                         r2, 
                         D_prime,
-                        tissue_obj['gene_name'] if 'gene_name' in tissue_obj else tissue_obj['geneSymbol'] if 'geneSymbol' in tissue_obj else 'NA',
+                        tissue_obj['gene_name_v35'] if tissue_obj['gene_name_v35'] != "NA" else tissue_obj['gene_name_v26'],
                         tissue_obj['gene_id'] if 'gene_id' in tissue_obj else tissue_obj['gencodeId'],
                         tissue_obj['tissueSiteDetail'] + "__" + tissue_obj['tissueSiteDetailId'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
                         allele_1,
