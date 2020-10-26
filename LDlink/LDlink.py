@@ -520,7 +520,7 @@ def ldexpress():
                     express["error"] = errors_warnings["error"]
                 else:
                     with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
-                        f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele\tEffect Allele\tEffect Size\tP-value\n")
+                        f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
@@ -551,7 +551,7 @@ def ldexpress():
                 return sendTraceback(errors_warnings["error"])
             else:
                 with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
-                    f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele\tEffect Allele\tEffect Size\tP-value\n")
+                    f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")

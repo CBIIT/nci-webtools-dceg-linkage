@@ -149,7 +149,7 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
                         geno_n_chr_bp, 
                         r2, 
                         D_prime,
-                        tissue_obj['gene_name_v35'] if tissue_obj['gene_name_v35'] != "NA" else tissue_obj['gene_name_v26'],
+                        tissue_obj['gene_name_v26'] + "__" + tissue_obj['gene_name_v35'] if 'gene_name_v26' in tissue_obj and 'gene_name_v35' in tissue_obj else "NA",
                         tissue_obj['gene_id'] if 'gene_id' in tissue_obj else tissue_obj['gencodeId'],
                         tissue_obj['tissueSiteDetail'] + "__" + tissue_obj['tissueSiteDetailId'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
                         allele_1,
