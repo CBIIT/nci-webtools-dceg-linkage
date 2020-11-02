@@ -81,7 +81,7 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
                     "pval_nominal": 1,
                     "tissueSiteDetail": "$tissue_info.tissueSiteDetail",
                     "gene_name_v26": "$gene_info.gene_name_v26",
-                    "gene_name_v35": "$gene_info.gene_name_v35"
+                    "gene_entrez_id": "$gene_info.entrez_id"
                 } 
             },
         ]
@@ -144,12 +144,13 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
             gtexQueryReturnCount += 1
             for tissue_obj in tissue_stats['singleTissueEqtl']:
                 if (float(tissue_obj['pval_nominal']) if 'pval_nominal' in tissue_obj else float(tissue_obj['pValue'])) < float(p_threshold):
+                    ncbi_link = tissue_obj['gene_id'].split(".")[0] if len(tissue_obj['gene_entrez_id']) > 1 else tissue_obj['gene_entrez_id'][0] if len(tissue_obj['gene_entrez_id']) > 0 else "NA"
                     temp = [
                         rs_n, 
                         geno_n_chr_bp, 
                         r2, 
                         D_prime,
-                        tissue_obj['gene_name_v26'] + "__" + tissue_obj['gene_name_v35'] if 'gene_name_v26' in tissue_obj and 'gene_name_v35' in tissue_obj else "NA",
+                        tissue_obj['gene_name_v26'] + "__" + ncbi_link if 'gene_name_v26' in tissue_obj and 'gene_entrez_id' in tissue_obj else "NA__NA",
                         tissue_obj['gene_id'] if 'gene_id' in tissue_obj else tissue_obj['gencodeId'],
                         tissue_obj['tissueSiteDetail'] + "__" + tissue_obj['tissueSiteDetailId'] if 'tissueSiteDetail' in tissue_obj else tissue_obj['tissueSiteDetailId'],
                         allele_1,

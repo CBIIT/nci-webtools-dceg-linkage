@@ -1413,9 +1413,20 @@ function ldexpress_Gencode_link(data, type, row) {
 }
 
 function ldexpress_NCBI_link(data, type, row) {
-    var href = 'https://www.ncbi.nlm.nih.gov/gene/?term=(' + (data.split("__")[1] === "NA" ? data.split("__")[0] : data.split("__")[1]) + '%5BGene+Name%5D)+AND+homo+sapiens%5BOrganism%5D'
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
-    return link;
+    if (data.split("__")[1] === "NA") {
+        return data.split("__")[0];
+    } else {
+        if (data.split("__")[1].substring(0, 4) === "ENSG") {
+            var href = 'https://www.ncbi.nlm.nih.gov/gene/?term=' + data.split("__")[1];
+            var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
+            return link;
+        } else {
+            var href = 'https://www.ncbi.nlm.nih.gov/gene/' + data.split("__")[1];
+            var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
+            return link;
+        }
+        
+    }
 }
 
 function ldexpress_GTEx_tissue_link(data, type, row) {
