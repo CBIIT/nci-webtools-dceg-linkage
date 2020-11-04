@@ -1416,16 +1416,9 @@ function ldexpress_NCBI_link(data, type, row) {
     if (data.split("__")[1] === "NA") {
         return data.split("__")[0];
     } else {
-        if (data.split("__")[1].substring(0, 4) === "ENSG") {
-            var href = 'https://www.ncbi.nlm.nih.gov/gene/?term=' + data.split("__")[1];
-            var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
-            return link;
-        } else {
-            var href = 'https://www.ncbi.nlm.nih.gov/gene/' + data.split("__")[1];
-            var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
-            return link;
-        }
-        
+        var href = 'https://www.ncbi.nlm.nih.gov/gene/' + data.split("__")[1];
+        var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data.split("__")[0] + '</a>';
+        return link;
     }
 }
 

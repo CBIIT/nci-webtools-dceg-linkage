@@ -4,6 +4,9 @@ import json
 # import gzip
 from timeit import default_timer as timer
 
+# This script requires "gencode.v35lift37.annotation.gff3" file from Gencode
+# Download "Full Annotation" from Gencode website
+
 def buildRecord(exportFile, gene_id, gene_name):
     record = {
         "gene_id": gene_id,
