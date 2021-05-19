@@ -127,13 +127,14 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
     gtexQueryReturnCount = 0
     out = []
     for snp in windowSNPs:
-        rs_n = snp[0]
-        chromosome = snp[1]
-        position = snp[2]
-        r2 = snp[3]
-        D_prime = snp[4]
-        allele_1 = snp[5]
-        allele_2 = snp[6]
+        query_rs_n = snp[0]
+        rs_n = snp[1]
+        chromosome = snp[2]
+        position = snp[3]
+        r2 = snp[4]
+        D_prime = snp[5]
+        allele_1 = snp[6]
+        allele_2 = snp[7]
         geno_n_chr_bp = "chr" + str(chromosome) + ":" + str(position)
         gtexQueryRequestCount += 1
         ###### RETRIEVE GTEX TISSUE INFO FROM API ######
@@ -145,6 +146,7 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
             for tissue_obj in tissue_stats['singleTissueEqtl']:
                 if (float(tissue_obj['pval_nominal']) if 'pval_nominal' in tissue_obj else float(tissue_obj['pValue'])) < float(p_threshold):
                     temp = [
+                        query_rs_n,
                         rs_n, 
                         geno_n_chr_bp, 
                         r2, 
