@@ -1,4 +1,4 @@
-var ldlink_version = "Version 5.0";
+var ldlink_version = "Version 5.1";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -42,7 +42,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-5.0.0.html", function (data) {
+    $.get("news-5.1.0.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -1688,7 +1688,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-5.0.0.html');
+    $('#help-tab').load('help-5.1.0.html');
 }
 
 function calculate(e) {
