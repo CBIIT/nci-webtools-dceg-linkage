@@ -1242,34 +1242,6 @@ function setupLDexpressControls() {
     toggleShowThinnedLists('toggle-show-ldexpress-thin-genes', 'ldexpress-genes-list');
     toggleShowThinnedLists('toggle-show-ldexpress-thin-tissues', 'ldexpress-tissues-list');
 
-    // snps click filter action
-    $('#ldexpress-snp-list').on('click', "a", function(e) {
-        $('#ldexpress-snp-list').show();
-        $('#ldexpress-initial-message').hide();
-        $('#new-ldexpress_wrapper').show();
-        // loadLDexpressDetails(ldExpressRaw, rs_number, ldExpressSort);
-        $('#new-ldexpress-query-warnings_wrapper').hide();
-        $('#ldexpress-initial-message').hide();
-        //console.log("clicking on link");
-        var rs_number = e.target.id;
-        console.log('filter rs', rs_number);
-        $('#ldexpress-detail-title').text("Details for " + rs_number);
-        // filter by query rs
-        var oTable = $('#new-ldexpress').dataTable();
-        // oTable
-        //     .column( 0 )
-        //     .data()
-        //     .filter( function ( value, index ) {
-        //         console.log("VALUE INDEX", value, index)
-        //         return value === rs_number;
-        //     } );
-        oTable.fnFilter( rs_number, 0 );
-        // $('#ldexpress-snp-list').show();
-        // $('#ldexpress-initial-message').hide();
-        // loadLDexpressDetails(ldExpressRaw, rs_number, ldExpressSort);
-        // $('#new-ldexpress-query-warnings_wrapper').hide();
-        // $('#ldexpress-initial-message').hide();
-    });
     $('#ldexpress-query-warnings-button').click( function() {
         $('#new-ldexpress_wrapper').hide();
         loadLDexpressQueryWarnings(ldExpressRaw);
@@ -2671,14 +2643,12 @@ function populateSNPlistLDexpress(data) {
     $.each(data.thinned_snps, function( index, value ){
         $("#ldexpress-snp-list").append(
             $("<tr>").append(
-                $("<td>").append(
-                    $("<a>")
-                        .attr('id', value)
-                        .attr('title', 'View details.')
-                        .append(value)
-                    )
-                )
+                $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
+                    $('<input />', { type: 'checkbox', id: 'filter_' + value, value: 'snp__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter_' + value, text: value, 'style': 'white-space: nowrap;' })
+                ])
             )
+        )
     });
 }
 
@@ -2689,14 +2659,9 @@ function populateGeneslistLDexpress(data) {
     $.each(data.thinned_genes, function( index, value ){
         $("#ldexpress-genes-list").append(
             $("<tr>").append(
-                $("<td>").append([
-                    $('<input />', { type: 'checkbox', id: 'filter_' + index, value: value, 'style': "margin-right: 4px;" }),
-                    $('<label />', { 'for': 'filter_' +  index, text: value })
-                    // $("<a>")
-                    //     .attr('id', value)
-                    //     .attr('title', 'View details.')
-                    //     .append(value)
-                    // )
+                $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
+                    $('<input />', { type: 'checkbox', id: 'filter_' + value, value: 'gene__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter_' + value, text: value, 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2710,14 +2675,9 @@ function populateTissueslistLDexpress(data) {
     $.each(data.thinned_tissues, function( index, value ){
         $("#ldexpress-tissues-list").append(
             $("<tr>").append(
-                $("<td>").append([
-                    $('<input />', { type: 'checkbox', id: 'filter_' + index, value: value, 'style': "margin-right: 4px;" }),
-                    $('<label />', { 'for': 'filter_' +  index, text: value })
-                    // $("<a>")
-                    //     .attr('id', value)
-                    //     .attr('title', 'View details.')
-                    //     .append(value)
-                    // )
+                $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
+                    $('<input />', { type: 'checkbox', id: 'filter_' + value, value: 'tissue__' + value, 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter_' +  value, text: value, 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2956,6 +2916,56 @@ function initExpress(data, r2_d) {
     populateSNPlistLDexpress(data);
     populateGeneslistLDexpress(data);
     populateTissueslistLDexpress(data);
+
+    // advanced filter click action
+    $('input[type=checkbox].ldexpress-data-filters').on('click', function(e) {
+        $('#ldexpress-snp-list').show();
+        $('#ldexpress-initial-message').hide();
+        $('#new-ldexpress_wrapper').show();
+        $('#new-ldexpress-query-warnings_wrapper').hide();
+        $('#ldexpress-initial-message').hide();
+
+        var selected_snps = [];
+        var selected_genes = [];
+        var selected_tissues = [];
+
+        $('input[type=checkbox].ldexpress-data-filters').each(function() {
+            if ($(this).is(':checked')) {
+                var category = $(this).attr('value').split('__')[0];
+                var checked_val = $(this).attr('value').split('__')[1];
+                if (category === "snp") {
+                    selected_snps.push(checked_val);
+                }
+                if (category === "gene") {
+                    selected_genes.push(checked_val);
+                }
+                if (category === "tissue") {
+                    selected_tissues.push(checked_val.replace("(", "\\(").replace(")", "\\)"));
+                }
+            }
+         });
+
+        var oTable = $('#new-ldexpress').dataTable();
+        if (selected_snps.length > 0) {
+            oTable.fnFilter(selected_snps.join("|"), 0, true, false);
+        } else {
+            oTable.fnFilter("", 0, true, false);
+        }
+        if (selected_genes.length > 0) {
+            oTable.fnFilter(selected_genes.join("|"), 5, true, false);
+        } else {
+            oTable.fnFilter("", 5, true, false);
+        }
+        if (selected_tissues.length > 0) {
+            oTable.fnFilter(selected_tissues.join("|"), 7, true, false);
+        } else {
+            oTable.fnFilter("", 7, true, false);
+        }
+        // table.fnFilter("aaa|bbb", 0, true, false);
+        
+        // oTable.fnFilter( rs_number, 0 );
+
+    });
 
     if(data.details.queryWarnings && data.details.queryWarnings.aaData.length > 0) {
         $('#ldexpress-query-warnings-button').show();
