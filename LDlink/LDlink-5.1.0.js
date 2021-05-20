@@ -2218,8 +2218,8 @@ function updateLDexpress() {
         pop: population.join("+"),
         tissues: tissues.join("+"),
         r2_d: r2_d,
-        r2_d_threshold: $("#" + id + "_r2_d_threshold").val(),
-        p_threshold: $("#" + id + "_p_threshold").val(),
+        r2_d_threshold: Number($("#" + id + "_r2_d_threshold").val()),
+        p_threshold: Number($("#" + id + "_p_threshold").val()),
         window: window,
         reference : Math.floor(Math.random() * (99999 - 10000 + 1))
     };
