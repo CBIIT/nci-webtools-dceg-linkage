@@ -2640,12 +2640,12 @@ function populateSNPlistLDexpress(data) {
     //clear out the list
     $("#ldexpress-snp-list").empty();
     //Add the clipped list
-    $.each(data.thinned_snps, function( index, value ){
+    $.each(data, function( index, value ){
         $("#ldexpress-snp-list").append(
             $("<tr>").append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter_' + value, value: 'snp__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter_' + value, text: value, 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__snp__' + value, value: 'snp__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter__snp__' + value, text: value, 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2656,12 +2656,12 @@ function populateGeneslistLDexpress(data) {
     //clear out the list
     $("#ldexpress-genes-list").empty();
     //Add the clipped list
-    $.each(data.thinned_genes, function( index, value ){
+    $.each(data, function( index, value ){
         $("#ldexpress-genes-list").append(
-            $("<tr>").append(
+            $("<tr>", { class: 'ldexpress-genes-list-rows', id: 'gene__row__' + value }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter_' + value, value: 'gene__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter_' + value, text: value, 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__gene__' + value, value: 'gene__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter_gene__' + value, text: value, 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2672,12 +2672,12 @@ function populateTissueslistLDexpress(data) {
     //clear out the list
     $("#ldexpress-tissues-list").empty();
     //Add the clipped list
-    $.each(data.thinned_tissues, function( index, value ){
+    $.each(data, function( index, value ){
         $("#ldexpress-tissues-list").append(
             $("<tr>").append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter_' + value, value: 'tissue__' + value, 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter_' +  value, text: value, 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__tissue__' + value, value: 'tissue__' + value, 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter__tissue__' +  value, text: value, 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2913,9 +2913,9 @@ function initExpress(data, r2_d) {
     ldExpressRaw = data;
     ldExpressSort = r2_d;
 
-    populateSNPlistLDexpress(data);
-    populateGeneslistLDexpress(data);
-    populateTissueslistLDexpress(data);
+    populateSNPlistLDexpress(data.thinned_snps);
+    populateGeneslistLDexpress(data.thinned_genes);
+    populateTissueslistLDexpress(data.thinned_tissues);
 
     // advanced filter click action
     $('input[type=checkbox].ldexpress-data-filters').on('click', function(e) {
@@ -2958,13 +2958,37 @@ function initExpress(data, r2_d) {
         }
         if (selected_tissues.length > 0) {
             oTable.fnFilter(selected_tissues.join("|"), 7, true, false);
+            // show only genes available for tissue
+            // only register on tissue click
+            if ($(e.target).attr("id").split("__")[1] === "tissue") {
+                var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+                var newGenes = [];
+                newData.forEach(function(row) {
+                    newGenes.push(row[5].split("__")[0])
+                });
+                var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+                $('.ldexpress-genes-list-rows').each(function(i, obj) {
+                    if (newGenesDistinct.includes($(obj).attr('id').split('__')[2])) {
+                        $(obj).show();
+                    } else {
+                        $('#filter__gene__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+                        $(obj).hide();
+                    }
+                });
+            }
         } else {
             oTable.fnFilter("", 7, true, false);
+            var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+            var newGenes = [];
+            newData.forEach(function(row) {
+                newGenes.push(row[5].split("__")[0])
+            });
+            var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+            console.log("newGenesDistinct", newGenesDistinct);
+            $('.ldexpress-genes-list-rows').each(function(i, obj) {
+                $(obj).show();
+            });
         }
-        // table.fnFilter("aaa|bbb", 0, true, false);
-        
-        // oTable.fnFilter( rs_number, 0 );
-
     });
 
     if(data.details.queryWarnings && data.details.queryWarnings.aaData.length > 0) {
