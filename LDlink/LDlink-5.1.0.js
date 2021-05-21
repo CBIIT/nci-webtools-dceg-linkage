@@ -2642,7 +2642,7 @@ function populateSNPlistLDexpress(data) {
     //Add the clipped list
     $.each(data, function( index, value ){
         $("#ldexpress-snp-list").append(
-            $("<tr>").append(
+            $("<tr>", { class: 'ldexpress-snps-list-rows', id: 'snp__row__' + value }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
                     $('<input />', { type: 'checkbox', id: 'filter__snp__' + value, value: 'snp__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
                     $('<label />', { 'for': 'filter__snp__' + value, text: value, 'style': 'white-space: nowrap;' })
@@ -2658,10 +2658,10 @@ function populateGeneslistLDexpress(data) {
     //Add the clipped list
     $.each(data, function( index, value ){
         $("#ldexpress-genes-list").append(
-            $("<tr>", { class: 'ldexpress-genes-list-rows', id: 'gene__row__' + value }).append(
+            $("<tr>", { class: 'ldexpress-genes-list-rows', id: 'gene__row__' + value.split("__")[0] }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter__gene__' + value, value: 'gene__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter_gene__' + value, text: value, 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__gene__' + value.split("__")[0], value: 'gene__' + value.split("__")[0], 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter__gene__' + value.split("__")[0], text: value.split("__")[0], 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2674,10 +2674,10 @@ function populateTissueslistLDexpress(data) {
     //Add the clipped list
     $.each(data, function( index, value ){
         $("#ldexpress-tissues-list").append(
-            $("<tr>").append(
+            $("<tr>", { class: 'ldexpress-tissues-list-rows', id: 'tissue__row__' + value.split("__")[1] }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter__tissue__' + value, value: 'tissue__' + value, 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter__tissue__' +  value, text: value, 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__tissue__' + value.split("__")[1], value: 'tissue__' + value.split("__")[1], 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters' }),
+                    $('<label />', { 'for': 'filter__tissue__' +  value.split("__")[1], text: value.split("__")[0], 'style': 'white-space: nowrap;' })
                 ])
             )
         )
@@ -2940,55 +2940,214 @@ function initExpress(data, r2_d) {
                     selected_genes.push(checked_val);
                 }
                 if (category === "tissue") {
-                    selected_tissues.push(checked_val.replace("(", "\\(").replace(")", "\\)"));
+                    var displayTissueName = data.thinned_tissues.filter(function(el) {
+                        return el.split("__")[1] === checked_val;
+                    })
+                    selected_tissues.push(displayTissueName[0].split("__")[0].replace("(", "\\(").replace(")", "\\)"));
                 }
             }
          });
 
+        // console.log("selected_snps", selected_snps);
+        // console.log("selected_genes", selected_genes);
+        // console.log("selected_tissues", selected_tissues);
+        //  apply filters
         var oTable = $('#new-ldexpress').dataTable();
-        if (selected_snps.length > 0) {
-            oTable.fnFilter(selected_snps.join("|"), 0, true, false);
-        } else {
-            oTable.fnFilter("", 0, true, false);
-        }
-        if (selected_genes.length > 0) {
-            oTable.fnFilter(selected_genes.join("|"), 5, true, false);
-        } else {
-            oTable.fnFilter("", 5, true, false);
-        }
-        if (selected_tissues.length > 0) {
-            oTable.fnFilter(selected_tissues.join("|"), 7, true, false);
-            // show only genes available for tissue
-            // only register on tissue click
-            if ($(e.target).attr("id").split("__")[1] === "tissue") {
-                var newData = Array.from(oTable._('tr', {"filter":"applied"}));
-                var newGenes = [];
-                newData.forEach(function(row) {
-                    newGenes.push(row[5].split("__")[0])
-                });
-                var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
-                $('.ldexpress-genes-list-rows').each(function(i, obj) {
-                    if (newGenesDistinct.includes($(obj).attr('id').split('__')[2])) {
-                        $(obj).show();
-                    } else {
-                        $('#filter__gene__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
-                        $(obj).hide();
-                    }
-                });
-            }
-        } else {
-            oTable.fnFilter("", 7, true, false);
-            var newData = Array.from(oTable._('tr', {"filter":"applied"}));
-            var newGenes = [];
-            newData.forEach(function(row) {
-                newGenes.push(row[5].split("__")[0])
-            });
-            var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
-            console.log("newGenesDistinct", newGenesDistinct);
-            $('.ldexpress-genes-list-rows').each(function(i, obj) {
+        oTable.fnFilter(selected_snps.join("|"), 0, true, false);
+        oTable.fnFilter(selected_genes.join("|"), 5, true, false);
+        oTable.fnFilter(selected_tissues.join("|"), 7, true, false);
+        var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        var newSNPs = [];
+        var newGenes = [];
+        var newTissues = [];
+        newData.forEach(function(row) {
+            newSNPs.push(row[0]);
+            newGenes.push(row[5].split("__")[0]);
+            newTissues.push(row[7].split("__")[1]);
+        });
+        newSNPs = newSNPs.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        newGenes = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        newTissues = newTissues.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        // console.log("newSNPs", newSNPs);
+        // console.log("newGenes", newGenes);
+        // console.log("newTissues", newTissues);
+        $('.ldexpress-snps-list-rows').each(function(i, obj) {
+            if (newSNPs.includes($(obj).attr('id').split('__')[2])) {
                 $(obj).show();
-            });
-        }
+            } else {
+                $('#filter__snp__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+                $(obj).hide();
+            }
+        });
+        $('.ldexpress-genes-list-rows').each(function(i, obj) {
+            if (newGenes.includes($(obj).attr('id').split('__')[2])) {
+                $(obj).show();
+            } else {
+                $('#filter__gene__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+                $(obj).hide();
+            }
+        });
+        $('.ldexpress-tissues-list-rows').each(function(i, obj) {
+            if (newTissues.includes($(obj).attr('id').split('__')[2])) {
+                $(obj).show();
+            } else {
+                $('#filter__tissue__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+                $(obj).hide();
+            }
+        });
+
+
+        // // refresh all filter options when other snp filters added
+        // if (selected_snps.length > 0) {
+        //     oTable.fnFilter(selected_snps.join("|"), 0, true, false);
+        //     if ($(e.target).attr("id").split("__")[1] === "snp") {
+        //         var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        //         var newGenes = [];
+        //         var newTissues = [];
+        //         newData.forEach(function(row) {
+        //             newGenes.push(row[5].split("__")[0]);
+        //             newTissues.push(row[7].split("__")[0]);
+        //         });
+        //         var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //         $('.ldexpress-genes-list-rows').each(function(i, obj) {
+        //             if (newGenesDistinct.includes($(obj).attr('id').split('__')[2])) {
+        //                 $(obj).show();
+        //             } else {
+        //                 $('#filter__gene__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+        //                 $(obj).hide();
+        //             }
+        //         });
+        //         var newTissuesDistinct = newTissues.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //         $('.ldexpress-tissues-list-rows').each(function(i, obj) {
+        //             if (newTissuesDistinct.includes($(obj).attr('id').split('__')[2])) {
+        //                 $(obj).show();
+        //             } else {
+        //                 $('#filter__tissue__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+        //                 $(obj).hide();
+        //             }
+        //         });
+        //     }
+        // } else {
+        //     oTable.fnFilter("", 0, true, false);
+        //     var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        //     var newGenes = [];
+        //     var newTissues = [];
+        //     newData.forEach(function(row) {
+        //         newGenes.push(row[5].split("__")[0]);
+        //         newTissues.push(row[7].split("__")[0]);
+        //     });
+        //     var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //     $('.ldexpress-genes-list-rows').each(function(i, obj) {
+        //         $(obj).show();
+        //     });
+        //     var newTissuesDistinct = newTissues.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //     $('.ldexpress-tissues-list-rows').each(function(i, obj) {
+        //         $(obj).show();
+        //     });
+        // }
+        // // refresh all filter options when gene filters added
+        // if (selected_genes.length > 0) {
+        //     oTable.fnFilter(selected_genes.join("|"), 5, true, false);
+        //     // show only tissues available for gene
+        //     // only register on gene click
+        //     if ($(e.target).attr("id").split("__")[1] === "gene") {
+        //         var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        //         var newTissues = [];
+        //         var newSNPs = [];
+        //         newData.forEach(function(row) {
+        //             newTissues.push(row[7].split("__")[1]);
+        //             newSNPs.push(row[0]);
+        //         });
+        //         var newTissuesDistinct = newTissues.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //         $('.ldexpress-tissues-list-rows').each(function(i, obj) {
+        //             if (newTissuesDistinct.includes($(obj).attr('id').split('__')[2])) {
+        //                 $(obj).show();
+        //             } else {
+        //                 $('#filter__tissue__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+        //                 $(obj).hide();
+        //             }
+        //         });
+        //         var newSNPsDistinct = newSNPs.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //         console.log("newSNPsDistinct", newSNPsDistinct);
+        //         $('.ldexpress-snps-list-rows').each(function(i, obj) {
+        //             if (newSNPsDistinct.includes($(obj).attr('id').split('__')[2])) {
+        //                 console.log("reached 1");
+        //                 $(obj).show();
+        //             } else {
+        //                 $('#filter__snp__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+        //                 $(obj).hide();
+        //                 console.log("reached 2");
+        //             }
+        //         });
+        //     }
+        // } else {
+        //     oTable.fnFilter("", 5, true, false);
+        //     var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        //     var newTissues = [];
+        //     var newSNPs = [];
+        //     newData.forEach(function(row) {
+        //         newTissues.push(row[7].split("__")[0]);
+        //         newSNPs.push(row[0]);
+        //     });
+        //     var newTissuesDistinct = newTissues.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //     $('.ldexpress-tissues-list-rows').each(function(i, obj) {
+        //         $(obj).show();
+        //     });
+        //     var newSNPsDistinct = newSNPs.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //     $('.ldexpress-snps-list-rows').each(function(i, obj) {
+        //         $(obj).show();
+        //     });
+        // }
+        // // refresh all filter options when other tissue filters added
+        // if (selected_tissues.length > 0) {
+        //     oTable.fnFilter(selected_tissues.join("|"), 7, true, false);
+        //     // show only genes available for tissue
+        //     // only register on tissue click
+        //     if ($(e.target).attr("id").split("__")[1] === "tissue") {
+        //         var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        //         var newGenes = [];
+        //         var newSNPs = [];
+        //         newData.forEach(function(row) {
+        //             newGenes.push(row[5].split("__")[0]);
+        //             newSNPs.push(row[0]);
+        //         });
+        //         var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //         $('.ldexpress-genes-list-rows').each(function(i, obj) {
+        //             if (newGenesDistinct.includes($(obj).attr('id').split('__')[2])) {
+        //                 $(obj).show();
+        //             } else {
+        //                 $('#filter__gene__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+        //                 $(obj).hide();
+        //             }
+        //         });
+        //         var newSNPsDistinct = newSNPs.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //         $('.ldexpress-snps-list-rows').each(function(i, obj) {
+        //             if (newSNPsDistinct.includes($(obj).attr('id').split('__')[2])) {
+        //                 $(obj).show();
+        //             } else {
+        //                 $('#filter__snp__' + $(obj).attr('id').split('__')[2]).prop("checked", false);
+        //                 $(obj).hide();
+        //             }
+        //         });
+        //     }
+        // } else {
+        //     oTable.fnFilter("", 7, true, false);
+        //     var newData = Array.from(oTable._('tr', {"filter":"applied"}));
+        //     var newGenes = [];
+        //     var newSNPs = [];
+        //     newData.forEach(function(row) {
+        //         newGenes.push(row[5].split("__")[0]);
+        //         newSNPs.push(row[0]);
+        //     });
+        //     var newGenesDistinct = newGenes.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //     $('.ldexpress-genes-list-rows').each(function(i, obj) {
+        //         $(obj).show();
+        //     });
+        //     var newSNPsDistinct = newSNPs.filter((item, i, ar) => ar.indexOf(item) === i).sort();
+        //     $('.ldexpress-snps-list-rows').each(function(i, obj) {
+        //         $(obj).show();
+        //     });
+        // }
     });
 
     if(data.details.queryWarnings && data.details.queryWarnings.aaData.length > 0) {
@@ -3029,7 +3188,6 @@ function initExpressTissues() {
     });
     ajaxRequest.success(function(data) {
         if (displayError(id, data) == false) {
-            // ldExpressTissues = data;
             buildTissueDropdown(id + "-tissue-codes", data);
         } else {
             buildTissueDropdown("ldexpress-tissue-codes", data);
