@@ -2644,8 +2644,8 @@ function populateSNPlistLDexpress(data) {
         $("#ldexpress-snp-list").append(
             $("<tr>", { class: 'ldexpress-snps-list-rows', id: 'snp__row__' + value }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter__snp__' + value, value: 'snp__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter__snp__' + value, text: value, 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__snp__' + value, value: 'snp__' + value, 'style': "margin-right: 4px;", class: 'ldexpress-data-filters', 'title': 'Filter on variant' }),
+                    $('<label />', { 'for': 'filter__snp__' + value, text: value, 'style': 'white-space: nowrap;', 'title': value })
                 ])
             )
         )
@@ -2660,8 +2660,8 @@ function populateGeneslistLDexpress(data) {
         $("#ldexpress-genes-list").append(
             $("<tr>", { class: 'ldexpress-genes-list-rows', id: 'gene__row__' + value.split("__")[0] }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter__gene__' + value.split("__")[0], value: 'gene__' + value.split("__")[0], 'style': "margin-right: 4px;", class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter__gene__' + value.split("__")[0], text: value.split("__")[0], 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__gene__' + value.split("__")[0], value: 'gene__' + value.split("__")[0], 'style': "margin-right: 4px;", class: 'ldexpress-data-filters', 'title': 'Filter on gene' }),
+                    $('<label />', { 'for': 'filter__gene__' + value.split("__")[0], text: value.split("__")[0], 'style': 'white-space: nowrap;', 'title': value.split("__")[0] })
                 ])
             )
         )
@@ -2676,8 +2676,8 @@ function populateTissueslistLDexpress(data) {
         $("#ldexpress-tissues-list").append(
             $("<tr>", { class: 'ldexpress-tissues-list-rows', id: 'tissue__row__' + value.split("__")[1] }).append(
                 $("<td>", { 'style': 'white-space: nowrap; width: 150px;' }).append([
-                    $('<input />', { type: 'checkbox', id: 'filter__tissue__' + value.split("__")[1], value: 'tissue__' + value.split("__")[1], 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters' }),
-                    $('<label />', { 'for': 'filter__tissue__' +  value.split("__")[1], text: value.split("__")[0], 'style': 'white-space: nowrap;' })
+                    $('<input />', { type: 'checkbox', id: 'filter__tissue__' + value.split("__")[1], value: 'tissue__' + value.split("__")[1], 'style': 'margin-right: 4px;', class: 'ldexpress-data-filters', 'title': 'Filter on tissue' }),
+                    $('<label />', { 'for': 'filter__tissue__' +  value.split("__")[1], text: value.split("__")[0], 'style': 'white-space: nowrap;', 'title': value.split("__")[0] })
                 ])
             )
         )

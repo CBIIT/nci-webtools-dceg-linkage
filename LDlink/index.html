@@ -808,13 +808,13 @@
 									<div class="input-group row" title="R2 or D' threshold for LD with query SNP">
 										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup> &ge;</label>
 										<input id="ldexpress_r2_d_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e\-[1-9]+)" value="0.1"
-											title="Threshold must be a number between 0 and 1" required>
+											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" title="P-value threshold for the QTL association">
 										<label id="ldexpress_p_threshold_label" for="ldexpress_p_threshold" style="width: 30px">P &nbsp;&lt;</label>
 										<input id="ldexpress_p_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e\-[1-9]+)" value="0.1"
-											title="Threshold must be a number between 0 and 1" required>
+											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" style="min-width: 200px;">
@@ -872,7 +872,7 @@
 								<!-- thinned snps -->
 								<table class="ldexpress-table-thin table table-striped table-chip" style="position: relative;">
 									<caption>
-										<span id="toggle-show-ldexpress-thin-snps" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true"></span>
+										<span id="toggle-show-ldexpress-thin-snps" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true" title="Toggle show/hide SNPs"></span>
 										Variants in LD with GTEx QTL
 									</caption>
 									<!-- <thead>
@@ -885,7 +885,7 @@
 								<!-- thinned genes -->
 								<table class="ldexpress-table-thin table table-striped table-chip" style="position: relative;">
 									<caption>
-										<span id="toggle-show-ldexpress-thin-genes" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true"></span>
+										<span id="toggle-show-ldexpress-thin-genes" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true" title="Toggle show/hide genes"></span>
 										Genes with GTEx QTL
 									</caption>
 									<!-- <thead>
@@ -898,7 +898,7 @@
 								<!-- thinned tissues -->
 								<table class="ldexpress-table-thin table table-striped table-chip" style="position: relative;">
 									<caption>
-										<span id="toggle-show-ldexpress-thin-tissues" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true"></span>
+										<span id="toggle-show-ldexpress-thin-tissues" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true" title="Toggle show/hide tissues"></span>
 										Tissues with GTEx QTL
 									</caption>
 									<!-- <thead>
