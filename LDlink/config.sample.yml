@@ -23,5 +23,6 @@ database:
   mongo_user_readonly: '<USERNAME_READ_ONLY>'
   mongo_user_api: '<USERNAME_READ_WRITE>'
   mongo_password: '<PASSWORD>'
+  mongo_port: 27017
 performance:
   num_subprocesses: 4
