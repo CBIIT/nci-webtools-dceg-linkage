@@ -257,7 +257,14 @@ def unlockUser(email):
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.find_one_and_update({"email": email}, { "$set": {"locked": 0}})
+    record = users.find_one({"email": email})
+
+    if record["locked"] == -1:
+        out_json = {
+            "message": "Email user (" + email + ") has concurrent access."
+        }
+    else:
+        users.find_one_and_update({"email": email}, { "$set": {"locked": 0}})
     return out_json
 
 # sets locked attribute of all users to 0=false
@@ -280,7 +287,7 @@ def unlockAllUsers():
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.update_many({}, { "$set": {"locked": 0}})
+    users.update_many({"locked": {"$not": -1}}, { "$set": {"locked": 0}})
     return out_json
 
 # update record only if email's token is expired and user re-registers
@@ -393,11 +400,12 @@ def checkLocked(token):
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
+
     if record is None:
         return False
     else:
         if "locked" in record:
-            if record["locked"] == 0:
+            if record["locked"] == 0 or record["locked"] == -1:
                 return False
             else:
                 return True
@@ -420,11 +428,15 @@ def toggleLocked(token, lock):
         client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
         db = client["LDLink"]
         users = db.api_users
-        if lock == 1:
-            calcStartTime = getDatetime()
-            users.find_one_and_update({"token": token}, { "$set": {"locked": calcStartTime}})
-        else: 
-            users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
+        record = users.find_one({"token": token})
+
+        # bypass lock toggle if user has -1 locked flag set (unlimited api calls)
+        if record["locked"] != -1:
+            if lock == 1:
+                calcStartTime = getDatetime()
+                users.find_one_and_update({"token": token}, { "$set": {"locked": calcStartTime}})
+            else: 
+                users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email, env, api_mongo_addr):
