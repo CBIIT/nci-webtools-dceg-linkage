@@ -238,7 +238,7 @@ def unblockUser(email):
     return out_json
 
 # sets locked attribute of user to 0=false
-def unlockUser(email):
+def setUserLock(email, lockValue):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
@@ -248,7 +248,7 @@ def unlockUser(email):
     mongo_port = config['database']['mongo_port']
 
     out_json = {
-        "message": "Email user (" + email + ")'s token access has been unlocked."
+        "message": "Email user (" + email + ")'s token access lock has been set to " + lockValue
     }
     if env == 'local':
         mongo_host = api_mongo_addr
@@ -257,14 +257,8 @@ def unlockUser(email):
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    record = users.find_one({"email": email})
+    users.find_one_and_update({"email": email}, { "$set": {"locked": lockValue}})
 
-    if record["locked"] == -1:
-        out_json = {
-            "message": "Email user (" + email + ") has concurrent access."
-        }
-    else:
-        users.find_one_and_update({"email": email}, { "$set": {"locked": 0}})
     return out_json
 
 # sets locked attribute of all users to 0=false

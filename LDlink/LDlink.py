@@ -32,7 +32,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, unlockUser, unlockAllUsers, getLockedUsers, getBlockedUsers
+from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
 
@@ -236,12 +236,13 @@ def unblock_user():
     return sendJSON(out_json)
 
 # Web route to unlock user's API token
-@app.route('/LDlinkRestWeb/apiaccess/unlock_user', methods=['GET'])
+@app.route('/LDlinkRestWeb/apiaccess/set_user_lock', methods=['GET'])
 @requires_admin_token
-def unlock_user():
+def set_user_lock():
     print("Execute api unlock user")
     email = request.args.get('email', False)
-    out_json = unlockUser(email)
+    lockValue = request.args.get('locked', False)
+    out_json = setUserLock(email, lockValue)
     return sendJSON(out_json)
 
 # Web route to unlock all users API tokens
