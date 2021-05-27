@@ -237,7 +237,7 @@ def unblockUser(email):
     emailUserUnblocked(email, email_account)
     return out_json
 
-# sets locked attribute of user to 0=false
+# sets locked attribute of user to lockValue
 def setUserLock(email, lockValue):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)

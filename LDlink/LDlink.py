@@ -240,9 +240,21 @@ def unblock_user():
 @requires_admin_token
 def set_user_lock():
     print("Execute api unlock user")
-    email = request.args.get('email', False)
-    lockValue = request.args.get('locked', False)
-    out_json = setUserLock(email, lockValue)
+    email = request.args.get('email', "Missing Argument")
+
+    try:
+        lockValue = int(request.args.get('locked', "Missing Argument"))
+        if lockValue == -1 or lockValue == 0:
+            out_json = setUserLock(email, lockValue)
+        else:
+            out_json =  {
+                "message": "invalid lock value: " + str(lockValue)
+            }
+    except:
+        out_json =  {
+            "message": "invalid lock value"
+        }
+
     return sendJSON(out_json)
 
 # Web route to unlock all users API tokens
