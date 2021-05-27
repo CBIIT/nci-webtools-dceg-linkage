@@ -678,6 +678,13 @@ hr.header {
 	border-right: 1px solid #ccc;
 }
 
+.toggle-show-thinned {
+  cursor: pointer;
+  position: absolute;
+  top: 10px;
+  left: -20px;
+} 
+
 #ldexpress-snp-list > a {
 	text-decoration: underline;
 	color: #2D6A9F;
@@ -779,12 +786,16 @@ table.table-chip > tbody {
     border:1px solid #ccc;
 }
 
-table#ldexpress-table-thin > tbody {
+.ldexpress-table-thin {
+  width: 100% !important;
+}
+
+table.ldexpress-table-thin > tbody {
   max-height: 400px;
   overflow-y: auto;
 }
 
-table#ldexpress-table-thin > tbody > tr > td {
+table.ldexpress-table-thin > tbody > tr > td {
   padding: 8px 20px 8px 10px;
 }
 

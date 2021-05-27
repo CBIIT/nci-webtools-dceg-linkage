@@ -23,7 +23,7 @@
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables@1.10.8/media/css/jquery.dataTables.min.css" integrity="sha256-4vA/Qvj3cRozXbsauVemzsbGBdKSD4GVsVaaMjYTuRk=" crossorigin="anonymous">	
 	<link rel="stylesheet" href="/common/css/style.css">
 	<link rel="stylesheet" href="/common/css/social.css">
-	<link rel="stylesheet" href="LDlink-5.0.0.css">
+	<link rel="stylesheet" href="LDlink-5.1.0.css">
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
@@ -807,14 +807,14 @@
 									<div class="row">Thresholds</div>
 									<div class="input-group row" title="R2 or D' threshold for LD with query SNP">
 										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup> &ge;</label>
-										<input id="ldexpress_r2_d_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
-											title="Threshold must be a number between 0 and 1" required>
+										<input id="ldexpress_r2_d_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e\-[1-9]+)" value="0.1"
+											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" title="P-value threshold for the QTL association">
 										<label id="ldexpress_p_threshold_label" for="ldexpress_p_threshold" style="width: 30px">P &nbsp;&lt;</label>
-										<input id="ldexpress_p_threshold" type="text" pattern="\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)" value="0.1"
-											title="Threshold must be a number between 0 and 1" required>
+										<input id="ldexpress_p_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e\-[1-9]+)" value="0.1"
+											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" style="min-width: 200px;">
@@ -869,15 +869,46 @@
 					<div class="container-fluid" id="ldexpress-results-container">
 						<div id="ldexpress-table-container" class="row">
 							<div class="col-md-2 ldexpress-table-scroller">
-								<table id="ldexpress-table-thin" class="table table-striped table-chip">
-									<caption>Variants in LD with GTEx QTL</caption>
-									<thead>
+								<!-- thinned snps -->
+								<table class="ldexpress-table-thin table table-striped table-chip" style="position: relative;">
+									<caption>
+										<span id="toggle-show-ldexpress-thin-snps" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true" title="Toggle show/hide SNPs"></span>
+										Variants in LD with GTEx QTL
+									</caption>
+									<!-- <thead>
 										<tr>
 											<th>RS Number</th>
 										</tr>
-									</thead>
-									<tbody id="ldexpress-snp-list"></tbody>
+									</thead> -->
+									<tbody id="ldexpress-snp-list" style="display: block; max-height: 350px; overflow-y: auto; overflow-x: auto; max-width: 150px; min-width: 150px;"></tbody>
 								</table>
+								<!-- thinned genes -->
+								<table class="ldexpress-table-thin table table-striped table-chip" style="position: relative;">
+									<caption>
+										<span id="toggle-show-ldexpress-thin-genes" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true" title="Toggle show/hide genes"></span>
+										Genes with GTEx QTL
+									</caption>
+									<!-- <thead>
+										<tr>
+											<th>Genes</th>
+										</tr>
+									</thead> -->
+									<tbody id="ldexpress-genes-list" style="display: block; max-height: 350px; overflow-y: auto; overflow-x: auto; max-width: 150px; min-width: 150px;"></tbody>
+								</table>
+								<!-- thinned tissues -->
+								<table class="ldexpress-table-thin table table-striped table-chip" style="position: relative;">
+									<caption>
+										<span id="toggle-show-ldexpress-thin-tissues" class="toggle-show-thinned mr-1 glyphicon glyphicon-minus" aria-hidden="true" title="Toggle show/hide tissues"></span>
+										Tissues with GTEx QTL
+									</caption>
+									<!-- <thead>
+										<tr>
+											<th>Tissues</th>
+										</tr>
+									</thead> -->
+									<tbody id="ldexpress-tissues-list" style="display: block; max-height: 350px; overflow-y: auto; overflow-x: auto; max-width: 150px; min-width: 150px;"></tbody>
+								</table>
+								<!-- warnings, if any -->
 								<a id="ldexpress-query-warnings-button" title="View details.">Variants with Warnings</a>
 							</div>
 
@@ -885,10 +916,11 @@
 
 								<!-- SNP and Trait Details -->
 								<table id="new-ldexpress" class="table display compact">
-									<caption id="ldexpress-detail-title">Details for rs1234</caption>
+									<!-- <caption id="ldexpress-detail-title">Details for rs1234</caption> -->
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
 											<!-- <th class="dt-head-left dt-body-left">Query RS Number</th> -->
+											<th class="dt-head-left dt-body-left">Query</th>
 											<th class="dt-head-left dt-body-left">RS Number</th>
 											<th class="dt-head-left dt-body-left">Position (GRCh37)</th>
 											<th class="dt-head-left dt-body-left">R<sup>2</sup></th>
@@ -928,11 +960,11 @@
 							</span>
 						</div>
 					</div>
-					<!-- <div class="row" style="padding-left: 30px;">
+					<div class="row" style="padding-left: 30px;">
 						<div style="float: left;">
-							<i>GWAS Catalog last updated on <span id="ldexpress-timestamp">...</span></i>
+							<i>GTEx v8</i>
 						</div>
-					</div> -->
+					</div>
 				</div> <!-- jumbotron -->
 			</div>
 			<!--  END OF ldexpress -->
@@ -2753,7 +2785,7 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.5/dist/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc=" crossorigin="anonymous"></script>	
 	<script src="https://cdn.jsdelivr.net/npm/knockout@3.1.0/build/output/knockout-latest.js" integrity="sha256-TwqMvYd1Dm109PGsukUkZ5vwLfsPCzY0YGG9eBMPBOE=" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/knockout.mapping@2.4.3/knockout.mapping.js" integrity="sha256-TUlOKeuoLfKJnB2YhKMgopAf5JurOPSCdfqw0jBlkXw=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="LDlink-5.0.0.js"></script>
+	<script type="text/javascript" src="LDlink-5.1.0.js"></script>
 	<script type="text/javascript" src="/common/js/purify.js"></script>
 	<script type="text/javascript" src="/common/js/bootstrap-multiselect.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery.browser@0.0.7/dist/jquery.browser.min.js" integrity="sha256-Rr2aTI0oGDN2yUVggLBqR2hq8L33245rgO7SdZXj3po=" crossorigin="anonymous"></script>	

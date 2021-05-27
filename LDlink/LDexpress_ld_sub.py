@@ -148,7 +148,7 @@ for geno_n in vcf:
             if ((r2_d == "r2" and out_stats[0] >= float(r2_d_threshold)) or (r2_d == "d" and out_stats[1] >= float(r2_d_threshold))):
                 bp_n = geno_n[1]
                 rs_n = geno_n[2]
-                out.append([rs_n, chromosome, bp_n, out_stats[0], out_stats[1], out_stats[2], out_stats[3]])
+                out.append([snp, rs_n, chromosome, bp_n, out_stats[0], out_stats[1], out_stats[2], out_stats[3]])
 
 for line in out:
     print("\t".join([str(val) for val in line]))

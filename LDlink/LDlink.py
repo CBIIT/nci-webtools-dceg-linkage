@@ -511,9 +511,11 @@ def ldexpress():
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             try:
                 express = {}
-                (query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
                 express["query_snps"] = query_snps
                 express["thinned_snps"] = thinned_snps
+                express["thinned_genes"] = thinned_genes
+                express["thinned_tissues"] = thinned_tissues
                 express["details"] = details
 
                 if "error" in errors_warnings:
@@ -521,10 +523,9 @@ def ldexpress():
                 else:
                     with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
                         f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n")
-                        for snp in thinned_snps:
-                            for matched_gwas in details[snp]["aaData"]:
-                                f.write(snp + "\t")
-                                f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
+                        # for snp in thinned_snps:
+                        for matched_gwas in details["results"]["aaData"]:
+                            f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
                         if "warning" in errors_warnings:
                             express["warning"] = errors_warnings["warning"]
                             f.write("Warning(s):\n")
@@ -542,7 +543,7 @@ def ldexpress():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
             # with open(tmp_dir + "express" + reference + ".json") as f:
             #     json_dict = json.load(f)
             if "error" in errors_warnings:
@@ -552,10 +553,9 @@ def ldexpress():
             else:
                 with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
                     f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n")
-                    for snp in thinned_snps:
-                        for matched_gwas in details[snp]["aaData"]:
-                            f.write(snp + "\t")
-                            f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
+                    # for snp in thinned_snps:
+                    for matched_gwas in details["results"]["aaData"]:
+                        f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
                     if "warning" in errors_warnings:
                         express["warning"] = errors_warnings["warning"]
                         f.write("Warning(s):\n")
