@@ -248,7 +248,7 @@ def setUserLock(email, lockValue):
     mongo_port = config['database']['mongo_port']
 
     out_json = {
-        "message": "Email user (" + email + ")'s token access lock has been set to " + lockValue
+        "message": "Email user (" + email + ")'s lock has been set to " + str(lockValue)
     }
     if env == 'local':
         mongo_host = api_mongo_addr
@@ -257,7 +257,7 @@ def setUserLock(email, lockValue):
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.find_one_and_update({"email": email}, { "$set": {"locked": lockValue}})
+    users.find_one_and_update({"email": email}, { "$set": {"locked": int(lockValue)}})
 
     return out_json
 
@@ -381,7 +381,7 @@ def checkBlocked(token):
         else:
             return False
 
-# check if token is locked (1=locked, 0=not locked). returns true (1) if token is locked
+# check if token is locked (1=locked, 0=not locked, -1=never locked). returns true (1) if token is locked
 def checkLocked(token):
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
