@@ -281,7 +281,7 @@ def unlockAllUsers():
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.update_many({"locked": {"$not": -1}}, { "$set": {"locked": 0}})
+    users.update_many({"locked": {"ne": -1}}, { "$set": {"locked": 0}})
     return out_json
 
 # update record only if email's token is expired and user re-registers
@@ -324,6 +324,9 @@ def checkToken(token, token_expiration, token_expiration_days):
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
+
+    print("LOCKED VALUUUUUE:: " + str(record["locked"]))
+
     if record is None:
         return False
     else:
@@ -394,6 +397,8 @@ def checkLocked(token):
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
+
+    print("LOCKED VALUE FOR USER::::: " + str(record["locked"]))
 
     if record is None:
         return False
