@@ -176,8 +176,10 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		def get_coords_gene(gene_raw):
 			gene=gene_raw.upper()
 			t=(gene,)
-			cur.execute("SELECT * FROM genes WHERE name=?", t)
-			return cur.fetchone()
+			result = db.genes.find_one({"name": t})
+    		return result["score"]
+			#cur.execute("SELECT * FROM genes WHERE name=?", t)
+			#return cur.fetchone()
 
 		# Find RS number in snp database
 		gene_coord=get_coords_gene(myargs.name)

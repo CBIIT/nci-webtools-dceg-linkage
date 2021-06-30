@@ -107,21 +107,10 @@ def LD_calcs(hap, allele, allele_n):
 
 
 # Open Connection to RegulomeDB
-con = sqlite3.connect(reg_dir)
-con.row_factory = sqlite3.Row
-con.text_factory = str
-curr = con.cursor()
-
-
-def get_regDB(chr, pos):
-    t = (pos,)
-    curr.execute("SELECT * FROM "+chr+" WHERE position=?", t)
-    a = curr.fetchone()
-    if a == None:
-        return "."
-    else:
-        return a[1]
-
+#con = sqlite3.connect(reg_dir)
+#con.row_factory = sqlite3.Row
+#con.text_factory = str
+#curr = con.cursor()
 
 # Connect to Mongo snp database
 if env == 'local':
@@ -130,6 +119,11 @@ else:
     mongo_host = 'localhost'
 client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
 db = client["LDLink"]
+
+
+def get_regDB(chr, pos):
+    result = db.chr_position_score.find_one({"chromosome": chr, "position": int(pos)})
+    return result["score"]
 
 
 def get_coords(db, rsid):
