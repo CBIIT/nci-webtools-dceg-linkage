@@ -756,3 +756,28 @@ def getBlockedUsers():
     }
     return out_json
 
+def lookupUser(email):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    env = config['env']
+    api_mongo_addr = config['api']['api_mongo_addr']
+
+    user_record = getEmailRecord(email, env, api_mongo_addr)
+
+    if user_record != None:
+        registered = user_record["registered"]
+        format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+        out_json = {
+            "email": user_record["email"],
+            "firstname": user_record["firstname"],
+            "lastname": user_record["lastname"],
+            "institution": user_record["institution"],
+            "token": user_record["token"],
+            "registered": format_registered,
+            "blocked": user_record["blocked"],
+            "locked": user_record["locked"]
+        }
+    else:
+        out_json = "No record found"
+    return out_json
+
