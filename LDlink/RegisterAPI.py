@@ -11,6 +11,7 @@ import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
+import UnlockStaleTokens
 
 # blocked users attribute: 0=false, 1=true
 
@@ -263,25 +264,11 @@ def setUserLock(email, lockValue):
 
 # sets locked attribute of all users to 0=false
 def unlockAllUsers():
+    UnlockStaleTokens.main()
+    
     out_json = {
         "message": "All tokens have been unlocked."
     }
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
-    env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
-    mongo_username = config['database']['mongo_user_api']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
-    if env == 'local':
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
-    db = client["LDLink"]
-    users = db.api_users
-    users.update_many({"locked": {"$ne": -1}}, { "$set": {"locked": 0}})
     return out_json
 
 # update record only if email's token is expired and user re-registers
