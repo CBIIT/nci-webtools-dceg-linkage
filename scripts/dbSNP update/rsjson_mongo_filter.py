@@ -1,8 +1,8 @@
 import sys
 import json
 import gzip
-from pymongo import MongoClient, ASCENDING
-from pymongo.errors import ConnectionFailure
+# from pymongo import MongoClient, ASCENDING
+# from pymongo.errors import ConnectionFailure
 import time
 start_time = time.time()  # measure script's run time
 
@@ -55,6 +55,7 @@ def getPosition(primary_refsnp, variant_type):
             assembly = i['placement_annot']['seq_id_traits_by_assembly'][0]['assembly_name']
             is_chrom = i['placement_annot']['seq_id_traits_by_assembly'][0]['is_chromosome']
             pos = i['alleles'][0]['allele']['spdi']['position']
+            ########    
             # only choose bp from GRCh37.p13
             if is_chrom == True and assembly == "GRCh37.p13":
                 if variant_type == "delins":
@@ -65,6 +66,11 @@ def getPosition(primary_refsnp, variant_type):
                     position = str(pos)
                 else:
                     position = str(int(pos) + 1)
+            ########  
+            ########
+            # CONSIDER PARSING "hgvs" property for 'corrected' position
+            ########  
+                
     return position
 
 
