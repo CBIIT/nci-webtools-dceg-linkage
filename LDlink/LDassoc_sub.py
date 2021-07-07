@@ -1,6 +1,5 @@
 import csv
 import json
-import sqlite3
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
@@ -105,13 +104,6 @@ def LD_calcs(hap, allele, allele_n):
 
         return [maf_q, maf_p, D_prime, r2, match]
 
-
-# Open Connection to RegulomeDB
-#con = sqlite3.connect(reg_dir)
-#con.row_factory = sqlite3.Row
-#con.text_factory = str
-#curr = con.cursor()
-
 # Connect to Mongo snp database
 if env == 'local':
     mongo_host = api_mongo_addr
@@ -122,7 +114,7 @@ db = client["LDLink"]
 
 
 def get_regDB(chr, pos):
-    result = db.chr_position_score.find_one({"chromosome": chr, "position": int(pos)})
+    result = db.regulome.find_one({"chromosome": chr, "position": int(pos)})
     return result["score"]
 
 
@@ -207,9 +199,3 @@ for geno_n in vcf:
 for i in range(len(out)):
     print("\t".join(str(j) for j in out[i]))
 
-
-# Close SQLite connections
-curr.close()
-con.close()
-# curr2.close()
-# con2.close()

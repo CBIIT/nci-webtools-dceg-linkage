@@ -20,8 +20,8 @@ def create_connection(db_file):
 def regulomeToMongo(conn):
    
     myclient = pymongo.MongoClient('localhost', 27017)
-    mydb = myclient['mydatabase']
-    chrCollection = mydb["chr_position_score"]
+    mydb = myclient['sqliteData']
+    chrCollection = mydb["regulome"]
     chrJSON = []
 
     cur = conn.cursor()
@@ -52,14 +52,14 @@ def regulomeToMongo(conn):
             ("chromosome", 1),
             ("position", 1)
         ])    
-    print(mydb.chr_position_score.count())
+    print(mydb.regulome.count())
 
     return
 
 def geneNamesToMongo(conn):
    
     myclient = pymongo.MongoClient('localhost', 27017)
-    mydb = myclient['mydatabase']
+    mydb = myclient['sqliteData']
     geneCollection = mydb["genes"]
     geneJSON = []
 
