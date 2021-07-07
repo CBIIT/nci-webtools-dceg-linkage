@@ -169,7 +169,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 		def get_coords_gene(gene_raw, db):
 			gene=gene_raw.upper()
-			mongoResult = db.genes.find_one({"name": gene})
+			mongoResult = db.genes_name_coords.find_one({"name": gene})
 
 			#format mongo output
 			if mongoResult != None:
