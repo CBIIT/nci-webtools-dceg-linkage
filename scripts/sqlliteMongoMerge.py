@@ -60,7 +60,7 @@ def geneNamesToMongo(conn):
    
     myclient = pymongo.MongoClient('localhost', 27017)
     mydb = myclient['sqliteData']
-    geneCollection = mydb["genes"]
+    geneCollection = mydb["genes_name_coords"]
     geneJSON = []
 
     cur = conn.cursor()
@@ -81,8 +81,12 @@ def geneNamesToMongo(conn):
             
     print("inserting many... gene record count: " + str(len(geneJSON)))
      
-    geneCollection.insert_many(geneJSON)   
-    print(mydb.genes.count())
+    geneCollection.insert_many(geneJSON)
+    resp = geneCollection.create_index(
+        [
+            ("name", 1)
+        ])     
+    print(mydb.genes_name_coords.count())
 
     return    
 
