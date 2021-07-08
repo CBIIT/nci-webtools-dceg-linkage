@@ -754,6 +754,13 @@ def lookupUser(email):
     if user_record != None:
         registered = user_record["registered"]
         format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+        locked = user_record["locked"]
+
+        try:
+            format_locked = locked.strftime("%Y-%m-%d %H:%M:%S")
+        except:
+            format_locked = locked
+            
         out_json = {
             "email": user_record["email"],
             "firstname": user_record["firstname"],
@@ -762,7 +769,7 @@ def lookupUser(email):
             "token": user_record["token"],
             "registered": format_registered,
             "blocked": user_record["blocked"],
-            "locked": user_record["locked"]
+            "locked": format_locked
         }
     else:
         out_json = "No record found"
