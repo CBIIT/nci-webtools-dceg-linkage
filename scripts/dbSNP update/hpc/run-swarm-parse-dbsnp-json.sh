@@ -25,24 +25,27 @@ if [ -z "$2" ]
 fi
 OUTPUT_DIR=$2
 
-# CURRENT_DATE=$(date +%F_%H:%M:%S)
+CURRENT_DATE=$(date +%F_%H:%M:%S)
 
-# mkdir ./swarm_export_out_$CURRENT_DATE
+mkdir ./swarm_export_out_$CURRENT_DATE
 
 # Log path
-# LOG_PATH="./swarm_export_out_$CURRENT_DATE/"
+LOG_PATH="./swarm_export_out_$CURRENT_DATE/"
 
 # Export script path
-# EXPORT_SCRIPT="../rsjson_mongo_filter.py"
+EXPORT_SCRIPT="../rsjson_mongo_filter.py"
 
-# Delete existing SWARM file if exists
-# if [ -e $SWARM_FILE ] 
-# then 
-#     echo "Delete existing SWARM file..."
-#     rm $SWARM_FILE
-# else
-#     echo "Creating new SWARM file..."
-# fi
+# Tmp lscratch path
+TMP_PATH="/lscratch/\$SLURM_JOB_ID"
+
+Delete existing SWARM file if exists
+if [ -e $SWARM_FILE ] 
+then 
+    echo "Delete existing SWARM file..."
+    rm $SWARM_FILE
+else
+    echo "Creating new SWARM file..."
+fi
 
 # Generate SWARM file
 echo "Generating SWARM script..."
@@ -54,13 +57,13 @@ do
     if [[ $FILE_BASENAME =~ ^refsnp-chr[1-9|X|Y]+\.json\.bz2$ ]]
     then
         echo "Found file: $FILE"
-        # echo "echo 'Creating MySQL instance...' ; local_mysql create --port $PORT ; echo 'Created MySQL instance.' ; echo 'Configuring MySQL instance...' ; cp mysql-lscratch.config  /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; sed -i 's/<PORT>/$PORT/g' /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; sed -i \"s/<SLURM_JOB_ID>/\$SLURM_JOB_ID/g\" /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; echo 'Configured MySQL instance.' ; echo 'Starting MySQL instance...' ; local_mysql start --port $PORT ; echo 'Started MySQL instance.' ; echo 'Creating MySQL user...' ; mysql -u root -p$PASSWORD --socket=$TMP_DIR/mysql.sock --execute=\"CREATE USER '$USER'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; CREATE USER '$USER'@'%' IDENTIFIED BY '$PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION; CREATE DATABASE plcogwas CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;\" ; echo 'Created MySQL user.' ; node $EXPORT_SCRIPT --port $PORT --user $USER --password $PASSWORD --file $FILE --phenotype_file $PHENOTYPE_FILE --output $OUTPUT_DIR --logdir $LOG_PATH --tmp $TMP_DIR ; echo 'Stopping MySQL instance...' ; local_mysql stop --port $PORT ; echo 'Stopped MySQL instance.' ;"
-        # echo "echo 'Creating MySQL instance...' ; local_mysql create --port $PORT ; echo 'Created MySQL instance.' ; echo 'Configuring MySQL instance...' ; cp mysql-lscratch.config  /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; sed -i 's/<PORT>/$PORT/g' /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; sed -i \"s/<SLURM_JOB_ID>/\$SLURM_JOB_ID/g\" /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; echo 'Configured MySQL instance.' ; echo 'Starting MySQL instance...' ; local_mysql start --port $PORT ; echo 'Started MySQL instance.' ; echo 'Creating MySQL user...' ; mysql -u root -p$PASSWORD --socket=$TMP_DIR/mysql.sock --execute=\"CREATE USER '$USER'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; CREATE USER '$USER'@'%' IDENTIFIED BY '$PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION; CREATE DATABASE plcogwas CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;\" ; echo 'Created MySQL user.' ; node $EXPORT_SCRIPT --port $PORT --user $USER --password $PASSWORD --file $FILE --phenotype_file $PHENOTYPE_FILE --output $OUTPUT_DIR --logdir $LOG_PATH --tmp $TMP_DIR ; echo 'Stopping MySQL instance...' ; local_mysql stop --port $PORT ; echo 'Stopped MySQL instance.' ;" >> $SWARM_FILE
+        echo "python3 ${SWARM_FILE} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}"
+        echo "python3 ${SWARM_FILE} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}" >> $SWARM_FILE
         echo ""
     fi
 done
 
-# [ -d $OUTPUT_DIR ] && echo "$OUTPUT_DIR directory already exists" || mkdir $OUTPUT_DIR
+[ -d $OUTPUT_DIR ] && echo "$OUTPUT_DIR directory already exists" || mkdir $OUTPUT_DIR
 
 # Run generated SWARM file
 # -f <filename> = specify .swarm file
@@ -69,4 +72,4 @@ done
 # --verbose <0-6> = choose verbose level, 6 being the most chatty
 # --gres=lscratch:<#> = number of gb of tmp space for each process subjob
 # swarm -f $SWARM_FILE -t 8 -g 64 --time 48:00:00 --verbose 6 --gres=lscratch:300 --logdir $LOG_PATH --module mysql/8.0,nodejs --merge-output
-# swarm -f $SWARM_FILE -t 4 -g 32 --time 48:00:00 --verbose 6 --gres=lscratch:300 --logdir $LOG_PATH --module mysql/5.7.22,nodejs --merge-output
+# swarm -f $SWARM_FILE -t 2 -g 16 --time 48:00:00 --verbose 6 --gres=lscratch:200 --logdir $LOG_PATH --merge-output
