@@ -27,13 +27,13 @@ OUTPUT_DIR=$2
 
 CURRENT_DATE=$(date +%F_%H:%M:%S)
 
-mkdir ./swarm_export_out_$CURRENT_DATE
+mkdir ./swarm_parse_dbsnp_out_$CURRENT_DATE
 
 # Log path
-LOG_PATH="./swarm_export_out_$CURRENT_DATE/"
+LOG_PATH="./swarm_parse_dbsnp_out_$CURRENT_DATE/"
 
-# Export script path
-EXPORT_SCRIPT="../rsjson_mongo_filter.py"
+# Parse script path
+PARSE_SCRIPT="../rsjson_mongo_filter.py"
 
 # Tmp lscratch path
 TMP_PATH="/lscratch/\$SLURM_JOB_ID"
@@ -57,8 +57,8 @@ do
     if [[ $FILE_BASENAME =~ ^refsnp-chr[1-9|X|Y]+\.json\.bz2$ ]]
     then
         echo "Found file: $FILE"
-        echo "python3 ${SWARM_FILE} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}"
-        echo "python3 ${SWARM_FILE} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}" >> $SWARM_FILE
+        echo "python3 ${PARSE_SCRIPT} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}"
+        echo "python3 ${PARSE_SCRIPT} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}" >> $SWARM_FILE
         echo ""
     fi
 done
