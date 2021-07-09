@@ -51,7 +51,7 @@ do
     echo $FILE
     FILE_BASENAME=$(basename $FILE)
     echo $FILE_BASENAME
-    if [[ $FILE_BASENAME =~ ^refsnp-chr[\d]*[X|Y]*\.json\.bz2$ ]]
+    if [[ $FILE_BASENAME =~ ^refsnp-chr([1-9]+|[X|Y])*\.json\.bz2$ ]]
     then
         echo "Found file: $FILE"
         # echo "echo 'Creating MySQL instance...' ; local_mysql create --port $PORT ; echo 'Created MySQL instance.' ; echo 'Configuring MySQL instance...' ; cp mysql-lscratch.config  /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; sed -i 's/<PORT>/$PORT/g' /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; sed -i \"s/<SLURM_JOB_ID>/\$SLURM_JOB_ID/g\" /lscratch/\$SLURM_JOB_ID/mysql/my.cnf ; echo 'Configured MySQL instance.' ; echo 'Starting MySQL instance...' ; local_mysql start --port $PORT ; echo 'Started MySQL instance.' ; echo 'Creating MySQL user...' ; mysql -u root -p$PASSWORD --socket=$TMP_DIR/mysql.sock --execute=\"CREATE USER '$USER'@'localhost' IDENTIFIED BY '$PASSWORD'; GRANT ALL PRIVILEGES ON *.* TO '$USER'@'localhost' WITH GRANT OPTION; CREATE USER '$USER'@'%' IDENTIFIED BY '$PASSWORD';GRANT ALL PRIVILEGES ON *.* TO '$USER'@'%' WITH GRANT OPTION; CREATE DATABASE plcogwas CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;\" ; echo 'Created MySQL user.' ; node $EXPORT_SCRIPT --port $PORT --user $USER --password $PASSWORD --file $FILE --phenotype_file $PHENOTYPE_FILE --output $OUTPUT_DIR --logdir $LOG_PATH --tmp $TMP_DIR ; echo 'Stopping MySQL instance...' ; local_mysql stop --port $PORT ; echo 'Stopped MySQL instance.' ;"
