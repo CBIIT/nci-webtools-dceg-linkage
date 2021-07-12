@@ -5,7 +5,7 @@ Built off Lon Phan's `rsjson_test.py` (lonphan@ncbi.nlm.nih.gov)
 
 ## Step 1: Parse chromosome files 1 - 22, X and Y.
 
-Includes script `rsjson_mongo_filter.py` to parse dbsnp .json.gz files and creates .json files that can be imported into MongoDB collection(s).
+Includes script `rsjson_parse_data_mongo.py` to parse dbsnp .json.gz files and creates .json files that can be imported into MongoDB collection(s).
 
 - Outputs .json file(s): `chr_#_filtered.json`
 

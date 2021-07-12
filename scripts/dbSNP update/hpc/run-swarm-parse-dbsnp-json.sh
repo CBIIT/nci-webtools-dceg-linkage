@@ -33,7 +33,7 @@ mkdir ./swarm_parse_dbsnp_out_$CURRENT_DATE
 LOG_PATH="./swarm_parse_dbsnp_out_$CURRENT_DATE/"
 
 # Parse script path
-PARSE_SCRIPT="../rsjson_mongo_filter.py"
+PARSE_SCRIPT="../rsjson_parse_data_mongo.py"
 
 # Tmp lscratch path
 TMP_PATH="/lscratch/\$SLURM_JOB_ID"
