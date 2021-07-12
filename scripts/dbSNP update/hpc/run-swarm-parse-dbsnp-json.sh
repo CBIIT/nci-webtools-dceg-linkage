@@ -38,7 +38,7 @@ PARSE_SCRIPT="../rsjson_mongo_filter.py"
 # Tmp lscratch path
 TMP_PATH="/lscratch/\$SLURM_JOB_ID"
 
-Delete existing SWARM file if exists
+# Delete existing SWARM file if exists
 if [ -e $SWARM_FILE ] 
 then 
     echo "Delete existing SWARM file..."
