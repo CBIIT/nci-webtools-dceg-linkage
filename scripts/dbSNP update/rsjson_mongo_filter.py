@@ -109,7 +109,7 @@ def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id
                 # insertMongoDB(rsid, chromosome, position, ','.join(annotations), variant_type)
             elif len(rsid) > 0 and len(chromosome) > 0 and len(positions) > 0 and len(annotations) == 0 and len(variant_type) > 0:
                 # if no annotations, insert NA
-                writeJSON(rsid, chromosome, positions, 'NA', variant_type, ref_id, tmp_path, tmp_path, out_path, result_file)
+                writeJSON(rsid, chromosome, positions, 'NA', variant_type, ref_id, tmp_path, out_path, result_file)
                 # insertMongoDB(rsid, chromosome, position, 'NA', variant_type)
             else:
                 pass
