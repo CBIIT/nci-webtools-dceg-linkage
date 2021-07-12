@@ -21,3 +21,4 @@ data/
 LDlink/tmp/
 LDlink/config.yml
 scripts/LDexpress update/tmp/
+scripts/dbSNP update/test/
