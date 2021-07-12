@@ -76,7 +76,7 @@ def getPositions(primary_refsnp, variant_type):
                 else:
                     position_grch37 = str(int(pos) + 1)
                 try:
-                    position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
+                    position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[0]))
                 except:
                     position_hgvs_grch37 = "NA"
 
@@ -91,7 +91,7 @@ def getPositions(primary_refsnp, variant_type):
                 else:
                     position_grch38 = str(int(pos) + 1)
                 try:
-                    position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
+                    position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[0]))
                 except:
                     position_hgvs_grch38 = "NA"
 
@@ -108,12 +108,28 @@ def getPositions(primary_refsnp, variant_type):
 def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file):
     if len(rsids) > 0:
         for rsid in rsids:
+            # check if fields are all populated
             if len(rsid) > 0 and \
                 len(chromosome) > 0 and \
-                ((positions['position_grch37'] is not "NA" and positions['position_hgvs_grch37'] is not "NA") or (positions['position_grch38'] is not "NA" and positions['position_hgvs_grch38']is not "NA")) and \
+                ((positions['position_grch37'] != "NA" and positions['position_hgvs_grch37'] != "NA") or (positions['position_grch38'] != "NA" and positions['position_hgvs_grch38'] != "NA")) and \
                 len(annotations) > 0 and \
                 len(variant_type) > 0:
-                writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file)
+                # check if position fields are equal
+                if (positions['position_grch37'] == positions['position_hgvs_grch37']) and (positions['position_grch38'] == positions['position_hgvs_grch38']):
+                    writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file)
+                else:
+                    error_data = {
+                    "id": rsid,
+                    "chromosome": chromosome,
+                    "position_grch37": positions['position_grch37'],
+                    "position_hgvs_grch37": positions['position_hgvs_grch37'],
+                    "position_grch38": positions['position_grch38'],
+                    "position_hgvs_grch38": positions['position_hgvs_grch38'],
+                    "function": annotations,
+                    "type": variant_type,
+                    "ref_id": ref_id
+                }
+                writeError(out_path, tmp_path, error_file, "Positions fields not equal", error_data)
             else:
                 error_data = {
                     "id": rsid,
@@ -133,20 +149,20 @@ def writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tm
     record = {
         "id": rsid,
         "chromosome": chromosome,
-        "position_grch37": positions['position_grch37'],
-        "position_hgvs_grch37": positions['position_hgvs_grch37'],
-        "position_grch38": positions['position_grch38'],
-        "position_hgvs_grch38": positions['position_hgvs_grch38'],
+        # "position_grch37": positions['position_grch37'],
+        "position_grch37": positions['position_hgvs_grch37'],
+        # "position_grch38": positions['position_grch38'],
+        "position_grch38": positions['position_hgvs_grch38'],
         "function": annotations,
         "type": variant_type,
         "ref_id": ref_id
     }
-    with open(os.path.join(out_path, result_file) if tmp_path is None else os.path.join(tmp_path, result_file), 'a') as outfile:
+    with open(os.path.join(out_path, result_file) if tmp_path == None else os.path.join(tmp_path, result_file), 'a') as outfile:
         json.dump(record, outfile)
         outfile.write('\n')
 
 def writeError(out_path, tmp_path, error_file, error_msg, data):
-    with open(os.path.join(out_path, error_file) if tmp_path is None else os.path.join(tmp_path, error_file), 'a') as errorfile:
+    with open(os.path.join(out_path, error_file) if tmp_path == None else os.path.join(tmp_path, error_file), 'a') as errorfile:
         json.dump({
             "error_msg": error_msg,
             "data": data
@@ -171,12 +187,12 @@ def main():
     error_file =  'chr_' + chromosome + '_filtered.ERROR.json'
 
     # copy file to hpc tmp scratch space if specified
-    if tmp_path is not None:
+    if tmp_path != None:
         print("Copying data to tmp scratch space...")
         shutil.copy(file_path, tmp_path)
 
     print("Begin parsing...")
-    with bz2.open(file_path if tmp_path is None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
+    with bz2.open(file_path if tmp_path == None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
         # limit lines read per file
         cnt = 0
         for line in f_in:
@@ -192,7 +208,7 @@ def main():
                         createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file)
                         # limit lines read per file
                         cnt = cnt + 1
-                        if cnt % 10000 is 0:
+                        if cnt % 10000 == 0:
                             print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
                         # if (cnt > 10):
                         #     break
@@ -208,7 +224,7 @@ def main():
 
 
     # copy parsed results json from hpc tmp scratch space to output dir if specified
-    if tmp_path is not None:
+    if tmp_path != None:
         if os.path.exists(os.path.join(tmp_path, result_file)):
             print("Copying results from tmp scratch space to output directory...")
             shutil.copy(os.path.join(tmp_path, result_file), out_path)
