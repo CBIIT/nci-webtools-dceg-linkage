@@ -75,7 +75,10 @@ def getPositions(primary_refsnp, variant_type):
                     position_grch37 = str(pos)
                 else:
                     position_grch37 = str(int(pos) + 1)
-                position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
+                try:
+                    position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
+                except:
+                    position_hgvs_grch37 = "NA"
 
             ######## parse position from GRCh38.p13
             if is_chrom == True and assembly == "GRCh38.p13":
@@ -87,8 +90,11 @@ def getPositions(primary_refsnp, variant_type):
                     position_grch38 = str(pos)
                 else:
                     position_grch38 = str(int(pos) + 1)
-                position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
-    
+                try:
+                    position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
+                except:
+                    position_hgvs_grch38 = "NA"
+
     positions = {
         "position_grch37": position_grch37,
         "position_hgvs_grch37": position_hgvs_grch37,
@@ -104,7 +110,7 @@ def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id
         for rsid in rsids:
             if len(rsid) > 0 and \
                 len(chromosome) > 0 and \
-                ((len(positions['position_grch37']) > 0 and len(positions['position_hgvs_grch37']) > 0) or (len(positions['position_grch38']) > 0 and len(positions['position_hgvs_grch38']) > 0)) and \
+                ((positions['position_grch37'] is not "NA" and positions['position_hgvs_grch37'] is not "NA") or (positions['position_grch38'] is not "NA" and positions['position_hgvs_grch38']is not "NA")) and \
                 len(annotations) > 0 and \
                 len(variant_type) > 0:
                 writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file)
