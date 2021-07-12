@@ -56,41 +56,39 @@ def getVariantType(primary_refsnp):
 
 # find GRCh37 genomic position
 def getPositions(primary_refsnp, variant_type):
-    try:
-        for i in primary_refsnp['placements_with_allele']:
-            if len(i['placement_annot']['seq_id_traits_by_assembly']) > 0:
-                assembly = i['placement_annot']['seq_id_traits_by_assembly'][0]['assembly_name']
-                is_chrom = i['placement_annot']['seq_id_traits_by_assembly'][0]['is_chromosome']
-                pos = i['alleles'][0]['allele']['spdi']['position']
+    position_grch37 = '',
+    position_hgvs_grch37 = '',
+    position_grch38 = '',
+    position_hgvs_grch38 = '',
+    for i in primary_refsnp['placements_with_allele']:
+        if len(i['placement_annot']['seq_id_traits_by_assembly']) > 0:
+            assembly = i['placement_annot']['seq_id_traits_by_assembly'][0]['assembly_name']
+            is_chrom = i['placement_annot']['seq_id_traits_by_assembly'][0]['is_chromosome']
+            pos = i['alleles'][0]['allele']['spdi']['position']
 
-                ######## parse position from GRCh37.p13
-                if is_chrom == True and assembly == "GRCh37.p13":
-                    if variant_type == "delins":
-                        position_grch37 = str(pos)
-                    elif variant_type == "del":
-                        position_grch37 = str(pos)
-                    elif variant_type == "ins":
-                        position_grch37 = str(pos)
-                    else:
-                        position_grch37 = str(int(pos) + 1)
-                    position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
+            ######## parse position from GRCh37.p13
+            if is_chrom == True and assembly == "GRCh37.p13":
+                if variant_type == "delins":
+                    position_grch37 = str(pos)
+                elif variant_type == "del":
+                    position_grch37 = str(pos)
+                elif variant_type == "ins":
+                    position_grch37 = str(pos)
+                else:
+                    position_grch37 = str(int(pos) + 1)
+                position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
 
-                ######## parse position from GRCh38.p13
-                if is_chrom == True and assembly == "GRCh38.p13":
-                    if variant_type == "delins":
-                        position_grch38 = str(pos)
-                    elif variant_type == "del":
-                        position_grch38 = str(pos)
-                    elif variant_type == "ins":
-                        position_grch38 = str(pos)
-                    else:
-                        position_grch38 = str(int(pos) + 1)
-                    position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
-    except:
-        position_grch37 = '',
-        position_hgvs_grch37 = '',
-        position_grch38 = '',
-        position_hgvs_grch38 = '',
+            ######## parse position from GRCh38.p13
+            if is_chrom == True and assembly == "GRCh38.p13":
+                if variant_type == "delins":
+                    position_grch38 = str(pos)
+                elif variant_type == "del":
+                    position_grch38 = str(pos)
+                elif variant_type == "ins":
+                    position_grch38 = str(pos)
+                else:
+                    position_grch38 = str(int(pos) + 1)
+                position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1]))
 
     return {
         "position_grch37": position_grch37,
@@ -101,7 +99,7 @@ def getPositions(primary_refsnp, variant_type):
 
 
 # write output from parsing json files
-def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file):
+def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file):
     if len(rsids) > 0:
         for rsid in rsids:
             if len(rsid) > 0 and len(chromosome) > 0 and len(positions['position_grch37']) > 0 and len(positions['position_hgvs_grch37']) > 0 and len(positions['position_grch38']) > 0 and len(positions['position_hgvs_grch38']) > 0 and len(annotations) > 0 and len(variant_type) > 0:
@@ -112,7 +110,22 @@ def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id
                 writeJSON(rsid, chromosome, positions, 'NA', variant_type, ref_id, tmp_path, out_path, result_file)
                 # insertMongoDB(rsid, chromosome, position, 'NA', variant_type)
             else:
-                pass
+                with open(os.path.join(out_path, error_file) if tmp_path is None else os.path.join(tmp_path, error_file), 'a') as errorfile:
+                    json.dump({
+                        "error_msg": "Missing data fields",
+                        "data": {
+                            "id": rsid,
+                            "chromosome": chromosome,
+                            "position_grch37": positions['position_grch37'],
+                            "position_hgvs_grch37": positions['position_hgvs_grch37'],
+                            "position_grch38": positions['position_grch38'],
+                            "position_hgvs_grch38": positions['position_hgvs_grch38'],
+                            "function": annotations,
+                            "type": variant_type,
+                            "ref_id": ref_id
+                        }
+                    }, errorfile)
+                    errorfile.write('\n')
 
 
 def writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file):
@@ -151,34 +164,46 @@ def main():
         shutil.copy(file_path, tmp_path)
 
     print("Begin parsing...")
-    with bz2.open(file_path if tmp_path is None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
-        # limit lines read per file
-        # cnt = 0
-        for line in f_in:
-            rs_obj = json.loads(line.decode('utf-8'))
-            # print("rs_obj", rs_obj)
-            if 'primary_snapshot_data' in rs_obj:
-                rsids, ref_id = getRSIDs(rs_obj)
-                chromosome = getChromosome(file_basename)
-                result_file = 'chr_' + chromosome + '_filtered.json'
-                annotations = getAnnotations(rs_obj['primary_snapshot_data'])
-                variant_type = getVariantType(rs_obj['primary_snapshot_data'])
-                positions = getPositions(rs_obj['primary_snapshot_data'], variant_type)
-                createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file)
-    #             # limit lines read per file
-    #             # cnt = cnt + 1
-    #             # if (cnt > 10):
-    #             #     break
-            else:
-                # ERROR PIPE
-                print("ERROR OBJ", rs_obj)
+    try:
+        with bz2.open(file_path if tmp_path is None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
+            # limit lines read per file
+            # cnt = 0
+            for line in f_in:
+                rs_obj = json.loads(line.decode('utf-8'))
+                # print("rs_obj", rs_obj)
+                if 'primary_snapshot_data' in rs_obj:
+                    rsids, ref_id = getRSIDs(rs_obj)
+                    chromosome = getChromosome(file_basename)
+                    result_file = 'chr_' + chromosome + '_filtered.json'
+                    error_file =  'chr_' + chromosome + '_filtered.ERROR.json'
+                    annotations = getAnnotations(rs_obj['primary_snapshot_data'])
+                    variant_type = getVariantType(rs_obj['primary_snapshot_data'])
+                    positions = getPositions(rs_obj['primary_snapshot_data'], variant_type)
+                    createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file)
+        #             # limit lines read per file
+        #             # cnt = cnt + 1
+        #             # if (cnt > 10):
+        #             #     break
+                else:
+                    # ERROR PIPE
+                    print("ERROR OBJ", rs_obj)
+                    with open(os.path.join(out_path, error_file) if tmp_path is None else os.path.join(tmp_path, error_file), 'a') as errorfile:
+                        json.dump({
+                            "error_msg": "primary_snapshot_data",
+                            "data": rs_obj
+                        }, errorfile)
+                        errorfile.write('\n')
+        print("Parsing completed...")
+    except:
+        print("Error while parsing...")
 
-    print("Parsing completed...")
 
     # copy parsed results json from hpc tmp scratch space to output dir if specified
     if tmp_path is not None:
         print("Copying results from tmp scratch space to output directory...")
         shutil.copy(os.path.join(tmp_path, result_file), out_path)
+        if os.path.exists(os.path.join(tmp_path, error_file)):
+            shutil.copy(os.path.join(tmp_path, error_file), out_path)
     
     print("--- %s seconds ---" % (time.time() - start_time))
 
