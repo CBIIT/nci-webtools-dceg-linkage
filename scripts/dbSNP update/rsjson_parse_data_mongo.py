@@ -54,9 +54,9 @@ def getVariantType(primary_refsnp):
 
 # find GRCh37 genomic position
 def getPositions(primary_refsnp, variant_type):
-    position_grch37 = "NA"
+    # position_grch37 = "NA"
     position_hgvs_grch37 = "NA"
-    position_grch38 = "NA"
+    # position_grch38 = "NA"
     position_hgvs_grch38 = "NA"
     
     for i in primary_refsnp['placements_with_allele']:
@@ -67,38 +67,38 @@ def getPositions(primary_refsnp, variant_type):
 
             ######## parse position from GRCh37.p13
             if assembly == "GRCh37.p13" and is_chrom == True: 
-                if variant_type == "delins":
-                    position_grch37 = str(pos)
-                elif variant_type == "del":
-                    position_grch37 = str(pos)
-                elif variant_type == "ins":
-                    position_grch37 = str(pos)
-                else:
-                    position_grch37 = str(int(pos) + 1)
+                # if variant_type == "delins":
+                #     position_grch37 = str(pos)
+                # elif variant_type == "del":
+                #     position_grch37 = str(pos)
+                # elif variant_type == "ins":
+                #     position_grch37 = str(pos)
+                # else:
+                #     position_grch37 = str(int(pos) + 1)
                 try:
-                    position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[0]))
+                    position_hgvs_grch37 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[1] if len(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")) > 1 else i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[0]))
                 except:
                     position_hgvs_grch37 = "NA"
 
             ######## parse position from GRCh38.p13
             if is_chrom == True and assembly == "GRCh38.p13":
-                if variant_type == "delins":
-                    position_grch38 = str(pos)
-                elif variant_type == "del":
-                    position_grch38 = str(pos)
-                elif variant_type == "ins":
-                    position_grch38 = str(pos)
-                else:
-                    position_grch38 = str(int(pos) + 1)
+                # if variant_type == "delins":
+                #     position_grch38 = str(pos)
+                # elif variant_type == "del":
+                #     position_grch38 = str(pos)
+                # elif variant_type == "ins":
+                #     position_grch38 = str(pos)
+                # else:
+                #     position_grch38 = str(int(pos) + 1)
                 try:
-                    position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[0]))
+                    position_hgvs_grch38 = re.sub(r"\D", "", str(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[1] if len(i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")) > 1 else i['alleles'][0]['hgvs'].split(':')[1].split('.')[1].split("_")[0]))
                 except:
                     position_hgvs_grch38 = "NA"
 
     positions = {
-        "position_grch37": position_grch37,
+        # "position_grch37": position_grch37,
         "position_hgvs_grch37": position_hgvs_grch37,
-        "position_grch38": position_grch38,
+        # "position_grch38": position_grch38,
         "position_hgvs_grch38": position_hgvs_grch38,
     }
     return positions
@@ -111,32 +111,32 @@ def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id
             # check if fields are all populated
             if len(rsid) > 0 and \
                 len(chromosome) > 0 and \
-                ((positions['position_grch37'] != "NA" and positions['position_hgvs_grch37'] != "NA") or (positions['position_grch38'] != "NA" and positions['position_hgvs_grch38'] != "NA")) and \
+                (positions['position_hgvs_grch37'] != "NA" or positions['position_hgvs_grch38'] != "NA") and \
                 len(annotations) > 0 and \
                 len(variant_type) > 0:
                 # check if position fields are equal
-                if (positions['position_grch37'] == positions['position_hgvs_grch37']) and (positions['position_grch38'] == positions['position_hgvs_grch38']):
-                    writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file)
-                else:
-                    error_data = {
-                    "id": rsid,
-                    "chromosome": chromosome,
-                    "position_grch37": positions['position_grch37'],
-                    "position_hgvs_grch37": positions['position_hgvs_grch37'],
-                    "position_grch38": positions['position_grch38'],
-                    "position_hgvs_grch38": positions['position_hgvs_grch38'],
-                    "function": annotations,
-                    "type": variant_type,
-                    "ref_id": ref_id
-                }
-                writeError(out_path, tmp_path, error_file, "Positions fields not equal", error_data)
+                # if (positions['position_grch37'] == positions['position_hgvs_grch37']) and (positions['position_grch38'] == positions['position_hgvs_grch38']):
+                writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file)
+                # else:
+                #     error_data = {
+                #         "id": rsid,
+                #         "chromosome": chromosome,
+                #         # "position_grch37": positions['position_grch37'],
+                #         "position_hgvs_grch37": positions['position_hgvs_grch37'],
+                #         # "position_grch38": positions['position_grch38'],
+                #         "position_hgvs_grch38": positions['position_hgvs_grch38'],
+                #         "function": annotations,
+                #         "type": variant_type,
+                #         "ref_id": ref_id
+                #     }
+                #     writeError(out_path, tmp_path, error_file, "Positions fields not equal", error_data)
             else:
                 error_data = {
                     "id": rsid,
                     "chromosome": chromosome,
-                    "position_grch37": positions['position_grch37'],
+                    # "position_grch37": positions['position_grch37'],
                     "position_hgvs_grch37": positions['position_hgvs_grch37'],
-                    "position_grch38": positions['position_grch38'],
+                    # "position_grch38": positions['position_grch38'],
                     "position_hgvs_grch38": positions['position_hgvs_grch38'],
                     "function": annotations,
                     "type": variant_type,
