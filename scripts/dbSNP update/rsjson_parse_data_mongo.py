@@ -193,6 +193,12 @@ def main():
                             rsid = getRSID(rs_obj)
                             merges = getMerges(rs_obj['merged_snapshot_data'])
                             writeJSONMerged(rsid, merges, tmp_path, out_path, result_file)
+                            cnt = cnt + 1
+                            if cnt % 10000 == 0:
+                                print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
+                            # limit lines read per file
+                            # if (cnt > 10):
+                            #     break
                         else:
                             # ERROR PIPE
                             writeError(out_path, tmp_path, error_file, "No merged_snapshot_data", rs_obj)
@@ -226,10 +232,10 @@ def main():
                             variant_type = getVariantType(rs_obj['primary_snapshot_data'])
                             positions = getPositions(rs_obj['primary_snapshot_data'])
                             createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file)
-                            # limit lines read per file
                             cnt = cnt + 1
                             if cnt % 10000 == 0:
                                 print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
+                            # limit lines read per file
                             # if (cnt > 10):
                             #     break
                         else:
