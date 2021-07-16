@@ -1,3 +1,5 @@
+# LAST UPDATED 07/16/2021 FOR dbSNP b155
+
 import json
 import sys
 from pymongo import MongoClient
@@ -8,9 +10,8 @@ def queryMongoRSID(db, rsid):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-
 def writeJSON(merge_record):
-    with open('processed_merges.json', 'a') as outfile:
+    with open('merged_filtered.json', 'a') as outfile:
         json.dump(merge_record, outfile)
         outfile.write('\n')
 
@@ -28,7 +29,7 @@ def main():
             # if merged rsid is found, toss record
             # else if merged rsid is not found, keep record and write to new file
             if query_results is not None:
-                print "Record found for RSID: ", file_id, "[SKIPPED]"
+                print("Record found for RSID: ", file_id, "[SKIPPED]")
             else: 
                 for merge_rsid in file_merges:
                     query_merge = queryMongoRSID(db, merge_rsid)
@@ -41,7 +42,7 @@ def main():
                             "type": query_merge['type'],
                             "ref_id": merge_rsid
                         }
-                        print merge_record
+                        print(merge_record)
                         writeJSON(merge_record)
                         break
 

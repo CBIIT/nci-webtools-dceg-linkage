@@ -1,3 +1,5 @@
+# LAST UPDATED 07/16/2021 FOR dbSNP b155
+
 import sys
 import json
 import bz2
@@ -23,7 +25,10 @@ def getRSIDs(primary_refsnp):
 # find chromosome
 def getChromosome(file_basename):
     try:
-        chromosome = file_basename.split('.')[0].split('-')[1].split('chr')[1] or "TEST"
+        if file_basename.split('.')[0].split('-')[1] == "merged":
+            chromosome = "merged"
+        else:
+            chromosome = file_basename.split('.')[0].split('-')[1].split('chr')[1] or "TEST"
     except IndexError:
         chromosome = "TEST"
     return chromosome   
@@ -52,8 +57,8 @@ def getVariantType(primary_refsnp):
     return variant_type
 
 
-# find GRCh37 genomic position
-def getPositions(primary_refsnp, variant_type):
+# find GRCh37 and GRCh38 genomic positions
+def getPositions(primary_refsnp):
     position_hgvs_grch37 = "NA"
     position_hgvs_grch38 = "NA"
     
@@ -107,6 +112,16 @@ def createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id
                 }
                 writeError(out_path, tmp_path, error_file, "Missing data fields", error_data)
 
+# find merged rs numbers
+def getRSID(primary_refsnp):
+    rsid = primary_refsnp['refsnp_id']
+    return rsid
+
+# find sequence change annotations
+def getMerges(primary_refsnp):
+    merges = primary_refsnp['merged_into']
+    return merges
+
 
 def writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file):
     record = {
@@ -121,6 +136,16 @@ def writeJSON(rsid, chromosome, positions, annotations, variant_type, ref_id, tm
     with open(os.path.join(out_path, result_file) if tmp_path == None else os.path.join(tmp_path, result_file), 'a') as outfile:
         json.dump(record, outfile)
         outfile.write('\n')
+
+def writeJSONMerged(rsid, merges, tmp_path, out_path, result_file):
+    record = {
+        "id": rsid,
+        "merged_into": merges
+    }
+    with open(os.path.join(out_path, result_file) if tmp_path == None else os.path.join(tmp_path, result_file), 'a') as outfile:
+        json.dump(record, outfile)
+        outfile.write('\n')
+
 
 def writeError(out_path, tmp_path, error_file, error_msg, data):
     with open(os.path.join(out_path, error_file) if tmp_path == None else os.path.join(tmp_path, error_file), 'a') as errorfile:
@@ -144,42 +169,76 @@ def main():
 
     file_basename = os.path.basename(file_path)
     chromosome = getChromosome(file_basename)
-    result_file = 'chr_' + chromosome + '_filtered.json'
-    error_file =  'chr_' + chromosome + '_filtered.ERROR.json'
 
-    # copy file to hpc tmp scratch space if specified
-    if tmp_path != None:
-        print("Copying data to tmp scratch space...")
-        shutil.copy(file_path, tmp_path)
+    # process "merged" variants data file
+    if chromosome == "merged":
+        result_file = 'merged_filtered.json'
+        error_file =  'merged_filtered.ERROR.json'
 
-    print("Begin parsing...")
-    with bz2.open(file_path if tmp_path == None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
-        # limit lines read per file
-        cnt = 0
-        for line in f_in:
-            # print("rs_obj", rs_obj)
-            try:
-                rs_obj = json.loads(line.decode('utf-8'))
+        # copy file to hpc tmp scratch space if specified
+        if tmp_path != None:
+            print("Copying data to tmp scratch space...")
+            shutil.copy(file_path, tmp_path)
+
+        print("Begin parsing...")
+        with bz2.open(file_path if tmp_path == None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
+            # limit lines read per file
+            cnt = 0
+            for line in f_in:
                 try:
-                    if 'primary_snapshot_data' in rs_obj:
-                        rsids, ref_id = getRSIDs(rs_obj)
-                        annotations = getAnnotations(rs_obj['primary_snapshot_data'])
-                        variant_type = getVariantType(rs_obj['primary_snapshot_data'])
-                        positions = getPositions(rs_obj['primary_snapshot_data'], variant_type)
-                        createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file)
-                        # limit lines read per file
-                        cnt = cnt + 1
-                        if cnt % 10000 == 0:
-                            print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
-                        # if (cnt > 10):
-                        #     break
-                    else:
-                        # ERROR PIPE
-                        writeError(out_path, tmp_path, error_file, "No primary_snapshot_data", rs_obj)
-                except Exception as err:
-                    writeError(out_path, tmp_path, error_file, err, rs_obj)
-            except:
-                writeError(out_path, tmp_path, error_file, "Cannot parse line to JSON", line)
+                    rs_obj = json.loads(line.decode('utf-8'))
+                    try:
+                        if 'merged_snapshot_data' in rs_obj:
+                            # print("rs_obj", rs_obj)
+                            rsid = getRSID(rs_obj)
+                            merges = getMerges(rs_obj['merged_snapshot_data'])
+                            writeJSONMerged(rsid, merges, tmp_path, out_path, result_file)
+                        else:
+                            # ERROR PIPE
+                            writeError(out_path, tmp_path, error_file, "No merged_snapshot_data", rs_obj)
+                    except Exception as err:
+                        writeError(out_path, tmp_path, error_file, err, rs_obj)
+                except:
+                    writeError(out_path, tmp_path, error_file, "Cannot parse line to JSON", line)
+                    
+    # process chr 1-22, X and Y variants data file
+    else:
+        result_file = 'chr_' + chromosome + '_filtered.json'
+        error_file =  'chr_' + chromosome + '_filtered.ERROR.json'
+
+        # copy file to hpc tmp scratch space if specified
+        if tmp_path != None:
+            print("Copying data to tmp scratch space...")
+            shutil.copy(file_path, tmp_path)
+
+        print("Begin parsing...")
+        with bz2.open(file_path if tmp_path == None else os.path.join(tmp_path, file_basename), 'rb') as f_in:
+            # limit lines read per file
+            cnt = 0
+            for line in f_in:
+                # print("rs_obj", rs_obj)
+                try:
+                    rs_obj = json.loads(line.decode('utf-8'))
+                    try:
+                        if 'primary_snapshot_data' in rs_obj:
+                            rsids, ref_id = getRSIDs(rs_obj)
+                            annotations = getAnnotations(rs_obj['primary_snapshot_data'])
+                            variant_type = getVariantType(rs_obj['primary_snapshot_data'])
+                            positions = getPositions(rs_obj['primary_snapshot_data'])
+                            createRecord(rsids, chromosome, positions, annotations, variant_type, ref_id, tmp_path, out_path, result_file, error_file)
+                            # limit lines read per file
+                            cnt = cnt + 1
+                            if cnt % 10000 == 0:
+                                print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
+                            # if (cnt > 10):
+                            #     break
+                        else:
+                            # ERROR PIPE
+                            writeError(out_path, tmp_path, error_file, "No primary_snapshot_data", rs_obj)
+                    except Exception as err:
+                        writeError(out_path, tmp_path, error_file, err, rs_obj)
+                except:
+                    writeError(out_path, tmp_path, error_file, "Cannot parse line to JSON", line)
 
     print("Parsing completed...")
 
