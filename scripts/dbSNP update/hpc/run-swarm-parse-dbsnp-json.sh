@@ -54,7 +54,7 @@ do
     # echo $FILE
     FILE_BASENAME=$(basename $FILE)
     # echo $FILE_BASENAME
-    if [[ $FILE_BASENAME =~ ^refsnp-(chr[1-9|X|Y]+|merged)\.json\.bz2$ ]]
+    if [[ $FILE_BASENAME =~ ^refsnp-(chr[0-9|X|Y]+|merged)\.json\.bz2$ ]]
     then
         echo "Found file: $FILE"
         echo "python3 ${PARSE_SCRIPT} ${FILE} ${OUTPUT_DIR} ${TMP_PATH}"
