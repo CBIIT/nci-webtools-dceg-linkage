@@ -4,6 +4,9 @@ import json
 import sys
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+import time
+start_time = time.time()  # measure script's run time
+
 
 def queryMongoRSID(db, rsid):
     query_results = db.dbsnp.find_one({"id": rsid})
@@ -25,6 +28,7 @@ def main():
     client = MongoClient()
     db = client["LDLink"]
     with open(filename, 'r') as f_in:
+        cnt = 0
         for line in f_in:
             record = json.loads(line)
             file_id = record['id']
@@ -52,7 +56,9 @@ def main():
                         msg = "Record not found for RSID: " + file_id + "[ADDED]"
                         writeLog(msg, merge_record)
                         writeJSON(merge_record)
-                        break
+                cnt = cnt + 1
+                if cnt % 10000 == 0:
+                    print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
 
 if __name__ == "__main__":
     main()

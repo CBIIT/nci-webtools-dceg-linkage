@@ -9,12 +9,13 @@ Download all data from ftp `ftp://ftp.ncbi.nih.gov/snp/latest_release/JSON/`.
 
 Run `md5sum -c CHECKSUMS` to verify data integrity. Re-download any files that fail the check.
 
-## Step 1: Parse raw dbsnp chromosome files 1 - 22, X and Y.
+## Step 1: Parse raw dbsnp chromosome files 1 - 22, X, Y, and "merged".
 
-Includes script `rsjson_parse_data_mongo.py` to parse dbsnp .json.gz files and creates .json files that can be imported into a MongoDB collection.
+Includes script `rsjson_parse_data_mongo.py` to parse dbsnp .json.bz2 files and creates .json files that can be imported into a MongoDB collection. Also finds merged variants from `refsnp-merged.json.bz2` and parses that file for extra merged variants. Further processing is required after chr1-22,X and Y .json files are imported to MongoDB to include these 'extra' merged variants.
 
-- Inputs: `/path/to/refsnp-chr<1-22,X,Y>`(required) `/path/to/output_directory`(required) `/path/to/tmp_diretory`(optional)
-- Output: `chr_#_filtered.json`(parsed data ready to be imported into mongo collection) `chr_#_filtered.ERROR.json`(dbsnp records that ran into any issues during parsing)
+- Inputs: `/path/to/refsnp-<chr1-22,chrX,chrY,merged>.json.bz2`(required) `/path/to/output_directory`(required) `/path/to/tmp_directory`(optional)
+- Output for `refsnp-<chr1-22,chrX,chrY>.json.bz2`: `chr_#_filtered.json`(parsed data ready to be imported into mongo collection) and `chr_#_filtered.ERROR.json`(dbsnp records that ran into any issues during parsing)
+- Output for `refsnp-merged.json.bz2`: `merged_filtered.json`(parsed merged variants data that is used as the input for `rsjson_find_merges.py`) and `merged_filtered.ERROR.json`(dbsnp merged records that ran into any issues during parsing)
 
 Each row of output file contains a variant JSON object with keys: RS id, chromosome, position, type (snv, delins, etc), and function (annotation). Record will be duplicated for each of the variant's merged RS ids - meaning, another record will be created with all the same fields except the RS id key (which will be the merged variant's RS id). This file can be imported into MongoDB via mongoimport.
 
@@ -26,19 +27,17 @@ Clone this repo into your data directory on the Biowulf cluster /data/your_usern
 
 Use mongoimport to import `processed_merges.json` into the Mongo dbsnp build:
 
-`mongoimport --db <db_name> --collection <collection_name> --file chr_#_filtered.json`
+`mongoimport --db LDLink --collection dbsnp --file chr_#_filtered.json`
 
 Use this script to import ALL files in a folder into a MongoDB collection:
 
-`for filename in *; do mongoimport --db <db_name> --collection <collection_name> --file $filename; done`
+`for filename in *; do mongoimport --db dbsnp --collection LDLink --file $filename; done`
 
-Create indexes on the collection to significantly speed up queries. Log into the the Mongo shell and execute these commands:
+Create indexes on the collection to significantly speed up queries. Execute command:
 
-`use <db_name>`
-`db.<collection_name>.createIndex({id: 1})`
-`db.<collection_name>.createIndex({chromosome: 1, position: 1})`
+`nohup mongo --eval "db.dbsnp.createIndexes([{id: 1}, {chromosome: 1, position_grch37: 1}, {chromosome: 1, position_grch38: 1}])" LDLink &`
 
-This process may take a long time. Make sure to keep your machine awake to prevent loss of progress.
+This process may take a long time. Consider using `nohup` and `&` to run task continuously in background.
 
 ## Step 3: Parse merged variants file.
 
