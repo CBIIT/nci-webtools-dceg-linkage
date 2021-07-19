@@ -58,9 +58,9 @@ def main():
                         msg = "Record not found for RSID: " + file_id + " [ADDED]"
                         writeLog(msg, merge_record)
                         writeJSON(merge_record)
-                cnt = cnt + 1
-                if cnt % 10000 == 0:
-                    print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
+            cnt = cnt + 1
+            if cnt % 10000 == 0:
+                print(str(cnt) + " JSON records parsed [" + str(time.time() - start_time) + " seconds elapsed]...")
 
 if __name__ == "__main__":
     main()
