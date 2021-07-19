@@ -24,9 +24,11 @@ def writeLog(msg, data):
         outfile.write('\n')
 
 def main():
+    print("Parsing merged variants...")
     filename = sys.argv[1]
     client = MongoClient()
     db = client["LDLink"]
+    print(filename)
     with open(filename, 'r') as f_in:
         cnt = 0
         for line in f_in:
@@ -38,7 +40,7 @@ def main():
             # if merged rsid is found, toss record
             # else if merged rsid is not found, keep record and write to new file
             if query_results is not None:
-                msg = "Record found for RSID: " + file_id + "[SKIPPED]"
+                msg = "Record found for RSID: " + file_id + " [SKIPPED]"
                 writeLog(msg, [])
             else: 
                 for merge_rsid in file_merges:
@@ -53,7 +55,7 @@ def main():
                             "type": query_merge['type'],
                             "ref_id": merge_rsid
                         }
-                        msg = "Record not found for RSID: " + file_id + "[ADDED]"
+                        msg = "Record not found for RSID: " + file_id + " [ADDED]"
                         writeLog(msg, merge_record)
                         writeJSON(merge_record)
                 cnt = cnt + 1
