@@ -115,13 +115,8 @@ con.text_factory = str
 curr = con.cursor()
 
 def get_regDB(chr, pos):
-    t = (pos,)
-    curr.execute("SELECT * FROM "+chr+" WHERE position=?", t)
-    a = curr.fetchone()
-    if a == None:
-        return "."
-    else:
-        return a[1]
+    result = db.chr_position_score.find_one({"chromosome": chr, "position": int(pos)})
+    return result["score"]
 
 # Connect to Mongo snp database
 if env == 'local':

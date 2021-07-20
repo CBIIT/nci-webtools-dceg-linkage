@@ -4,7 +4,6 @@ import csv
 import json
 import operator
 import os
-import sqlite3
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
@@ -168,23 +167,27 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			out_json.close()
 			return("","")
 
-		# Connect to gene database
-		conn=sqlite3.connect(gene_dir2)
-		conn.text_factory=str
-		cur=conn.cursor()
-
-		def get_coords_gene(gene_raw):
+		def get_coords_gene(gene_raw, db):
 			gene=gene_raw.upper()
-			t=(gene,)
-			cur.execute("SELECT * FROM genes WHERE name=?", t)
-			return cur.fetchone()
+			mongoResult = db.genes_name_coords.find_one({"name": gene})
+
+			#format mongo output
+			if mongoResult != None:
+				geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+				return geneResult
+			else:
+				return None
+
+		# Connect to Mongo snp database
+		if env == 'local':
+			mongo_host = api_mongo_addr
+		else: 
+			mongo_host = 'localhost'
+		client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
+		db = client["LDLink"]
 
 		# Find RS number in snp database
-		gene_coord=get_coords_gene(myargs.name)
-
-		# Close snp connection
-		cur.close()
-		conn.close()
+		gene_coord=get_coords_gene(myargs.name, db)
 
 		if gene_coord==None:
 			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
