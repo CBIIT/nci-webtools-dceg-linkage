@@ -97,7 +97,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -106,7 +106,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -169,8 +169,8 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position']]
+                        snp_pos.append(snp_coord['position_grch37'])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
