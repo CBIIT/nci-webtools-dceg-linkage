@@ -6,6 +6,8 @@ import operator
 import os
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+import boto3
+import botocore
 import subprocess
 import sys
 import collections
@@ -29,9 +31,18 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
+    aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
+
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+    else:
+        # retrieve aws credentials here
+        session = boto3.Session()
+        credentials = session.get_credentials().get_frozen_credentials()
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
     tmp_dir = "./tmp/"
 
@@ -218,11 +229,14 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_file = vcf_dir + \
-        snp_coords[0][1] + \
-        ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snps = "tabix -fh {0}{1} | grep -v -e END".format(
-        vcf_file, tabix_coords)
+    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+
+    if not checkS3File(config['aws']['bucket'], vcf_filePath):
+        error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
+
+    tabix_snps = export_s3_keys + " tabix -fh {0}{1} | grep -v -e END".format(
+        vcf_query_snp_file, tabix_coords)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Make MAF function
@@ -434,6 +448,24 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     out_json.close()
     return(snps, rsnum_lst, details)
 
+def checkS3File(bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True
 
 def main():
     import json

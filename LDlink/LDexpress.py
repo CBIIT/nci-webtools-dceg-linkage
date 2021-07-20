@@ -15,7 +15,9 @@ from bson import json_util, ObjectId
 import subprocess
 from multiprocessing.dummy import Pool
 import sys
-import numpy as np	
+import numpy as np
+import boto3
+import botocore
 from timeit import default_timer as timer
 
 # Set data directories using config.yml	
@@ -26,10 +28,19 @@ api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 pop_dir = config['data']['pop_dir']	
 vcf_dir = config['data']['vcf_dir']
+aws_info = config['aws']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 num_subprocesses = config['performance']['num_subprocesses']
+
+if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+  export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+else:
+  # retrieve aws credentials here
+  session = boto3.Session()
+  credentials = session.get_credentials().get_frozen_credentials()
+  export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
 def get_ldexpress_tissues(web):
     try:
@@ -71,16 +82,23 @@ def get_ldexpress_tissues(web):
         return None
 
 def get_query_variant(snp_coord, pop_ids, request):
+
+    vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+
     tmp_dir = "./tmp/"
     queryVariantWarnings = []
     # Extract query SNP phased genotypes
-    vcf_query_snp_file = vcf_dir + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_query_snp_h = "tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
+
+    if not checkS3File(config['aws']['bucket'], vcf_filePath):
+        error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
+
+    tabix_query_snp_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
     proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
     # print("head length", len(head))
 
-    tabix_query_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
+    tabix_query_snp = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_query_snp, shell=True)
     # proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
     # tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
@@ -463,6 +481,25 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     print("##### LDEXPRESS COMPLETE #####")
 
     return (sanitized_query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings)
+
+def checkS3File(bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True
 
 
 def main():

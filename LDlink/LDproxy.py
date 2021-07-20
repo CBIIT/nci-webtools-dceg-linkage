@@ -12,6 +12,8 @@ import time
 import threading
 import weakref
 import time
+import boto3
+import botocore
 from multiprocessing.dummy import Pool
 import math
 
@@ -49,10 +51,19 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     recomb_dir = config['data']['recomb_dir']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
+    aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
     num_subprocesses = config['performance']['num_subprocesses']
+
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+    else:
+        # retrieve aws credentials here
+        session = boto3.Session()
+        credentials = session.get_credentials().get_frozen_credentials()
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
     tmp_dir = "./tmp/"
 
@@ -182,14 +193,17 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_file = vcf_dir + \
-        snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    tabix_snp_h = "tabix -H {0} | grep CHROM".format(vcf_file)
+    if not checkS3File(config['aws']['bucket'], vcf_filePath):
+        error(400, 'could not find sequences archive file [%s]' % (vcf_file))
+
+    tabix_snp_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
+    tabix_snp = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
         vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
@@ -637,7 +651,13 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     proxy_plot.title.align = "center"
 
-    tabix_recomb = "tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_dir, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
+    recomb_filePath = "ldlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz"
+    recomb_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+
+    if not checkS3File(config['aws']['bucket'], recomb_filePath):
+        error(400, 'could not find sequences archive file [%s]' % (recomb_file))
+
+    tabix_recomb = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
     subprocess.call(tabix_recomb, shell=True)
     filename = tmp_dir + "recomb_" + request + ".txt"
     recomb_raw = open(filename).readlines()
@@ -735,8 +755,14 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     rug.toolbar_location = None
 
     # Gene Plot
-    tabix_gene = "tabix -fh {0} {1}:{2}-{3} > {4}".format(
-        gene_dir, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
+    gene_filePath = "ldlink/data/sqlite/refGene/sorted_refGene.txt.gz"
+    gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
+
+    if not checkS3File(config['aws']['bucket'], gene_filePath):
+        error(400, 'could not find sequences archive file [%s]' % (gene_file))
+
+    tabix_gene = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(
+        gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
@@ -889,6 +915,25 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # Return plot output
     return(out_script, out_div)
+
+def checkS3File(bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True
 
 
 def main():
