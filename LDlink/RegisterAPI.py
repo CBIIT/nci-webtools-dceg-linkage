@@ -11,6 +11,7 @@ import datetime
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from bson import json_util, ObjectId
+import UnlockStaleTokens
 
 # blocked users attribute: 0=false, 1=true
 
@@ -263,25 +264,11 @@ def setUserLock(email, lockValue):
 
 # sets locked attribute of all users to 0=false
 def unlockAllUsers():
+    UnlockStaleTokens.main()
+    
     out_json = {
         "message": "All tokens have been unlocked."
     }
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
-    env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
-    mongo_username = config['database']['mongo_user_api']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
-    if env == 'local':
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
-    db = client["LDLink"]
-    users = db.api_users
-    users.update_many({"locked": {"$not": -1}}, { "$set": {"locked": 0}})
     return out_json
 
 # update record only if email's token is expired and user re-registers
@@ -324,6 +311,7 @@ def checkToken(token, token_expiration, token_expiration_days):
     db = client["LDLink"]
     users = db.api_users
     record = users.find_one({"token": token})
+
     if record is None:
         return False
     else:
@@ -753,5 +741,37 @@ def getBlockedUsers():
         "#_blocked_users": numBlockedUsers,
         "blocked_users": blocked_users_json_sanitized
     }
+    return out_json
+
+def lookupUser(email):
+    with open('config.yml', 'r') as c:
+        config = yaml.load(c)
+    env = config['env']
+    api_mongo_addr = config['api']['api_mongo_addr']
+
+    user_record = getEmailRecord(email, env, api_mongo_addr)
+
+    if user_record != None:
+        registered = user_record["registered"]
+        format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
+        locked = user_record["locked"]
+
+        try:
+            format_locked = locked.strftime("%Y-%m-%d %H:%M:%S")
+        except:
+            format_locked = locked
+            
+        out_json = {
+            "email": user_record["email"],
+            "firstname": user_record["firstname"],
+            "lastname": user_record["lastname"],
+            "institution": user_record["institution"],
+            "token": user_record["token"],
+            "registered": format_registered,
+            "blocked": user_record["blocked"],
+            "locked": format_locked
+        }
+    else:
+        out_json = "No record found"
     return out_json
 

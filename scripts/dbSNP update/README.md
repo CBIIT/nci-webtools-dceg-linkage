@@ -1,7 +1,13 @@
 # dbsnp-mongodb
-Scripts to filter dbsnp records provided by NCBI and create files that can be imported to a MongoDB collection. NCBI dbsnp records are located here: ftp://ftp.ncbi.nlm.nih.gov/snp/.redesign/
+Scripts to filter dbsnp records provided by NCBI and create files that can be imported to a MongoDB collection. NCBI dbsnp records are located here: https://ftp.ncbi.nih.gov/snp/latest_release/JSON/ ftp://ftp.ncbi.nih.gov/snp/latest_release/JSON/ 
 
 Built off Lon Phan's `rsjson_test.py` (lonphan@ncbi.nlm.nih.gov)
+
+## Download dbSNP (latest build) raw data files from NCBI
+
+Download all data from ftp `ftp://ftp.ncbi.nih.gov/snp/latest_release/JSON/`.
+
+Run `md5sum -c CHECKSUMS` to verify data integrity. Re-download any files that fail the check.
 
 ## Step 1: Parse chromosome files 1 - 22, X and Y.
 
@@ -9,15 +15,15 @@ Includes script `rsjson_mongo_filter.py` to parse dbsnp .json.gz files and creat
 
 - Outputs .json file(s): `chr_#_filtered.json`
 
-Each row of output file(s) contains a variant JSON object with keys: RS id, chromosome, position, type (snv, delins, etc), and function (annotation). Record will be duplicated for each of the variant's merged RS ids - meaning, another record will be created with all the same fields except the RS id key (which will be the merged variant's RS id). This file can be imported into MongoDB via mongoimport.
+<!-- Each row of output file(s) contains a variant JSON object with keys: RS id, chromosome, position, type (snv, delins, etc), and function (annotation). Record will be duplicated for each of the variant's merged RS ids - meaning, another record will be created with all the same fields except the RS id key (which will be the merged variant's RS id). This file can be imported into MongoDB via mongoimport. -->
 
-### Running script
+### Recommended: Running script with HPC cluster (i.e. NIH's BIOWULF)
 
-Copy this directory into your data directory on the Biowulf cluster /data/your_username. 
+Clone this repo into your data directory on the Biowulf cluster /data/your_username. 
 
-Create folder named `json_refsnp` in this directory and place all compressed json `json.gz` files from the FTP in the folder.
+<!-- Create folder named `json_refsnp` in this directory and place all compressed json `json.gz` files from the FTP in the folder. -->
 
-Run `./rsjson_run.sh` to queue 24 jobs to process the 24 compressed chromosome .json.gz files.
+<!-- Run `./rsjson_run.sh` to queue 24 jobs to process the 24 compressed chromosome .json.gz files. -->
 
 ## Step 2: Import chromosome variants and index collection.
 
