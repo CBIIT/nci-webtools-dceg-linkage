@@ -134,7 +134,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -191,16 +191,16 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Define window of interest around query SNP
     # window = 500000
-    coord1 = int(snp_coord['position']) - window
+    coord1 = int(snp_coord['position_grch37']) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord['position']) + window
+    coord2 = int(snp_coord['position_grch37']) + window
 
     # Calculate proxy LD statistics in parallel
     # threads = 4
     # block = (2 * window) // 4
     # block = (2 * window) // num_subprocesses
-    windowChunkRanges = chunkWindow(int(snp_coord['position']), window, num_subprocesses)
+    windowChunkRanges = chunkWindow(int(snp_coord['position_grch37']), window, num_subprocesses)
 
     commands = []
     # for i in range(num_subprocesses):

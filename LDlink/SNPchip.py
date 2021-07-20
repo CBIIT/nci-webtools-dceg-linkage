@@ -215,8 +215,8 @@ def calculate_chip(snplst, platform_query, web, request):
                         else:
                             chr = int(snp_coord['chromosome'])
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position'])
-                        temp = [snp_i[0], chr, int(snp_coord['position'])]
+                        snp_pos.append(snp_coord['position_grch37'])
+                        temp = [snp_i[0], chr, int(snp_coord['position_grch37'])]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])

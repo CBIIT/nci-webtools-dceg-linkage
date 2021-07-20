@@ -347,8 +347,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
                 snp_coord = get_coords(db, snp_i[0])
                 if snp_coord != None:
                     rs_nums.append(snp_i[0])
-                    snp_pos.append(int(snp_coord['position']))
-                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position'])]
+                    snp_pos.append(int(snp_coord['position_grch37']))
+                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position_grch37'])]
                     snp_coords.append(temp)
                 else:
                     # Generate warning if query variant is not found in dbsnp

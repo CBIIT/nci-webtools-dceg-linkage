@@ -239,12 +239,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # Extract 1000 Genomes phased genotypes
     # SNP1
     vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
+    rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position_grch37']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
     vcf_rs2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
+    rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position_grch37'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 

@@ -79,7 +79,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             
 
         chromosome = var_coord['chromosome']
-        org_coord = var_coord['position']
+        org_coord = var_coord['position_grch37']
 
 
     # Open Association Data

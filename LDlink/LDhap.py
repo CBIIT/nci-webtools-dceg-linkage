@@ -157,8 +157,8 @@ def calculate_hap(snplst, pop, request, web):
                     print(snp_coord)
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position']]
+                        snp_pos.append(snp_coord['position_grch37'])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])

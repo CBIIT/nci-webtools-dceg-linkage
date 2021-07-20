@@ -97,7 +97,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 
 		chromosome = var_coord['chromosome']
-		org_coord = var_coord['position']
+		org_coord = var_coord['position_grch37']
 
 
 	# Open Association Data
