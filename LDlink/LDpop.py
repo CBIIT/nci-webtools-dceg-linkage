@@ -5,6 +5,8 @@ import math
 import os
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+import boto3
+import botocore
 import subprocess
 import sys
 import time
@@ -27,9 +29,18 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
+    aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
+
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+    else:
+        # retrieve aws credentials here
+        session = boto3.Session()
+        credentials = session.get_credentials().get_frozen_credentials()
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
     tmp_dir = "./tmp/"
 
@@ -238,13 +249,23 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    vcf_rs1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    rs1_test = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
+    vcf_filePath1 = "data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_rs1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
+
+    if not checkS3File(config['aws']['bucket'], vcf_filePath1):
+        error(400, 'could not find sequences archive file [%s]' % (vcf_rs1))
+
+    rs1_test = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
-    vcf_rs2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    rs2_test = "tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
+    vcf_filePath2 = "data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
+
+    if not checkS3File(config['aws']['bucket'], vcf_filePath2):
+        error(400, 'could not find sequences archive file [%s]' % (vcf_rs2))
+
+    rs2_test = export_s3_keys + " tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
@@ -323,11 +344,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # vcf2 = vcf2[0].strip().split()
 
     # Get headers
-    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_rs1)
+    tabix_snp1_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_rs1)
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_rs2)
+    tabix_snp2_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_rs2)
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 
@@ -762,6 +783,25 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         output = json.dumps(output_table, sort_keys=True, indent=2)
         
     return output
+
+def checkS3File(bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True
 
 def main():
     snp1 = sys.argv[1]
