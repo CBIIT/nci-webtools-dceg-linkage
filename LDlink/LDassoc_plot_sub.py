@@ -59,7 +59,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
             def get_coords_var(db, rsid):
                 rsid = rsid.strip("rs")
-                query_results = db.dbsnp151.find_one({"id": rsid})
+                query_results = db.dbsnp.find_one({"id": rsid})
                 query_results_sanitized = json.loads(json_util.dumps(query_results))
                 return query_results_sanitized
 

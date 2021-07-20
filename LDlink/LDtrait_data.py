@@ -52,7 +52,7 @@ def main():
     else:
         client = MongoClient('localhost')
     db = client["LDLink"]
-    dbsnp = db.dbsnp151
+    dbsnp = db.dbsnp
 
     # delete old error SNPs file if there is one
     if (os.path.isfile(tmp_dir + errFilename)):

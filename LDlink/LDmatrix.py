@@ -93,7 +93,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -102,7 +102,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 

@@ -140,7 +140,7 @@ def get_query_variant(snp_coord, pop_ids, request):
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
-    query_results = db.dbsnp151.find_one({"id": rsid})
+    query_results = db.dbsnp.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
@@ -223,7 +223,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
             client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
     # Check if dbsnp collection in MongoDB exists, if not, display error
-    if "dbsnp151" not in db.list_collection_names():
+    if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."
         return("", "", "", errors_warnings)
 
@@ -252,12 +252,12 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     # tissue_ids = tissue.split("+")
     # print("tissue_ids", tissue_ids)
 
-    # Get rs number from genomic coordinates from dbsnp151
+    # Get rs number from genomic coordinates from dbsnp
     def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 

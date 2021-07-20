@@ -139,7 +139,7 @@ db = client["LDLink"]
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
-    query_results = db.dbsnp151.find_one({"id": rsid})
+    query_results = db.dbsnp.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
