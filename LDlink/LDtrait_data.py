@@ -52,7 +52,7 @@ def main():
     else:
         client = MongoClient('localhost')
     db = client["LDLink"]
-    dbsnp = db.dbsnp151
+    dbsnp = db.dbsnp
 
     # delete old error SNPs file if there is one
     if (os.path.isfile(tmp_dir + errFilename)):
@@ -93,9 +93,9 @@ def main():
                     # find chr, pos in dbsnp using rsid
                     record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
                     # if found in dbsnp, add to chr, pos to record
-                    if record is not None and len(record["chromosome"]) > 0 and len(record["position"]) > 0: 
+                    if record is not None and len(record["chromosome"]) > 0 and len(record["position_grch37"]) > 0 and record["position_grch37"] != "NA": 
                         document["chromosome_grch37"] = str(record["chromosome"])
-                        document["position_grch37"] = int(record["position"])
+                        document["position_grch37"] = int(record["position_grch37"])
                         gwas_catalog_tmp.insert_one(document)
                     else:
                         document["err_msg"] = "Genomic coordinates not found in dbSNP."

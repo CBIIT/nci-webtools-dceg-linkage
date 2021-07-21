@@ -101,7 +101,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     def get_coords(rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -110,7 +110,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -193,10 +193,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    if not checkS3File(config['aws']['bucket'], vcf_filePath):
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         error(400, 'could not find sequences archive file [%s]' % (vcf_file))
 
     tabix_snp_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
@@ -204,7 +204,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -283,10 +283,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # Define window of interest around query SNP
     # window = 500000
-    coord1 = int(snp_coord['position']) - window
+    coord1 = int(snp_coord['position_grch37']) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord['position']) + window
+    coord2 = int(snp_coord['position_grch37']) + window
     print("")
 
     # Calculate proxy LD statistics in parallel
@@ -294,7 +294,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     # block = (2 * window) // 4
     # block = (2 * window) // num_subprocesses
 
-    windowChunkRanges = chunkWindow(int(snp_coord['position']), window, num_subprocesses)
+    windowChunkRanges = chunkWindow(int(snp_coord['position_grch37']), window, num_subprocesses)
 
     commands = []
     # for i in range(num_subprocesses):
@@ -651,10 +651,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     proxy_plot.title.align = "center"
 
-    recomb_filePath = "ldlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz"
+    recomb_filePath = "data/recomb/genetic_map_autosomes_combined_b37.txt.gz"
     recomb_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    if not checkS3File(config['aws']['bucket'], recomb_filePath):
+    if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
         error(400, 'could not find sequences archive file [%s]' % (recomb_file))
 
     tabix_recomb = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
@@ -755,10 +755,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     rug.toolbar_location = None
 
     # Gene Plot
-    gene_filePath = "ldlink/data/sqlite/refGene/sorted_refGene.txt.gz"
+    gene_filePath = "data/sqlite/refGene/sorted_refGene.txt.gz"
     gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
-    if not checkS3File(config['aws']['bucket'], gene_filePath):
+    if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         error(400, 'could not find sequences archive file [%s]' % (gene_file))
 
     tabix_gene = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(
@@ -916,7 +916,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     # Return plot output
     return(out_script, out_div)
 
-def checkS3File(bucket, filePath):
+def checkS3File(aws_info, bucket, filePath):
     if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
         session = boto3.Session(
         aws_access_key_id=aws_info['aws_access_key_id'],

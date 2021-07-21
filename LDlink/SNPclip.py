@@ -108,7 +108,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -117,7 +117,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -180,8 +180,8 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position']]
+                        snp_pos.append(snp_coord['position_grch37'])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -229,10 +229,10 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    if not checkS3File(config['aws']['bucket'], vcf_filePath):
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
 
     tabix_snps = export_s3_keys + " tabix -fh {0}{1} | grep -v -e END".format(
@@ -448,7 +448,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     out_json.close()
     return(snps, rsnum_lst, details)
 
-def checkS3File(bucket, filePath):
+def checkS3File(aws_info, bucket, filePath):
     if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
         session = boto3.Session(
         aws_access_key_id=aws_info['aws_access_key_id'],

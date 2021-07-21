@@ -68,7 +68,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -77,7 +77,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -134,7 +134,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
+        vcf_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf")
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -191,16 +191,16 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Define window of interest around query SNP
     # window = 500000
-    coord1 = int(snp_coord['position']) - window
+    coord1 = int(snp_coord['position_grch37']) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord['position']) + window
+    coord2 = int(snp_coord['position_grch37']) + window
 
     # Calculate proxy LD statistics in parallel
     # threads = 4
     # block = (2 * window) // 4
     # block = (2 * window) // num_subprocesses
-    windowChunkRanges = chunkWindow(int(snp_coord['position']), window, num_subprocesses)
+    windowChunkRanges = chunkWindow(int(snp_coord['position_grch37']), window, num_subprocesses)
 
     commands = []
     # for i in range(num_subprocesses):

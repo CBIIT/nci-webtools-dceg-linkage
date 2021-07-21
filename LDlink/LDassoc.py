@@ -82,7 +82,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 			def get_coords_var(db, rsid):
 				rsid = rsid.strip("rs")
-				query_results = db.dbsnp151.find_one({"id": rsid})
+				query_results = db.dbsnp.find_one({"id": rsid})
 				query_results_sanitized = json.loads(json_util.dumps(query_results))
 				return query_results_sanitized
 
@@ -107,7 +107,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 
 		chromosome = var_coord['chromosome']
-		org_coord = var_coord['position']
+		org_coord = var_coord['position_grch37']
 
 
 	# Open Association Data

@@ -90,7 +90,7 @@ def get_query_variant(snp_coord, pop_ids, request):
     queryVariantWarnings = []
     # Extract query SNP phased genotypes
 
-    if not checkS3File(config['aws']['bucket'], vcf_filePath):
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
 
     tabix_query_snp_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
@@ -158,7 +158,7 @@ def get_query_variant(snp_coord, pop_ids, request):
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
-    query_results = db.dbsnp151.find_one({"id": rsid})
+    query_results = db.dbsnp.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
@@ -241,7 +241,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
             client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
     # Check if dbsnp collection in MongoDB exists, if not, display error
-    if "dbsnp151" not in db.list_collection_names():
+    if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."
         return("", "", "", errors_warnings)
 
@@ -270,12 +270,12 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     # tissue_ids = tissue.split("+")
     # print("tissue_ids", tissue_ids)
 
-    # Get rs number from genomic coordinates from dbsnp151
+    # Get rs number from genomic coordinates from dbsnp
     def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -338,8 +338,8 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
                 snp_coord = get_coords(db, snp_i[0])
                 if snp_coord != None:
                     rs_nums.append(snp_i[0])
-                    snp_pos.append(int(snp_coord['position']))
-                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position'])]
+                    snp_pos.append(int(snp_coord['position_grch37']))
+                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position_grch37'])]
                     snp_coords.append(temp)
                 else:
                     # Generate warning if query variant is not found in dbsnp
@@ -482,7 +482,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
     return (sanitized_query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings)
 
-def checkS3File(bucket, filePath):
+def checkS3File(aws_info, bucket, filePath):
     if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
         session = boto3.Session(
         aws_access_key_id=aws_info['aws_access_key_id'],
