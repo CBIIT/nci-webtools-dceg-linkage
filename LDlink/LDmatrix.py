@@ -229,11 +229,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
+        print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " tabix -h {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords)
@@ -787,11 +787,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     rug.toolbar_location = None
 
     # Gene Plot
-    gene_filePath = "data/sqlite/refGene/sorted_refGene.txt.gz"
-    gene_bucket_path = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+    gene_filePath = "ldlink/data/sqlite/refGene/sorted_refGene.txt.gz"
+    gene_bucket_path = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
-        error(400, 'could not find sequences archive file [%s]' % (gene_bucket_path))
+        print("could not find sequences archive file.")
 
     tabix_gene = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
         (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt")

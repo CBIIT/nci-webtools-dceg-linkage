@@ -160,11 +160,11 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Extract 1000 Genomes phased genotypes
 
     # SNP1
-    vcf_filePath1 = "data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath1 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_file1))
+        print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'])
@@ -173,11 +173,11 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
 
     # SNP2
-    vcf_filePath2 = "data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath2 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_file2))
+        print("could not find sequences archive file."))
 
     tabix_snp2_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'])

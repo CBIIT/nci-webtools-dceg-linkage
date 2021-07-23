@@ -229,11 +229,11 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
+        print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " tabix -fh {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords)

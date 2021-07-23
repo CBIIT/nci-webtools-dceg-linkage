@@ -414,11 +414,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			snp="chr"+var_p[0].split("-")[0]
 
 			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+			vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 			vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 			if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-				error(400, 'could not find sequences archive file [%s]' % (vcf_file))
+				print("could not find sequences archive file.")
 
 			tabix_snp_h= export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
 			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
@@ -489,12 +489,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+		vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
 		vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 		if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-			print('could not find sequences archive file ' + vcf_file)
-			return
+			print("could not find sequences archive file.")
 
 		tabix_snp_h= export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
 		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
@@ -968,11 +967,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	assoc_plot.title.align="center"
 
 	# Add recombination rate
-	recomb_filePath = "data/recomb/genetic_map_autosomes_combined_b37.txt.gz"
+	recomb_filePath = "ldlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz"
 	recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
 
 	if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
-		error(400, 'could not find sequences archive file [%s]' % (recomb_file))
+		print("could not find sequences archive file.")
 
 	tabix_recomb= export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_file, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
 	subprocess.call(tabix_recomb, shell=True)
@@ -1039,11 +1038,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 
 	# Gene Plot (All Transcripts)
-	gene_filePath = "data/sqlite/refGene/sorted_refGene.txt.gz"
+	gene_filePath = "ldlink/data/sqlite/refGene/sorted_refGene.txt.gz"
 	gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
 	if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
-		error(400, 'could not find sequences archive file [%s]' % (gene_file))
+		print("could not find sequences archive file.")
 
 	if myargs.transcript==True:
 		tabix_gene= export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
@@ -1197,11 +1196,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	# Gene Plot (Collapsed)
 	else:
-		gene_c_filePath = "data/sqlite/refGene/sorted_refGene_collapsed_3.txt.gz"
+		gene_c_filePath = "ldlink/data/sqlite/refGene/sorted_refGene_collapsed_3.txt.gz"
 		gene_c_file = "s3://%s/%s" % (config['aws']['bucket'], gene_c_filePath)
 
 		if not checkS3File(aws_info, config['aws']['bucket'], gene_c_filePath):
-			error(400, 'could not find sequences archive file [%s]' % (gene_c_file))
+			print("could not find sequences archive file.")
 		
 		tabix_gene_c= export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
 		subprocess.call(tabix_gene_c, shell=True)

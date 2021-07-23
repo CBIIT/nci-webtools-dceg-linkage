@@ -83,7 +83,7 @@ def get_ldexpress_tissues(web):
 
 def get_query_variant(snp_coord, pop_ids, request):
 
-    vcf_filePath = "data/1000G/Phase3/genotypes/ALL.chr" + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coord[1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     tmp_dir = "./tmp/"
@@ -91,7 +91,7 @@ def get_query_variant(snp_coord, pop_ids, request):
     # Extract query SNP phased genotypes
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_query_snp_file))
+        print("could not find sequences archive file.")
 
     tabix_query_snp_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
     proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
