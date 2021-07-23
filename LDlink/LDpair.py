@@ -5,6 +5,8 @@ import math
 import os
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+import boto3
+import botocore
 import subprocess
 import sys
 import time
@@ -25,9 +27,18 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     dbsnp_version = config['data']['dbsnp_version']
     pop_dir = config['data']['pop_dir']
     vcf_dir = config['data']['vcf_dir']
+    aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
+
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+    else:
+        # retrieve aws credentials here
+        session = boto3.Session()
+        credentials = session.get_credentials().get_frozen_credentials()
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
     tmp_dir = "./tmp/"
 
@@ -54,7 +65,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -63,7 +74,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -149,23 +160,33 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Extract 1000 Genomes phased genotypes
 
     # SNP1
-    vcf_file1 = vcf_dir + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp1_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord['chromosome'], snp1_coord['position'])
+    vcf_filePath1 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
+
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
+        print("could not find sequences archive file.")
+
+    tabix_snp1_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+        vcf_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'])
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
 
     # SNP2
-    vcf_file2 = vcf_dir + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-    tabix_snp2_offset = "tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord['chromosome'], snp2_coord['position'])
+    vcf_filePath2 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
+
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
+        print("could not find sequences archive file.")
+
+    tabix_snp2_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
+        vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'])
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
 
-    vcf1_pos = snp1_coord['position']
-    vcf2_pos = snp2_coord['position']
+    vcf1_pos = snp1_coord['position_grch37']
+    vcf2_pos = snp2_coord['position_grch37']
     vcf1 = vcf1_offset
     vcf2 = vcf2_offset
 
@@ -537,6 +558,24 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Return output
     return(json.dumps(output, sort_keys=True, indent=2))
 
+def checkS3File(aws_info, bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True
 
 def main():
     import json

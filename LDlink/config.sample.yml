@@ -26,3 +26,7 @@ database:
   mongo_port: 27017
 performance:
   num_subprocesses: 4
+aws:
+  bucket: <BUCKET_NAME>
+  aws_access_key_id: <aws_access_key_id>
+  aws_secret_access_key: <aws_secret_access_key>

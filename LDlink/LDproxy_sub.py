@@ -4,6 +4,8 @@ import sqlite3
 import json
 from pymongo import MongoClient
 from bson import json_util, ObjectId
+import boto3
+import botocore
 import subprocess
 import sys
 
@@ -21,12 +23,21 @@ with open('config.yml', 'r') as f:
     config = yaml.load(f)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
-pop_dir = config['data']['pop_dir']
-vcf_dir = config['data']['vcf_dir']
-reg_dir = config['data']['reg_dir']
+#pop_dir = config['data']['pop_dir']
+#vcf_dir = config['data']['vcf_dir']
+#reg_dir = config['data']['reg_dir']
+aws_info = config['aws']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+
+if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+    export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+else:
+    # retrieve aws credentials here
+    session = boto3.Session()
+    credentials = session.get_credentials().get_frozen_credentials()
+    export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
 tmp_dir = "./tmp/"
 
@@ -38,10 +49,34 @@ for i in range(len(pop_list)):
 
 pop_ids = list(set(ids))
 
+def checkS3File(aws_info, bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True
+
 # Get VCF region
-vcf_file = vcf_dir+chr+".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-tabix_snp = "tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
-    vcf_file, chr, start, stop)
+vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chr + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+
+if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
+    print("could not find sequences archive file.")
+
+tabix_snp = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} | grep -v -e END".format(
+    vcf_query_snp_file, chr, start, stop)
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 # Define function to calculate LD metrics
@@ -107,17 +142,6 @@ def LD_calcs(hap, allele, allele_n):
 
         return [maf_q, maf_p, D_prime, r2, match]
 
-
-# Open Connection to RegulomeDB
-con = sqlite3.connect(reg_dir)
-con.row_factory = sqlite3.Row
-con.text_factory = str
-curr = con.cursor()
-
-def get_regDB(chr, pos):
-    result = db.chr_position_score.find_one({"chromosome": chr, "position": int(pos)})
-    return result["score"]
-
 # Connect to Mongo snp database
 if env == 'local':
     mongo_host = api_mongo_addr
@@ -132,9 +156,13 @@ else:
         client = MongoClient('localhost', mongo_port)
 db = client["LDLink"]
 
+def get_regDB(chr, pos):
+    result = db.regulome.find_one({"chromosome": chr, "position": int(pos)})
+    return result["score"]
+
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
-    query_results = db.dbsnp151.find_one({"id": rsid})
+    query_results = db.dbsnp.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
@@ -217,8 +245,3 @@ for geno_n in vcf:
 
 for i in range(len(out)):
     print("\t".join(str(j) for j in out[i]))
-
-
-# Close SQLite connections
-curr.close()
-con.close()
