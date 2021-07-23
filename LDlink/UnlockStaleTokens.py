@@ -29,7 +29,7 @@ def main():
     for user in users.find():
         if "locked" in user:
             locked = user["locked"]
-            if locked != 0:
+            if locked != 0 and locked != -1:
                 if isinstance(locked, datetime.datetime):
                     diff = present - locked
                 else:
