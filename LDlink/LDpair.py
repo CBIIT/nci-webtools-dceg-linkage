@@ -177,7 +177,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
-        print("could not find sequences archive file."))
+        print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'])
