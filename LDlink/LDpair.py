@@ -166,8 +166,8 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
-    tabix_snp1_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'])
+    tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
+        vcf_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'], vcf_dir)
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
@@ -179,8 +179,8 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
         print("could not find sequences archive file.")
 
-    tabix_snp2_offset = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'])
+    tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
+        vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'], vcf_dir)
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]

@@ -221,8 +221,8 @@ def calculate_hap(snplst, pop, request, web):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snps = export_s3_keys + " tabix -fh {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords)
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
+        vcf_query_snp_file, tabix_coords, vcf_dir)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles

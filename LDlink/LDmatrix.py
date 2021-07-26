@@ -235,8 +235,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snps = export_s3_keys + " tabix -h {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords)
+    tabix_snps = export_s3_keys + " cd {2}; tabix -hD {0}{1} | grep -v -e END".format(
+        vcf_query_snp_file, tabix_coords, vcf_dir)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -793,8 +793,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")
 
-    tabix_gene = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
-        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt")
+    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
+        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt", gene_dir)
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
