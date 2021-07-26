@@ -1045,7 +1045,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		print("could not find sequences archive file.")
 
 	if myargs.transcript==True:
-		tabix_gene= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt", gene_dir)
+		tabix_gene= export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 		subprocess.call(tabix_gene, shell=True)
 		filename=tmp_dir+"genes_"+request+".txt"
 		genes_raw=open(filename).readlines()
@@ -1202,7 +1202,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if not checkS3File(aws_info, config['aws']['bucket'], gene_c_filePath):
 			print("could not find sequences archive file.")
 		
-		tabix_gene_c= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt", gene_dir)
+		tabix_gene_c= export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
 		subprocess.call(tabix_gene_c, shell=True)
 		filename_c=tmp_dir+"genes_c_"+request+".txt"
 		genes_c_raw=open(filename_c).readlines()

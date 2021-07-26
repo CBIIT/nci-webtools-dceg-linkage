@@ -762,8 +762,8 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")
 
-    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(
-        gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt", gene_dir)
+    tabix_gene = export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(
+        gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
