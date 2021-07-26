@@ -7,6 +7,8 @@ from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
 import sys
+import boto3
+import botocore
 import time
 import threading
 import weakref
@@ -43,7 +45,16 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
+    aws_info = config['aws']
     num_subprocesses = config['performance']['num_subprocesses']
+
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
+    else:
+        # retrieve aws credentials here
+        session = boto3.Session()
+        credentials = session.get_credentials().get_frozen_credentials()
+        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
     tmp_dir = "./tmp/"
 
@@ -68,7 +79,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -77,7 +88,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -126,15 +137,18 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_file = vcf_dir + \
-        snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    tabix_snp_h = "tabix -H {0} | grep CHROM".format(vcf_file)
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
+        print("could not find sequences archive file.")
+
+    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, vcf_dir)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp = "tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord['position'], tmp_dir + "snp_no_dups_" + request + ".vcf")
+    tabix_snp =  export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
+        vcf_query_snp_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf", vcf_dir)
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -191,16 +205,16 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Define window of interest around query SNP
     # window = 500000
-    coord1 = int(snp_coord['position']) - window
+    coord1 = int(snp_coord['position_grch37']) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord['position']) + window
+    coord2 = int(snp_coord['position_grch37']) + window
 
     # Calculate proxy LD statistics in parallel
     # threads = 4
     # block = (2 * window) // 4
     # block = (2 * window) // num_subprocesses
-    windowChunkRanges = chunkWindow(int(snp_coord['position']), window, num_subprocesses)
+    windowChunkRanges = chunkWindow(int(snp_coord['position_grch37']), window, num_subprocesses)
 
     commands = []
     # for i in range(num_subprocesses):
@@ -628,6 +642,24 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     # Return plot output
     return None
 
+def checkS3File(aws_info, bucket, filePath):
+    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
+        session = boto3.Session(
+        aws_access_key_id=aws_info['aws_access_key_id'],
+        aws_secret_access_key=aws_info['aws_secret_access_key'],
+        )
+        s3 = session.resource('s3')
+    else: 
+        s3 = boto3.resource('s3')
+    try:
+        s3.Object(bucket, filePath).load()
+    except botocore.exceptions.ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            return False
+        else:
+            return False
+    else: 
+        return True  
 
 def main():
 

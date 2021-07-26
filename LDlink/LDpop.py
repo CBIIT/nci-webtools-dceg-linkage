@@ -67,7 +67,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
 
     def get_chrom_coords(db, rsid):
         rsid = rsid.strip("rs")
-        query_results = db.dbsnp151.find_one({"id": rsid})
+        query_results = db.dbsnp.find_one({"id": rsid})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -76,7 +76,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp151.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -249,23 +249,23 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    vcf_filePath1 = "data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath1 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_rs1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
-    if not checkS3File(config['aws']['bucket'], vcf_filePath1):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_rs1))
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
+        print("could not find sequences archive file.")
 
-    rs1_test = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position']) 
+    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position_grch37'], vcf_dir) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
-    vcf_filePath2 = "data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath2 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
-    if not checkS3File(config['aws']['bucket'], vcf_filePath2):
-        error(400, 'could not find sequences archive file [%s]' % (vcf_rs2))
+    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
+        print("could not find sequences archive file.")
 
-    rs2_test = export_s3_keys + " tabix {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position'])
+    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position_grch37'], vcf_dir)
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
@@ -344,40 +344,16 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # vcf2 = vcf2[0].strip().split()
 
     # Get headers
-    tabix_snp1_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_rs1)
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, vcf_dir)
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_rs2)
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, vcf_dir)
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 
     rs1_dict = dict(list(zip(head1, geno1)))
     rs2_dict = dict(list(zip(head2, geno2)))
-
-    # if snp1 != rs1_dict["ID"]:
-    #     if "warning" in output:
-    #         output["warning"] = output["warning"] + \
-    #             ". Genomic position for query variant1 (" + snp1 + \
-    #             ") does not match RS number at 1000G position (chr" + \
-    #             rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
-    #     else:
-    #         output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-    #             ") does not match RS number at 1000G position (chr" + \
-    #             rs1_dict["#CHROM"]+":"+rs1_dict["POS"]+")"
-    #     snp1 = rs1_dict["ID"]
-
-    # if snp2 != rs2_dict["ID"]:
-    #     if "warning" in output:
-    #         output["warning"] = output["warning"] + \
-    #             ". Genomic position for query variant2 (" + snp2 + \
-    #             ") does not match RS number at 1000G position (chr" + \
-    #             rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
-    #     else:
-    #         output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-    #             ") does not match RS number at 1000G position (chr" + \
-    #             rs2_dict["#CHROM"]+":"+rs2_dict["POS"]+")"
-    #     snp2 = rs2_dict["ID"]
     
     if "<" in rs1_dict["REF"]:
         if "warning" in output:
@@ -784,7 +760,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         
     return output
 
-def checkS3File(bucket, filePath):
+def checkS3File(aws_info, bucket, filePath):
     if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
         session = boto3.Session(
         aws_access_key_id=aws_info['aws_access_key_id'],
