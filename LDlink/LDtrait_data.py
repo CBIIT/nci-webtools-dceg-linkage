@@ -100,8 +100,8 @@ def main():
                     # if found in dbsnp, add to chr, pos to record
                     if record is not None and (record["position_grch37"] != "NA" or record["position_grch38"] != "NA"): 
                         document["chromosome"] = record["chromosome"]
-                        document["position_grch37"] = record["position_grch37"]
-                        document["position_grch38"] = record["position_grch38"]
+                        document["position_grch37"] = int(record["position_grch37"]) if record["position_grch37"] != "NA" else "NA"
+                        document["position_grch38"] = int(record["position_grch38"]) if record["position_grch38"] != "NA" else "NA"
                         gwas_catalog_tmp.insert_one(document)
                     else:
                         document["err_msg"] = "Genomic coordinates not found in dbSNP."
