@@ -83,8 +83,11 @@ def main():
         errSNPs = []
         for line in lines:
             values = line.strip().split('\t')
+            # placeholder for chromosome to be retrieved from dbsnp
             values.append("NA")
+            # placeholder for position_grch37 to be retrieved from dbsnp
             values.append("NA")
+            # placeholder for position_grch38 to be retrieved from dbsnp
             values.append("NA")
             document = dict(list(zip(headers, values)))
             # check if orginal gwas row has populated rs number column
