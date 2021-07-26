@@ -66,7 +66,7 @@ def get_ldtrait_timestamp(web):
 
 def get_window_variants(db, chromosome, position, window):
     query_results = db.gwas_catalog.find({
-        "chromosome_grch37": chromosome, 
+        "chromosome": chromosome, 
         "position_grch37": {
             "$gte": (position - window) if (position - window) > 0 else 0, 
             "$lte": position + window
@@ -142,7 +142,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # RS Number
                 matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
                 # Position
-                matched_record.append("chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]))
+                matched_record.append("chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]))
                 # Alleles	
                 matched_record.append(ld["alleles"])	
                 # R2	
@@ -167,13 +167,13 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_snps.append(matched_record)
             else: 
                 if (r2_d == "r2"):
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
                     window_problematic_snps.append(problematic_record)
                 else:
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
                     window_problematic_snps.append(problematic_record)
         else:
-            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome_grch37"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
 
@@ -397,7 +397,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
             thinned_list.append(snp_coord[0])
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found[snp_coord[0]]:	
-                ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome_grch37"]), str(record["position_grch37"])])	
+                ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record["position_grch37"])])	
         else:	
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
                 
