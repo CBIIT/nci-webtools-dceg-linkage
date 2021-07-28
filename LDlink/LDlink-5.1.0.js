@@ -24,6 +24,66 @@ var tissueJSON;
 var modules = [ "ldassoc", "ldexpress", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
 var homeStartBox = 0;
 var newsList = [];
+var moduleTitleDescription = [
+    {
+        "module": modules[0],
+        "title": "LDassoc Tool",
+        "description": "Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest."
+    },
+    {
+        "module": modules[1],
+        "title": "LDexpress Tool",
+        "description": "Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types."
+    },
+    {
+        "module": modules[2],
+        "title": "LDhap Tool",
+        "description": "Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants."
+    },
+    {
+        "module": modules[3],
+        "title": "LDmatrix Tool",
+        "description": "Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics."
+    },
+    {
+        "module": modules[4],
+        "title": "LDpair Tool",
+        "description": "Investigate correlated alleles for a pair of variants in high LD."
+    },
+    {
+        "module": modules[5],
+        "title": "LDpop Tool",
+        "description": "Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations."
+    },
+    {
+        "module": modules[6],
+        "title": "LDproxy Tool",
+        "description": "Interactively explore proxy and putatively functional variants for a query variant."
+    },
+    {
+        "module": modules[7],
+        "title": "LDtrait Tool",
+        "description": "Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease."
+    },
+    {
+        "module": modules[8],
+        "title": "SNPclip Tool",
+        "description": "Prune a list of variants by linkage disequilibrium"
+    },
+    {
+        "module": modules[9],
+        "title": "SNPchip Tool",
+        "description": "Find commercial genotyping platforms for variants."
+    },
+    {
+        "module": modules[10],
+        "title": "API Access",
+        "description": "LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers who are \
+        interested in performing batch queries. The syntax is similar to the web address link created for queries on the webpage. Generally text output \
+        is returned that is the same as the file a user would download from the online site. Please register below for an access token required for your \
+        API call. Once registered, your access token will be emailed to you.Interactively visualize association p-value results and linkage disequilibrium \
+        patterns for a genomic region of interest."
+    }];
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -149,6 +209,21 @@ $(document).ready(function() {
                 $("#region-variant-index").val('');
                 // $("#region-variant-base-pair-window").val('');
                 $("#region-variant-container").show();
+                break;
+        }
+    });
+
+    // GRCH37-38 Toggle
+    $("#genome-build > .dropdown-menu li a").click(function(e){
+        $("#genome-build > .btn:first-child").html($(this).text() + '&nbsp;<span class="caret"></span>');
+        $("#genome-build > .btn:first-child").val($(this).text().toLowerCase());
+        console.log(e.target.id);
+        switch($(this).text()) {
+            case "GRCh37":
+                // SET to 37
+                break;
+            case "GRCh38":
+                // SET to 38
                 break;
         }
     });

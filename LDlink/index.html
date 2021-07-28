@@ -366,13 +366,28 @@
 
 			</div>
 			</div>
-
+			<div class="tab-pane fade not-home">
+				<div class="container-fluid">
+					<h2 class="text-center">Module name<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDassoc" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
+					<p class="text-center">Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.</p>
+					<hr style="margin-top:0">
+					<div class="row" style="padding-top: 10px;"></div>
+				</div>
+			</div>
 			<!-- LDassoc -->
 			<div class="tab-pane fade not-home" id="ldassoc-tab">
 				<!-- ldassoc INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">LDassoc Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDassoc" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.</p>
+					<div id="genome-build" class="dropdown" style="margin-bottom: -40px;">
+						<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-men" data-toggle="dropdown"
+						 style="width:155px;">Genome Build<span class="caret"></span></button>
+						<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-men">
+							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh37</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh38</a></li>
+						</ul>
+					</div>
+						<h2 class="text-center">LDassoc Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDassoc" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
+						<p class="text-center">Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.</p>
 					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- ldassoc FORM -->
@@ -482,8 +497,7 @@
 												</ul>
 											</div>
 											<!-- region = Gene -->
-											<div id="region-gene-container" class="form-inline" style="display
-										:none;">
+											<div id="region-gene-container" class="form-inline" style="display:none;">
 												<a id="ldassoc-region-gene-name" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
