@@ -163,6 +163,7 @@ html body .footer {
 }
 
 .tab-content .not-home {
+  margin-top: 200px;
   margin-bottom: 200px;
   padding-top: 20px;
   padding-bottom: 20px;
@@ -181,6 +182,28 @@ html body .footer {
   overflow: hidden;
 
   margin:auto;
+}
+
+.tab-content .module-header {
+  margin-bottom: 10px;
+  padding-top: 20px;
+  padding-bottom: 25px;
+  padding-left: 25px;
+  padding-right: 25px;
+  width: 100%;
+  background: white;
+  border-width: 0 1px 1px 1px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  max-width:1270px;
+  border-width: 0 0px 0px 0px;
+  border-style: solid;
+  border-color: #d9d9d9;
+  border-radius: 6px;
+  overflow: hidden;
+
+  margin-top:auto;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* @media ( max-width : 480px) {
@@ -1109,6 +1132,13 @@ textarea:invalid, .error {
 #ldassoc-sample-label {
   float:right;
 }
+
+#ldassoc-gr-toggle {
+  position: absolute;
+  float: left;
+  clear: left;
+}
+
 #ldassoc-file-container {
   margin-top: 4px;
 }
