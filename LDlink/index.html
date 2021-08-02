@@ -366,29 +366,25 @@
 
 			</div>
 			</div>
-			<div class="tab-pane fade not-home">
+			<!-- Module Header-->
+			<div class="module-header" id="module-header">
 				<div class="container-fluid">
-					<h2 class="text-center">Module name<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDassoc" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.</p>
-					<hr style="margin-top:0">
-					<div class="row" style="padding-top: 10px;"></div>
+					<div id="genome-build" class="dropdown" style="margin-bottom: -20px;">
+						<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-men" data-toggle="dropdown"
+						style="width:155px;">Genome Build<span class="caret"></span></button>
+						<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-men">
+							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh37</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh38</a></li>
+						</ul>
+					</div>
+						<h2 id="module-title" class="text-center">Module Name<sup><a id="module-help" class="help-anchor-link glyphicon glyphicon-info-sign" href="" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
+						<p id="module-description" class="text-center">Module description</p>
 				</div>
 			</div>
 			<!-- LDassoc -->
 			<div class="tab-pane fade not-home" id="ldassoc-tab">
 				<!-- ldassoc INPUTS-->
 				<div class="container-fluid">
-					<div id="genome-build" class="dropdown" style="margin-bottom: -40px;">
-						<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-men" data-toggle="dropdown"
-						 style="width:155px;">Genome Build<span class="caret"></span></button>
-						<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-men">
-							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh37</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh38</a></li>
-						</ul>
-					</div>
-						<h2 class="text-center">LDassoc Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDassoc" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-						<p class="text-center">Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest.</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- ldassoc FORM -->
 						<form id="ldassocForm" class="ldlinkForm">
@@ -751,9 +747,6 @@
 			<div class="tab-pane fade not-home" id="ldexpress-tab">
 				<!-- LDtrait INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">LDexpress Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDexpress" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types.</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDexpress FORM -->
 						<form id="ldexpressForm" class="ldlinkForm">
@@ -987,9 +980,6 @@
 			<div class="tab-pane fade not-home" id="ldhap-tab">
 				<!-- LDhap INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">LDhap Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDhap" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class = "text-center">Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants.</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDHap FORM -->
 						<form id="ldhapForm" class="ldlinkForm">
@@ -1141,9 +1131,6 @@
 			<div class="tab-pane fade not-home" id="ldmatrix-tab">
 				<!-- LDmatrix INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">LDmatrix Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDmatrix" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics.</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<div class="alert alert-danger ffWarning">You are using
 							a version of Firefox that does not render tool tips properly in the
@@ -1263,9 +1250,6 @@
 			<!-- LDpair -->
 			<div class="tab-pane fade not-home" id="ldpair-tab">
 				<!-- LDpair INPUTS-->
-				<h2 class="text-center">LDpair Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDpair" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-				<p class="text-center">Investigate correlated alleles for a pair of variants in high LD.</p>
-				<hr style="margin-top:0">
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-sm-11">
 						<!-- FORM 4 LDPair -->
@@ -1446,9 +1430,6 @@
 			<!-- LDpop -->
 			<div class="tab-pane fade not-home" id="ldpop-tab">
 				<!-- LDpop INPUTS-->
-				<h2 class="text-center">LDpop Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDpop" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-				<p class="text-center">Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations.</p>
-				<hr style="margin-top:0">
 				<div class="row" style="padding-top: 10px;">
 					<div class="col-sm-11">
 						<!-- FORM 4 LDpop -->
@@ -1736,9 +1717,6 @@
 			<!-- LDproxy -->
 			<div class="tab-pane fade not-home" id="ldproxy-tab">
 				<!-- LDproxy INPUTS-->
-				<h2 class="text-center">LDproxy Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDproxy" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-				<p class="text-center">Interactively explore proxy and putatively functional variants for a query variant.</p>
-				<hr style="margin-top:0">
 				<div class="row" style="padding-top: 10px;">
 					<div class="alert alert-danger ffWarning">You are using a
 						version of Firefox that does not render tool tips properly in the
@@ -1896,9 +1874,6 @@
 			<div class="tab-pane fade not-home" id="ldtrait-tab">
 				<!-- LDtrait INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">LDtrait Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#LDtrait" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- LDtrait FORM -->
 						<form id="ldtraitForm" class="ldlinkForm">
@@ -2085,9 +2060,6 @@
 			<div class="tab-pane fade not-home" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">SNPclip Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#SNPclip" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Prune a list of variants by linkage disequilibrium</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPclip FORM -->
 						<form id="snpclipForm" class="ldlinkForm">
@@ -2249,9 +2221,6 @@
 			<div class="tab-pane fade not-home" id="snpchip-tab">
 				<!-- SNPchip INPUTS-->
 				<div class="container-fluid">
-					<h2 class="text-center">SNPchip Tool<sup><a class="help-anchor-link glyphicon glyphicon-info-sign" href="#SNPchip" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
-					<p class="text-center">Find commercial genotyping platforms for variants.</p>
-					<hr style="margin-top:0">
 					<div class="row" style="padding-top: 10px;">
 						<!-- SNPchip FORM -->
 						<form id="snpchipForm" class="ldlinkForm">

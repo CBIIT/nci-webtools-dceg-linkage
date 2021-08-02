@@ -22,68 +22,26 @@ var ldTraitSort;
 var ldClipRaw;
 var tissueJSON;
 var modules = [ "ldassoc", "ldexpress", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip", "apiaccess" ];
+var headerModules = [ "ldassoc", "ldexpress", "ldhap", "ldmatrix", "ldpair", "ldpop", "ldproxy", "ldtrait", "snpclip", "snpchip" ];
 var homeStartBox = 0;
 var newsList = [];
-var moduleTitleDescription = [
-    {
-        "module": modules[0],
-        "title": "LDassoc Tool",
-        "description": "Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest."
-    },
-    {
-        "module": modules[1],
-        "title": "LDexpress Tool",
-        "description": "Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types."
-    },
-    {
-        "module": modules[2],
-        "title": "LDhap Tool",
-        "description": "Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants."
-    },
-    {
-        "module": modules[3],
-        "title": "LDmatrix Tool",
-        "description": "Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics."
-    },
-    {
-        "module": modules[4],
-        "title": "LDpair Tool",
-        "description": "Investigate correlated alleles for a pair of variants in high LD."
-    },
-    {
-        "module": modules[5],
-        "title": "LDpop Tool",
-        "description": "Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations."
-    },
-    {
-        "module": modules[6],
-        "title": "LDproxy Tool",
-        "description": "Interactively explore proxy and putatively functional variants for a query variant."
-    },
-    {
-        "module": modules[7],
-        "title": "LDtrait Tool",
-        "description": "Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease."
-    },
-    {
-        "module": modules[8],
-        "title": "SNPclip Tool",
-        "description": "Prune a list of variants by linkage disequilibrium"
-    },
-    {
-        "module": modules[9],
-        "title": "SNPchip Tool",
-        "description": "Find commercial genotyping platforms for variants."
-    },
-    {
-        "module": modules[10],
-        "title": "API Access",
-        "description": "LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers who are \
-        interested in performing batch queries. The syntax is similar to the web address link created for queries on the webpage. Generally text output \
-        is returned that is the same as the file a user would download from the online site. Please register below for an access token required for your \
-        API call. Once registered, your access token will be emailed to you.Interactively visualize association p-value results and linkage disequilibrium \
-        patterns for a genomic region of interest."
-    }];
+var moduleTitleDescription = {
+    "ldassoc": ["LDassoc Tool", "#LDassoc", "Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic region of interest."],
+    "ldexpress": ["LDexpress Tool", "#LDexpress", "Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types."],
+    "ldhap": ["LDhap Tool", "#LDhap", "Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants."],
+    "ldmatrix": ["LDmatrix Tool", "#LDmatrix", "Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics."],
+    "ldpair": ["LDpair Tool", "#LDpair", "Investigate correlated alleles for a pair of variants in high LD."],
+    "ldpop": ["LDpop Tool", "#LDpop", "Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations."],
+    "ldproxy": ["LDproxy Tool", "#LDproxy", "Interactively explore proxy and putatively functional variants for a query variant."],
+    "ldtrait": ["LDtrait Tool", "#LDtrait", "Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease."],
+    "snpclip": ["SNPclip Tool", "#SNPclip", "Prune a list of variants by linkage disequilibrium."],
+    "snpchip": ["SNPchip Tool", "#SNPchip", "Find commercial genotyping platforms for variants."],
+    "apiaccess": ["API Access", "#APIaccess", "LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers who are \
+    interested in performing batch queries. The syntax is similar to the web address link created for queries on the webpage. Generally text output \
+    is returned that is the same as the file a user would download from the online site. Please register below for an access token required for your \
+    API call. Once registered, your access token will be emailed to you.Interactively visualize association p-value results and linkage disequilibrium \
+    patterns for a genomic region of interest."]
+};
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -1133,7 +1091,7 @@ function setupTabs() {
         currentTab = 'home';
         window.history.pushState({},'', "?tab=home");
     }
-    if(currentTab.search('assoc')>=0) currentTab = 'ldassoc';
+    if(currentTab.search('assoc')>=0) currentTab = 'ldassoc'; 
     if(currentTab.search('express')>=0) currentTab = 'ldexpress';
     if(currentTab.search('hap')>=0) currentTab = 'ldhap';
     if(currentTab.search('matrix')>=0) currentTab = 'ldmatrix';
@@ -1144,7 +1102,7 @@ function setupTabs() {
     if(currentTab.search('clip')>=0) currentTab = 'snpclip';
     if(currentTab.search('chip')>=0) currentTab = 'snpchip';
     if(currentTab.search('access')>=0) currentTab = 'apiaccess';
-    // console.log("currentTab", currentTab);
+
     $('#'+currentTab+'-tab').addClass("in").addClass('active');
     $('#'+currentTab+'-tab-anchor').parent().addClass('active');
     let found = false;
@@ -1164,6 +1122,18 @@ function setupTabs() {
         //console.dir(url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
         updateData(currentTab, url.inputs.replace(/\t/, '').replace(/\n/, '\\\\n'));
     }
+
+    if (headerModules.includes(currentTab)) {
+        $('#module-header').show();
+        document.getElementById("module-help").href = moduleTitleDescription[currentTab][1];
+        document.getElementById("module-title").childNodes[0].nodeValue = moduleTitleDescription[currentTab][0];
+        document.getElementById("module-description").innerHTML = moduleTitleDescription[currentTab][2];
+        console.log(document.getElementById("module-title").childNodes);
+    }
+    else {
+        $('#module-header').hide();
+    }
+    
 }
 
 function refreshPopulation(pop, id) {
@@ -5475,6 +5445,19 @@ function clearTabs(currentTab){
     }
     else{
         $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
+    }
+
+    console.log(currentTab);
+
+    if (headerModules.includes(currentTab)) {
+        $('#module-header').show();
+        document.getElementById("module-help").href = moduleTitleDescription[currentTab][1];
+        document.getElementById("module-title").childNodes[0].nodeValue = moduleTitleDescription[currentTab][0];
+        document.getElementById("module-description").innerHTML = moduleTitleDescription[currentTab][2];
+        console.log(document.getElementById("module-title").childNodes);
+    }
+    else {
+        $('#module-header').hide();
     }
     
 }
