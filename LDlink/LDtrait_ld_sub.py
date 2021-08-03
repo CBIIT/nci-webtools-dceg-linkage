@@ -17,8 +17,10 @@ with open('config.yml', 'r') as f:
     config = yaml.load(f)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
-pop_dir = config['data']['pop_dir']
-vcf_dir = config['data']['vcf_dir']
+population_samples_dir = config['data']['population_samples_dir']
+data_dir = config['data']['data_dir']
+tmp_dir = config['data']['tmp_dir']
+genotypes_dir = config['data']['genotypes_dir']
 # reg_dir = config['data']['reg_dir']
 aws_info = config['aws']
 mongo_username = config['database']['mongo_user_readonly']
@@ -32,8 +34,6 @@ else:
     session = boto3.Session()
     credentials = session.get_credentials().get_frozen_credentials()
     export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-tmp_dir = "./tmp/"
 
 # Get population ids
 pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
@@ -89,26 +89,26 @@ def get_ld_stats(variantPair, pop_ids):
     }	
     # Extract 1000 Genomes phased genotypes	
     # SNP1
-    vcf_filePath1 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath1 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp1_coord['chromosome'])
     vcf_query_snp_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'], vcf_dir)	
+        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'], data_dir + genotypes_dir)	
     proc1_offset = subprocess.Popen(	
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)	
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]	
     # SNP2
-    vcf_filePath2 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath2 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp2_coord['chromosome'])
     vcf_query_snp_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'], vcf_dir)	
+        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'], data_dir + genotypes_dir)	
     proc2_offset = subprocess.Popen(	
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
@@ -259,11 +259,11 @@ def get_ld_stats(variantPair, pop_ids):
         }	
 
     # Get headers	
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, vcf_dir)	
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, data_dir + genotypes_dir)	
     proc1_h = subprocess.Popen(	
         tabix_snp1_h, shell=True, stdout=subprocess.PIPE)	
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()	
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, vcf_dir)	
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, data_dir + genotypes_dir)	
     proc2_h = subprocess.Popen(	
         tabix_snp2_h, shell=True, stdout=subprocess.PIPE)	
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()	

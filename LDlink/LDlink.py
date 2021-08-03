@@ -37,7 +37,9 @@ from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
 
 # Ensure tmp directory exists
-tmp_dir = "./tmp/"
+with open('config.yml', 'r') as f:
+    config = yaml.load(f)
+tmp_dir = config['data']['tmp_dir']
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
@@ -382,8 +384,8 @@ def upload():
 def ldassoc_example():
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    example_dir = config['data']['example_dir']
-    example_filepath = example_dir + 'prostate_example.txt'
+    ldassoc_example_dir = config['data']['ldassoc_example_dir']
+    example_filepath = ldassoc_example_dir + 'prostate_example.txt'
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -443,7 +445,7 @@ def ldassoc():
     print("Execute ldassoc.")
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
-    example_dir = config['data']['example_dir']
+    ldassoc_example_dir = config['data']['ldassoc_example_dir']
     myargs = argparse.Namespace()
     myargs.window = None
     filename = secure_filename(request.args.get('filename', False))
@@ -458,7 +460,7 @@ def ldassoc():
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = example_dir + 'prostate_example.txt'
+        filename = ldassoc_example_dir + 'prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":

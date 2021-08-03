@@ -25,7 +25,9 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     gene_dir2 = config['data']['gene_dir2']
-    vcf_dir = config['data']['vcf_dir']
+    data_dir = config['data']['data_dir']
+    tmp_dir = config['data']['tmp_dir']
+    genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
@@ -39,8 +41,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         session = boto3.Session()
         credentials = session.get_credentials().get_frozen_credentials()
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-    tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -287,13 +287,13 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             snp="chr"+var_p[0].split("-")[0]
 
             # Extract lowest P SNP phased genotypes
-            vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+            vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
             vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
             if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
                 print("could not find sequences archive file.")
 
-            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, vcf_dir)
+            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir)
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
@@ -338,17 +338,17 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             
 
         # Extract query SNP phased genotypes
-        vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+        vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
         vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
         if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
             print("could not find sequences archive file.")
 
-        tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, vcf_dir)
+        tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir)
         proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
         head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-        tabix_snp= export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", vcf_dir)
+        tabix_snp= export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir)
         subprocess.call(tabix_snp, shell=True)
 
 

@@ -20,9 +20,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
-    gene_dir = config['data']['gene_dir']
-    pop_dir = config['data']['pop_dir']
-    vcf_dir = config['data']['vcf_dir']
+    data_dir = config['data']['data_dir']
+    tmp_dir = config['data']['tmp_dir']
+    refgene_dir = config['data']['refgene_dir']
+    population_samples_dir = config['data']['population_samples_dir']
+    genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
@@ -35,8 +37,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         session = boto3.Session()
         credentials = session.get_credentials().get_frozen_credentials()
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-    tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -72,7 +72,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     pop_dirs = []
     for pop_i in pops:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(pop_dir + pop_i + ".txt")
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -229,14 +229,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -hD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, vcf_dir)
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -787,14 +787,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     rug.toolbar_location = None
 
     # Gene Plot
-    gene_filePath = "ldlink/data/sqlite/refGene/sorted_refGene.txt.gz"
+    gene_filePath = "%s/%s/sorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
     gene_bucket_path = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")
 
-    tabix_gene = export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
-        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt")
+    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
+        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
@@ -968,8 +968,6 @@ def checkS3File(aws_info, bucket, filePath):
 
 
 def main():
-    import json
-    import sys
     tmp_dir = "./tmp/"
 
     # Import LDmatrix options

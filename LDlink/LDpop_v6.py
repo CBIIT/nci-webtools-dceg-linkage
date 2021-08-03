@@ -24,8 +24,6 @@ def allele_freq_per_pop(snp1, snp2, pop):
     #pop_dir = config['data']['pop_dir']
     #vcf_dir = config['data']['vcf_dir']
 
-    #tmp_dir = "./tmp/"
-
     # Ensure tmp directory exists
     #if not os.path.exists(tmp_dir):
      #   os.makedirs(tmp_dir)
