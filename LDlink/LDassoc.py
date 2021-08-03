@@ -26,7 +26,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	dbsnp_version = config['data']['dbsnp_version']
 	gene_dir = config['data']['gene_dir']
 	gene_c_dir = config['data']['gene_c_dir']
-	gene_dir2 = config['data']['gene_dir2']
+	# gene_dir2 = config['data']['gene_dir2']
 	recomb_dir = config['data']['recomb_dir']
 	pop_dir = config['data']['pop_dir']
 	vcf_dir = config['data']['vcf_dir']
