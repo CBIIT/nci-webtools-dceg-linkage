@@ -611,8 +611,10 @@ def ldhap():
     snps = request.args.get('snps', False)
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
+    genome_build = request.args.get('genome_build', 'grch37')
     print('snps: ' + snps)
     print('pop: ' + pop)
+    print('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -625,7 +627,7 @@ def ldhap():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                out_json = calculate_hap(snplst, pop, reference, web)
+                out_json = calculate_hap(snplst, pop, reference, web, genome_build)
             except:
                 return sendTraceback(None)
         else:
@@ -641,7 +643,7 @@ def ldhap():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_json = calculate_hap(snplst, pop, reference, web)
+            out_json = calculate_hap(snplst, pop, reference, web, genome_build)
             # display api out
             try: 
                 # unlock token then display api output

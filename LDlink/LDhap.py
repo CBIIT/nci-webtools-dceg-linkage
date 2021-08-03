@@ -13,7 +13,7 @@ import subprocess
 import sys
 
 # Create LDhap function
-def calculate_hap(snplst, pop, request, web):
+def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -44,6 +44,28 @@ def calculate_hap(snplst, pop, request, web):
 
     # Create JSON output
     output = {}
+
+    genome_build_vars = {
+        "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
+        "grch37": {
+            "title": "GRCh37",
+            "position": "position_grch37"
+        },
+        "grch38": {
+            "title": "GRCh38",
+            "position": "position_grch38"
+        },
+        "grch38_high_coverage": {
+            "title": "30x GRCh38",
+            "position": "position_grch38"
+        }
+    }
+
+    # Validate genome build param
+    print("genome_build", genome_build)
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Open Inputted SNPs list file
     snps_raw = open(snplst).readlines()
@@ -101,7 +123,7 @@ def calculate_hap(snplst, pop, request, web):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -166,8 +188,8 @@ def calculate_hap(snplst, pop, request, web):
                     print(snp_coord)
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
+                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -491,12 +513,13 @@ def main():
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
+        genome_build = sys.argv[5]
     else:
         print("Correct useage is: LDLink.py snplst populations request false")
         sys.exit()
 
     # Run function
-    out_json = calculate_hap(snplst, pop, request, web)
+    out_json = calculate_hap(snplst, pop, request, web, genome_build)
 
     # Print output
     json_dict = json.loads(out_json)
