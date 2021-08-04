@@ -13,7 +13,6 @@ import sys
 
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
-
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -235,7 +234,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snps = export_s3_keys + " cd {2}; tabix -hD {0}{1} | grep -v -e END".format(
+    tabix_snps = export_s3_keys + " cd {2}; tabix -HD {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 

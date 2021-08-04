@@ -295,12 +295,12 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Get headers
-    tabix_snp1_h = "tabix -H {0} | grep CHROM".format(vcf_file1)
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir)
     proc1_h = subprocess.Popen(
         tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = "tabix -H {0} | grep CHROM".format(vcf_file2)
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir)
     proc2_h = subprocess.Popen(
         tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
