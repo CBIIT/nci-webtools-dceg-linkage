@@ -420,11 +420,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
 				print("could not find sequences archive file.")
 
-			tabix_snp_h= export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
+			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, vcf_dir)
 			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 			head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-			tabix_snp= export_s3_keys + " tabix {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf")
+			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", vcf_dir)
 			subprocess.call(tabix_snp, shell=True)
 
 
@@ -495,11 +495,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
 			print("could not find sequences archive file.")
 
-		tabix_snp_h= export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
+		tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, vcf_dir)
 		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 		head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-		tabix_snp=export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf")
+		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", vcf_dir)
 		subprocess.call(tabix_snp, shell=True)
 
 
@@ -973,7 +973,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
 		print("could not find sequences archive file.")
 
-	tabix_recomb= export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_file, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt")
+	tabix_recomb= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt", recomb_dir)
 	subprocess.call(tabix_recomb, shell=True)
 	filename=tmp_dir+"recomb_"+request+".txt"
 	recomb_raw=open(filename).readlines()
@@ -1045,7 +1045,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		print("could not find sequences archive file.")
 
 	if myargs.transcript==True:
-		tabix_gene= export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
+		tabix_gene= export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
 		subprocess.call(tabix_gene, shell=True)
 		filename=tmp_dir+"genes_"+request+".txt"
 		genes_raw=open(filename).readlines()
@@ -1202,7 +1202,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if not checkS3File(aws_info, config['aws']['bucket'], gene_c_filePath):
 			print("could not find sequences archive file.")
 		
-		tabix_gene_c= export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
+		tabix_gene_c= export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
 		subprocess.call(tabix_gene_c, shell=True)
 		filename_c=tmp_dir+"genes_c_"+request+".txt"
 		genes_c_raw=open(filename_c).readlines()

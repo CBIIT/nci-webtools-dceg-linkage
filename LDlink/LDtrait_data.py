@@ -72,8 +72,9 @@ def main():
         lines = f.readlines()
         headers = lines[0].strip().split('\t')
         print("\n".join(headers))
-        headers.append("chromosome_grch37")
+        headers.append("chromosome")
         headers.append("position_grch37")
+        headers.append("position_grch38")
         # trim headers from list
         lines = lines[1:]
         print("Finding genomics coordinates from dbsnp and inserting to MongoDB collection...")
@@ -82,7 +83,11 @@ def main():
         errSNPs = []
         for line in lines:
             values = line.strip().split('\t')
+            # placeholder for chromosome to be retrieved from dbsnp
             values.append("NA")
+            # placeholder for position_grch37 to be retrieved from dbsnp
+            values.append("NA")
+            # placeholder for position_grch38 to be retrieved from dbsnp
             values.append("NA")
             document = dict(list(zip(headers, values)))
             # check if orginal gwas row has populated rs number column
@@ -93,9 +98,10 @@ def main():
                     # find chr, pos in dbsnp using rsid
                     record = dbsnp.find_one({"id": document['SNP_ID_CURRENT']})
                     # if found in dbsnp, add to chr, pos to record
-                    if record is not None and len(record["chromosome"]) > 0 and len(record["position_grch37"]) > 0 and record["position_grch37"] != "NA": 
-                        document["chromosome_grch37"] = str(record["chromosome"])
-                        document["position_grch37"] = int(record["position_grch37"])
+                    if record is not None and (record["position_grch37"] != "NA" or record["position_grch38"] != "NA"): 
+                        document["chromosome"] = record["chromosome"]
+                        document["position_grch37"] = int(record["position_grch37"]) if record["position_grch37"] != "NA" else "NA"
+                        document["position_grch38"] = int(record["position_grch38"]) if record["position_grch38"] != "NA" else "NA"
                         gwas_catalog_tmp.insert_one(document)
                     else:
                         document["err_msg"] = "Genomic coordinates not found in dbSNP."
@@ -114,11 +120,12 @@ def main():
 
     print("Problematic GWAS variants:", missing_field)
     print("Genomic position not found in dbSNP:", no_dbsnp_match)
-    print("===== Total # variants w/ no GRCh37 genomic positions:", missing_field + no_dbsnp_match)
+    print("===== Total # variants w/ no GRCh37 and GRCh38 genomic positions:", missing_field + no_dbsnp_match)
     print("GWAS catalog inserted into MongoDB.")
 
     print("Indexing GWAS catalog Mongo collection...")
-    gwas_catalog_tmp.create_index([("chromosome_grch37", ASCENDING), ("position_grch37", ASCENDING)])
+    gwas_catalog_tmp.create_index([("chromosome", ASCENDING), ("position_grch37", ASCENDING)])
+    gwas_catalog_tmp.create_index([("chromosome", ASCENDING), ("position_grch38", ASCENDING)])
     print("Indexing completed.")
     # if gwas_catalog collection already exists, delete 
     if "gwas_catalog" in db.list_collection_names():

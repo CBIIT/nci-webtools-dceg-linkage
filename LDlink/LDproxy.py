@@ -199,12 +199,12 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snp_h = export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_file)
+    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, vcf_dir)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp = export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf")
+    tabix_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
+        vcf_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf", vcf_dir)
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -658,7 +658,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
         print("could not find sequences archive file.")
 
-    tabix_recomb = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt")
+    tabix_recomb = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt", recomb_dir)
     subprocess.call(tabix_recomb, shell=True)
     filename = tmp_dir + "recomb_" + request + ".txt"
     recomb_raw = open(filename).readlines()
@@ -762,7 +762,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")
 
-    tabix_gene = export_s3_keys + " tabix -fh {0} {1}:{2}-{3} > {4}".format(
+    tabix_gene = export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(
         gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt")
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"

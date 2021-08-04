@@ -293,7 +293,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
                 print("could not find sequences archive file.")
 
-            tabix_snp_h= export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
+            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, vcf_dir)
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
@@ -344,11 +344,11 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
             print("could not find sequences archive file.")
 
-        tabix_snp_h= export_s3_keys + " tabix -H {0} | grep CHROM".format(vcf_query_snp_file)
+        tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, vcf_dir)
         proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
         head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-        tabix_snp= export_s3_keys + " tabix {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf")
+        tabix_snp= export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", vcf_dir)
         subprocess.call(tabix_snp, shell=True)
 
 
