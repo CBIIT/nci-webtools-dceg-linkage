@@ -18,6 +18,7 @@ geckodriver*
 chromedriver*
 
 data/
+tmp/
 LDlink/tmp/
 LDlink/config.yml
 scripts/LDexpress update/tmp/

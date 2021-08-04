@@ -25,8 +25,10 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
-    pop_dir = config['data']['pop_dir']
-    vcf_dir = config['data']['vcf_dir']
+    population_samples_dir = config['data']['population_samples_dir']
+    data_dir = config['data']['data_dir']
+    tmp_dir = config['data']['tmp_dir']
+    genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
@@ -39,8 +41,6 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
         session = boto3.Session()
         credentials = session.get_credentials().get_frozen_credentials()
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-    tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -145,7 +145,7 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     pop_dirs = []
     for pop_i in pops:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(pop_dir + pop_i + ".txt")
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             return(json.dumps(output, sort_keys=True, indent=2))
@@ -160,27 +160,27 @@ def calculate_pair(snp1, snp2, pop, web, request=None):
     # Extract 1000 Genomes phased genotypes
 
     # SNP1
-    vcf_filePath1 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp1_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath1 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp1_coord['chromosome'])
     vcf_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'], vcf_dir)
+        vcf_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'], data_dir + genotypes_dir)
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
 
     # SNP2
-    vcf_filePath2 = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp2_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath2 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp2_coord['chromosome'])
     vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'], vcf_dir)
+        vcf_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'], data_dir + genotypes_dir)
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]

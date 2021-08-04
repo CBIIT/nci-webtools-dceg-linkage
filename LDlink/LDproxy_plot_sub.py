@@ -41,7 +41,9 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
-    vcf_dir = config['data']['vcf_dir']
+    data_dir = config['data']['data_dir']
+    tmp_dir = config['data']['tmp_dir']
+    genotypes_dir = config['data']['genotypes_dir']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -55,8 +57,6 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
         session = boto3.Session()
         credentials = session.get_credentials().get_frozen_credentials()
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-    tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -137,18 +137,18 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coord['chromosome'] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coord['chromosome'])
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, vcf_dir)
+    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir)
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp =  export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_query_snp_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf", vcf_dir)
+        vcf_query_snp_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir)
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not

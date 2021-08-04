@@ -19,8 +19,9 @@ with open('config.yml', 'r') as f:
     config = yaml.load(f)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
-pop_dir = config['data']['pop_dir']
-vcf_dir = config['data']['vcf_dir']
+data_dir = config['data']['data_dir']
+tmp_dir = config['data']['tmp_dir']
+genotypes_dir = config['data']['genotypes_dir']
 # reg_dir = config['data']['reg_dir']
 aws_info = config['aws']
 mongo_username = config['database']['mongo_user_readonly']
@@ -34,9 +35,6 @@ else:
     session = boto3.Session()
     credentials = session.get_credentials().get_frozen_credentials()
     export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-tmp_dir = "./tmp/"
-
 
 # Get population ids
 pop_list = open(tmp_dir+"pops_"+request+".txt").readlines()
@@ -66,14 +64,14 @@ def checkS3File(aws_info, bucket, filePath):
         return True
 
 # Get VCF region
-vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chr + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"  % (config['aws']['data_subfolder'], genotypes_dir, chr)
 vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
     print("could not find sequences archive file.")
 
 coordinates = coords.replace("_", " ")
-tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, vcf_dir)
+tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir)
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 

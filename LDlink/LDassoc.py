@@ -24,12 +24,12 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	env = config['env']
 	api_mongo_addr = config['api']['api_mongo_addr']
 	dbsnp_version = config['data']['dbsnp_version']
-	gene_dir = config['data']['gene_dir']
-	gene_c_dir = config['data']['gene_c_dir']
-	# gene_dir2 = config['data']['gene_dir2']
+	data_dir = config['data']['data_dir']
+	tmp_dir = config['data']['tmp_dir']
+	refgene_dir = config['data']['refgene_dir']
 	recomb_dir = config['data']['recomb_dir']
-	pop_dir = config['data']['pop_dir']
-	vcf_dir = config['data']['vcf_dir']
+	population_samples_dir = config['data']['population_samples_dir']
+	genotypes_dir = config['data']['genotypes_dir']
 	aws_info = config['aws']
 	mongo_username = config['database']['mongo_user_readonly']
 	mongo_password = config['database']['mongo_password']
@@ -43,9 +43,6 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		session = boto3.Session()
 		credentials = session.get_credentials().get_frozen_credentials()
 		export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-	tmp_dir = "./tmp/"
-
 
 	# Ensure tmp directory exists
 	if not os.path.exists(tmp_dir):
@@ -385,7 +382,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	pop_dirs=[]
 	for pop_i in pops:
 		if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-			pop_dirs.append(pop_dir+pop_i+".txt")
+			pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
 		else:
 			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -414,7 +411,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			snp="chr"+var_p[0].split("-")[0]
 
 			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+			vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['bucket'], genotypes_dir, chromosome)
 			vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 			if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
@@ -489,13 +486,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + chromosome + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+		vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['bucket'], genotypes_dir, chromosome)
 		vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 		if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
 			print("could not find sequences archive file.")
 
-		tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, vcf_dir)
+		tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir)
 		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 		head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
@@ -967,13 +964,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 	assoc_plot.title.align="center"
 
 	# Add recombination rate
-	recomb_filePath = "ldlink/data/recomb/genetic_map_autosomes_combined_b37.txt.gz"
+	recomb_filePath = "%s/%sgenetic_map_autosomes_combined_b37.txt.gz" % (config['aws']['data_subfolder'], recomb_dir)
 	recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
 
 	if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
 		print("could not find sequences archive file.")
 
-	tabix_recomb= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt", recomb_dir)
+	tabix_recomb= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, chromosome, coord1-whitespace, coord2+whitespace, tmp_dir+"recomb_"+request+".txt", data_dir + recomb_dir)
 	subprocess.call(tabix_recomb, shell=True)
 	filename=tmp_dir+"recomb_"+request+".txt"
 	recomb_raw=open(filename).readlines()
@@ -1038,14 +1035,14 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 
 	# Gene Plot (All Transcripts)
-	gene_filePath = "ldlink/data/sqlite/refGene/sorted_refGene.txt.gz"
+	gene_filePath = "%s/%ssorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
 	gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
 	if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
 		print("could not find sequences archive file.")
 
 	if myargs.transcript==True:
-		tabix_gene= export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt")
+		tabix_gene= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_file, chromosome, coord1, coord2, tmp_dir+"genes_"+request+".txt", data_dir + refgene_dir)
 		subprocess.call(tabix_gene, shell=True)
 		filename=tmp_dir+"genes_"+request+".txt"
 		genes_raw=open(filename).readlines()
@@ -1196,13 +1193,13 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 	# Gene Plot (Collapsed)
 	else:
-		gene_c_filePath = "ldlink/data/sqlite/refGene/sorted_refGene_collapsed_3.txt.gz"
+		gene_c_filePath = "%s/%ssorted_refGene_collapsed_3.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
 		gene_c_file = "s3://%s/%s" % (config['aws']['bucket'], gene_c_filePath)
 
 		if not checkS3File(aws_info, config['aws']['bucket'], gene_c_filePath):
 			print("could not find sequences archive file.")
 		
-		tabix_gene_c= export_s3_keys + " tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt")
+		tabix_gene_c= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt", data_dir + refgene_dir)
 		subprocess.call(tabix_gene_c, shell=True)
 		filename_c=tmp_dir+"genes_c_"+request+".txt"
 		genes_c_raw=open(filename_c).readlines()

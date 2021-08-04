@@ -60,6 +60,7 @@ def convert_codeToPlatforms(platform_query, web):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
+    tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
@@ -92,13 +93,12 @@ def calculate_chip(snplst, platform_query, web, request):
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
     env = config['env']
+    tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
-
-    tmp_dir = "./tmp/"
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -305,7 +305,10 @@ def calculate_chip(snplst, platform_query, web, request):
 
 
 def createOutputFile(request):
-    tmp_dir = "./tmp/"
+    # Set data directories using config.yml
+    with open('config.yml', 'r') as f:
+        config = yaml.load(f)
+    tmp_dir = config['data']['tmp_dir']
 
     details_file = open(tmp_dir+'details'+request+".txt", "w")
 

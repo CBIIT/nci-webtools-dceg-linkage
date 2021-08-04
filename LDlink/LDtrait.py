@@ -23,8 +23,9 @@ with open('config.yml', 'r') as f:
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
-pop_dir = config['data']['pop_dir']	
-vcf_dir = config['data']['vcf_dir']
+data_dir = config['data']['data_dir']
+tmp_dir = config['data']['tmp_dir']
+population_samples_dir = config['data']['population_samples_dir']	
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
@@ -190,7 +191,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
     max_list = 50
 
     # Ensure tmp directory exists
-    tmp_dir = "./tmp/"
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
@@ -251,7 +251,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
     pop_dirs = []
     for pop_i in pops:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(pop_dir+pop_i+".txt")
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             json_output = json.dumps(output, sort_keys=True, indent=2)

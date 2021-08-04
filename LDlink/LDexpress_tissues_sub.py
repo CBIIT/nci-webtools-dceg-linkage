@@ -18,14 +18,11 @@ with open('config.yml', 'r') as f:
     config = yaml.load(f)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
-pop_dir = config['data']['pop_dir']
-vcf_dir = config['data']['vcf_dir']
+tmp_dir = config['data']['tmp_dir']
 # reg_dir = config['data']['reg_dir']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
-
-tmp_dir = "./tmp/"
 
 windowSNPs = []
 

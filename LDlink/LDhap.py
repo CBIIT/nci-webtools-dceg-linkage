@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 import yaml
 import json
-import math
 import operator
 import os
-# import sqlite3
 from pymongo import MongoClient
-from bson import json_util, ObjectId
+from bson import json_util
 import boto3
 import botocore
 import subprocess
 import sys
 
 # Create LDhap function
-def calculate_hap(snplst, pop, request, web):
+def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
@@ -21,8 +19,10 @@ def calculate_hap(snplst, pop, request, web):
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
-    pop_dir = config['data']['pop_dir']
-    vcf_dir = config['data']['vcf_dir']
+    data_dir = config['data']['data_dir']
+    tmp_dir = config['data']['tmp_dir']
+    population_samples_dir = config['data']['population_samples_dir']
+    genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
     mongo_username = config['database']['mongo_user_readonly']
     mongo_password = config['database']['mongo_password']
@@ -36,14 +36,34 @@ def calculate_hap(snplst, pop, request, web):
         credentials = session.get_credentials().get_frozen_credentials()
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
 
-    tmp_dir = "./tmp/"
-
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
     # Create JSON output
     output = {}
+
+    genome_build_vars = {
+        "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
+        "grch37": {
+            "title": "GRCh37",
+            "position": "position_grch37"
+        },
+        "grch38": {
+            "title": "GRCh38",
+            "position": "position_grch38"
+        },
+        "grch38_high_coverage": {
+            "title": "30x GRCh38",
+            "position": "position_grch38"
+        }
+    }
+
+    # Validate genome build param
+    print("genome_build", genome_build)
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Open Inputted SNPs list file
     snps_raw = open(snplst).readlines()
@@ -64,7 +84,7 @@ def calculate_hap(snplst, pop, request, web):
     pop_dirs = []
     for pop_i in pops:
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(pop_dir+pop_i+".txt")
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
             return(json.dumps(output, sort_keys=True, indent=2))
@@ -101,7 +121,7 @@ def calculate_hap(snplst, pop, request, web):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -166,8 +186,8 @@ def calculate_hap(snplst, pop, request, web):
                     print(snp_coord)
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
+                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -215,14 +235,14 @@ def calculate_hap(snplst, pop, request, web):
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "ldlink/data/1000G/Phase3/genotypes/ALL.chr" + snp_coords[0][1] + ".phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, vcf_dir)
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -482,21 +502,19 @@ def checkS3File(aws_info, bucket, filePath):
         return True
 
 def main():
-    import json
-    import sys
-
     # Import LDLink options
     if len(sys.argv) == 4:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
+        genome_build = sys.argv[5]
     else:
         print("Correct useage is: LDLink.py snplst populations request false")
         sys.exit()
 
     # Run function
-    out_json = calculate_hap(snplst, pop, request, web)
+    out_json = calculate_hap(snplst, pop, request, web, genome_build)
 
     # Print output
     json_dict = json.loads(out_json)
