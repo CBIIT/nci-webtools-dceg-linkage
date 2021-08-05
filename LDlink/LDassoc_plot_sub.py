@@ -142,14 +142,19 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         conn.text_factory=str
         cur=conn.cursor()
 
-        def get_coords_gene(gene_raw):
-            gene=gene_raw.upper()
-            t=(gene,)
-            cur.execute("SELECT * FROM genes WHERE name=?", t)
-            return cur.fetchone()
+        def get_coords_gene(gene_raw, db):
+			gene=gene_raw.upper()
+			mongoResult = db.genes_name_coords.find_one({"name": gene})
+
+			#format mongo output
+			if mongoResult != None:
+				geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+				return geneResult
+			else:
+				return None
 
         # Find RS number in snp database
-        gene_coord=get_coords_gene(myargsName)
+        gene_coord=get_coords_gene(myargsName, db)
 
         # Close snp connection
         cur.close()
