@@ -42,6 +42,7 @@ var moduleTitleDescription = {
     API call. Once registered, your access token will be emailed to you.Interactively visualize association p-value results and linkage disequilibrium \
     patterns for a genomic region of interest."]
 };
+var genomeBuild = "grch37";
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -183,9 +184,11 @@ $(document).ready(function() {
         switch($(this).text()) {
             case "GRCh37":
                 // SET to 37
+                genomeBuild = "grch37";
                 break;
             case "GRCh38":
                 // SET to 38
+                genomeBuild = "grch38";
                 break;
         }
     });
@@ -2172,7 +2175,8 @@ function updateLDhap() {
     var ldInputs = {
         snps : snps,
         pop : population.join("+"),
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
     var url = restServerUrl + "/ldhap";
     var ajaxRequest = $.ajax({
@@ -2193,6 +2197,14 @@ function updateLDhap() {
         }
 
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             var ldhapTable = formatLDhapData($.parseJSON(data));
