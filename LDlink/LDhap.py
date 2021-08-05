@@ -34,15 +34,18 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
         "grch37": {
             "title": "GRCh37",
-            "position": "position_grch37"
+            "position": "position_grch37",
+            "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
         },
         "grch38": {
             "title": "GRCh38",
-            "position": "position_grch38"
+            "position": "position_grch38",
+            "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
         },
         "grch38_high_coverage": {
             "title": "30x GRCh38",
-            "position": "position_grch38"
+            "position": "position_grch38",
+            "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
         }
     }
 
@@ -222,7 +225,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%sGRCh37/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
