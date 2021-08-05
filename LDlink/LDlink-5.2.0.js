@@ -172,6 +172,10 @@ $(document).ready(function() {
     });
 
     // GRCH37-38 Toggle
+    $(document).ready(function() {  
+        $("#genome-build > .dropdown-menu li a")[0].click();
+     });
+
     $("#genome-build > .dropdown-menu li a").click(function(e){
         $("#genome-build > .btn:first-child").html($(this).text() + '&nbsp;<span class="caret"></span>');
         $("#genome-build > .btn:first-child").val($(this).text().toLowerCase());
@@ -1128,7 +1132,6 @@ function setupTabs() {
         document.getElementById("module-help").href = moduleTitleDescription[currentTab][1];
         document.getElementById("module-title").childNodes[0].nodeValue = moduleTitleDescription[currentTab][0];
         document.getElementById("module-description").innerHTML = moduleTitleDescription[currentTab][2];
-        console.log(document.getElementById("module-title").childNodes);
     }
     else {
         $('#module-header').hide();
@@ -5447,21 +5450,16 @@ function clearTabs(currentTab){
         $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
     }
 
-    console.log(currentTab);
-
     if (headerModules.includes(currentTab)) {
         $('#module-header').show();
         document.getElementById("module-help").href = moduleTitleDescription[currentTab][1];
         document.getElementById("module-title").childNodes[0].nodeValue = moduleTitleDescription[currentTab][0];
         document.getElementById("module-description").innerHTML = moduleTitleDescription[currentTab][2];
-        console.log(document.getElementById("module-title").childNodes);
     }
     else {
         $('#module-header').hide();
     }
-    
 }
-
 
 $("#news-link").on('click',function(){
     console.log( $("#news-container").offset())
