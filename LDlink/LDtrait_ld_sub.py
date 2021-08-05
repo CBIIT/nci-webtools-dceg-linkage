@@ -8,6 +8,7 @@ import botocore
 import subprocess
 import sys
 import requests
+from LDcommon import checkS3File
 
 request = sys.argv[1]
 subprocess_id = sys.argv[2]
@@ -49,25 +50,6 @@ with open(tmp_dir + 'trait_ld_' + str(subprocess_id) + '_' + str(request) + '.tx
     lines = snpPairsFile.readlines() 
     for line in lines: 
         variantPairs.append(line.strip().split("\t"))
-
-def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-        aws_access_key_id=aws_info['aws_access_key_id'],
-        aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
-    try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return False
-        else:
-            return False
-    else: 
-        return True
 
 def get_ld_stats(variantPair, pop_ids):	
     # parse ld pair array parameter input

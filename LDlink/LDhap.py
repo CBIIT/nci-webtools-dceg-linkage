@@ -9,10 +9,10 @@ import boto3
 import botocore
 import subprocess
 import sys
+from LDcommon import checkS3File
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
-
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -239,7 +239,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        output["error"] = "1000G data cannot be reached."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
@@ -481,25 +482,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Return JSON output
     return(json.dumps(output, sort_keys=True, indent=2))
-
-def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-        aws_access_key_id=aws_info['aws_access_key_id'],
-        aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
-    try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return False
-        else:
-            return False
-    else: 
-        return True
 
 def main():
     # Import LDLink options

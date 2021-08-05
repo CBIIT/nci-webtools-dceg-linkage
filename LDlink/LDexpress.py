@@ -19,6 +19,7 @@ import numpy as np
 import boto3
 import botocore
 from timeit import default_timer as timer
+from LDcommon import checkS3File
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as f:	
@@ -481,26 +482,6 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     print("##### LDEXPRESS COMPLETE #####")
 
     return (sanitized_query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings)
-
-def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-        aws_access_key_id=aws_info['aws_access_key_id'],
-        aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
-    try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return False
-        else:
-            return False
-    else: 
-        return True
-
 
 def main():
     # snplst = sys.argv[1]
