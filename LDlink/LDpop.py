@@ -266,7 +266,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         print("could not find sequences archive file.")
 
     # need to add | grep -v -e END ???
-    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2}".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position_grch37'], data_dir + genotypes_dir)
+    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position_grch37'], data_dir + genotypes_dir)
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
