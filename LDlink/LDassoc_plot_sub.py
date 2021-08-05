@@ -24,7 +24,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
-    gene_dir2 = config['data']['gene_dir2']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     genotypes_dir = config['data']['genotypes_dir']
@@ -135,35 +134,24 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     elif region=="gene":
         if myargsName=="None":
             return None
-            
-
-        # Connect to gene database
-        conn=sqlite3.connect(gene_dir2)
-        conn.text_factory=str
-        cur=conn.cursor()
 
         def get_coords_gene(gene_raw, db):
-			gene=gene_raw.upper()
-			mongoResult = db.genes_name_coords.find_one({"name": gene})
+            gene=gene_raw.upper()
+            mongoResult = db.genes_name_coords.find_one({"name": gene})
 
-			#format mongo output
-			if mongoResult != None:
-				geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
-				return geneResult
-			else:
-				return None
+            #format mongo output
+            if mongoResult != None:
+                geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+                return geneResult
+            else:
+                return None
 
         # Find RS number in snp database
         gene_coord=get_coords_gene(myargsName, db)
 
-        # Close snp connection
-        cur.close()
-        conn.close()
-
         if gene_coord==None:
             return None
             
-
         # Define search coordinates
         coord1=int(gene_coord[2])-window
         if coord1<0:
