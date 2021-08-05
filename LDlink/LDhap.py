@@ -2,11 +2,8 @@
 import yaml
 import json
 import operator
-import os
 from pymongo import MongoClient
 from bson import json_util
-import boto3
-import botocore
 import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials
