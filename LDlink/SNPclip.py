@@ -11,7 +11,7 @@ import botocore
 import subprocess
 import sys
 import collections
-from LDcommon import checkS3File
+from LDcommon import checkS3File, retrieveAWSCredentials
 
 ###########
 # SNPclip #
@@ -38,13 +38,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
-    else:
-        # retrieve aws credentials here
-        session = boto3.Session()
-        credentials = session.get_credentials().get_frozen_credentials()
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
+    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
