@@ -385,7 +385,8 @@ def ldassoc_example():
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
-    example_filepath = ldassoc_example_dir + 'prostate_example.txt'
+    data_dir = config['data']['data_dir']
+    example_filepath = data_dir + ldassoc_example_dir + 'prostate_example.txt'
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -446,6 +447,7 @@ def ldassoc():
     with open('config.yml', 'r') as c:
         config = yaml.load(c)
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
+    data_dir = config['data']['data_dir']
     myargs = argparse.Namespace()
     myargs.window = None
     filename = secure_filename(request.args.get('filename', False))
@@ -460,7 +462,7 @@ def ldassoc():
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = ldassoc_example_dir + 'prostate_example.txt'
+        filename = data_dir + ldassoc_example_dir + 'prostate_example.txt'
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
@@ -545,7 +547,7 @@ def ldexpress():
                 if "error" in errors_warnings:
                     express["error"] = errors_warnings["error"]
                 else:
-                    with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
+                    with open(tmp_dir + 'express_variants_annotated' + reference + '.txt', 'w') as f:
                         f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n")
                         # for snp in thinned_snps:
                         for matched_gwas in details["results"]["aaData"]:
@@ -575,7 +577,7 @@ def ldexpress():
                 toggleLocked(token, 0)
                 return sendTraceback(errors_warnings["error"])
             else:
-                with open('tmp/express_variants_annotated' + reference + '.txt', 'w') as f:
+                with open(tmp_dir + 'express_variants_annotated' + reference + '.txt', 'w') as f:
                     f.write("Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n")
                     # for snp in thinned_snps:
                     for matched_gwas in details["results"]["aaData"]:
@@ -586,7 +588,7 @@ def ldexpress():
                         f.write(express["warning"])
                 # display api out
                 try:
-                    with open('tmp/express_variants_annotated' + reference + '.txt', 'r') as fp:
+                    with open(tmp_dir + 'express_variants_annotated' + reference + '.txt', 'r') as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     return content
@@ -649,8 +651,8 @@ def ldhap():
             # display api out
             try: 
                 # unlock token then display api output
-                resultFile1 = "./tmp/snps_" + reference + ".txt"
-                resultFile2 = "./tmp/haplotypes_" + reference + ".txt"
+                resultFile1 = tmp_dir + "snps_" + reference + ".txt"
+                resultFile2 = tmp_dir + "haplotypes_" + reference + ".txt"
                 with open(resultFile1, "r") as fp:
                     content1 = fp.read()
                 with open(resultFile2, "r") as fp:
@@ -716,8 +718,11 @@ def ldmatrix():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
+                print("reach1")
                 out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
+                print("reach2")
             except:
+                print("reach3")
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -738,9 +743,9 @@ def ldmatrix():
                 # unlock token then display api output
                 resultFile = ""
                 if r2_d == "d":
-                    resultFile = "./tmp/d_prime_"+reference+".txt"
+                    resultFile = tmp_dir + "d_prime_"+reference+".txt"
                 else:
-                    resultFile = "./tmp/r2_"+reference+".txt"
+                    resultFile = tmp_dir + "r2_"+reference+".txt"
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
@@ -796,7 +801,7 @@ def ldpair():
             # display api out
             try:
                 # unlock token then display api output
-                with open('./tmp/LDpair_'+reference+'.txt', "r") as fp:
+                with open(tmp_dir + 'LDpair_'+reference+'.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
@@ -852,7 +857,7 @@ def ldpop():
             # display api out
             try:
                 # unlock token then display api output
-                with open('./tmp/LDpop_' + reference + '.txt', "r") as fp:
+                with open(tmp_dir + 'LDpop_' + reference + '.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
@@ -908,7 +913,7 @@ def ldproxy():
             # display api out
             try:
                 # unlock token then display api output
-                with open('./tmp/proxy' + reference + '.txt', "r") as fp:
+                with open(tmp_dir + 'proxy' + reference + '.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
@@ -969,7 +974,7 @@ def ldtrait():
                 if "error" in json_dict:
                     trait["error"] = json_dict["error"]
                 else:
-                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                    with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
                         f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
@@ -1006,7 +1011,7 @@ def ldtrait():
                 toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
             else:
-                with open('tmp/trait_variants_annotated' + reference + '.txt', 'w') as f:
+                with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
                     f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
@@ -1018,7 +1023,7 @@ def ldtrait():
                         f.write(trait["warning"])
                 # display api out
                 try:
-                    with open('tmp/trait_variants_annotated' + reference + '.txt', 'r') as fp:
+                    with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'r') as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
                     return content
@@ -1078,7 +1083,7 @@ def snpchip():
             # display api out
             try:
                 # unlock token then display api output
-                resultFile = "./tmp/details"+reference+".txt"
+                resultFile = tmp_dir + "details"+reference+".txt"
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
@@ -1141,10 +1146,10 @@ def snpclip():
                         clip["filtered"][snp[0]] = details[snp[0]]
                     if "warning" in json_dict:
                         clip["warning"] = json_dict["warning"]
-                with open('tmp/snp_list' + reference + '.txt', 'w') as f:
+                with open(tmp_dir + 'snp_list' + reference + '.txt', 'w') as f:
                     for rs_number in snp_list:
                         f.write(rs_number + '\n')
-                with open('tmp/details' + reference + '.txt', 'w') as f:
+                with open(tmp_dir + 'details' + reference + '.txt', 'w') as f:
                     f.write("RS Number\tPosition\tAlleles\tDetails\n")
                     if(type(details) is collections.OrderedDict):
                         for snp in snps:
@@ -1172,7 +1177,7 @@ def snpclip():
             (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
             with open(tmp_dir + "clip" + reference + ".json") as f:
                 json_dict = json.load(f)
-            with open('tmp/details' + reference + '.txt', 'w') as f:
+            with open(tmp_dir + 'details' + reference + '.txt', 'w') as f:
                 f.write("RS Number\tPosition\tAlleles\tDetails\n")
                 if(type(details) is collections.OrderedDict):
                     for snp in snps:
@@ -1181,7 +1186,7 @@ def snpclip():
             # display api out
             try:
                 # unlock token then display api output
-                resultFile = "./tmp/details" + reference + ".txt"
+                resultFile = tmp_dir + "details" + reference + ".txt"
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 with open(tmp_dir + "clip" + reference + ".json") as f:

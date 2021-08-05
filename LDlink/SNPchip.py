@@ -312,7 +312,7 @@ def createOutputFile(request):
 
     details_file = open(tmp_dir+'details'+request+".txt", "w")
 
-    with open("./tmp/proxy"+request+".json") as out_json:
+    with open(tmp_dir + "proxy"+request+".json") as out_json:
         json_dict = json.load(out_json)
 
     rs_dict = dict(json_dict)

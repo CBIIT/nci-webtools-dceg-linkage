@@ -152,13 +152,13 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['bucket'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snps = export_s3_keys + " cd {2}; tabix -hD {0}{1} | grep -v -e END".format(
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
