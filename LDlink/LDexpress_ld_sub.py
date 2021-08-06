@@ -7,6 +7,7 @@ import boto3
 import botocore
 import subprocess
 import sys
+from LDcommon import checkS3File, retrieveAWSCredentials
 
 web = sys.argv[1]
 snp = sys.argv[2]
@@ -17,7 +18,6 @@ request = sys.argv[6]
 subprocess_id = sys.argv[7]
 r2_d = sys.argv[8]
 r2_d_threshold = sys.argv[9]
-
 
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
@@ -33,13 +33,7 @@ mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 
-if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-    export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
-else:
-    # retrieve aws credentials here
-    session = boto3.Session()
-    credentials = session.get_credentials().get_frozen_credentials()
-    export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
+export_s3_keys = retrieveAWSCredentials()
 
 # Get population ids
 pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
@@ -48,25 +42,6 @@ for i in range(len(pop_list)):
     ids.append(pop_list[i].strip())
 
 pop_ids = list(set(ids))
-
-def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-        aws_access_key_id=aws_info['aws_access_key_id'],
-        aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
-    try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return False
-        else:
-            return False
-    else: 
-        return True
 
 # Get VCF region
 vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)

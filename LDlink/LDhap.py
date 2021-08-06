@@ -2,17 +2,14 @@
 import yaml
 import json
 import operator
-import os
 from pymongo import MongoClient
 from bson import json_util
-import boto3
-import botocore
 import subprocess
 import sys
+from LDcommon import checkS3File, retrieveAWSCredentials
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
-
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -28,17 +25,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
-    else:
-        # retrieve aws credentials here
-        session = boto3.Session()
-        credentials = session.get_credentials().get_frozen_credentials()
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-
-    # Ensure tmp directory exists
-    if not os.path.exists(tmp_dir):
-        os.makedirs(tmp_dir)
+    export_s3_keys = retrieveAWSCredentials()
 
     # Create JSON output
     output = {}
@@ -47,15 +34,18 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
         "grch37": {
             "title": "GRCh37",
-            "position": "position_grch37"
+            "position": "position_grch37",
+            "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
         },
         "grch38": {
             "title": "GRCh38",
-            "position": "position_grch38"
+            "position": "position_grch38",
+            "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
         },
         "grch38_high_coverage": {
             "title": "30x GRCh38",
-            "position": "position_grch38"
+            "position": "position_grch38",
+            "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
         }
     }
 
@@ -235,14 +225,15 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        output["error"] = "1000G data cannot be reached."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -481,25 +472,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Return JSON output
     return(json.dumps(output, sort_keys=True, indent=2))
-
-def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-        aws_access_key_id=aws_info['aws_access_key_id'],
-        aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
-    try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return False
-        else:
-            return False
-    else: 
-        return True
 
 def main():
     # Import LDLink options

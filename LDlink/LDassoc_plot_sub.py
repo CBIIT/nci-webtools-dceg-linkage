@@ -14,7 +14,7 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-
+from LDcommon import checkS3File, retrieveAWSCredentials
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
@@ -24,7 +24,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         config = yaml.load(f)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
-    gene_dir2 = config['data']['gene_dir2']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     genotypes_dir = config['data']['genotypes_dir']
@@ -34,13 +33,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     mongo_port = config['database']['mongo_port']
     num_subprocesses = config['performance']['num_subprocesses']
 
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
-    else:
-        # retrieve aws credentials here
-        session = boto3.Session()
-        credentials = session.get_credentials().get_frozen_credentials()
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
+    export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -141,30 +134,24 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     elif region=="gene":
         if myargsName=="None":
             return None
-            
 
-        # Connect to gene database
-        conn=sqlite3.connect(gene_dir2)
-        conn.text_factory=str
-        cur=conn.cursor()
-
-        def get_coords_gene(gene_raw):
+        def get_coords_gene(gene_raw, db):
             gene=gene_raw.upper()
-            t=(gene,)
-            cur.execute("SELECT * FROM genes WHERE name=?", t)
-            return cur.fetchone()
+            mongoResult = db.genes_name_coords.find_one({"name": gene})
+
+            #format mongo output
+            if mongoResult != None:
+                geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+                return geneResult
+            else:
+                return None
 
         # Find RS number in snp database
-        gene_coord=get_coords_gene(myargsName)
-
-        # Close snp connection
-        cur.close()
-        conn.close()
+        gene_coord=get_coords_gene(myargsName, db)
 
         if gene_coord==None:
             return None
             
-
         # Define search coordinates
         coord1=int(gene_coord[2])-window
         if coord1<0:
@@ -958,26 +945,6 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Return plot output
     return None
-
-def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-        aws_access_key_id=aws_info['aws_access_key_id'],
-        aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
-    try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            return False
-        else:
-            return False
-    else: 
-        return True
-
 
 def main():
 
