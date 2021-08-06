@@ -316,6 +316,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     for subprocess_id in range(num_subprocesses):
         getWindowVariantsArgs = " ".join([str(web), str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id)])
+        print("COMMAND:::" + getWindowVariantsArgs)
         commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
 
     processes = [subprocess.Popen(
@@ -658,7 +659,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
         print("could not find sequences archive file.")
 
-    tabix_recomb = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt", data_dir + recomb_dir)
+    tabix_recomb = export_s3_keys + " cd {5}; tabix -fHD {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt", data_dir + recomb_dir)
     subprocess.call(tabix_recomb, shell=True)
     filename = tmp_dir + "recomb_" + request + ".txt"
     recomb_raw = open(filename).readlines()
@@ -757,12 +758,12 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # Gene Plot
     gene_filePath = "%s/%ssorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
-    gene_file = "s3://%s/%s/%s" % (config['aws']['bucket'], gene_filePath)
+    gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")
 
-    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(
+    tabix_gene = export_s3_keys + " cd {5}; tabix -fHD {0} {1}:{2}-{3} > {4}".format(
         gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
@@ -886,7 +887,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     if web:
         # Open thread for high quality image exports
         command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d + " " + str(window)
-        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        #subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
     # Html output for testing #
