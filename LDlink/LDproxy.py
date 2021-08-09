@@ -752,7 +752,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # Gene Plot
     gene_filePath = "%s/%ssorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
-    gene_file = "s3://%s/%s/%s" % (config['aws']['bucket'], gene_filePath)
+    gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")

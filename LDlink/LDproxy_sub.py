@@ -133,7 +133,10 @@ db = client["LDLink"]
 
 def get_regDB(chr, pos):
     result = db.regulome.find_one({"chromosome": chr, "position": int(pos)})
-    return result["score"]
+    if result is None:
+        return "."   
+    else:
+        return result["score"]
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
