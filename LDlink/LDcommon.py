@@ -2,6 +2,8 @@ import boto3
 import botocore
 import yaml
 from pymongo import MongoClient
+import json
+import subprocess
 # from bson import json_util
 
 # retrieve config
@@ -13,6 +15,25 @@ api_mongo_addr = config['api']['api_mongo_addr']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+
+genome_build_vars = {
+    "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
+    "grch37": {
+        "title": "GRCh37",
+        "position": "position_grch37",
+        "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+    },
+    "grch38": {
+        "title": "GRCh38",
+        "position": "position_grch38",
+        "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
+    },
+    "grch38_high_coverage": {
+        "title": "30x GRCh38",
+        "position": "position_grch38",
+        "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
+    }
+}
 
 def checkS3File(aws_info, bucket, filePath):
     if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
@@ -58,3 +79,11 @@ def connectMongoDBReadOnly(web):
             client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
     return db
+
+def retrieveTabix1000GData(query_file, coords, query_dir):
+    export_s3_keys = retrieveAWSCredentials()
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
+        query_file, coords, query_dir)
+    proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    return vcf
