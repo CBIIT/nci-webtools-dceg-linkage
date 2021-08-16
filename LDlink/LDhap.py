@@ -153,13 +153,19 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 # Check first two charcters are rs and last charcter of each snp
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    print("SNP_COORD")
-                    print(snp_coord)
-                    if snp_coord != None:
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
-                        snp_coords.append(temp)
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
+                        # check if variant is on chrY for genome build = GRCh38
+                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            else:
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                        else:
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
                 else:
@@ -169,11 +175,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            dbsnp_version + ": " + ", ".join(warn)
+            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "): " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + "."
+            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + output["warning"]
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome
@@ -269,11 +275,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         geno = vcf[g].strip().split()
         if geno[1] not in snp_pos:
             if "warning" in output:
-                output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " search coordinates for query variant"
+                output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             else:
-                output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " search coordinates for query variant"
+                output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
