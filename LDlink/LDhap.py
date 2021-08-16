@@ -1,53 +1,27 @@
 #!/usr/bin/env python3
+
 import yaml
 import json
 import operator
-from pymongo import MongoClient
 from bson import json_util
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
-    env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     population_samples_dir = config['data']['population_samples_dir']
     genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
-    export_s3_keys = retrieveAWSCredentials()
 
     # Create JSON output
     output = {}
-
-    genome_build_vars = {
-        "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
-        "grch37": {
-            "title": "GRCh37",
-            "position": "position_grch37",
-            "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
-        },
-        "grch38": {
-            "title": "GRCh38",
-            "position": "position_grch38",
-            "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
-        },
-        "grch38_high_coverage": {
-            "title": "30x GRCh38",
-            "position": "position_grch38",
-            "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
-        }
-    }
 
     # Validate genome build param
     print("genome_build", genome_build)
@@ -86,19 +60,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    # Connect to Mongo snp database
-    if env == 'local':
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username+':' + mongo_password+'@' + mongo_host + '/admin', mongo_port)
-    else:
-        if env == 'local':
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(web)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
@@ -172,13 +134,19 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 # Check first two charcters are rs and last charcter of each snp
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    print("SNP_COORD")
-                    print(snp_coord)
-                    if snp_coord != None:
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
-                        snp_coords.append(temp)
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
+                        # check if variant is on chrY for genome build = GRCh38
+                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            else:
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                        else:
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
                 else:
@@ -188,11 +156,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     if warn != []:
         output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            dbsnp_version + ": " + ", ".join(warn)
+            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "): " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + "."
+            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + output["warning"]
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome
@@ -224,7 +192,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                      str(i)+"-"+str(i) for i in snp_pos_int]
     tabix_coords = " "+" ".join(snp_coord_str)
 
-    # Extract 1000 Genomes phased genotypes
+    # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
@@ -232,9 +200,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         output["error"] = "1000G data cannot be reached."
         return(json.dumps(output, sort_keys=True, indent=2))
 
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
-    proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
 
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
@@ -252,8 +218,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             a2_n = a2[1:]
         return(a1_n, a2_n)
 
-    # Import SNP VCF files
-    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
@@ -287,11 +251,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         geno = vcf[g].strip().split()
         if geno[1] not in snp_pos:
             if "warning" in output:
-                output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " search coordinates for query variant"
+                output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             else:
-                output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " search coordinates for query variant"
+                output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
