@@ -10,10 +10,10 @@ import botocore
 import subprocess
 import sys
 import time
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum
 
 # Create LDpop function
-def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
+def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     # trim any whitespace
     snp1 = snp1.lower().strip()
@@ -46,6 +46,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     # Create JSON output
     output = {}
 
+    # Validate genome build param
+    print("genome_build " + genome_build)
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
+
     # Connect to Mongo snp database
     if env == 'local':
         mongo_host = api_mongo_addr
@@ -66,21 +72,12 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
     # Replace input genomic coordinates with variant ids (rsids)
     def replace_coord_rsid(db, snp):
         if snp[0:2] == "rs":
             return snp
         else:
-            snp_info_lst = get_rsnum(db, snp)
+            snp_info_lst = get_rsnum(db, snp, genome_build)
             # print "snp_info_lst"
             # print snp_info_lst
             if snp_info_lst != None:
@@ -244,24 +241,24 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    vcf_filePath1 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp1_coord['chromosome'])
+    vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
     vcf_rs1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
-    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord['position_grch37'], data_dir + genotypes_dir) 
+    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
-    vcf_filePath2 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"  % (config['aws']['data_subfolder'], genotypes_dir, snp2_coord['chromosome'])
+    vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
     vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
         print("could not find sequences archive file.")
 
     # need to add | grep -v -e END ???
-    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord['position_grch37'], data_dir + genotypes_dir)
+    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 

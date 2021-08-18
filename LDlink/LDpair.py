@@ -10,7 +10,7 @@ import botocore
 import subprocess
 import sys
 import time
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum
 
 # Create LDpair function
 
@@ -70,21 +70,12 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
     # Replace input genomic coordinates with variant ids (rsids)
     def replace_coord_rsid(db, snp):
         if snp[0:2] == "rs":
             return snp
         else:
-            snp_info_lst = get_rsnum(db, snp)
+            snp_info_lst = get_rsnum(db, snp, genome_build)
             print("snp_info_lst")
             print(snp_info_lst)
             if snp_info_lst != None:

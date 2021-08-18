@@ -829,10 +829,12 @@ def ldpop():
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
+    genome_build = request.args.get('genome_build', 'grch37')
     print('var1: ' + var1)
     print('var2: ' + var2)
     print('pop: ' + pop)
     print('r2_d: ' + r2_d)
+    print('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -842,7 +844,7 @@ def ldpop():
             reference = request.args.get('reference', False)
             print('request: ' + str(reference))
             try:
-                out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+                out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
             except:
                 return sendTraceback(None)
         else:
@@ -855,7 +857,7 @@ def ldpop():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_json = calculate_pop(var1, var2, pop, r2_d, web, reference)
+            out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
             # display api out
             try:
                 # unlock token then display api output

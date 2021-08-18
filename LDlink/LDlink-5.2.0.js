@@ -4237,6 +4237,7 @@ function updateLDpop() {
         var1 : $('#ldpop-snp1').val(),
         var2 : $('#ldpop-snp2').val(),
         pop : population.join("+"),
+        genome_build: genomeBuild,
         reference : reference,
         r2_d: r2_d
     };
