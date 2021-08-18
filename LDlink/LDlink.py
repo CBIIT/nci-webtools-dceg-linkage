@@ -1114,10 +1114,12 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
+    genome_build = data['genome_build']
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_threshold: ' + r2_threshold)
     print('maf_threshold: ' + maf_threshold)
+    print('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1134,7 +1136,7 @@ def snpclip():
                         f.write(s.lower() + '\n')
             try:
                 clip = {}
-                (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
+                (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, genome_build, float(r2_threshold), float(maf_threshold))
                 clip["snp_list"] = snp_list
                 clip["details"] = details
                 clip["snps"] = snps
@@ -1176,7 +1178,7 @@ def snpclip():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, float(r2_threshold), float(maf_threshold))
+            (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, genome_build, float(r2_threshold), float(maf_threshold))
             with open(tmp_dir + "clip" + reference + ".json") as f:
                 json_dict = json.load(f)
             with open(tmp_dir + 'details' + reference + '.txt', 'w') as f:

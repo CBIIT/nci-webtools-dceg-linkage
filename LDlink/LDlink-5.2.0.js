@@ -2416,7 +2416,8 @@ function updateSNPclip() {
         pop : population.join("+"),
         r2_threshold: $("#"+id+"_r2_threshold").val(),
         maf_threshold: $("#"+id+"_maf_threshold").val(),
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
