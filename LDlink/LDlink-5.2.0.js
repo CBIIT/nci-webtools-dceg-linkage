@@ -3826,12 +3826,13 @@ function updateLDpair() {
     //console.log("LD Pair");
     //console.log('population');
     //console.dir(population);
-        var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
     var ldpairInputs = {
         var1 : $('#ldpair-snp1').val(),
         var2 : $('#ldpair-snp2').val(),
         pop : population.join("+"),
-        reference : reference
+        reference : reference,
+        genome_build: genomeBuild
     };
     //console.log("ldpairInputs");
     //console.dir(ldpairInputs);
