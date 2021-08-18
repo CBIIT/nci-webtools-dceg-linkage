@@ -2358,7 +2358,8 @@ function updateLDtrait() {
         r2_d: r2_d,
         r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
         window: window,
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message

@@ -946,11 +946,13 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
+    genome_build = data['genome_build']
     print('snps: ', snps)
     print('pop: ', pop)
     print('r2_d: ', r2_d)
     print('r2_d_threshold: ', r2_d_threshold)
     print('window: ', window)
+    print('genome_build: ', genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -968,7 +970,7 @@ def ldtrait():
             try:
                 trait = {}
                 # snplst, pop, request, web, r2_d, threshold
-                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold), int(window))
+                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
                 trait["query_snps"] = query_snps
                 trait["thinned_snps"] = thinned_snps
                 trait["details"] = details
@@ -1007,7 +1009,7 @@ def ldtrait():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, float(r2_d_threshold), int(window))
+            (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
             with open(tmp_dir + "trait" + reference + ".json") as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
