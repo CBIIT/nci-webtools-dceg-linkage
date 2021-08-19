@@ -21,5 +21,6 @@ data/
 tmp/
 LDlink/tmp/
 LDlink/config.yml
-scripts/LDexpress update/tmp/
-scripts/dbSNP update/test/
+scripts/LDexpress_update/tmp/
+scripts/dbSNP_mongo_update/test/
+scripts/liftover/test/
