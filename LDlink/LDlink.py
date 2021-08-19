@@ -946,7 +946,10 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    genome_build = data['genome_build']
+    try:
+        genome_build = data['genome_build']
+    except:
+        genome_build = 'grch37'
     print('snps: ', snps)
     print('pop: ', pop)
     print('r2_d: ', r2_d)
@@ -1118,7 +1121,10 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
-    genome_build = data['genome_build']
+    try:
+        genome_build = data['genome_build']
+    except:
+        genome_build = 'grch37'
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_threshold: ' + r2_threshold)

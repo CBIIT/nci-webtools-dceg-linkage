@@ -2389,6 +2389,14 @@ function updateLDtrait() {
         var jsonObj=data;
         // console.log(data);
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
