@@ -15,6 +15,7 @@ from multiprocessing.dummy import Pool
 import sys
 import numpy as np	
 from timeit import default_timer as timer
+from LDcommon import genome_build_vars, get_rsnum
 
 
 # Set data directories using config.yml	
@@ -65,10 +66,10 @@ def get_ldtrait_timestamp(web):
     return json_output
 
 
-def get_window_variants(db, chromosome, position, window):
+def get_window_variants(db, chromosome, position, window, genome_build):
     query_results = db.gwas_catalog.find({
         "chromosome": chromosome, 
-        "position_grch37": {
+        genome_build_vars[genome_build]['position']: {
             "$gte": (position - window) if (position - window) > 0 else 0, 
             "$lte": position + window
         }
@@ -128,7 +129,7 @@ def findRangeString(val):
     else:
         return "NA"
 
-def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold):	    
+def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_ids, ldInfo, r2_d, r2_d_threshold, genome_build):	    
     matched_snps = []
     window_problematic_snps = []
     for record in found:
@@ -143,7 +144,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 # RS Number
                 matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
                 # Position
-                matched_record.append("chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]))
+                matched_record.append("chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]))
                 # Alleles	
                 matched_record.append(ld["alleles"])	
                 # R2	
@@ -168,13 +169,13 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_snps.append(matched_record)
             else: 
                 if (r2_d == "r2"):
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "R2 value (" + str(ld["r2"]) + ") below threshold (" + str(r2_d_threshold) + ")"]
                     window_problematic_snps.append(problematic_record)
                 else:
-                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
+                    problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
                     window_problematic_snps.append(problematic_record)
         else:
-            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record["position_grch37"]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
 
@@ -183,7 +184,7 @@ def get_output(process):
     return process.communicate()[0].splitlines()
 
 # Create LDtrait function
-def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=500000):
+def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold=0.1, window=500000):
     print("##### START LD TRAIT CALCULATION #####")	
     start = timer()
     
@@ -197,6 +198,12 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
     # Create JSON output for warnings and errors
     out_json = open(tmp_dir + "trait" + str(request) + ".json", "w")
     output = {}
+
+    # Validate genome build param
+    print("genome_build " + genome_build)
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
@@ -274,16 +281,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
-
-    # Get rs number from genomic coordinates from dbsnp
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro, "position_grch37": pos})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
     # Replace input genomic coordinates with variant ids (rsids)
     def replace_coords_rsid(db, snp_lst):
         new_snp_lst = []
@@ -293,7 +290,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
                 new_snp_lst.append(snp_raw_i)
             else:
                 # print "reached 2", snp_raw_i
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
+                snp_info_lst = get_rsnum(db, snp_raw_i[0], genome_build)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -347,8 +344,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
                 snp_coord = get_coords(db, snp_i[0])
                 if snp_coord != None:
                     rs_nums.append(snp_i[0])
-                    snp_pos.append(int(snp_coord['position_grch37']))
-                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position_grch37'])]
+                    snp_pos.append(int(snp_coord[genome_build_vars[genome_build]['position']]))
+                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
                     snp_coords.append(temp)
                 else:
                     # Generate warning if query variant is not found in dbsnp
@@ -391,13 +388,13 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
     # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
         # print(snp_coord)
-        found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window)
+        found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, genome_build)
         # print("found", snp_coord[0], len(found[snp_coord[0]]))
         if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found[snp_coord[0]]:	
-                ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record["position_grch37"])])	
+                ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record[genome_build_vars[genome_build]['position']])])	
         else:	
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
                 
@@ -417,7 +414,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
 
     ld_subprocess_commands = []
     for subprocess_id in range(num_subprocesses):
-        getPairLDArgs = " ".join([str(request), str(subprocess_id)])
+        getPairLDArgs = " ".join([str(request), str(subprocess_id), genome_build])
         ld_subprocess_commands.append("python3 LDtrait_ld_sub.py " + getPairLDArgs)
 
     ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
@@ -455,7 +452,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold=0.1, window=
         	
     for snp_coord in snp_coords:	
         # print("snp_coord", snp_coord)
-        (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found[snp_coord[0]], pops, pop_ids, ldInfo, r2_d, r2_d_threshold)
+        (matched_snps, window_problematic_snps) = get_gwas_fields(snp_coord[0], snp_coord[1], snp_coord[2], found[snp_coord[0]], pops, pop_ids, ldInfo, r2_d, r2_d_threshold, genome_build)
         
         # windowWarnings += window_problematic_snps
         if (len(matched_snps) > 0):

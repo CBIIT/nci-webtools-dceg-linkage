@@ -8,10 +8,11 @@ import botocore
 import subprocess
 import sys
 import requests
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 request = sys.argv[1]
 subprocess_id = sys.argv[2]
+genome_build = sys.argv[3]
 
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
@@ -50,12 +51,12 @@ def get_ld_stats(variantPair, pop_ids):
     snp1 = variantPair[0]
     snp1_coord = {
         "chromosome": variantPair[1], 
-        "position_grch37": variantPair[2]
+        genome_build_vars[genome_build]['position']: variantPair[2]
     }
     snp2 = variantPair[3]
     snp2_coord = {
         "chromosome": variantPair[4], 
-        "position_grch37": variantPair[5]
+        genome_build_vars[genome_build]['position']: variantPair[5]
     }
 
     # errors/warnings encountered	
@@ -65,32 +66,32 @@ def get_ld_stats(variantPair, pop_ids):
     }	
     # Extract 1000 Genomes phased genotypes	
     # SNP1
-    vcf_filePath1 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp1_coord['chromosome'])
+    vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
     vcf_query_snp_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord['position_grch37'], data_dir + genotypes_dir)	
+        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)	
     proc1_offset = subprocess.Popen(	
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)	
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]	
     # SNP2
-    vcf_filePath2 = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp2_coord['chromosome'])
+    vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
     vcf_query_snp_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord['position_grch37'], data_dir + genotypes_dir)	
+        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)	
     proc2_offset = subprocess.Popen(	
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
 
-    vcf1_pos = snp1_coord['position_grch37']	
-    vcf2_pos = snp2_coord['position_grch37']	
+    vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]	
+    vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]	
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	
 

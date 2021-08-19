@@ -2358,7 +2358,8 @@ function updateLDtrait() {
         r2_d: r2_d,
         r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
         window: window,
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
@@ -2388,6 +2389,14 @@ function updateLDtrait() {
         var jsonObj=data;
         // console.log(data);
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2416,7 +2425,8 @@ function updateSNPclip() {
         pop : population.join("+"),
         r2_threshold: $("#"+id+"_r2_threshold").val(),
         maf_threshold: $("#"+id+"_maf_threshold").val(),
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
@@ -3826,12 +3836,13 @@ function updateLDpair() {
     //console.log("LD Pair");
     //console.log('population');
     //console.dir(population);
-        var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
     var ldpairInputs = {
         var1 : $('#ldpair-snp1').val(),
         var2 : $('#ldpair-snp2').val(),
         pop : population.join("+"),
-        reference : reference
+        reference : reference,
+        genome_build: genomeBuild
     };
     //console.log("ldpairInputs");
     //console.dir(ldpairInputs);
@@ -4235,6 +4246,7 @@ function updateLDpop() {
         var1 : $('#ldpop-snp1').val(),
         var2 : $('#ldpop-snp2').val(),
         pop : population.join("+"),
+        genome_build: genomeBuild,
         reference : reference,
         r2_d: r2_d
     };
