@@ -17,7 +17,7 @@ api:
   # token_experation_days only applies if token_expiration is True
   token_expiration: False
   token_expiration_days: 365
-  email_account: 'mailfwd.nih.gov'
+  email_account: '<EMAIL_HOST_SERVER_ADDRESS>'
   api_superuser: '<YOUR_EMAIL_ADDRESS>'
 database:
   mongo_user_readonly: '<USERNAME_READ_ONLY>'
