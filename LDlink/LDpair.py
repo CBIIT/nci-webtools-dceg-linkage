@@ -132,6 +132,17 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         output["warning"] = snp1 + " and " + \
             snp2 + " are on different chromosomes"
 
+    # Check if input SNPs are on chromosome Y while genome build == grch38
+    # SNP1
+    if snp1_coord == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
+
+    # SNP2
+    if snp2_coord == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
+
     # Select desired ancestral populations
     pops = pop.split("+")
     pop_dirs = []
