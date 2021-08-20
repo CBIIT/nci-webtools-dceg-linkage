@@ -140,6 +140,17 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         output["warning"] = snp1 + " and " + \
             snp2 + " are on different chromosomes"
 
+    # Check if input SNPs are on chromosome Y while genome build == grch38
+    # SNP1
+    if snp1_coord['chromosome'] == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
+
+    # SNP2
+    if snp2_coord['chromosome'] == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
+
     # create indexes for population order
     pop_order = {
         "ALL": 1,
@@ -247,7 +258,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
-    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir) 
+    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
@@ -258,7 +269,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         print("could not find sequences archive file.")
 
     # need to add | grep -v -e END ???
-    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
+    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
@@ -337,11 +348,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # vcf2 = vcf2[0].strip().split()
 
     # Get headers
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir)
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir)
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 
