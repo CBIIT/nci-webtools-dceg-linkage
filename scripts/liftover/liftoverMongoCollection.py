@@ -7,8 +7,18 @@ from pymongo import MongoClient
 from bson import json_util, ObjectId
 start_time = time.time()  # measure script's run time
 
+def generateInputBed():
+    return []
+
+def runLiftOver():
+    # usage: liftOver oldFile map.chain newFile unMapped
+    return []
+
 def main():
     print("Starting liftOver script...")
+
+    print("LiftOver completed [" + str(time.time() - start_time) + " seconds elapsed]...")
+
     
 if __name__ == "__main__":
     main()
