@@ -134,12 +134,12 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
 
     # Check if input SNPs are on chromosome Y while genome build == grch38
     # SNP1
-    if snp1_coord == "Y" and genome_build == "grch38":
+    if snp1_coord['chromosome'] == "Y" and genome_build == "grch38":
         output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # SNP2
-    if snp2_coord == "Y" and genome_build == "grch38":
+    if snp2_coord['chromosome'] == "Y" and genome_build == "grch38":
         output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
         return(json.dumps(output, sort_keys=True, indent=2))
 
@@ -170,7 +170,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
+        vcf_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
@@ -183,7 +183,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
+        vcf_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
@@ -298,12 +298,12 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Get headers
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir)
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc1_h = subprocess.Popen(
         tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir)
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2_h = subprocess.Popen(
         tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
