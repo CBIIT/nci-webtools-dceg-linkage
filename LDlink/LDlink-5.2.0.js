@@ -44,6 +44,7 @@ var moduleTitleDescription = {
 };
 try {
     const urlParams = new URLSearchParams(window.location.search);
+    console.log('url params: ' + urlParams.toString())
     var genomeBuild = urlParams.get('genome_build');
 } catch {
     var genomeBuild = "grch37";
