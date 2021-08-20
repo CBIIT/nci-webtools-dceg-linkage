@@ -375,8 +375,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
 
     # generate warnings for query variants not found in dbsnp
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + \
-            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "): " + ", ".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:

@@ -352,8 +352,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
     # Generate warnings for query variants not found in dbsnp
     if warn != []:
-        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + \
-            dbsnp_version + ": " + ", ".join(warn)
+        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
