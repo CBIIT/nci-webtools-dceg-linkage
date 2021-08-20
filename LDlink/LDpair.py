@@ -117,14 +117,14 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     # Find RS numbers in snp database
     # SNP1
     snp1_coord = get_coords(db, snp1)
-    if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # SNP2
     snp2_coord = get_coords(db, snp2)
-    if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check if SNPs are on the same chromosome

@@ -207,7 +207,7 @@ def calculate_chip(snplst, platform_query, web, request):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None:
+                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
                         if snp_coord['chromosome'] == "X":
                             chr = 23
                         elif snp_coord['chromosome'] == "Y":
@@ -228,11 +228,10 @@ def calculate_chip(snplst, platform_query, web, request):
     output["warning"] = ""
     output["error"] = ""
     if warn != [] and len(rs_nums) != 0:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + \
             dbsnp_version + ": " + ", ".join(warn)+".\n"
     elif len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + ".\n"
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates.\n"
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()

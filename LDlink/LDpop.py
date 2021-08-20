@@ -124,14 +124,14 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     # Check if RS numbers are in snp database
     # SNP1
-    if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
     # SNP2
-    if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
@@ -697,7 +697,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     rs1_map_data = []
     rs2_map_data = []
     rs1_rs2_LD_map_data = []
-    print(list(output.keys()))
+    # print(list(output.keys()))
     # populate table data
     for key in list(output.keys()):
         if key in list(pop_order.keys()):
@@ -747,8 +747,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # Generate output file
     with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
         ldpop_out.write("\t".join(["Population", "Abbrev", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'", "Chisq", "P"]) + "\n")
-        print("output_table", output_table)
-        print('output_table["aaData"]', output_table["aaData"])
+        # print("output_table", output_table)
+        # print('output_table["aaData"]', output_table["aaData"])
         for row in output_table["aaData"]:
             ldpop_out.write(str(location_data[row[0]]["location"] + "\t" + row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\n")
         if "error" in output_table:

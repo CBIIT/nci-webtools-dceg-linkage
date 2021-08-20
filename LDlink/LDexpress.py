@@ -89,12 +89,12 @@ def get_query_variant(snp_coord, pop_ids, request):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir)
+    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
     proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
     # print("head length", len(head))
 
-    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir)
+    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + "GRCh37")
     subprocess.call(tabix_query_snp, shell=True)
     # proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
     # tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
@@ -331,7 +331,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
             if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                 # query variant to get genomic coordinates in dbsnp
                 snp_coord = get_coords(db, snp_i[0])
-                if snp_coord != None:
+                if snp_coord != None and snp_coord['position_grch37'] != "NA":
                     rs_nums.append(snp_i[0])
                     snp_pos.append(int(snp_coord['position_grch37']))
                     temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position_grch37'])]
@@ -352,12 +352,12 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
     # Generate warnings for query variants not found in dbsnp
     if warn != []:
-        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
+        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + \
             dbsnp_version + ": " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
-        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + dbsnp_version + "."
+        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers or coordinates."
         subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
         return("", "", "", errors_warnings)
 

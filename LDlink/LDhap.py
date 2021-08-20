@@ -142,6 +142,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                                     ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
                                 output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            warn.append(snp_i[0])
                         else:
                             rs_nums.append(snp_i[0])
                             snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
@@ -155,12 +156,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 warn.append(snp_i[0])
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + \
             dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "): " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + output["warning"]
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + output["warning"]
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome

@@ -166,7 +166,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None:
+                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord['position_grch37'])
                         temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
@@ -180,12 +180,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + \
             dbsnp_version + ": " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + "."
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -230,7 +229,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + "GRCh37")
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles

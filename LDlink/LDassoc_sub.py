@@ -47,7 +47,7 @@ if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
     print("could not find sequences archive file.")
 
 coordinates = coords.replace("_", " ")
-tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir)
+tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir + "GRCh37")
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 

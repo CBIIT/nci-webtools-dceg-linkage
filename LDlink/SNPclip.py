@@ -170,13 +170,23 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
-                        snp_coords.append(temp)
+                        # check if variant is on chrY for genome build = GRCh38
+                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            else:
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            warn.append(snp_i[0])
+                            details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38."]
+                        else:
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
-                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
+                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "), variant removed."]
                 else:
                     warn.append(snp_i[0])
                     details[snp_i[0]] = ["NA", "NA",
@@ -193,12 +203,10 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             return("", "", "")
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "): " + ", ".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + output["warning"]
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
