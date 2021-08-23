@@ -45,7 +45,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     if web or request_method == "GET":
         snp_limit = 300
     else:
-        snp_limit = 10000
+        snp_limit = 1000
     if len(snps_raw) > snp_limit:
         output["error"] = "Maximum variant list is " + str(snp_limit) + " RS numbers. Your list contains " + \
             str(len(snps_raw)) + " entries."
