@@ -236,9 +236,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
         geno = vcf[0].strip().split()
 
     if geno[2] != snp:
-        output["warning"] = "Genomic position for query variant (" + snp + \
-            ") does not match RS number at 1000G position (chr" + \
-            geno[0]+":"+geno[1]+")"
+        if geno[2] != ".":
+            output["warning"] = "Genomic position for query variant (" + snp + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno[0]+":"+geno[1]+")"
         snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:

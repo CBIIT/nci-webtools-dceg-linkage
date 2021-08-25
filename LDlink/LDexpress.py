@@ -125,7 +125,8 @@ def get_query_variant(snp_coord, pop_ids, request):
     
     if geno[2] != snp_coord[0]:
         # print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
-        queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + ")."])
+        if geno[2] != ".":
+            queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + ")."])
         # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:

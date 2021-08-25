@@ -526,10 +526,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			geno=vcf[0].strip().split()
 
 		if geno[2]!=snp and snp[0:2]=="rs":
-			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
-			else:
-				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+			if geno[2] != ".":
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+				else:
+					output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
 			snp=geno[2]
 
 		if "," in geno[3] or "," in geno[4]:
