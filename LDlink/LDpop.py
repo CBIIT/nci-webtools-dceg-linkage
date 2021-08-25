@@ -299,11 +299,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
                 output["warning"] = output["warning"] + \
                     ". Genomic position for query variant1 (" + snp1 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+")"
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
             else:
                 output["warning"] = "Genomic position for query variant1 (" + snp1 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+")"
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -335,11 +335,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
                 output["warning"] = output["warning"] + \
                     ". Genomic position for query variant2 (" + snp2 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+")"
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
             else:
                 output["warning"] = "Genomic position for query variant2 (" + snp2 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+")"
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:

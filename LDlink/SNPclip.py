@@ -363,11 +363,11 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                         output["warning"] = output["warning"] + \
                             ". Genomic position for query variant ("+rs_query + \
                             ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+")"
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
                     else:
                         output["warning"] = "Genomic position for query variant ("+rs_query + \
                             ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+")"
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
 
                 # try catch this index ... ValueError thrown when rs_query not found in snps
                 print("#####")

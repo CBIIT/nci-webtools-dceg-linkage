@@ -123,7 +123,7 @@ def get_ld_stats(variantPair, pop_ids):
         geno1 = vcf1[0].strip().split()	
     if geno1[2] != snp1:	
         if geno1[2] != ".":
-            output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+")")	
+            output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+" = " + geno1[2] + ")")
         snp1 = geno1[2]	
     if "," in geno1[3] or "," in geno1[4]:	
         output["error"].append(snp1 + " is not a biallelic variant.")	
@@ -184,7 +184,7 @@ def get_ld_stats(variantPair, pop_ids):
         geno2 = vcf2[0].strip().split()	
     if geno2[2] != snp2:	
         if geno2[2] != ".":
-            output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + ")")	
+            output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + " = " + geno2[2] + ")")	
         snp2 = geno2[2]	
     if "," in geno2[3] or "," in geno2[4]:	
         output["error"].append(snp2 + " is not a biallelic variant.")	

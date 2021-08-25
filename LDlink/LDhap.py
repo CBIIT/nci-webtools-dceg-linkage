@@ -274,7 +274,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             continue
 
         rs_1000g = geno[2]
-
+        print("rs_1000g", rs_1000g)
         if rs_query == rs_1000g:
             rsnum = rs_1000g
         else:
@@ -286,6 +286,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     found = "true"
                     break
                 count += 1
+            print("found", found)
 
             if found == "false":
                 if rs_1000g != ".":
@@ -293,11 +294,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                         output["warning"] = output["warning"] + \
                             ". Genomic position for query variant ("+rs_query + \
                             ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+")"
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
                     else:
                         output["warning"] = "Genomic position for query variant ("+rs_query + \
                             ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+")"
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
 
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0]=geno[2]

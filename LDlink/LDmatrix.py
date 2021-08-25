@@ -326,10 +326,10 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
                 if rs_1000g != ".":
                     if "warning" in output:
                         output["warning"] = output[
-                            "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+                            "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
                     else:
                         output[
-                            "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+                            "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
 
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0] = geno[2]
