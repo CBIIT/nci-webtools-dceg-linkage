@@ -55,9 +55,11 @@ def generateTabixFile(headers, outputBedFileName, outputTabixFile):
     with open(outputTabixFile + ".txt", 'a') as tf:
         tf.write("\t".join(headers) + '\n')
         for line in splitLines:
-            writeLine = [line[0].lstrip('chr').split("_")[0], line[1], line[3]]
-            # print(writeLine)
-            tf.write("\t".join(writeLine) + '\n')
+            # drop any rows with chr#_*
+            if len(line[0].split("_")) <= 1:
+                writeLine = [line[0].lstrip('chr'), line[1], line[3]]
+                # print(writeLine)
+                tf.write("\t".join(writeLine) + '\n')
     # bgzip file for tabix
     process = subprocess.Popen(['bgzip', outputTabixFile + ".txt"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
@@ -80,8 +82,8 @@ def main():
         chainFile = sys.argv[2]
         outputTabixFile = sys.argv[3]
     except:
-        print("USAGE: python3 liftOverTabix.py <INPUT_TABIX_FILE> <CHAIN_FILE> <OUTPUT_TABIX_FILE>")
-        print("EXAMPLE: python3 liftOverTabix.py ./genetic_map_autosomes_combined_b37.txt.gz ./hg19ToHg38.over.chain.gz ./genetic_map_autosomes_combined_b38.txt.gz ")
+        print("USAGE: python3 liftOverTabix.py <INPUT_TABIX_FILE> <CHAIN_FILE> <OUTPUT_TABIX_FILE_NAME>")
+        print("EXAMPLE: python3 liftOverTabix.py ./genetic_map_autosomes_combined_b37.txt.gz ./hg19ToHg38.over.chain.gz genetic_map_autosomes_combined_b38")
         sys.exit(1)
 
     inputBedFileName, headers = generateInputBed(inputTabixFile)
