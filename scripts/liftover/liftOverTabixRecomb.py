@@ -1,4 +1,4 @@
-# this script is written to use the liftOver program to convert LDlink MongoDB collections with GRCh37 positions to GRCh38
+# this script is written to use the liftOver program to convert LDlink's Recombination Rate Tabix file with GRCh37 positions to GRCh38
 # http://genome.ucsc.edu/goldenPath/help/hgTracksHelp.html#Liftover
 # requirement: you must download liftOver precompiled executable binary and place in PATH before running script
 # requirement: you must download and install tabix in local PATH before running script
@@ -76,14 +76,14 @@ def generateTabixIndex(outputTabixFile):
     print("Finished generating Tabix index file...")
 
 def main():
-    print("Starting liftOver script...")
+    print("Starting liftOver script for Recombination Rate Tabix file...")
     try:
         inputTabixFile = sys.argv[1]
         chainFile = sys.argv[2]
         outputTabixFile = sys.argv[3]
     except:
-        print("USAGE: python3 liftOverTabix.py <INPUT_TABIX_FILE> <CHAIN_FILE> <OUTPUT_TABIX_FILE_NAME>")
-        print("EXAMPLE: python3 liftOverTabix.py ./genetic_map_autosomes_combined_b37.txt.gz ./hg19ToHg38.over.chain.gz genetic_map_autosomes_combined_b38")
+        print("USAGE: python3 liftOverTabixRecomb.py <INPUT_TABIX_FILE> <CHAIN_FILE> <OUTPUT_TABIX_FILENAME_NO_EXTENSION>")
+        print("EXAMPLE: python3 liftOverTabixRecomb.py ./genetic_map_autosomes_combined_b37.txt.gz ./hg19ToHg38.over.chain.gz genetic_map_autosomes_combined_b38")
         sys.exit(1)
 
     inputBedFileName, headers = generateInputBed(inputTabixFile)

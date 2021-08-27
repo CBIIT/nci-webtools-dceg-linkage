@@ -274,7 +274,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             continue
 
         rs_1000g = geno[2]
-        print("rs_1000g", rs_1000g)
+
         if rs_query == rs_1000g:
             rsnum = rs_1000g
         else:
@@ -286,7 +286,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     found = "true"
                     break
                 count += 1
-            print("found", found)
 
             if found == "false":
                 if rs_1000g != ".":
