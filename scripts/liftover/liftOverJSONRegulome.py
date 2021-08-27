@@ -60,7 +60,7 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                     "chromosome_grch37": line[3].split("__")[1].split(":")[0],
                     "position_grch37": int(line[3].split("__")[1].split(":")[1]),
                     "chromosome_grch38": line[0],
-                    "position_grch38": line[2]
+                    "position_grch38": int(line[2])
                 }
                 jf.write(json.dumps(writeJSONMapped) + "\n")
         for line in splitLinesUnmapped:
