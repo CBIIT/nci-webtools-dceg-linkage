@@ -58,7 +58,7 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                 writeJSONMapped = {
                     "score": line[3].split("__")[2],
                     "chromosome_grch37": line[3].split("__")[1].split(":")[0],
-                    "position_grch37": line[3].split("__")[1].split(":")[1],
+                    "position_grch37": int(line[3].split("__")[1].split(":")[1]),
                     "chromosome_grch38": line[0],
                     "position_grch38": line[2]
                 }
@@ -68,7 +68,7 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                 writeJSONUnmapped = {
                     "score": line[3].split("__")[2],
                     "chromosome_grch37": line[3].split("__")[1].split(":")[0],
-                    "position_grch37": line[3].split("__")[1].split(":")[1],
+                    "position_grch37": int(line[3].split("__")[1].split(":")[1]),
                     "chromosome_grch38": "NA",
                     "position_grch38": "NA"
                 }

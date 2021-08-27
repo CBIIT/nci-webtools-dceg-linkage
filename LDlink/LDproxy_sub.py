@@ -132,7 +132,7 @@ else:
 db = client["LDLink"]
 
 def get_regDB(chr, pos):
-    result = db.regulome.find_one({"chromosome": chr, "position": int(pos)})
+    result = db.regulome.find_one({"chromosome_grch37": chr, "position_grch37": int(pos)})
     if result is None:
         return "."   
     else:
