@@ -5,8 +5,6 @@
 # requirement: you must download desired liftOver chain file from https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/
 
 import time
-from pymongo import MongoClient
-from bson import json_util, ObjectId
 import sys
 import gzip
 import datetime

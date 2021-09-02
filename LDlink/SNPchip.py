@@ -264,21 +264,23 @@ def calculate_chip(snplst, platform_query, web, request):
         cursor = ()
         platform = ""
         count = count+1
-        if platform_query == "":  # <--If user did not enter platforms as a request
-            cursor = db.snp_col.find({'$and': [{"pos": position}, {"data.chr": Chr}, {
-                                     "data.platform": {'$regex': '.*'}}]})  # Json object that stores all the results
-        elif platform_query != "":  # <--If user did not enter platforms as a request
-            cursor = db.snp_col.find({'$and': [{"pos": position}, {"data.chr": Chr}, {
-                                     "data.platform": {"$in": platform_list}}]})  # Json object that stores all the results
+        cursor = db.snp_col.find({"chromosome_grch37": Chr, "position_grch37": position})
+        # if platform_query == "":  # <--If user did not enter platforms as a request
+        #     cursor = db.snp_col.find({'$and': [{"position_grch37": position}, {"chromosome_grch37": Chr}, {
+        #                              "data.platform": {'$regex': '.*'}}]})  # Json object that stores all the results
+        # elif platform_query != "":  # <--If user did not enter platforms as a request
+        #     cursor = db.snp_col.find({'$and': [{"position_grch37": position}, {"chromosome_grch37": Chr}, {
+        #                              "data.platform": {"$in": platform_list}}]})  # Json object that stores all the results
             # Parsing each docuemnt to retrieve platforms
         for document in cursor:
             for z in range(0, len(document["data"])):
-                if(document["data"][z]["chr"] == Chr and document["data"][z]["platform"] in platform_list and platform_query != ""):
-                    platform = document["data"][z]["platform"]
+                # if(document["chromosome_grch37"] == Chr and document["data"][z]["platform"] in platform_list and platform_query != ""):
+                if(document["data"][z]["platform"] in platform_list and platform_query != ""):
                     platforms.append(document["data"][z]["platform"])
-                elif(document["data"][z]["chr"] == Chr and platform_query == ""):
+                    # platform = document["data"][z]["platform"]
+                elif(platform_query == ""):
                     platforms.append(document["data"][z]["platform"])
-                    platform = document["data"][z]["platform"]
+                    # platform = document["data"][z]["platform"]
         if(platforms == []):
             rs = snp_coords_sort[k][0]
             platform_NOT.append(rs)

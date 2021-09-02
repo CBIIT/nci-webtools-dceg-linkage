@@ -147,7 +147,7 @@ def requires_token(f):
                 token = request.args['token']
                 # Check if token is valid
                 if checkToken(token, token_expiration, token_expiration_days) is False or token is None:
-                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + url_root + '?tab=apiaccess' + str(token_expiration) + " " + str(token_expiration_days))
+                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + url_root + '?tab=apiaccess')
                 # Check if token is blocked
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
