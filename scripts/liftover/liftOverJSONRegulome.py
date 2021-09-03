@@ -61,6 +61,15 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                     "position_grch38": int(line[2])
                 }
                 jf.write(json.dumps(writeJSONMapped) + "\n")
+            else:
+                writeJSONMapped = {
+                    "score": line[3].split("__")[2],
+                    "chromosome_grch37": line[3].split("__")[1].split(":")[0],
+                    "position_grch37": int(line[3].split("__")[1].split(":")[1]),
+                    "chromosome_grch38": "NA",
+                    "position_grch38": "NA"
+                }
+                jf.write(json.dumps(writeJSONMapped) + "\n")
         for line in splitLinesUnmapped:
             if "#" not in line[0]:
                 writeJSONUnmapped = {

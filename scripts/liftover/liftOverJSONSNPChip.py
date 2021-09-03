@@ -59,6 +59,15 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                         "data": snp_col_obj['data']
                     }
                     jf.write(json.dumps(writeJSONMapped) + "\n")
+                else:
+                    writeJSONMapped = {
+                        "chromosome_grch37": snp_col_obj['chromosome_grch37'],
+                        "position_grch37": int(snp_col_obj['position_grch37']),
+                        "chromosome_grch38": "NA",
+                        "position_grch38": "NA",
+                        "data": snp_col_obj['data']
+                    }
+                    jf.write(json.dumps(writeJSONMapped) + "\n")
         with open(outputUnmappedBedFileName) as bf:
             for line in bf:
                 split_line = line.strip().split()
