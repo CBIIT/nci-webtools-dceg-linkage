@@ -1,7 +1,7 @@
-# this script is written to use the liftOver program to convert SNPChip's snp_col MongoDB collection of arrays data with GRCh37 positions to GRCh38
+# this script is written to use the liftOver program to convert LDassoc's genes_name_coords MongoDB collection with GRCh37 positions to GRCh38
 # and create a MongoDB-importable JSON file with both GRCh37 and GRCh38 positions
 # http://genome.ucsc.edu/goldenPath/help/hgTracksHelp.html#Liftover
-# input: use "mongoexport" to export existing "snp_col" MongoDB collection to .json outfile and use as input for this script
+# input: use "mongoexport" to export existing "genes_name_coords" MongoDB collection to .json outfile and use as input for this script
 # requirement: you must download liftOver precompiled executable binary and place in PATH before running script
 # requirement: you must download and install tabix in local PATH before running script
 # requirement: you must download desired liftOver chain file from https://hgdownload.cse.ucsc.edu/goldenpath/hg19/liftOver/
@@ -23,7 +23,7 @@ def generateInputBed(inputJSONFile):
             for line in inputfile:
                 jsonObj = json.loads(line)
                 if isinstance(jsonObj['position_grch37'], int):
-                    writeLine = ["chr" + jsonObj['chromosome_grch37'], str(jsonObj['position_grch37']), str(int(jsonObj['position_grch37']) + 1), json.dumps(jsonObj, separators=(',', ':')).replace(" ", "__")]
+                    writeLine = ["chr" + jsonObj['chromosome'], str(jsonObj['begin']), str(jsonObj['end']), json.dumps(jsonObj, separators=(',', ':')).replace(" ", "__")]
                     bedfile.write("\t".join(writeLine) + '\n')
     print("liftOver input file " + inputBedFileName + " generated...")
     return inputBedFileName
@@ -48,49 +48,55 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
         with open(outputBedFileName) as bf:
             for line in bf:
                 split_line = line.strip().split()
-                snp_col_obj = json.loads(split_line[3].replace("__", " "))
+                genes_name_coords_obj = json.loads(split_line[3].replace("__", " "))
                 # drop any rows with chr#_*
                 if len(split_line[0].split("_")) <= 1:
                     writeJSONMapped = {
-                        "chromosome_grch37": snp_col_obj['chromosome_grch37'],
-                        "position_grch37": int(snp_col_obj['position_grch37']),
+                        "chromosome_grch37": genes_name_coords_obj['chromosome'],
+                        "begin_grch37": int(genes_name_coords_obj['begin']),
+                        "end_grch37": int(genes_name_coords_obj['end']),
                         "chromosome_grch38": split_line[0].lstrip('chr'),
-                        "position_grch38": int(split_line[1]),
-                        "data": snp_col_obj['data']
+                        "begin_grch38": int(split_line[1]),
+                        "end_grch38": int(split_line[2]),
+                        "name": genes_name_coords_obj['name']
                     }
                     jf.write(json.dumps(writeJSONMapped) + "\n")
                 else:
                     writeJSONMapped = {
-                        "chromosome_grch37": snp_col_obj['chromosome_grch37'],
-                        "position_grch37": int(snp_col_obj['position_grch37']),
-                        "chromosome_grch38": "NA",
-                        "position_grch38": "NA",
-                        "data": snp_col_obj['data']
+                        "chromosome_grch37": genes_name_coords_obj['chromosome'],
+                        "begin_grch37": int(genes_name_coords_obj['begin']),
+                        "end_grch37": int(genes_name_coords_obj['end']),
+                        "chromosome_grch38": split_line[0].lstrip('chr'),
+                        "begin_grch38": "NA",
+                        "end_grch38": "NA",
+                        "name": genes_name_coords_obj['name']
                     }
                     jf.write(json.dumps(writeJSONMapped) + "\n")
         with open(outputUnmappedBedFileName) as bf:
             for line in bf:
                 split_line = line.strip().split()
                 if "#" not in split_line[0]:
-                    snp_col_obj = json.loads(split_line[3].replace("__", " "))
+                    genes_name_coords_obj = json.loads(split_line[3].replace("__", " "))
                     writeJSONUnmapped = {
-                        "chromosome_grch37": snp_col_obj['chromosome_grch37'],
-                        "position_grch37": int(snp_col_obj['position_grch37']),
-                        "chromosome_grch38": "NA",
-                        "position_grch38": "NA",
-                        "data": snp_col_obj['data']
+                        "chromosome_grch37": genes_name_coords_obj['chromosome'],
+                        "begin_grch37": int(genes_name_coords_obj['begin']),
+                        "end_grch37": int(genes_name_coords_obj['end']),
+                        "chromosome_grch38": split_line[0].lstrip('chr'),
+                        "begin_grch38": "NA",
+                        "end_grch38": "NA",
+                        "name": genes_name_coords_obj['name']
                     }
                     jf.write(json.dumps(writeJSONUnmapped) + "\n")
 
 def main():
-    print("Starting liftOver script for SNPChip 'snp_col' JSON...")
+    print("Starting liftOver script for LDassoc 'genes_name_coords' JSON...")
     try:
         inputJSONFile = sys.argv[1]
         chainFile = sys.argv[2]
         outputJSONFile = sys.argv[3]
     except:
-        print("USAGE: python3 liftOverJSONSNPChip.py <INPUT_JSON_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
-        print("EXAMPLE: python3 liftOverJSONSNPChip.py ./export_snp_col.json ./hg19ToHg38.over.chain.gz new_snp_col.json")
+        print("USAGE: python3 liftOverJSONGenesNameCoords.py <INPUT_JSON_DATA> <CHAIN_FILE> <OUTPUT_JSON_FILENAME_W_EXTENSION>")
+        print("EXAMPLE: python3 liftOverJSONGenesNameCoords.py ./export_genes_name_coords.json ./hg19ToHg38.over.chain.gz new_genes_name_coords.json")
         sys.exit(1)
 
     inputBedFileName = generateInputBed(inputJSONFile)
