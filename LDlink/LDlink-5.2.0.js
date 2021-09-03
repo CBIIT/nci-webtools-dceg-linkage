@@ -2660,9 +2660,8 @@ function loadSNPChip(data) {
 
     $.each(platform_list, function(key, value) {
         //reversed_platform_list.push(snpchipReverseLookup[value]);
-
         obj ={
-            code: snpchipReverseLookup[value],
+            code: snpchipReverseLookup[value] !== undefined ?  snpchipReverseLookup[value] : snpchipReverseLookup[value.replace(/\sArray$/, "")],
             platform: value
         };
         if(typeof obj.code === "undefined") {
