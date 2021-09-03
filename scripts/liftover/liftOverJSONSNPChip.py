@@ -40,39 +40,38 @@ def runLiftOver(inputBedFileName, chainFile):
     print("liftOver unmapped output " + outputUnmappedBedFileName + " generated...")
     return outputBedFileName, outputUnmappedBedFileName
 
-# CAPTURE END POS
+# CAPTURE START POS
 
 def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFile):
     print("Generating JSON file...")
     with open(outputJSONFile, 'a') as jf:
         with open(outputBedFileName) as bf:
-            linesMapped = bf.read().splitlines() 
-        splitLinesMapped = list(map(lambda x: x.split("\t"), linesMapped))
+            for line in bf:
+                split_line = line.strip().split()
+                snp_col_obj = json.loads(split_line[3])
+                # drop any rows with chr#_*
+                if len(split_line[0].split("_")) <= 1:
+                    writeJSONMapped = {
+                        "chromosome_grch37": snp_col_obj['chromosome_grch37'],
+                        "position_grch37": int(snp_col_obj['position_grch37']),
+                        "chromosome_grch38": split_line[0].lstrip('chr'),
+                        "position_grch38": int(split_line[1]),
+                        "data": snp_col_obj['data']
+                    }
+                    jf.write(json.dumps(writeJSONMapped) + "\n")
         with open(outputUnmappedBedFileName) as bf:
-            linesUnmapped = bf.read().splitlines() 
-        splitLinesUnmapped = list(map(lambda x: x.split("\t"), linesUnmapped))
-    
-        for line in splitLinesMapped:
-            # drop any rows with chr#_*
-            if len(line[0].split("_")) <= 1:
-                writeJSONMapped = {
-                    "score": line[3].split("__")[2],
-                    "chromosome_grch37": line[3].split("__")[1].split(":")[0],
-                    "position_grch37": int(line[3].split("__")[1].split(":")[1]),
-                    "chromosome_grch38": line[0],
-                    "position_grch38": int(line[2])
-                }
-                jf.write(json.dumps(writeJSONMapped) + "\n")
-        for line in splitLinesUnmapped:
-            if "#" not in line[0]:
-                writeJSONUnmapped = {
-                    "score": line[3].split("__")[2],
-                    "chromosome_grch37": line[3].split("__")[1].split(":")[0],
-                    "position_grch37": int(line[3].split("__")[1].split(":")[1]),
-                    "chromosome_grch38": "NA",
-                    "position_grch38": "NA"
-                }
-                jf.write(json.dumps(writeJSONUnmapped) + "\n")
+            for line in bf:
+                split_line = line.strip().split()
+                if "#" not in split_line[0]:
+                    snp_col_obj = json.loads(split_line[3])
+                    writeJSONUnmapped = {
+                        "chromosome_grch37": snp_col_obj['chromosome_grch37'],
+                        "position_grch37": int(snp_col_obj['position_grch37']),
+                        "chromosome_grch38": "NA",
+                        "position_grch38": "NA",
+                        "data": snp_col_obj['data']
+                    }
+                    jf.write(json.dumps(writeJSONUnmapped) + "\n")
 
 def main():
     print("Starting liftOver script for SNPChip 'snp_col' JSON...")
@@ -87,7 +86,7 @@ def main():
 
     inputBedFileName = generateInputBed(inputJSONFile)
     outputBedFileName, outputUnmappedBedFileName = runLiftOver(inputBedFileName, chainFile)
-    # generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFile)
+    generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFile)
 
     print("LiftOver completed [" + str(time.time() - start_time) + " seconds elapsed]...")
 
