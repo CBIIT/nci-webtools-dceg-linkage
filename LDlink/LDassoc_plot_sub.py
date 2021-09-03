@@ -141,7 +141,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
             #format mongo output
             if mongoResult != None:
-                geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+                geneResult = [mongoResult["name"], mongoResult["chromosome_grch37"], mongoResult["begin_grch37"], mongoResult["end_grch37"]]
                 return geneResult
             else:
                 return None

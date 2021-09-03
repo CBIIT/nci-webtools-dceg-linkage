@@ -22,18 +22,24 @@ genome_build_vars = {
         "title": "GRCh37",
         "chromosome": "chromosome_grch37",
         "position": "position_grch37",
+        "gene_begin": "begin_grch37",
+        "gene_end": "end_grch37",
         "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     },
     "grch38": {
         "title": "GRCh38",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
+        "gene_begin": "begin_grch38",
+        "gene_end": "end_grch38",
         "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
     },
     "grch38_high_coverage": {
         "title": "30x GRCh38",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
+        "gene_begin": "begin_grch38",
+        "gene_end": "end_grch38",
         "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
     }
 }
