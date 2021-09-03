@@ -22,7 +22,7 @@ def generateInputBed(inputJSONFile):
         with open(inputJSONFile) as inputfile:
             for line in inputfile:
                 jsonObj = json.loads(line)
-                if isinstance(jsonObj['position_grch37'], int):
+                if isinstance(jsonObj['begin'], int) and isinstance(jsonObj['end'], int):
                     writeLine = ["chr" + jsonObj['chromosome'], str(jsonObj['begin']), str(jsonObj['end']), json.dumps(jsonObj, separators=(',', ':')).replace(" ", "__")]
                     bedfile.write("\t".join(writeLine) + '\n')
     print("liftOver input file " + inputBedFileName + " generated...")
@@ -66,7 +66,7 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                         "chromosome_grch37": genes_name_coords_obj['chromosome'],
                         "begin_grch37": int(genes_name_coords_obj['begin']),
                         "end_grch37": int(genes_name_coords_obj['end']),
-                        "chromosome_grch38": split_line[0].lstrip('chr'),
+                        "chromosome_grch38": "NA",
                         "begin_grch38": "NA",
                         "end_grch38": "NA",
                         "name": genes_name_coords_obj['name']
@@ -81,7 +81,7 @@ def generateJSONFile(outputBedFileName, outputUnmappedBedFileName, outputJSONFil
                         "chromosome_grch37": genes_name_coords_obj['chromosome'],
                         "begin_grch37": int(genes_name_coords_obj['begin']),
                         "end_grch37": int(genes_name_coords_obj['end']),
-                        "chromosome_grch38": split_line[0].lstrip('chr'),
+                        "chromosome_grch38": "NA",
                         "begin_grch38": "NA",
                         "end_grch38": "NA",
                         "name": genes_name_coords_obj['name']
