@@ -205,6 +205,12 @@ $(document).ready(function() {
         }
     });
 
+    // Hide Genome Build dropdown on LD Tools dropdown-nav hover 
+    dropdownTools = document.querySelector("#dropdown-tools");
+    dropdownTools.addEventListener("mouseover", event => {
+        $("#genome-build").click()
+    });
+
     $('#ldassoc').prop('disabled', true);
 
     // reset apiaccess form
