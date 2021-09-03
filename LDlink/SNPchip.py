@@ -83,7 +83,7 @@ def convert_codeToPlatforms(platform_query, web):
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
         platforms.append(document["platform"])
-    print(platforms)
+    # print(platforms)
     return platforms
 
 
@@ -257,6 +257,9 @@ def calculate_chip(snplst, platform_query, web, request):
     # Quering MongoDB to get platforms for position/chromsome pairs
     else:
         platform_list = []
+
+    print("platform_list", platform_list)
+
     for k in range(len(snp_coords_sort)):
         platforms = []
         position = str(snp_coords_sort[k][2])

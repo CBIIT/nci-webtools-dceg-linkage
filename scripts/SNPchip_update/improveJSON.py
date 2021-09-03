@@ -36,7 +36,7 @@ def improveJSON(inputJSONFile, outputJSONFile):
                             keepDataEntries.append(dataEntry)
                     newKeepJSON = {
                         "chromosome_grch37": firstChr,
-                        "position_grch37": int(jsonObj['pos']),
+                        "position_grch37": int(jsonObj['pos']) if jsonObj['pos'].isdigit() else jsonObj['pos'],
                         "data": list(map(lambda x: {"platform": x['platform']}, keepDataEntries))
                     }
                     # print("newKeepJSON", newKeepJSON)
@@ -44,7 +44,7 @@ def improveJSON(inputJSONFile, outputJSONFile):
                     for newData in newDataEntries:
                         newNewJSON = {
                             "chromosome_grch37": newData['chr'],
-                            "position_grch37": int(jsonObj['pos']),
+                            "position_grch37": int(jsonObj['pos']) if jsonObj['pos'].isdigit() else jsonObj['pos'],
                             "data": [{"platform": newData['platform']}]
                         }
                         # print("newNewJSON", newNewJSON)
@@ -54,7 +54,7 @@ def improveJSON(inputJSONFile, outputJSONFile):
                     # no chr mismatch in data
                     newJSON = {
                         "chromosome_grch37": firstChr,
-                        "position_grch37": int(jsonObj['pos']),
+                        "position_grch37": int(jsonObj['pos']) if jsonObj['pos'].isdigit() else jsonObj['pos'],
                         "data": list(map(lambda x: {"platform": x['platform']}, jsonObj['data']))
                     }
                     outfile.write(json.dumps(newJSON) + "\n")
