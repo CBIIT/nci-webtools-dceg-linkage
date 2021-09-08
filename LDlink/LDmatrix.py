@@ -106,7 +106,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -168,8 +168,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None:
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
+                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -793,6 +793,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
+
+    print("genes raw: " + genes_raw)
 
     genes_plot_start = []
     genes_plot_end = []
