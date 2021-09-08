@@ -117,20 +117,31 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     # Find RS numbers in snp database
     # SNP1
     snp1_coord = get_coords(db, snp1)
-    if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # SNP2
     snp2_coord = get_coords(db, snp2)
-    if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check if SNPs are on the same chromosome
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
         output["warning"] = snp1 + " and " + \
             snp2 + " are on different chromosomes"
+
+    # Check if input SNPs are on chromosome Y while genome build == grch38
+    # SNP1
+    if snp1_coord['chromosome'] == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
+
+    # SNP2
+    if snp2_coord['chromosome'] == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -159,7 +170,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
+        vcf_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc1_offset = subprocess.Popen(
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
@@ -172,7 +183,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-        vcf_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
+        vcf_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2_offset = subprocess.Popen(
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
@@ -200,15 +211,16 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         geno1 = vcf1[0].strip().split()
 
     if geno1[2] != snp1:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno1[0]+":"+geno1[1]+")"
-        else:
-            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno1[0]+":"+geno1[1]+")"
+        if geno1[2] != ".":
+            if "warning" in output:
+                output["warning"] = output["warning"] + \
+                    ". Genomic position for query variant1 (" + snp1 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+            else:
+                output["warning"] = "Genomic position for query variant1 (" + snp1 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -247,15 +259,16 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         geno2 = vcf2[0].strip().split()
 
     if geno2[2] != snp2:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno2[0]+":"+geno2[1]+")"
-        else:
-            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno2[0]+":"+geno2[1]+")"
+        if geno2[2] != ".":
+            if "warning" in output:
+                output["warning"] = output["warning"] + \
+                    ". Genomic position for query variant2 (" + snp2 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+            else:
+                output["warning"] = "Genomic position for query variant2 (" + snp2 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:
@@ -287,12 +300,12 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Get headers
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir)
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc1_h = subprocess.Popen(
         tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir)
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2_h = subprocess.Popen(
         tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()

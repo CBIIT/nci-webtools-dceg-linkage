@@ -73,7 +73,7 @@ def get_ld_stats(variantPair, pop_ids):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)	
+        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])	
     proc1_offset = subprocess.Popen(	
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)	
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]	
@@ -85,7 +85,7 @@ def get_ld_stats(variantPair, pop_ids):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)	
+        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])	
     proc2_offset = subprocess.Popen(	
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
@@ -122,7 +122,8 @@ def get_ld_stats(variantPair, pop_ids):
     else:	
         geno1 = vcf1[0].strip().split()	
     if geno1[2] != snp1:	
-        output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+")")	
+        if geno1[2] != ".":
+            output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+" = " + geno1[2] + ")")
         snp1 = geno1[2]	
     if "," in geno1[3] or "," in geno1[4]:	
         output["error"].append(snp1 + " is not a biallelic variant.")	
@@ -182,7 +183,8 @@ def get_ld_stats(variantPair, pop_ids):
     else:	
         geno2 = vcf2[0].strip().split()	
     if geno2[2] != snp2:	
-        output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + ")")	
+        if geno2[2] != ".":
+            output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + " = " + geno2[2] + ")")	
         snp2 = geno2[2]	
     if "," in geno2[3] or "," in geno2[4]:	
         output["error"].append(snp2 + " is not a biallelic variant.")	
@@ -236,11 +238,11 @@ def get_ld_stats(variantPair, pop_ids):
         }	
 
     # Get headers	
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, data_dir + genotypes_dir)	
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])	
     proc1_h = subprocess.Popen(	
         tabix_snp1_h, shell=True, stdout=subprocess.PIPE)	
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()	
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, data_dir + genotypes_dir)	
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])	
     proc2_h = subprocess.Popen(	
         tabix_snp2_h, shell=True, stdout=subprocess.PIPE)	
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()	

@@ -51,7 +51,7 @@ if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
     print("could not find sequences archive file.")
 
 tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(
-    vcf_query_snp_file, chr, start, stop, data_dir + genotypes_dir)
+    vcf_query_snp_file, chr, start, stop, data_dir + genotypes_dir + "GRCh37")
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 # Define function to calculate LD metrics
@@ -132,7 +132,7 @@ else:
 db = client["LDLink"]
 
 def get_regDB(chr, pos):
-    result = db.regulome.find_one({"chromosome": chr, "position": int(pos)})
+    result = db.regulome.find_one({"chromosome_grch37": chr, "position_grch37": int(pos)})
     if result is None:
         return "."   
     else:

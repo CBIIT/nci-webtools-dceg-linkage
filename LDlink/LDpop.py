@@ -124,14 +124,14 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     # Check if RS numbers are in snp database
     # SNP1
-    if snp1_coord == None:
-        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
     # SNP2
-    if snp2_coord == None:
-        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + "."
+    if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
@@ -139,6 +139,17 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
         output["warning"] = snp1 + " and " + \
             snp2 + " are on different chromosomes"
+
+    # Check if input SNPs are on chromosome Y while genome build == grch38
+    # SNP1
+    if snp1_coord['chromosome'] == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
+
+    # SNP2
+    if snp2_coord['chromosome'] == "Y" and genome_build == "grch38":
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # create indexes for population order
     pop_order = {
@@ -247,7 +258,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
-    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir) 
+    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
@@ -258,7 +269,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         print("could not find sequences archive file.")
 
     # need to add | grep -v -e END ???
-    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir)
+    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
@@ -283,15 +294,16 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         geno1 = vcf1[0].strip().split()
 
     if geno1[2] != snp1:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno1[0]+":"+geno1[1]+")"
-        else:
-            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno1[0]+":"+geno1[1]+")"
+        if geno1[2] != ".":
+            if "warning" in output:
+                output["warning"] = output["warning"] + \
+                    ". Genomic position for query variant1 (" + snp1 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+            else:
+                output["warning"] = "Genomic position for query variant1 (" + snp1 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -318,15 +330,16 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         geno2 = vcf2[0].strip().split()
 
     if geno2[2] != snp2:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno2[0]+":"+geno2[1]+")"
-        else:
-            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno2[0]+":"+geno2[1]+")"
+        if geno2[2] != ".":
+            if "warning" in output:
+                output["warning"] = output["warning"] + \
+                    ". Genomic position for query variant2 (" + snp2 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+            else:
+                output["warning"] = "Genomic position for query variant2 (" + snp2 + \
+                    ") does not match RS number at 1000G position (chr" + \
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:
@@ -337,11 +350,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # vcf2 = vcf2[0].strip().split()
 
     # Get headers
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir)
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir)
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 
@@ -686,7 +699,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     rs1_map_data = []
     rs2_map_data = []
     rs1_rs2_LD_map_data = []
-    print(list(output.keys()))
+    # print(list(output.keys()))
     # populate table data
     for key in list(output.keys()):
         if key in list(pop_order.keys()):
@@ -736,8 +749,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # Generate output file
     with open(tmp_dir + "LDpop_" + request + ".txt", "w") as ldpop_out:
         ldpop_out.write("\t".join(["Population", "Abbrev", "N", output_table["inputs"]["rs1"] + " Allele Freq", output_table["inputs"]["rs2"] + " Allele Freq", "R2", "D\'", "Chisq", "P"]) + "\n")
-        print("output_table", output_table)
-        print('output_table["aaData"]', output_table["aaData"])
+        # print("output_table", output_table)
+        # print('output_table["aaData"]', output_table["aaData"])
         for row in output_table["aaData"]:
             ldpop_out.write(str(location_data[row[0]]["location"] + "\t" + row[0]) + "\t" + str(row[1]) + "\t" + str(row[2]) + "\t" + str(row[3]) + "\t" + str(row[4]) + "\t" + str(row[5]) + "\t" + str(row[7]) + "\t" + str(row[8]) + "\n")
         if "error" in output_table:

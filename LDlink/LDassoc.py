@@ -175,7 +175,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 
 			#format mongo output
 			if mongoResult != None:
-				geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+				geneResult = [mongoResult["name"], mongoResult["chromosome_grch37"], mongoResult["begin_grch37"], mongoResult["end_grch37"]]
 				return geneResult
 			else:
 				return None
@@ -411,11 +411,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
 				print("could not find sequences archive file.")
 
-			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir)
+			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + "GRCh37")
 			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 			head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir)
+			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + "GRCh37")
 			subprocess.call(tabix_snp, shell=True)
 
 
@@ -486,11 +486,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
 			print("could not find sequences archive file.")
 
-		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir)
+		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + "GRCh37")
 		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 		head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir)
+		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + "GRCh37")
 		subprocess.call(tabix_snp, shell=True)
 
 
@@ -526,10 +526,11 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			geno=vcf[0].strip().split()
 
 		if geno[2]!=snp and snp[0:2]=="rs":
-			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
-			else:
-				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+			if geno[2] != ".":
+				if "warning" in output:
+					output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
+				else:
+					output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
 			snp=geno[2]
 
 		if "," in geno[3] or "," in geno[4]:
