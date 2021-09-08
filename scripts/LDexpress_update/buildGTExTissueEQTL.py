@@ -1,3 +1,6 @@
+# PREREQ: download GTEx eQTL Tissues data from https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_Analysis_v8_eQTL.tar
+# PRRREQ: set up and index gtex_snps MongoDB reference collection by running insert GTExSNPs.py (for finding GRCh37 positions)
+
 import sys
 import os
 import json

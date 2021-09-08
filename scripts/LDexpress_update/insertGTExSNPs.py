@@ -1,3 +1,5 @@
+# PREREQ: download raw data input from https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz
+
 import sys
 import os
 import json
