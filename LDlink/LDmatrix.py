@@ -166,7 +166,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None:
+                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
                         temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
@@ -180,12 +180,10 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            dbsnp_version + ": " + ", ".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + "."
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -230,7 +228,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + "GRCh37")
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -325,12 +323,13 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
                 count += 1
 
             if found == "false":
-                if "warning" in output:
-                    output["warning"] = output[
-                        "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
-                else:
-                    output[
-                        "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+")"
+                if rs_1000g != ".":
+                    if "warning" in output:
+                        output["warning"] = output[
+                            "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+                    else:
+                        output[
+                            "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
 
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0] = geno[2]

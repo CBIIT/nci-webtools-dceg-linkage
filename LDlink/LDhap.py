@@ -142,6 +142,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                                     ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
                                 output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            warn.append(snp_i[0])
                         else:
                             rs_nums.append(snp_i[0])
                             snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
@@ -155,12 +156,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 warn.append(snp_i[0])
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "): " + ", ".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + output["warning"]
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + output["warning"]
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome
@@ -289,15 +288,16 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 count += 1
 
             if found == "false":
-                if "warning" in output:
-                    output["warning"] = output["warning"] + \
-                        ". Genomic position for query variant ("+rs_query + \
-                        ") does not match RS number at 1000G position (chr" + \
-                        geno[0]+":"+geno[1]+")"
-                else:
-                    output["warning"] = "Genomic position for query variant ("+rs_query + \
-                        ") does not match RS number at 1000G position (chr" + \
-                        geno[0]+":"+geno[1]+")"
+                if rs_1000g != ".":
+                    if "warning" in output:
+                        output["warning"] = output["warning"] + \
+                            ". Genomic position for query variant ("+rs_query + \
+                            ") does not match RS number at 1000G position (chr" + \
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+                    else:
+                        output["warning"] = "Genomic position for query variant ("+rs_query + \
+                            ") does not match RS number at 1000G position (chr" + \
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
 
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0]=geno[2]

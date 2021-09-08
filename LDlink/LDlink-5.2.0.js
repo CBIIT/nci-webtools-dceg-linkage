@@ -42,7 +42,13 @@ var moduleTitleDescription = {
     API call. Once registered, your access token will be emailed to you.Interactively visualize association p-value results and linkage disequilibrium \
     patterns for a genomic region of interest."]
 };
-var genomeBuild = "grch37";
+try {
+    const urlParams = new URLSearchParams(window.location.search);
+    var genomeBuild = urlParams.get('genome_build');
+} catch {
+    var genomeBuild = "grch37";
+}
+
 
 Object.size = function(obj) {
     var size = 0, key;
@@ -173,10 +179,16 @@ $(document).ready(function() {
     });
 
     // GRCH37-38 Toggle
-    $(document).ready(function() {  
-        $("#genome-build > .dropdown-menu li a")[0].click();
-     });
-
+    if (genomeBuild == 'grch38') {
+        $(document).ready(function() {  
+            $("#genome-build > .dropdown-menu li a")[1].click();
+        });
+    } else {
+        $(document).ready(function() {  
+            $("#genome-build > .dropdown-menu li a")[0].click();
+        });
+    }
+    
     $("#genome-build > .dropdown-menu li a").click(function(e){
         $("#genome-build > .btn:first-child").html($(this).text() + '&nbsp;<span class="caret"></span>');
         $("#genome-build > .btn:first-child").val($(this).text().toLowerCase());
@@ -191,6 +203,12 @@ $(document).ready(function() {
                 genomeBuild = "grch38";
                 break;
         }
+    });
+
+    // Hide Genome Build dropdown on LD Tools dropdown-nav hover 
+    dropdownTools = document.querySelector("#dropdown-tools");
+    dropdownTools.addEventListener("mouseover", event => {
+        $("#genome-build").click()
     });
 
     $('#ldassoc').prop('disabled', true);
@@ -770,7 +788,7 @@ function createPopTable() {
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair in final row
-                    return ldpop_ldpair_results_link(data, type, row);
+                    return ldpop_ldpair_results_link(data, type, row, genomeBuild);
                 },
                 "targets": 6
             },
@@ -1429,9 +1447,8 @@ function ldproxy_rs_results_link(data, type, row) {
     return link;
 }
 
-function ldpop_ldpair_results_link(data, type, row) {
+function ldpop_ldpair_results_link(data, type, row, genomeBuild) {
     // parse data
-    // console.log(data);
     var snp1 = data[0];
     var snp2 = data[1];
     var pops = data[2];
@@ -1439,7 +1456,8 @@ function ldpop_ldpair_results_link(data, type, row) {
     var params = {
         var1: snp1,
         var2: snp2,
-        pop: pops
+        pop: pops,
+        genome_build: genomeBuild
     };
     var href = server + '&' + $.param(params);
     var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
@@ -2358,7 +2376,8 @@ function updateLDtrait() {
         r2_d: r2_d,
         r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
         window: window,
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
@@ -2388,6 +2407,14 @@ function updateLDtrait() {
         var jsonObj=data;
         // console.log(data);
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2416,7 +2443,8 @@ function updateSNPclip() {
         pop : population.join("+"),
         r2_threshold: $("#"+id+"_r2_threshold").val(),
         maf_threshold: $("#"+id+"_maf_threshold").val(),
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
@@ -2632,9 +2660,8 @@ function loadSNPChip(data) {
 
     $.each(platform_list, function(key, value) {
         //reversed_platform_list.push(snpchipReverseLookup[value]);
-
         obj ={
-            code: snpchipReverseLookup[value],
+            code: snpchipReverseLookup[value] !== undefined ?  snpchipReverseLookup[value] : snpchipReverseLookup[value.replace(/\sArray$/, "")],
             platform: value
         };
         if(typeof obj.code === "undefined") {
@@ -3826,12 +3853,13 @@ function updateLDpair() {
     //console.log("LD Pair");
     //console.log('population');
     //console.dir(population);
-        var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
+    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
     var ldpairInputs = {
         var1 : $('#ldpair-snp1').val(),
         var2 : $('#ldpair-snp2').val(),
         pop : population.join("+"),
-        reference : reference
+        reference : reference,
+        genome_build: genomeBuild
     };
     //console.log("ldpairInputs");
     //console.dir(ldpairInputs);
@@ -4235,6 +4263,7 @@ function updateLDpop() {
         var1 : $('#ldpop-snp1').val(),
         var2 : $('#ldpop-snp2').val(),
         pop : population.join("+"),
+        genome_build: genomeBuild,
         reference : reference,
         r2_d: r2_d
     };

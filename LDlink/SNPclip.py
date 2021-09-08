@@ -11,7 +11,7 @@ import botocore
 import subprocess
 import sys
 import collections
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum
 
 ###########
 # SNPclip #
@@ -19,7 +19,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials
 
 # Create SNPtip function
 
-def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.01):
+def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, maf_threshold=0.01):
 
     max_list = 5000
 
@@ -47,6 +47,12 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     # Create JSON output
     out_json = open(tmp_dir+"clip"+request+".json", "w")
     output = {}
+
+    # Validate genome build param
+    print("genome_build " + genome_build)
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Open SNP list file
     snps_raw = open(snplst).readlines()
@@ -106,15 +112,6 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
     # Replace input genomic coordinates with variant ids (rsids)
     def replace_coords_rsid(db, snp_lst):
         new_snp_lst = []
@@ -122,7 +119,7 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
             if snp_raw_i[0][0:2] == "rs":
                 new_snp_lst.append(snp_raw_i)
             else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
+                snp_info_lst = get_rsnum(db, snp_raw_i[0], genome_build)
                 print("snp_info_lst")
                 print(snp_info_lst)
                 if snp_info_lst != None:
@@ -172,14 +169,24 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None:
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
-                        snp_coords.append(temp)
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
+                        # check if variant is on chrY for genome build = GRCh38
+                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            else:
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            warn.append(snp_i[0])
+                            details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38."]
+                        else:
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
-                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + ", variant removed."]
+                        details[snp_i[0]] = ["NA", "NA", "Variant not found in dbSNP" + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "), variant removed."]
                 else:
                     warn.append(snp_i[0])
                     details[snp_i[0]] = ["NA", "NA",
@@ -196,12 +203,10 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
             return("", "", "")
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) were not found in dbSNP " + \
-            dbsnp_version + ": " + ", ".join(warn)
+        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers that are in dbSNP " + \
-            dbsnp_version + "."
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -223,18 +228,15 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir)
-    proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
+    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
 
     # Make MAF function
-
     def calc_maf(genos):
         vals = {"0|0": 0, "0|1": 0, "1|0": 0, "1|1": 0, "0": 0, "1": 0}
         for i in range(len(genos)):
@@ -300,7 +302,6 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
 
     # Import SNP VCF file
     hap_dict = {}
-    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
@@ -320,10 +321,10 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " search coordinates for query variant"
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " search coordinates for query variant"
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
@@ -357,15 +358,16 @@ def calculate_clip(snplst, pop, request, web, r2_threshold=0.1, maf_threshold=0.
                 count += 1
 
             if found == "false":
-                if "warning" in output:
-                    output["warning"] = output["warning"] + \
-                        ". Genomic position for query variant ("+rs_query + \
-                        ") does not match RS number at 1000G position (chr" + \
-                        geno[0]+":"+geno[1]+")"
-                else:
-                    output["warning"] = "Genomic position for query variant ("+rs_query + \
-                        ") does not match RS number at 1000G position (chr" + \
-                        geno[0]+":"+geno[1]+")"
+                if rs_1000g != ".":
+                    if "warning" in output:
+                        output["warning"] = output["warning"] + \
+                            ". Genomic position for query variant ("+rs_query + \
+                            ") does not match RS number at 1000G position (chr" + \
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+                    else:
+                        output["warning"] = "Genomic position for query variant ("+rs_query + \
+                            ") does not match RS number at 1000G position (chr" + \
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
 
                 # try catch this index ... ValueError thrown when rs_query not found in snps
                 print("#####")

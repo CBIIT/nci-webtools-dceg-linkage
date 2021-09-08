@@ -20,17 +20,26 @@ genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
     "grch37": {
         "title": "GRCh37",
+        "chromosome": "chromosome_grch37",
         "position": "position_grch37",
+        "gene_begin": "begin_grch37",
+        "gene_end": "end_grch37",
         "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
     },
     "grch38": {
         "title": "GRCh38",
+        "chromosome": "chromosome_grch38",
         "position": "position_grch38",
+        "gene_begin": "begin_grch38",
+        "gene_end": "end_grch38",
         "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
     },
     "grch38_high_coverage": {
         "title": "30x GRCh38",
+        "chromosome": "chromosome_grch38",
         "position": "position_grch38",
+        "gene_begin": "begin_grch38",
+        "gene_end": "end_grch38",
         "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
     }
 }
@@ -87,3 +96,12 @@ def retrieveTabix1000GData(query_file, coords, query_dir):
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
     vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
     return vcf
+
+# Query genomic coordinates
+def get_rsnum(db, coord, genome_build):
+    temp_coord = coord.strip("chr").split(":")
+    chro = temp_coord[0]
+    pos = temp_coord[1]
+    query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
