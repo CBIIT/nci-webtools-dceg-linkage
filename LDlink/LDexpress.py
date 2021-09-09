@@ -80,7 +80,7 @@ def get_ldexpress_tissues(web):
 
 def get_query_variant(snp_coord, pop_ids, request, genome_build):
 
-    vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], snp_coord[1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     queryVariantWarnings = []

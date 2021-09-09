@@ -45,7 +45,7 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 # Get VCF region
-vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], chromosome)
+vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (chromosome))
 vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):

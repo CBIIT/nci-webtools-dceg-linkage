@@ -2217,10 +2217,10 @@ function updateLDhap() {
         if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
-                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
                     break;
                 case "grch38":
-                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
                     break;
             }
             $('#' + id + '-results-container').show();
@@ -2299,7 +2299,8 @@ function updateLDexpress() {
         r2_d_threshold: Number($("#" + id + "_r2_d_threshold").val()),
         p_threshold: Number($("#" + id + "_p_threshold").val()),
         window: window,
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
@@ -2329,6 +2330,14 @@ function updateLDexpress() {
         var jsonObj=data;
         // console.log(data);
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2409,10 +2418,10 @@ function updateLDtrait() {
         if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
-                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
                     break;
                 case "grch38":
-                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
                     break;
             }
             $('#' + id + '-results-container').show();
@@ -2473,6 +2482,14 @@ function updateSNPclip() {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2508,7 +2525,8 @@ function updateSNPchip() {
     var ldInputs = {
         snps : snps,
         platforms: platforms.join("+"),
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
     $('#snp_chip_list').attr('href', "tmp/details"+ldInputs.reference+".txt");
     $('#snp_chip_list').attr('target', "chip_details"+ldInputs.reference+".txt");
@@ -2525,6 +2543,14 @@ function updateSNPchip() {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();

@@ -1054,6 +1054,7 @@ def snpchip():
     data = json.loads(request.stream.read())
     snps = data['snps']
     platforms = data['platforms']
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('platforms: ' + platforms)
@@ -1069,7 +1070,7 @@ def snpchip():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                snp_chip = calculate_chip(snplst, platforms, web, reference)
+                snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
             except:
                 return sendTraceback(None)
@@ -1086,7 +1087,7 @@ def snpchip():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            snp_chip = calculate_chip(snplst, platforms, web, reference)
+            snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             # display api out
             try:
                 # unlock token then display api output
