@@ -526,6 +526,7 @@ def ldexpress():
     r2_d_threshold = data['r2_d_threshold']
     p_threshold = data['p_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     token = request.args.get('token', False)
     web = False
     # differentiate web or api request
@@ -537,7 +538,7 @@ def ldexpress():
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             try:
                 express = {}
-                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
                 express["query_snps"] = query_snps
                 express["thinned_snps"] = thinned_snps
                 express["thinned_genes"] = thinned_genes
@@ -569,7 +570,7 @@ def ldexpress():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
             # with open(tmp_dir + "express" + reference + ".json") as f:
             #     json_dict = json.load(f)
             if "error" in errors_warnings:
@@ -946,10 +947,7 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ', snps)
     print('pop: ', pop)
     print('r2_d: ', r2_d)
@@ -1121,10 +1119,7 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_threshold: ' + r2_threshold)

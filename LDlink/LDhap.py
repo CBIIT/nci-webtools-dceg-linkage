@@ -24,7 +24,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     output = {}
 
     # Validate genome build param
-    print("genome_build", genome_build)
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
         return(json.dumps(output, sort_keys=True, indent=2))

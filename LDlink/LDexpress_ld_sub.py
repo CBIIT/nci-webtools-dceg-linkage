@@ -7,7 +7,7 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 web = sys.argv[1]
 snp = sys.argv[2]
@@ -18,6 +18,7 @@ request = sys.argv[6]
 subprocess_id = sys.argv[7]
 r2_d = sys.argv[8]
 r2_d_threshold = sys.argv[9]
+genome_build = sys.argv[10]
 
 # Set data directories using config.yml
 with open('config.yml', 'r') as f:
@@ -44,13 +45,13 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 # Get VCF region
-vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
+vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], chromosome)
 vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
     print("could not find sequences archive file.")
 
-tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(vcf_query_snp_file, chromosome, start, stop, data_dir + genotypes_dir + "GRCh37")
+tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(vcf_query_snp_file, chromosome, start, stop, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 # Define function to calculate LD metrics
