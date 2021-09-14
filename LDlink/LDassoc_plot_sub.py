@@ -48,7 +48,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             
 
     if myargsOrigin!="None":
-        # Find coordinates (GRCh37/hg19) for SNP RS number
+        # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
         if myargsOrigin[0:2]=="rs":
             snp=myargsOrigin
 

@@ -228,13 +228,13 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Make MAF function
     def calc_maf(genos):

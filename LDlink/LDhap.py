@@ -191,14 +191,14 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         output["error"] = "1000G data cannot be reached."
         return(json.dumps(output, sort_keys=True, indent=2))
 
-    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
@@ -411,7 +411,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Create SNP File
     snp_out = open(tmp_dir+"snps_"+request+".txt", "w")
-    print("RS_Number\tPosition (hg19)\tAllele Frequency", file=snp_out)
+    print("RS_Number\tPosition (" + genome_build_vars[genome_build]['title_hg'] + ")\tAllele Frequency", file=snp_out)
     for k in sorted(output["snps"].keys()):
         rs_k = output["snps"][k]["RS"]
         coord_k = output["snps"][k]["Coord"]

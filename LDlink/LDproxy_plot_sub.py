@@ -61,7 +61,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Create JSON output
 
-    # Find coordinates (GRCh37/hg19) for SNP RS number
+    # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
     
     # Connect to Mongo snp database
     if env == 'local':

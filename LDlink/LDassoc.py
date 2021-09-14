@@ -59,7 +59,7 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 			return("","")
 
 	if myargs.origin!=None:
-		# Find coordinates (GRCh37/hg19) for SNP RS number
+		# Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
