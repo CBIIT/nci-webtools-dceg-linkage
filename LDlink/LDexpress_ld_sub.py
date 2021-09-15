@@ -21,8 +21,8 @@ r2_d_threshold = sys.argv[9]
 genome_build = sys.argv[10]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file, Loader=yaml.FullLoader)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 data_dir = config['data']['data_dir']

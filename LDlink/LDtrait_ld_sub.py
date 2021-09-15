@@ -15,8 +15,8 @@ subprocess_id = sys.argv[2]
 genome_build = sys.argv[3]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file, Loader=yaml.FullLoader)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 population_samples_dir = config['data']['population_samples_dir']

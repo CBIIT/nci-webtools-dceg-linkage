@@ -21,8 +21,8 @@ from LDcommon import genome_build_vars
 def get_platform_request(web):
 
     try:
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file, Loader=yaml.FullLoader)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
@@ -58,8 +58,8 @@ def get_platform_request(web):
 
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     env = config['env']
     tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -91,8 +91,8 @@ def convert_codeToPlatforms(platform_query, web):
 def calculate_chip(snplst, platform_query, web, request, genome_build):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     env = config['env']
     tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -306,8 +306,8 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
 
 def createOutputFile(request, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     tmp_dir = config['data']['tmp_dir']
 
     details_file = open(tmp_dir+'details'+request+".txt", "w")

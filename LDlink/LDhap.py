@@ -11,8 +11,8 @@ from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, ret
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']

@@ -19,8 +19,8 @@ from LDcommon import genome_build_vars, get_rsnum
 
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as f:	
-    config = yaml.load(f)	
+with open('config.yml', 'r') as yml_file:	
+    config = yaml.load(yml_file, Loader=yaml.FullLoader)	
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
@@ -34,8 +34,8 @@ num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldtrait_timestamp(web):
     try:
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file, Loader=yaml.FullLoader)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']

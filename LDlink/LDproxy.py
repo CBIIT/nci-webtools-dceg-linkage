@@ -43,8 +43,8 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     start_time = time.time()
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']

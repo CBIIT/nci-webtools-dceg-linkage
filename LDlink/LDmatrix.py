@@ -15,8 +15,8 @@ from LDcommon import checkS3File, retrieveAWSCredentials
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']

@@ -21,8 +21,8 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     snp2 = snp2.lower().strip() 
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file, Loader=yaml.FullLoader)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
