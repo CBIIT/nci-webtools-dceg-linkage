@@ -147,9 +147,9 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 return None
 
         # Find RS number in snp database
-        gene_coord=get_coords_gene(myargsName, db)
+        gene_coord = get_coords_gene(myargsName, db)
 
-        if gene_coord==None:
+        if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
             return None
             
         # Define search coordinates

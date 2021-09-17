@@ -189,10 +189,10 @@ def calculate_assoc(file, region, pop, request, web, myargs):
 		db = client["LDLink"]
 
 		# Find RS number in snp database
-		gene_coord=get_coords_gene(myargs.name, db)
+		gene_coord = get_coords_gene(myargs.name, db)
 
-		if gene_coord==None:
-			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
+		if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
+			output["error"]="Gene name " + myargs.name + " is not in RefSeq database."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
