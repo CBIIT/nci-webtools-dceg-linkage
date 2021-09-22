@@ -44,7 +44,7 @@ var moduleTitleDescription = {
 };
 try {
     const urlParams = new URLSearchParams(window.location.search);
-    var genomeBuild = urlParams.get('genome_build');
+    var genomeBuild = urlParams.get('genome_build') ? urlParams.get('genome_build') : 'grch37';
 } catch {
     var genomeBuild = "grch37";
 }
@@ -178,31 +178,34 @@ $(document).ready(function() {
         }
     });
 
-    // GRCH37-38 Toggle
-    if (genomeBuild == 'grch38') {
-        $(document).ready(function() {  
-            $("#genome-build > .dropdown-menu li a")[1].click();
-        });
-    } else {
-        $(document).ready(function() {  
-            $("#genome-build > .dropdown-menu li a")[0].click();
-        });
+    // init genome build selection
+    switch(genomeBuild) {
+        case "grch37":
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[0].click();
+            });
+            break;
+        case "grch38":
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[1].click();
+            });
+            break;
+        case "grch38_high_coverage":
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[2].click();
+            });
+            break;
+        default:
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[0].click();
+            });
     }
     
     $("#genome-build > .dropdown-menu li a").click(function(e){
         $("#genome-build > .btn:first-child").html($(this).text() + '&nbsp;<span class="caret"></span>');
         $("#genome-build > .btn:first-child").val($(this).text().toLowerCase());
-        console.log(e.target.id);
-        switch($(this).text()) {
-            case "GRCh37":
-                // SET to 37
-                genomeBuild = "grch37";
-                break;
-            case "GRCh38":
-                // SET to 38
-                genomeBuild = "grch38";
-                break;
-        }
+        // console.log($(this).attr("value"));
+        genomeBuild = $(this).attr("value");
     });
 
     // Hide Genome Build dropdown on LD Tools dropdown-nav hover 
@@ -2222,6 +2225,9 @@ function updateLDhap() {
                 case "grch38":
                     $('.' + id + '-position-genome-build-header').text("GRCh38");
                     break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
             }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
@@ -2337,6 +2343,9 @@ function updateLDexpress() {
                 case "grch38":
                     $('.' + id + '-position-genome-build-header').text("GRCh38");
                     break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
             }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
@@ -2423,6 +2432,9 @@ function updateLDtrait() {
                 case "grch38":
                     $('.' + id + '-position-genome-build-header').text("GRCh38");
                     break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
             }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
@@ -2489,6 +2501,9 @@ function updateSNPclip() {
                 case "grch38":
                     $('.' + id + '-position-genome-build-header').text("GRCh38");
                     break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
             }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
@@ -2549,6 +2564,9 @@ function updateSNPchip() {
                     break;
                 case "grch38":
                     $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
                     break;
             }
             $('#' + id + '-results-container').show();

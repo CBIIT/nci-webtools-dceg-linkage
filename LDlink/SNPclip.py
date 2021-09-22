@@ -171,14 +171,14 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                         # check if variant is on chrY for genome build = GRCh38
-                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                        if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
-                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             warn.append(snp_i[0])
-                            details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38."]
+                            details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37."]
                         else:
                             rs_nums.append(snp_i[0])
                             snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
@@ -224,7 +224,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             return("", "", "")
 
     # Make tabix formatted coordinates
-    snp_coord_str = [snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
@@ -318,6 +318,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
@@ -358,7 +359,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                 count += 1
 
             if found == "false":
-                if rs_1000g != ".":
+                if "rs" in rs_1000g:
                     if "warning" in output:
                         output["warning"] = output["warning"] + \
                             ". Genomic position for query variant ("+rs_query + \

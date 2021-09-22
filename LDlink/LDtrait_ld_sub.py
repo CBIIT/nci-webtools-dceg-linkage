@@ -73,7 +73,7 @@ def get_ld_stats(variantPair, pop_ids):
         print("could not find sequences archive file.")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
+        vcf_query_snp_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
     proc1_offset = subprocess.Popen(	
         tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)	
     vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]	
@@ -85,7 +85,7 @@ def get_ld_stats(variantPair, pop_ids):
         print("could not find sequences archive file.")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
+        vcf_query_snp_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
     proc2_offset = subprocess.Popen(	
         tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)	
     vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]	
@@ -110,6 +110,7 @@ def get_ld_stats(variantPair, pop_ids):
         for i in range(len(vcf1)):	
             if vcf1[i].strip().split()[2] == snp1:	
                 geno1 = vcf1[i].strip().split()	
+                geno1[0] = geno1[0].lstrip('chr')
         if geno1 == []:	
             output["error"].append(snp1 + " is not in 1000G reference panel.")	
             return {	
@@ -121,8 +122,9 @@ def get_ld_stats(variantPair, pop_ids):
             }	
     else:	
         geno1 = vcf1[0].strip().split()	
+        geno1[0] = geno1[0].lstrip('chr')
     if geno1[2] != snp1:	
-        if geno1[2] != ".":
+        if "rs" in geno1[2]:
             output["warning"].append("Genomic position for query variant1 (" + snp1 + ") does not match RS number at 1000G position (chr" + geno1[0]+":"+geno1[1]+" = " + geno1[2] + ")")
         snp1 = geno1[2]	
     if "," in geno1[3] or "," in geno1[4]:	
@@ -171,6 +173,7 @@ def get_ld_stats(variantPair, pop_ids):
         for i in range(len(vcf2)):	
             if vcf2[i].strip().split()[2] == snp2:	
                 geno2 = vcf2[i].strip().split()	
+                geno2[0] = geno2[0].lstrip('chr')
         if geno2 == []:	
             output["error"].append(snp2 + " is not in 1000G reference panel.")	
             return {	
@@ -182,8 +185,9 @@ def get_ld_stats(variantPair, pop_ids):
             }	
     else:	
         geno2 = vcf2[0].strip().split()	
+        geno2[0] = geno2[0].lstrip('chr')
     if geno2[2] != snp2:	
-        if geno2[2] != ".":
+        if "rs" in geno2[2]:
             output["warning"].append("Genomic position for query variant2 (" + snp2 + ") does not match RS number at 1000G position (chr" + geno2[0] + ":" + geno2[1] + " = " + geno2[2] + ")")	
         snp2 = geno2[2]	
     if "," in geno2[3] or "," in geno2[4]:	

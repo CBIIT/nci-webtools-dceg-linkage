@@ -94,7 +94,7 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
     # print("head length", len(head))
 
-    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     subprocess.call(tabix_query_snp, shell=True)
     # proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
     # tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
@@ -113,6 +113,7 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
         for i in range(len(tabix_query_snp_out)):
             if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
                 geno = tabix_query_snp_out[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')
         if geno == []:
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
@@ -122,10 +123,11 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
             return (None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
     
     if geno[2] != snp_coord[0]:
         # print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
-        if geno[2] != ".":
+        if "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
         # snp = geno[2]
 
@@ -340,12 +342,12 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
                 snp_coord = get_coords(db, snp_i[0])
                 if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                      # check if variant is on chrY for genome build = GRCh38
-                    if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                    if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                         if "warning" in errors_warnings:
                             errors_warnings["warning"] = errors_warnings["warning"] + \
-                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         else:
-                            errors_warnings["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            errors_warnings["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         warn.append(snp_i[0])
                     else:
                         rs_nums.append(snp_i[0])
@@ -386,6 +388,8 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         find_window_ld_start = timer()
 
         (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids, str(request), genome_build)
+        # print("geno", geno)
+        # print("queryVariantWarnings", queryVariantWarnings)
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings
         if (geno is not None):
