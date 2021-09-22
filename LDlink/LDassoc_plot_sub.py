@@ -21,7 +21,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file, Loader=yaml.FullLoader)
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     data_dir = config['data']['data_dir']

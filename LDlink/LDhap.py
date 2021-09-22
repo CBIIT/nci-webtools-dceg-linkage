@@ -12,7 +12,7 @@ from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, ret
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file, Loader=yaml.FullLoader)
+        config = yaml.load(yml_file)
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']

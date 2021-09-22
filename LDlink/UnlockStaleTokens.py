@@ -13,7 +13,7 @@ def getDatetime():
 # triggered from CRON job
 def main():
     with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file, Loader=yaml.FullLoader)
+        config = yaml.load(yml_file)
     api_mongo_addr = config['api']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']

@@ -8,7 +8,7 @@ import subprocess
 
 # retrieve config
 with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file, Loader=yaml.FullLoader)
+    config = yaml.load(yml_file)
 aws_info = config['aws']
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']

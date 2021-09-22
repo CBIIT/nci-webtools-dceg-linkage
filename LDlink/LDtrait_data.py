@@ -18,7 +18,7 @@ errFilename = "ldtrait_error_snps.json"
 # Load variables from config file
 with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as yml_file:
 # with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file, Loader=yaml.FullLoader)
+    config = yaml.load(yml_file)
 ldtrait_src = config['data']['ldtrait_src']
 tmp_dir = config['data']['tmp_dir']
 mongo_username = config['database']['mongo_user_api']

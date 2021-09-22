@@ -22,7 +22,7 @@ def get_platform_request(web):
 
     try:
         with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file, Loader=yaml.FullLoader)
+            config = yaml.load(yml_file)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
@@ -59,7 +59,7 @@ def get_platform_request(web):
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file, Loader=yaml.FullLoader)
+        config = yaml.load(yml_file)
     env = config['env']
     tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -92,7 +92,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file, Loader=yaml.FullLoader)
+        config = yaml.load(yml_file)
     env = config['env']
     tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -307,7 +307,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
 def createOutputFile(request, genome_build):
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file, Loader=yaml.FullLoader)
+        config = yaml.load(yml_file)
     tmp_dir = config['data']['tmp_dir']
 
     details_file = open(tmp_dir+'details'+request+".txt", "w")

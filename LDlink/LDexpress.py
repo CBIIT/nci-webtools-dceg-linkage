@@ -23,7 +23,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
-    config = yaml.load(yml_file, Loader=yaml.FullLoader)	
+    config = yaml.load(yml_file)	
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
@@ -42,7 +42,7 @@ export_s3_keys = retrieveAWSCredentials()
 def get_ldexpress_tissues(web):
     try:
         with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file, Loader=yaml.FullLoader)
+            config = yaml.load(yml_file)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
