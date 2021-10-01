@@ -604,10 +604,26 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     lines = [0]
     gap = 80000
     tall = 0.75
-    if genes_raw != None:
-        for i in range(len(genes_raw)):
-            bin, name_id, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts, exonEnds, score, name2, cdsStartStat, cdsEndStat, exonFrames = genes_raw[
-                i].strip().split()
+    if genes_raw != None and len(genes_raw) > 0:
+        for gene_raw_obj in genes_raw:
+            gene_obj = json.loads(gene_raw_obj)
+            print("gene_obj", gene_obj)
+            bin = gene_obj['bin']
+            name_id = gene_obj['name']
+            chrom = gene_obj['chrom']
+            strand = gene_obj['strand']
+            txStart = gene_obj['txStart']
+            txEnd = gene_obj['txEnd']
+            cdsStart = gene_obj['cdsStart']
+            cdsEnd = gene_obj['cdsEnd']
+            exonCount = gene_obj['exonCount']
+            exonStarts = gene_obj['exonStarts']
+            exonEnds = gene_obj['exonEnds']
+            score = gene_obj['score']
+            name2 = gene_obj['name2']
+            cdsStartStat = gene_obj['cdsStartStat']
+            cdsEndStat = gene_obj['cdsEndStat']
+            exonFrames = gene_obj['exonFrames']
             name = name2
             id = name_id
             e_start = exonStarts.split(",")

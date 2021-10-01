@@ -719,11 +719,8 @@ def ldmatrix():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                print("reach1")
                 out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
-                print("reach2")
             except:
-                print("reach3")
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
