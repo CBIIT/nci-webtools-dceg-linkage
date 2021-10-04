@@ -52,7 +52,7 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "refGene": "refGene_grch38",
-        "recomb": "",
+        "recomb": "38",
         "1000G_dir": "GRCh38_High_Coverage",
         "1000G_file": "CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.filtered.shapeit2-duohmm-phased.vcf.gz",
         "1000G_chr_prefix": "chr"

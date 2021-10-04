@@ -586,8 +586,8 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     # Gene Plot
     # Get genes from LDmatrix.py output file
-    filename = tmp_dir + "genes_" + request + ".txt"
-    genes_raw = open(filename).readlines()
+    genes_file = tmp_dir + "genes_" + request + ".json"
+    genes_raw = open(genes_file).readlines()
 
     genes_plot_start = []
     genes_plot_end = []
@@ -607,23 +607,22 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     if genes_raw != None and len(genes_raw) > 0:
         for gene_raw_obj in genes_raw:
             gene_obj = json.loads(gene_raw_obj)
-            print("gene_obj", gene_obj)
-            bin = gene_obj['bin']
-            name_id = gene_obj['name']
-            chrom = gene_obj['chrom']
-            strand = gene_obj['strand']
-            txStart = gene_obj['txStart']
-            txEnd = gene_obj['txEnd']
-            cdsStart = gene_obj['cdsStart']
-            cdsEnd = gene_obj['cdsEnd']
-            exonCount = gene_obj['exonCount']
-            exonStarts = gene_obj['exonStarts']
-            exonEnds = gene_obj['exonEnds']
-            score = gene_obj['score']
-            name2 = gene_obj['name2']
-            cdsStartStat = gene_obj['cdsStartStat']
-            cdsEndStat = gene_obj['cdsEndStat']
-            exonFrames = gene_obj['exonFrames']
+            bin = gene_obj["bin"]
+            name_id = gene_obj["name"]
+            chrom = gene_obj["chrom"]
+            strand = gene_obj["strand"]
+            txStart = gene_obj["txStart"]
+            txEnd = gene_obj["txEnd"]
+            cdsStart = gene_obj["cdsStart"]
+            cdsEnd = gene_obj["cdsEnd"]
+            exonCount = gene_obj["exonCount"]
+            exonStarts = gene_obj["exonStarts"]
+            exonEnds = gene_obj["exonEnds"]
+            score = gene_obj["score"]
+            name2 = gene_obj["name2"]
+            cdsStartStat = gene_obj["cdsStartStat"]
+            cdsEndStat = gene_obj["cdsEndStat"] 
+            exonFrames = gene_obj["exonFrames"]
             name = name2
             id = name_id
             e_start = exonStarts.split(",")

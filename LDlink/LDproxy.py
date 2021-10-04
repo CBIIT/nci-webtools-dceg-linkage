@@ -752,16 +752,8 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     rug.toolbar_location = None
 
     # Gene Plot
-    # tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(
-    #     gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
-    # subprocess.call(tabix_gene, shell=True)
-    #filename = tmp_dir + "genes_" + request + ".txt"
-    #getRefGene(db, filename, snp_coord['chromosome'], int(coord1), int(coord2), 'grch37')
-    #genes_raw = open(filename).readlines()
-
-    jsonDump = tmp_dir + "genes_json_" + request + ".json"
-    refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
-    genes_json = getRefGene(db, jsonDump, refGene_params[0], refGene_params[1], refGene_params[2], genome_build)
+    genes_file = tmp_dir + "genes_" + request + ".json"
+    genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build)
 
     genes_plot_start = []
     genes_plot_end = []
@@ -777,25 +769,24 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     lines = [0]
     gap = 80000
     tall = 0.75
-    if genes_json != None:
-        for i in range(len(genes_json)):
-            bin = genes_json[i]["bin"]
-            name_id = genes_json[i]["name"]
-            chrom = genes_json[i]["chrom"]
-            chrom = chrom.replace('chr', '')
-            strand = genes_json[i]["strand"]
-            txStart = genes_json[i]["txStart"]
-            txEnd = genes_json[i]["txEnd"]
-            cdsStart = genes_json[i]["cdsStart"]
-            cdsEnd = genes_json[i]["cdsEnd"]
-            exonCount = genes_json[i]["exonCount"]
-            exonStarts = genes_json[i]["exonStarts"]
-            exonEnds = genes_json[i]["exonEnds"]
-            score = genes_json[i]["score"]
-            name2 = genes_json[i]["name2"]
-            cdsStartStat = genes_json[i]["cdsStartStat"]
-            cdsEndStat = genes_json[i]["cdsEndStat"] 
-            exonFrames = genes_json[i]["exonFrames"]
+    if genes_json != None and len(genes_json) > 0:
+        for gene_obj in genes_json:
+            bin = gene_obj["bin"]
+            name_id = gene_obj["name"]
+            chrom = gene_obj["chrom"]
+            strand = gene_obj["strand"]
+            txStart = gene_obj["txStart"]
+            txEnd = gene_obj["txEnd"]
+            cdsStart = gene_obj["cdsStart"]
+            cdsEnd = gene_obj["cdsEnd"]
+            exonCount = gene_obj["exonCount"]
+            exonStarts = gene_obj["exonStarts"]
+            exonEnds = gene_obj["exonEnds"]
+            score = gene_obj["score"]
+            name2 = gene_obj["name2"]
+            cdsStartStat = gene_obj["cdsStartStat"]
+            cdsEndStat = gene_obj["cdsEndStat"] 
+            exonFrames = gene_obj["exonFrames"]
             name = name2
             id = name_id
             e_start = exonStarts.split(",")
