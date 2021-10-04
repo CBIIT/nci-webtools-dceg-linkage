@@ -32,6 +32,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
+from LDcommon import genome_build_vars
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
@@ -683,26 +684,11 @@ def ldmatrix():
     if request.method == 'POST':
         # POST REQUEST
         data = json.loads(request.stream.read())
-        if 'snps' in data:
-            snps = data['snps']
-        else:
-            snps = False
-        if "pop" in data:
-            pop = data['pop']
-        else:
-            pop = False
-        if "reference" in data:
-            reference = data['reference']
-        else:
-            reference = False
-        if "r2_d" in data:
-            r2_d = data['r2_d']
-        else:
-            r2_d = False
-        try:
-            genome_build = data['genome_build']
-        except:
-            genome_build = 'grch37'
+        snps = data['snps'] if 'snps' in data else False
+        pop = data['pop'] if 'pop' in data else False
+        reference = data['reference'] if 'reference' in data else False
+        r2_d = data['r2_d'] if 'r2_d' in data else False
+        genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     else:
         # GET REQUEST
         snps = request.args.get('snps', False)
@@ -989,7 +975,7 @@ def ldtrait():
                     trait["error"] = json_dict["error"]
                 else:
                     with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                        f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                        f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
@@ -1026,7 +1012,7 @@ def ldtrait():
                 return sendTraceback(json_dict["error"])
             else:
                 with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                    f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                    f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")
