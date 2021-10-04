@@ -16,7 +16,7 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 import math
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):
@@ -35,7 +35,7 @@ def chunkWindow(pos, window, num_subprocesses):
     return chunks
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
+def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=500000):
 
     # trim any whitespace
     snp = snp.lower().strip()
@@ -105,8 +105,25 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
+
+    def get_refGene(db, query_params):
+        query_results = db[genome_build_vars[genome_build]['refGene']].find({"chrom": 'chr'+query_params[0], 
+                                                                            "txStart": {
+                                                                                "$gte": query_params[1]
+                                                                            }},
+                                                                            {"txStart": {
+                                                                                "$lte": query_params[2]
+                                                                            }})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+
+        #create temp file
+        jsonDump = tmp_dir + "genes_json_" + request + ".json"
+        with open(jsonDump, 'w') as the_file:
+            json.dump(query_results_sanitized, the_file)
+
         return query_results_sanitized
 
     # Replace input genomic coordinates with variant ids (rsids)
@@ -188,18 +205,18 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coord['chromosome'])
+    vcf_filePath = "%s/%sGRCh%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["recomb"], snp_coord['chromosome'])
     vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + "GRCh37")
+    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + "GRCh37")
+        vcf_file, snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -279,10 +296,10 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     # Define window of interest around query SNP
     # window = 500000
-    coord1 = int(snp_coord['position_grch37']) - window
+    coord1 = int(snp_coord[genome_build_vars[genome_build]['position']]) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord['position_grch37']) + window
+    coord2 = int(snp_coord[genome_build_vars[genome_build]['position']]) + window
     print("")
 
     # Calculate proxy LD statistics in parallel
@@ -290,7 +307,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     # block = (2 * window) // 4
     # block = (2 * window) // num_subprocesses
 
-    windowChunkRanges = chunkWindow(int(snp_coord['position_grch37']), window, num_subprocesses)
+    windowChunkRanges = chunkWindow(int(snp_coord[genome_build_vars[genome_build]['position']]), window, num_subprocesses)
 
     commands = []
     # for i in range(num_subprocesses):
@@ -649,7 +666,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     proxy_plot.title.align = "center"
 
-    recomb_filePath = "%s/%sgenetic_map_autosomes_combined_b37.txt.gz" % (config['aws']['data_subfolder'], recomb_dir)
+    recomb_filePath = "%s/%sgenetic_map_autosomes_combined_%s.txt.gz" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb"])
     recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
@@ -765,6 +782,9 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     filename = tmp_dir + "genes_" + request + ".txt"
     genes_raw = open(filename).readlines()
 
+    refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
+    genes_json = get_refGene(db, refGene_params)
+
     genes_plot_start = []
     genes_plot_end = []
     genes_plot_y = []
@@ -779,10 +799,25 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
     lines = [0]
     gap = 80000
     tall = 0.75
-    if genes_raw != None:
-        for i in range(len(genes_raw)):
-            bin, name_id, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts, exonEnds, score, name2, cdsStartStat, cdsEndStat, exonFrames = genes_raw[
-                i].strip().split()
+    if genes_json != None:
+        for i in range(len(genes_json)):
+            bin = genes_json[i]["bin"]
+            name_id = genes_json[i]["name"]
+            chrom = genes_json[i]["chrom"]
+            chrom = chrom.replace('chr', '')
+            strand = genes_json[i]["strand"]
+            txStart = genes_json[i]["txStart"]
+            txEnd = genes_json[i]["txEnd"]
+            cdsStart = genes_json[i]["cdsStart"]
+            cdsEnd = genes_json[i]["cdsEnd"]
+            exonCount = genes_json[i]["exonCount"]
+            exonStarts = genes_json[i]["exonStarts"]
+            exonEnds = genes_json[i]["exonEnds"]
+            score = genes_json[i]["score"]
+            name2 = genes_json[i]["name2"]
+            cdsStartStat = genes_json[i]["cdsStartStat"]
+            cdsEndStat = genes_json[i]["cdsEndStat"] 
+            exonFrames = genes_json[i]["exonFrames"]
             name = name2
             id = name_id
             e_start = exonStarts.split(",")
@@ -855,7 +890,7 @@ def calculate_proxy(snp, pop, request, web, r2_d="r2", window=500000):
 
     gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
                    source=source_gene_plot, fill_color="grey", line_color="grey")
-    gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(GRCh37)"
+    gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
     gene_plot.yaxis.axis_label = "Genes"
     gene_plot.ygrid.grid_line_color = None
     gene_plot.yaxis.axis_line_color = None

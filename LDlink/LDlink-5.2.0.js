@@ -2075,6 +2075,7 @@ function updateLDassoc() {
         gene: new Object(),
         region: new Object(),
         variant: new Object(),
+        genome_build: genomeBuild,
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
         transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
         annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
@@ -3413,6 +3414,7 @@ function updateLDmatrix() {
         snps : snps,
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild,
         r2_d : r2_d
     };
     //console.log('ldmatrixInputs');
@@ -3612,6 +3614,7 @@ function updateLDproxy() {
         "var" : $('#ldproxy-snp').val(),
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild,
         r2_d : r2_d,
         window: windowSize
     };

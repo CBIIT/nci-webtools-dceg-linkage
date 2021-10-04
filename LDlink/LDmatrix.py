@@ -10,10 +10,10 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # Create LDmatrix function
-def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
+def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2"):
     # Set data directories using config.yml
     with open('config.yml', 'r') as f:
         config = yaml.load(f)
@@ -31,6 +31,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     mongo_port = config['database']['mongo_port']
 
     export_s3_keys = retrieveAWSCredentials()
+    
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -101,6 +102,23 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
+    def get_refGene(db, query_params):
+        query_results = db[genome_build_vars[genome_build]['refGene']].find({"chrom": 'chr'+query_params[0], 
+                                                                            "txStart": {
+                                                                                "$gte": query_params[1]
+                                                                            }},
+                                                                            {"txStart": {
+                                                                                "$lte": query_params[2]
+                                                                            }})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+
+        #create temp file
+        jsonDump = tmp_dir + "genes_json_" + request + ".json"
+        with open(jsonDump, 'w') as the_file:
+            json.dump(query_results_sanitized, the_file)
+
+        return query_results_sanitized
+
     # Query genomic coordinates
     def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
@@ -166,7 +184,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
                         temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
@@ -221,14 +239,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + "GRCh37")
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -558,6 +576,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         coord_snps_plot.append(xpos[i])
         snp_id_plot.append(xnames[i])
         alleles_snp_plot.append(xA[i])
+        
 
     print("early x", x)
 
@@ -787,13 +806,17 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
         print("could not find sequences archive file.")
 
-    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
-        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
-    subprocess.call(tabix_gene, shell=True)
-    filename = tmp_dir + "genes_" + request + ".txt"
-    genes_raw = open(filename).readlines()
+    #tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
+    #    (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
+    #subprocess.call(tabix_gene, shell=True)
+    #filename = tmp_dir + "genes_" + request + ".txt"
+    #genes_raw = open(filename).readlines()
 
-    print("genes raw: " + genes_raw)
+    refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
+    genes_json = get_refGene(db, refGene_params)
+
+    print("genes ryan: " + str(genes_json))
+    print("genes raw: " + str(genes_raw))
 
     genes_plot_start = []
     genes_plot_end = []
@@ -810,14 +833,32 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     lines = [0]
     gap = 80000
     tall = 0.75
-    if genes_raw != None:
-        for i in range(len(genes_raw)):
-            bin, name_id, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts, exonEnds, score, name2, cdsStartStat, cdsEndStat, exonFrames = genes_raw[
-                i].strip().split()
+    if genes_json != None:
+        for i in range(len(genes_json)):
+            bin = genes_json[i]["bin"]
+            name_id = genes_json[i]["name"]
+            chrom = genes_json[i]["chrom"]
+            chrom = chrom.replace('chr', '')
+            strand = genes_json[i]["strand"]
+            txStart = genes_json[i]["txStart"]
+            txEnd = genes_json[i]["txEnd"]
+            cdsStart = genes_json[i]["cdsStart"]
+            cdsEnd = genes_json[i]["cdsEnd"]
+            exonCount = genes_json[i]["exonCount"]
+            exonStarts = genes_json[i]["exonStarts"]
+            exonEnds = genes_json[i]["exonEnds"]
+            score = genes_json[i]["score"]
+            name2 = genes_json[i]["name2"]
+            cdsStartStat = genes_json[i]["cdsStartStat"]
+            cdsEndStat = genes_json[i]["cdsEndStat"] 
+            exonFrames = genes_json[i]["exonFrames"]
             name = name2
             id = name_id
             e_start = exonStarts.split(",")
             e_end = exonEnds.split(",")
+
+            #del e_start[-1]
+            #del e_end[-1]
 
             # Determine Y Coordinate
             i = 0
@@ -906,7 +947,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     #                    text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
     gene_plot.xaxis.axis_label = "Chromosome " + \
-        snp_coords[1][1] + " Coordinate (Mb)(GRCh37)"
+        snp_coords[1][1] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
     gene_plot.yaxis.axis_label = "Genes"
     gene_plot.ygrid.grid_line_color = None
     gene_plot.yaxis.axis_line_color = None
@@ -919,12 +960,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))
 
-    # Generate high quality images only if accessed via web instance
-    if web:
-        # Open thread for high quality image exports
-        command = "python3 LDmatrix_plot_sub.py " + \
-            snplst + " " + pop + " " + request + " " + r2_d
-        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+    
 
     ###########################
     # Html output for testing #

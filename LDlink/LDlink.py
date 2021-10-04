@@ -453,9 +453,11 @@ def ldassoc():
     filename = secure_filename(request.args.get('filename', False))
     region = request.args.get('calculateRegion')
     pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
     print('filename: ' + filename)
     print('region: ' + region)
     print('pop: ' + pop)
+    print('genome build: ', genome_build)
     myargs.dprime = bool(request.args.get("dprime") == "True")
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
@@ -503,7 +505,7 @@ def ldassoc():
         reference = request.args.get('reference', False)
         print('reference: ' + reference)
         try:
-            out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
+            out_json = calculate_assoc(filename, region, pop, reference, genome_build, web, myargs)
         except:
             return sendTraceback(None)
     else:
@@ -696,16 +698,22 @@ def ldmatrix():
             r2_d = data['r2_d']
         else:
             r2_d = False
+        try:
+            genome_build = data['genome_build']
+        except:
+            genome_build = 'grch37'
     else:
         # GET REQUEST
         snps = request.args.get('snps', False)
         pop = request.args.get('pop', False)
         reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
+        genome_build = request.args.get('genome_build', 'grch37')
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_d: ' + r2_d)
+    print('genome build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -719,7 +727,7 @@ def ldmatrix():
                 f.write(snps.lower())
             try:
                 print("reach1")
-                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
+                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d)
                 print("reach2")
             except:
                 print("reach3")
@@ -737,7 +745,7 @@ def ldmatrix():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d)
             # display api out
             try:
                 # unlock token then display api output
@@ -887,10 +895,12 @@ def ldproxy():
     r2_d = request.args.get('r2_d', False)
     window = request.args.get('window', '500000').replace(',', '')
     token = request.args.get('token', False)
+    genome_build = request.args.get('genome_build', 'grch37')
     print('var: ', var)
     print('pop: ',  pop)
     print('r2_d: ',  r2_d)
     print('window: ',  window)
+    print('genome build: ', genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -900,7 +910,7 @@ def ldproxy():
             reference = request.args.get('reference', False)
             print('request: ' + str(reference))
             try:
-                out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d, int(window))
+                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window))
             except:
                 return sendTraceback(None)
         else:
@@ -913,7 +923,7 @@ def ldproxy():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d, int(window))
+            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window))
             # display api out
             try:
                 # unlock token then display api output

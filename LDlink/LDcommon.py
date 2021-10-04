@@ -25,7 +25,8 @@ genome_build_vars = {
         "gene_begin": "begin_grch37",
         "gene_end": "end_grch37",
         "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz",
-        "refGene": "refGene_grch37"
+        "refGene": "refGene_grch37",
+        "recomb": "37"
     },
     "grch38": {
         "title": "GRCh38",
@@ -34,7 +35,8 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz",
-        "refGene": "refGene_grch38"
+        "refGene": "refGene_grch38",
+        "recomb": "38"
     },
     "grch38_high_coverage": {
         "title": "30x GRCh38",
@@ -43,7 +45,8 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz",
-        "refGene": ""
+        "refGene": "",
+        "recomb": ""
     }
 }
 
@@ -108,3 +111,15 @@ def get_rsnum(db, coord, genome_build):
     query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
+
+def get_refGene(db, query_params, genome_build):
+        print("query:params: " + str(query_params[1]))
+        query_results = db[genome_build_vars[genome_build]['refGene']].find({"chrom": 'chr'+query_params[0], 
+                                                                            "cdsStart": {
+                                                                                "$gte": str(query_params[1])
+                                                                            },
+                                                                            "cdsEnd": {
+                                                                                "$lte": str(query_params[2])
+                                                                            }})
+        query_results_sanitized = json.loads(json_util.dumps(query_results))
+        return query_results_sanitized
