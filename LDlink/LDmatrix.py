@@ -101,23 +101,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
-    def get_refGene(db, query_params):
-        query_results = db[genome_build_vars[genome_build]['refGene']].find({"chrom": 'chr'+query_params[0], 
-                                                                            "txStart": {
-                                                                                "$gte": query_params[1]
-                                                                            }},
-                                                                            {"txStart": {
-                                                                                "$lte": query_params[2]
-                                                                            }})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-
-        #create temp file
-        jsonDump = tmp_dir + "genes_json_" + request + ".json"
-        with open(jsonDump, 'w') as the_file:
-            json.dump(query_results_sanitized, the_file)
-
-        return query_results_sanitized
-
     # Query genomic coordinates
     def get_rsnum(db, coord):
         temp_coord = coord.strip("chr").split(":")
@@ -798,8 +781,9 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     rug.toolbar_location = None
 
     # Gene Plot
+    jsonDump = tmp_dir + "genes_json_" + request + ".json"
     refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
-    genes_json = get_refGene(db, refGene_params)
+    genes_json = getRefGene(db, jsonDump. refGene_params[0], refGene_params[1], refGene_params[2], genome_build)
 
     print("genes ryan: " + str(genes_json))
     print("genes raw: " + str(genes_raw))
