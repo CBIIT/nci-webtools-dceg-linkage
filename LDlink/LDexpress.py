@@ -19,11 +19,11 @@ import numpy as np
 import boto3
 import botocore
 from timeit import default_timer as timer
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as f:	
-    config = yaml.load(f)	
+with open('config.yml', 'r') as yml_file:	
+    config = yaml.load(yml_file)	
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
@@ -41,8 +41,8 @@ export_s3_keys = retrieveAWSCredentials()
 
 def get_ldexpress_tissues(web):
     try:
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
@@ -78,9 +78,9 @@ def get_ldexpress_tissues(web):
     else:
         return None
 
-def get_query_variant(snp_coord, pop_ids, request):
+def get_query_variant(snp_coord, pop_ids, request, genome_build):
 
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coord[1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     queryVariantWarnings = []
@@ -89,12 +89,12 @@ def get_query_variant(snp_coord, pop_ids, request):
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
+    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
     # print("head length", len(head))
 
-    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + "GRCh37")
+    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     subprocess.call(tabix_query_snp, shell=True)
     # proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
     # tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
@@ -113,6 +113,7 @@ def get_query_variant(snp_coord, pop_ids, request):
         for i in range(len(tabix_query_snp_out)):
             if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
                 geno = tabix_query_snp_out[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')
         if geno == []:
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
@@ -122,10 +123,11 @@ def get_query_variant(snp_coord, pop_ids, request):
             return (None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
     
     if geno[2] != snp_coord[0]:
         # print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
-        if geno[2] != ".":
+        if "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
         # snp = geno[2]
 
@@ -180,7 +182,7 @@ def get_output(process):
     return process.communicate()[0].splitlines()
 
 # Create LDexpress function
-def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
+def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
     print("##### START LD EXPRESS CALCULATION #####")	
     print("raw snplst", snplst)
     print("raw pop", pop)
@@ -191,6 +193,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     print("raw r2_d_threshold", r2_d_threshold)
     print("raw p_threshold", p_threshold)
     print("raw window", window)
+    print("raw genome_build", genome_build)
 
     full_start = timer()
     
@@ -202,6 +205,11 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
         os.makedirs(tmp_dir)
 
     errors_warnings = {}
+
+    # Validate genome build param
+    if genome_build not in genome_build_vars['vars']:
+        errors_warnings["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return("", "", "", errors_warnings)
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
@@ -271,7 +279,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro, genome_build_vars[genome_build]['position']: pos})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -332,11 +340,20 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
             if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                 # query variant to get genomic coordinates in dbsnp
                 snp_coord = get_coords(db, snp_i[0])
-                if snp_coord != None and snp_coord['position_grch37'] != "NA":
-                    rs_nums.append(snp_i[0])
-                    snp_pos.append(int(snp_coord['position_grch37']))
-                    temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord['position_grch37'])]
-                    snp_coords.append(temp)
+                if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
+                     # check if variant is on chrY for genome build = GRCh38
+                    if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
+                        if "warning" in errors_warnings:
+                            errors_warnings["warning"] = errors_warnings["warning"] + \
+                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                        else:
+                            errors_warnings["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                        warn.append(snp_i[0])
+                    else:
+                        rs_nums.append(snp_i[0])
+                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                        temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
+                        snp_coords.append(temp)
                 else:
                     # Generate warning if query variant is not found in dbsnp
                     warn.append(snp_i[0])
@@ -370,7 +387,9 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
     for snp_coord in snp_coords:
         find_window_ld_start = timer()
 
-        (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids, str(request))
+        (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids, str(request), genome_build)
+        # print("geno", geno)
+        # print("queryVariantWarnings", queryVariantWarnings)
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings
         if (geno is not None):
@@ -381,7 +400,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
             
             ld_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
-                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold)])
+                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold), str(genome_build)])
                 # print("getWindowVariantsArgs", getWindowVariantsArgs)
                 ld_subprocess_commands.append("python3 LDexpress_ld_sub.py " + getWindowVariantsArgs)
 
@@ -412,7 +431,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold=0
 
             tissues_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
-                getTissuesArgs = " ".join([str(web), str(request), str(subprocess_id), str(p_threshold), str(tissues)])
+                getTissuesArgs = " ".join([str(web), str(request), str(subprocess_id), str(p_threshold), str(tissues), str(genome_build)])
                 tissues_subprocess_commands.append("python3 LDexpress_tissues_sub.py " + getTissuesArgs)
 
             tissues_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in tissues_subprocess_commands]
@@ -488,9 +507,10 @@ def main():
     p_threshold = 0.1
     window = 500000
     tissues = "Adipose_Subcutaneous+Adipose_Visceral_Omentum"
+    genome_build = 'grch37'
 
     # Run function
-    (sanitized_query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplst, pop, request, web, tissues, r2_d, r2_d_threshold, p_threshold, window)
+    (sanitized_query_snps, thinned_snps, details, errors_warnings) = calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2_d_threshold, p_threshold, window)
     print()
     print("##### FINAL LDEXPRESS.PY OUT - RETURN TO FRONTEND #####")
     print("query_snps", sanitized_query_snps)

@@ -4,11 +4,11 @@ import yaml
 from pymongo import MongoClient
 import json
 import subprocess
-# from bson import json_util
+from bson import json_util
 
 # retrieve config
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file)
 aws_info = config['aws']
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
@@ -20,27 +20,39 @@ genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
     "grch37": {
         "title": "GRCh37",
+        "title_hg": "hg19",
         "chromosome": "chromosome_grch37",
         "position": "position_grch37",
         "gene_begin": "begin_grch37",
         "gene_end": "end_grch37",
-        "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"
+        "1000G_dir": "GRCh37",
+        "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz",
+        "1000G_chr_prefix": "",
+        "refGene": "refGene_grch37"
     },
     "grch38": {
         "title": "GRCh38",
+        "title_hg": "hg38",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
-        "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz"
+        "1000G_dir": "GRCh38",
+        "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz",
+        "1000G_chr_prefix": "",
+        "refGene": "refGene_grch38"
     },
     "grch38_high_coverage": {
-        "title": "30x GRCh38",
+        "title": "GRCh38 High Coverage",
+        "title_hg": "hg38",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
-        "1000G_file": "20201028_CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.recalibrated_variants.vcf.gz"
+        "1000G_dir": "GRCh38_High_Coverage",
+        "1000G_file": "CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.filtered.shapeit2-duohmm-phased.vcf.gz",
+        "1000G_chr_prefix": "chr",
+        "refGene": "refGene_grch38"
     }
 }
 
@@ -104,4 +116,32 @@ def get_rsnum(db, coord, genome_build):
     pos = temp_coord[1]
     query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
+def getRefGene(db, filename, chromosome, begin, end, genome_build):
+    query_results = db[genome_build_vars[genome_build]['refGene']].find({
+        "chrom": "chr" + chromosome, 
+        "$or": [
+            {
+                "txStart": {"$lte": int(begin)}, 
+                "txEnd": {"$gte": int(end)}
+            }, 
+            {
+                "txStart": {"$gte": int(begin)}, 
+                "txEnd": {"$lte": int(end)}
+            },
+            {
+                "txStart": {"$lte": int(begin)}, 
+                "txEnd": {"$gte": int(begin), "$lte": int(end)}
+            },
+            {
+                "txStart": {"$gte": int(begin), "$lte": int(end)}, 
+                "txEnd": {"$gte": int(end)}
+            }
+        ]
+    })
+    query_results_sanitized = json.loads(json_util.dumps(query_results)) 
+    with open(filename, "w") as f:
+        for x in query_results_sanitized:
+            f.write(json.dumps(x) + '\n')
     return query_results_sanitized

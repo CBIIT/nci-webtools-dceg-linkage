@@ -23,8 +23,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     snp2_input = snp2
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
@@ -142,13 +142,13 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     # Check if input SNPs are on chromosome Y while genome build == grch38
     # SNP1
-    if snp1_coord['chromosome'] == "Y" and genome_build == "grch38":
-        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
+    if snp1_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # SNP2
-    if snp2_coord['chromosome'] == "Y" and genome_build == "grch38":
-        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
+    if snp2_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # create indexes for population order
@@ -252,24 +252,24 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
+    vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
     vcf_rs1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
         print("could not find sequences archive file.")
 
-    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title']) 
+    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
     vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
 
-    vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
+    vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
     vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
         print("could not find sequences archive file.")
 
     # need to add | grep -v -e END ???
-    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
     vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
 
@@ -285,6 +285,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         for i in range(len(vcf1)):
             if vcf1[i].strip().split()[2] == snp1:
                 geno1 = vcf1[i].strip().split()
+                geno1[0] = geno1[0].lstrip('chr')
         if geno1 == []:
             output["error"] = snp1 + " is not in 1000G reference panel."
             if web:
@@ -292,9 +293,10 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             return output
     else:
         geno1 = vcf1[0].strip().split()
+        geno1[0] = geno1[0].lstrip('chr')
 
     if geno1[2] != snp1:
-        if geno1[2] != ".":
+        if "rs" in geno1[2]:
             if "warning" in output:
                 output["warning"] = output["warning"] + \
                     ". Genomic position for query variant1 (" + snp1 + \
@@ -321,6 +323,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         for i in range(len(vcf2)):
             if vcf2[i].strip().split()[2] == snp2:
                 geno2 = vcf2[i].strip().split()
+                geno2[0] = geno2[0].lstrip('chr')
         if geno2 == []:
             output["error"] = snp2 + " is not in 1000G reference panel."
             if web:
@@ -328,9 +331,10 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             return output
     else:
         geno2 = vcf2[0].strip().split()
+        geno2[0] = geno2[0].lstrip('chr')
 
     if geno2[2] != snp2:
-        if geno2[2] != ".":
+        if "rs" in geno2[2]:
             if "warning" in output:
                 output["warning"] = output["warning"] + \
                     ". Genomic position for query variant2 (" + snp2 + \
@@ -350,11 +354,11 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # vcf2 = vcf2[0].strip().split()
 
     # Get headers
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
     head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
 
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
     head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
 

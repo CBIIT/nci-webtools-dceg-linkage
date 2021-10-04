@@ -37,8 +37,8 @@ from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
 
 # Ensure tmp directory exists
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file)
 tmp_dir = config['data']['tmp_dir']
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -126,8 +126,8 @@ def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Set data directories using config.yml
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         env = config['env']
         if env == 'local':
             url_root = 'http://localhost:5000/'
@@ -169,8 +169,8 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         api_superuser = config['api']['api_superuser']
         # api_access_dir = config['api']['api_access_dir']
         api_superuser_token = getToken(api_superuser)
@@ -309,8 +309,8 @@ def api_blocked_users():
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
-    # with open('config.yml', 'r') as c:
-    #     config = yaml.load(c)
+    # with open('config.yml', 'r') as yml_file:
+    #     config = yaml.load(yml_file)
     # env = config['env']
     # if env == "local":
         # return app.send_static_file('index.html')
@@ -382,8 +382,8 @@ def upload():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
     example_filepath = data_dir + ldassoc_example_dir + 'prostate_example.txt'
@@ -444,8 +444,8 @@ def ldtrait_timestamp():
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     print("Execute ldassoc.")
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
     myargs = argparse.Namespace()
@@ -526,6 +526,7 @@ def ldexpress():
     r2_d_threshold = data['r2_d_threshold']
     p_threshold = data['p_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     token = request.args.get('token', False)
     web = False
     # differentiate web or api request
@@ -537,7 +538,7 @@ def ldexpress():
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             try:
                 express = {}
-                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
                 express["query_snps"] = query_snps
                 express["thinned_snps"] = thinned_snps
                 express["thinned_genes"] = thinned_genes
@@ -569,7 +570,7 @@ def ldexpress():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
             # with open(tmp_dir + "express" + reference + ".json") as f:
             #     json_dict = json.load(f)
             if "error" in errors_warnings:
@@ -718,11 +719,8 @@ def ldmatrix():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                print("reach1")
                 out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
-                print("reach2")
             except:
-                print("reach3")
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -946,10 +944,7 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ', snps)
     print('pop: ', pop)
     print('r2_d: ', r2_d)
@@ -1056,6 +1051,7 @@ def snpchip():
     data = json.loads(request.stream.read())
     snps = data['snps']
     platforms = data['platforms']
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('platforms: ' + platforms)
@@ -1071,7 +1067,7 @@ def snpchip():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                snp_chip = calculate_chip(snplst, platforms, web, reference)
+                snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
             except:
                 return sendTraceback(None)
@@ -1088,7 +1084,7 @@ def snpchip():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            snp_chip = calculate_chip(snplst, platforms, web, reference)
+            snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             # display api out
             try:
                 # unlock token then display api output
@@ -1121,10 +1117,7 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_threshold: ' + r2_threshold)

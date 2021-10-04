@@ -11,8 +11,8 @@ from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, ret
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
@@ -24,7 +24,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     output = {}
 
     # Validate genome build param
-    print("genome_build", genome_build)
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
         return(json.dumps(output, sort_keys=True, indent=2))
@@ -136,12 +135,12 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                         # check if variant is on chrY for genome build = GRCh38
-                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                        if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
-                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             warn.append(snp_i[0])
                         else:
                             rs_nums.append(snp_i[0])
@@ -187,19 +186,19 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [snp_coords[0][1]+":" +
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1]+":" +
                      str(i)+"-"+str(i) for i in snp_pos_int]
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         output["error"] = "1000G data cannot be reached."
         return(json.dumps(output, sort_keys=True, indent=2))
 
-    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
@@ -248,6 +247,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
@@ -288,7 +288,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 count += 1
 
             if found == "false":
-                if rs_1000g != ".":
+                if "rs" in rs_1000g:
                     if "warning" in output:
                         output["warning"] = output["warning"] + \
                             ". Genomic position for query variant ("+rs_query + \
@@ -412,7 +412,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Create SNP File
     snp_out = open(tmp_dir+"snps_"+request+".txt", "w")
-    print("RS_Number\tPosition (hg19)\tAllele Frequency", file=snp_out)
+    print("RS_Number\tPosition (" + genome_build_vars[genome_build]['title_hg'] + ")\tAllele Frequency", file=snp_out)
     for k in sorted(output["snps"].keys()):
         rs_k = output["snps"][k]["RS"]
         coord_k = output["snps"][k]["Coord"]

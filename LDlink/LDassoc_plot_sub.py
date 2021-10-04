@@ -20,8 +20,8 @@ from LDcommon import checkS3File, retrieveAWSCredentials
 def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     data_dir = config['data']['data_dir']
@@ -48,7 +48,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             
 
     if myargsOrigin!="None":
-        # Find coordinates (GRCh37/hg19) for SNP RS number
+        # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
         if myargsOrigin[0:2]=="rs":
             snp=myargsOrigin
 
@@ -147,9 +147,9 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 return None
 
         # Find RS number in snp database
-        gene_coord=get_coords_gene(myargsName, db)
+        gene_coord = get_coords_gene(myargsName, db)
 
-        if gene_coord==None:
+        if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
             return None
             
         # Define search coordinates

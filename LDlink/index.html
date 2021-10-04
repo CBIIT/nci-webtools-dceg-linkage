@@ -376,8 +376,9 @@
 						<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-men" data-toggle="dropdown"
 						style="width:160px;">Genome Build<span class="caret"></span></button>
 						<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-men">
-							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh37</a></li>
-							<li role="presentation"><a role="menuitem" tabindex="-1" >GRCh38</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" value="grch37">GRCh37</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" value="grch38">GRCh38</a></li>
+							<li role="presentation"><a role="menuitem" tabindex="-1" value="grch38_high_coverage">GRCh38 High Coverage</a></li>
 						</ul>
 					</div>
 						<h2 id="module-title" class="text-center"> <sup><a id="module-help" class="help-anchor-link glyphicon glyphicon-info-sign" href="" style="font-size: 20px; text-decoration: none; margin-left: 5px;" title="Click here for documentation"></a></sup></h2>
@@ -521,15 +522,15 @@
 												<a id="ldassoc-region-region-start" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div>
-													<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in GRCh37</label>
-													<input type="text" id="region-region-start-coord" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000) in GRCh37"
+													<label for="region-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</label>
+													<input type="text" id="region-region-start-coord" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000)"
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<a id="ldassoc-region-region-end" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
 												<div>
 													<label for="region-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
-													<input type="text" id="region-region-end-coord" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000) in GRCh37"
+													<input type="text" id="region-region-end-coord" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000)"
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div>
@@ -699,7 +700,7 @@
 								<tr>
 									<th>RS Number</th>
 									<th class="dt-body-center">Chr</th>
-									<th>Position (GRCh37)</th>
+									<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
 									<th>Alleles</th>
 									<th>MAF</th>
 									<th>Distance</th>
@@ -716,7 +717,7 @@
 								<tr>
 									<th>RS Results</th>
 									<th>Chr</th>
-									<th>Position (GRCh37)</th>
+									<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
 									<th>Alleles</th>
 									<th>MAF</th>
 									<th>Distance</th>
@@ -932,7 +933,7 @@
 											<!-- <th class="dt-head-left dt-body-left">Query RS Number</th> -->
 											<th class="dt-head-left dt-body-left">Query</th>
 											<th class="dt-head-left dt-body-left">RS Number</th>
-											<th class="dt-head-left dt-body-left">Position (GRCh37)</th>
+											<th class="dt-head-left dt-body-left">Position (<span class="ldexpress-position-genome-build-header">GRCh37</span>)</th>
 											<th class="dt-head-left dt-body-left">R<sup>2</sup></th>
 											<th class="dt-head-left dt-body-left">D'</th>
 											<th class="dt-head-left dt-body-left">Gene Symbol</th>
@@ -953,7 +954,7 @@
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
 											<th class="dt-head-left dt-body-left">Variant</th>
-											<th class="dt-head-left dt-body-left">Position</th>
+											<th class="dt-head-left dt-body-left">Position (<span class="ldexpress-position-genome-build-header">GRCh37</span>)</th>
 											<th class="dt-head-left dt-body-left">Details</th>
 										</tr>
 									</thead>
@@ -1058,7 +1059,7 @@
 									<thead>
 										<tr>
 											<th>RS Number</th>
-											<th>Position (<span id="ldhap-position-genome-build-header">GRCh37</span>)</th>
+											<th>Position (<span class="ldhap-position-genome-build-header">GRCh37</span>)</th>
 											<th nowrap>Allele Frequencies</th>
 										</tr>
 									</thead>
@@ -1834,7 +1835,7 @@
 										<tr>
 											<th>RS Number</th>
 											<th class="dt-body-center">Chr</th>
-											<th>Position (GRCh37)</th>
+											<th>Position (<span class="ldproxy-position-genome-build-header">GRCh37</span>)</th>
 											<th>Alleles</th>
 											<th>MAF</th>
 											<th>Distance</th>
@@ -1850,7 +1851,7 @@
 										<tr>
 											<th>RS Results</th>
 											<th>Chr</th>
-											<th>Position (GRCh37)</th>
+											<th>Position (<span class="ldproxy-position-genome-build-header">GRCh37</span>)</th>
 											<th>Alleles</th>
 											<th>MAF</th>
 											<th>Distance</th>
@@ -2012,7 +2013,7 @@
 											<!-- <th class="dt-head-left dt-body-left">Query RS Number</th> -->
 											<th class="dt-head-left dt-body-left">GWAS Trait</th>
 											<th class="dt-head-left dt-body-left">RS Number</th>
-											<th class="dt-head-left dt-body-left">Position (<span id="ldtrait-position-genome-build-header">GRCh37</span>)</th>
+											<th class="dt-head-left dt-body-left">Position (<span class="ldtrait-position-genome-build-header">GRCh37</span>)</th>
 											<th class="dt-head-left dt-body-left">Alleles</th>
 											<th class="dt-head-left dt-body-left">R<sup>2</sup></th>
 											<th class="dt-head-left dt-body-left">D'</th>
@@ -2033,7 +2034,7 @@
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
 											<th class="dt-head-left dt-body-left">Variant</th>
-											<th class="dt-head-left dt-body-left">Position</th>
+											<th class="dt-head-left dt-body-left">Position (<span class="ldtrait-position-genome-build-header">GRCh37</span>)</th>
 											<th class="dt-head-left dt-body-left">Details</th>
 										</tr>
 									</thead>
@@ -2164,7 +2165,7 @@
 									<thead>
 										<tr>
 											<th>RS Number</th>
-											<th>Position</th>
+											<th>Position (<span class="snpclip-position-genome-build-header">GRCh37</span>)</th>
 											<th>Alleles</th>
 											<th>Details</th>
 										</tr>
@@ -2185,7 +2186,7 @@
 									<thead>
 										<tr>
 											<th>RS Number</th>
-											<th>Position</th>
+											<th>Position (<span class="snpclip-position-genome-build-header">GRCh37</span>)</th>
 											<th>Alleles</th>
 											<th>Details</th>
 										</tr>
@@ -2348,7 +2349,7 @@
 										</tr>
 										<tr>
 											<th nowrap>RS Number</th>
-											<th nowrap>Position (GRCh37)</th>
+											<th nowrap>Position (<span class="snpchip-position-genome-build-header">GRCh37</span>)</th>
 										</tr>
 									</thead>
 									<tbody>
