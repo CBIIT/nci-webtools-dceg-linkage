@@ -19,8 +19,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	start_time=time.time()
 
 	# Set data directories using config.yml
-	with open('config.yml', 'r') as f:
-		config = yaml.load(f)
+	with open('config.yml', 'r') as yml_file:
+		config = yaml.load(yml_file)
 	env = config['env']
 	api_mongo_addr = config['api']['api_mongo_addr']
 	dbsnp_version = config['data']['dbsnp_version']
@@ -59,7 +59,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 	if myargs.origin!=None:
-		# Find coordinates (GRCh37/hg19) for SNP RS number
+		# Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
 
@@ -206,10 +206,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		db = client["LDLink"]
 
 		# Find RS number in snp database
-		gene_coord=get_coords_gene(myargs.name, db)
+		gene_coord = get_coords_gene(myargs.name, db)
 
-		if gene_coord==None:
-			output["error"]="Gene name "+myargs.name+" is not in RefSeq database."
+		if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
+			output["error"]="Gene name " + myargs.name + " is not in RefSeq database."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
@@ -543,7 +543,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			geno=vcf[0].strip().split()
 
 		if geno[2]!=snp and snp[0:2]=="rs":
-			if geno[2] != ".":
+			if "rs" in geno[2]:
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
 				else:

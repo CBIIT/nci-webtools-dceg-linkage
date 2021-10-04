@@ -121,6 +121,14 @@ body {
 	background: #f2f2f2;
 }
 
+#genome-build.dropdown {
+  position: absolute;
+}
+
+#genome-build > .dropdown-toggle {
+  width: 190px !important;
+}
+
 /* Sticky footer */
 html {
   min-height: 100%;

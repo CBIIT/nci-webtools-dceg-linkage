@@ -19,8 +19,8 @@ from LDcommon import genome_build_vars, get_rsnum
 
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as f:	
-    config = yaml.load(f)	
+with open('config.yml', 'r') as yml_file:	
+    config = yaml.load(yml_file)	
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
@@ -34,8 +34,8 @@ num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldtrait_timestamp(web):
     try:
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
@@ -344,14 +344,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                 snp_coord = get_coords(db, snp_i[0])
                 if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                     # check if variant is on chrY for genome build = GRCh38
-                    if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                    if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                         if "warning" in output:
                             output["warning"] = output["warning"] + \
-                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         else:
-                            output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         warn.append(snp_i[0])
-                        queryWarnings.append([snp_i[0], "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38."])
+                        queryWarnings.append([snp_i[0], "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37."])
                     else:
                         rs_nums.append(snp_i[0])
                         snp_pos.append(int(snp_coord[genome_build_vars[genome_build]['position']]))

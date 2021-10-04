@@ -16,7 +16,7 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 import math
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
 
 def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):
@@ -43,14 +43,13 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     start_time = time.time()
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
-    refgene_dir = config['data']['refgene_dir']
     recomb_dir = config['data']['recomb_dir']
     population_samples_dir = config['data']['population_samples_dir']
     genotypes_dir = config['data']['genotypes_dir']
@@ -253,7 +252,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         geno = vcf[0].strip().split()
 
     if geno[2] != snp:
-        if geno[2] != ".":
+        if "rs" in geno[2]:
             output["warning"] = "Genomic position for query variant (" + snp + \
                 ") does not match RS number at 1000G position (chr" + \
                 geno[0]+":"+geno[1]+" = "+geno[2]+")"
@@ -770,16 +769,11 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     rug.toolbar_location = None
 
     # Gene Plot
-    gene_filePath = "%s/%ssorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
-    gene_file = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
-
-    if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
-        print("could not find sequences archive file.")
-
-    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(
-        gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
-    subprocess.call(tabix_gene, shell=True)
+    # tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(
+    #     gene_file, snp_coord['chromosome'], coord1, coord2, tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
+    # subprocess.call(tabix_gene, shell=True)
     filename = tmp_dir + "genes_" + request + ".txt"
+    getRefGene(db, filename, snp_coord['chromosome'], int(coord1), int(coord2), 'grch37')
     genes_raw = open(filename).readlines()
 
     refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]

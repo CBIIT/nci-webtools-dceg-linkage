@@ -5,8 +5,10 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/
 # User-specific stuff:
 .idea/*
-/common
+common
 common/
+LDlink/common
+LDlink/common/
 
 .DS_Store
 .vscode

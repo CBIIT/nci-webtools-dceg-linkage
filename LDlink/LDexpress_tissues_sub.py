@@ -6,16 +6,18 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 import requests
+from LDcommon import genome_build_vars
 
 web = sys.argv[1]
 request = sys.argv[2]
 subprocess_id = sys.argv[3]
 p_threshold = sys.argv[4]
 tissues = sys.argv[5]
+genome_build = sys.argv[6]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 tmp_dir = config['data']['tmp_dir']
@@ -44,8 +46,8 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
                     "tissueSiteDetailId": {
                         "$in": tissues.split("+")
                     },
-                    "chr_b37": str(chromosome),
-                    "variant_pos_b37": str(position)
+                    genome_build_vars[genome_build]['chromosome']: str(chromosome),
+                    genome_build_vars[genome_build]['position']: int(position)
                 }
             },
             {

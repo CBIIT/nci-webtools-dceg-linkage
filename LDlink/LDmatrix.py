@@ -10,19 +10,18 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
 
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2"):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
-    refgene_dir = config['data']['refgene_dir']
     population_samples_dir = config['data']['population_samples_dir']
     genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
@@ -341,7 +340,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
                 count += 1
 
             if found == "false":
-                if rs_1000g != ".":
+                if "rs" in rs_1000g:
                     if "warning" in output:
                         output["warning"] = output[
                             "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
@@ -799,19 +798,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     rug.toolbar_location = None
 
     # Gene Plot
-    gene_filePath = "%s/%ssorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
-    gene_bucket_path = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
-    
-
-    if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
-        print("could not find sequences archive file.")
-
-    #tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
-    #    (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
-    #subprocess.call(tabix_gene, shell=True)
-    #filename = tmp_dir + "genes_" + request + ".txt"
-    #genes_raw = open(filename).readlines()
-
     refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
     genes_json = get_refGene(db, refGene_params)
 
