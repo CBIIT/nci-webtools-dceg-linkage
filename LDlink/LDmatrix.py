@@ -783,7 +783,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     # Gene Plot
     jsonDump = tmp_dir + "genes_json_" + request + ".json"
     refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
-    genes_json = getRefGene(db, jsonDump. refGene_params[0], refGene_params[1], refGene_params[2], genome_build)
+    genes_json = getRefGene(db, jsonDump, refGene_params[0], refGene_params[1], refGene_params[2], genome_build)
 
     print("genes ryan: " + str(genes_json))
     print("genes raw: " + str(genes_raw))

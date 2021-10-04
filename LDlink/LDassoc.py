@@ -1043,7 +1043,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 		jsonDump = tmp_dir + "genes_json_" + request + ".json"
 		refGene_params = [snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000)]
-		genes_json = getRefGene(db, jsonDump. refGene_params[0], refGene_params[1], refGene_params[2], genome_build)
+		genes_json = getRefGene(db, jsonDump, refGene_params[0], refGene_params[1], refGene_params[2], genome_build)
 
 		genes_plot_start=[]
 		genes_plot_end=[]
