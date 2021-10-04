@@ -801,7 +801,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     if genes_raw != None and len(genes_raw) > 0:
         for gene_raw_obj in genes_raw:
             gene_obj = json.loads(gene_raw_obj)
-            print("gene_obj", gene_obj)
             bin = gene_obj['bin']
             name_id = gene_obj['name']
             chrom = gene_obj['chrom']

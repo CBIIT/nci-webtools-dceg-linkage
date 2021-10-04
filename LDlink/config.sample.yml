@@ -6,7 +6,6 @@ data:
   ldassoc_example_dir: 'ldassoc_example/'
   population_samples_dir: '1000G_population_samples/'
   genotypes_dir: '1000G/'
-  refgene_dir: 'refGene/'
   recomb_dir: 'recomb/'
   ldtrait_src: 'https://www.ebi.ac.uk/gwas/api/search/downloads/alternative'
 api:

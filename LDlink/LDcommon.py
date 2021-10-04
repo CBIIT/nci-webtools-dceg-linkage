@@ -119,9 +119,27 @@ def get_rsnum(db, coord, genome_build):
     return query_results_sanitized
 
 def getRefGene(db, filename, chromosome, begin, end, genome_build):
-    print("getRefGene", chromosome, begin, end, genome_build_vars[genome_build]['refGene'])
-    print({"chrom": "chr" + chromosome, "$or": [{"txStart": {"$lte": int(begin)}, "txEnd": {"$gte": int(end)}}, {"txStart": {"$gte": int(begin)}, "txEnd": {"$lte": int(end)}}]})
-    query_results = db[genome_build_vars[genome_build]['refGene']].find({"chrom": "chr" + chromosome, "$or": [{"txStart": {"$lte": int(begin)}, "txEnd": {"$gte": int(end)}}, {"txStart": {"$gte": int(begin)}, "txEnd": {"$lte": int(end)}}]})
+    query_results = db[genome_build_vars[genome_build]['refGene']].find({
+        "chrom": "chr" + chromosome, 
+        "$or": [
+            {
+                "txStart": {"$lte": int(begin)}, 
+                "txEnd": {"$gte": int(end)}
+            }, 
+            {
+                "txStart": {"$gte": int(begin)}, 
+                "txEnd": {"$lte": int(end)}
+            },
+            {
+                "txStart": {"$lte": int(begin)}, 
+                "txEnd": {"$gte": int(begin), "$lte": int(end)}
+            },
+            {
+                "txStart": {"$gte": int(begin), "$lte": int(end)}, 
+                "txEnd": {"$gte": int(end)}
+            }
+        ]
+    })
     query_results_sanitized = json.loads(json_util.dumps(query_results)) 
     with open(filename, "w") as f:
         for x in query_results_sanitized:
