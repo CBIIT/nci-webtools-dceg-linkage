@@ -1514,9 +1514,13 @@ function ldexpress_GTEx_tissue_link(data, type, row) {
 }
 
 function ldexpress_dbsnp_link(data, type, row) {
-    var href = 'https://www.ncbi.nlm.nih.gov/snp/' + data;
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
-    return link;
+    if (data.includes("rs")) {
+        var href = 'https://www.ncbi.nlm.nih.gov/snp/' + data;
+        var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
+        return link;
+    } else {
+        return data;
+    }
 }
 
 function ldexpress_GTEx_effect_size_link(data, type, row) {

@@ -775,11 +775,12 @@ def main():
     snp2 = sys.argv[2]
     pop = sys.argv[3]
     r2_d = sys.argv[4]
+    genome_build = sys.argv[5]
     web = False
     request = None
 
     # Run function
-    out_json = calculate_pop(snp1, snp2, pop, r2_d, web, request)
+    out_json = calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request)
 
     # Print output
     # print out_json

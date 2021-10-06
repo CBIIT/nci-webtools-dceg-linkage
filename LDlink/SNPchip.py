@@ -365,12 +365,13 @@ def main():
         snplst = sys.argv[2]
         platform_query = sys.argv[3]
         request = sys.argv[4]
+        genome_build = sys.argv[5]
     else:
         print("Correct useage is: SNPchip.py false snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\"")
         sys.exit()
 
     # Run function
-    calculate_chip(snplst, platform_query, web, request)
+    calculate_chip(snplst, platform_query, web, request, genome_build)
 
 
 if __name__ == "__main__":

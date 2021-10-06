@@ -449,25 +449,28 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import SNPclip options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         web = sys.argv[1]
         snplst = sys.argv[2]
         pop = sys.argv[3]
         request = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_threshold = 0.10
-        maf_threshold = 0.01
-    elif len(sys.argv) == 6:
-        web = sys.argv[1]
-        snplst = sys.argv[2]
-        pop = sys.argv[3]
-        request = sys.argv[4]
-        r2_threshold = sys.argv[5]
         maf_threshold = 0.01
     elif len(sys.argv) == 7:
         web = sys.argv[1]
-        snplst = sys.argv[3]
-        pop = sys.argv[4]
-        request = sys.argv[5]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        genome_build = sys.argv[5]
+        r2_threshold = sys.argv[6]
+        maf_threshold = 0.01
+    elif len(sys.argv) == 8:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_threshold = sys.argv[6]
         maf_threshold = sys.argv[7]
     else:
@@ -476,7 +479,7 @@ def main():
 
     # Run function
     snps, thin_list, details = calculate_clip(
-        snplst, pop, request, web, r2_threshold, maf_threshold)
+        snplst, pop, request, web, genome_build, r2_threshold, maf_threshold)
 
     # Print output
     with open(tmp_dir+"clip"+request+".json") as f:

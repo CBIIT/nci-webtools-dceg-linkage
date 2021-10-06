@@ -187,18 +187,18 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_filePath = "%s/%sGRCh%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["recomb"], snp_coord['chromosome'])
+    vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], snp_coord['chromosome'])
     vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
-    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+        vcf_file, snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not

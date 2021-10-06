@@ -572,23 +572,26 @@ def main():
     import sys
 
     # Import LDpair options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 7:
         snp1 = sys.argv[1]
         snp2 = sys.argv[2]
         pop = sys.argv[3]
         web = sys.argv[4]
-        request = sys.argv[5]
-    elif sys.argv[4] is False:
+        genome_build = sys.argv[5]
+        request = sys.argv[6]
+    elif len(sys.argv) == 6:
         snp1 = sys.argv[1]
         snp2 = sys.argv[2]
         pop = sys.argv[3]
+        web = sys.argv[4]
+        genome_build = sys.argv[5]
         request = str(time.strftime("%I%M%S"))
     else:
         print("Correct useage is: LDpair.py snp1 snp2 populations request false")
         sys.exit()
 
     # Run function
-    out_json = calculate_pair(snp1, snp2, pop, web, request)
+    out_json = calculate_pair(snp1, snp2, pop, web, genome_build, request)
 
     # Print output
     json_dict = json.loads(out_json)

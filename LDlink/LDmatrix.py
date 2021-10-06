@@ -40,6 +40,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     out_json = open(tmp_dir + "matrix" + request + ".json", "w")
     output = {}
 
+    # Validate genome build param
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
+
     # Open SNP list file
     snps_raw = open(snplst).readlines()
     if web or request_method == "GET":
@@ -167,10 +175,19 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
-                        snp_coords.append(temp)
+                        # check if variant is on chrY for genome build = GRCh38
+                        if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            else:
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            warn.append(snp_i[0])
+                        else:
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
                 else:
@@ -216,19 +233,18 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [snp_coords[0][1] + ":" +
-                     str(i) + "-" + str(i) for i in snp_pos_int]
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("could not find sequences archive file.")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -283,13 +299,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
         if geno[1] not in snp_pos:
             if "warning" in output:
-                output["warning"] = output["warning"] + ". Genomic position (" + geno[
-                    1] + ") in VCF file does not match db" + dbsnp_version + " search coordinates for query variant"
+                output["warning"] = output["warning"] + ". Genomic position (" + geno[1] + ") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             else:
-                output["warning"] = "Genomic position (" + geno[
-                    1] + ") in VCF file does not match db" + dbsnp_version + " search coordinates for query variant"
+                output["warning"] = "Genomic position (" + geno[1] + ") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
@@ -922,7 +939,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
                         ncols=1, toolbar_options=dict(logo=None))
 
-    
+    # Generate high quality images only if accessed via web instance
+    if web:
+        # Open thread for high quality image exports
+        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d
+        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################
     # Html output for testing #
@@ -945,24 +966,26 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import LDmatrix options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_d = "r2"
-    elif len(sys.argv) == 6:
+    elif len(sys.argv) == 7:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
         r2_d = sys.argv[5]
+        genome_build = sys.argv[6]
     else:
         print("Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)")
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", r2_d)
+    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", r2_d, genome_build)
 
     # Print output
     with open(tmp_dir + "matrix" + request + ".json") as f:

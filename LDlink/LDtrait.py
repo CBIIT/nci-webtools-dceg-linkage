@@ -200,7 +200,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     output = {}
 
     # Validate genome build param
-    print("genome_build " + genome_build)
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
         return(json.dumps(output, sort_keys=True, indent=2))
@@ -504,10 +503,12 @@ def main():
     request = 8888
     web = False
     r2_d = "r2"
+    genome_build = "grch37"
     r2_d_threshold = 0.1
+    window=500000
 
     # Run function
-    (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)
+    (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold, window)
     print("query_snps", sanitized_query_snps)
     print("thinned_snps", thinned_list)
     print("details", json.dumps(details))

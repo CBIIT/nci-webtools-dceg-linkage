@@ -186,9 +186,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1]+":" +
-                     str(i)+"-"+str(i) for i in snp_pos_int]
-    tabix_coords = " "+" ".join(snp_coord_str)
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
+    tabix_coords = " " + " ".join(snp_coord_str)
 
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
@@ -439,7 +438,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
 def main():
     # Import LDLink options
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 6:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
