@@ -227,6 +227,9 @@ for geno_n in vcf:
 
                 if snp_coord != None:
                     funct = snp_coord['function']
+                    # Retrieve rsid from dbsnp if missing from 1000G data
+                    if len(snp_coord['id']) > 0:
+                        rs_n = 'rs' + snp_coord['id']
                 else:
                     funct = "."
             else:
