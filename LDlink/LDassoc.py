@@ -958,7 +958,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	assoc_plot.title.align="center"
 
 	# Add recombination rate
-	recomb_filePath = "%s/%sgenetic_map_autosomes_combined_b%s.txt.gz" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb"])
+	recomb_filePath = "%s/%s%s" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb_file"])
 	recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
 
 	if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):

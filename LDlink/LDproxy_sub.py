@@ -8,7 +8,7 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 web = sys.argv[1]
 snp = sys.argv[2]
@@ -16,7 +16,8 @@ chr = sys.argv[3]
 start = sys.argv[4]
 stop = sys.argv[5]
 request = sys.argv[6]
-process = sys.argv[7]
+genome_build = sys.argv[7]
+process = sys.argv[8]
 
 
 # Set data directories using config.yml
@@ -27,7 +28,6 @@ api_mongo_addr = config['api']['api_mongo_addr']
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']
 genotypes_dir = config['data']['genotypes_dir']
-#reg_dir = config['data']['reg_dir']
 aws_info = config['aws']
 mongo_username = config['database']['mongo_user_readonly']
 mongo_password = config['database']['mongo_password']
@@ -44,14 +44,14 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 # Get VCF region
-vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"  % (config['aws']['data_subfolder'], genotypes_dir, chr)
+vcf_filePath = "%s/%s%s/%s"  % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]["1000G_file"] % (chr))
 vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
     print("could not find sequences archive file.")
 
 tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(
-    vcf_query_snp_file, chr, start, stop, data_dir + genotypes_dir + "GRCh37")
+    vcf_query_snp_file, chr, start, stop, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 # Define function to calculate LD metrics
@@ -132,7 +132,7 @@ else:
 db = client["LDLink"]
 
 def get_regDB(chr, pos):
-    result = db.regulome.find_one({"chromosome_grch37": chr, "position_grch37": int(pos)})
+    result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: chr, genome_build_vars[genome_build]['position']: int(pos)})
     if result is None:
         return "."   
     else:
@@ -151,8 +151,10 @@ if len(vcf) > 1:
     for i in range(len(vcf)):
         if vcf[i].strip().split()[2] == snp:
             geno = vcf[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')
 else:
     geno = vcf[0].strip().split()
+    geno[0] = geno[0].lstrip('chr')
 
 new_alleles = set_alleles(geno[3], geno[4])
 allele = {"0": new_alleles[0], "1": new_alleles[1]}

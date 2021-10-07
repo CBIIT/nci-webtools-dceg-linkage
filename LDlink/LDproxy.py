@@ -72,6 +72,14 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
 
+    # Validate genome build param
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
+
     if window < 0 or window > 1000000:
         output["error"] = "Window value must be a number between 0 and 1,000,000."
         json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -154,8 +162,16 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Find RS number in snp database
     snp_coord = get_coords(snp)
 
-    if snp_coord == None:
-        output["error"] = snp + " is not in dbSNP build " + dbsnp_version + "."
+    if snp_coord == None or snp_coord[genome_build_vars[genome_build]['position']] == "NA":
+        output["error"] = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
+
+    # check if variant is on chrY for genome build = GRCh38
+    if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
+        output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -187,7 +203,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], snp_coord['chromosome'])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (snp_coord['chromosome']))
     vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
@@ -220,6 +236,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         for i in range(len(vcf)):
             if vcf[i].strip().split()[2] == snp:
                 geno = vcf[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')
         if geno == []:
             output["error"] = snp + " is not in 1000G reference panel."
             json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -233,6 +250,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     else:
         geno = vcf[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
 
     if geno[2] != snp:
         if "rs" in geno[2]:
@@ -310,8 +328,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        getWindowVariantsArgs = " ".join([str(web), str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id)])
-        print("COMMAND:::" + getWindowVariantsArgs)
+        getWindowVariantsArgs = " ".join([str(web), str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
         commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
 
     processes = [subprocess.Popen(
@@ -648,7 +665,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     proxy_plot.title.align = "center"
 
-    recomb_filePath = "%s/%sgenetic_map_autosomes_combined_%s.txt.gz" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb"])
+    recomb_filePath = "%s/%s%s" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb_file"])
     recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
@@ -886,7 +903,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Generate high quality images only if accessed via web instance
     if web:
         # Open thread for high quality image exports
-        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + r2_d + " " + str(window)
+        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window)
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
     ###########################

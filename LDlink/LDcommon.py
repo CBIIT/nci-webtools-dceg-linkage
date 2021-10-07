@@ -26,7 +26,7 @@ genome_build_vars = {
         "gene_begin": "begin_grch37",
         "gene_end": "end_grch37",
         "refGene": "refGene_grch37",
-        "recomb": "37",
+        "recomb_file": "genetic_map_autosomes_combined_b37.txt.gz",
         "1000G_dir": "GRCh37",
         "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz",
         "1000G_chr_prefix": ""
@@ -39,7 +39,7 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "refGene": "refGene_grch38",
-        "recomb": "38",
+        "recomb_file": "genetic_map_autosomes_combined_b38.txt.gz",
         "1000G_dir": "GRCh38",
         "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz",
         "1000G_chr_prefix": ""
@@ -52,7 +52,7 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "refGene": "refGene_grch38",
-        "recomb": "38",
+        "recomb_file": "genetic_map_autosomes_combined_b38.txt.gz",
         "1000G_dir": "GRCh38_High_Coverage",
         "1000G_file": "CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.filtered.shapeit2-duohmm-phased.vcf.gz",
         "1000G_chr_prefix": "chr"
