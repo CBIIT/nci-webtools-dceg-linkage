@@ -256,7 +256,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     vcf_rs1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir']) 
     proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
@@ -266,7 +266,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     # need to add | grep -v -e END ???
     rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

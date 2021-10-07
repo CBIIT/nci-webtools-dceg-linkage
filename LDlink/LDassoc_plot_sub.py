@@ -278,7 +278,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
             if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-                print("could not find sequences archive file.")
+                print("Internal Server Error: Data cannot be reached")
 
             tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
@@ -329,7 +329,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
         if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-            print("could not find sequences archive file.")
+            print("Internal Server Error: Data cannot be reached")
 
         tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
         proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)

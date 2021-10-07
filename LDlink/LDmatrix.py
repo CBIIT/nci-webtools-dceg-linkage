@@ -241,7 +241,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

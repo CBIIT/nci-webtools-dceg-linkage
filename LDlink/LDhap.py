@@ -194,8 +194,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        output["error"] = "1000G data cannot be reached."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        print("Internal Server Error: Data cannot be reached")
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 

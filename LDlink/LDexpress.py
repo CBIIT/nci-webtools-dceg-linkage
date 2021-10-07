@@ -87,7 +87,7 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     # Extract query SNP phased genotypes
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)

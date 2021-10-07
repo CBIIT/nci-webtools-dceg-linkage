@@ -4520,7 +4520,7 @@ function displayCommFail(id, jqXHR, textStatus) {
     //console.dir(jqXHR);
     console.warn("CommFail\n"+"Status: "+textStatus);
     var message = jqXHR.responseText;
-    message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
+    message += "<p>Internal Server Error: " + jqXHR.status + " - " + textStatus + "</p>";
     message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);

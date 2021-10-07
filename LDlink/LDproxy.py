@@ -207,7 +207,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
@@ -653,7 +653,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_recomb = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt", data_dir + recomb_dir)
     subprocess.call(tabix_recomb, shell=True)
