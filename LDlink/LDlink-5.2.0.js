@@ -1598,7 +1598,7 @@ function ldproxy_position_link(data, type, row) {
     var position = chr + ":" + range;
     var rs_number = row[0];
     var params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
@@ -1611,19 +1611,18 @@ function ldproxy_position_link(data, type, row) {
 }
 
 function ldproxy_regulome_link(data, type, row) {
-
     // Create RegulomeDB links
-
-    var server = 'http://www.regulomedb.org/snp';
+    var server = 'http://www.regulomedb.org/regulome-search';
     var chr = row[1];
     var mid_value = parseInt(row[2]);
     var zero_base = mid_value - 1;
-    var href = server + "/" + chr + "/" + zero_base;
-    var target = 'regulome_' + Math.floor(Math.random() * (99999 - 10000 + 1));
-    var link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
-
+    var params = {
+        genome: genomeBuild == "grch37" ? "GRCh37" : "GRCh38",
+        regions : "chr" + chr + "%3A" + zero_base + "-" + mid_value
+    }
+    var href = server + "?" + $.param(params);
+    var link = '<a href="' + href + '" target="_blank">' + data + '</a>';
     return link;
-
 }
 
 function ldproxy_haploreg_link(data, type, row) {
@@ -2106,7 +2105,7 @@ function updateLDassoc() {
     ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
 
     $('#ldassoc-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + genomeBuild == 'grch37' ? 'hg19' : 'hg38' + '&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -2889,7 +2888,7 @@ function anchorRSposition(coord, rs_number) {
     var range = (mid_value - offset) + "-" + (mid_value + offset);
     var position = chr + ":" + range;
     params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
@@ -3672,7 +3671,7 @@ function updateLDproxy() {
     //console.log(location.hostname);
 
     $('#ldproxy-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + genomeBuild == 'grch37' ? 'hg19' : 'hg38' + '&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldproxyInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -4638,7 +4637,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
         position = chr + ":" + range;
         rs_number = value.RS;
         params = {
-            db:'hg19',
+            db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
             position : position,
             snp151 : 'pack',
             'hgFind.matches' : rs_number
@@ -4687,7 +4686,7 @@ function addLDpairHyperLinks(data) {
     var position = chr + ":" + range;
     rs_number = data.snp1.rsnum;
     params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
@@ -4703,7 +4702,7 @@ function addLDpairHyperLinks(data) {
     position = chr + ":" + range;
     rs_number = data.snp2.rsnum;
     params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
