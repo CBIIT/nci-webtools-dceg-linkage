@@ -1618,12 +1618,13 @@ function ldproxy_regulome_link(data, type, row) {
     var zero_base = mid_value - 1;
     var params = {
         genome: genomeBuild == "grch37" ? "GRCh37" : "GRCh38",
-        regions : "chr" + chr + "%3A" + zero_base + "-" + mid_value
+        regions : chr + ":" + zero_base + "-" + mid_value
     }
     var href = server + "?" + $.param(params);
     var link = '<a href="' + href + '" target="_blank">' + data + '</a>';
     return link;
 }
+
 
 function ldproxy_haploreg_link(data, type, row) {
 
