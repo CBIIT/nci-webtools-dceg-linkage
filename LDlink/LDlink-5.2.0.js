@@ -1433,7 +1433,7 @@ function RefreshTableSort(tableId, json, sort, r2Col, dCol) {
 function ldproxy_rs_results_link(data, type, row) {
 
     //if no rs number is available return without a link.
-    if(data.length == 1) {
+    if(!data.includes("rs") || data.length <= 2) {
         return data;
     }
     var server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';

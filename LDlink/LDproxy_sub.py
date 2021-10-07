@@ -222,7 +222,7 @@ for geno_n in vcf:
                     funct = snp_coord['function']
                 else:
                     funct = "."
-            elif rs_n[0] == ".":
+            elif rs_n[0:2] != "rs":
                 snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
 
                 if snp_coord != None:

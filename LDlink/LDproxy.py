@@ -314,7 +314,6 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     for subprocess_id in range(num_subprocesses):
         getWindowVariantsArgs = " ".join([str(web), str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
         commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
-    print("SUB COMMANDS", commands)
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]
