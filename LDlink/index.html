@@ -2607,10 +2607,10 @@
 					<p><a class="help-anchor-link" href="#LDexpress">LDexpress</a><br>
 						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldexpress?token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDhap">LDhap</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&genome_build=grch37&token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&genome_build=grch38&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDmatrix">LDmatrix</a><br>
 						<pre class="apiaccess-examples">
-							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&genome_build=grch37&token=faketoken123'
+							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&genome_build=grch38_high_coverage&token=faketoken123'
 						</pre>
 						<p><i>Note: GET request can support up to 300 SNPs.</i></p>
 						<pre class="apiaccess-examples">
