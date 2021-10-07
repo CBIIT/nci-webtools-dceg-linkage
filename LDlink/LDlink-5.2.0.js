@@ -1434,7 +1434,7 @@ function ldproxy_rs_results_link(data, type, row) {
 
     //if no rs number is available return without a link.
     if(data.length == 1) {
-        return "";
+        return data;
     }
     var server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
     var rs_number = data.substring(2);
@@ -3716,7 +3716,7 @@ function updateLDproxy() {
                     $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
                     break;
             }
-            
+
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
