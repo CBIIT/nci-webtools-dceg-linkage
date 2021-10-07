@@ -112,7 +112,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -257,10 +257,10 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             output["warning"] = "Genomic position for query variant (" + snp + \
                 ") does not match RS number at 1000G position (chr" + \
                 geno[0]+":"+geno[1]+" = "+geno[2]+")"
-        snp = geno[2]
+        geno_snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
-        output["error"] = snp + " is not a biallelic variant."
+        output["error"] = geno_snp + " is not a biallelic variant."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -284,7 +284,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
                 genotypes[j] = 1
 
     if genotypes["0"] == 0 or genotypes["1"] == 0:
-        output["error"] = snp + \
+        output["error"] = geno_snp + \
             " is monoallelic in the " + pop + " population."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
@@ -310,26 +310,11 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     windowChunkRanges = chunkWindow(int(snp_coord[genome_build_vars[genome_build]['position']]), window, num_subprocesses)
 
     commands = []
-    # for i in range(num_subprocesses):
-    #     if i == min(range(num_subprocesses)) and i == max(range(num_subprocesses)):
-    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
-    #             snp_coord['chromosome'] + " " + str(coord1) + " " + \
-    #             str(coord2) + " " + request + " " + str(i)
-    #     elif i == min(range(num_subprocesses)):
-    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + \
-    #             snp_coord['chromosome'] + " " + str(coord1) + " " + \
-    #             str(coord1 + block) + " " + request + " " + str(i)
-    #     elif i == max(range(num_subprocesses)):
-    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(
-    #             coord1 + (block * i) + 1) + " " + str(coord2) + " " + request + " " + str(i)
-    #     else:
-    #         command = "python3 LDproxy_sub.py " + str(web) + " " + snp + " " + snp_coord['chromosome'] + " " + str(coord1 + (
-    #             block * i) + 1) + " " + str(coord1 + (block * (i + 1))) + " " + request + " " + str(i)
-    #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
         getWindowVariantsArgs = " ".join([str(web), str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
         commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
+    print("SUB COMMANDS", commands)
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]

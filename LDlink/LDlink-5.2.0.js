@@ -3705,6 +3705,18 @@ function updateLDproxy() {
 
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
+            
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button

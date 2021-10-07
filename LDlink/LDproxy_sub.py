@@ -132,15 +132,20 @@ else:
 db = client["LDLink"]
 
 def get_regDB(chr, pos):
-    result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: chr, genome_build_vars[genome_build]['position']: int(pos)})
+    result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]['position']: int(pos)})
     if result is None:
         return "."   
     else:
         return result["score"]
 
-def get_coords(db, rsid):
+def get_dbsnp_rsid(db, rsid):
     rsid = rsid.strip("rs")
     query_results = db.dbsnp.find_one({"id": rsid})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
+def get_dbsnp_coord(db, chromosome, position):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
@@ -181,6 +186,7 @@ for i in range(9, len(head)):
 # Loop through SNPs
 out = []
 for geno_n in vcf:
+    geno_n[0] = geno_n[0].lstrip('chr')
     if "," not in geno_n[3] and "," not in geno_n[4]:
         new_alleles_n = set_alleles(geno_n[3], geno_n[4])
         allele_n = {"0": new_alleles_n[0], "1": new_alleles_n[1]}
@@ -198,7 +204,8 @@ for geno_n in vcf:
         out_stats = LD_calcs(hap, allele, allele_n)
         if out_stats != None:
             maf_q, maf_p, D_prime, r2, match = out_stats
-
+            
+            chr_n = geno_n[0]
             bp_n = geno_n[1]
             rs_n = geno_n[2]
             al_n = "("+new_alleles_n[0]+"/"+new_alleles_n[1]+")"
@@ -208,8 +215,15 @@ for geno_n in vcf:
             score = get_regDB("chr"+geno_n[0], geno_n[1])
 
             # Get dbSNP function
-            if rs_n[0:2] == "rs":
-                snp_coord = get_coords(db, rs_n)
+            if rs_n[0:2] == "rs": 
+                snp_coord = get_dbsnp_rsid(db, rs_n)
+
+                if snp_coord != None:
+                    funct = snp_coord['function']
+                else:
+                    funct = "."
+            elif rs_n[0] == ".":
+                snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
 
                 if snp_coord != None:
                     funct = snp_coord['function']
@@ -218,7 +232,7 @@ for geno_n in vcf:
             else:
                 funct = "."
 
-            temp = [rs, al, "chr"+chr+":"+bp, rs_n, al_n, "chr"+chr+":" +
+            temp = [rs, al, "chr"+chr+":"+bp, rs_n, al_n, "chr"+chr_n+":" +
                     bp_n, dist, D_prime, r2, match, score, maf_q, maf_p, funct]
             out.append(temp)
 
