@@ -234,9 +234,13 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
     output["warning"] = ""
     output["error"] = ""
     if warn != [] and len(rs_nums) != 0:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)+".\n"
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
     elif len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates.\n"
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()

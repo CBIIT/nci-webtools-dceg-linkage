@@ -207,12 +207,12 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     # Validate genome build param
     if genome_build not in genome_build_vars['vars']:
         errors_warnings["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
         errors_warnings["error"] = "Window value must be a number between 0 and 1,000,000."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     # Parse SNPs list
     snps_raw = snplst.split("+")
@@ -221,7 +221,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         errors_warnings["error"] = "Maximum SNP list is " + \
             str(max_list)+" RS numbers. Your list contains " + \
             str(len(snps_raw))+" entries."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
     # Remove duplicate RS numbers
     sanitized_query_snps = []
     for snp_raw in snps_raw:
@@ -245,7 +245,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -255,7 +255,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             errors_warnings["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            return("", "", "", errors_warnings)
+            return("", "", "", "", "", errors_warnings)
 
     # get_pops = "cat " + " ".join(pop_dirs)
     # proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -364,17 +364,21 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             # Generate error for empty query variant
             errors_warnings["error"] = "Input list of RS numbers is empty"
             subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            return("", "", "", errors_warnings)
+            return("", "", "", "", "", errors_warnings)
 
     # Generate warnings for query variants not found in dbsnp
     if warn != []:
-        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in errors_warnings:
+            errors_warnings["warning"] = errors_warnings["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
-        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers or coordinates."
+        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + errors_warnings["warning"]
         subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     thinned_snps = []
 
@@ -486,7 +490,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     # Check if thinned list is empty, if it is, display error
     if len(thinned_snps) < 1:
         errors_warnings["error"] = "No entries in GTEx are identified using the LDexpress search criteria."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     full_end = timer()	
     print("TIME ELAPSED:", str(full_end - full_start) + "(s)")	
