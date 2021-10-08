@@ -83,7 +83,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             
 
         chromosome = var_coord['chromosome']
-        org_coord = var_coord['position_grch37']
+        org_coord = var_coord[genome_build_vars[genome_build]['position']]
 
 
     # Open Association Data
@@ -141,7 +141,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
             #format mongo output
             if mongoResult != None:
-                geneResult = [mongoResult["name"], mongoResult["chromosome_grch37"], mongoResult["begin_grch37"], mongoResult["end_grch37"]]
+                geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
                 return geneResult
             else:
                 return None
@@ -274,16 +274,17 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             snp="chr"+var_p[0].split("-")[0]
 
             # Extract lowest P SNP phased genotypes
-            vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
-            vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+            vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+            vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
             if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
                 print("Internal Server Error: Data cannot be reached")
+                return None
 
-            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
+            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
-
+            
             # Check lowest P SNP is in the 1000G population and not monoallelic from LDassoc.py output file
             vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
@@ -321,23 +322,21 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
 
     else:
-        if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
+        if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
             return None
             
 
         # Extract query SNP phased genotypes
-        vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
-        vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+        vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+        vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
         if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
             print("Internal Server Error: Data cannot be reached")
+            return None
 
-        tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
+        tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
         proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
         head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
-
-        tabix_snp= export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + "GRCh37")
-        subprocess.call(tabix_snp, shell=True)
 
 
         # Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
@@ -353,6 +352,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             for i in range(len(vcf)):
                 if vcf[i].strip().split()[2]==snp:
                     geno=vcf[i].strip().split()
+                    geno[0] = geno[0].lstrip('chr')
             if geno==[]:
                 subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
                 subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
@@ -360,9 +360,10 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
                 
         else:
             geno=vcf[0].strip().split()
+            geno[0] = geno[0].lstrip('chr')
 
-        if geno[2]!=snp and snp[0:2]=="rs":
-            snp=geno[2]
+        if geno[2]!=snp and snp[0:2]=="rs" and "rs" in geno[2]:
+            snp = geno[2]
 
         if "," in geno[3] or "," in geno[4]:
             subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
@@ -414,7 +415,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(subprocess_id)])
+        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
         commands.append("python3 LDassoc_sub.py " + subprocessArgs)
 
     processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
@@ -439,7 +440,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             col[8]=float(col[8])
             col.append(abs(int(col[6])))
             pos_i_j=col[5].split(":")[1]
-            coord_i_j=chromosome+":"+pos_i_j+"-"+pos_i_j
+            coord_i_j=genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome+":"+pos_i_j+"-"+pos_i_j
             if coord_i_j in assoc_dict:
                 col.append(float(assoc_dict[coord_i_j][0]))
                 out_prox.append(col)
@@ -763,7 +764,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         #     gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
         #                     text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
-        gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+        gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
         gene_plot.yaxis.axis_label = "Genes (All Transcripts)"
         gene_plot.ygrid.grid_line_color = None
         gene_plot.yaxis.axis_line_color = None
@@ -905,7 +906,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         #     gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
         #                     text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
-        gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+        gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
         gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
         gene_c_plot.ygrid.grid_line_color = None
         gene_c_plot.yaxis.axis_line_color = None

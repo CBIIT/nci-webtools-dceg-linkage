@@ -252,7 +252,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         geno = vcf[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
 
-    if geno[2] != snp and "rs" in geno[2]:
+    if geno[2] != snp and snp[0:2]=="rs" and "rs" in geno[2]:
             output["warning"] = "Genomic position for query variant (" + snp + \
                 ") does not match RS number at 1000G position (chr" + \
                 geno[0]+":"+geno[1]+" = "+geno[2]+")"

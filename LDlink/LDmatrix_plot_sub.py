@@ -152,6 +152,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2"):
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("Internal Server Error: Data cannot be reached")
+        return None
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
@@ -230,6 +231,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2"):
             found = "false"
             while count <= 2 and count + g < len(vcf):
                 geno_next = vcf[g + count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break

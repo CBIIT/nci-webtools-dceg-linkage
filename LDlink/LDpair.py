@@ -212,17 +212,16 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         geno1 = vcf1[0].strip().split()
         geno1[0] = geno1[0].lstrip('chr')
 
-    if geno1[2] != snp1:
-        if "rs" in geno1[2]:
-            if "warning" in output:
-                output["warning"] = output["warning"] + \
-                    ". Genomic position for query variant1 (" + snp1 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
-            else:
-                output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+    if geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". Genomic position for query variant1 (" + snp1 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+        else:
+            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -262,17 +261,16 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         geno2 = vcf2[0].strip().split()
         geno2[0] = geno2[0].lstrip('chr')
 
-    if geno2[2] != snp2:
-        if "rs" in geno2[2]:
-            if "warning" in output:
-                output["warning"] = output["warning"] + \
-                    ". Genomic position for query variant2 (" + snp2 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
-            else:
-                output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+    if geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". Genomic position for query variant2 (" + snp2 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+        else:
+            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:

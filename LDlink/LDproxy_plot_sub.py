@@ -136,6 +136,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
         print("Internal Server Error: Data cannot be reached")
+        return None
 
     tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
@@ -170,7 +171,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
         geno = vcf[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
 
-    if geno[2] != snp and "rs" in geno[2]:
+    if geno[2] != snp and snp[0:2]=="rs" and "rs" in geno[2]:
             snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:

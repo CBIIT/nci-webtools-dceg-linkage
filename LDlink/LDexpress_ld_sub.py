@@ -119,8 +119,11 @@ if len(vcf) > 1:
     for i in range(len(vcf)):
         if vcf[i].strip().split()[2] == snp:
             geno = vcf[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')
+            
 else:
     geno = vcf[0].strip().split()
+    geno[0] = geno[0].lstrip('chr')
 
 # Import Window around SNP
 vcf = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")

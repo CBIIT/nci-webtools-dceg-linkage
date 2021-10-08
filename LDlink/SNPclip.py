@@ -353,6 +353,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             found = "false"
             while count <= 2 and count+g < len(vcf):
                 geno_next = vcf[g+count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break

@@ -536,13 +536,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			geno=vcf[0].strip().split()
 			geno[0] = geno[0].lstrip('chr')
 
-		if geno[2]!=snp and snp[0:2]=="rs":
-			if "rs" in geno[2]:
-				if "warning" in output:
-					output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-				else:
-					output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-				snp = geno[2]
+		if geno[2]!=snp and snp[0:2]=="rs" and "rs" in geno[2]:
+			if "warning" in output:
+				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
+			else:
+				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
+			snp = geno[2]
 
 		if "," in geno[3] or "," in geno[4]:
 			output["error"]=snp+" is not a biallelic variant."
