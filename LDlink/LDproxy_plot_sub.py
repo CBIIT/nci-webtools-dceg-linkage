@@ -647,7 +647,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     # Remove temporary files
     subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
     subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-    subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
+    subprocess.call("rm " + tmp_dir + "genes_" + request + ".json", shell=True)
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
     # Return plot output

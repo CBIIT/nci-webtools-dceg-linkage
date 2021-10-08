@@ -786,7 +786,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2"):
                     request + ".svg", shell=True)
     # Remove temporary file(s)
     subprocess.call("rm " + tmp_dir + "genes_" + 
-                    request + ".txt", shell=True)
+                    request + ".json", shell=True)
 
     reset_output()
 

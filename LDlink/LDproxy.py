@@ -909,12 +909,6 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     duration = time.time() - start_time
     print("Run time: " + str(duration) + " seconds\n")
 
-    # Remove temporary files
-    # subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-    # subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-    # subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
-    # subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
-
     # Return plot output
     return(out_script, out_div)
 

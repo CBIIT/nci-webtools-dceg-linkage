@@ -955,7 +955,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # Remove temporary files
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.json", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
