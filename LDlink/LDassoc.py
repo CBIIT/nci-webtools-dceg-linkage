@@ -96,7 +96,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 			# check if variant is on chrY for genome build = GRCh38
 			if var_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
-				output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + var_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+				output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + var_coord['id'] + " = chr" + var_coord['chromosome'] + ":" + var_coord[genome_build_vars[genome_build]['position']] + ")"
 				json_output = json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
