@@ -125,11 +125,9 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
         geno = tabix_query_snp_out[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
     
-    if geno[2] != snp_coord[0]:
-        # print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
-        if "rs" in geno[2]:
+    if geno[2] != snp_coord[0] and "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
-        # snp = geno[2]
+            # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
         # print('handle error: snp + " is not a biallelic variant."')

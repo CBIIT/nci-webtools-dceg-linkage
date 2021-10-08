@@ -170,8 +170,8 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
         geno = vcf[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
 
-    if geno[2] != snp:
-        snp = geno[2]
+    if geno[2] != snp and "rs" in geno[2]:
+            snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
         subprocess.call("rm " + tmp_dir + "pops_" +

@@ -206,6 +206,10 @@ $(document).ready(function() {
         $("#genome-build > .btn:first-child").val($(this).text().toLowerCase());
         // console.log($(this).attr("value"));
         genomeBuild = $(this).attr("value");
+        // change ldassoc example inputs
+        if (document.getElementById('example-gwas').checked) {
+            setupLDassocExample();
+        }
     });
 
     // Hide Genome Build dropdown on LD Tools dropdown-nav hover 
@@ -232,79 +236,7 @@ $(document).ready(function() {
     });
 
     $("#example-gwas").click(function(e){
-    //   console.log("Use example GWAS data.");
-      var useEx = document.getElementById('example-gwas');
-      // var exampleHeaders = ['A', 'B', 'C'];
-      if (useEx.checked){
-        var url = restServerUrl + "/ldassoc_example";
-        var ajaxRequest = $.ajax({
-            type : 'GET',
-            url : url,
-            contentType : 'application/json' // JSON
-        }).success(function(response) {
-          var data = JSON.parse(response);
-          $('#ldassoc-file-label').val(data.filename);
-          populateAssocDropDown(data.headers);
-          $("#header-values").show();
-          $("#assoc-chromosome > button").val("chr");
-          $("#assoc-chromosome > button").text("Chromosome: chr column");
-          $("#assoc-position > button").val("pos");
-          $("#assoc-position > button").text("Position: pos column");
-          $("#assoc-p-value > button").val("p");
-          $("#assoc-p-value > button").text("P-Value: p column");
-          $('#ldassoc-file').prop('disabled', true);
-          $('#ldassoc').removeAttr('disabled');
-        });
-
-        $('#region-gene-name').val('');
-        $('#region-gene-index').val('');
-        $('#region-variant-index').val('');
-
-        $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
-        $("#assoc-region > .btn:first-child").html("Region" + '&nbsp;<span class="caret"></span>');
-
-        $("#region-gene-container").hide();
-        $("#region-region-container").hide();
-        $("#region-variant-container").hide();
-        $("#region-region-container").show();
-        $("#region-region-start-coord").val("chr8:128289591");
-        $("#region-region-end-coord").val("chr8:128784397");
-        $("#region-region-index").val("rs7837688");
-        // console.log($("#region-region-start-coord").val());
-        // console.log($("#region-region-end-coord").val());
-        // console.log($("#region-region-index").val());
-
-        $("#ldassoc-population-codes").val('');
-        refreshPopulation([],"ldassoc");
-        $("#ldassoc-population-codes").val(["CEU"]);
-        refreshPopulation(["CEU"],"ldassoc");
-        // console.log($("#ldassoc-population-codes").val());
-      }else{
-        $('#ldassoc-file').prop('disabled', false);
-        $('#ldassoc').prop('disabled', true);
-        $("#assoc-chromosome > button").val('');
-        $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
-        $("#assoc-position > button").val('');
-        $("#assoc-position > button").html('Select Position&nbsp;<span class="caret"></span>');
-        $("#assoc-p-value > button").val('');
-        $("#assoc-p-value > button").html('Select P-Value&nbsp;<span class="caret"></span>');
-
-        $('#ldassoc-file-label').val('');
-        populateAssocDropDown([]);
-        $("#header-values").hide();
-        $('#ldassoc-file').val('');
-        // console.log("Don't use example GWAS data.");
-        $("#region-gene-container").hide();
-        $("#region-region-container").hide();
-        $("#region-variant-container").hide();
-        $("#assoc-region > .btn:first-child").val('');
-        $("#assoc-region > .btn:first-child").html('Select Region<span class="caret"></span>');
-        $("#region-region-start-coord").val('');
-        $("#region-region-end-coord").val('');
-        $("#region-region-index").val('');
-        $("#ldassoc-population-codes").val('');
-        refreshPopulation([],"ldassoc");
-      }
+        setupLDassocExample();
     });
 
     updateVersion(ldlink_version);
@@ -478,6 +410,98 @@ $(document).ready(function() {
 $(document).on('change','.btn-snp :file', createFileSelectTrigger);
 // ldAssoc File Change
 $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
+
+
+function setupLDassocExample() {
+    //   console.log("Use example GWAS data.");
+    var useEx = document.getElementById('example-gwas');
+    // var exampleHeaders = ['A', 'B', 'C'];
+    if (useEx.checked){
+      var url = restServerUrl + "/ldassoc_example";
+      var ajaxRequest = $.ajax({
+          type : 'GET',
+          url : url,
+          contentType : 'application/json', // JSON
+          data: {
+              genome_build: genomeBuild
+          }
+      }).success(function(response) {
+        var data = JSON.parse(response);
+        $('#ldassoc-file-label').val(data.filename);
+        populateAssocDropDown(data.headers);
+        $("#header-values").show();
+        $("#assoc-chromosome > button").val("chr");
+        $("#assoc-chromosome > button").text("Chromosome: chr column");
+        $("#assoc-position > button").val("pos");
+        $("#assoc-position > button").text("Position: pos column");
+        $("#assoc-p-value > button").val("p");
+        $("#assoc-p-value > button").text("P-Value: p column");
+        $('#ldassoc-file').prop('disabled', true);
+        $('#ldassoc').removeAttr('disabled');
+      });
+
+      $('#region-gene-name').val('');
+      $('#region-gene-index').val('');
+      $('#region-variant-index').val('');
+
+      $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
+      $("#assoc-region > .btn:first-child").html("Region" + '&nbsp;<span class="caret"></span>');
+
+      $("#region-gene-container").hide();
+      $("#region-region-container").hide();
+      $("#region-variant-container").hide();
+      $("#region-region-container").show();
+      switch(genomeBuild) {
+          case "grch37":
+              $("#region-region-start-coord").val("chr8:128289591");
+              $("#region-region-end-coord").val("chr8:128784397");
+              break;
+          case "grch38":
+              $("#region-region-start-coord").val("chr8:127277115");
+              $("#region-region-end-coord").val("chr8:127777115");
+              break;
+          case "grch38_high_coverage":
+              $("#region-region-start-coord").val("chr8:127277115");
+              $("#region-region-end-coord").val("chr8:127777115");
+              break;
+      }
+      $("#region-region-index").val("rs7837688");
+      // console.log($("#region-region-start-coord").val());
+      // console.log($("#region-region-end-coord").val());
+      // console.log($("#region-region-index").val());
+
+      $("#ldassoc-population-codes").val('');
+      refreshPopulation([],"ldassoc");
+      $("#ldassoc-population-codes").val(["CEU"]);
+      refreshPopulation(["CEU"],"ldassoc");
+      // console.log($("#ldassoc-population-codes").val());
+    }else{
+      $('#ldassoc-file').prop('disabled', false);
+      $('#ldassoc').prop('disabled', true);
+      $("#assoc-chromosome > button").val('');
+      $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
+      $("#assoc-position > button").val('');
+      $("#assoc-position > button").html('Select Position&nbsp;<span class="caret"></span>');
+      $("#assoc-p-value > button").val('');
+      $("#assoc-p-value > button").html('Select P-Value&nbsp;<span class="caret"></span>');
+
+      $('#ldassoc-file-label').val('');
+      populateAssocDropDown([]);
+      $("#header-values").hide();
+      $('#ldassoc-file').val('');
+      // console.log("Don't use example GWAS data.");
+      $("#region-gene-container").hide();
+      $("#region-region-container").hide();
+      $("#region-variant-container").hide();
+      $("#assoc-region > .btn:first-child").val('');
+      $("#assoc-region > .btn:first-child").html('Select Region<span class="caret"></span>');
+      $("#region-region-start-coord").val('');
+      $("#region-region-end-coord").val('');
+      $("#region-region-index").val('');
+      $("#ldassoc-population-codes").val('');
+      refreshPopulation([],"ldassoc");
+    }
+}
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL, retries) {
@@ -2138,6 +2162,18 @@ function updateLDassoc() {
 
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
+            
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button

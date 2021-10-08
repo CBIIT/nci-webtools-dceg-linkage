@@ -29,7 +29,8 @@ genome_build_vars = {
         "recomb_file": "genetic_map_autosomes_combined_b37.txt.gz",
         "1000G_dir": "GRCh37",
         "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz",
-        "1000G_chr_prefix": ""
+        "1000G_chr_prefix": "",
+        "ldassoc_example_file": "prostate_example_grch37.txt"
     },
     "grch38": {
         "title": "GRCh38",
@@ -42,7 +43,8 @@ genome_build_vars = {
         "recomb_file": "genetic_map_autosomes_combined_b38.txt.gz",
         "1000G_dir": "GRCh38",
         "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz",
-        "1000G_chr_prefix": ""
+        "1000G_chr_prefix": "",
+        "ldassoc_example_file": "prostate_example_grch38.txt"
     },
     "grch38_high_coverage": {
         "title": "GRCh38 High Coverage",
@@ -55,7 +57,8 @@ genome_build_vars = {
         "recomb_file": "genetic_map_autosomes_combined_b38.txt.gz",
         "1000G_dir": "GRCh38_High_Coverage",
         "1000G_file": "CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.filtered.shapeit2-duohmm-phased.vcf.gz",
-        "1000G_chr_prefix": "chr"
+        "1000G_chr_prefix": "chr",
+        "ldassoc_example_file": "prostate_example_grch38.txt"
     }
 }
 

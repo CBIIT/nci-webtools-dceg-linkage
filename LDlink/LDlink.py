@@ -385,9 +385,10 @@ def upload():
 def ldassoc_example():
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
+    genome_build = request.args.get('genome_build', 'grch37')
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
-    example_filepath = data_dir + ldassoc_example_dir + 'prostate_example.txt'
+    example_filepath = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -465,7 +466,7 @@ def ldassoc():
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = data_dir + ldassoc_example_dir + 'prostate_example.txt'
+        filename = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":

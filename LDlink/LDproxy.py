@@ -252,15 +252,14 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         geno = vcf[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
 
-    if geno[2] != snp:
-        if "rs" in geno[2]:
+    if geno[2] != snp and "rs" in geno[2]:
             output["warning"] = "Genomic position for query variant (" + snp + \
                 ") does not match RS number at 1000G position (chr" + \
                 geno[0]+":"+geno[1]+" = "+geno[2]+")"
-        geno_snp = geno[2]
+            snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
-        output["error"] = geno_snp + " is not a biallelic variant."
+        output["error"] = snp + " is not a biallelic variant."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -284,7 +283,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
                 genotypes[j] = 1
 
     if genotypes["0"] == 0 or genotypes["1"] == 0:
-        output["error"] = geno_snp + \
+        output["error"] = snp + \
             " is monoallelic in the " + pop + " population."
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)

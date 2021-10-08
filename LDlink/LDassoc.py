@@ -44,8 +44,16 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 
 	# Create JSON output
-	out_json=open(tmp_dir+'assoc'+request+".json","w")
-	output={}
+	out_json = open(tmp_dir+'assoc'+request+".json","w")
+	output = {}
+
+	# Validate genome build param
+	if genome_build not in genome_build_vars['vars']:
+		output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+		json_output = json.dumps(output, sort_keys=True, indent=2)
+		print(json_output, file=out_json)
+		out_json.close()
+		return("", "")
 
 	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
@@ -80,7 +88,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			var_coord=get_coords_var(db, snp)
 
 			if var_coord==None:
-				output["error"]=snp+" is not in dbSNP build " + dbsnp_version + "."
+				output["error"] = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
@@ -353,7 +361,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 							except ValueError:
 								continue
 							else:
-								coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+								coord_i = genome_build_vars[genome_build]['1000G_chr_prefix'] + col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
 								assoc_coords.append(coord_i)
 								a_pos.append(col[pos_index])
 								assoc_dict[coord_i]=[col[p_index]]
@@ -404,7 +412,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp="chr"+var_p[0].split("-")[0]
 
 			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], chromosome)
+			vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
 			vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 			if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
@@ -414,7 +422,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 			head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 			subprocess.call(tabix_snp, shell=True)
 
 
@@ -432,10 +440,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 					output["warning"]=output["warning"]+". Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
 				else:
 					output["warning"]="Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
-				geno=vcf[0].strip().split()
+				geno = vcf[0].strip().split()
+				geno[0] = geno[0].lstrip('chr')
 
 			else:
-				geno=vcf[0].strip().split()
+				geno = vcf[0].strip().split()
+				geno[0] = geno[0].lstrip('chr')
 
 			if "," in geno[3] or "," in geno[4]:
 				if "warning" in output:
@@ -471,7 +481,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 
 	else:
-		if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
+		if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + org_coord + "-" + org_coord not in assoc_coords:
 			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
@@ -479,7 +489,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "%s/%s%s/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], chromosome)
+		vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
 		vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 		if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
@@ -489,7 +499,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
 		head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
-		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 		subprocess.call(tabix_snp, shell=True)
 
 
@@ -510,7 +520,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			geno=[]
 			for i in range(len(vcf)):
 				if vcf[i].strip().split()[2]==snp:
-					geno=vcf[i].strip().split()
+					geno = vcf[i].strip().split()
+					geno[0] = geno[0].lstrip('chr')
 			if geno==[]:
 				output["error"]=snp+" is not in 1000G reference panel."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
@@ -523,6 +534,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				
 		else:
 			geno=vcf[0].strip().split()
+			geno[0] = geno[0].lstrip('chr')
 
 		if geno[2]!=snp and snp[0:2]=="rs":
 			if "rs" in geno[2]:
@@ -530,7 +542,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 					output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
 				else:
 					output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-			snp=geno[2]
+				snp = geno[2]
 
 		if "," in geno[3] or "," in geno[4]:
 			output["error"]=snp+" is not a biallelic variant."
@@ -588,25 +600,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	print("Create LDassoc_sub subprocesses")
 
 	for subprocess_id in range(num_subprocesses):
-		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(subprocess_id)])
+		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
 		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
-
-	# for i in range(num_subprocesses):
-	# 	if i==min(range(num_subprocesses)) and i==max(range(num_subprocesses)):
-	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords)+" "+request+" "+str(i)
-	# 	elif i==min(range(num_subprocesses)):
-	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[:block])+" "+request+" "+str(i)
-	# 	elif i==max(range(num_subprocesses)):
-	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:])+" "+request+" "+str(i)
-	# 	else:
-	# 		command="python3 LDassoc_sub.py "+snp+" "+chromosome+" "+"_".join(assoc_coords[(block*i)+1:block*(i+1)])+" "+request+" "+str(i)
-	# 	commands.append(command)
-
-	# print("######COMMANDS######")
-	# parseCommands = [x.split(" ")[4].split("_") for x in commands]
-	# for x in parseCommands:
-	# 	print(len(x))
-	# print("####################")
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
@@ -618,7 +613,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
-	#print("out_raw", out_raw)
 	pool.close()
 	pool.join()
 
@@ -636,11 +630,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			col[8]=float(col[8])
 			col.append(abs(int(col[6])))
 			pos_i_j=col[5].split(":")[1]
-			coord_i_j=chromosome+":"+pos_i_j+"-"+pos_i_j
+			coord_i_j=genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + pos_i_j + "-" + pos_i_j
 			if coord_i_j in assoc_dict:
 				col.append(float(assoc_dict[coord_i_j][0]))
 				out_prox.append(col)
-
 
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
 	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=False)
@@ -1187,7 +1180,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		if web:
 			# Open thread for high quality image exports
 			print("Open thread for high quality image exports.")
-			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
@@ -1335,7 +1328,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		if web:
 			# Open thread for high quality image exports
 			print("Open thread for high quality image exports.")
-			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + myargsName + " " + myargsOrigin
+			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
 			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
@@ -1406,8 +1399,10 @@ def main():
 	# initialize web instance as True if run via main
 	web = True
 
+	genome_build = "grch37"
+
 	# Run function
-	out_script,out_div=calculate_assoc(args.file, region, args.pop, args.request, web, args)
+	out_script,out_div=calculate_assoc(args.file, region, args.pop, args.request, genome_build, web, args)
 
 
 	# Print output

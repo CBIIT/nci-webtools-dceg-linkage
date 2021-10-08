@@ -14,10 +14,10 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # LDassoc subprocess to export bokeh to high quality images in the background
-def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
+def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
@@ -245,7 +245,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                             except ValueError:
                                 continue
                             else:
-                                coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+                                coord_i = genome_build_vars[genome_build]['1000G_chr_prefix'] + col[chr_index].strip("chr") + ":" + col[pos_index] + "-" + col[pos_index]
                                 assoc_coords.append(coord_i)
                                 a_pos.append(col[pos_index])
                                 assoc_dict[coord_i]=[col[p_index]]
@@ -291,9 +291,10 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 continue
             elif len(vcf)>1:
                 geno=vcf[0].strip().split()
-
+                geno[0] = geno[0].lstrip('chr')
             else:
                 geno=vcf[0].strip().split()
+                geno[0] = geno[0].lstrip('chr')
 
             if "," in geno[3] or "," in geno[4]:
                 continue
@@ -965,14 +966,15 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 def main():
 
     # Import LDassoc options
-    if len(sys.argv) == 8:
+    if len(sys.argv) == 9:
         filename = sys.argv[1]
         file = sys.argv[2]
         region = sys.argv[3]
         pop = sys.argv[4]
         request = sys.argv[5]
-        myargsName = sys.argv[6]
-        myargsOrigin = sys.argv[7]
+        genome_build = sys.argv[6]
+        myargsName = sys.argv[7]
+        myargsOrigin = sys.argv[8]
     else:
         sys.exit()
     # Load args parameters passed from LDassoc.py
@@ -980,7 +982,7 @@ def main():
         args = json.load(f)
 
     # Run function
-    calculate_assoc_svg(file, region, pop, request, args, myargsName, myargsOrigin)
+    calculate_assoc_svg(file, region, pop, request, genome_build, args, myargsName, myargsOrigin)
 
 
 if __name__ == "__main__":
