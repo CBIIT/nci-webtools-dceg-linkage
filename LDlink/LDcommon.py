@@ -192,7 +192,7 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
         for gene_name_key in group_by_gene_name.keys():
             query_results_sanitized.append(processCollapsedTranscript(group_by_gene_name[gene_name_key]))
         # print("COLLAPSED", "query_results_sanitized")
-        print(json.dumps(query_results_sanitized, indent=4, sort_keys=True))
+        # print(json.dumps(query_results_sanitized, indent=4, sort_keys=True))
     else:
         query_results_sanitized = json.loads(json_util.dumps(query_results)) 
         # print("NOT COLLAPSED", "query_results", query_results_sanitized)
