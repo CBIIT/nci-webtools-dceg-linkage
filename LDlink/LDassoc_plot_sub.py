@@ -813,7 +813,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # Gene Plot (Collapsed)
     else:
         # Get genes from LDassoc.py output file
-        genes_c_file = tmp_dir + "genes_" + request + ".json"
+        genes_c_file = tmp_dir + "genes_c_" + request + ".json"
         genes_c_raw = open(genes_c_file).readlines()
 
         genes_c_plot_start=[]
