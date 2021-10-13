@@ -1050,24 +1050,24 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		tall=0.75
 		if genes_json != None and len(genes_json) > 0:
 			for gene_obj in genes_json:
-				bin = gene_obj["bin"]
+				# bin = gene_obj["bin"]
 				name_id = gene_obj["name"]
 				chrom = gene_obj["chrom"]
 				strand = gene_obj["strand"]
 				txStart = gene_obj["txStart"]
 				txEnd = gene_obj["txEnd"]
-				cdsStart = gene_obj["cdsStart"]
-				cdsEnd = gene_obj["cdsEnd"]
-				exonCount = gene_obj["exonCount"]
+				# cdsStart = gene_obj["cdsStart"]
+				# cdsEnd = gene_obj["cdsEnd"]
+				# exonCount = gene_obj["exonCount"]
 				exonStarts = gene_obj["exonStarts"]
 				exonEnds = gene_obj["exonEnds"]
-				score = gene_obj["score"]
+				# score = gene_obj["score"]
 				name2 = gene_obj["name2"]
-				cdsStartStat = gene_obj["cdsStartStat"]
-				cdsEndStat = gene_obj["cdsEndStat"] 
-				exonFrames = gene_obj["exonFrames"]
+				# cdsStartStat = gene_obj["cdsStartStat"]
+				# cdsEndStat = gene_obj["cdsEndStat"] 
+				# exonFrames = gene_obj["exonFrames"]
 				name = name2
-				id = name_id
+				# id = name_id
 				e_start = exonStarts.split(",")
 				e_end = exonEnds.split(",")
 
@@ -1216,30 +1216,19 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		tall=0.75
 		if genes_c_json != None and len(genes_c_json) > 0:
 			for gene_c_obj in genes_c_json:
-				bin = gene_c_obj["bin"]
-				name_id = gene_c_obj["name"]
 				chrom = gene_c_obj["chrom"]
-				strand = gene_c_obj["strand"]
 				txStart = gene_c_obj["txStart"]
 				txEnd = gene_c_obj["txEnd"]
-				cdsStart = gene_c_obj["cdsStart"]
-				cdsEnd = gene_c_obj["cdsEnd"]
-				exonCount = gene_c_obj["exonCount"]
 				exonStarts = gene_c_obj["exonStarts"]
 				exonEnds = gene_c_obj["exonEnds"]
-				score = gene_c_obj["score"]
 				name2 = gene_c_obj["name2"]
-				cdsStartStat = gene_c_obj["cdsStartStat"]
-				cdsEndStat = gene_c_obj["cdsEndStat"] 
-				exonFrames = gene_c_obj["exonFrames"]
+				transcripts = gene_c_obj["transcripts"]
 				name = name2
-				id = name_id
 				e_start = exonStarts.split(",")
 				e_end = exonEnds.split(",")
+				e_transcripts=transcripts.split(",")
 
 				# chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
-				# e_transcripts=transcripts.split(",")
-				e_transcripts = e_start
 
 				# Determine Y Coordinate
 				i=0

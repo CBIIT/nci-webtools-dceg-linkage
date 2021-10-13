@@ -124,6 +124,33 @@ def get_rsnum(db, coord, genome_build):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
+def processCollapsedTranscript(genes_same_name):
+    chrom = genes_same_name[0]["chrom"]
+    txStart = genes_same_name[0]["txStart"]
+    txEnd = genes_same_name[0]["txEnd"]
+    exonStarts = genes_same_name[0]["exonStarts"].split(",")
+    exonEnds = genes_same_name[0]["exonEnds"].split(",")
+    name = genes_same_name[0]["name"]
+    name2 = genes_same_name[0]["name2"]
+    transcripts = [name] * len(list(filter(lambda x: x != "",genes_same_name[0]["exonStarts"].split(","))))
+
+
+    for gene in genes_same_name[1:]:
+        txStart = gene['txStart'] if gene['txStart'] < txStart else txStart
+        txEnd = gene['txEnd'] if gene['txEnd'] > txEnd else txEnd
+        exonStarts = list(filter(lambda x: x != "", gene["exonStarts"].split(","))) + exonStarts
+        exonEnds = list(filter(lambda x: x != "", gene["exonEnds"].split(","))) + exonEnds
+        transcripts = transcripts + ([gene['name']] * len(list(filter(lambda x: x != "", gene["exonStarts"].split(",")))))
+    return {
+        "chrom": chrom,
+        "txStart": txStart,
+        "txEnd": txEnd,
+        "exonStarts": ",".join(exonStarts),
+        "exonEnds": ",".join(exonEnds),
+        "name2": name2,
+        "transcripts": ",".join(transcripts)
+    }
+
 def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTranscript):
     query_results = db[genome_build_vars[genome_build]['refGene']].find({
         "chrom": "chr" + chromosome, 
@@ -146,7 +173,29 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
             }
         ]
     })
-    query_results_sanitized = json.loads(json_util.dumps(query_results)) 
+    if collapseTranscript:
+        query_results_sanitized = json.loads(json_util.dumps(query_results)) 
+        group_by_gene_name = {}
+        for gene in query_results_sanitized:
+            # new gene name
+            if gene['name2'] not in group_by_gene_name:
+                group_by_gene_name[gene['name2']] = []
+                group_by_gene_name[gene['name2']].append(gene)
+            # same gene name as another's
+            else:
+                group_by_gene_name[gene['name2']].append(gene)
+
+        # print("COLLAPSED", "group_by_gene_name")
+        # print(json.dumps(group_by_gene_name, indent=4, sort_keys=True))
+
+        query_results_sanitized = []
+        for gene_name_key in group_by_gene_name.keys():
+            query_results_sanitized.append(processCollapsedTranscript(group_by_gene_name[gene_name_key]))
+        # print("COLLAPSED", "query_results_sanitized")
+        print(json.dumps(query_results_sanitized, indent=4, sort_keys=True))
+    else:
+        query_results_sanitized = json.loads(json_util.dumps(query_results)) 
+        # print("NOT COLLAPSED", "query_results", query_results_sanitized)
     with open(filename, "w") as f:
         for x in query_results_sanitized:
             f.write(json.dumps(x) + '\n')

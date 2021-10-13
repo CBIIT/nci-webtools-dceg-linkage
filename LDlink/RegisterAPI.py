@@ -685,7 +685,7 @@ def getStats(startdatetime, enddatetime, top):
     for user in users_json_sanitized:
         numCalls += int(user['#_api_calls'])
     out_json = {
-        "#_registered_users": numUsers,
+        "#_total_registered_users": numUsers,
         "#_total_api_calls": numCalls,
         "users": users_json_sanitized
     }
