@@ -1197,9 +1197,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		genes_c_file = tmp_dir + "genes_c_" + request + ".json"
 		genes_c_json = getRefGene(db, genes_c_file, chromosome, coord1, coord2, genome_build, True)
 
-		# filename_c=tmp_dir+"genes_c_"+request+".txt"
-		# genes_c_raw=open(filename_c).readlines()
-
 		genes_c_plot_start=[]
 		genes_c_plot_end=[]
 		genes_c_plot_y=[]
@@ -1227,8 +1224,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				e_start = exonStarts.split(",")
 				e_end = exonEnds.split(",")
 				e_transcripts=transcripts.split(",")
-
-				# chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
 
 				# Determine Y Coordinate
 				i=0

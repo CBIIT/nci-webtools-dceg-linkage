@@ -813,8 +813,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # Gene Plot (Collapsed)
     else:
         # Get genes from LDassoc.py output file
-        filename_c=tmp_dir+"genes_c_"+request+".txt"
-        genes_c_raw=open(filename_c).readlines()
+        genes_c_file = tmp_dir + "genes_" + request + ".json"
+        genes_c_raw = open(genes_file).readlines()
 
         genes_c_plot_start=[]
         genes_c_plot_end=[]
@@ -830,11 +830,19 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         lines_c=[0]
         gap=80000
         tall=0.75
-        if genes_c_raw!=None:
-            for i in range(len(genes_c_raw)):
-                chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
-                e_start=exonStarts.split(",")
-                e_end=exonEnds.split(",")
+        if genes_c_raw != None and len(genes_c_raw) > 0:
+            for gene_raw_obj in genes_c_raw:
+                gene_c_obj = json.loads(gene_raw_obj)
+                chrom = gene_c_obj["chrom"]
+                txStart = gene_c_obj["txStart"]
+                txEnd = gene_c_obj["txEnd"]
+                exonStarts = gene_c_obj["exonStarts"]
+                exonEnds = gene_c_obj["exonEnds"]
+                name2 = gene_c_obj["name2"]
+                transcripts = gene_c_obj["transcripts"]
+                name = name2
+                e_start = exonStarts.split(",")
+                e_end = exonEnds.split(",")
                 e_transcripts=transcripts.split(",")
 
                 # Determine Y Coordinate
