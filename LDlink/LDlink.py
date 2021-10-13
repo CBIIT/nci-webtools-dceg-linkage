@@ -39,8 +39,8 @@ from werkzeug.debug import DebuggedApplication
 from Logger import logInfo, logError
 
 # Ensure tmp directory exists
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file)
 tmp_dir = config['data']['tmp_dir']
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -128,8 +128,8 @@ def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Set data directories using config.yml
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         env = config['env']
         if env == 'local':
             url_root = 'http://localhost:5000/'
@@ -171,8 +171,8 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         api_superuser = config['api']['api_superuser']
         # api_access_dir = config['api']['api_access_dir']
         api_superuser_token = getToken(api_superuser)
@@ -311,8 +311,8 @@ def api_blocked_users():
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
-    # with open('config.yml', 'r') as c:
-    #     config = yaml.load(c)
+    # with open('config.yml', 'r') as yml_file:
+    #     config = yaml.load(yml_file)
     # env = config['env']
     # if env == "local":
         # return app.send_static_file('index.html')
@@ -447,8 +447,8 @@ def ldtrait_timestamp():
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     logInfo("Execute ldassoc.")
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
     myargs = argparse.Namespace()
