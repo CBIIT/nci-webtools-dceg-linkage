@@ -87,7 +87,7 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     # Extract query SNP phased genotypes
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
@@ -125,11 +125,9 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
         geno = tabix_query_snp_out[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
     
-    if geno[2] != snp_coord[0]:
-        # print('handle warning: "Genomic position for query variant (" + snp + ") does not match RS number at 1000G position (chr" + geno[0]+":"+geno[1]+")"')
-        if "rs" in geno[2]:
+    if geno[2] != snp_coord[0] and "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
-        # snp = geno[2]
+            # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
         # print('handle error: snp + " is not a biallelic variant."')
@@ -209,12 +207,12 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     # Validate genome build param
     if genome_build not in genome_build_vars['vars']:
         errors_warnings["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
         errors_warnings["error"] = "Window value must be a number between 0 and 1,000,000."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     # Parse SNPs list
     snps_raw = snplst.split("+")
@@ -223,7 +221,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         errors_warnings["error"] = "Maximum SNP list is " + \
             str(max_list)+" RS numbers. Your list contains " + \
             str(len(snps_raw))+" entries."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
     # Remove duplicate RS numbers
     sanitized_query_snps = []
     for snp_raw in snps_raw:
@@ -247,7 +245,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     # Select desired ancestral populations
     pops = pop.split("+")
@@ -257,7 +255,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             errors_warnings["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            return("", "", "", errors_warnings)
+            return("", "", "", "", "", errors_warnings)
 
     # get_pops = "cat " + " ".join(pop_dirs)
     # proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
@@ -279,7 +277,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro, genome_build_vars[genome_build]['position']: pos})
+        query_results = db.dbsnp.find({"chromosome": str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -345,9 +343,9 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
                     if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                         if "warning" in errors_warnings:
                             errors_warnings["warning"] = errors_warnings["warning"] + \
-                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         else:
-                            errors_warnings["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            errors_warnings["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         warn.append(snp_i[0])
                     else:
                         rs_nums.append(snp_i[0])
@@ -366,17 +364,21 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             # Generate error for empty query variant
             errors_warnings["error"] = "Input list of RS numbers is empty"
             subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            return("", "", "", errors_warnings)
+            return("", "", "", "", "", errors_warnings)
 
     # Generate warnings for query variants not found in dbsnp
     if warn != []:
-        errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in errors_warnings:
+            errors_warnings["warning"] = errors_warnings["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            errors_warnings["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
-        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers or coordinates."
+        errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + errors_warnings["warning"]
         subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     thinned_snps = []
 
@@ -488,7 +490,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     # Check if thinned list is empty, if it is, display error
     if len(thinned_snps) < 1:
         errors_warnings["error"] = "No entries in GTEx are identified using the LDexpress search criteria."
-        return("", "", "", errors_warnings)
+        return("", "", "", "", "", errors_warnings)
 
     full_end = timer()	
     print("TIME ELAPSED:", str(full_end - full_start) + "(s)")	

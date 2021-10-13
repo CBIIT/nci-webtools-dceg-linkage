@@ -512,9 +512,9 @@
 													 style="width:90px;"><span style="margin-left:10px;">base pair window</span>
 												</div>
 												<div class="form-group">
-													<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
-													<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)"
-													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
+													<label for="region-gene-index" style="display:none;">Index RSID (optional)</label>
+													<input type="text" id="region-gene-index" class="form-control" placeholder="Index RSID (optional)"
+													 pattern="(^rs\d+$)">
 												</div>
 											</div>
 											<!-- region = Region -->
@@ -534,9 +534,9 @@
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div>
-													<label for="region-region-index" style="display:none;">Index variant (optional)</label>
-													<input type="text" id="region-region-index" class="form-control" style="width:300px;" placeholder="Index variant (optional)"
-													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
+													<label for="region-region-index" style="display:none;">Index RSID (optional)</label>
+													<input type="text" id="region-region-index" class="form-control" style="width:300px;" placeholder="Index RSID (optional)"
+													 pattern="(^rs\d+$)">
 												</div>
 											</div>
 											<!-- region = Variant -->
@@ -544,8 +544,8 @@
 												<a id="ldassoc-variant-index-pop" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
-													<label for="region-variant-index" style="display:none;">RS Number or Genomic Coordinate (optional)</label>
-													<input type="text" id="region-variant-index" class="form-control" style="width:225px" placeholder="RS Number or Genomic Coordinate" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
+													<label for="region-variant-index" style="display:none;">Index RSID</label>
+													<input type="text" id="region-variant-index" class="form-control" style="width:225px" placeholder="Variant RSID" pattern="(^rs\d+$)">
 												</div>
 												<div class="form-group">
 													<a id="ldassoc-variant-bp-pop" style="position:relative;left:95px;top:5px"  data-toggle="popover"
@@ -715,7 +715,7 @@
 							</thead>
 							<tfoot>
 								<tr>
-									<th>RS Results</th>
+									<th>RS Number</th>
 									<th>Chr</th>
 									<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
 									<th>Alleles</th>
@@ -1182,21 +1182,25 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<!-- COLUMN4 - sm-2 -->
-								<!-- <div class="col-sm-2 col-sm-offset-1">
-									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
-										<label id="matrix_color_r2" class="btn btn-default active">
-											<input type="radio" name="options" autocomplete="off" checked> R<sup>2</sup>
+								<div class="col-sm-2">
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDmatrix">Collapse transcripts: </a>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<div title="Choose to show all or collapse transcripts" data-toggle="buttons" class="btn-group flag-switches">
+										<label class="btn btn-default active" id="matrix_collapse_transcripts" title="Collapse transcripts">
+											<input type="radio" checked="" autocomplete="off" name="options">Yes
 										</label>
-										<label class="btn btn-default">
-											<input type="radio" name="options" autocomplete="off"> D'
+										<label class="btn btn-default" title="Show transcripts">
+											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
-								</div> -->
+								</div>
 							</div>
 							<div class="form-group">
 								<!-- COLUMN5 - sm-2 -->
-								<div class="col-sm-2">
+								<div class="col-sm-1">
 									<input type="submit" id="ldmatrix" value="Calculate" class="btn btn-default calculate" />
 								</div>
 							</div>
@@ -1261,16 +1265,16 @@
 						<form id="ldpairForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpair-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpair-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpair-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpair-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
@@ -1441,16 +1445,16 @@
 						<form id="ldpopForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpop-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpop-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpop-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpop-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
@@ -1730,14 +1734,14 @@
 						<!-- LDProxy FORM -->
 						<form id="ldproxyForm" class="ldlinkForm">
 							<div class="form-group">
-								<div class="col-sm-3">
-									<input id="ldproxy-snp" name="snp" type="text" class="form-control" placeholder="Variant RS Number or Coordinate"
-									 title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" style="width:215px;" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+								<div class="col-sm-2">
+									<input id="ldproxy-snp" name="snp" type="text" class="form-control" placeholder="Variant RSID or CHR:POS"
+									 title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" style="width:180px;" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-3">
+								<div class="col-sm-2">
 									<a id="ldproxy-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
@@ -1752,12 +1756,28 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDproxy">LD Measure: </a>
+									</div>
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDproxy">Collapse transcripts: </a>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<div title="Select pairwise value" data-toggle="buttons" class="btn-group flag-switches">
 										<label class="btn btn-default active" id="proxy_color_r2">
 											<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
 										</label>
 										<label class="btn btn-default">
 											<input type="radio" autocomplete="off" name="options"> D'
+										</label>
+									</div>
+									<div title="Choose to show all or collapse transcripts" data-toggle="buttons" class="btn-group flag-switches">
+										<label class="btn btn-default active" id="proxy_collapse_transcripts" title="Collapse transcripts">
+											<input type="radio" checked="" autocomplete="off" name="options">Yes
+										</label>
+										<label class="btn btn-default" title="Show transcripts">
+											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
 								</div>
@@ -1849,7 +1869,7 @@
 									</thead>
 									<tfoot>
 										<tr>
-											<th>RS Results</th>
+											<th>RS Number</th>
 											<th>Chr</th>
 											<th>Position (<span class="ldproxy-position-genome-build-header">GRCh37</span>)</th>
 											<th>Alleles</th>
@@ -2605,31 +2625,31 @@
 					</p>
 
 					<p><a class="help-anchor-link" href="#LDexpress">LDexpress</a><br>
-						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldexpress?token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldexpress?token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDhap">LDhap</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&genome_build=grch38&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDmatrix">LDmatrix</a><br>
 						<pre class="apiaccess-examples">
-							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&token=faketoken123'
+							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&genome_build=grch38_high_coverage&token=faketoken123'
 						</pre>
 						<p><i>Note: GET request can support up to 300 SNPs.</i></p>
 						<pre class="apiaccess-examples">
-							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?token=faketoken123'
+							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?token=faketoken123'
 						</pre>
 						<p><i>Note: POST request can support up to 1,000 SNPs.</i></p>
 					</p>
 					<p><a class="help-anchor-link" href="#LDpair">LDpair</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&genome_build=grch37&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDpop">LDpop</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpop?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&r2_d=r2&token=faketoken123'</pre></p>	
+						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpop?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&r2_d=r2&genome_build=grch37&token=faketoken123'</pre></p>	
 					<p><a class="help-anchor-link" href="#LDproxy">LDproxy</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&window=500000&token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&window=500000&genome_build=grch37&token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#LDtrait">LDtrait</a><br>
-						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": "0.1", "window": "500000"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldtrait?token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldtrait?token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#SNPchip">SNPchip</a><br>
-						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpchip?token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpchip?token=faketoken123'</pre></p>
 					<p><a class="help-anchor-link" href="#SNPclip">SNPclip</a><br>
-						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpclip?token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/snpclip?token=faketoken123'</pre></p>
 					<p><strong>Note</strong>: <a class="help-anchor-link" href="#LDassoc">LDassoc</a> is not currently accessible via programmatic
 						access.</p>
 

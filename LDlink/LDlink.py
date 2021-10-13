@@ -32,6 +32,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
+from LDcommon import genome_build_vars
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
@@ -383,11 +384,12 @@ def upload():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
+    genome_build = request.args.get('genome_build', 'grch37')
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
-    example_filepath = data_dir + ldassoc_example_dir + 'prostate_example.txt'
+    example_filepath = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -463,7 +465,7 @@ def ldassoc():
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = data_dir + ldassoc_example_dir + 'prostate_example.txt'
+        filename = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
@@ -681,26 +683,12 @@ def ldmatrix():
     if request.method == 'POST':
         # POST REQUEST
         data = json.loads(request.stream.read())
-        if 'snps' in data:
-            snps = data['snps']
-        else:
-            snps = False
-        if "pop" in data:
-            pop = data['pop']
-        else:
-            pop = False
-        if "reference" in data:
-            reference = data['reference']
-        else:
-            reference = False
-        if "r2_d" in data:
-            r2_d = data['r2_d']
-        else:
-            r2_d = False
-        try:
-            genome_build = data['genome_build']
-        except:
-            genome_build = 'grch37'
+        snps = data['snps'] if 'snps' in data else False
+        pop = data['pop'] if 'pop' in data else False
+        reference = data['reference'] if 'reference' in data else False
+        r2_d = data['r2_d'] if 'r2_d' in data else False
+        genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
+        collapseTranscript = data['collapseTranscript'] if 'collapseTranscript' in data else True
     else:
         # GET REQUEST
         snps = request.args.get('snps', False)
@@ -708,11 +696,13 @@ def ldmatrix():
         reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
         genome_build = request.args.get('genome_build', 'grch37')
+        collapseTranscript = request.args.get('collapseTranscript', True)
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_d: ' + r2_d)
     print('genome build: ' + genome_build)
+    print('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -725,9 +715,7 @@ def ldmatrix():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                print("reach1")
-                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d)
-                print("reach2")
+                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             except:
                 print("reach3")
                 return sendTraceback(None)
@@ -744,7 +732,7 @@ def ldmatrix():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             # display api out
             try:
                 # unlock token then display api output
@@ -895,11 +883,13 @@ def ldproxy():
     window = request.args.get('window', '500000').replace(',', '')
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
+    collapseTranscript = request.args.get('collapseTranscript', True)
     print('var: ', var)
     print('pop: ',  pop)
     print('r2_d: ',  r2_d)
     print('window: ',  window)
     print('genome build: ', genome_build)
+    print('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -909,7 +899,7 @@ def ldproxy():
             reference = request.args.get('reference', False)
             print('request: ' + str(reference))
             try:
-                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window))
+                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             except:
                 return sendTraceback(None)
         else:
@@ -922,7 +912,7 @@ def ldproxy():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window))
+            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             # display api out
             try:
                 # unlock token then display api output
@@ -993,7 +983,7 @@ def ldtrait():
                     trait["error"] = json_dict["error"]
                 else:
                     with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                        f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                        f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
@@ -1030,7 +1020,7 @@ def ldtrait():
                 return sendTraceback(json_dict["error"])
             else:
                 with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                    f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                    f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")

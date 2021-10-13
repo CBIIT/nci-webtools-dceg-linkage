@@ -167,7 +167,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     vcf_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
@@ -180,7 +180,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
@@ -212,17 +212,16 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         geno1 = vcf1[0].strip().split()
         geno1[0] = geno1[0].lstrip('chr')
 
-    if geno1[2] != snp1:
-        if "rs" in geno1[2]:
-            if "warning" in output:
-                output["warning"] = output["warning"] + \
-                    ". Genomic position for query variant1 (" + snp1 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
-            else:
-                output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+    if geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". Genomic position for query variant1 (" + snp1 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+        else:
+            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
         snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
@@ -262,17 +261,16 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
         geno2 = vcf2[0].strip().split()
         geno2[0] = geno2[0].lstrip('chr')
 
-    if geno2[2] != snp2:
-        if "rs" in geno2[2]:
-            if "warning" in output:
-                output["warning"] = output["warning"] + \
-                    ". Genomic position for query variant2 (" + snp2 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
-            else:
-                output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+    if geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]:
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". Genomic position for query variant2 (" + snp2 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+        else:
+            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
+                ") does not match RS number at 1000G position (chr" + \
+                geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
         snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:
@@ -572,23 +570,26 @@ def main():
     import sys
 
     # Import LDpair options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 7:
         snp1 = sys.argv[1]
         snp2 = sys.argv[2]
         pop = sys.argv[3]
         web = sys.argv[4]
-        request = sys.argv[5]
-    elif sys.argv[4] is False:
+        genome_build = sys.argv[5]
+        request = sys.argv[6]
+    elif len(sys.argv) == 6:
         snp1 = sys.argv[1]
         snp2 = sys.argv[2]
         pop = sys.argv[3]
+        web = sys.argv[4]
+        genome_build = sys.argv[5]
         request = str(time.strftime("%I%M%S"))
     else:
         print("Correct useage is: LDpair.py snp1 snp2 populations request false")
         sys.exit()
 
     # Run function
-    out_json = calculate_pair(snp1, snp2, pop, web, request)
+    out_json = calculate_pair(snp1, snp2, pop, web, genome_build, request)
 
     # Print output
     json_dict = json.loads(out_json)

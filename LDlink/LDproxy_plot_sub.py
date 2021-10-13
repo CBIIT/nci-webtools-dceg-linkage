@@ -14,7 +14,7 @@ import threading
 import weakref
 from multiprocessing.dummy import Pool
 import math
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # LDproxy subprocess to export bokeh to high quality images in the background
 
@@ -34,7 +34,7 @@ def chunkWindow(pos, window, num_subprocesses):
         newMin = newMax + 1
     return chunks
 
-def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
+def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
@@ -82,7 +82,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -131,18 +131,19 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     pop_ids = list(set(ids))
 
     # Extract query SNP phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coord['chromosome'])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord['chromosome']))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
+        return None
 
-    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
+    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
     head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
 
     tabix_snp =  export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_query_snp_file, snp_coord['chromosome'], snp_coord['position_grch37'], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + "GRCh37")
+        vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     subprocess.call(tabix_snp, shell=True)
 
     # Check SNP is in the 1000G population, has the correct RS number, and not
@@ -159,6 +160,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
         for i in range(len(vcf)):
             if vcf[i].strip().split()[2] == snp:
                 geno = vcf[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')
         if geno == []:
             subprocess.call("rm " + tmp_dir + "pops_" +
                             request + ".txt", shell=True)
@@ -167,9 +169,10 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
             return None
     else:
         geno = vcf[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
 
-    if geno[2] != snp:
-        snp = geno[2]
+    if geno[2] != snp and snp[0:2]=="rs" and "rs" in geno[2]:
+            snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
         subprocess.call("rm " + tmp_dir + "pops_" +
@@ -199,16 +202,16 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Define window of interest around query SNP
     # window = 500000
-    coord1 = int(snp_coord['position_grch37']) - window
+    coord1 = int(snp_coord[genome_build_vars[genome_build]['position']]) - window
     if coord1 < 0:
         coord1 = 0
-    coord2 = int(snp_coord['position_grch37']) + window
+    coord2 = int(snp_coord[genome_build_vars[genome_build]['position']]) + window
 
     # Calculate proxy LD statistics in parallel
     # threads = 4
     # block = (2 * window) // 4
     # block = (2 * window) // num_subprocesses
-    windowChunkRanges = chunkWindow(int(snp_coord['position_grch37']), window, num_subprocesses)
+    windowChunkRanges = chunkWindow(int(snp_coord[genome_build_vars[genome_build]['position']]), window, num_subprocesses)
 
     commands = []
     # for i in range(num_subprocesses):
@@ -229,7 +232,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        getWindowVariantsArgs = " ".join(["True", str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id)])
+        getWindowVariantsArgs = " ".join(["True", str(snp), str(snp_coord['chromosome']), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), genome_build, str(subprocess_id)])
         commands.append("python3 LDproxy_sub.py " + getWindowVariantsArgs)
 
     processes = [subprocess.Popen(
@@ -467,8 +470,8 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     # Gene Plot
     # Get genes from LDproxy.py tmp output files
-    filename = tmp_dir + "genes_" + request + ".txt"
-    genes_raw = open(filename).readlines()
+    genes_file = tmp_dir + "genes_" + request + ".json"
+    genes_raw = open(genes_file).readlines()
 
     genes_plot_start = []
     genes_plot_end = []
@@ -487,22 +490,22 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     if genes_raw != None and len(genes_raw) > 0:
         for gene_raw_obj in genes_raw:
             gene_obj = json.loads(gene_raw_obj)
-            bin = gene_obj['bin']
-            name_id = gene_obj['name']
-            chrom = gene_obj['chrom']
-            strand = gene_obj['strand']
-            txStart = gene_obj['txStart']
-            txEnd = gene_obj['txEnd']
-            cdsStart = gene_obj['cdsStart']
-            cdsEnd = gene_obj['cdsEnd']
-            exonCount = gene_obj['exonCount']
-            exonStarts = gene_obj['exonStarts']
-            exonEnds = gene_obj['exonEnds']
-            score = gene_obj['score']
-            name2 = gene_obj['name2']
-            cdsStartStat = gene_obj['cdsStartStat']
-            cdsEndStat = gene_obj['cdsEndStat']
-            exonFrames = gene_obj['exonFrames']
+            bin = gene_obj["bin"]
+            name_id = gene_obj["name"]
+            chrom = gene_obj["chrom"]
+            strand = gene_obj["strand"]
+            txStart = gene_obj["txStart"]
+            txEnd = gene_obj["txEnd"]
+            cdsStart = gene_obj["cdsStart"]
+            cdsEnd = gene_obj["cdsEnd"]
+            exonCount = gene_obj["exonCount"]
+            exonStarts = gene_obj["exonStarts"]
+            exonEnds = gene_obj["exonEnds"]
+            score = gene_obj["score"]
+            name2 = gene_obj["name2"]
+            cdsStartStat = gene_obj["cdsStartStat"]
+            cdsEndStat = gene_obj["cdsEndStat"] 
+            exonFrames = gene_obj["exonFrames"]
             name = name2
             id = name_id
             e_start = exonStarts.split(",")
@@ -575,8 +578,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 
     gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
                    source=source_gene_plot, fill_color="grey", line_color="grey")
-    gene_plot.xaxis.axis_label = "Chromosome " + \
-        snp_coord['chromosome'] + " Coordinate (Mb)(GRCh37)"
+    gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
     gene_plot.yaxis.axis_label = "Genes"
     gene_plot.ygrid.grid_line_color = None
     gene_plot.yaxis.axis_line_color = None
@@ -645,7 +647,7 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
     # Remove temporary files
     subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
     subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-    subprocess.call("rm " + tmp_dir + "genes_" + request + ".txt", shell=True)
+    subprocess.call("rm " + tmp_dir + "genes_" + request + ".json", shell=True)
     subprocess.call("rm " + tmp_dir + "recomb_" + request + ".txt", shell=True)
 
     # Return plot output
@@ -654,23 +656,19 @@ def calculate_proxy_svg(snp, pop, request, r2_d="r2", window=500000):
 def main():
 
     # Import LDproxy options
-    if len(sys.argv) == 5:
-        snp = sys.argv[1]
-        pop = sys.argv[2]
-        request = False
-        r2_d = "r2"
-        window = sys.argv[3]
-    elif len(sys.argv) == 6:
+    if len(sys.argv) == 7:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
-        r2_d = sys.argv[4]
-        window = sys.argv[5]
+        genome_build = sys.argv[4]
+        r2_d = sys.argv[5]
+        window = sys.argv[6]
+        collapseTranscript = sys.argv[7]
     else:
         sys.exit()
 
     # Run function
-    calculate_proxy_svg(snp, pop, request, r2_d, int(window))
+    calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript)
 
 
 if __name__ == "__main__":

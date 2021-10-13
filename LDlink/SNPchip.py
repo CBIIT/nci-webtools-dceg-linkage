@@ -153,7 +153,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -234,9 +234,13 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
     output["warning"] = ""
     output["error"] = ""
     if warn != [] and len(rs_nums) != 0:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)+".\n"
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
     elif len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates.\n"
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -365,12 +369,13 @@ def main():
         snplst = sys.argv[2]
         platform_query = sys.argv[3]
         request = sys.argv[4]
+        genome_build = sys.argv[5]
     else:
         print("Correct useage is: SNPchip.py false snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\"")
         sys.exit()
 
     # Run function
-    calculate_chip(snplst, platform_query, web, request)
+    calculate_chip(snplst, platform_query, web, request, genome_build)
 
 
 if __name__ == "__main__":

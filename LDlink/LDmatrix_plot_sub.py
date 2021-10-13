@@ -10,10 +10,10 @@ import botocore
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
-def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
+def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
@@ -78,7 +78,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
         
@@ -127,11 +127,13 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
-                        snp_coords.append(temp)
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
+                        # check if variant is on chrY for genome build = GRCh38
+                        if not (snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage")):
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
 
     # Check max distance between SNPs
     distance_bp = []
@@ -141,19 +143,19 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [snp_coords[0][1] + ":" +
-                    str(i) + "-" + str(i) for i in snp_pos_int]
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
+        return None
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + "GRCh37")
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -200,6 +202,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
         if geno[1] not in snp_pos:
             continue
 
@@ -228,6 +231,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
             found = "false"
             while count <= 2 and count + g < len(vcf):
                 geno_next = vcf[g + count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
@@ -586,8 +590,8 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 
     # Gene Plot
     # Get genes from LDmatrix.py output file
-    filename = tmp_dir + "genes_" + request + ".txt"
-    genes_raw = open(filename).readlines()
+    genes_file = tmp_dir + "genes_" + request + ".json"
+    genes_raw = open(genes_file).readlines()
 
     genes_plot_start = []
     genes_plot_end = []
@@ -607,23 +611,22 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     if genes_raw != None and len(genes_raw) > 0:
         for gene_raw_obj in genes_raw:
             gene_obj = json.loads(gene_raw_obj)
-            print("gene_obj", gene_obj)
-            bin = gene_obj['bin']
-            name_id = gene_obj['name']
-            chrom = gene_obj['chrom']
-            strand = gene_obj['strand']
-            txStart = gene_obj['txStart']
-            txEnd = gene_obj['txEnd']
-            cdsStart = gene_obj['cdsStart']
-            cdsEnd = gene_obj['cdsEnd']
-            exonCount = gene_obj['exonCount']
-            exonStarts = gene_obj['exonStarts']
-            exonEnds = gene_obj['exonEnds']
-            score = gene_obj['score']
-            name2 = gene_obj['name2']
-            cdsStartStat = gene_obj['cdsStartStat']
-            cdsEndStat = gene_obj['cdsEndStat']
-            exonFrames = gene_obj['exonFrames']
+            bin = gene_obj["bin"]
+            name_id = gene_obj["name"]
+            chrom = gene_obj["chrom"]
+            strand = gene_obj["strand"]
+            txStart = gene_obj["txStart"]
+            txEnd = gene_obj["txEnd"]
+            cdsStart = gene_obj["cdsStart"]
+            cdsEnd = gene_obj["cdsEnd"]
+            exonCount = gene_obj["exonCount"]
+            exonStarts = gene_obj["exonStarts"]
+            exonEnds = gene_obj["exonEnds"]
+            score = gene_obj["score"]
+            name2 = gene_obj["name2"]
+            cdsStartStat = gene_obj["cdsStartStat"]
+            cdsEndStat = gene_obj["cdsEndStat"] 
+            exonFrames = gene_obj["exonFrames"]
             name = name2
             id = name_id
             e_start = exonStarts.split(",")
@@ -716,7 +719,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
     #                    text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
     gene_plot.xaxis.axis_label = "Chromosome " + \
-        snp_coords[1][1] + " Coordinate (Mb)(GRCh37)"
+        snp_coords[1][1] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
     gene_plot.yaxis.axis_label = "Genes"
     gene_plot.ygrid.grid_line_color = None
     gene_plot.yaxis.axis_line_color = None
@@ -783,7 +786,7 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
                     request + ".svg", shell=True)
     # Remove temporary file(s)
     subprocess.call("rm " + tmp_dir + "genes_" + 
-                    request + ".txt", shell=True)
+                    request + ".json", shell=True)
 
     reset_output()
 
@@ -792,21 +795,25 @@ def calculate_matrix_svg(snplst, pop, request, r2_d="r2"):
 def main():
 
     # Import LDmatrix options
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 5:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
+        genome_build = sys.argv[4]
         r2_d = "r2"
-    elif len(sys.argv) == 5:
+        collapseTranscript = True
+    elif len(sys.argv) == 7:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
-        r2_d = sys.argv[4]
+        genome_build = sys.argv[4]
+        r2_d = sys.argv[5]
+        collapseTranscript = sys.argv[6]
     else:
         sys.exit()
 
     # Run function
-    calculate_matrix_svg(snplst, pop, request, r2_d)
+    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript)
 
 
 if __name__ == "__main__":

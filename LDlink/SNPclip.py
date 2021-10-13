@@ -174,9 +174,9 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                         if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
-                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             warn.append(snp_i[0])
                             details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37."]
                         else:
@@ -203,7 +203,11 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             return("", "", "")
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
@@ -232,7 +236,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
@@ -353,6 +357,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             found = "false"
             while count <= 2 and count+g < len(vcf):
                 geno_next = vcf[g+count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
@@ -449,25 +454,28 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import SNPclip options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         web = sys.argv[1]
         snplst = sys.argv[2]
         pop = sys.argv[3]
         request = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_threshold = 0.10
-        maf_threshold = 0.01
-    elif len(sys.argv) == 6:
-        web = sys.argv[1]
-        snplst = sys.argv[2]
-        pop = sys.argv[3]
-        request = sys.argv[4]
-        r2_threshold = sys.argv[5]
         maf_threshold = 0.01
     elif len(sys.argv) == 7:
         web = sys.argv[1]
-        snplst = sys.argv[3]
-        pop = sys.argv[4]
-        request = sys.argv[5]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        genome_build = sys.argv[5]
+        r2_threshold = sys.argv[6]
+        maf_threshold = 0.01
+    elif len(sys.argv) == 8:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_threshold = sys.argv[6]
         maf_threshold = sys.argv[7]
     else:
@@ -476,7 +484,7 @@ def main():
 
     # Run function
     snps, thin_list, details = calculate_clip(
-        snplst, pop, request, web, r2_threshold, maf_threshold)
+        snplst, pop, request, web, genome_build, r2_threshold, maf_threshold)
 
     # Print output
     with open(tmp_dir+"clip"+request+".json") as f:

@@ -26,10 +26,11 @@ genome_build_vars = {
         "gene_begin": "begin_grch37",
         "gene_end": "end_grch37",
         "refGene": "refGene_grch37",
-        "recomb": "37",
+        "recomb_file": "genetic_map_autosomes_combined_b37.txt.gz",
         "1000G_dir": "GRCh37",
         "1000G_file": "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz",
-        "1000G_chr_prefix": ""
+        "1000G_chr_prefix": "",
+        "ldassoc_example_file": "prostate_example_grch37.txt"
     },
     "grch38": {
         "title": "GRCh38",
@@ -39,10 +40,11 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "refGene": "refGene_grch38",
-        "recomb": "38",
+        "recomb_file": "genetic_map_autosomes_combined_b38.txt.gz",
         "1000G_dir": "GRCh38",
         "1000G_file": "ALL.chr%s.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz",
-        "1000G_chr_prefix": ""
+        "1000G_chr_prefix": "",
+        "ldassoc_example_file": "prostate_example_grch38.txt"
     },
     "grch38_high_coverage": {
         "title": "GRCh38 High Coverage",
@@ -52,10 +54,11 @@ genome_build_vars = {
         "gene_begin": "begin_grch38",
         "gene_end": "end_grch38",
         "refGene": "refGene_grch38",
-        "recomb": "",
+        "recomb_file": "genetic_map_autosomes_combined_b38.txt.gz",
         "1000G_dir": "GRCh38_High_Coverage",
         "1000G_file": "CCDG_14151_B01_GRM_WGS_2020-08-05_chr%s.filtered.shapeit2-duohmm-phased.vcf.gz",
-        "1000G_chr_prefix": "chr"
+        "1000G_chr_prefix": "chr",
+        "ldassoc_example_file": "prostate_example_grch38.txt"
     }
 }
 
@@ -117,11 +120,11 @@ def get_rsnum(db, coord, genome_build):
     temp_coord = coord.strip("chr").split(":")
     chro = temp_coord[0]
     pos = temp_coord[1]
-    query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
+    query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-def getRefGene(db, filename, chromosome, begin, end, genome_build):
+def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTranscript):
     query_results = db[genome_build_vars[genome_build]['refGene']].find({
         "chrom": "chr" + chromosome, 
         "$or": [

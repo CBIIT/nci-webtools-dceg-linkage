@@ -72,7 +72,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, genome_build_vars[genome_build]['position']: pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -138,9 +138,9 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                         if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
-                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             warn.append(snp_i[0])
                         else:
                             rs_nums.append(snp_i[0])
@@ -155,7 +155,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 warn.append(snp_i[0])
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + output["warning"]
@@ -186,17 +190,15 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1]+":" +
-                     str(i)+"-"+str(i) for i in snp_pos_int]
-    tabix_coords = " "+" ".join(snp_coord_str)
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
+    tabix_coords = " " + " ".join(snp_coord_str)
 
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        output["error"] = "1000G data cannot be reached."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        print("Internal Server Error: Data cannot be reached")
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
@@ -282,6 +284,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             found = "false"
             while count <= 2 and count+g < len(vcf):
                 geno_next = vcf[g+count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
@@ -439,7 +442,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
 def main():
     # Import LDLink options
-    if len(sys.argv) == 4:
+    if len(sys.argv) == 6:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]

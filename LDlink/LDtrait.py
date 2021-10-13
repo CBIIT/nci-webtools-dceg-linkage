@@ -200,7 +200,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     output = {}
 
     # Validate genome build param
-    print("genome_build " + genome_build)
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
         return(json.dumps(output, sort_keys=True, indent=2))
@@ -347,9 +346,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                     if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                         if "warning" in output:
                             output["warning"] = output["warning"] + \
-                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         else:
-                            output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                         warn.append(snp_i[0])
                         queryWarnings.append([snp_i[0], "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37."])
                     else:
@@ -375,7 +374,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
 
     # generate warnings for query variants not found in dbsnp
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
@@ -504,10 +507,12 @@ def main():
     request = 8888
     web = False
     r2_d = "r2"
+    genome_build = "grch37"
     r2_d_threshold = 0.1
+    window=500000
 
     # Run function
-    (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, r2_d_threshold)
+    (sanitized_query_snps, thinned_list, details) = calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold, window)
     print("query_snps", sanitized_query_snps)
     print("thinned_snps", thinned_list)
     print("details", json.dumps(details))
