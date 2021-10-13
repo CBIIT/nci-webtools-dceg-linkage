@@ -26,7 +26,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	dbsnp_version = config['data']['dbsnp_version']
 	data_dir = config['data']['data_dir']
 	tmp_dir = config['data']['tmp_dir']
-	refgene_dir = config['data']['refgene_dir']
 	recomb_dir = config['data']['recomb_dir']
 	population_samples_dir = config['data']['population_samples_dir']
 	genotypes_dir = config['data']['genotypes_dir']
@@ -1028,12 +1027,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
 	rug.toolbar_location=None
 
-
-	# Gene Plot (All Transcripts)
-	genes_file = tmp_dir + "genes_" + request + ".json"
-	genes_json = getRefGene(db, genes_file, chromosome, coord1, coord2, genome_build)
-
+	print("myargs.transcript", myargs.transcript)
 	if myargs.transcript==True:
+		# Gene Plot (All Transcripts)
+		genes_file = tmp_dir + "genes_" + request + ".json"
+		genes_json = getRefGene(db, genes_file, chromosome, coord1, coord2, genome_build, False)
+
 		genes_plot_start=[]
 		genes_plot_end=[]
 		genes_plot_y=[]
@@ -1195,16 +1194,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# Gene Plot (Collapsed)
 	else:
-		gene_c_filePath = "%s/%ssorted_refGene_collapsed_3.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
-		gene_c_file = "s3://%s/%s" % (config['aws']['bucket'], gene_c_filePath)
+		genes_c_file = tmp_dir + "genes_c_" + request + ".json"
+		genes_c_json = getRefGene(db, genes_c_file, chromosome, coord1, coord2, genome_build, True)
 
-		if not checkS3File(aws_info, config['aws']['bucket'], gene_c_filePath):
-			print("Internal Server Error: Data cannot be reached")
-		
-		tabix_gene_c= export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_c_file, chromosome, coord1, coord2, tmp_dir+"genes_c_"+request+".txt", data_dir + refgene_dir)
-		subprocess.call(tabix_gene_c, shell=True)
-		filename_c=tmp_dir+"genes_c_"+request+".txt"
-		genes_c_raw=open(filename_c).readlines()
+		# filename_c=tmp_dir+"genes_c_"+request+".txt"
+		# genes_c_raw=open(filename_c).readlines()
 
 		genes_c_plot_start=[]
 		genes_c_plot_end=[]
@@ -1220,12 +1214,32 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		lines_c=[0]
 		gap=80000
 		tall=0.75
-		if genes_c_raw!=None:
-			for i in range(len(genes_c_raw)):
-				chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
-				e_start=exonStarts.split(",")
-				e_end=exonEnds.split(",")
-				e_transcripts=transcripts.split(",")
+		if genes_c_json != None and len(genes_c_json) > 0:
+			for gene_c_obj in genes_c_json:
+				bin = gene_c_obj["bin"]
+				name_id = gene_c_obj["name"]
+				chrom = gene_c_obj["chrom"]
+				strand = gene_c_obj["strand"]
+				txStart = gene_c_obj["txStart"]
+				txEnd = gene_c_obj["txEnd"]
+				cdsStart = gene_c_obj["cdsStart"]
+				cdsEnd = gene_c_obj["cdsEnd"]
+				exonCount = gene_c_obj["exonCount"]
+				exonStarts = gene_c_obj["exonStarts"]
+				exonEnds = gene_c_obj["exonEnds"]
+				score = gene_c_obj["score"]
+				name2 = gene_c_obj["name2"]
+				cdsStartStat = gene_c_obj["cdsStartStat"]
+				cdsEndStat = gene_c_obj["cdsEndStat"] 
+				exonFrames = gene_c_obj["exonFrames"]
+				name = name2
+				id = name_id
+				e_start = exonStarts.split(",")
+				e_end = exonEnds.split(",")
+
+				# chrom,txStart,txEnd,name,exonStarts,exonEnds,transcripts=genes_c_raw[i].strip().split()
+				# e_transcripts=transcripts.split(",")
+				e_transcripts = e_start
 
 				# Determine Y Coordinate
 				i=0
@@ -1245,8 +1259,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				genes_c_plot_y.append(y_coord)
 				genes_c_plot_name.append(name+"  ")
 
-				for i in range(len(e_start)):
-
+				# for i in range(len(e_start)):
+				for i in range(len(e_start)-1):
 					width=(int(e_end[i])-int(e_start[i]))/1000000.0
 					x_coord=int(e_start[i])/1000000.0+(width/2)
 

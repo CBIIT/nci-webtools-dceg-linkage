@@ -997,6 +997,8 @@ function createExpressQueryWarningsTable() {
 
 }
 
+
+
 function createTraitDetailsTable() {
 
     var ldtraitDetailsTable = $('#new-ldtrait').DataTable( {
@@ -1016,22 +1018,9 @@ function createTraitDetailsTable() {
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
-                    // Round floats to 4 decimal places 
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
-                        if (parseFloat(data) == 1.0) {
-                            return "1.0";
-                        } else if (parseFloat(data) == 0.0) {
-                            return "0.0";
-                        } else if (parseFloat(data) <= 0.0001) {
-                            return "<0.0001"
-                        } else {
-                            return parseFloat(data).toFixed(3);
-                        }
-                    }
+                    return ldtrait_parse_float(data);
                 },
-                "targets": [ 4, 5, 8 ]
+                "targets": [ 8 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -1075,8 +1064,15 @@ function createTraitDetailsTable() {
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair 
-                    return ldtrait_ldpair_results_link(data, type, row);
+                    var snp1 = row[6][0];
+                    var snp2 = row[6][1];
+                    var pops = row[6][2];
+                    return ldtrait_ldpair_results_link(snp1, snp2, pops, data);
                 },
+                "targets": [ 4, 5 ]
+            },
+            {
+                "bVisible": false,
                 "targets": 6
             },
             {
@@ -1498,12 +1494,7 @@ function ldexpress_gwas_catalog_link(data, type, row) {
     return link;
 }
 
-function ldtrait_ldpair_results_link(data, type, row) {
-    // parse data
-    // console.log(data);
-    var snp1 = data[0];
-    var snp2 = data[1];
-    var pops = data[2];
+function ldtrait_ldpair_results_link(snp1, snp2, pops, data) {
     var server = window.location.origin + '/?tab=ldpair';
     var params = {
         var1: snp1,
@@ -1511,8 +1502,25 @@ function ldtrait_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + ldtrait_parse_float(data).toString() + '</a>';
     return link;
+}
+
+function ldtrait_parse_float(data) {
+    // Round floats to 4 decimal places 
+    if (typeof data === 'string' || data instanceof String) {
+        return data;
+    } else {
+        if (parseFloat(data) == 1.0) {
+            return "1.0";
+        } else if (parseFloat(data) == 0.0) {
+            return "0.0";
+        } else if (parseFloat(data) <= 0.0001) {
+            return "<0.0001"
+        } else {
+            return parseFloat(data).toFixed(3);
+        }
+    }
 }
 
 function ldexpress_Gencode_link(data, type, row) {

@@ -124,7 +124,7 @@ def get_rsnum(db, coord, genome_build):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-def getRefGene(db, filename, chromosome, begin, end, genome_build):
+def getRefGene(db, filename, chromosome, begin, end, genome_build, isCollapsed):
     query_results = db[genome_build_vars[genome_build]['refGene']].find({
         "chrom": "chr" + chromosome, 
         "$or": [

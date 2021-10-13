@@ -753,7 +753,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     # Gene Plot
     genes_file = tmp_dir + "genes_" + request + ".json"
-    genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build)
+    genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
 
     genes_plot_start = []
     genes_plot_end = []
