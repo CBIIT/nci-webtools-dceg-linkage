@@ -456,9 +456,11 @@ def ldassoc():
     filename = secure_filename(request.args.get('filename', False))
     region = request.args.get('calculateRegion')
     pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
     print('filename: ' + filename)
     print('region: ' + region)
     print('pop: ' + pop)
+    print('genome build: ', genome_build)
     myargs.dprime = bool(request.args.get("dprime") == "True")
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
@@ -506,7 +508,7 @@ def ldassoc():
         reference = request.args.get('reference', False)
         print('reference: ' + reference)
         try:
-            out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
+            out_json = calculate_assoc(filename, region, pop, reference, genome_build, web, myargs)
         except:
             return sendTraceback(None)
     else:
@@ -530,6 +532,7 @@ def ldexpress():
     p_threshold = data['p_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -540,7 +543,7 @@ def ldexpress():
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             try:
                 express = {}
-                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
                 express["query_snps"] = query_snps
                 express["thinned_snps"] = thinned_snps
                 express["thinned_genes"] = thinned_genes
@@ -572,7 +575,7 @@ def ldexpress():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
             # with open(tmp_dir + "express" + reference + ".json") as f:
             #     json_dict = json.load(f)
             if "error" in errors_warnings:
@@ -717,7 +720,6 @@ def ldmatrix():
             try:
                 out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             except:
-                print("reach3")
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -945,10 +947,7 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ', snps)
     print('pop: ', pop)
     print('r2_d: ', r2_d)
@@ -1054,6 +1053,7 @@ def snpchip():
     logInfo("Execute snpchip.")
     data = json.loads(request.stream.read())
     snps = data['snps']
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     platforms = data['platforms']
     token = request.args.get('token', False)
     print('snps: ' + snps)
@@ -1070,7 +1070,7 @@ def snpchip():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                snp_chip = calculate_chip(snplst, platforms, web, reference)
+                snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
             except:
                 return sendTraceback(None)
@@ -1087,7 +1087,7 @@ def snpchip():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            snp_chip = calculate_chip(snplst, platforms, web, reference)
+            snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             # display api out
             try:
                 # unlock token then display api output
@@ -1120,10 +1120,7 @@ def snpclip():
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_threshold: ' + r2_threshold)
