@@ -3507,7 +3507,8 @@ function updateLDmatrix() {
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
         genome_build: genomeBuild,
-        r2_d : r2_d
+        r2_d : r2_d,
+        collapseTranscript: $("#matrix_collapse_transcripts").hasClass('active')
     };
     //console.log('ldmatrixInputs');
     //console.dir(ldmatrixInputs);
@@ -3708,7 +3709,8 @@ function updateLDproxy() {
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
         genome_build: genomeBuild,
         r2_d : r2_d,
-        window: windowSize
+        window: windowSize,
+        collapseTranscript: $("#proxy_collapse_transcripts").hasClass('active')
     };
 
     updateHistoryURL(id, ldproxyInputs);

@@ -35,7 +35,7 @@ def chunkWindow(pos, window, num_subprocesses):
     return chunks
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=500000):
+def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
 
     # trim any whitespace
     snp = snp.lower().strip()
@@ -551,363 +551,367 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     outfile.close()
     track.close()
 
-    # Organize scatter plot data
-    q_rs = []
-    q_allele = []
-    q_coord = []
-    q_maf = []
-    p_rs = []
-    p_allele = []
-    p_coord = []
-    p_maf = []
-    dist = []
-    d_prime = []
-    d_prime_round = []
-    r2 = []
-    r2_round = []
-    corr_alleles = []
-    regdb = []
-    funct = []
-    color = []
-    size = []
-    for i in range(len(out_ld_sort)):
-        q_rs_i, q_allele_i, q_coord_i, p_rs_i, p_allele_i, p_coord_i, dist_i, d_prime_i, r2_i, corr_alleles_i, regdb_i, q_maf_i, p_maf_i, funct_i, dist_abs = out_ld_sort[
-            i]
-
-        if float(r2_i) > 0.01:
-            q_rs.append(q_rs_i)
-            q_allele.append(q_allele_i)
-            q_coord.append(float(q_coord_i.split(":")[1]) / 1000000)
-            q_maf.append(str(round(float(q_maf_i), 4)))
-            if p_rs_i == ".":
-                p_rs_i = p_coord_i
-            p_rs.append(p_rs_i)
-            p_allele.append(p_allele_i)
-            p_coord.append(float(p_coord_i.split(":")[1]) / 1000000)
-            p_maf.append(str(round(float(p_maf_i), 4)))
-            dist.append(str(round(dist_i / 1000000.0, 4)))
-            d_prime.append(float(d_prime_i))
-            d_prime_round.append(str(round(float(d_prime_i), 4)))
-            r2.append(float(r2_i))
-            r2_round.append(str(round(float(r2_i), 4)))
-            corr_alleles.append(corr_alleles_i)
-
-            # Correct Missing Annotations
-            if regdb_i == ".":
-                regdb_i = ""
-            regdb.append(regdb_i)
-            if funct_i == ".":
-                funct_i = ""
-            if funct_i == "NA":
-                funct_i = "none"
-            funct.append(funct_i)
-
-            # Set Color
-            if i == 0:
-                color_i = "blue"
-            elif funct_i != "none" and funct_i != "":
-                color_i = "red"
-            else:
-                color_i = "orange"
-            color.append(color_i)
-
-            # Set Size
-            size_i = 9 + float(p_maf_i) * 14.0
-            size.append(size_i)
-
-    # Begin Bokeh Plotting
-    from collections import OrderedDict
-    from bokeh.embed import components, file_html
-    from bokeh.layouts import gridplot
-    from bokeh.models import HoverTool, LinearAxis, Range1d
-    from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
-    from bokeh.resources import CDN
-
-    reset_output()
-
-    # Proxy Plot
-    x = p_coord
-    if r2_d == "r2":
-        y = r2
-    else:
-        y = d_prime
-    whitespace = 0.01
-    xr = Range1d(start=coord1 / 1000000.0 - whitespace,
-                 end=coord2 / 1000000.0 + whitespace)
-    yr = Range1d(start=-0.03, end=1.03)
-    sup_2 = "\u00B2"
-
-    proxy_plot = figure(
-        title="Proxies for " + snp + " in " + pop,
-        min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-        plot_width=900,
-        plot_height=600,
-        x_range=xr, y_range=yr,
-        tools="hover,tap,pan,box_zoom,box_select,undo,redo,reset,previewsave", logo=None,
-        toolbar_location="above")
-
-    proxy_plot.title.align = "center"
-
-    recomb_filePath = "%s/%s%s" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb_file"])
-    recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
-
-    if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
-        print("Internal Server Error: Data cannot be reached")
-
-    tabix_recomb = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt", data_dir + recomb_dir)
-    subprocess.call(tabix_recomb, shell=True)
-    filename = tmp_dir + "recomb_" + request + ".txt"
-    recomb_raw = open(filename).readlines()
-    recomb_x = []
-    recomb_y = []
-    for i in range(len(recomb_raw)):
-        chr, pos, rate = recomb_raw[i].strip().split()
-        recomb_x.append(int(pos) / 1000000.0)
-        recomb_y.append(float(rate) / 100.0)
-
-    data = {
-        'x': x,
-        'y': y,
-        'qrs': q_rs,
-        'q_alle': q_allele,
-        'q_maf': q_maf,
-        'prs': p_rs,
-        'p_alle': p_allele,
-        'p_maf': p_maf,
-        'dist': dist,
-        'r': r2_round,
-        'd': d_prime_round,
-        'alleles': corr_alleles,
-        'regdb': regdb,
-        'funct': funct,
-        'size': size,
-        'color': color
-    }
-    source = ColumnDataSource(data)
-
-    proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
-
-    proxy_plot.circle(x='x', y='y', size='size',
-                      color='color', alpha=0.5, source=source)
-
-    hover = proxy_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Query Variant", "@qrs @q_alle"),
-        ("Proxy Variant", "@prs @p_alle"),
-        ("Distance (Mb)", "@dist"),
-        ("MAF (Query,Proxy)", "@q_maf,@p_maf"),
-        ("R" + sup_2, "@r"),
-        ("D\'", "@d"),
-        ("Correlated Alleles", "@alleles"),
-        ("RegulomeDB", "@regdb"),
-        ("Functional Class", "@funct"),
-    ])
-
-    proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
-                    text_baseline="middle", text_align="center", angle=0)
-
-    if r2_d == "r2":
-        proxy_plot.yaxis.axis_label = "R" + sup_2
-    else:
-        proxy_plot.yaxis.axis_label = "D\'"
-
-    proxy_plot.extra_y_ranges = {"y2_axis": Range1d(start=-3, end=103)}
-    proxy_plot.add_layout(LinearAxis(y_range_name="y2_axis",
-                                     axis_label="Combined Recombination Rate (cM/Mb)"), "right")
-
-    # Rug Plot
-    y2_ll = [-0.03] * len(x)
-    y2_ul = [1.03] * len(x)
-    yr_rug = Range1d(start=-0.03, end=1.03)
-
-    data_rug = {
-        'x': x,
-        'y': y,
-        'y2_ll': y2_ll,
-        'y2_ul': y2_ul,
-        'qrs': q_rs,
-        'q_alle': q_allele,
-        'q_maf': q_maf,
-        'prs': p_rs,
-        'p_alle': p_allele,
-        'p_maf': p_maf,
-        'dist': dist,
-        'r': r2_round,
-        'd': d_prime_round,
-        'alleles': corr_alleles,
-        'regdb': regdb,
-        'funct': funct,
-        'size': size,
-        'color': color
-    }
-    source_rug = ColumnDataSource(data_rug)
-
-    rug = figure(
-        x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
-        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-        plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
-
-    rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug,
-                color='color', alpha=0.5, line_width=1)
-    rug.toolbar_location = None
-
-    # Gene Plot
-    genes_file = tmp_dir + "genes_" + request + ".json"
-    genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
-
-    genes_plot_start = []
-    genes_plot_end = []
-    genes_plot_y = []
-    genes_plot_name = []
-    exons_plot_x = []
-    exons_plot_y = []
-    exons_plot_w = []
-    exons_plot_h = []
-    exons_plot_name = []
-    exons_plot_id = []
-    exons_plot_exon = []
-    lines = [0]
-    gap = 80000
-    tall = 0.75
-    if genes_json != None and len(genes_json) > 0:
-        for gene_obj in genes_json:
-            bin = gene_obj["bin"]
-            name_id = gene_obj["name"]
-            chrom = gene_obj["chrom"]
-            strand = gene_obj["strand"]
-            txStart = gene_obj["txStart"]
-            txEnd = gene_obj["txEnd"]
-            cdsStart = gene_obj["cdsStart"]
-            cdsEnd = gene_obj["cdsEnd"]
-            exonCount = gene_obj["exonCount"]
-            exonStarts = gene_obj["exonStarts"]
-            exonEnds = gene_obj["exonEnds"]
-            score = gene_obj["score"]
-            name2 = gene_obj["name2"]
-            cdsStartStat = gene_obj["cdsStartStat"]
-            cdsEndStat = gene_obj["cdsEndStat"] 
-            exonFrames = gene_obj["exonFrames"]
-            name = name2
-            id = name_id
-            e_start = exonStarts.split(",")
-            e_end = exonEnds.split(",")
-
-            # Determine Y Coordinate
-            i = 0
-            y_coord = None
-            while y_coord == None:
-                if i > len(lines) - 1:
-                    y_coord = i + 1
-                    lines.append(int(txEnd))
-                elif int(txStart) > (gap + lines[i]):
-                    y_coord = i + 1
-                    lines[i] = int(txEnd)
-                else:
-                    i += 1
-
-            genes_plot_start.append(int(txStart) / 1000000.0)
-            genes_plot_end.append(int(txEnd) / 1000000.0)
-            genes_plot_y.append(y_coord)
-            genes_plot_name.append(name + "  ")
-
-            for i in range(len(e_start) - 1):
-                if strand == "+":
-                    exon = i + 1
-                else:
-                    exon = len(e_start) - 1 - i
-
-                width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
-                x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
-
-                exons_plot_x.append(x_coord)
-                exons_plot_y.append(y_coord)
-                exons_plot_w.append(width)
-                exons_plot_h.append(tall)
-                exons_plot_name.append(name)
-                exons_plot_id.append(id)
-                exons_plot_exon.append(exon)
-
-    n_rows = len(lines)
-    genes_plot_yn = [n_rows - x + 0.5 for x in genes_plot_y]
-    exons_plot_yn = [n_rows - x + 0.5 for x in exons_plot_y]
-    yr2 = Range1d(start=0, end=n_rows)
-
-    data_gene_plot = {
-        'exons_plot_x': exons_plot_x,
-        'exons_plot_yn': exons_plot_yn,
-        'exons_plot_w': exons_plot_w,
-        'exons_plot_h': exons_plot_h,
-        'exons_plot_name': exons_plot_name,
-        'exons_plot_id': exons_plot_id,
-        'exons_plot_exon': exons_plot_exon
-    }
-
-    source_gene_plot = ColumnDataSource(data_gene_plot)
-
-    if len(lines) < 3:
-        plot_h_pix = 150
-    else:
-        plot_h_pix = 150 + (len(lines) - 2) * 50
-
-    gene_plot = figure(
-        x_range=xr, y_range=yr2, border_fill_color='white',
-        title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-        plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
-
-    gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
-                      genes_plot_yn, color="black", alpha=1, line_width=2)
-
-    gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                   source=source_gene_plot, fill_color="grey", line_color="grey")
-    gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
-    gene_plot.yaxis.axis_label = "Genes"
-    gene_plot.ygrid.grid_line_color = None
-    gene_plot.yaxis.axis_line_color = None
-    gene_plot.yaxis.minor_tick_line_color = None
-    gene_plot.yaxis.major_tick_line_color = None
-    gene_plot.yaxis.major_label_text_color = None
-
-    hover = gene_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Gene", "@exons_plot_name"),
-        ("ID", "@exons_plot_id"),
-        ("Exon", "@exons_plot_exon"),
-    ])
-
-    gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-                   text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-
-    gene_plot.toolbar_location = "below"
-
-    # Combine plots into a grid
-    out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
-                        toolbar_options=dict(logo=None))
-
-    # Generate high quality images only if accessed via web instance
+    out_script = ""
+    out_div = ""
+    
     if web:
+        # Organize scatter plot data
+        q_rs = []
+        q_allele = []
+        q_coord = []
+        q_maf = []
+        p_rs = []
+        p_allele = []
+        p_coord = []
+        p_maf = []
+        dist = []
+        d_prime = []
+        d_prime_round = []
+        r2 = []
+        r2_round = []
+        corr_alleles = []
+        regdb = []
+        funct = []
+        color = []
+        size = []
+        for i in range(len(out_ld_sort)):
+            q_rs_i, q_allele_i, q_coord_i, p_rs_i, p_allele_i, p_coord_i, dist_i, d_prime_i, r2_i, corr_alleles_i, regdb_i, q_maf_i, p_maf_i, funct_i, dist_abs = out_ld_sort[
+                i]
+
+            if float(r2_i) > 0.01:
+                q_rs.append(q_rs_i)
+                q_allele.append(q_allele_i)
+                q_coord.append(float(q_coord_i.split(":")[1]) / 1000000)
+                q_maf.append(str(round(float(q_maf_i), 4)))
+                if p_rs_i == ".":
+                    p_rs_i = p_coord_i
+                p_rs.append(p_rs_i)
+                p_allele.append(p_allele_i)
+                p_coord.append(float(p_coord_i.split(":")[1]) / 1000000)
+                p_maf.append(str(round(float(p_maf_i), 4)))
+                dist.append(str(round(dist_i / 1000000.0, 4)))
+                d_prime.append(float(d_prime_i))
+                d_prime_round.append(str(round(float(d_prime_i), 4)))
+                r2.append(float(r2_i))
+                r2_round.append(str(round(float(r2_i), 4)))
+                corr_alleles.append(corr_alleles_i)
+
+                # Correct Missing Annotations
+                if regdb_i == ".":
+                    regdb_i = ""
+                regdb.append(regdb_i)
+                if funct_i == ".":
+                    funct_i = ""
+                if funct_i == "NA":
+                    funct_i = "none"
+                funct.append(funct_i)
+
+                # Set Color
+                if i == 0:
+                    color_i = "blue"
+                elif funct_i != "none" and funct_i != "":
+                    color_i = "red"
+                else:
+                    color_i = "orange"
+                color.append(color_i)
+
+                # Set Size
+                size_i = 9 + float(p_maf_i) * 14.0
+                size.append(size_i)
+
+        # Begin Bokeh Plotting
+        from collections import OrderedDict
+        from bokeh.embed import components, file_html
+        from bokeh.layouts import gridplot
+        from bokeh.models import HoverTool, LinearAxis, Range1d
+        from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
+        from bokeh.resources import CDN
+
+        reset_output()
+
+        # Proxy Plot
+        x = p_coord
+        if r2_d == "r2":
+            y = r2
+        else:
+            y = d_prime
+        whitespace = 0.01
+        xr = Range1d(start=coord1 / 1000000.0 - whitespace,
+                    end=coord2 / 1000000.0 + whitespace)
+        yr = Range1d(start=-0.03, end=1.03)
+        sup_2 = "\u00B2"
+
+        proxy_plot = figure(
+            title="Proxies for " + snp + " in " + pop,
+            min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+            plot_width=900,
+            plot_height=600,
+            x_range=xr, y_range=yr,
+            tools="hover,tap,pan,box_zoom,box_select,undo,redo,reset,previewsave", logo=None,
+            toolbar_location="above")
+
+        proxy_plot.title.align = "center"
+
+        recomb_filePath = "%s/%s%s" % (config['aws']['data_subfolder'], recomb_dir, genome_build_vars[genome_build]["recomb_file"])
+        recomb_file = "s3://%s/%s" % (config['aws']['bucket'], recomb_filePath)
+
+        if not checkS3File(aws_info, config['aws']['bucket'], recomb_filePath):
+            print("Internal Server Error: Data cannot be reached")
+
+        tabix_recomb = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(recomb_file, snp_coord['chromosome'], coord1 - whitespace, coord2 + whitespace, tmp_dir + "recomb_" + request + ".txt", data_dir + recomb_dir)
+        subprocess.call(tabix_recomb, shell=True)
+        filename = tmp_dir + "recomb_" + request + ".txt"
+        recomb_raw = open(filename).readlines()
+        recomb_x = []
+        recomb_y = []
+        for i in range(len(recomb_raw)):
+            chr, pos, rate = recomb_raw[i].strip().split()
+            recomb_x.append(int(pos) / 1000000.0)
+            recomb_y.append(float(rate) / 100.0)
+
+        data = {
+            'x': x,
+            'y': y,
+            'qrs': q_rs,
+            'q_alle': q_allele,
+            'q_maf': q_maf,
+            'prs': p_rs,
+            'p_alle': p_allele,
+            'p_maf': p_maf,
+            'dist': dist,
+            'r': r2_round,
+            'd': d_prime_round,
+            'alleles': corr_alleles,
+            'regdb': regdb,
+            'funct': funct,
+            'size': size,
+            'color': color
+        }
+        source = ColumnDataSource(data)
+
+        proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
+
+        proxy_plot.circle(x='x', y='y', size='size',
+                        color='color', alpha=0.5, source=source)
+
+        hover = proxy_plot.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("Query Variant", "@qrs @q_alle"),
+            ("Proxy Variant", "@prs @p_alle"),
+            ("Distance (Mb)", "@dist"),
+            ("MAF (Query,Proxy)", "@q_maf,@p_maf"),
+            ("R" + sup_2, "@r"),
+            ("D\'", "@d"),
+            ("Correlated Alleles", "@alleles"),
+            ("RegulomeDB", "@regdb"),
+            ("Functional Class", "@funct"),
+        ])
+
+        proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
+                        text_baseline="middle", text_align="center", angle=0)
+
+        if r2_d == "r2":
+            proxy_plot.yaxis.axis_label = "R" + sup_2
+        else:
+            proxy_plot.yaxis.axis_label = "D\'"
+
+        proxy_plot.extra_y_ranges = {"y2_axis": Range1d(start=-3, end=103)}
+        proxy_plot.add_layout(LinearAxis(y_range_name="y2_axis",
+                                        axis_label="Combined Recombination Rate (cM/Mb)"), "right")
+
+        # Rug Plot
+        y2_ll = [-0.03] * len(x)
+        y2_ul = [1.03] * len(x)
+        yr_rug = Range1d(start=-0.03, end=1.03)
+
+        data_rug = {
+            'x': x,
+            'y': y,
+            'y2_ll': y2_ll,
+            'y2_ul': y2_ul,
+            'qrs': q_rs,
+            'q_alle': q_allele,
+            'q_maf': q_maf,
+            'prs': p_rs,
+            'p_alle': p_allele,
+            'p_maf': p_maf,
+            'dist': dist,
+            'r': r2_round,
+            'd': d_prime_round,
+            'alleles': corr_alleles,
+            'regdb': regdb,
+            'funct': funct,
+            'size': size,
+            'color': color
+        }
+        source_rug = ColumnDataSource(data_rug)
+
+        rug = figure(
+            x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
+            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+            plot_width=900, plot_height=50, tools="xpan,tap", logo=None)
+
+        rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug,
+                    color='color', alpha=0.5, line_width=1)
+        rug.toolbar_location = None
+
+        # Gene Plot
+        genes_file = tmp_dir + "genes_" + request + ".json"
+        genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
+
+        genes_plot_start = []
+        genes_plot_end = []
+        genes_plot_y = []
+        genes_plot_name = []
+        exons_plot_x = []
+        exons_plot_y = []
+        exons_plot_w = []
+        exons_plot_h = []
+        exons_plot_name = []
+        exons_plot_id = []
+        exons_plot_exon = []
+        lines = [0]
+        gap = 80000
+        tall = 0.75
+        if genes_json != None and len(genes_json) > 0:
+            for gene_obj in genes_json:
+                bin = gene_obj["bin"]
+                name_id = gene_obj["name"]
+                chrom = gene_obj["chrom"]
+                strand = gene_obj["strand"]
+                txStart = gene_obj["txStart"]
+                txEnd = gene_obj["txEnd"]
+                cdsStart = gene_obj["cdsStart"]
+                cdsEnd = gene_obj["cdsEnd"]
+                exonCount = gene_obj["exonCount"]
+                exonStarts = gene_obj["exonStarts"]
+                exonEnds = gene_obj["exonEnds"]
+                score = gene_obj["score"]
+                name2 = gene_obj["name2"]
+                cdsStartStat = gene_obj["cdsStartStat"]
+                cdsEndStat = gene_obj["cdsEndStat"] 
+                exonFrames = gene_obj["exonFrames"]
+                name = name2
+                id = name_id
+                e_start = exonStarts.split(",")
+                e_end = exonEnds.split(",")
+
+                # Determine Y Coordinate
+                i = 0
+                y_coord = None
+                while y_coord == None:
+                    if i > len(lines) - 1:
+                        y_coord = i + 1
+                        lines.append(int(txEnd))
+                    elif int(txStart) > (gap + lines[i]):
+                        y_coord = i + 1
+                        lines[i] = int(txEnd)
+                    else:
+                        i += 1
+
+                genes_plot_start.append(int(txStart) / 1000000.0)
+                genes_plot_end.append(int(txEnd) / 1000000.0)
+                genes_plot_y.append(y_coord)
+                genes_plot_name.append(name + "  ")
+
+                for i in range(len(e_start) - 1):
+                    if strand == "+":
+                        exon = i + 1
+                    else:
+                        exon = len(e_start) - 1 - i
+
+                    width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
+                    x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
+
+                    exons_plot_x.append(x_coord)
+                    exons_plot_y.append(y_coord)
+                    exons_plot_w.append(width)
+                    exons_plot_h.append(tall)
+                    exons_plot_name.append(name)
+                    exons_plot_id.append(id)
+                    exons_plot_exon.append(exon)
+
+        n_rows = len(lines)
+        genes_plot_yn = [n_rows - x + 0.5 for x in genes_plot_y]
+        exons_plot_yn = [n_rows - x + 0.5 for x in exons_plot_y]
+        yr2 = Range1d(start=0, end=n_rows)
+
+        data_gene_plot = {
+            'exons_plot_x': exons_plot_x,
+            'exons_plot_yn': exons_plot_yn,
+            'exons_plot_w': exons_plot_w,
+            'exons_plot_h': exons_plot_h,
+            'exons_plot_name': exons_plot_name,
+            'exons_plot_id': exons_plot_id,
+            'exons_plot_exon': exons_plot_exon
+        }
+
+        source_gene_plot = ColumnDataSource(data_gene_plot)
+
+        if len(lines) < 3:
+            plot_h_pix = 150
+        else:
+            plot_h_pix = 150 + (len(lines) - 2) * 50
+
+        gene_plot = figure(
+            x_range=xr, y_range=yr2, border_fill_color='white',
+            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+            plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
+
+        gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+                        genes_plot_yn, color="black", alpha=1, line_width=2)
+
+        gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
+                    source=source_gene_plot, fill_color="grey", line_color="grey")
+        gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
+        gene_plot.yaxis.axis_label = "Genes"
+        gene_plot.ygrid.grid_line_color = None
+        gene_plot.yaxis.axis_line_color = None
+        gene_plot.yaxis.minor_tick_line_color = None
+        gene_plot.yaxis.major_tick_line_color = None
+        gene_plot.yaxis.major_label_text_color = None
+
+        hover = gene_plot.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("Gene", "@exons_plot_name"),
+            ("ID", "@exons_plot_id"),
+            ("Exon", "@exons_plot_exon"),
+        ])
+
+        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+                    text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+
+        gene_plot.toolbar_location = "below"
+
+        # Combine plots into a grid
+        out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
+                            toolbar_options=dict(logo=None))
+
+        # Generate high quality images only if accessed via web instance
+        
         # Open thread for high quality image exports
-        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window)
+        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window) + " " + collapseTranscript
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
-    ###########################
-    # Html output for testing #
-    ###########################
-    #html=file_html(out_grid, CDN, "Test Plot")
-    # out_html=open("LDproxy.html","w")
-    #print >> out_html, html
-    # out_html.close()
+        ###########################
+        # Html output for testing #
+        ###########################
+        #html=file_html(out_grid, CDN, "Test Plot")
+        # out_html=open("LDproxy.html","w")
+        #print >> out_html, html
+        # out_html.close()
 
-    out_script, out_div = components(out_grid, CDN)
-    reset_output()
+        out_script, out_div = components(out_grid, CDN)
+        reset_output()
 
-    # Print run time statistics
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
-    print("\nNumber of Individuals: " + str(len(pop_list)))
+        # Print run time statistics
+        pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
+        print("\nNumber of Individuals: " + str(len(pop_list)))
 
-    print("SNPs in Region: " + str(len(out_prox)))
+        print("SNPs in Region: " + str(len(out_prox)))
 
-    duration = time.time() - start_time
-    print("Run time: " + str(duration) + " seconds\n")
+        duration = time.time() - start_time
+        print("Run time: " + str(duration) + " seconds\n")
 
     # Return plot output
     return(out_script, out_div)
@@ -922,18 +926,22 @@ def main():
         request = False
         web = sys.argv[4]
         r2_d = "r2"
+        window = 500000
+        collapseTranscript = True
     elif len(sys.argv) == 6:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
         r2_d = sys.argv[5]
+        window = 500000
+        collapseTranscript = True
     else:
         print("Correct useage is: LDproxy.py snp populations request (optional: r2_d)")
         sys.exit()
 
     # Run function
-    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d, 500000)
+    out_script, out_div, error_msg = calculate_proxy(snp, pop, request, web, r2_d, window, collapseTranscript)
 
     # Print output
     with open(tmp_dir + "proxy" + request + ".json") as f:

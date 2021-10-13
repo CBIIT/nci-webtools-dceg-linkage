@@ -690,6 +690,7 @@ def ldmatrix():
         reference = data['reference'] if 'reference' in data else False
         r2_d = data['r2_d'] if 'r2_d' in data else False
         genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
+        collapseTranscript = data['collapseTranscript'] if 'collapseTranscript' in data else True
     else:
         # GET REQUEST
         snps = request.args.get('snps', False)
@@ -697,11 +698,13 @@ def ldmatrix():
         reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
         genome_build = request.args.get('genome_build', 'grch37')
+        collapseTranscript = request.args.get('collapseTranscript', True)
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_d: ' + r2_d)
     print('genome build: ' + genome_build)
+    print('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -714,7 +717,7 @@ def ldmatrix():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d)
+                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             except:
                 return sendTraceback(None)
         else:
@@ -730,7 +733,7 @@ def ldmatrix():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             # display api out
             try:
                 # unlock token then display api output
@@ -881,11 +884,13 @@ def ldproxy():
     window = request.args.get('window', '500000').replace(',', '')
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
+    collapseTranscript = request.args.get('collapseTranscript', True)
     print('var: ', var)
     print('pop: ',  pop)
     print('r2_d: ',  r2_d)
     print('window: ',  window)
     print('genome build: ', genome_build)
+    print('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -895,7 +900,7 @@ def ldproxy():
             reference = request.args.get('reference', False)
             print('request: ' + str(reference))
             try:
-                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window))
+                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             except:
                 return sendTraceback(None)
         else:
@@ -908,7 +913,7 @@ def ldproxy():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window))
+            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             # display api out
             try:
                 # unlock token then display api output

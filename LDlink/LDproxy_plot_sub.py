@@ -34,7 +34,7 @@ def chunkWindow(pos, window, num_subprocesses):
         newMin = newMax + 1
     return chunks
 
-def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000):
+def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
@@ -663,11 +663,12 @@ def main():
         genome_build = sys.argv[4]
         r2_d = sys.argv[5]
         window = sys.argv[6]
+        collapseTranscript = sys.argv[7]
     else:
         sys.exit()
 
     # Run function
-    calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window))
+    calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript)
 
 
 if __name__ == "__main__":

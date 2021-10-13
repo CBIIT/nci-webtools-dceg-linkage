@@ -512,9 +512,9 @@
 													 style="width:90px;"><span style="margin-left:10px;">base pair window</span>
 												</div>
 												<div class="form-group">
-													<label for="region-gene-index" style="display:none;">Index variant (optional)</label>
-													<input type="text" id="region-gene-index" class="form-control" placeholder="Index variant (optional)"
-													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
+													<label for="region-gene-index" style="display:none;">Index RSID (optional)</label>
+													<input type="text" id="region-gene-index" class="form-control" placeholder="Index RSID (optional)"
+													 pattern="(^rs\d+$)">
 												</div>
 											</div>
 											<!-- region = Region -->
@@ -534,9 +534,9 @@
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div>
-													<label for="region-region-index" style="display:none;">Index variant (optional)</label>
-													<input type="text" id="region-region-index" class="form-control" style="width:300px;" placeholder="Index variant (optional)"
-													 pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
+													<label for="region-region-index" style="display:none;">Index RSID (optional)</label>
+													<input type="text" id="region-region-index" class="form-control" style="width:300px;" placeholder="Index RSID (optional)"
+													 pattern="(^rs\d+$)">
 												</div>
 											</div>
 											<!-- region = Variant -->
@@ -544,8 +544,8 @@
 												<a id="ldassoc-variant-index-pop" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
-													<label for="region-variant-index" style="display:none;">RS Number or Genomic Coordinate (optional)</label>
-													<input type="text" id="region-variant-index" class="form-control" style="width:225px" placeholder="RS Number or Genomic Coordinate" pattern="(^rs\d+$)|(^chr(\d{1,2}|(x|y|X|Y)):\d+$)">
+													<label for="region-variant-index" style="display:none;">Index RSID</label>
+													<input type="text" id="region-variant-index" class="form-control" style="width:225px" placeholder="Variant RSID" pattern="(^rs\d+$)">
 												</div>
 												<div class="form-group">
 													<a id="ldassoc-variant-bp-pop" style="position:relative;left:95px;top:5px"  data-toggle="popover"
@@ -1182,21 +1182,25 @@
 								</div>
 							</div>
 							<div class="form-group">
-								<!-- COLUMN4 - sm-2 -->
-								<!-- <div class="col-sm-2 col-sm-offset-1">
-									<div class="btn-group" data-toggle="buttons" title="Select heat map variable">
-										<label id="matrix_color_r2" class="btn btn-default active">
-											<input type="radio" name="options" autocomplete="off" checked> R<sup>2</sup>
+								<div class="col-sm-2">
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDmatrix">Collapse transcripts: </a>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<div title="Choose to show all or collapse transcripts" data-toggle="buttons" class="btn-group flag-switches">
+										<label class="btn btn-default active" id="matrix_collapse_transcripts" title="Collapse transcripts">
+											<input type="radio" checked="" autocomplete="off" name="options">Yes
 										</label>
-										<label class="btn btn-default">
-											<input type="radio" name="options" autocomplete="off"> D'
+										<label class="btn btn-default" title="Show transcripts">
+											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
-								</div> -->
+								</div>
 							</div>
 							<div class="form-group">
 								<!-- COLUMN5 - sm-2 -->
-								<div class="col-sm-2">
+								<div class="col-sm-1">
 									<input type="submit" id="ldmatrix" value="Calculate" class="btn btn-default calculate" />
 								</div>
 							</div>
@@ -1261,16 +1265,16 @@
 						<form id="ldpairForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpair-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpair-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpair-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpair-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
@@ -1441,16 +1445,16 @@
 						<form id="ldpopForm" class="ldlinkForm">
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpop-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpop-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
 
 							<div class="form-group">
 								<div class="col-sm-3">
-									<input id="ldpop-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RS Number or Coordinate"
-									 title="Enter a RS number or Genomic Coordinate" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									<input id="ldpop-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RSID or CHR:POS"
+									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
@@ -1730,14 +1734,14 @@
 						<!-- LDProxy FORM -->
 						<form id="ldproxyForm" class="ldlinkForm">
 							<div class="form-group">
-								<div class="col-sm-3">
-									<input id="ldproxy-snp" name="snp" type="text" class="form-control" placeholder="Variant RS Number or Coordinate"
-									 title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" style="width:215px;" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+								<div class="col-sm-2">
+									<input id="ldproxy-snp" name="snp" type="text" class="form-control" placeholder="Variant RSID or CHR:POS"
+									 title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" style="width:180px;" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
 									 required />
 								</div>
 							</div>
 							<div class="form-group">
-								<div class="col-sm-3">
+								<div class="col-sm-2">
 									<a id="ldproxy-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
 									 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">Population
 											codes</span></a>
@@ -1752,12 +1756,28 @@
 							</div>
 							<div class="form-group">
 								<div class="col-sm-2">
-									<div title="Select pairwise value" data-toggle="buttons" class="btn-group">
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDproxy">LD Measure: </a>
+									</div>
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDproxy">Collapse transcripts: </a>
+									</div>
+								</div>
+								<div class="col-sm-2">
+									<div title="Select pairwise value" data-toggle="buttons" class="btn-group flag-switches">
 										<label class="btn btn-default active" id="proxy_color_r2">
 											<input type="radio" checked="" autocomplete="off" name="options"> R<sup>2</sup>
 										</label>
 										<label class="btn btn-default">
 											<input type="radio" autocomplete="off" name="options"> D'
+										</label>
+									</div>
+									<div title="Choose to show all or collapse transcripts" data-toggle="buttons" class="btn-group flag-switches">
+										<label class="btn btn-default active" id="proxy_collapse_transcripts" title="Collapse transcripts">
+											<input type="radio" checked="" autocomplete="off" name="options">Yes
+										</label>
+										<label class="btn btn-default" title="Show transcripts">
+											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
 								</div>

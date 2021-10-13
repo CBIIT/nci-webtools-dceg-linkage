@@ -13,7 +13,7 @@ import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
 
 # Create LDmatrix function
-def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2"):
+def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
@@ -494,7 +494,10 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             temp_r.append(str(ld_matrix[i][j][8]))
         print("\t".join(temp_d), file=d_out)
         print("\t".join(temp_r), file=r_out)
-        
+
+    out_script = ""
+    out_div = ""
+
     if web:
         # Generate Plot Variables
         out = [j for i in ld_matrix for j in i]
@@ -948,7 +951,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         # Generate high quality images only if accessed via web instance
         
         # Open thread for high quality image exports
-        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d
+        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
         ###########################
@@ -962,12 +965,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         out_script, out_div = components(out_grid, CDN)
         reset_output()
 
-        # Return output
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return(out_script, out_div)
-    return("", "")
+    # Return output
+    json_output = json.dumps(output, sort_keys=True, indent=2)
+    print(json_output, file=out_json)
+    out_json.close()
+    return(out_script, out_div)
 
 def main():
     tmp_dir = "./tmp/"
@@ -980,19 +982,21 @@ def main():
         web = sys.argv[4]
         genome_build = sys.argv[5]
         r2_d = "r2"
-    elif len(sys.argv) == 7:
+        collapseTranscript = True
+    elif len(sys.argv) == 8:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
-        r2_d = sys.argv[5]
-        genome_build = sys.argv[6]
+        genome_build = sys.argv[5]
+        r2_d = sys.argv[6]
+        collapseTranscript = sys.argv[7]
     else:
         print("Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)")
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", r2_d, genome_build)
+    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", genome_build, r2_d, collapseTranscript)
 
     # Print output
     with open(tmp_dir + "matrix" + request + ".json") as f:

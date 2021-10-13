@@ -13,7 +13,7 @@ import subprocess
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
-def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2"):
+def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
@@ -801,17 +801,19 @@ def main():
         request = sys.argv[3]
         genome_build = sys.argv[4]
         r2_d = "r2"
-    elif len(sys.argv) == 6:
+        collapseTranscript = True
+    elif len(sys.argv) == 7:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         genome_build = sys.argv[4]
         r2_d = sys.argv[5]
+        collapseTranscript = sys.argv[6]
     else:
         sys.exit()
 
     # Run function
-    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d)
+    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript)
 
 
 if __name__ == "__main__":
