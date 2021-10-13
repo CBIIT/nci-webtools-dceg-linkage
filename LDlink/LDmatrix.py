@@ -10,19 +10,18 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
 
 # Create LDmatrix function
-def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
+def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
-    refgene_dir = config['data']['refgene_dir']
     population_samples_dir = config['data']['population_samples_dir']
     genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
@@ -31,6 +30,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     mongo_port = config['database']['mongo_port']
 
     export_s3_keys = retrieveAWSCredentials()
+    
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -39,6 +39,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     # Create JSON output
     out_json = open(tmp_dir + "matrix" + request + ".json", "w")
     output = {}
+
+    # Validate genome build param
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "")
 
     # Open SNP list file
     snps_raw = open(snplst).readlines()
@@ -106,7 +114,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -166,11 +174,20 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
-                        rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], snp_coord['chromosome'], snp_coord['position_grch37']]
-                        snp_coords.append(temp)
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
+                        # check if variant is on chrY for genome build = GRCh38
+                        if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
+                            if "warning" in output:
+                                output["warning"] = output["warning"] + \
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            else:
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                            warn.append(snp_i[0])
+                        else:
+                            rs_nums.append(snp_i[0])
+                            snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                            temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
+                            snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
                 else:
@@ -180,7 +197,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     # Check RS numbers were found
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates."
@@ -216,19 +237,18 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [snp_coords[0][1] + ":" +
-                     str(i) + "-" + str(i) for i in snp_pos_int]
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, snp_coords[0][1])
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + "GRCh37")
+        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
 
     # Define function to correct indel alleles
@@ -283,13 +303,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
 
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
         if geno[1] not in snp_pos:
             if "warning" in output:
-                output["warning"] = output["warning"] + ". Genomic position (" + geno[
-                    1] + ") in VCF file does not match db" + dbsnp_version + " search coordinates for query variant"
+                output["warning"] = output["warning"] + ". Genomic position (" + geno[1] + ") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             else:
-                output["warning"] = "Genomic position (" + geno[
-                    1] + ") in VCF file does not match db" + dbsnp_version + " search coordinates for query variant"
+                output["warning"] = "Genomic position (" + geno[1] + ") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
             continue
 
         if snp_pos.count(geno[1]) == 1:
@@ -317,13 +338,14 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
             found = "false"
             while count <= 2 and count + g < len(vcf):
                 geno_next = vcf[g + count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
                 count += 1
 
             if found == "false":
-                if rs_1000g != ".":
+                if "rs" in rs_1000g:
                     if "warning" in output:
                         output["warning"] = output[
                             "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
@@ -473,467 +495,475 @@ def calculate_matrix(snplst, pop, request, web, request_method, r2_d="r2"):
         print("\t".join(temp_d), file=d_out)
         print("\t".join(temp_r), file=r_out)
 
-    # Generate Plot Variables
-    out = [j for i in ld_matrix for j in i]
-    xnames = []
-    ynames = []
-    xA = []
-    yA = []
-    corA = []
-    xpos = []
-    ypos = []
-    D = []
-    R = []
-    box_color = []
-    box_trans = []
+    out_script = ""
+    out_div = ""
 
-    if r2_d not in ["r2", "d"]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + ". " + r2_d + \
-                " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-        else:
-            output["warning"] = r2_d + \
-                " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
-        r2_d = "r2"
-
-    for i in range(len(out)):
-        snp1, snp2, allele1, allele2, corr, pos1, pos2, D_prime, r2 = out[i]
-        xnames.append(snp1)
-        ynames.append(snp2)
-        xA.append(allele1)
-        yA.append(allele2)
-        corA.append(corr)
-        xpos.append(pos1)
-        ypos.append(pos2)
-        sqrti = math.floor(math.sqrt(len(out)))
-        if sqrti == 0:
-            D.append(str(round(float(D_prime), 4)))
-            R.append(str(round(float(r2), 4)))
-            box_color.append("red")
-            box_trans.append(r2)
-        elif i%sqrti < i//sqrti and r2 != "NA":
-            D.append(str(round(float(D_prime), 4)))
-            R.append(str(round(float(r2), 4)))
-            box_color.append("blue")
-            box_trans.append(abs(D_prime))
-        elif i%sqrti > i//sqrti and D_prime != "NA":
-            D.append(str(round(float(D_prime), 4)))
-            R.append(str(round(float(r2), 4)))
-            box_color.append("red")
-            box_trans.append(r2)
-        elif i%sqrti == i//sqrti and D_prime != "NA":
-            D.append(str(round(float(D_prime), 4)))
-            R.append(str(round(float(r2), 4)))
-            box_color.append("purple")
-            box_trans.append(r2)
-        else:
-            D.append("NA")
-            R.append("NA")
-            box_color.append("gray")
-            box_trans.append(0.1)
-    # Import plotting modules
-    from collections import OrderedDict
-    from bokeh.embed import components, file_html
-    from bokeh.layouts import gridplot
-    from bokeh.models import HoverTool, LinearAxis, Range1d
-    from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
-    from bokeh.resources import CDN
-    from math import pi
-
-    reset_output()
-
-    # Aggregate Plotting Data
-    x = []
-    y = []
-    w = []
-    h = []
-    coord_snps_plot = []
-    snp_id_plot = []
-    alleles_snp_plot = []
-    for i in range(0, len(xpos), int(len(xpos)**0.5)):
-        x.append(int(xpos[i].split(":")[1]) / 1000000.0)
-        y.append(0.5)
-        w.append(0.00003)
-        h.append(1.06)
-        coord_snps_plot.append(xpos[i])
-        snp_id_plot.append(xnames[i])
-        alleles_snp_plot.append(xA[i])
-
-    print("early x", x)
-
-    # Generate error if less than two SNPs
-    if len(x) < 2:
-        output["error"] = "Less than two variants to plot."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "")
-
-    buffer = (x[-1] - x[0]) * 0.025
-    xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
-    yr = Range1d(start=-0.03, end=1.03)
-    y2_ll = [-0.03] * len(x)
-    y2_ul = [1.03] * len(x)
-
-    yr_pos = Range1d(start=(x[-1] + buffer) * -1, end=(x[0] - buffer) * -1)
-    yr0 = Range1d(start=0, end=1)
-    yr2 = Range1d(start=0, end=3.8)
-    yr3 = Range1d(start=0, end=1)
-
-    spacing = (x[-1] - x[0] + buffer + buffer) / (len(x) * 1.0)
-    x2 = []
-    y0 = []
-    y1 = []
-    y2 = []
-    y3 = []
-    y4 = []
-    for i in range(len(x)):
-        x2.append(x[0] - buffer + spacing * (i + 0.5))
-        y0.append(0)
-        y1.append(0.20)
-        y2.append(0.80)
-        y3.append(1)
-        y4.append(1.15)
-
-    xname_pos = []
-    for i in x2:
-        for j in range(len(x2)):
-            xname_pos.append(i)
-
-    data = {
-        'xname': xnames,
-        'xname_pos': xname_pos,
-        'yname': ynames,
-        'xA': xA,
-        'yA': yA,
-        'xpos': xpos,
-        'ypos': ypos,
-        'R2': R,
-        'Dp': D,
-        'corA': corA,
-        'box_color': box_color,
-        'box_trans': box_trans
-    }
-
-    # Delete redundant data
-    # startidx = []
-    # Isolate indices of elements in y=x
-    # for xidx, xn in enumerate(data['xname']):
-    # for yidx, yn in enumerate(data['yname']):
-    # if xn == yn and xidx == yidx:
-    # startidx.append(xidx)
-    # Flatten list snps
-    # flat_snps = [item for sublist in snps for item in sublist]
-    # Reverse flattend snp list
-    # rev_snps = list(reversed(flat_snps))
-    # get index of every appearance of last snp in snplst
-    # recsnp = rev_snps[-1]
-    # print "snps", rev_snps
-    # print "recsnp", recsnp
-    # print "data[yname]", data['yname']
-    # recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
-    # print "recsnp_idx", recsnp_idx
-    # Add range of indices between y=x and height of y at x
-    # newidx = []
-    # print "startidx", startidx
-    # print "recsnp_idx", recsnp_idx
-    # for i in range(0, len(startidx)):
-    #     if startidx[i] != recsnp_idx[i]:
-    #         newidx.append(range(startidx[i], recsnp_idx[i]))
-    #         newidx.append([recsnp_idx[i]])
-    #     else:
-    #         newidx.append([startidx[i]])
-    # Flatten list indices
-    # flat_newidx = [item for sublist in newidx for item in sublist]
-    # Add only whitelisted indices to new data dict
-    # new_data = {}
-    # for key in data:
-    #     new_data[key] = []
-    #     for idx, val in enumerate(data[key]):
-    #         if idx in flat_newidx:
-    #             new_data[key].append(val)
-
-    # debug prints for 45 degree rotation
-    # print "###################################"
-    # print "START - debug prints for 45 degree rotation"
-    # for i in data:
-    #     print (i, data[i])
-    # print "###################################"
-    # for i in new_data:
-    #     print (i, new_data[i])
-    # print "END   - debug prints for 45 degree rotation"
-    # print "###################################"
-
-    # source = ColumnDataSource(new_data)
-    source = ColumnDataSource(data)
-
-    threshold = 70
-    if len(snps) < threshold:
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
-                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-        # CHANGE AXIS LABELS & LINE COLOR:
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
-        #                     x_range=xr, y_range=list(rsnum_lst),
-        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
-        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-
-    else:
-        matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
-                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                             h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                             tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-        # CHANGE AXIS LABELS & LINE COLOR:
-        # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
-        #                     x_range=xr, y_range=list(rsnum_lst),
-        #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
-        #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
-
-    matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
-                     color="box_color", alpha="box_trans", line_color=None)
-    # Rotate LDmatrix 45 degrees
-    # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=0.785398, source=source,
-    #                 color="box_color", alpha="box_trans", line_color=None)
-    # print "spacing"
-    # print spacing
-    # matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
-    #                 color="box_color", alpha="box_trans", line_color=None)
-
-    matrix_plot.grid.grid_line_color = None
-    matrix_plot.axis.axis_line_color = None
-    matrix_plot.axis.major_tick_line_color = None
-    if len(snps) < threshold:
-        matrix_plot.axis.major_label_text_font_size = "8pt"
-        matrix_plot.xaxis.major_label_orientation = "vertical"
-
-    matrix_plot.axis.major_label_text_font_style = "normal"
-    matrix_plot.xaxis.major_label_standoff = 0
-
-    sup_2 = "\u00B2"
-
-    hover = matrix_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Variant 1", " " + "@yname (@yA)"),
-        ("Variant 2", " " + "@xname (@xA)"),
-        ("D\'", " " + "@Dp"),
-        ("R" + sup_2, " " + "@R2"),
-        ("Correlated Alleles", " " + "@corA"),
-    ])
-
-    # Connecting and Rug Plots
-    # Connector Plot
-    if len(snps) < threshold:
-        connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
-                           x_range=xr, y_range=yr2, border_fill_color='white',
-                           title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                           plot_width=800, plot_height=90, tools="xpan,tap")
-        connector.segment(x, y0, x, y1, color="black")
-        connector.segment(x, y1, x2, y2, color="black")
-        connector.segment(x2, y2, x2, y3, color="black")
-        connector.text(x2, y4, text=snp_id_plot, alpha=1, angle=pi / 2,
-                       text_font_size="8pt", text_baseline="middle", text_align="left")
-    else:
-        connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
-                           x_range=xr, y_range=yr3, border_fill_color='white',
-                           title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                           plot_width=800, plot_height=30, tools="xpan,tap")
-        connector.segment(x, y0, x, y1, color="black")
-        connector.segment(x, y1, x2, y2, color="black")
-        connector.segment(x2, y2, x2, y3, color="black")
-
-    connector.yaxis.major_label_text_color = None
-    connector.yaxis.minor_tick_line_alpha = 0  # Option does not work
-    connector.yaxis.axis_label = " "
-    connector.grid.grid_line_color = None
-    connector.axis.axis_line_color = None
-    connector.axis.major_tick_line_color = None
-    connector.axis.minor_tick_line_color = None
-
-    connector.toolbar_location = None
-
-    data_rug = {
-        'x': x,
-        'y': y,
-        'w': w,
-        'h': h,
-        'coord_snps_plot': coord_snps_plot,
-        'snp_id_plot': snp_id_plot,
-        'alleles_snp_plot': alleles_snp_plot
-    }
-
-    source_rug = ColumnDataSource(data_rug)
-
-    # Rug Plot
-    rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
-                 title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
-                 plot_width=800, plot_height=50, tools="hover,xpan,tap")
-    rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
-             dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
-
-    hover = rug.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("SNP", "@snp_id_plot (@alleles_snp_plot)"),
-        ("Coord", "@coord_snps_plot"),
-    ])
-
-    rug.toolbar_location = None
-
-    # Gene Plot
-    gene_filePath = "%s/%ssorted_refGene.txt.gz" % (config['aws']['data_subfolder'], refgene_dir)
-    gene_bucket_path = "s3://%s/%s" % (config['aws']['bucket'], gene_filePath)
-    
-
-    if not checkS3File(aws_info, config['aws']['bucket'], gene_filePath):
-        print("could not find sequences archive file.")
-
-    tabix_gene = export_s3_keys + " cd {5}; tabix -fhD {0} {1}:{2}-{3} > {4}".format(gene_bucket_path, snp_coords[1][1], int(
-        (x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), tmp_dir + "genes_" + request + ".txt", data_dir + refgene_dir)
-    subprocess.call(tabix_gene, shell=True)
-    filename = tmp_dir + "genes_" + request + ".txt"
-    genes_raw = open(filename).readlines()
-
-    genes_plot_start = []
-    genes_plot_end = []
-    genes_plot_y = []
-    genes_plot_name = []
-    exons_plot_x = []
-    exons_plot_y = []
-    exons_plot_w = []
-    exons_plot_h = []
-    exons_plot_name = []
-    exons_plot_id = []
-    exons_plot_exon = []
-    message = ["Too many genes to plot."]
-    lines = [0]
-    gap = 80000
-    tall = 0.75
-    if genes_raw != None:
-        for i in range(len(genes_raw)):
-            bin, name_id, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts, exonEnds, score, name2, cdsStartStat, cdsEndStat, exonFrames = genes_raw[
-                i].strip().split()
-            name = name2
-            id = name_id
-            e_start = exonStarts.split(",")
-            e_end = exonEnds.split(",")
-
-            # Determine Y Coordinate
-            i = 0
-            y_coord = None
-            while y_coord == None:
-                if i > len(lines) - 1:
-                    y_coord = i + 1
-                    lines.append(int(txEnd))
-                elif int(txStart) > (gap + lines[i]):
-                    y_coord = i + 1
-                    lines[i] = int(txEnd)
-                else:
-                    i += 1
-
-            genes_plot_start.append(int(txStart) / 1000000.0)
-            genes_plot_end.append(int(txEnd) / 1000000.0)
-            genes_plot_y.append(y_coord)
-            genes_plot_name.append(name + "  ")
-
-            for i in range(len(e_start) - 1):
-                if strand == "+":
-                    exon = i + 1
-                else:
-                    exon = len(e_start) - 1 - i
-
-                width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
-                x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
-
-                exons_plot_x.append(x_coord)
-                exons_plot_y.append(y_coord)
-                exons_plot_w.append(width)
-                exons_plot_h.append(tall)
-                exons_plot_name.append(name)
-                exons_plot_id.append(id)
-                exons_plot_exon.append(exon)
-
-    n_rows = len(lines)
-    genes_plot_yn = [n_rows - w + 0.5 for w in genes_plot_y]
-    exons_plot_yn = [n_rows - w + 0.5 for w in exons_plot_y]
-    yr2 = Range1d(start=0, end=n_rows)
-
-    data_gene_plot = {
-        'exons_plot_x': exons_plot_x,
-        'exons_plot_yn': exons_plot_yn,
-        'exons_plot_w': exons_plot_w,
-        'exons_plot_h': exons_plot_h,
-        'exons_plot_name': exons_plot_name,
-        'exons_plot_id': exons_plot_id,
-        'exons_plot_exon': exons_plot_exon,
-        'coord_snps_plot': coord_snps_plot,
-        'snp_id_plot': snp_id_plot,
-        'alleles_snp_plot': alleles_snp_plot
-    }
-
-    source_gene_plot = ColumnDataSource(data_gene_plot)
-
-    max_genes = 40
-    # if len(lines) < 3 or len(genes_raw) > max_genes:
-    if len(lines) < 3:
-        plot_h_pix = 150
-    else:
-        plot_h_pix = 150 + (len(lines) - 2) * 50
-
-    gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
-                       x_range=xr, y_range=yr2, border_fill_color='white',
-                       title="", h_symmetry=False, v_symmetry=False, logo=None,
-                       plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
-
-    # if len(genes_raw) <= max_genes:
-    gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
-                        genes_plot_yn, color="black", alpha=1, line_width=2)
-    gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                    source=source_gene_plot, fill_color='grey', line_color="grey")
-    gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-                    text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
-    hover = gene_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Gene", "@exons_plot_name"),
-        ("ID", "@exons_plot_id"),
-        ("Exon", "@exons_plot_exon"),
-    ])
-
-    # else:
-    #     x_coord_text = x[0] + (x[-1] - x[0]) / 2.0
-    #     gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
-    #                    text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
-
-    gene_plot.xaxis.axis_label = "Chromosome " + \
-        snp_coords[1][1] + " Coordinate (Mb)(GRCh37)"
-    gene_plot.yaxis.axis_label = "Genes"
-    gene_plot.ygrid.grid_line_color = None
-    gene_plot.yaxis.axis_line_color = None
-    gene_plot.yaxis.minor_tick_line_color = None
-    gene_plot.yaxis.major_tick_line_color = None
-    gene_plot.yaxis.major_label_text_color = None
-
-    gene_plot.toolbar_location = "below"
-
-    out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
-                        ncols=1, toolbar_options=dict(logo=None))
-
-    # Generate high quality images only if accessed via web instance
     if web:
+        # Generate Plot Variables
+        out = [j for i in ld_matrix for j in i]
+        xnames = []
+        ynames = []
+        xA = []
+        yA = []
+        corA = []
+        xpos = []
+        ypos = []
+        D = []
+        R = []
+        box_color = []
+        box_trans = []
+
+        if r2_d not in ["r2", "d"]:
+            if "warning" in output:
+                output["warning"] = output["warning"] + ". " + r2_d + \
+                    " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+            else:
+                output["warning"] = r2_d + \
+                    " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
+            r2_d = "r2"
+
+        for i in range(len(out)):
+            snp1, snp2, allele1, allele2, corr, pos1, pos2, D_prime, r2 = out[i]
+            xnames.append(snp1)
+            ynames.append(snp2)
+            xA.append(allele1)
+            yA.append(allele2)
+            corA.append(corr)
+            xpos.append(pos1)
+            ypos.append(pos2)
+            sqrti = math.floor(math.sqrt(len(out)))
+            if sqrti == 0:
+                D.append(str(round(float(D_prime), 4)))
+                R.append(str(round(float(r2), 4)))
+                box_color.append("red")
+                box_trans.append(r2)
+            elif i%sqrti < i//sqrti and r2 != "NA":
+                D.append(str(round(float(D_prime), 4)))
+                R.append(str(round(float(r2), 4)))
+                box_color.append("blue")
+                box_trans.append(abs(D_prime))
+            elif i%sqrti > i//sqrti and D_prime != "NA":
+                D.append(str(round(float(D_prime), 4)))
+                R.append(str(round(float(r2), 4)))
+                box_color.append("red")
+                box_trans.append(r2)
+            elif i%sqrti == i//sqrti and D_prime != "NA":
+                D.append(str(round(float(D_prime), 4)))
+                R.append(str(round(float(r2), 4)))
+                box_color.append("purple")
+                box_trans.append(r2)
+            else:
+                D.append("NA")
+                R.append("NA")
+                box_color.append("gray")
+                box_trans.append(0.1)
+        # Import plotting modules
+        from collections import OrderedDict
+        from bokeh.embed import components, file_html
+        from bokeh.layouts import gridplot
+        from bokeh.models import HoverTool, LinearAxis, Range1d
+        from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
+        from bokeh.resources import CDN
+        from math import pi
+
+        reset_output()
+
+        # Aggregate Plotting Data
+        x = []
+        y = []
+        w = []
+        h = []
+        coord_snps_plot = []
+        snp_id_plot = []
+        alleles_snp_plot = []
+        for i in range(0, len(xpos), int(len(xpos)**0.5)):
+            x.append(int(xpos[i].split(":")[1]) / 1000000.0)
+            y.append(0.5)
+            w.append(0.00003)
+            h.append(1.06)
+            coord_snps_plot.append(xpos[i])
+            snp_id_plot.append(xnames[i])
+            alleles_snp_plot.append(xA[i])
+            
+
+        print("early x", x)
+
+        # Generate error if less than two SNPs
+        if len(x) < 2:
+            output["error"] = "Less than two variants to plot."
+            json_output = json.dumps(output, sort_keys=True, indent=2)
+            print(json_output, file=out_json)
+            out_json.close()
+            return("", "")
+
+        buffer = (x[-1] - x[0]) * 0.025
+        xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
+        yr = Range1d(start=-0.03, end=1.03)
+        y2_ll = [-0.03] * len(x)
+        y2_ul = [1.03] * len(x)
+
+        yr_pos = Range1d(start=(x[-1] + buffer) * -1, end=(x[0] - buffer) * -1)
+        yr0 = Range1d(start=0, end=1)
+        yr2 = Range1d(start=0, end=3.8)
+        yr3 = Range1d(start=0, end=1)
+
+        spacing = (x[-1] - x[0] + buffer + buffer) / (len(x) * 1.0)
+        x2 = []
+        y0 = []
+        y1 = []
+        y2 = []
+        y3 = []
+        y4 = []
+        for i in range(len(x)):
+            x2.append(x[0] - buffer + spacing * (i + 0.5))
+            y0.append(0)
+            y1.append(0.20)
+            y2.append(0.80)
+            y3.append(1)
+            y4.append(1.15)
+
+        xname_pos = []
+        for i in x2:
+            for j in range(len(x2)):
+                xname_pos.append(i)
+
+        data = {
+            'xname': xnames,
+            'xname_pos': xname_pos,
+            'yname': ynames,
+            'xA': xA,
+            'yA': yA,
+            'xpos': xpos,
+            'ypos': ypos,
+            'R2': R,
+            'Dp': D,
+            'corA': corA,
+            'box_color': box_color,
+            'box_trans': box_trans
+        }
+
+        # Delete redundant data
+        # startidx = []
+        # Isolate indices of elements in y=x
+        # for xidx, xn in enumerate(data['xname']):
+        # for yidx, yn in enumerate(data['yname']):
+        # if xn == yn and xidx == yidx:
+        # startidx.append(xidx)
+        # Flatten list snps
+        # flat_snps = [item for sublist in snps for item in sublist]
+        # Reverse flattend snp list
+        # rev_snps = list(reversed(flat_snps))
+        # get index of every appearance of last snp in snplst
+        # recsnp = rev_snps[-1]
+        # print "snps", rev_snps
+        # print "recsnp", recsnp
+        # print "data[yname]", data['yname']
+        # recsnp_idx = [rid for rid, xval in enumerate(data['yname']) if xval == recsnp]
+        # print "recsnp_idx", recsnp_idx
+        # Add range of indices between y=x and height of y at x
+        # newidx = []
+        # print "startidx", startidx
+        # print "recsnp_idx", recsnp_idx
+        # for i in range(0, len(startidx)):
+        #     if startidx[i] != recsnp_idx[i]:
+        #         newidx.append(range(startidx[i], recsnp_idx[i]))
+        #         newidx.append([recsnp_idx[i]])
+        #     else:
+        #         newidx.append([startidx[i]])
+        # Flatten list indices
+        # flat_newidx = [item for sublist in newidx for item in sublist]
+        # Add only whitelisted indices to new data dict
+        # new_data = {}
+        # for key in data:
+        #     new_data[key] = []
+        #     for idx, val in enumerate(data[key]):
+        #         if idx in flat_newidx:
+        #             new_data[key].append(val)
+
+        # debug prints for 45 degree rotation
+        # print "###################################"
+        # print "START - debug prints for 45 degree rotation"
+        # for i in data:
+        #     print (i, data[i])
+        # print "###################################"
+        # for i in new_data:
+        #     print (i, new_data[i])
+        # print "END   - debug prints for 45 degree rotation"
+        # print "###################################"
+
+        # source = ColumnDataSource(new_data)
+        source = ColumnDataSource(data)
+
+        threshold = 70
+        if len(snps) < threshold:
+            matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
+                                x_range=xr, y_range=list(reversed(rsnum_lst)),
+                                h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
+                                tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+            # CHANGE AXIS LABELS & LINE COLOR:
+            # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
+            #                     x_range=xr, y_range=list(rsnum_lst),
+            #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
+            #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+
+        else:
+            matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
+                                x_range=xr, y_range=list(reversed(rsnum_lst)),
+                                h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
+                                tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+            # CHANGE AXIS LABELS & LINE COLOR:
+            # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
+            #                     x_range=xr, y_range=list(rsnum_lst),
+            #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
+            #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+
+        matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
+                        color="box_color", alpha="box_trans", line_color=None)
+        # Rotate LDmatrix 45 degrees
+        # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=0.785398, source=source,
+        #                 color="box_color", alpha="box_trans", line_color=None)
+        # print "spacing"
+        # print spacing
+        # matrix_plot.square(x='xname_pos', y='yname', size=4 * spacing, angle=0.785398, source=source,
+        #                 color="box_color", alpha="box_trans", line_color=None)
+
+        matrix_plot.grid.grid_line_color = None
+        matrix_plot.axis.axis_line_color = None
+        matrix_plot.axis.major_tick_line_color = None
+        if len(snps) < threshold:
+            matrix_plot.axis.major_label_text_font_size = "8pt"
+            matrix_plot.xaxis.major_label_orientation = "vertical"
+
+        matrix_plot.axis.major_label_text_font_style = "normal"
+        matrix_plot.xaxis.major_label_standoff = 0
+
+        sup_2 = "\u00B2"
+
+        hover = matrix_plot.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("Variant 1", " " + "@yname (@yA)"),
+            ("Variant 2", " " + "@xname (@xA)"),
+            ("D\'", " " + "@Dp"),
+            ("R" + sup_2, " " + "@R2"),
+            ("Correlated Alleles", " " + "@corA"),
+        ])
+
+        # Connecting and Rug Plots
+        # Connector Plot
+        if len(snps) < threshold:
+            connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+                            x_range=xr, y_range=yr2, border_fill_color='white',
+                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
+                            plot_width=800, plot_height=90, tools="xpan,tap")
+            connector.segment(x, y0, x, y1, color="black")
+            connector.segment(x, y1, x2, y2, color="black")
+            connector.segment(x2, y2, x2, y3, color="black")
+            connector.text(x2, y4, text=snp_id_plot, alpha=1, angle=pi / 2,
+                        text_font_size="8pt", text_baseline="middle", text_align="left")
+        else:
+            connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+                            x_range=xr, y_range=yr3, border_fill_color='white',
+                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
+                            plot_width=800, plot_height=30, tools="xpan,tap")
+            connector.segment(x, y0, x, y1, color="black")
+            connector.segment(x, y1, x2, y2, color="black")
+            connector.segment(x2, y2, x2, y3, color="black")
+
+        connector.yaxis.major_label_text_color = None
+        connector.yaxis.minor_tick_line_alpha = 0  # Option does not work
+        connector.yaxis.axis_label = " "
+        connector.grid.grid_line_color = None
+        connector.axis.axis_line_color = None
+        connector.axis.major_tick_line_color = None
+        connector.axis.minor_tick_line_color = None
+
+        connector.toolbar_location = None
+
+        data_rug = {
+            'x': x,
+            'y': y,
+            'w': w,
+            'h': h,
+            'coord_snps_plot': coord_snps_plot,
+            'snp_id_plot': snp_id_plot,
+            'alleles_snp_plot': alleles_snp_plot
+        }
+
+        source_rug = ColumnDataSource(data_rug)
+
+        # Rug Plot
+        rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
+                    title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
+                    plot_width=800, plot_height=50, tools="hover,xpan,tap")
+        rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
+                dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
+
+        hover = rug.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("SNP", "@snp_id_plot (@alleles_snp_plot)"),
+            ("Coord", "@coord_snps_plot"),
+        ])
+
+        rug.toolbar_location = None
+
+        # Gene Plot
+        genes_file = tmp_dir + "genes_" + request + ".json"
+        genes_json = getRefGene(db, genes_file, snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), genome_build, False)
+
+        genes_plot_start = []
+        genes_plot_end = []
+        genes_plot_y = []
+        genes_plot_name = []
+        exons_plot_x = []
+        exons_plot_y = []
+        exons_plot_w = []
+        exons_plot_h = []
+        exons_plot_name = []
+        exons_plot_id = []
+        exons_plot_exon = []
+        message = ["Too many genes to plot."]
+        lines = [0]
+        gap = 80000
+        tall = 0.75
+        if genes_json != None and len(genes_json) > 0:
+            for gene_obj in genes_json:
+                bin = gene_obj["bin"]
+                name_id = gene_obj["name"]
+                chrom = gene_obj["chrom"]
+                strand = gene_obj["strand"]
+                txStart = gene_obj["txStart"]
+                txEnd = gene_obj["txEnd"]
+                cdsStart = gene_obj["cdsStart"]
+                cdsEnd = gene_obj["cdsEnd"]
+                exonCount = gene_obj["exonCount"]
+                exonStarts = gene_obj["exonStarts"]
+                exonEnds = gene_obj["exonEnds"]
+                score = gene_obj["score"]
+                name2 = gene_obj["name2"]
+                cdsStartStat = gene_obj["cdsStartStat"]
+                cdsEndStat = gene_obj["cdsEndStat"] 
+                exonFrames = gene_obj["exonFrames"]
+                name = name2
+                id = name_id
+                e_start = exonStarts.split(",")
+                e_end = exonEnds.split(",")
+
+                # Determine Y Coordinate
+                i = 0
+                y_coord = None
+                while y_coord == None:
+                    if i > len(lines) - 1:
+                        y_coord = i + 1
+                        lines.append(int(txEnd))
+                    elif int(txStart) > (gap + lines[i]):
+                        y_coord = i + 1
+                        lines[i] = int(txEnd)
+                    else:
+                        i += 1
+
+                genes_plot_start.append(int(txStart) / 1000000.0)
+                genes_plot_end.append(int(txEnd) / 1000000.0)
+                genes_plot_y.append(y_coord)
+                genes_plot_name.append(name + "  ")
+
+                for i in range(len(e_start) - 1):
+                    if strand == "+":
+                        exon = i + 1
+                    else:
+                        exon = len(e_start) - 1 - i
+
+                    width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
+                    x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
+
+                    exons_plot_x.append(x_coord)
+                    exons_plot_y.append(y_coord)
+                    exons_plot_w.append(width)
+                    exons_plot_h.append(tall)
+                    exons_plot_name.append(name)
+                    exons_plot_id.append(id)
+                    exons_plot_exon.append(exon)
+
+        n_rows = len(lines)
+        genes_plot_yn = [n_rows - w + 0.5 for w in genes_plot_y]
+        exons_plot_yn = [n_rows - w + 0.5 for w in exons_plot_y]
+        yr2 = Range1d(start=0, end=n_rows)
+
+        data_gene_plot = {
+            'exons_plot_x': exons_plot_x,
+            'exons_plot_yn': exons_plot_yn,
+            'exons_plot_w': exons_plot_w,
+            'exons_plot_h': exons_plot_h,
+            'exons_plot_name': exons_plot_name,
+            'exons_plot_id': exons_plot_id,
+            'exons_plot_exon': exons_plot_exon,
+            'coord_snps_plot': coord_snps_plot,
+            'snp_id_plot': snp_id_plot,
+            'alleles_snp_plot': alleles_snp_plot
+        }
+
+        source_gene_plot = ColumnDataSource(data_gene_plot)
+
+        max_genes = 40
+        # if len(lines) < 3 or len(genes_raw) > max_genes:
+        if len(lines) < 3:
+            plot_h_pix = 150
+        else:
+            plot_h_pix = 150 + (len(lines) - 2) * 50
+
+        gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+                        x_range=xr, y_range=yr2, border_fill_color='white',
+                        title="", h_symmetry=False, v_symmetry=False, logo=None,
+                        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+
+        # if len(genes_raw) <= max_genes:
+        gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+                            genes_plot_yn, color="black", alpha=1, line_width=2)
+        gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
+                        source=source_gene_plot, fill_color='grey', line_color="grey")
+        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+        hover = gene_plot.select(dict(type=HoverTool))
+        hover.tooltips = OrderedDict([
+            ("Gene", "@exons_plot_name"),
+            ("ID", "@exons_plot_id"),
+            ("Exon", "@exons_plot_exon"),
+        ])
+
+        # else:
+        #     x_coord_text = x[0] + (x[-1] - x[0]) / 2.0
+        #     gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
+        #                    text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+
+        gene_plot.xaxis.axis_label = "Chromosome " + \
+            snp_coords[1][1] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
+        gene_plot.yaxis.axis_label = "Genes"
+        gene_plot.ygrid.grid_line_color = None
+        gene_plot.yaxis.axis_line_color = None
+        gene_plot.yaxis.minor_tick_line_color = None
+        gene_plot.yaxis.major_tick_line_color = None
+        gene_plot.yaxis.major_label_text_color = None
+
+        gene_plot.toolbar_location = "below"
+
+        out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
+                            ncols=1, toolbar_options=dict(logo=None))
+
+        # Generate high quality images only if accessed via web instance
+        
         # Open thread for high quality image exports
-        command = "python3 LDmatrix_plot_sub.py " + \
-            snplst + " " + pop + " " + request + " " + r2_d
+        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
-    ###########################
-    # Html output for testing #
-    ###########################
-    # html=file_html(out_grid, CDN, "Test Plot")
-    # out_html=open("LDmatrix.html","w")
-    # print >> out_html, html
-    # out_html.close()
+        ###########################
+        # Html output for testing #
+        ###########################
+        # html=file_html(out_grid, CDN, "Test Plot")
+        # out_html=open("LDmatrix.html","w")
+        # print >> out_html, html
+        # out_html.close()
 
-    out_script, out_div = components(out_grid, CDN)
-    reset_output()
+        out_script, out_div = components(out_grid, CDN)
+        reset_output()
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -945,24 +975,28 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import LDmatrix options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_d = "r2"
-    elif len(sys.argv) == 6:
+        collapseTranscript = True
+    elif len(sys.argv) == 8:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         web = sys.argv[4]
-        r2_d = sys.argv[5]
+        genome_build = sys.argv[5]
+        r2_d = sys.argv[6]
+        collapseTranscript = sys.argv[7]
     else:
         print("Correct useage is: LDmatrix.py snplst populations request (optional: r2_d)")
         sys.exit()
 
     # Run function
-    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", r2_d)
+    out_script, out_div = calculate_matrix(snplst, pop, request, web, "GET", genome_build, r2_d, collapseTranscript)
 
     # Print output
     with open(tmp_dir + "matrix" + request + ".json") as f:

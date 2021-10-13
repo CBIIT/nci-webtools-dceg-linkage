@@ -121,6 +121,14 @@ body {
 	background: #f2f2f2;
 }
 
+#genome-build.dropdown {
+  position: absolute;
+}
+
+#genome-build > .dropdown-toggle {
+  width: 190px !important;
+}
+
 /* Sticky footer */
 html {
   min-height: 100%;
@@ -1154,6 +1162,16 @@ textarea:invalid, .error {
   text-align: left;
 }
 #ldassoc-flag-switches {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: horizontal;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: row;
+          flex-direction: row;
+  padding-bottom: 5px;
+}
+.flag-switches {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;

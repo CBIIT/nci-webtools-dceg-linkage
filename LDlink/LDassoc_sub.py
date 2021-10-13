@@ -7,17 +7,18 @@ import botocore
 import subprocess
 import sys
 import yaml
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 snp = sys.argv[1]
 chr = sys.argv[2]
 coords = sys.argv[3]
 request = sys.argv[4]
-process = sys.argv[5]
+genome_build = sys.argv[5]
+process = sys.argv[6]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file)
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']
 data_dir = config['data']['data_dir']
@@ -40,14 +41,14 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 # Get VCF region
-vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz"  % (config['aws']['data_subfolder'], genotypes_dir, chr)
+vcf_filePath = "%s/%s%s/%s"  % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chr))
 vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
 if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-    print("could not find sequences archive file.")
+    print("Internal Server Error: Data cannot be reached")
 
 coordinates = coords.replace("_", " ")
-tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir + "GRCh37")
+tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"])
 proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
 
 
@@ -121,21 +122,27 @@ client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' 
 db = client["LDLink"]
 
 def get_regDB(chr, pos):
-    result = db.regulome.find_one({"chromosome": chr, "position": int(pos)})
+    result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]["position"]: int(pos)})
     if result is None:
         return "."   
     else:
         return result["score"]
 
-def get_coords(db, rsid):
+def get_dbsnp_rsid(db, rsid):
     rsid = rsid.strip("rs")
     query_results = db.dbsnp.find_one({"id": rsid})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
+def get_dbsnp_coord(db, chromosome, position):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 geno = vcf[0].strip().split()
+geno[0] = geno[0].lstrip('chr')
 
 new_alleles = set_alleles(geno[3], geno[4])
 allele = {"0": new_alleles[0], "1": new_alleles[1]}
@@ -162,6 +169,7 @@ for i in range(9, len(head)):
 # Loop through SNPs
 out = []
 for geno_n in vcf:
+    geno_n[0] = geno_n[0].lstrip('chr')
     if "," not in geno_n[3] and "," not in geno_n[4]:
         new_alleles_n = set_alleles(geno_n[3], geno_n[4])
         allele_n = {"0": new_alleles_n[0], "1": new_alleles_n[1]}
@@ -179,7 +187,8 @@ for geno_n in vcf:
         out_stats = LD_calcs(hap, allele, allele_n)
         if out_stats != None:
             maf_q, maf_p, D_prime, r2, match = out_stats
-
+            
+            chr_n = geno_n[0]
             bp_n = geno_n[1]
             rs_n = geno_n[2]
             al_n = "("+new_alleles_n[0]+"/"+new_alleles_n[1]+")"
@@ -190,17 +199,26 @@ for geno_n in vcf:
 
             # Get dbSNP function
             if rs_n[0:2] == "rs":
-                snp_coord = get_coords(db, rs_n)
+                snp_coord = get_dbsnp_rsid(db, rs_n)
 
                 if snp_coord != None:
                     funct = snp_coord['function']
                 else:
                     funct = "."
+            elif rs_n[0:2] != "rs":
+                snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
+
+                if snp_coord != None:
+                    funct = snp_coord['function']
+                    # Retrieve rsid from dbsnp if missing from 1000G data
+                    if len(snp_coord['id']) > 0:
+                        rs_n = 'rs' + snp_coord['id']
+                else:
+                    funct = "."
             else:
                 funct = "."
 
-            temp = [rs, al, "chr"+chr+":"+bp, rs_n, al_n, "chr"+chr+":" +
-                    bp_n, dist, D_prime, r2, match, score, maf_q, maf_p, funct]
+            temp = [rs, al, "chr" + chr + ":" + bp, rs_n, al_n, "chr" + chr_n + ":" + bp_n, dist, D_prime, r2, match, score, maf_q, maf_p, funct]
             out.append(temp)
 
 

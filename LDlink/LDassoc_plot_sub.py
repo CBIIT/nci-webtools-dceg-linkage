@@ -14,14 +14,14 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 
 # LDassoc subprocess to export bokeh to high quality images in the background
-def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOrigin):
+def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     data_dir = config['data']['data_dir']
@@ -48,7 +48,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             
 
     if myargsOrigin!="None":
-        # Find coordinates (GRCh37/hg19) for SNP RS number
+        # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
         if myargsOrigin[0:2]=="rs":
             snp=myargsOrigin
 
@@ -83,7 +83,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             
 
         chromosome = var_coord['chromosome']
-        org_coord = var_coord['position_grch37']
+        org_coord = var_coord[genome_build_vars[genome_build]['position']]
 
 
     # Open Association Data
@@ -141,15 +141,15 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
             #format mongo output
             if mongoResult != None:
-                geneResult = [mongoResult["name"], mongoResult["chromosome"], mongoResult["begin"], mongoResult["end"]]
+                geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
                 return geneResult
             else:
                 return None
 
         # Find RS number in snp database
-        gene_coord=get_coords_gene(myargsName, db)
+        gene_coord = get_coords_gene(myargsName, db)
 
-        if gene_coord==None:
+        if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
             return None
             
         # Define search coordinates
@@ -245,7 +245,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                             except ValueError:
                                 continue
                             else:
-                                coord_i=col[chr_index].strip("chr")+":"+col[pos_index]+"-"+col[pos_index]
+                                coord_i = genome_build_vars[genome_build]['1000G_chr_prefix'] + col[chr_index].strip("chr") + ":" + col[pos_index] + "-" + col[pos_index]
                                 assoc_coords.append(coord_i)
                                 a_pos.append(col[pos_index])
                                 assoc_dict[coord_i]=[col[p_index]]
@@ -274,16 +274,17 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             snp="chr"+var_p[0].split("-")[0]
 
             # Extract lowest P SNP phased genotypes
-            vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
-            vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+            vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+            vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
             if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-                print("could not find sequences archive file.")
+                print("Internal Server Error: Data cannot be reached")
+                return None
 
-            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
+            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
             proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
             head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
-
+            
             # Check lowest P SNP is in the 1000G population and not monoallelic from LDassoc.py output file
             vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
@@ -291,9 +292,10 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 continue
             elif len(vcf)>1:
                 geno=vcf[0].strip().split()
-
+                geno[0] = geno[0].lstrip('chr')
             else:
                 geno=vcf[0].strip().split()
+                geno[0] = geno[0].lstrip('chr')
 
             if "," in geno[3] or "," in geno[4]:
                 continue
@@ -320,23 +322,21 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 
 
     else:
-        if chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
+        if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
             return None
             
 
         # Extract query SNP phased genotypes
-        vcf_filePath = "%s/%sGRCh37/ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz" % (config['aws']['data_subfolder'], genotypes_dir, chromosome)
-        vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+        vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+        vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
         if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-            print("could not find sequences archive file.")
+            print("Internal Server Error: Data cannot be reached")
+            return None
 
-        tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + "GRCh37")
+        tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
         proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
         head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
-
-        tabix_snp= export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + "GRCh37")
-        subprocess.call(tabix_snp, shell=True)
 
 
         # Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
@@ -352,6 +352,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             for i in range(len(vcf)):
                 if vcf[i].strip().split()[2]==snp:
                     geno=vcf[i].strip().split()
+                    geno[0] = geno[0].lstrip('chr')
             if geno==[]:
                 subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
                 subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
@@ -359,9 +360,10 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
                 
         else:
             geno=vcf[0].strip().split()
+            geno[0] = geno[0].lstrip('chr')
 
-        if geno[2]!=snp and snp[0:2]=="rs":
-            snp=geno[2]
+        if geno[2]!=snp and snp[0:2]=="rs" and "rs" in geno[2]:
+            snp = geno[2]
 
         if "," in geno[3] or "," in geno[4]:
             subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
@@ -413,7 +415,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     #     commands.append(command)
 
     for subprocess_id in range(num_subprocesses):
-        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(subprocess_id)])
+        subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
         commands.append("python3 LDassoc_sub.py " + subprocessArgs)
 
     processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
@@ -438,7 +440,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
             col[8]=float(col[8])
             col.append(abs(int(col[6])))
             pos_i_j=col[5].split(":")[1]
-            coord_i_j=chromosome+":"+pos_i_j+"-"+pos_i_j
+            coord_i_j=genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome+":"+pos_i_j+"-"+pos_i_j
             if coord_i_j in assoc_dict:
                 col.append(float(assoc_dict[coord_i_j][0]))
                 out_prox.append(col)
@@ -645,8 +647,8 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
         # Get genes from LDassoc.py output file
-        filename=tmp_dir+"genes_"+request+".txt"
-        genes_raw=open(filename).readlines()
+        genes_file = tmp_dir + "genes_" + request + ".json"
+        genes_raw = open(genes_file).readlines()
 
         genes_plot_start=[]
         genes_plot_end=[]
@@ -663,13 +665,29 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         lines=[0]
         gap=80000
         tall=0.75
-        if genes_raw!=None:
-            for i in range(len(genes_raw)):
-                bin,name_id,chrom,strand,txStart,txEnd,cdsStart,cdsEnd,exonCount,exonStarts,exonEnds,score,name2,cdsStartStat,cdsEndStat,exonFrames=genes_raw[i].strip().split()
-                name=name2
-                id=name_id
-                e_start=exonStarts.split(",")
-                e_end=exonEnds.split(",")
+        if genes_raw != None and len(genes_raw) > 0:
+            for gene_raw_obj in genes_raw:
+                gene_obj = json.loads(gene_raw_obj)
+                bin = gene_obj["bin"]
+                name_id = gene_obj["name"]
+                chrom = gene_obj["chrom"]
+                strand = gene_obj["strand"]
+                txStart = gene_obj["txStart"]
+                txEnd = gene_obj["txEnd"]
+                cdsStart = gene_obj["cdsStart"]
+                cdsEnd = gene_obj["cdsEnd"]
+                exonCount = gene_obj["exonCount"]
+                exonStarts = gene_obj["exonStarts"]
+                exonEnds = gene_obj["exonEnds"]
+                score = gene_obj["score"]
+                name2 = gene_obj["name2"]
+                cdsStartStat = gene_obj["cdsStartStat"]
+                cdsEndStat = gene_obj["cdsEndStat"] 
+                exonFrames = gene_obj["exonFrames"]
+                name = name2
+                id = name_id
+                e_start = exonStarts.split(",")
+                e_end = exonEnds.split(",")
 
                 # Determine Y Coordinate
                 i=0
@@ -746,7 +764,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         #     gene_plot.text(x_coord_text, n_rows / 2.0, text=message, alpha=1,
         #                     text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
-        gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+        gene_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
         gene_plot.yaxis.axis_label = "Genes (All Transcripts)"
         gene_plot.ygrid.grid_line_color = None
         gene_plot.yaxis.axis_line_color = None
@@ -888,7 +906,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
         #     gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
         #                     text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
 
-        gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(GRCh37)"
+        gene_c_plot.xaxis.axis_label = "Chromosome " + chromosome + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
         gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
         gene_c_plot.ygrid.grid_line_color = None
         gene_c_plot.yaxis.axis_line_color = None
@@ -937,7 +955,7 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
     # Remove temporary files
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.json", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
@@ -949,14 +967,15 @@ def calculate_assoc_svg(file, region, pop, request, myargs, myargsName, myargsOr
 def main():
 
     # Import LDassoc options
-    if len(sys.argv) == 8:
+    if len(sys.argv) == 9:
         filename = sys.argv[1]
         file = sys.argv[2]
         region = sys.argv[3]
         pop = sys.argv[4]
         request = sys.argv[5]
-        myargsName = sys.argv[6]
-        myargsOrigin = sys.argv[7]
+        genome_build = sys.argv[6]
+        myargsName = sys.argv[7]
+        myargsOrigin = sys.argv[8]
     else:
         sys.exit()
     # Load args parameters passed from LDassoc.py
@@ -964,7 +983,7 @@ def main():
         args = json.load(f)
 
     # Run function
-    calculate_assoc_svg(file, region, pop, request, args, myargsName, myargsOrigin)
+    calculate_assoc_svg(file, region, pop, request, genome_build, args, myargsName, myargsOrigin)
 
 
 if __name__ == "__main__":

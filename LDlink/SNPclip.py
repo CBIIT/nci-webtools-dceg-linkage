@@ -24,8 +24,8 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     max_list = 5000
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     api_mongo_addr = config['api']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
@@ -171,14 +171,14 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                     snp_coord = get_coords(db, snp_i[0])
                     if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                         # check if variant is on chrY for genome build = GRCh38
-                        if snp_coord['chromosome'] == "Y" and genome_build == "grch38":
+                        if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             else:
-                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38 (" + "rs" + snp_coord['id'] + " - chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
                             warn.append(snp_i[0])
-                            details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37 or 30x GRCh38."]
+                            details[snp_i[0]] = ["NA", "NA", "Chromosome Y variants are unavailable for GRCh38, only available for GRCh37."]
                         else:
                             rs_nums.append(snp_i[0])
                             snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
@@ -203,7 +203,11 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             return("", "", "")
 
     if warn != []:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
         output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
@@ -224,17 +228,17 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             return("", "", "")
 
     # Make tabix formatted coordinates
-    snp_coord_str = [snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['title'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("could not find sequences archive file.")
+        print("Internal Server Error: Data cannot be reached")
 
-    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['title'])
+    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Make MAF function
     def calc_maf(genos):
@@ -318,6 +322,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
@@ -352,13 +357,14 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             found = "false"
             while count <= 2 and count+g < len(vcf):
                 geno_next = vcf[g+count].strip().split()
+                geno_next[0] = geno_next[0].lstrip('chr')
                 if len(geno_next) >= 3 and rs_query == geno_next[2]:
                     found = "true"
                     break
                 count += 1
 
             if found == "false":
-                if rs_1000g != ".":
+                if "rs" in rs_1000g:
                     if "warning" in output:
                         output["warning"] = output["warning"] + \
                             ". Genomic position for query variant ("+rs_query + \
@@ -448,25 +454,28 @@ def main():
     tmp_dir = "./tmp/"
 
     # Import SNPclip options
-    if len(sys.argv) == 5:
+    if len(sys.argv) == 6:
         web = sys.argv[1]
         snplst = sys.argv[2]
         pop = sys.argv[3]
         request = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_threshold = 0.10
-        maf_threshold = 0.01
-    elif len(sys.argv) == 6:
-        web = sys.argv[1]
-        snplst = sys.argv[2]
-        pop = sys.argv[3]
-        request = sys.argv[4]
-        r2_threshold = sys.argv[5]
         maf_threshold = 0.01
     elif len(sys.argv) == 7:
         web = sys.argv[1]
-        snplst = sys.argv[3]
-        pop = sys.argv[4]
-        request = sys.argv[5]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        genome_build = sys.argv[5]
+        r2_threshold = sys.argv[6]
+        maf_threshold = 0.01
+    elif len(sys.argv) == 8:
+        web = sys.argv[1]
+        snplst = sys.argv[2]
+        pop = sys.argv[3]
+        request = sys.argv[4]
+        genome_build = sys.argv[5]
         r2_threshold = sys.argv[6]
         maf_threshold = sys.argv[7]
     else:
@@ -475,7 +484,7 @@ def main():
 
     # Run function
     snps, thin_list, details = calculate_clip(
-        snplst, pop, request, web, r2_threshold, maf_threshold)
+        snplst, pop, request, web, genome_build, r2_threshold, maf_threshold)
 
     # Print output
     with open(tmp_dir+"clip"+request+".json") as f:

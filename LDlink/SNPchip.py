@@ -15,13 +15,14 @@ import operator
 import os
 import json
 import sys
+from LDcommon import genome_build_vars
 
 
 def get_platform_request(web):
 
     try:
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         env = config['env']
         api_mongo_addr = config['api']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
@@ -57,8 +58,8 @@ def get_platform_request(web):
 
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -83,15 +84,15 @@ def convert_codeToPlatforms(platform_query, web):
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
         platforms.append(document["platform"])
-    print(platforms)
+    # print(platforms)
     return platforms
 
 
-def calculate_chip(snplst, platform_query, web, request):
+def calculate_chip(snplst, platform_query, web, request, genome_build):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     env = config['env']
     tmp_dir = config['data']['tmp_dir']
     api_mongo_addr = config['api']['api_mongo_addr']
@@ -107,6 +108,11 @@ def calculate_chip(snplst, platform_query, web, request):
     # Create JSON output
     out_json = open(tmp_dir+'proxy'+request+".json", "w")
     output = {}
+
+    # Validate genome build param
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
 
     # Open SNP list file
     snps_raw = open(snplst).readlines()
@@ -147,7 +153,7 @@ def calculate_chip(snplst, platform_query, web, request):
         temp_coord = coord.strip("chr").split(":")
         chro = temp_coord[0]
         pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else chro, "position_grch37": pos})
+        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
         query_results_sanitized = json.loads(json_util.dumps(query_results))
         return query_results_sanitized
 
@@ -207,7 +213,7 @@ def calculate_chip(snplst, platform_query, web, request):
             if len(snp_i[0]) > 2:
                 if (snp_i[0][0:2] == "rs" or snp_i[0][0:3] == "chr") and snp_i[0][-1].isdigit():
                     snp_coord = get_coords(db, snp_i[0])
-                    if snp_coord != None and snp_coord['position_grch37'] != "NA":
+                    if snp_coord != None and snp_coord[genome_build_vars[genome_build]['position']] != "NA":
                         if snp_coord['chromosome'] == "X":
                             chr = 23
                         elif snp_coord['chromosome'] == "Y":
@@ -215,8 +221,8 @@ def calculate_chip(snplst, platform_query, web, request):
                         else:
                             chr = int(snp_coord['chromosome'])
                         rs_nums.append(snp_i[0])
-                        snp_pos.append(snp_coord['position_grch37'])
-                        temp = [snp_i[0], chr, int(snp_coord['position_grch37'])]
+                        snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+                        temp = [snp_i[0], chr, int(snp_coord[genome_build_vars[genome_build]['position']])]
                         snp_coords.append(temp)
                     else:
                         warn.append(snp_i[0])
@@ -228,13 +234,17 @@ def calculate_chip(snplst, platform_query, web, request):
     output["warning"] = ""
     output["error"] = ""
     if warn != [] and len(rs_nums) != 0:
-        output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)+".\n"
+        if "warning" in output:
+            output["warning"] = output["warning"] + \
+                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+        else:
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
     elif len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates.\n"
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
-        createOutputFile(request)
+        createOutputFile(request, genome_build)
         return json_output
 
     # Sort by chromosome and then position
@@ -257,6 +267,9 @@ def calculate_chip(snplst, platform_query, web, request):
     # Quering MongoDB to get platforms for position/chromsome pairs
     else:
         platform_list = []
+
+    print("platform_list", platform_list)
+
     for k in range(len(snp_coords_sort)):
         platforms = []
         position = str(snp_coords_sort[k][2])
@@ -264,21 +277,14 @@ def calculate_chip(snplst, platform_query, web, request):
         cursor = ()
         platform = ""
         count = count+1
-        if platform_query == "":  # <--If user did not enter platforms as a request
-            cursor = db.snp_col.find({'$and': [{"pos": position}, {"data.chr": Chr}, {
-                                     "data.platform": {'$regex': '.*'}}]})  # Json object that stores all the results
-        elif platform_query != "":  # <--If user did not enter platforms as a request
-            cursor = db.snp_col.find({'$and': [{"pos": position}, {"data.chr": Chr}, {
-                                     "data.platform": {"$in": platform_list}}]})  # Json object that stores all the results
-            # Parsing each docuemnt to retrieve platforms
+        cursor = db.snp_col.find({genome_build_vars[genome_build]['chromosome']: str(Chr), genome_build_vars[genome_build]['position']: int(position)})
+
         for document in cursor:
             for z in range(0, len(document["data"])):
-                if(document["data"][z]["chr"] == Chr and document["data"][z]["platform"] in platform_list and platform_query != ""):
-                    platform = document["data"][z]["platform"]
+                if((document["data"][z]["platform"] in platform_list or document["data"][z]["platform"].rstrip(' Array') in platform_list) and platform_query != ""):
                     platforms.append(document["data"][z]["platform"])
-                elif(document["data"][z]["chr"] == Chr and platform_query == ""):
+                elif(platform_query == ""):
                     platforms.append(document["data"][z]["platform"])
-                    platform = document["data"][z]["platform"]
         if(platforms == []):
             rs = snp_coords_sort[k][0]
             platform_NOT.append(rs)
@@ -297,15 +303,15 @@ def calculate_chip(snplst, platform_query, web, request):
     json_output = json.dumps(output, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
-    createOutputFile(request)
+    createOutputFile(request, genome_build)
 
     return json_output
 
 
-def createOutputFile(request):
+def createOutputFile(request, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as f:
-        config = yaml.load(f)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     tmp_dir = config['data']['tmp_dir']
 
     details_file = open(tmp_dir+'details'+request+".txt", "w")
@@ -318,7 +324,7 @@ def createOutputFile(request):
     del rs_dict['warning']
 
     # Header
-    header = ["RS Number", "Position (GRCh37)", "Arrays"]
+    header = ["RS Number", "Position (" + genome_build_vars[genome_build]['title'] + ")", "Arrays"]
     print("\t".join(header), file=details_file)
 
     # Body
@@ -363,12 +369,13 @@ def main():
         snplst = sys.argv[2]
         platform_query = sys.argv[3]
         request = sys.argv[4]
+        genome_build = sys.argv[5]
     else:
         print("Correct useage is: SNPchip.py false snplst platforms request, enter \"\" for platform_query if empty otherwise seperate each platform by a \"+\"")
         sys.exit()
 
     # Run function
-    calculate_chip(snplst, platform_query, web, request)
+    calculate_chip(snplst, platform_query, web, request, genome_build)
 
 
 if __name__ == "__main__":

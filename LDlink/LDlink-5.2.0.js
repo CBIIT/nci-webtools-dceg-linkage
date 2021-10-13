@@ -44,7 +44,7 @@ var moduleTitleDescription = {
 };
 try {
     const urlParams = new URLSearchParams(window.location.search);
-    var genomeBuild = urlParams.get('genome_build');
+    var genomeBuild = urlParams.get('genome_build') ? urlParams.get('genome_build') : 'grch37';
 } catch {
     var genomeBuild = "grch37";
 }
@@ -178,31 +178,44 @@ $(document).ready(function() {
         }
     });
 
-    // GRCH37-38 Toggle
-    if (genomeBuild == 'grch38') {
-        $(document).ready(function() {  
-            $("#genome-build > .dropdown-menu li a")[1].click();
-        });
-    } else {
-        $(document).ready(function() {  
-            $("#genome-build > .dropdown-menu li a")[0].click();
-        });
+    // init genome build selection
+    switch(genomeBuild) {
+        case "grch37":
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[0].click();
+            });
+            break;
+        case "grch38":
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[1].click();
+            });
+            break;
+        case "grch38_high_coverage":
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[2].click();
+            });
+            break;
+        default:
+            $(document).ready(function() {
+                $("#genome-build > .dropdown-menu li a")[0].click();
+            });
     }
     
     $("#genome-build > .dropdown-menu li a").click(function(e){
         $("#genome-build > .btn:first-child").html($(this).text() + '&nbsp;<span class="caret"></span>');
         $("#genome-build > .btn:first-child").val($(this).text().toLowerCase());
-        console.log(e.target.id);
-        switch($(this).text()) {
-            case "GRCh37":
-                // SET to 37
-                genomeBuild = "grch37";
-                break;
-            case "GRCh38":
-                // SET to 38
-                genomeBuild = "grch38";
-                break;
+        // console.log($(this).attr("value"));
+        genomeBuild = $(this).attr("value");
+        // change ldassoc example inputs
+        if (document.getElementById('example-gwas').checked) {
+            setupLDassocExample();
         }
+    });
+
+    // Hide Genome Build dropdown on LD Tools dropdown-nav hover 
+    dropdownTools = document.querySelector("#dropdown-tools");
+    dropdownTools.addEventListener("mouseover", event => {
+        $("#genome-build").click()
     });
 
     $('#ldassoc').prop('disabled', true);
@@ -223,79 +236,7 @@ $(document).ready(function() {
     });
 
     $("#example-gwas").click(function(e){
-    //   console.log("Use example GWAS data.");
-      var useEx = document.getElementById('example-gwas');
-      // var exampleHeaders = ['A', 'B', 'C'];
-      if (useEx.checked){
-        var url = restServerUrl + "/ldassoc_example";
-        var ajaxRequest = $.ajax({
-            type : 'GET',
-            url : url,
-            contentType : 'application/json' // JSON
-        }).success(function(response) {
-          var data = JSON.parse(response);
-          $('#ldassoc-file-label').val(data.filename);
-          populateAssocDropDown(data.headers);
-          $("#header-values").show();
-          $("#assoc-chromosome > button").val("chr");
-          $("#assoc-chromosome > button").text("Chromosome: chr column");
-          $("#assoc-position > button").val("pos");
-          $("#assoc-position > button").text("Position: pos column");
-          $("#assoc-p-value > button").val("p");
-          $("#assoc-p-value > button").text("P-Value: p column");
-          $('#ldassoc-file').prop('disabled', true);
-          $('#ldassoc').removeAttr('disabled');
-        });
-
-        $('#region-gene-name').val('');
-        $('#region-gene-index').val('');
-        $('#region-variant-index').val('');
-
-        $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
-        $("#assoc-region > .btn:first-child").html("Region" + '&nbsp;<span class="caret"></span>');
-
-        $("#region-gene-container").hide();
-        $("#region-region-container").hide();
-        $("#region-variant-container").hide();
-        $("#region-region-container").show();
-        $("#region-region-start-coord").val("chr8:128289591");
-        $("#region-region-end-coord").val("chr8:128784397");
-        $("#region-region-index").val("rs7837688");
-        // console.log($("#region-region-start-coord").val());
-        // console.log($("#region-region-end-coord").val());
-        // console.log($("#region-region-index").val());
-
-        $("#ldassoc-population-codes").val('');
-        refreshPopulation([],"ldassoc");
-        $("#ldassoc-population-codes").val(["CEU"]);
-        refreshPopulation(["CEU"],"ldassoc");
-        // console.log($("#ldassoc-population-codes").val());
-      }else{
-        $('#ldassoc-file').prop('disabled', false);
-        $('#ldassoc').prop('disabled', true);
-        $("#assoc-chromosome > button").val('');
-        $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
-        $("#assoc-position > button").val('');
-        $("#assoc-position > button").html('Select Position&nbsp;<span class="caret"></span>');
-        $("#assoc-p-value > button").val('');
-        $("#assoc-p-value > button").html('Select P-Value&nbsp;<span class="caret"></span>');
-
-        $('#ldassoc-file-label').val('');
-        populateAssocDropDown([]);
-        $("#header-values").hide();
-        $('#ldassoc-file').val('');
-        // console.log("Don't use example GWAS data.");
-        $("#region-gene-container").hide();
-        $("#region-region-container").hide();
-        $("#region-variant-container").hide();
-        $("#assoc-region > .btn:first-child").val('');
-        $("#assoc-region > .btn:first-child").html('Select Region<span class="caret"></span>');
-        $("#region-region-start-coord").val('');
-        $("#region-region-end-coord").val('');
-        $("#region-region-index").val('');
-        $("#ldassoc-population-codes").val('');
-        refreshPopulation([],"ldassoc");
-      }
+        setupLDassocExample();
     });
 
     updateVersion(ldlink_version);
@@ -469,6 +410,98 @@ $(document).ready(function() {
 $(document).on('change','.btn-snp :file', createFileSelectTrigger);
 // ldAssoc File Change
 $(document).on('change','.btn-csv-file :file', createFileSelectTrigger);
+
+
+function setupLDassocExample() {
+    //   console.log("Use example GWAS data.");
+    var useEx = document.getElementById('example-gwas');
+    // var exampleHeaders = ['A', 'B', 'C'];
+    if (useEx.checked){
+      var url = restServerUrl + "/ldassoc_example";
+      var ajaxRequest = $.ajax({
+          type : 'GET',
+          url : url,
+          contentType : 'application/json', // JSON
+          data: {
+              genome_build: genomeBuild
+          }
+      }).success(function(response) {
+        var data = JSON.parse(response);
+        $('#ldassoc-file-label').val(data.filename);
+        populateAssocDropDown(data.headers);
+        $("#header-values").show();
+        $("#assoc-chromosome > button").val("chr");
+        $("#assoc-chromosome > button").text("Chromosome: chr column");
+        $("#assoc-position > button").val("pos");
+        $("#assoc-position > button").text("Position: pos column");
+        $("#assoc-p-value > button").val("p");
+        $("#assoc-p-value > button").text("P-Value: p column");
+        $('#ldassoc-file').prop('disabled', true);
+        $('#ldassoc').removeAttr('disabled');
+      });
+
+      $('#region-gene-name').val('');
+      $('#region-gene-index').val('');
+      $('#region-variant-index').val('');
+
+      $("#assoc-region > .btn:first-child").val("Region".toLowerCase());
+      $("#assoc-region > .btn:first-child").html("Region" + '&nbsp;<span class="caret"></span>');
+
+      $("#region-gene-container").hide();
+      $("#region-region-container").hide();
+      $("#region-variant-container").hide();
+      $("#region-region-container").show();
+      switch(genomeBuild) {
+          case "grch37":
+              $("#region-region-start-coord").val("chr8:128289591");
+              $("#region-region-end-coord").val("chr8:128784397");
+              break;
+          case "grch38":
+              $("#region-region-start-coord").val("chr8:127277115");
+              $("#region-region-end-coord").val("chr8:127777115");
+              break;
+          case "grch38_high_coverage":
+              $("#region-region-start-coord").val("chr8:127277115");
+              $("#region-region-end-coord").val("chr8:127777115");
+              break;
+      }
+      $("#region-region-index").val("rs7837688");
+      // console.log($("#region-region-start-coord").val());
+      // console.log($("#region-region-end-coord").val());
+      // console.log($("#region-region-index").val());
+
+      $("#ldassoc-population-codes").val('');
+      refreshPopulation([],"ldassoc");
+      $("#ldassoc-population-codes").val(["CEU"]);
+      refreshPopulation(["CEU"],"ldassoc");
+      // console.log($("#ldassoc-population-codes").val());
+    }else{
+      $('#ldassoc-file').prop('disabled', false);
+      $('#ldassoc').prop('disabled', true);
+      $("#assoc-chromosome > button").val('');
+      $("#assoc-chromosome > button").html('Select Chromosome&nbsp;<span class="caret"></span>');
+      $("#assoc-position > button").val('');
+      $("#assoc-position > button").html('Select Position&nbsp;<span class="caret"></span>');
+      $("#assoc-p-value > button").val('');
+      $("#assoc-p-value > button").html('Select P-Value&nbsp;<span class="caret"></span>');
+
+      $('#ldassoc-file-label').val('');
+      populateAssocDropDown([]);
+      $("#header-values").hide();
+      $('#ldassoc-file').val('');
+      // console.log("Don't use example GWAS data.");
+      $("#region-gene-container").hide();
+      $("#region-region-container").hide();
+      $("#region-variant-container").hide();
+      $("#assoc-region > .btn:first-child").val('');
+      $("#assoc-region > .btn:first-child").html('Select Region<span class="caret"></span>');
+      $("#region-region-start-coord").val('');
+      $("#region-region-end-coord").val('');
+      $("#region-region-index").val('');
+      $("#ldassoc-population-codes").val('');
+      refreshPopulation([],"ldassoc");
+    }
+}
 
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL, retries) {
@@ -964,6 +997,8 @@ function createExpressQueryWarningsTable() {
 
 }
 
+
+
 function createTraitDetailsTable() {
 
     var ldtraitDetailsTable = $('#new-ldtrait').DataTable( {
@@ -983,22 +1018,9 @@ function createTraitDetailsTable() {
         "columnDefs": [
             {
                 "render": function ( data, type, row ) {
-                    // Round floats to 4 decimal places 
-                    if (typeof data === 'string' || data instanceof String) {
-                        return data;
-                    } else {
-                        if (parseFloat(data) == 1.0) {
-                            return "1.0";
-                        } else if (parseFloat(data) == 0.0) {
-                            return "0.0";
-                        } else if (parseFloat(data) <= 0.0001) {
-                            return "<0.0001"
-                        } else {
-                            return parseFloat(data).toFixed(3);
-                        }
-                    }
+                    return ldtrait_parse_float(data);
                 },
-                "targets": [ 4, 5, 8 ]
+                "targets": [ 8 ]
             },
             {
                 "render": function ( data, type, row ) {
@@ -1042,8 +1064,15 @@ function createTraitDetailsTable() {
             {
                 "render": function ( data, type, row ) {
                     // Provide link to LDpair 
-                    return ldtrait_ldpair_results_link(data, type, row);
+                    var snp1 = row[6][0];
+                    var snp2 = row[6][1];
+                    var pops = row[6][2];
+                    return ldtrait_ldpair_results_link(snp1, snp2, pops, data);
                 },
+                "targets": [ 4, 5 ]
+            },
+            {
+                "bVisible": false,
                 "targets": 6
             },
             {
@@ -1424,8 +1453,8 @@ function RefreshTableSort(tableId, json, sort, r2Col, dCol) {
 function ldproxy_rs_results_link(data, type, row) {
 
     //if no rs number is available return without a link.
-    if(data.length == 1) {
-        return "";
+    if(!data.includes("rs") || data.length <= 2) {
+        return ".";
     }
     var server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
     var rs_number = data.substring(2);
@@ -1465,12 +1494,7 @@ function ldexpress_gwas_catalog_link(data, type, row) {
     return link;
 }
 
-function ldtrait_ldpair_results_link(data, type, row) {
-    // parse data
-    // console.log(data);
-    var snp1 = data[0];
-    var snp2 = data[1];
-    var pops = data[2];
+function ldtrait_ldpair_results_link(snp1, snp2, pops, data) {
     var server = window.location.origin + '/?tab=ldpair';
     var params = {
         var1: snp1,
@@ -1478,8 +1502,25 @@ function ldtrait_ldpair_results_link(data, type, row) {
         pop: pops
     };
     var href = server + '&' + $.param(params);
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">link</a>';
+    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + ldtrait_parse_float(data).toString() + '</a>';
     return link;
+}
+
+function ldtrait_parse_float(data) {
+    // Round floats to 4 decimal places 
+    if (typeof data === 'string' || data instanceof String) {
+        return data;
+    } else {
+        if (parseFloat(data) == 1.0) {
+            return "1.0";
+        } else if (parseFloat(data) == 0.0) {
+            return "0.0";
+        } else if (parseFloat(data) <= 0.0001) {
+            return "<0.0001"
+        } else {
+            return parseFloat(data).toFixed(3);
+        }
+    }
 }
 
 function ldexpress_Gencode_link(data, type, row) {
@@ -1505,9 +1546,13 @@ function ldexpress_GTEx_tissue_link(data, type, row) {
 }
 
 function ldexpress_dbsnp_link(data, type, row) {
-    var href = 'https://www.ncbi.nlm.nih.gov/snp/' + data;
-    var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
-    return link;
+    if (data.includes("rs")) {
+        var href = 'https://www.ncbi.nlm.nih.gov/snp/' + data;
+        var link = '<a style="color: #318fe2" href="' + href + '" + target="_blank">' + data + '</a>';
+        return link;
+    } else {
+        return data;
+    }
 }
 
 function ldexpress_GTEx_effect_size_link(data, type, row) {
@@ -1585,7 +1630,7 @@ function ldproxy_position_link(data, type, row) {
     var position = chr + ":" + range;
     var rs_number = row[0];
     var params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
@@ -1598,20 +1643,20 @@ function ldproxy_position_link(data, type, row) {
 }
 
 function ldproxy_regulome_link(data, type, row) {
-
     // Create RegulomeDB links
-
-    var server = 'http://www.regulomedb.org/snp';
+    var server = 'http://www.regulomedb.org/regulome-search';
     var chr = row[1];
     var mid_value = parseInt(row[2]);
     var zero_base = mid_value - 1;
-    var href = server + "/" + chr + "/" + zero_base;
-    var target = 'regulome_' + Math.floor(Math.random() * (99999 - 10000 + 1));
-    var link = '<a href="'+href+'" target="'+target+'">'+data+'</a>';
-
+    var params = {
+        genome: genomeBuild == "grch37" ? "GRCh37" : "GRCh38",
+        regions : chr + ":" + zero_base + "-" + mid_value
+    }
+    var href = server + "?" + $.param(params);
+    var link = '<a href="' + href + '" target="_blank">' + data + '</a>';
     return link;
-
 }
+
 
 function ldproxy_haploreg_link(data, type, row) {
 
@@ -2069,6 +2114,7 @@ function updateLDassoc() {
         gene: new Object(),
         region: new Object(),
         variant: new Object(),
+        genome_build: genomeBuild,
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
         transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
         annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
@@ -2092,7 +2138,7 @@ function updateLDassoc() {
     ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
 
     $('#ldassoc-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + genomeBuild == 'grch37' ? 'hg19' : 'hg38' + '&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -2124,6 +2170,18 @@ function updateLDassoc() {
 
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
+            
             $('#ldassoc-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
@@ -2211,10 +2269,13 @@ function updateLDhap() {
         if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
-                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
                     break;
                 case "grch38":
-                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
                     break;
             }
             $('#' + id + '-results-container').show();
@@ -2293,7 +2354,8 @@ function updateLDexpress() {
         r2_d_threshold: Number($("#" + id + "_r2_d_threshold").val()),
         p_threshold: Number($("#" + id + "_p_threshold").val()),
         window: window,
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
 
     //Show inital message
@@ -2323,6 +2385,17 @@ function updateLDexpress() {
         var jsonObj=data;
         // console.log(data);
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2403,10 +2476,13 @@ function updateLDtrait() {
         if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
-                    $('#' + id + '-position-genome-build-header').text("GRCh37");
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
                     break;
                 case "grch38":
-                    $('#' + id + '-position-genome-build-header').text("GRCh38");
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
                     break;
             }
             $('#' + id + '-results-container').show();
@@ -2467,6 +2543,17 @@ function updateSNPclip() {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2502,7 +2589,8 @@ function updateSNPchip() {
     var ldInputs = {
         snps : snps,
         platforms: platforms.join("+"),
-        reference : Math.floor(Math.random() * (99999 - 10000 + 1))
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild
     };
     $('#snp_chip_list').attr('href', "tmp/details"+ldInputs.reference+".txt");
     $('#snp_chip_list').attr('target', "chip_details"+ldInputs.reference+".txt");
@@ -2519,6 +2607,17 @@ function updateSNPchip() {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
         if (displayError(id, jsonObj) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
@@ -2654,9 +2753,8 @@ function loadSNPChip(data) {
 
     $.each(platform_list, function(key, value) {
         //reversed_platform_list.push(snpchipReverseLookup[value]);
-
         obj ={
-            code: snpchipReverseLookup[value],
+            code: snpchipReverseLookup[value] !== undefined ?  snpchipReverseLookup[value] : snpchipReverseLookup[value.replace(/\sArray$/, "")],
             platform: value
         };
         if(typeof obj.code === "undefined") {
@@ -2835,7 +2933,7 @@ function anchorRSposition(coord, rs_number) {
     var range = (mid_value - offset) + "-" + (mid_value + offset);
     var position = chr + ":" + range;
     params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
@@ -3408,7 +3506,9 @@ function updateLDmatrix() {
         snps : snps,
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
-        r2_d : r2_d
+        genome_build: genomeBuild,
+        r2_d : r2_d,
+        collapseTranscript: $("#matrix_collapse_transcripts").hasClass('active')
     };
     //console.log('ldmatrixInputs');
     //console.dir(ldmatrixInputs);
@@ -3607,8 +3707,10 @@ function updateLDproxy() {
         "var" : $('#ldproxy-snp').val(),
         pop : population.join("+"),
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        genome_build: genomeBuild,
         r2_d : r2_d,
-        window: windowSize
+        window: windowSize,
+        collapseTranscript: $("#proxy_collapse_transcripts").hasClass('active')
     };
 
     updateHistoryURL(id, ldproxyInputs);
@@ -3616,7 +3718,7 @@ function updateLDproxy() {
     //console.log(location.hostname);
 
     $('#ldproxy-genome').attr('href',
-        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=hg19&hgt.customText=http://'+location.hostname+'/tmp/track'
+        'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + genomeBuild == 'grch37' ? 'hg19' : 'hg38' + '&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldproxyInputs.reference + '.txt');
 
     //console.dir(ldproxyInputs);
@@ -3649,6 +3751,18 @@ function updateLDproxy() {
 
         // display graph if no errors
         if (displayError(id, jsonObjCanvas) == false) {
+            switch(genomeBuild) {
+                case "grch37":
+                    $('.' + id + '-position-genome-build-header').text("GRCh37");
+                    break;
+                case "grch38":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38");
+                    break;
+                case "grch38_high_coverage":
+                    $('.' + id + '-position-genome-build-header').text("GRCh38 High Coverage");
+                    break;
+            }
+
             $('#ldproxy-bokeh-graph').empty().append(dataCanvas);
  
             // place Download PDF button
@@ -4452,7 +4566,7 @@ function displayCommFail(id, jqXHR, textStatus) {
     //console.dir(jqXHR);
     console.warn("CommFail\n"+"Status: "+textStatus);
     var message = jqXHR.responseText;
-    message += "<p>code: "+jqXHR.status+" - "+textStatus+"</p>";
+    message += "<p>Internal Server Error: " + jqXHR.status + " - " + textStatus + "</p>";
     message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
@@ -4570,7 +4684,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
         position = chr + ":" + range;
         rs_number = value.RS;
         params = {
-            db:'hg19',
+            db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
             position : position,
             snp151 : 'pack',
             'hgFind.matches' : rs_number
@@ -4619,7 +4733,7 @@ function addLDpairHyperLinks(data) {
     var position = chr + ":" + range;
     rs_number = data.snp1.rsnum;
     params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number
@@ -4635,7 +4749,7 @@ function addLDpairHyperLinks(data) {
     position = chr + ":" + range;
     rs_number = data.snp2.rsnum;
     params = {
-        db:'hg19',
+        db: genomeBuild == 'grch37' ? 'hg19' : 'hg38',
         position : position,
         snp151 : 'pack',
         'hgFind.matches' : rs_number

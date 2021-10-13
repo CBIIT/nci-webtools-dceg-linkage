@@ -32,13 +32,15 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
+from LDcommon import genome_build_vars
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
+from Logger import logInfo, logError
 
 # Ensure tmp directory exists
-with open('config.yml', 'r') as f:
-    config = yaml.load(f)
+with open('config.yml', 'r') as yml_file:
+    config = yaml.load(yml_file)
 tmp_dir = config['data']['tmp_dir']
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -74,7 +76,7 @@ def sendTraceback(error):
         custom["error"] = "Raised when a generated error does not fall into any category."
     else:
         custom["error"] = error
-    print("Unexpected error:", sys.exc_info()[0])
+    logError("Unexpected error: " + str(sys.exc_info()[0]))
     traceback.print_exc()
     custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
@@ -126,8 +128,8 @@ def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Set data directories using config.yml
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         env = config['env']
         if env == 'local':
             url_root = 'http://localhost:5000/'
@@ -147,7 +149,7 @@ def requires_token(f):
                 token = request.args['token']
                 # Check if token is valid
                 if checkToken(token, token_expiration, token_expiration_days) is False or token is None:
-                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + url_root + '?tab=apiaccess' + str(token_expiration) + " " + str(token_expiration_days))
+                    return sendTraceback('Invalid or expired API token. Please register using the API Access tab: ' + url_root + '?tab=apiaccess')
                 # Check if token is blocked
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
@@ -169,8 +171,8 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        with open('config.yml', 'r') as c:
-            config = yaml.load(c)
+        with open('config.yml', 'r') as yml_file:
+            config = yaml.load(yml_file)
         api_superuser = config['api']['api_superuser']
         # api_access_dir = config['api']['api_access_dir']
         api_superuser_token = getToken(api_superuser)
@@ -187,7 +189,7 @@ def requires_admin_token(f):
 # Web route to send API token unblock request from front-end
 @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
 def apiblocked_web():
-    print("Execute api blocked user justification submission")
+    logInfo("Execute api blocked user justification submission")
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
@@ -201,7 +203,7 @@ def apiblocked_web():
 # Web route to register user's email for API token
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
 def register_web():
-    print("Execute api register user")
+    logInfo("Execute api register user")
     firstname = request.args.get('firstname', False)
     lastname = request.args.get('lastname', False)
     email = request.args.get('email', False)
@@ -223,7 +225,7 @@ def register_web():
 @app.route('/LDlinkRestWeb/apiaccess/block_user', methods=['GET'])
 @requires_admin_token
 def block_user():
-    print("Execute api block user")
+    logInfo("Execute api block user")
     email = request.args.get('email', False)
     out_json = blockUser(email, request.url_root)
     return sendJSON(out_json)
@@ -232,7 +234,7 @@ def block_user():
 @app.route('/LDlinkRestWeb/apiaccess/unblock_user', methods=['GET'])
 @requires_admin_token
 def unblock_user():
-    print("Execute api unblock user")
+    logInfo("Execute api unblock user")
     email = request.args.get('email', False)
     out_json = unblockUser(email)
     return sendJSON(out_json)
@@ -241,7 +243,7 @@ def unblock_user():
 @app.route('/LDlinkRestWeb/apiaccess/set_user_lock', methods=['GET'])
 @requires_admin_token
 def set_user_lock():
-    print("Execute api unlock user")
+    logInfo("Execute api unlock user")
     email = request.args.get('email', "Missing Argument")
 
     try:
@@ -263,7 +265,7 @@ def set_user_lock():
 @app.route('/LDlinkRestWeb/apiaccess/unlock_all_users', methods=['GET'])
 @requires_admin_token
 def unlock_all_users():
-    print("Execute api unlock all users")
+    logInfo("Execute api unlock all users")
     out_json = unlockAllUsers()
     return sendJSON(out_json)
 
@@ -271,7 +273,7 @@ def unlock_all_users():
 @app.route('/LDlinkRestWeb/apiaccess/lookup_user', methods=['GET'])
 @requires_admin_token
 def lookup_user():
-    print("Retrieving user record")
+    logInfo("Retrieving user record")
     email = request.args.get('email', False)
     out_json = lookupUser(email)
     return sendJSON(out_json)
@@ -280,7 +282,7 @@ def lookup_user():
 @app.route('/LDlinkRestWeb/apiaccess/stats', methods=['GET'])
 @requires_admin_token
 def api_stats():
-    print("Execute api stats")
+    logInfo("Execute api stats")
     startdatetime = request.args.get('startdatetime', False)
     enddatetime = request.args.get('enddatetime', False)
     top = request.args.get('top', False)
@@ -291,7 +293,7 @@ def api_stats():
 @app.route('/LDlinkRestWeb/apiaccess/locked_users', methods=['GET'])
 @requires_admin_token
 def api_locked_users():
-    print("Execute api locked users stats")
+    logInfo("Execute api locked users stats")
     out_json = getLockedUsers()
     return sendJSON(out_json)
 
@@ -299,7 +301,7 @@ def api_locked_users():
 @app.route('/LDlinkRestWeb/apiaccess/blocked_users', methods=['GET'])
 @requires_admin_token
 def api_blocked_users():
-    print("Execute api blocked users stats")
+    logInfo("Execute api blocked users stats")
     out_json = getBlockedUsers()
     return sendJSON(out_json)
 
@@ -309,8 +311,8 @@ def api_blocked_users():
 @app.route('/')
 def root():
     return app.send_static_file('index.html')
-    # with open('config.yml', 'r') as c:
-    #     config = yaml.load(c)
+    # with open('config.yml', 'r') as yml_file:
+    #     config = yaml.load(yml_file)
     # env = config['env']
     # if env == "local":
         # return app.send_static_file('index.html')
@@ -336,7 +338,7 @@ def ping():
     try:
         return "true"
     except Exception as e:
-        print('------------EXCEPTION------------')
+        logError(e)
         traceback.print_exc(1)
         return str(e), 400
 
@@ -382,11 +384,12 @@ def upload():
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
+    genome_build = request.args.get('genome_build', 'grch37')
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
-    example_filepath = data_dir + ldassoc_example_dir + 'prostate_example.txt'
+    example_filepath = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     example = {
         'filename': os.path.basename(example_filepath),
         'headers': read_csv_headers(example_filepath)
@@ -397,7 +400,7 @@ def ldassoc_example():
 @app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldexpress_tissues', methods=['GET'])
 def ldexpress_tissues():
-    print("Retrieve LDexpress Tissues")
+    logInfo("Retrieve LDexpress Tissues")
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
@@ -411,7 +414,7 @@ def ldexpress_tissues():
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
-    print("Retrieve SNPchip Platforms")
+    logInfo("Retrieve SNPchip Platforms")
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -426,7 +429,7 @@ def snpchip_platforms():
 @app.route('/LDlinkRest/ldtrait_timestamp', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldtrait_timestamp', methods=['GET'])
 def ldtrait_timestamp():
-    print("Retrieve LDtrait Timestamp")
+    logInfo("Retrieve LDtrait Timestamp")
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -443,9 +446,9 @@ def ldtrait_timestamp():
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
-    print("Execute ldassoc.")
-    with open('config.yml', 'r') as c:
-        config = yaml.load(c)
+    logInfo("Execute ldassoc.")
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
     ldassoc_example_dir = config['data']['ldassoc_example_dir']
     data_dir = config['data']['data_dir']
     myargs = argparse.Namespace()
@@ -453,16 +456,18 @@ def ldassoc():
     filename = secure_filename(request.args.get('filename', False))
     region = request.args.get('calculateRegion')
     pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
     print('filename: ' + filename)
     print('region: ' + region)
     print('pop: ' + pop)
+    print('genome build: ', genome_build)
     myargs.dprime = bool(request.args.get("dprime") == "True")
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
     myargs.pval = str(request.args.get('columns[pvalue]'))
     print("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
-        filename = data_dir + ldassoc_example_dir + 'prostate_example.txt'
+        filename = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     else:
         filename = os.path.join(app.config['UPLOAD_DIR'], secure_filename(str(request.args.get('filename'))))
     if region == "variant":
@@ -503,7 +508,7 @@ def ldassoc():
         reference = request.args.get('reference', False)
         print('reference: ' + reference)
         try:
-            out_json = calculate_assoc(filename, region, pop, reference, web, myargs)
+            out_json = calculate_assoc(filename, region, pop, reference, genome_build, web, myargs)
         except:
             return sendTraceback(None)
     else:
@@ -517,7 +522,7 @@ def ldassoc():
 @app.route('/LDlinkRestWeb/ldexpress', methods=['POST'])
 @requires_token
 def ldexpress():
-    print('Execute ldexpress.')
+    logInfo('Execute ldexpress.')
     data = json.loads(request.stream.read())
     snps = data['snps']
     pop = data['pop']
@@ -527,6 +532,7 @@ def ldexpress():
     p_threshold = data['p_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -537,7 +543,7 @@ def ldexpress():
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             try:
                 express = {}
-                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
                 express["query_snps"] = query_snps
                 express["thinned_snps"] = thinned_snps
                 express["thinned_genes"] = thinned_genes
@@ -569,7 +575,7 @@ def ldexpress():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, float(r2_d_threshold), float(p_threshold), int(window))
+            (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = calculate_express(snplist, pop, reference, web, tissues, r2_d, genome_build, float(r2_d_threshold), float(p_threshold), int(window))
             # with open(tmp_dir + "express" + reference + ".json") as f:
             #     json_dict = json.load(f)
             if "error" in errors_warnings:
@@ -607,7 +613,7 @@ def ldexpress():
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
 def ldhap():
-    print('Execute ldhap.')
+    logInfo('Execute ldhap.')
     # print 'Request User Agent: ', request.user_agent
     # print 'Request User Agent Platform: ', request.user_agent.platform
     # print 'Request User Agent Browser: ', request.user_agent.browser
@@ -675,37 +681,31 @@ def ldhap():
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
 def ldmatrix():
-    print('Execute ldmatrix.')
+    logInfo('Execute ldmatrix.')
     # differentiate POST or GET request
     if request.method == 'POST':
         # POST REQUEST
         data = json.loads(request.stream.read())
-        if 'snps' in data:
-            snps = data['snps']
-        else:
-            snps = False
-        if "pop" in data:
-            pop = data['pop']
-        else:
-            pop = False
-        if "reference" in data:
-            reference = data['reference']
-        else:
-            reference = False
-        if "r2_d" in data:
-            r2_d = data['r2_d']
-        else:
-            r2_d = False
+        snps = data['snps'] if 'snps' in data else False
+        pop = data['pop'] if 'pop' in data else False
+        reference = data['reference'] if 'reference' in data else False
+        r2_d = data['r2_d'] if 'r2_d' in data else False
+        genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
+        collapseTranscript = data['collapseTranscript'] if 'collapseTranscript' in data else True
     else:
         # GET REQUEST
         snps = request.args.get('snps', False)
         pop = request.args.get('pop', False)
         reference = request.args.get('reference', False)
         r2_d = request.args.get('r2_d', False)
+        genome_build = request.args.get('genome_build', 'grch37')
+        collapseTranscript = request.args.get('collapseTranscript', True)
     token = request.args.get('token', False)
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_d: ' + r2_d)
+    print('genome build: ' + genome_build)
+    print('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -718,11 +718,8 @@ def ldmatrix():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                print("reach1")
-                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
-                print("reach2")
+                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             except:
-                print("reach3")
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -737,7 +734,7 @@ def ldmatrix():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), r2_d)
+            out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
             # display api out
             try:
                 # unlock token then display api output
@@ -767,7 +764,7 @@ def ldmatrix():
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
 def ldpair():
-    print('Execute ldpair.')
+    logInfo('Execute ldpair.')
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
@@ -823,7 +820,7 @@ def ldpair():
 @app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
 @requires_token
 def ldpop():
-    print('Execute ldpop.')
+    logInfo('Execute ldpop.')
     var1 = request.args.get('var1', False)
     var2 = request.args.get('var2', False)
     pop = request.args.get('pop', False)
@@ -881,16 +878,20 @@ def ldpop():
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 @requires_token
 def ldproxy():
-    print('Execute ldproxy.')
+    logInfo('Execute ldproxy.')
     var = request.args.get('var', False)
     pop = request.args.get('pop', False)
     r2_d = request.args.get('r2_d', False)
     window = request.args.get('window', '500000').replace(',', '')
     token = request.args.get('token', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    collapseTranscript = request.args.get('collapseTranscript', True)
     print('var: ', var)
     print('pop: ',  pop)
     print('r2_d: ',  r2_d)
     print('window: ',  window)
+    print('genome build: ', genome_build)
+    print('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -900,7 +901,7 @@ def ldproxy():
             reference = request.args.get('reference', False)
             print('request: ' + str(reference))
             try:
-                out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d, int(window))
+                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             except:
                 return sendTraceback(None)
         else:
@@ -913,7 +914,7 @@ def ldproxy():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, r2_d, int(window))
+            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             # display api out
             try:
                 # unlock token then display api output
@@ -938,7 +939,7 @@ def ldproxy():
 @app.route('/LDlinkRestWeb/ldtrait', methods=['POST'])
 @requires_token
 def ldtrait():
-    print('Execute ldtrait.')
+    logInfo('Execute ldtrait.')
     data = json.loads(request.stream.read())
     snps = data['snps']
     pop = data['pop']
@@ -946,10 +947,7 @@ def ldtrait():
     r2_d_threshold = data['r2_d_threshold']
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ', snps)
     print('pop: ', pop)
     print('r2_d: ', r2_d)
@@ -984,7 +982,7 @@ def ldtrait():
                     trait["error"] = json_dict["error"]
                 else:
                     with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                        f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                        f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
@@ -1021,7 +1019,7 @@ def ldtrait():
                 return sendTraceback(json_dict["error"])
             else:
                 with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                    f.write("Query\tGWAS Trait\tRS Number\tPosition (GRCh37)\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                    f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")
@@ -1052,9 +1050,10 @@ def ldtrait():
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
 def snpchip():
-    print("Execute snpchip.")
+    logInfo("Execute snpchip.")
     data = json.loads(request.stream.read())
     snps = data['snps']
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     platforms = data['platforms']
     token = request.args.get('token', False)
     print('snps: ' + snps)
@@ -1071,7 +1070,7 @@ def snpchip():
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                snp_chip = calculate_chip(snplst, platforms, web, reference)
+                snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
             except:
                 return sendTraceback(None)
@@ -1088,7 +1087,7 @@ def snpchip():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            snp_chip = calculate_chip(snplst, platforms, web, reference)
+            snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             # display api out
             try:
                 # unlock token then display api output
@@ -1114,17 +1113,14 @@ def snpchip():
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
 def snpclip():
-    print('Execute snpclip.')
+    logInfo('Execute snpclip.')
     data = json.loads(request.stream.read())
     snps = data['snps']
     pop = data['pop']
     r2_threshold = data['r2_threshold']
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
-    try:
-        genome_build = data['genome_build']
-    except:
-        genome_build = 'grch37'
+    genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     print('snps: ' + snps)
     print('pop: ' + pop)
     print('r2_threshold: ' + r2_threshold)
