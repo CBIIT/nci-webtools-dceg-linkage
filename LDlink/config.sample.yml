@@ -3,6 +3,7 @@ data:
   dbsnp_version: '155'
   data_dir: '<ABSOLUTE_PATH_TO_DATA_DIR>'
   tmp_dir: '<ABSOLUTE_PATH_TO_TMP_DIR>'
+  log_dir: '<ABSOLUTE_PATH_TO_LOG_DIR>'
   ldassoc_example_dir: 'ldassoc_example/'
   population_samples_dir: '1000G_population_samples/'
   genotypes_dir: '1000G/'

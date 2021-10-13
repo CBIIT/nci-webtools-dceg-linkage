@@ -7,9 +7,9 @@ import sys
 # retrieve config
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
-aws_info = config['aws']
+log_dir = config['data']['log_dir']
 
-logging.basicConfig(filename="logs/ldlink.log", 
+logging.basicConfig(filename=log_dir + "ldlink.log", 
                 format='%(levelname)s : %(asctime)s : %(message)s', 
                 filemode='w', level=logging.INFO, datefmt='%m-%d-%Y %I:%M:%S')
 log = logging.getLogger("LDLink")
