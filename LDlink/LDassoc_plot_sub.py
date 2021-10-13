@@ -814,7 +814,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     else:
         # Get genes from LDassoc.py output file
         genes_c_file = tmp_dir + "genes_" + request + ".json"
-        genes_c_raw = open(genes_file).readlines()
+        genes_c_raw = open(genes_c_file).readlines()
 
         genes_c_plot_start=[]
         genes_c_plot_end=[]
@@ -863,8 +863,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
                 genes_c_plot_y.append(y_coord)
                 genes_c_plot_name.append(name+"  ")
 
-                for i in range(len(e_start)):
-
+                # for i in range(len(e_start)):
+                for i in range(len(e_start)-1):
                     width=(int(e_end[i])-int(e_start[i]))/1000000.0
                     x_coord=int(e_start[i])/1000000.0+(width/2)
 
