@@ -731,7 +731,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     
     # Gene Plot (Collapsed)
     else:
-        genes_c_file = tmp_dir + "genes_" + request + ".json"
+        genes_c_file = tmp_dir + "genes_c_" + request + ".json"
         genes_c_raw = open(genes_c_file).readlines()
 
         genes_c_plot_start=[]
