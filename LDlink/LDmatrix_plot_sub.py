@@ -804,14 +804,14 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
         max_genes_c = 40
         # if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
         if len(lines_c) < 3:
-            plot_c_h_pix = 250
+            plot_h_pix = 250
         else:
-            plot_c_h_pix = 250 + (len(lines_c) - 2) * 50
+            plot_h_pix = 250 + (len(lines_c) - 2) * 50
 
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                         x_range=xr, y_range=yr2_c, border_fill_color='white',
                         title="", h_symmetry=False, v_symmetry=False, logo=None,
-                        plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                        plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
