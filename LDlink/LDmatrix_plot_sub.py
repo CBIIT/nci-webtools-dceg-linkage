@@ -720,7 +720,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
         gene_plot.xaxis.axis_label = "Chromosome " + \
             snp_coords[1][1] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
-        gene_plot.yaxis.axis_label = "Genes"
+        gene_plot.yaxis.axis_label = "Genes (All Transcripts)"
         gene_plot.ygrid.grid_line_color = None
         gene_plot.yaxis.axis_line_color = None
         gene_plot.yaxis.minor_tick_line_color = None
@@ -897,8 +897,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     subprocess.call("rm " + tmp_dir + "matrix_plot_scaled_" +
                     request + ".svg", shell=True)
     # Remove temporary file(s)
-    subprocess.call("rm " + tmp_dir + "genes_" + 
-                    request + ".json", shell=True)
+    subprocess.call("rm " + tmp_dir + "genes_*" + 
+                    request + "*.json", shell=True)
 
 
     reset_output()
