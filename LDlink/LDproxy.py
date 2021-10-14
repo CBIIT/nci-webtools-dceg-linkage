@@ -755,137 +755,252 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
                     color='color', alpha=0.5, line_width=1)
         rug.toolbar_location = None
 
-        # Gene Plot
-        genes_file = tmp_dir + "genes_" + request + ".json"
-        genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
+        if collapseTranscript == "false":
+            # Gene Plot (All Transcripts)
+            genes_file = tmp_dir + "genes_" + request + ".json"
+            genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
 
-        genes_plot_start = []
-        genes_plot_end = []
-        genes_plot_y = []
-        genes_plot_name = []
-        exons_plot_x = []
-        exons_plot_y = []
-        exons_plot_w = []
-        exons_plot_h = []
-        exons_plot_name = []
-        exons_plot_id = []
-        exons_plot_exon = []
-        lines = [0]
-        gap = 80000
-        tall = 0.75
-        if genes_json != None and len(genes_json) > 0:
-            for gene_obj in genes_json:
-                bin = gene_obj["bin"]
-                name_id = gene_obj["name"]
-                chrom = gene_obj["chrom"]
-                strand = gene_obj["strand"]
-                txStart = gene_obj["txStart"]
-                txEnd = gene_obj["txEnd"]
-                cdsStart = gene_obj["cdsStart"]
-                cdsEnd = gene_obj["cdsEnd"]
-                exonCount = gene_obj["exonCount"]
-                exonStarts = gene_obj["exonStarts"]
-                exonEnds = gene_obj["exonEnds"]
-                score = gene_obj["score"]
-                name2 = gene_obj["name2"]
-                cdsStartStat = gene_obj["cdsStartStat"]
-                cdsEndStat = gene_obj["cdsEndStat"] 
-                exonFrames = gene_obj["exonFrames"]
-                name = name2
-                id = name_id
-                e_start = exonStarts.split(",")
-                e_end = exonEnds.split(",")
+            genes_plot_start = []
+            genes_plot_end = []
+            genes_plot_y = []
+            genes_plot_name = []
+            exons_plot_x = []
+            exons_plot_y = []
+            exons_plot_w = []
+            exons_plot_h = []
+            exons_plot_name = []
+            exons_plot_id = []
+            exons_plot_exon = []
+            lines = [0]
+            gap = 80000
+            tall = 0.75
+            if genes_json != None and len(genes_json) > 0:
+                for gene_obj in genes_json:
+                    bin = gene_obj["bin"]
+                    name_id = gene_obj["name"]
+                    chrom = gene_obj["chrom"]
+                    strand = gene_obj["strand"]
+                    txStart = gene_obj["txStart"]
+                    txEnd = gene_obj["txEnd"]
+                    cdsStart = gene_obj["cdsStart"]
+                    cdsEnd = gene_obj["cdsEnd"]
+                    exonCount = gene_obj["exonCount"]
+                    exonStarts = gene_obj["exonStarts"]
+                    exonEnds = gene_obj["exonEnds"]
+                    score = gene_obj["score"]
+                    name2 = gene_obj["name2"]
+                    cdsStartStat = gene_obj["cdsStartStat"]
+                    cdsEndStat = gene_obj["cdsEndStat"] 
+                    exonFrames = gene_obj["exonFrames"]
+                    name = name2
+                    id = name_id
+                    e_start = exonStarts.split(",")
+                    e_end = exonEnds.split(",")
 
-                # Determine Y Coordinate
-                i = 0
-                y_coord = None
-                while y_coord == None:
-                    if i > len(lines) - 1:
-                        y_coord = i + 1
-                        lines.append(int(txEnd))
-                    elif int(txStart) > (gap + lines[i]):
-                        y_coord = i + 1
-                        lines[i] = int(txEnd)
-                    else:
-                        i += 1
+                    # Determine Y Coordinate
+                    i = 0
+                    y_coord = None
+                    while y_coord == None:
+                        if i > len(lines) - 1:
+                            y_coord = i + 1
+                            lines.append(int(txEnd))
+                        elif int(txStart) > (gap + lines[i]):
+                            y_coord = i + 1
+                            lines[i] = int(txEnd)
+                        else:
+                            i += 1
 
-                genes_plot_start.append(int(txStart) / 1000000.0)
-                genes_plot_end.append(int(txEnd) / 1000000.0)
-                genes_plot_y.append(y_coord)
-                genes_plot_name.append(name + "  ")
+                    genes_plot_start.append(int(txStart) / 1000000.0)
+                    genes_plot_end.append(int(txEnd) / 1000000.0)
+                    genes_plot_y.append(y_coord)
+                    genes_plot_name.append(name + "  ")
 
-                for i in range(len(e_start) - 1):
-                    if strand == "+":
-                        exon = i + 1
-                    else:
-                        exon = len(e_start) - 1 - i
+                    for i in range(len(e_start) - 1):
+                        if strand == "+":
+                            exon = i + 1
+                        else:
+                            exon = len(e_start) - 1 - i
 
-                    width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
-                    x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
+                        width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
+                        x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
 
-                    exons_plot_x.append(x_coord)
-                    exons_plot_y.append(y_coord)
-                    exons_plot_w.append(width)
-                    exons_plot_h.append(tall)
-                    exons_plot_name.append(name)
-                    exons_plot_id.append(id)
-                    exons_plot_exon.append(exon)
+                        exons_plot_x.append(x_coord)
+                        exons_plot_y.append(y_coord)
+                        exons_plot_w.append(width)
+                        exons_plot_h.append(tall)
+                        exons_plot_name.append(name)
+                        exons_plot_id.append(id)
+                        exons_plot_exon.append(exon)
 
-        n_rows = len(lines)
-        genes_plot_yn = [n_rows - x + 0.5 for x in genes_plot_y]
-        exons_plot_yn = [n_rows - x + 0.5 for x in exons_plot_y]
-        yr2 = Range1d(start=0, end=n_rows)
+            n_rows = len(lines)
+            genes_plot_yn = [n_rows - x + 0.5 for x in genes_plot_y]
+            exons_plot_yn = [n_rows - x + 0.5 for x in exons_plot_y]
+            yr2 = Range1d(start=0, end=n_rows)
 
-        data_gene_plot = {
-            'exons_plot_x': exons_plot_x,
-            'exons_plot_yn': exons_plot_yn,
-            'exons_plot_w': exons_plot_w,
-            'exons_plot_h': exons_plot_h,
-            'exons_plot_name': exons_plot_name,
-            'exons_plot_id': exons_plot_id,
-            'exons_plot_exon': exons_plot_exon
-        }
+            data_gene_plot = {
+                'exons_plot_x': exons_plot_x,
+                'exons_plot_yn': exons_plot_yn,
+                'exons_plot_w': exons_plot_w,
+                'exons_plot_h': exons_plot_h,
+                'exons_plot_name': exons_plot_name,
+                'exons_plot_id': exons_plot_id,
+                'exons_plot_exon': exons_plot_exon
+            }
 
-        source_gene_plot = ColumnDataSource(data_gene_plot)
+            source_gene_plot = ColumnDataSource(data_gene_plot)
 
-        if len(lines) < 3:
-            plot_h_pix = 150
+            if len(lines) < 3:
+                plot_h_pix = 250
+            else:
+                plot_h_pix = 250 + (len(lines) - 2) * 50
+
+            gene_plot = figure(
+                x_range=xr, y_range=yr2, border_fill_color='white',
+                title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
+                plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
+
+            gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
+                            genes_plot_yn, color="black", alpha=1, line_width=2)
+
+            gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
+                        source=source_gene_plot, fill_color="grey", line_color="grey")
+            gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
+            gene_plot.yaxis.axis_label = "Genes (All Transcripts)"
+            gene_plot.ygrid.grid_line_color = None
+            gene_plot.yaxis.axis_line_color = None
+            gene_plot.yaxis.minor_tick_line_color = None
+            gene_plot.yaxis.major_tick_line_color = None
+            gene_plot.yaxis.major_label_text_color = None
+
+            hover = gene_plot.select(dict(type=HoverTool))
+            hover.tooltips = OrderedDict([
+                ("Gene", "@exons_plot_name"),
+                ("ID", "@exons_plot_id"),
+                ("Exon", "@exons_plot_exon"),
+            ])
+
+            gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
+                        text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+
+            gene_plot.toolbar_location = "below"
+
+            # Combine plots into a grid
+            out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
+                                toolbar_options=dict(logo=None))
+        # Gene Plot (Collapsed)                        
         else:
-            plot_h_pix = 150 + (len(lines) - 2) * 50
+            genes_c_file = tmp_dir + "genes_c_" + request + ".json"
+            genes_c_json = getRefGene(db, genes_c_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, True)
 
-        gene_plot = figure(
-            x_range=xr, y_range=yr2, border_fill_color='white',
-            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-            plot_width=900, plot_height=plot_h_pix, tools="hover,tap,xpan,box_zoom,undo,redo,reset,previewsave", logo=None)
+            genes_c_plot_start=[]
+            genes_c_plot_end=[]
+            genes_c_plot_y=[]
+            genes_c_plot_name=[]
+            exons_c_plot_x=[]
+            exons_c_plot_y=[]
+            exons_c_plot_w=[]
+            exons_c_plot_h=[]
+            exons_c_plot_name=[]
+            exons_c_plot_id=[]
+            message_c = ["Too many genes to plot."]
+            lines_c=[0]
+            gap=80000
+            tall=0.75
+            if genes_c_json != None and len(genes_c_json) > 0:
+                for gene_c_obj in genes_c_json:
+                    chrom = gene_c_obj["chrom"]
+                    txStart = gene_c_obj["txStart"]
+                    txEnd = gene_c_obj["txEnd"]
+                    exonStarts = gene_c_obj["exonStarts"]
+                    exonEnds = gene_c_obj["exonEnds"]
+                    name2 = gene_c_obj["name2"]
+                    transcripts = gene_c_obj["transcripts"]
+                    name = name2
+                    e_start = exonStarts.split(",")
+                    e_end = exonEnds.split(",")
+                    e_transcripts=transcripts.split(",")
 
-        gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
-                        genes_plot_yn, color="black", alpha=1, line_width=2)
+                    # Determine Y Coordinate
+                    i=0
+                    y_coord=None
+                    while y_coord==None:
+                        if i>len(lines_c)-1:
+                            y_coord=i+1
+                            lines_c.append(int(txEnd))
+                        elif int(txStart)>(gap+lines_c[i]):
+                            y_coord=i+1
+                            lines_c[i]=int(txEnd)
+                        else:
+                            i+=1
 
-        gene_plot.rect(x='exons_plot_x', y='exons_plot_yn', width='exons_plot_w', height='exons_plot_h',
-                    source=source_gene_plot, fill_color="grey", line_color="grey")
-        gene_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
-        gene_plot.yaxis.axis_label = "Genes"
-        gene_plot.ygrid.grid_line_color = None
-        gene_plot.yaxis.axis_line_color = None
-        gene_plot.yaxis.minor_tick_line_color = None
-        gene_plot.yaxis.major_tick_line_color = None
-        gene_plot.yaxis.major_label_text_color = None
+                    genes_c_plot_start.append(int(txStart)/1000000.0)
+                    genes_c_plot_end.append(int(txEnd)/1000000.0)
+                    genes_c_plot_y.append(y_coord)
+                    genes_c_plot_name.append(name+"  ")
 
-        hover = gene_plot.select(dict(type=HoverTool))
-        hover.tooltips = OrderedDict([
-            ("Gene", "@exons_plot_name"),
-            ("ID", "@exons_plot_id"),
-            ("Exon", "@exons_plot_exon"),
-        ])
+                    # for i in range(len(e_start)):
+                    for i in range(len(e_start)-1):
+                        width=(int(e_end[i])-int(e_start[i]))/1000000.0
+                        x_coord=int(e_start[i])/1000000.0+(width/2)
 
-        gene_plot.text(genes_plot_start, genes_plot_yn, text=genes_plot_name, alpha=1, text_font_size="7pt",
-                    text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+                        exons_c_plot_x.append(x_coord)
+                        exons_c_plot_y.append(y_coord)
+                        exons_c_plot_w.append(width)
+                        exons_c_plot_h.append(tall)
+                        exons_c_plot_name.append(name)
+                        exons_c_plot_id.append(e_transcripts[i].replace("-",","))
 
-        gene_plot.toolbar_location = "below"
 
-        # Combine plots into a grid
-        out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
-                            toolbar_options=dict(logo=None))
+            n_rows_c=len(lines_c)
+            genes_c_plot_yn=[n_rows_c-x+0.5 for x in genes_c_plot_y]
+            exons_c_plot_yn=[n_rows_c-x+0.5 for x in exons_c_plot_y]
+            yr2_c=Range1d(start=0, end=n_rows_c)
+
+            data_gene_c_plot = {'exons_c_plot_x': exons_c_plot_x, 'exons_c_plot_yn': exons_c_plot_yn, 'exons_c_plot_w': exons_c_plot_w, 'exons_c_plot_h': exons_c_plot_h, 'exons_c_plot_name': exons_c_plot_name, 'exons_c_plot_id': exons_c_plot_id}
+            source_gene_c_plot=ColumnDataSource(data_gene_c_plot)
+
+            max_genes_c = 40
+            # if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
+            if len(lines_c) < 3:
+                plot_c_h_pix = 250
+            else:
+                plot_c_h_pix = 250 + (len(lines_c) - 2) * 50
+
+            gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
+                            x_range=xr, y_range=yr2_c, border_fill_color='white',
+                            title="", h_symmetry=False, v_symmetry=False, logo=None,
+                            plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+
+            # if len(genes_c_raw) <= max_genes_c:
+            gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
+                                genes_c_plot_yn, color="black", alpha=1, line_width=2)
+            gene_c_plot.rect(x='exons_c_plot_x', y='exons_c_plot_yn', width='exons_c_plot_w', height='exons_c_plot_h',
+                            source=source_gene_c_plot, fill_color="grey", line_color="grey")
+            gene_c_plot.text(genes_c_plot_start, genes_c_plot_yn, text=genes_c_plot_name, alpha=1, text_font_size="7pt",
+                            text_font_style="bold", text_baseline="middle", text_align="right", angle=0)
+            hover = gene_c_plot.select(dict(type=HoverTool))
+            hover.tooltips = OrderedDict([
+                ("Gene", "@exons_c_plot_name"),
+                ("Transcript IDs", "@exons_c_plot_id"),
+            ])
+
+            # else:
+            # 	x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
+            # 	gene_c_plot.text(x_coord_text, n_rows_c / 2.0, text=message_c, alpha=1,
+            # 				   text_font_size="12pt", text_font_style="bold", text_baseline="middle", text_align="center", angle=0)
+
+            gene_c_plot.xaxis.axis_label = "Chromosome " + snp_coord['chromosome'] + " Coordinate (Mb)(" + genome_build_vars[genome_build]['title'] + ")"
+            gene_c_plot.yaxis.axis_label = "Genes (Transcripts Collapsed)"
+            gene_c_plot.ygrid.grid_line_color = None
+            gene_c_plot.yaxis.axis_line_color = None
+            gene_c_plot.yaxis.minor_tick_line_color = None
+            gene_c_plot.yaxis.major_tick_line_color = None
+            gene_c_plot.yaxis.major_label_text_color = None
+
+            gene_c_plot.toolbar_location = "below"
+            
+            out_grid = gridplot(proxy_plot, rug, gene_c_plot,
+                        ncols=1, toolbar_options=dict(logo=None))
 
         # Generate high quality images only if accessed via web instance
         
