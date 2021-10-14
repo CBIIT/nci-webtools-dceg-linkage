@@ -564,9 +564,9 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     source_gene_plot = ColumnDataSource(data_gene_plot)
 
     if len(lines) < 3:
-        plot_h_pix = 150
+        plot_h_pix = 250
     else:
-        plot_h_pix = 150 + (len(lines) - 2) * 50
+        plot_h_pix = 250 + (len(lines) - 2) * 50
 
     gene_plot = figure(
         x_range=xr, y_range=yr2, border_fill_color='white',

@@ -736,9 +736,9 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         max_genes = 40
         # if len(lines) < 3 or len(genes_raw) > max_genes:
         if len(lines) < 3:
-            plot_h_pix = 150
+            plot_h_pix = 250
         else:
-            plot_h_pix = 150 + (len(lines) - 2) * 50
+            plot_h_pix = 250 + (len(lines) - 2) * 50
 
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2, border_fill_color='white',
@@ -887,9 +887,9 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         max_genes_c = 40
         # if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
         if len(lines_c) < 3:
-            plot_c_h_pix = 150
+            plot_c_h_pix = 250
         else:
-            plot_c_h_pix = 150 + (len(lines_c) - 2) * 50
+            plot_c_h_pix = 250 + (len(lines_c) - 2) * 50
 
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2_c, border_fill_color='white',

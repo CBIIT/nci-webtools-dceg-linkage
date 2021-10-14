@@ -1027,7 +1027,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
 	rug.toolbar_location=None
 
-	print("myargs.transcript", myargs.transcript)
 	if myargs.transcript==True:
 		# Gene Plot (All Transcripts)
 		genes_file = tmp_dir + "genes_" + request + ".json"
@@ -1118,9 +1117,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		max_genes = 40
 		# if len(lines) < 3 or len(genes_raw) > max_genes:
 		if len(lines) < 3:
-			plot_h_pix = 150
+			plot_h_pix = 250
 		else:
-			plot_h_pix = 150 + (len(lines) - 2) * 50
+			plot_h_pix = 250 + (len(lines) - 2) * 50
 
 		gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
 						   x_range=xr, y_range=yr2, border_fill_color='white',
@@ -1183,12 +1182,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			pass
 		
 
-		# Generate high quality images only if accessed via web instance
-		if web:
-			# Open thread for high quality image exports
-			print("Open thread for high quality image exports.")
-			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
-			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+		# # Generate high quality images only if accessed via web instance
+		# if web:
+		# 	# Open thread for high quality image exports
+		# 	print("Open thread for high quality image exports.")
+		# 	command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
+		# 	subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 
 
@@ -1267,9 +1266,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		max_genes_c = 40
 		# if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
 		if len(lines_c) < 3:
-			plot_c_h_pix = 150
+			plot_c_h_pix = 250
 		else:
-			plot_c_h_pix = 150 + (len(lines_c) - 2) * 50
+			plot_c_h_pix = 250 + (len(lines_c) - 2) * 50
 
 		gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
 						   x_range=xr, y_range=yr2_c, border_fill_color='white',
@@ -1330,12 +1329,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		except:
 			pass
 
-		# Generate high quality images only if accessed via web instance
-		if web:
-			# Open thread for high quality image exports
-			print("Open thread for high quality image exports.")
-			command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
-			subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+	# Generate high quality images only if accessed via web instance
+	if web:
+		# Open thread for high quality image exports
+		print("Open thread for high quality image exports.")
+		command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
+		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
 	###########################
 	# Html output for testing #
