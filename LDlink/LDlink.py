@@ -509,7 +509,8 @@ def ldassoc():
         print('reference: ' + reference)
         try:
             out_json = calculate_assoc(filename, region, pop, reference, genome_build, web, myargs)
-        except:
+        except Exception as e:
+            logError(e)
             return sendTraceback(None)
     else:
         # API REQUEST
@@ -563,7 +564,8 @@ def ldexpress():
                             f.write("Warning(s):\n")
                             f.write(express["warning"])
                 out_json = json.dumps(express, sort_keys=False)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -598,12 +600,14 @@ def ldexpress():
                         content = fp.read()
                     toggleLocked(token, 0)
                     return content
-                except:
+                except Exception as e:
                     # unlock token then display error message
                     toggleLocked(token, 0)
+                    logError(e)
                     return sendTraceback(None)
-        except:
+        except Exception as e:
             # unlock token if internal error w/ calculation
+            logError(e)
             toggleLocked(token, 0)
             return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
@@ -638,7 +642,8 @@ def ldhap():
                 f.write(snps.lower())
             try:
                 out_json = calculate_hap(snplst, pop, reference, web, genome_build)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -665,14 +670,16 @@ def ldhap():
                     content2 = fp.read()
                 toggleLocked(token, 0)
                 return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
-            except:
+            except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)
                 toggleLocked(token, 0)
+                logError(e)
                 return sendTraceback(output["error"])
-        except:
+        except Exception as e:
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
+            logError(e)
             return sendTraceback(None)
     return sendJSON(out_json)
 
@@ -719,7 +726,8 @@ def ldmatrix():
                 f.write(snps.lower())
             try:
                 out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -747,15 +755,17 @@ def ldmatrix():
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
-            except:
+            except Exception as e:
                 # unlock token then display error message
                 with open(tmp_dir + "matrix" + reference + ".json") as f:
                     json_dict = json.load(f)
                 toggleLocked(token, 0)
+                logError(e)
                 return sendTraceback(json_dict["error"])
-        except:
+        except Exception as e:
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
+            logError(e)
             return sendTraceback(None)
     return out_script + "\n " + out_div
 
@@ -784,7 +794,8 @@ def ldpair():
             print('request: ' + str(reference))
             try:
                 out_json = calculate_pair(var1, var2, pop, web, genome_build, reference)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -804,14 +815,16 @@ def ldpair():
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
-            except:
+            except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)
                 toggleLocked(token, 0)
+                logError(e)
                 return sendTraceback(output["error"])
-        except:
+        except Exception as e:
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
+            logError(e)
             return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
 
@@ -842,7 +855,8 @@ def ldpop():
             print('request: ' + str(reference))
             try:
                 out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -862,14 +876,16 @@ def ldpop():
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
-            except:
+            except Exception as e:
                 # unlock token then display error message
                 # output = json.loads(out_json)
                 toggleLocked(token, 0)
+                logError(e)
                 return sendTraceback(out_json["error"])
-        except:
+        except Exception as e:
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
+            logError(e)
             return sendTraceback(None)
     return current_app.response_class(out_json, mimetype='application/json')
 
@@ -902,7 +918,8 @@ def ldproxy():
             print('request: ' + str(reference))
             try:
                 out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -922,13 +939,15 @@ def ldproxy():
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
-            except:
+            except Exception as e:
+                logError(e)
                 # unlock token then display error message
                 with open(tmp_dir + "proxy" + reference + ".json") as f:
                     json_dict = json.load(f)
                 toggleLocked(token, 0)
                 return sendTraceback(json_dict["error"])
-        except:
+        except Exception as e:
+            logError(e)
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
             return sendTraceback(None)
@@ -992,7 +1011,8 @@ def ldtrait():
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
                 out_json = json.dumps(trait, sort_keys=False)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -1034,11 +1054,13 @@ def ldtrait():
                         content = fp.read()
                     toggleLocked(token, 0)
                     return content
-                except:
+                except Exception as e:
+                    logError(e)
                     # unlock token then display error message
                     toggleLocked(token, 0)
                     return sendTraceback(None)
-        except:
+        except Exception as e:
+            logError(e)
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
             return sendTraceback(None)
@@ -1072,7 +1094,8 @@ def snpchip():
             try:
                 snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -1096,13 +1119,15 @@ def snpchip():
                     content = fp.read()
                 toggleLocked(token, 0)
                 return content
-            except:
+            except Exception as e:
+                logError(e)
                 # unlock token then display error message
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
                 output = json.loads(out_json)
                 toggleLocked(token, 0)
                 return sendTraceback(output["error"])
-        except:
+        except Exception as e:
+            logError(e)
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
             return sendTraceback(None)
@@ -1166,7 +1191,8 @@ def snpclip():
                             f.write(snp[0] + "\t" + "\t".join(details[snp[0]]))
                             f.write("\n")
                 out_json = json.dumps(clip, sort_keys=False)
-            except:
+            except Exception as e:
+                logError(e)
                 return sendTraceback(None)
         else:
             return sendJSON("This web API route does not support programmatic access. Please use the API routes specified on the API Access web page.")
@@ -1206,11 +1232,13 @@ def snpclip():
                         return sendTraceback(json_dict["error"])
                 toggleLocked(token, 0)
                 return content
-            except:
+            except Exception as e:
+                logError(e)
                 # unlock token then display error message
                 toggleLocked(token, 0)
                 return sendTraceback(None)
-        except:
+        except Exception as e:
+            logError(e)
             # unlock token if internal error w/ calculation
             toggleLocked(token, 0)
             return sendTraceback(None)
