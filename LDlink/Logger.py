@@ -9,6 +9,7 @@ from logging.handlers import TimedRotatingFileHandler
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
 
+log_dir = config['data']['log_dir']
 logFilename = config['log']['filename']
 logLevel = config['log']['log_level']
 
@@ -25,7 +26,7 @@ elif (logLevel == 'CRITICAL'):
 else:
     logLevel = logging.DEBUG
 
-logging.basicConfig(filename=logFilename, 
+logging.basicConfig(filename=log_dir + logFilename, 
                 format='%(levelname)s : %(asctime)s : %(message)s', 
                 filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
 log = logging.getLogger("LDLink")
