@@ -106,9 +106,8 @@ else:
         client = MongoClient('localhost', mongo_port)
 db = client["LDLink"]
 
-def get_coords(db, rsid):
-    rsid = rsid.strip("rs")
-    query_results = db.dbsnp.find_one({"id": rsid})
+def get_dbsnp_coord(db, chromosome, position):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
@@ -160,7 +159,12 @@ for geno_n in vcf:
         if out_stats != None:
             if ((r2_d == "r2" and out_stats[0] >= float(r2_d_threshold)) or (r2_d == "d" and out_stats[1] >= float(r2_d_threshold))):
                 bp_n = geno_n[1]
-                rs_n = geno_n[2]
+                if geno_n[2][0:2] == "rs":
+                    rs_n = geno_n[2]
+                else: 
+                    snp_coord = get_dbsnp_coord(db, chromosome, bp_n)
+                    if snp_coord is not None:
+                        rs_n = "rs" + snp_coord['id']
                 out.append([snp, rs_n, chromosome, bp_n, out_stats[0], out_stats[1], out_stats[2], out_stats[3]])
 
 for line in out:

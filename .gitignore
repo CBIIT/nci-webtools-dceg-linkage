@@ -22,6 +22,7 @@ chromedriver*
 data/
 tmp/
 **logs/
+*ldlink.log*
 LDlink/tmp/
 LDlink/config.yml
 scripts/LDexpress_update/tmp/
