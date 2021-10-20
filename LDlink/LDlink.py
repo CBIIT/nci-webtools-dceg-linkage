@@ -457,15 +457,12 @@ def ldassoc():
     region = request.args.get('calculateRegion')
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    logDebug('filename: ' + filename)
-    logDebug('region: ' + region)
-    logDebug('pop: ' + pop)
-    logDebug('genome build: ', genome_build)
+    logDebug(request.args)
+    logDebug(myargs)
     myargs.dprime = bool(request.args.get("dprime") == "True")
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
     myargs.pval = str(request.args.get('columns[pvalue]'))
-    logDebug("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
         filename = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     else:
@@ -626,9 +623,7 @@ def ldhap():
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    logDebug('snps: ' + snps)
-    logDebug('pop: ' + pop)
-    logDebug('genome_build: ' + genome_build)
+    logDebug(request.args)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -699,6 +694,7 @@ def ldmatrix():
         r2_d = data['r2_d'] if 'r2_d' in data else False
         genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
         collapseTranscript = data['collapseTranscript'] if 'collapseTranscript' in data else True
+        logDebug(data)
     else:
         # GET REQUEST
         snps = request.args.get('snps', False)
@@ -707,12 +703,8 @@ def ldmatrix():
         r2_d = request.args.get('r2_d', False)
         genome_build = request.args.get('genome_build', 'grch37')
         collapseTranscript = request.args.get('collapseTranscript', True)
+        logDebug(request.args)
     token = request.args.get('token', False)
-    logDebug('snps: ' + snps)
-    logDebug('pop: ' + pop)
-    logDebug('r2_d: ' + r2_d)
-    logDebug('genome build: ' + genome_build)
-    logDebug('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -780,10 +772,7 @@ def ldpair():
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    logDebug('var1: ' + var1)
-    logDebug('var2: ' + var2)
-    logDebug('pop: ' + pop)
-    logDebug('genome_build: ' + genome_build)
+    logDebug(request.args)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -840,11 +829,7 @@ def ldpop():
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    logDebug('var1: ' + var1)
-    logDebug('var2: ' + var2)
-    logDebug('pop: ' + pop)
-    logDebug('r2_d: ' + r2_d)
-    logDebug('genome_build: ' + genome_build)
+    logDebug(request.args)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -902,12 +887,7 @@ def ldproxy():
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
     collapseTranscript = request.args.get('collapseTranscript', True)
-    logDebug('var: ', var)
-    logDebug('pop: ',  pop)
-    logDebug('r2_d: ',  r2_d)
-    logDebug('window: ',  window)
-    logDebug('genome build: ', genome_build)
-    logDebug('collapseTranscript', collapseTranscript)
+    logDebug(request.args)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -967,12 +947,7 @@ def ldtrait():
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
-    logDebug('snps: ', snps)
-    logDebug('pop: ', pop)
-    logDebug('r2_d: ', r2_d)
-    logDebug('r2_d_threshold: ', r2_d_threshold)
-    logDebug('window: ', window)
-    logDebug('genome_build: ', genome_build)
+    logDebug(data)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1078,8 +1053,7 @@ def snpchip():
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     platforms = data['platforms']
     token = request.args.get('token', False)
-    logDebug('snps: ' + snps)
-    logDebug('platforms: ' + platforms)
+    logDebug(request.args)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1146,11 +1120,7 @@ def snpclip():
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
-    logDebug('snps: ' + snps)
-    logDebug('pop: ' + pop)
-    logDebug('r2_threshold: ' + r2_threshold)
-    logDebug('maf_threshold: ' + maf_threshold)
-    logDebug('genome_build: ' + genome_build)
+    logDebug(data)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
