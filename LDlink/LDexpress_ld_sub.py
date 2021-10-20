@@ -165,6 +165,8 @@ for geno_n in vcf:
                     snp_coord = get_dbsnp_coord(db, chromosome, bp_n)
                     if snp_coord is not None:
                         rs_n = "rs" + snp_coord['id']
+                    else: 
+                        rs_n = "."
                 out.append([snp, rs_n, chromosome, bp_n, out_stats[0], out_stats[1], out_stats[2], out_stats[3]])
 
 for line in out:
