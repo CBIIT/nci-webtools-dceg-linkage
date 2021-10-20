@@ -3,7 +3,7 @@ import yaml
 import logging
 import os
 import sys
-from datetime import date
+import datetime
 from logging.handlers import TimedRotatingFileHandler
 
 # retrieve config
@@ -13,8 +13,8 @@ with open('config.yml', 'r') as f:
 log_dir = config['log']['log_dir']
 logFilename = config['log']['filename']
 logLevel = config['log']['log_level']
-today = date.today()
-timestamp = today.strftime("%m-%d-%y")
+today = datetime.datetime.now()
+timestamp = today.strftime("%m-%d-%y_%H:%M:%S")
 
 if (logLevel == 'DEBUG'):
     logLevel = logging.DEBUG
