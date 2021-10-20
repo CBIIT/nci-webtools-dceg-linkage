@@ -36,7 +36,7 @@ from LDcommon import genome_build_vars
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 from werkzeug.debug import DebuggedApplication
-from Logger import logInfo, logError
+from Logger import logInfo, logError, logDebug
 
 # Ensure tmp directory exists
 with open('config.yml', 'r') as yml_file:
@@ -457,15 +457,15 @@ def ldassoc():
     region = request.args.get('calculateRegion')
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    print('filename: ' + filename)
-    print('region: ' + region)
-    print('pop: ' + pop)
-    print('genome build: ', genome_build)
+    logDebug('filename: ' + filename)
+    logDebug('region: ' + region)
+    logDebug('pop: ' + pop)
+    logDebug('genome build: ', genome_build)
     myargs.dprime = bool(request.args.get("dprime") == "True")
     myargs.chr = str(request.args.get('columns[chromosome]'))
     myargs.bp = str(request.args.get('columns[position]'))
     myargs.pval = str(request.args.get('columns[pvalue]'))
-    print("dprime: " + str(myargs.dprime))
+    logDebug("dprime: " + str(myargs.dprime))
     if bool(request.args.get("useEx") == "True"):
         filename = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     else:
@@ -626,9 +626,9 @@ def ldhap():
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    print('snps: ' + snps)
-    print('pop: ' + pop)
-    print('genome_build: ' + genome_build)
+    logDebug('snps: ' + snps)
+    logDebug('pop: ' + pop)
+    logDebug('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -708,11 +708,11 @@ def ldmatrix():
         genome_build = request.args.get('genome_build', 'grch37')
         collapseTranscript = request.args.get('collapseTranscript', True)
     token = request.args.get('token', False)
-    print('snps: ' + snps)
-    print('pop: ' + pop)
-    print('r2_d: ' + r2_d)
-    print('genome build: ' + genome_build)
-    print('collapseTranscript', collapseTranscript)
+    logDebug('snps: ' + snps)
+    logDebug('pop: ' + pop)
+    logDebug('r2_d: ' + r2_d)
+    logDebug('genome build: ' + genome_build)
+    logDebug('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -780,10 +780,10 @@ def ldpair():
     pop = request.args.get('pop', False)
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    print('var1: ' + var1)
-    print('var2: ' + var2)
-    print('pop: ' + pop)
-    print('genome_build: ' + genome_build)
+    logDebug('var1: ' + var1)
+    logDebug('var2: ' + var2)
+    logDebug('pop: ' + pop)
+    logDebug('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -840,11 +840,11 @@ def ldpop():
     r2_d = request.args.get('r2_d', False)
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    print('var1: ' + var1)
-    print('var2: ' + var2)
-    print('pop: ' + pop)
-    print('r2_d: ' + r2_d)
-    print('genome_build: ' + genome_build)
+    logDebug('var1: ' + var1)
+    logDebug('var2: ' + var2)
+    logDebug('pop: ' + pop)
+    logDebug('r2_d: ' + r2_d)
+    logDebug('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -902,12 +902,12 @@ def ldproxy():
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
     collapseTranscript = request.args.get('collapseTranscript', True)
-    print('var: ', var)
-    print('pop: ',  pop)
-    print('r2_d: ',  r2_d)
-    print('window: ',  window)
-    print('genome build: ', genome_build)
-    print('collapseTranscript', collapseTranscript)
+    logDebug('var: ', var)
+    logDebug('pop: ',  pop)
+    logDebug('r2_d: ',  r2_d)
+    logDebug('window: ',  window)
+    logDebug('genome build: ', genome_build)
+    logDebug('collapseTranscript', collapseTranscript)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -967,12 +967,12 @@ def ldtrait():
     window = data['window'].replace(',', '') if 'window' in data else '500000'
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
-    print('snps: ', snps)
-    print('pop: ', pop)
-    print('r2_d: ', r2_d)
-    print('r2_d_threshold: ', r2_d_threshold)
-    print('window: ', window)
-    print('genome_build: ', genome_build)
+    logDebug('snps: ', snps)
+    logDebug('pop: ', pop)
+    logDebug('r2_d: ', r2_d)
+    logDebug('r2_d_threshold: ', r2_d_threshold)
+    logDebug('window: ', window)
+    logDebug('genome_build: ', genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1078,8 +1078,8 @@ def snpchip():
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     platforms = data['platforms']
     token = request.args.get('token', False)
-    print('snps: ' + snps)
-    print('platforms: ' + platforms)
+    logDebug('snps: ' + snps)
+    logDebug('platforms: ' + platforms)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1146,11 +1146,11 @@ def snpclip():
     maf_threshold = data['maf_threshold']
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
-    print('snps: ' + snps)
-    print('pop: ' + pop)
-    print('r2_threshold: ' + r2_threshold)
-    print('maf_threshold: ' + maf_threshold)
-    print('genome_build: ' + genome_build)
+    logDebug('snps: ' + snps)
+    logDebug('pop: ' + pop)
+    logDebug('r2_threshold: ' + r2_threshold)
+    logDebug('maf_threshold: ' + maf_threshold)
+    logDebug('genome_build: ' + genome_build)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
