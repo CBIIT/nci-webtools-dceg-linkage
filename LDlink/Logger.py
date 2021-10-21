@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import datetime
-from logging.handlers import TimedRotatingFileHandler
+#from logging.handlers import TimedRotatingFileHandler
 
 # retrieve config
 with open('config.yml', 'r') as f:
@@ -29,16 +29,18 @@ elif (logLevel == 'CRITICAL'):
 else:
     logLevel = logging.DEBUG
 
-logging.basicConfig(filename=log_dir + logFilename + "." + timestamp, 
+logPath = log_dir + logFilename + "." + timestamp    
+
+logging.basicConfig(filename=logPath, 
                 format='%(levelname)s : %(asctime)s : %(message)s', 
                 filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
 log = logging.getLogger("LDLink")
 #log.propagate = False
 
 #handler to rotate log file at specified time
-handler = TimedRotatingFileHandler(logFilename, when="midnight", interval=1)
-handler.suffix = "%Y%m%d"
-log.addHandler(handler)
+#handler = TimedRotatingFileHandler(logPath, when="midnight", interval=1)
+#handler.suffix = "%Y%m%d"
+#log.addHandler(handler)
 
 def logDebug(message):
     log.debug(message)
