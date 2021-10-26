@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 import datetime
-#from logging.handlers import TimedRotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 
 # retrieve config
 with open('config.yml', 'r') as f:
@@ -38,9 +38,12 @@ log = logging.getLogger("LDLink")
 #log.propagate = False
 
 #handler to rotate log file at specified time
-#handler = TimedRotatingFileHandler(logPath, when="midnight", interval=1)
-#handler.suffix = "%Y%m%d"
-#log.addHandler(handler)
+env = config['env']
+if (env == 'prod'):
+    rotatingLogPath = log_dir + logFilename
+    handler = TimedRotatingFileHandler(rotatingLogPath, when='midnight')
+    handler.suffix = "%m-%d-%y_%H:%M:%S"
+    log.addHandler(handler)
 
 def logDebug(message):
     log.debug(message)
