@@ -35,4 +35,4 @@ aws:
 log:
   log_dir: '<ABSOLUTE_PATH_TO_LOG_DIR>'
   filename: 'ldlink.log'
-  log_level: 'INFO'
+  log_level: 'DEBUG'
