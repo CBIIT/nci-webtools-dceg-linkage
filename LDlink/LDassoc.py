@@ -961,15 +961,18 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	recomb_results = db.recomb.find({
 		genome_build_vars[genome_build]['chromosome']: str(chromosome), 
 		genome_build_vars[genome_build]['position']: {
-            "$gte": coord1-whitespace, 
-            "$lte": coord2+whitespace
+            "$gte": int(coord1 - whitespace), 
+            "$lte": int(coord2 + whitespace)
         }
 	})
 	recomb_results_sanitized = json.loads(json_util.dumps(recomb_results)) 
 
 	with open(tmp_dir + "recomb_" + request + ".json", "w") as f:
-		for x in recomb_results_sanitized:
-			f.write(json.dumps(x) + '\n')
+		for recomb_obj in recomb_results_sanitized:
+			f.write(json.dumps({
+				"rate": recomb_obj['rate'],
+				genome_build_vars[genome_build]['position']: recomb_obj[genome_build_vars[genome_build]['position']]
+			}) + '\n')
 
 	recomb_x=[]
 	recomb_y=[]
