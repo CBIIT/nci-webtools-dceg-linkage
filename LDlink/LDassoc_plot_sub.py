@@ -582,7 +582,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     assoc_plot.title.align="center"
 
     # Add recombination rate from LDassoc.py output file
-    recomb_raw = open(tmp_dir + "recomb_" + request + ".txt").readlines()
+    recomb_raw = open(tmp_dir + "recomb_" + request + ".json").readlines()
     recomb_x=[]
     recomb_y=[]
     for recomb_raw_obj in recomb_raw:
