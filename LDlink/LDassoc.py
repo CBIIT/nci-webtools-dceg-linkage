@@ -12,7 +12,7 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
@@ -26,7 +26,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	dbsnp_version = config['data']['dbsnp_version']
 	data_dir = config['data']['data_dir']
 	tmp_dir = config['data']['tmp_dir']
-	recomb_dir = config['data']['recomb_dir']
 	population_samples_dir = config['data']['population_samples_dir']
 	genotypes_dir = config['data']['genotypes_dir']
 	aws_info = config['aws']
@@ -958,28 +957,15 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	assoc_plot.title.align="center"
 
 	# Add recombination rate
-	recomb_results = db.recomb.find({
-		genome_build_vars[genome_build]['chromosome']: str(chromosome), 
-		genome_build_vars[genome_build]['position']: {
-            "$gte": int(coord1 - whitespace), 
-            "$lte": int(coord2 + whitespace)
-        }
-	})
-	recomb_results_sanitized = json.loads(json_util.dumps(recomb_results)) 
-
-	with open(tmp_dir + "recomb_" + request + ".json", "w") as f:
-		for recomb_obj in recomb_results_sanitized:
-			f.write(json.dumps({
-				"rate": recomb_obj['rate'],
-				genome_build_vars[genome_build]['position']: recomb_obj[genome_build_vars[genome_build]['position']]
-			}) + '\n')
+	recomb_file = tmp_dir + "recomb_" + request + ".json"
+	recomb_json = getRecomb(db, recomb_file, chromosome, coord1 - whitespace, coord2 + whitespace, genome_build)
 
 	recomb_x=[]
 	recomb_y=[]
 
-	for recomb_obj in recomb_results_sanitized:
-		recomb_x.append(int(recomb_obj[genome_build_vars[genome_build]['position']])/1000000.0)
-		recomb_y.append(float(recomb_obj['rate'])/100*max(y))
+	for recomb_obj in recomb_json:
+		recomb_x.append(int(recomb_obj[genome_build_vars[genome_build]['position']]) / 1000000.0)
+		recomb_y.append(float(recomb_obj['rate']) / 100 * max(y))
 
 	assoc_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
 

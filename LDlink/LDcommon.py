@@ -192,3 +192,21 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
         for x in query_results_sanitized:
             f.write(json.dumps(x) + '\n')
     return query_results_sanitized
+
+def getRecomb(db, filename, chromosome, begin, end, genome_build):
+    recomb_results = db.recomb.find({
+		genome_build_vars[genome_build]['chromosome']: str(chromosome), 
+		genome_build_vars[genome_build]['position']: {
+            "$gte": int(begin), 
+            "$lte": int(end)
+        }
+	})
+    recomb_results_sanitized = json.loads(json_util.dumps(recomb_results)) 
+
+    with open(filename, "w") as f:
+        for recomb_obj in recomb_results_sanitized:
+            f.write(json.dumps({
+                "rate": recomb_obj['rate'],
+                genome_build_vars[genome_build]['position']: recomb_obj[genome_build_vars[genome_build]['position']]
+            }) + '\n')
+    return recomb_results_sanitized
