@@ -32,8 +32,9 @@
 				Project</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#ucsc_refgene"><strong>UCSC RefSeq</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#regulomedb"><strong>RegulomeDB</strong></a></p>
-	<p style="margin-left: 80px;"> <a href="#gwas_catalog"><strong>GWAS Catalog</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#recomb"><strong>IMPUTE2</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#gtex"><strong>GTEx Portal</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#gwas_catalog"><strong>GWAS Catalog</strong></a></p>
 	<p style="margin-left: 40px;"> <a href="#Calculations"><strong>Calculations</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#D_prime"><strong>D
 				prime</strong></a></p>
@@ -127,6 +128,11 @@
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
 	<p>
+		<strong><a name="recomb"></a><a href="http://mathgen.stats.ox.ac.uk/impute/impute_v2.html" target="_blank">IMPUTE2</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
+		Publicly available combined rates (cM/Mb) from IMPUTE2 are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
+		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
+	</p>
+	<p>
 		<strong><a name="gtex"></a><a href="https://www.gtexportal.org/home/" target="_blank">GTEx Portal</a></strong> (source: <a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_Analysis_v8_eQTL.tar" target="_blank">GRCh38</a>) - 
 		Publicly available single-tissue cis-QTL data from the GTEx Portal is used by LDlink's <a href="#LDexpress">LDexpress</a> module to show significant variant-gene associations in multiple tissue types.
 		GRCh37 support is added via <a href="https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz" target="_blank">GTEx lookup table</a>.
@@ -134,7 +140,7 @@
 	<p>
 		<strong><a name="gwas_catalog"></a><a href="https://www.ebi.ac.uk/gwas/home" target="_blank">GWAS Catalog</a></strong> (source: <a href="https://www.ebi.ac.uk/gwas/api/search/downloads/alternative" target="_blank">GRCh38</a>) - 
 		Publicly available NHGRI-EBI Catalog of human genome-wide association studies from GWAS Catalog is used by LDlink's <a href="#LDtrait">LDtrait</a> module to search if variants have previously been associated with a trait or disease.
-		GRCh37 support is added via <a href="#dbSNP" target="_blank">dbSNP</a>.
+		GRCh37 support is added via <a href="#dbSNP">dbSNP</a>.
 	</p>
 	<br>
 	<p> <strong><a name="Calculations"></a>Calculations</strong>
@@ -228,7 +234,7 @@
 		- interactive plot
 		of index variant and p-values of all bi-allelic variants in the specified
 		plotting region. X axis is the chromosomal coordinates and the Y axis
-		is the -log10 p-value as well as the combined recombination rate from HapMap.
+		is the -log10 p-value as well as the combined recombination rate from <a href="#recomb">IMPUTE2</a>.
 		Each point represents a variant and is colored based on D' or R<sup>2</sup>,
 		sized based on minor allele frequency, and labeled based on regulatory
 		potential. Hovering over the point will display detailed information on
@@ -513,7 +519,7 @@
 		- interactive plot
 		of query variant and all bi-allelic dbSNP variants plus or minus 500 kilobases(Kb)
 		of the query variant. X axis is the chromosomal coordinates and the Y axis
-		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from HapMap.
+		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from <a href="#recomb">IMPUTE2</a>.
 		Each point represents a proxy variant and is colored based on function,
 		sized based on minor allele frequency, and labeled based on regulatory
 		potential. Hovering over the point will display detailed information on
