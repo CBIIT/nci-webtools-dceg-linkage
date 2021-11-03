@@ -30,10 +30,6 @@ else:
     logLevel = logging.DEBUG
 
 logPath = log_dir + logFilename + "." + timestamp    
-
-logging.basicConfig(filename=logPath, 
-                format='%(levelname)s : %(asctime)s : %(message)s', 
-                filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
 log = logging.getLogger("LDLink")
 #log.propagate = False
 
@@ -41,9 +37,16 @@ log = logging.getLogger("LDLink")
 env = config['env']
 if (env == 'prod'):
     rotatingLogPath = log_dir + logFilename
-    handler = TimedRotatingFileHandler(rotatingLogPath, when='midnight')
+    handler = TimedRotatingFileHandler(rotatingLogPath, when='s', interval=10)
     handler.suffix = "%m-%d-%y_%H:%M:%S"
+    logFormatter = logging.Formatter('%(levelname)s : %(asctime)s : %(message)s', datefmt='%m-%d-%Y %I:%M:%S')
+    handler.setFormatter(logFormatter)
+    handler.setLevel(logLevel)
     log.addHandler(handler)
+else:
+    logging.basicConfig(filename=logPath, 
+                    format='%(levelname)s : %(asctime)s : %(message)s', 
+                    filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
 
 def logDebug(message):
     log.debug(message)
