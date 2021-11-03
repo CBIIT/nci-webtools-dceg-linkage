@@ -582,14 +582,16 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     assoc_plot.title.align="center"
 
     # Add recombination rate from LDassoc.py output file
-    filename=tmp_dir+"recomb_"+request+".txt"
-    recomb_raw=open(filename).readlines()
+    recomb_file = tmp_dir + "recomb_" + request + ".json"
+    recomb_raw = open(recomb_file).readlines()
+
     recomb_x=[]
     recomb_y=[]
-    for i in range(len(recomb_raw)):
-        chr,pos,rate=recomb_raw[i].strip().split()
-        recomb_x.append(int(pos)/1000000.0)
-        recomb_y.append(float(rate)/100*max(y))
+
+    for recomb_raw_obj in recomb_raw:
+        recomb_obj = json.loads(recomb_raw_obj)
+        recomb_x.append(int(recomb_obj[genome_build_vars[genome_build]['position']])/1000000.0)
+        recomb_y.append(float(recomb_obj['rate'])/100*max(y))
 
     assoc_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
 
@@ -964,7 +966,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
     subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.json", shell=True)
-    subprocess.call("rm "+tmp_dir+"recomb_"+request+".txt", shell=True)
+    subprocess.call("rm "+tmp_dir+"recomb_"+request+".json", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
     print("Bokeh high quality image export complete!")
