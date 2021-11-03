@@ -30,6 +30,11 @@
 	<p style="margin-left: 80px;"> <a href="#dbSNP"><strong>dbSNP</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#1000_Genomes_Project"><strong>1000 Genomes
 				Project</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#ucsc_refgene"><strong>UCSC RefSeq</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#regulomedb"><strong>RegulomeDB</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#recomb"><strong>IMPUTE2</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#gtex"><strong>GTEx Portal</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#gwas_catalog"><strong>GWAS Catalog</strong></a></p>
 	<p style="margin-left: 40px;"> <a href="#Calculations"><strong>Calculations</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#D_prime"><strong>D
 				prime</strong></a></p>
@@ -91,37 +96,60 @@
 	<p> <strong><a name="Data_Sources"></a>Data
 			Sources</strong>
 	</p>
-	<p><a name="dbSNP"></a>To investigate patterns
-		of linkage disequilibrium, LDlink
+	<p>
+		<strong><a name="dbSNP"></a><a href="https://www.ncbi.nlm.nih.gov/snp/" target="_blank">dbSNP</a></strong> (source: <a href="https://ftp.ncbi.nih.gov/snp/" target="_blank">GRCh37 and GRCh38</a>) - 
+		To investigate patterns of linkage disequilibrium, LDlink
 		focuses on two main class of genetic variation: single
 		nucleotide polymorphisms (SNPs) and insertions/deletions (indels). Every module of LDlink requires the
 		entry of at least one variant as identified by a RefSNP number (RS
-		number). RS numbers have been assigned by <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
-		and
-		are well-curated
-		identifiers that follow the format "rs" followed by 1 to 8 numbers. The
+		number) or genomic position (chr#:position). RS numbers have been assigned by dbSNP
+		and are well-curated identifiers that follow the format "rs" followed by 1 to 8 numbers. The
 		current implementation of LDlink references dbSNP and only
-		accepts input for bi-allelic variants.</p>
-	<p><a name="1000_Genomes_Project"></a>Publicly
-		available reference haplotypes from Phase 3 (<a href="ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/"
-		 target="_blank">Version 5</a>) of the
-		<a href="http://www.1000genomes.org/" target="_blank">1000
-			Genomes Project</a>
-		are used by LDlink to calculate
+		accepts input for bi-allelic variants.
+	</p>
+	<p>
+		<strong><a name="1000_Genomes_Project"></a><a href="https://www.internationalgenome.org/" target="_blank">1000 Genomes Project</a></strong> (source: <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/" target="_blank">GRCh37</a>, <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/" target="_blank">GRCh38</a>, and <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20201028_3202_phased/" target="_blank">GRCh38 High Coverage</a>) - 
+		Publicly available reference haplotypes from the 1000 Genomes Project are used by LDlink to calculate
 		population-specific measures of linkage disequilibrium. Haplotypes are
 		available for continental populations (ex: European, African, and
 		Admixed American) and sub-populations (ex: Finnish, Gambian, and
 		Peruvian). All LDlink modules require the selection of at least one
 		1000 Genomes Project sub-population, but several sub-populations can be
 		selected simultaneously. Available haplotypes vary by sub-population
-		based on sample size.</p>
+		based on sample size.
+	</p>
+	<p>
+		<strong><a name="ucsc_refgene"></a><a href="https://genome.ucsc.edu/cgi-bin/hgTables" target="_blank">UCSC RefSeq</a></strong> (source: <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=Human&db=hg19&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=0&hgta_regionType=genome&position=chrX%3A15%2C578%2C261-15%2C621%2C068&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh37</a> and <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=&db=hg38&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=ncbiRefSeq&hgta_regionType=genome&position=&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh38</a>) - 
+		Publicly available gene transcripts from the UCSC Table Browser are used by LDlink's <a href="#LDassoc">LDassoc</a>, <a href="#LDmatrix">LDmatrix</a>, and <a href="#LDproxy">LDproxy</a> modules to display genes within the genomic window of interest.
+	</p>
+	<p>
+		<strong><a name="regulomedb"></a><a href="https://regulomedb.org/" target="_blank">RegulomeDB</a></strong> (source: <a href="https://www.encodeproject.org/files/ENCFF297XMQ/@@download/ENCFF297XMQ.tsv" target="_blank">GRCh37</a>) - 
+		Publicly available scores from RegulomeDB are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to rank available datatypes for a single coordinate.
+		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
+	</p>
+	<p>
+		<strong><a name="recomb"></a><a href="http://mathgen.stats.ox.ac.uk/impute/impute_v2.html" target="_blank">IMPUTE2</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
+		Publicly available combined rates (cM/Mb) from IMPUTE2 are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
+		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
+	</p>
+	<p>
+		<strong><a name="gtex"></a><a href="https://www.gtexportal.org/home/" target="_blank">GTEx Portal</a></strong> (source: <a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_Analysis_v8_eQTL.tar" target="_blank">GRCh38</a>) - 
+		Publicly available single-tissue cis-QTL data from the GTEx Portal is used by LDlink's <a href="#LDexpress">LDexpress</a> module to show significant variant-gene associations in multiple tissue types.
+		GRCh37 support is added via <a href="https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz" target="_blank">GTEx lookup table</a>.
+	</p>
+	<p>
+		<strong><a name="gwas_catalog"></a><a href="https://www.ebi.ac.uk/gwas/home" target="_blank">GWAS Catalog</a></strong> (source: <a href="https://www.ebi.ac.uk/gwas/api/search/downloads/alternative" target="_blank">GRCh38</a>) - 
+		Publicly available NHGRI-EBI Catalog of human genome-wide association studies from GWAS Catalog is used by LDlink's <a href="#LDtrait">LDtrait</a> module to search if variants have previously been associated with a trait or disease.
+		GRCh37 support is added via <a href="#dbSNP">dbSNP</a>.
+	</p>
 	<br>
 	<p> <strong><a name="Calculations"></a>Calculations</strong>
 	</p>
-	<p>LDlink modules report the following measures of linkage
+	<p>
+		LDlink modules report the following measures of linkage
 		disequilibrium: <a href="#D_prime">D prime</a>, <a href="#R_squared">R squared</a>, and <a href="#Goodness_of_Fit">goodness-of-fit</a>
-		statistics.
-		Below is a brief description of each measure.</p>
+		statistics. Below is a brief description of each measure.
+	</p>
 	<p> <strong><a name="D_prime"></a>D
 			prime (D')</strong> - an indicator of
 		allelic segregation for two genetic variants. D' values range from 0 to
@@ -153,8 +181,9 @@
 	<p>LDlink consists of ten modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDexpress">LDexpress</a>, <a href="#LDhap">LDhap</a>,
 		<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>, <a href="#LDpop">LDpop</a>, 
 		<a href="#LDproxy">LDproxy</a>, <a href="#LDtrait">LDtrait</a>, <a href="#SNPchip">SNPchip</a>,
-		and <a href="#SNPclip">SNPclip</a>. Each module can be
-		accessed by clicking on the desired tab at
+		and <a href="#SNPclip">SNPclip</a>. 
+		Choose between GRCh37 (hg19), GRCh38 (hg38), and GRCh38 High Coverage (hg38) 1000 Genome Project datasets with the Genome Build (1000G) dropdown menu on the top left.
+		Each module can be accessed by clicking on LD Tools dropdown at
 		the top of all LDlink pages. Below is a description of each module, the
 		required user input, and an explanation of the returned output.</p>
 	<br>
@@ -190,8 +219,14 @@
 		from the drop down menu. At least one 1000 Genomes Project
 		sub-population is required, but more than one may be selected.
 	</p>
-	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+	<p style="margin-left: 120px;"><u>LD measure</u>
 		- select if desired output is based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 120px;"><u>Collapse transcripts</u>
+		- choose to combine gene transcripts with the same name in the gene plot.
+	</p>
+	<p style="margin-left: 120px;"><u>RegulomeDB annotation</u>
+		- choose to display RegulomeDB scores in the interactive plot.
 	</p>
 	<p style="margin-left: 80px;"> <strong>Output:</strong>
 	</p>
@@ -199,7 +234,7 @@
 		- interactive plot
 		of index variant and p-values of all bi-allelic variants in the specified
 		plotting region. X axis is the chromosomal coordinates and the Y axis
-		is the -log10 p-value as well as the combined recombination rate from HapMap.
+		is the -log10 p-value as well as the combined recombination rate from <a href="#recomb">IMPUTE2</a>.
 		Each point represents a variant and is colored based on D' or R<sup>2</sup>,
 		sized based on minor allele frequency, and labeled based on regulatory
 		potential. Hovering over the point will display detailed information on
@@ -215,10 +250,10 @@
 	<p style="margin-left: 120px;"><u>Table of Association Results</u> - by default, the ten
 		variants with the lowest p-values and closest
 		distance to the index variant are displayed. External links lead to the variant
-		RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway"
+		RS number in <a href="#dbSNP">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway"
 		 target="_blank">UCSC
 			Genome Browser</a>, and
-		regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
+		regulatory information (if any) in <a href="#regulomedb">RegulomeDB</a>.
 	</p>
 	<p style="margin-left: 120px;"><u>Download association data for all
 			variants</u> - download a
@@ -230,7 +265,7 @@
 	
 	<p style="margin-left: 40px;"> <strong><a name="LDexpress"></a><span style="text-decoration: underline;">LDexpress</span></strong>
 		- Search if a list of variants (or variants in LD with those variants) is associated with gene expression in tissues of interest. 
-		Quantitative trait loci data is downloaded from the GTEx portal (GTEx v8). 
+		Quantitative trait loci data is downloaded from the <a href="#gtex">GTEx Portal</a> (GTEx v8). 
 	</p>
 	<p style="margin-left: 80px;"> <strong>Input:</strong>
 	</p>
@@ -271,7 +306,7 @@
 	</p>
 	<p style="margin-left: 120px;"><u>Variants with Warnings</u>
 		- output table that appears when a variant produces a warning in LDexpress. Common reasons for a variant to be on the warning list are if the variant is not found in dbSNP/GTEx or 
-		if no variants in LD are found within window of the GWAS Catalog. Details are provided on genomic position and why the variant was excluded from the variant list.
+		if no variants in LD are found within window of the 1000G reference VCF file. Details are provided on genomic position and why the variant was excluded from the variant list.
 	</p>
 	<p style="margin-left: 120px;"><u>Download GTEx QTL list</u>
 		- clickable link to download a text file in tab-delimited format that lists all query variant RS numbers, respective QTL which are in LD with query variant, and associated gene expression.
@@ -307,7 +342,7 @@
 		and and are sorted by genomic position. Queries should be limited to nearby variants, since haplotype switch rate
 		errors
 		become more common as genomic distance increases. Links are
-		available to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a> RS numbers and coordinates
+		available to <a href="#dbSNP">dbSNP</a> RS numbers and coordinates
 		in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC Genome
 			Browser</a>.
 	</p>
@@ -344,6 +379,9 @@
 			population(s)</u> - selected
 		from the drop down menu. At least one 1000 Genomes Project
 		sub-population is required, but more than one may be selected.
+	</p>
+	<p style="margin-left: 120px;"><u>Collapse transcripts</u>
+		- choose to combine gene transcripts with the same name in the gene plot.
 	</p>
 	<p style="margin-left: 80px;"> <strong>Output:</strong>
 	</p>
@@ -389,7 +427,7 @@
 	<p style="margin-left: 120px;"><u>Two-by-two table</u>
 		- contingency table
 		displaying haplotype counts and allele frequencies for the two query
-		variants. External links are available to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		variants. External links are available to <a href="#dbSNP">dbSNP</a>
 		RS numbers and coordinates
 		in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC Genome Browser</a>.
 	</p>
@@ -469,8 +507,11 @@
 		from the drop down menu. At least one 1000 Genomes Project
 		sub-population is required, but more than one may be selected.
 	</p>
-	<p style="margin-left: 120px;"><u>R<sup>2</sup>/D' toggle</u>
+	<p style="margin-left: 120px;"><u>LD measure</u>
 		- select if desired output is based on estimated R<sup>2</sup> or D'.
+	</p>
+	<p style="margin-left: 120px;"><u>Collapse transcripts</u>
+		- choose to combine gene transcripts with the same name in the gene plot.
 	</p>
 	<p style="margin-left: 80px;"> <strong>Output:</strong>
 	</p>
@@ -478,7 +519,7 @@
 		- interactive plot
 		of query variant and all bi-allelic dbSNP variants plus or minus 500 kilobases(Kb)
 		of the query variant. X axis is the chromosomal coordinates and the Y axis
-		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from HapMap.
+		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from <a href="#recomb">IMPUTE2</a>.
 		Each point represents a proxy variant and is colored based on function,
 		sized based on minor allele frequency, and labeled based on regulatory
 		potential. Hovering over the point will display detailed information on
@@ -494,10 +535,10 @@
 	<p style="margin-left: 120px;"><u>Table of proxy variants</u> - by default, the ten
 		variants with the highest R<sup>2</sup> values and closest
 		distance to the query variant are displayed. External links lead to the variant
-		RS number in <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway"
+		RS number in <a href="#dbSNP">dbSNP</a>, coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway"
 		 target="_blank">UCSC
 			Genome Browser</a>, and
-		regulatory information (if any) in <a href="http://www.regulomedb.org/" target="_blank">RegulomeDB</a>.
+		regulatory information (if any) in <a href="#regulomedb">RegulomeDB</a>.
 	</p>
 	<p style="margin-left: 120px;"><u>Download all proxy
 			variants</u> - download a
@@ -509,7 +550,7 @@
 
 	<p style="margin-left: 40px;"> <strong><a name="LDtrait"></a><span style="text-decoration: underline;">LDtrait</span></strong>
 		- Search if a list of variants (or variants in LD with those variants) that have previously been associated with a trait or disease. 
-		Trait and disease data is updated nightly from the <a href="https://www.ebi.ac.uk/gwas/docs/file-downloads" target="_blank">GWAS Catalog</a>. 
+		Trait and disease data is updated nightly from the <a href="#gwas_catalog">GWAS Catalog</a>. 
 		Problematic data entries in the GWAS Catalog can be browsed <a href="./tmp/ldtrait_error_snps.json" target="_blank">here</a>.
 	</p>
 	<p style="margin-left: 80px;"> <strong>Input:</strong>
@@ -540,7 +581,7 @@
 	<p style="margin-left: 120px;"><u>Details Tables</u>
 		-  output table that appears when a variant in the variant list is clicked. Details are provided on GWAS trait, genomic position, alleles, R2, D', Effect Size (95% CI), 
 		Beta or OR, and P-value. External links lead to the result variant in the
-		<a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">GWAS Catalog</a>.
+		<a href="#gwas_catalog">GWAS Catalog</a>.
 	</p>
 	<p style="margin-left: 120px;"><u>Variants with Warnings</u>
 		- output table that appears when a variant produces a warning in LDtrait. Common reasons for a variant to be on the warning list are if the variant is not found in dbSNP or 
@@ -575,7 +616,7 @@
 		- output table of variant rows and array columns. The presence of an "X" designates
 		the variant is present on the respective commercial genotyping array. Variants are ordered
 		by genomic location. External links lead to the variant RS number in
-		<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		<a href="#dbSNP">dbSNP</a>
 		and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
 			Genome Browser</a>.
 	</p>
@@ -625,7 +666,7 @@
 		- output table that appears when a variant in the thinned variant list is clicked.
 		Details are provided on genomic position, alleles, and why the variant was included
 		or excluded from the thinned variant list. External links lead to the variant RS number in
-		<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		<a href="#dbSNP">dbSNP</a>
 		and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
 			Genome Browser</a>.
 	</p>
@@ -635,7 +676,7 @@
 		a query that is not a RS number, and a RS number not found in the 1000G reference VCF file.
 		Details are provided on genomic position, alleles, and why the variant was included
 		or excluded from the thinned variant list. External links lead to the variant RS number in
-		<a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		<a href="#dbSNP">dbSNP</a>
 		and coordinates in the <a href="http://genome.ucsc.edu/cgi-bin/hgGateway" target="_blank">UCSC
 			Genome Browser</a>.
 	</p>
@@ -715,8 +756,7 @@
 	<p style="margin-left: 40px;"> <strong>What is the maximum number of variants LDhap and LDmatrix can accept as input?</strong>
 	</p>
 	<p style="margin-left: 80px;">LDhap has a limit of 30 variants
-		and LDmatrix has a limit of 300
-		variants. These limits were selected to optimize query speed and
+		and LDmatrix has a limit of 300 variants. LDmatrix supports up to 1,000 variants via API call. These limits were selected to optimize query speed and
 		visualization of results.</p>
 
 	<p style="margin-left: 40px;"> <strong>Why are the variants in LDhap and LDmatrix output not in the same order as the
@@ -738,16 +778,18 @@
 
 	<p style="margin-left: 40px;"> <strong>What genome build does LDlink use for genomic coordinates?</strong>
 	</p>
-	<p style="margin-left: 80px;">All coordinates in LDlink are based on
-		GRCh37/hg19 and GRCh38/hg38. For help with converting coordinates from one genome build to another, please
-		refer to <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.</p>
+	<p style="margin-left: 80px;">LDlink supports
+		GRCh37 (hg19) and GRCh38 (hg38). Choose between GRCh37 (hg19), GRCh38 (hg38), and GRCh38 High Coverage (hg38) 1000 Genome Project datasets with the Genome Build (1000G) dropdown menu on the top left.
+		<!-- For help with converting coordinates from one genome build to another, please
+		refer to <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>. -->
+	</p>
 
 	<p style="margin-left: 40px;"> <strong>Why do variant coordinates not always match dbSNP or UCSC coordinates?</strong>
 	</p>
 	<p style="margin-left: 80px;">All coordinates in LDlink are based on
 		variant positions in the 1000 Genomes VCF files. Slight difference in
 		positions may be observed due to updates in mapping and alignment. Please
-		refer to <a href="http://www.ncbi.nlm.nih.gov/SNP/" target="_blank">dbSNP</a>
+		refer to <a href="#dbSNP">dbSNP</a>
 		for the most up-to-date information on variant coordinates.</p>
 
 	<p style="margin-left: 40px;"> <strong>What browsers are supported by LDlink?</strong>

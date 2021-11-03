@@ -29,16 +29,24 @@ elif (logLevel == 'CRITICAL'):
 else:
     logLevel = logging.DEBUG
 
-logging.basicConfig(filename=log_dir + logFilename + "." + timestamp, 
-                format='%(levelname)s : %(asctime)s : %(message)s', 
-                filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
+logPath = log_dir + logFilename + "." + timestamp    
 log = logging.getLogger("LDLink")
 #log.propagate = False
 
 #handler to rotate log file at specified time
-handler = TimedRotatingFileHandler(logFilename, when="midnight", interval=1)
-handler.suffix = "%Y%m%d"
-log.addHandler(handler)
+env = config['env']
+if (env == 'prod'):
+    rotatingLogPath = log_dir + logFilename
+    handler = TimedRotatingFileHandler(rotatingLogPath, when='s', interval=10)
+    handler.suffix = "%m-%d-%y_%H:%M:%S"
+    logFormatter = logging.Formatter('%(levelname)s : %(asctime)s : %(message)s', datefmt='%m-%d-%Y %I:%M:%S')
+    handler.setFormatter(logFormatter)
+    handler.setLevel(logLevel)
+    log.addHandler(handler)
+else:
+    logging.basicConfig(filename=logPath, 
+                    format='%(levelname)s : %(asctime)s : %(message)s', 
+                    filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
 
 def logDebug(message):
     log.debug(message)

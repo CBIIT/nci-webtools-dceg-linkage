@@ -372,15 +372,17 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     proxy_plot.title.align = "center"
 
-    # Get recomb from LDproxy.py tmp output files
-    filename = tmp_dir + "recomb_" + request + ".txt"
-    recomb_raw = open(filename).readlines()
+    # Add recombination rate from LDproxy.py output file
+    recomb_file = tmp_dir + "recomb_" + request + ".json"
+    recomb_raw = open(recomb_file).readlines()
+
     recomb_x = []
     recomb_y = []
-    for i in range(len(recomb_raw)):
-        chr, pos, rate = recomb_raw[i].strip().split()
-        recomb_x.append(int(pos) / 1000000.0)
-        recomb_y.append(float(rate) / 100.0)
+
+    for recomb_raw_obj in recomb_raw:
+        recomb_obj = json.loads(recomb_raw_obj)
+        recomb_x.append(int(recomb_obj[genome_build_vars[genome_build]['position']]) / 1000000.0)
+        recomb_y.append(float(recomb_obj['rate']) / 100.0)
 
     data = {
         'x': x,
