@@ -32,7 +32,7 @@
 				Project</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#ucsc_refgene"><strong>UCSC RefSeq</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#regulomedb"><strong>RegulomeDB</strong></a></p>
-	<p style="margin-left: 80px;"> <a href="#recomb"><strong>IMPUTE2</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#recomb"><strong>Genetic Map</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#gtex"><strong>GTEx Portal</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#gwas_catalog"><strong>GWAS Catalog</strong></a></p>
 	<p style="margin-left: 40px;"> <a href="#Calculations"><strong>Calculations</strong></a></p>
@@ -128,8 +128,8 @@
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
 	<p>
-		<strong><a name="recomb"></a><a href="http://mathgen.stats.ox.ac.uk/impute/impute_v2.html" target="_blank">IMPUTE2</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
-		Publicly available combined rates (cM/Mb) from IMPUTE2 are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
+		<strong><a name="recomb"></a><a href="http://mathgen.stats.ox.ac.uk/impute/impute_v2.html" target="_blank">Genetic Map</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
+		Publicly available combined recombination rates (cM/Mb) from the 1000 Genomes Project are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
 	<p>
@@ -234,7 +234,7 @@
 		- interactive plot
 		of index variant and p-values of all bi-allelic variants in the specified
 		plotting region. X axis is the chromosomal coordinates and the Y axis
-		is the -log10 p-value as well as the combined recombination rate from <a href="#recomb">IMPUTE2</a>.
+		is the -log10 p-value as well as the combined recombination rate.
 		Each point represents a variant and is colored based on D' or R<sup>2</sup>,
 		sized based on minor allele frequency, and labeled based on regulatory
 		potential. Hovering over the point will display detailed information on
@@ -519,7 +519,7 @@
 		- interactive plot
 		of query variant and all bi-allelic dbSNP variants plus or minus 500 kilobases(Kb)
 		of the query variant. X axis is the chromosomal coordinates and the Y axis
-		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate from <a href="#recomb">IMPUTE2</a>.
+		is the pairwise R<sup>2</sup> value with the query variant as well as the combined recombination rate.
 		Each point represents a proxy variant and is colored based on function,
 		sized based on minor allele frequency, and labeled based on regulatory
 		potential. Hovering over the point will display detailed information on
