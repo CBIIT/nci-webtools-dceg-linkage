@@ -8,7 +8,7 @@
 }
 
 /* AuthorArranger Ad */
-.authorarranger_ad {
+/* .authorarranger_ad {
   font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-weight: 500;
   font-size: medium;
@@ -19,7 +19,7 @@
   margin-bottom:25px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
   text-align: center;
-}
+} */
 
 /* LDlinkR Ad */
 .ldlinkr_ad {
@@ -1442,7 +1442,7 @@ input:checked + .slider:before {
 
 .news-card-outside{
   display:inline-block; 
-  width: 33%; 
+  width: 31%; 
   height:210px; 
   padding:0px 10px;
   margin: 10px 0;
@@ -1481,7 +1481,7 @@ input:checked + .slider:before {
   height:210px; 
   width:3%;
   color:white; 
-  display:none; 
+  /* display:none;  */
   vertical-align:top; 
   margin-top:10px; 
 }
