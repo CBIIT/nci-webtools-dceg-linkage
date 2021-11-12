@@ -1645,7 +1645,7 @@ function ldproxy_position_link(data, type, row) {
 
 function ldproxy_regulome_link(data, type, row) {
     // Create RegulomeDB links
-    var server = 'http://www.regulomedb.org/regulome-search';
+    var server = 'https://www.regulomedb.org/regulome-search';
     var chr = row[1];
     var mid_value = parseInt(row[2]);
     var zero_base = mid_value - 1;
