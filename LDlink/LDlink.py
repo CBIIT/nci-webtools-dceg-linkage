@@ -72,16 +72,18 @@ app.debug = False
 
 ### Helper functions ###
 
-# Return error and traceback from calculations
-def sendTraceback(error):
+# Return error (and traceback if specified) from calculations
+def sendTraceback(error, showTraceback=False):
     custom = {}
-    if (error is None):
-        custom["error"] = "Raised when a generated error does not fall into any category."
+    if (error is None or len(error) == 0):
+        custom["error"] = "Internal server error. Please contact LDlink admin."
     else:
         custom["error"] = error
-    traceback.print_exc()
-    custom["traceback"] = traceback.format_exc()
+    if showTraceback:
+        traceback.print_exc()
+        custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
+    logger.info('Generated error message ' + json.dumps(custom, indent=4, sort_keys=True))
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Return JSON output from calculations
@@ -821,6 +823,9 @@ def ldhap():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_hap(snplst, pop, reference, web, genome_build)
+            if 'error' in json.loads(out_json):
+                toggleLocked(token, 0)
+                return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try: 
                 # unlock token then display api output
@@ -927,6 +932,11 @@ def ldmatrix():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
+            with open(tmp_dir + "matrix" + reference + ".json") as f:
+                json_dict = json.load(f)
+            if 'error' in json_dict:
+                toggleLocked(token, 0)
+                return sendTraceback(json_dict["error"])
             # display api out
             try:
                 # unlock token then display api output
@@ -1013,6 +1023,9 @@ def ldpair():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pair(var1, var2, pop, web, genome_build, reference)
+            if 'error' in json.loads(out_json):
+                toggleLocked(token, 0)
+                return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try:
                 # unlock token then display api output
@@ -1094,6 +1107,9 @@ def ldpop():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
+            if 'error' in json.loads(out_json):
+                toggleLocked(token, 0)
+                return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try:
                 # unlock token then display api output
@@ -1180,6 +1196,12 @@ def ldproxy():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
+            with open(tmp_dir + "proxy" + reference + ".json") as f:
+                json_dict = json.load(f)
+            if "error" in json_dict:
+                # display api out w/ error
+                toggleLocked(token, 0)
+                return sendTraceback(json_dict["error"])
             # display api out
             try:
                 # unlock token then display api output
@@ -1402,6 +1424,9 @@ def snpchip():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
+            if 'error' in json.loads(snp_chip) and len(json.loads(snp_chip)["error"]) > 0:
+                toggleLocked(token, 0)
+                return sendTraceback(json.loads(snp_chip)["error"])
             # display api out
             try:
                 # unlock token then display api output
@@ -1526,6 +1551,9 @@ def snpclip():
             (snps, snp_list, details) = calculate_clip(snpfile, pop, reference, web, genome_build, float(r2_threshold), float(maf_threshold))
             with open(tmp_dir + "clip" + reference + ".json") as f:
                 json_dict = json.load(f)
+            if "error" in json_dict:
+                toggleLocked(token, 0)
+                return sendTraceback(json_dict["error"])
             with open(tmp_dir + 'details' + reference + '.txt', 'w') as f:
                 f.write("RS Number\tPosition\tAlleles\tDetails\n")
                 if(type(details) is collections.OrderedDict):

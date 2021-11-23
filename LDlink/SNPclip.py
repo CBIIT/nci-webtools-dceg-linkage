@@ -52,7 +52,10 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     print("genome_build " + genome_build)
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Open SNP list file
     snps_raw = open(snplst).readlines()

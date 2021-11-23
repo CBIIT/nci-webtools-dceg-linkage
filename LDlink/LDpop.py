@@ -761,8 +761,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             ldpop_out.write(output_table["warning"])
 
     # Change manipulate output data for frontend only if accessed via Web instance
-    if web:
-        output = json.dumps(output_table, sort_keys=True, indent=2)
+    # if web:
+    output = json.dumps(output_table, sort_keys=True, indent=2)
         
     return output
 

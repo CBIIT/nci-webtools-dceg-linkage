@@ -202,7 +202,10 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     # Validate genome build param
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
