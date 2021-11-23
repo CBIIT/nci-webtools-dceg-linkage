@@ -746,6 +746,8 @@ def ldexpress():
                     with open(tmp_dir + 'express_variants_annotated' + reference + '.txt', 'r') as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
+                    end_time = time.time()
+                    logger.info("Executed LDexpress (%ss)" % (round(end_time - start_time, 2)))
                     return content
                 except Exception as e:
                     # unlock token then display error message
@@ -829,6 +831,8 @@ def ldhap():
                 with open(resultFile2, "r") as fp:
                     content2 = fp.read()
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed LDhap (%ss)" % (round(end_time - start_time, 2)))
                 return content1 + "\n" + "#####################################################################################" + "\n\n" + content2
             except Exception as e:
                 # unlock token then display error message
@@ -934,6 +938,8 @@ def ldmatrix():
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed LDmatrix (%ss)" % (round(end_time - start_time, 2)))
                 return content
             except Exception as e:
                 # unlock token then display error message
@@ -1013,6 +1019,8 @@ def ldpair():
                 with open(tmp_dir + 'LDpair_'+reference+'.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
                 return content
             except Exception as e:
                 # unlock token then display error message
@@ -1092,6 +1100,8 @@ def ldpop():
                 with open(tmp_dir + 'LDpop_' + reference + '.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed LDpop (%ss)" % (round(end_time - start_time, 2)))
                 return content
             except Exception as e:
                 # unlock token then display error message
@@ -1176,6 +1186,8 @@ def ldproxy():
                 with open(tmp_dir + 'proxy' + reference + '.txt', "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed LDproxy (%ss)" % (round(end_time - start_time, 2)))
                 return content
             except Exception as e:
                 # unlock token then display error message
@@ -1312,6 +1324,8 @@ def ldtrait():
                     with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'r') as fp:
                         content = fp.read()
                     toggleLocked(token, 0)
+                    end_time = time.time()
+                    logger.info("Executed LDtrait (%ss)" % (round(end_time - start_time, 2)))
                     return content
                 except Exception as e:
                     # unlock token then display error message
@@ -1395,6 +1409,8 @@ def snpchip():
                 with open(resultFile, "r") as fp:
                     content = fp.read()
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed SNPchip (%ss)" % (round(end_time - start_time, 2)))
                 return content
             except Exception as e:
                 # unlock token then display error message
@@ -1528,6 +1544,8 @@ def snpclip():
                         toggleLocked(token, 0)
                         return sendTraceback(json_dict["error"])
                 toggleLocked(token, 0)
+                end_time = time.time()
+                logger.info("Executed SNPclip (%ss)" % (round(end_time - start_time, 2)))
                 return content
             except Exception as e:
                 # unlock token then display error message
