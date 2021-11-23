@@ -150,9 +150,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("Internal Server Error: Data cannot be reached")
-        return None
+    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
         vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

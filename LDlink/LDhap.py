@@ -84,8 +84,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
+                # print("snp_info_lst")
+                # print(snp_info_lst)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -120,7 +120,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         return new_snp_lst
 
     snps = replace_coords_rsid(db, snps)
-    print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
+    # print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
     snp_pos = []
@@ -197,8 +197,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("Internal Server Error: Data cannot be reached")
+    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 

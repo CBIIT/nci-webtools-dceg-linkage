@@ -166,8 +166,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
     vcf_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
 
-    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1):
-        print("Internal Server Error: Data cannot be reached")
+    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1)
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
@@ -179,8 +178,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
     vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
     vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
 
-    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2):
-        print("Internal Server Error: Data cannot be reached")
+    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2)
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

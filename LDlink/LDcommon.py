@@ -1,5 +1,6 @@
 import boto3
 import botocore
+from numpy import False_
 import yaml
 from pymongo import MongoClient
 import json
@@ -72,9 +73,11 @@ def checkS3File(aws_info, bucket, filePath):
         s3.Object(bucket, filePath).load()
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == "404":
-            return False
+            raise Exception("File not found in AWS S3.")
+            # return False
         else:
-            return False
+            raise Exception("File not found in AWS S3.")
+            # return False
     else: 
         return True
 

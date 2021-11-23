@@ -134,9 +134,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord['chromosome']))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-    if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-        print("Internal Server Error: Data cannot be reached")
-        return None
+    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
     tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)

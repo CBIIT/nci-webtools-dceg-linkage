@@ -44,8 +44,7 @@ pop_ids = list(set(ids))
 vcf_filePath = "%s/%s%s/%s"  % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chr))
 vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
-if not checkS3File(aws_info, config['aws']['bucket'], vcf_filePath):
-    print("Internal Server Error: Data cannot be reached")
+checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
 coordinates = coords.replace("_", " ")
 tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"])

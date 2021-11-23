@@ -1,64 +1,33 @@
-#LOGGER.PY
 import yaml
 import logging
-import os
-import sys
-import datetime
-from logging.handlers import TimedRotatingFileHandler
+import logging.handlers
 
-# retrieve config
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
 
 log_dir = config['log']['log_dir']
-logFilename = config['log']['filename']
-logLevel = config['log']['log_level']
-today = datetime.datetime.now()
-timestamp = today.strftime("%m-%d-%y_%H:%M:%S")
+log_filename = config['log']['filename']
+log_level = config['log']['log_level']
 
-if (logLevel == 'DEBUG'):
-    logLevel = logging.DEBUG
-elif (logLevel == 'INFO'):
-    logLevel = logging.INFO
-elif (logLevel == 'WARNING'):
-    logLevel = logging.WARNING
-elif (logLevel == 'ERROR'):
-    logLevel = logging.ERROR
-elif (logLevel == 'CRITICAL'):
-    logLevel = logging.CRITICAL
+logger = logging.getLogger('LDlink')
+
+if (log_level == 'DEBUG'):
+    logger.setLevel(logging.DEBUG)
+elif (log_level == 'INFO'):
+    logger.setLevel(logging.INFO)
+elif (log_level == 'WARNING'):
+    logger.setLevel(logging.WARNING)
+elif (log_level == 'ERROR'):
+    logger.setLevel(logging.ERROR)
+elif (log_level == 'CRITICAL'):
+    logger.setLevel(logging.CRITICAL)
 else:
-    logLevel = logging.DEBUG
+    logger.setLevel(logging.DEBUG)
 
-logPath = log_dir + logFilename + "." + timestamp    
-log = logging.getLogger("LDLink")
-#log.propagate = False
+# Add the log message handler to the logger
+handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, 'H',  interval=8)
+handler.suffix = "%m-%d-%y_%H:%M:%S"
+logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%m-%d-%Y %I:%M:%S')
+handler.setFormatter(logFormatter)
 
-#handler to rotate log file at specified time
-env = config['env']
-if (env == 'prod'):
-    rotatingLogPath = log_dir + logFilename
-    handler = TimedRotatingFileHandler(rotatingLogPath, when='s', interval=10)
-    handler.suffix = "%m-%d-%y_%H:%M:%S"
-    logFormatter = logging.Formatter('%(levelname)s : %(asctime)s : %(message)s', datefmt='%m-%d-%Y %I:%M:%S')
-    handler.setFormatter(logFormatter)
-    handler.setLevel(logLevel)
-    log.addHandler(handler)
-else:
-    logging.basicConfig(filename=logPath, 
-                    format='%(levelname)s : %(asctime)s : %(message)s', 
-                    filemode='w', level=logLevel, datefmt='%m-%d-%Y %I:%M:%S')
-
-def logDebug(message):
-    log.debug(message)
-
-def logInfo(message):
-    log.info(message)
-
-def logWarning(message):
-    log.warning(message)
-
-def logError(message):
-    log.error(message, exc_info=True)
-
-def logCritical(message):
-    log.critical(message)
+logger.addHandler(handler)
