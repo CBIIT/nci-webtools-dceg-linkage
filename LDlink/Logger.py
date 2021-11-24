@@ -1,7 +1,7 @@
 import yaml
 import logging
 import logging.handlers
-# import re
+import re
 
 with open('config.yml', 'r') as f:
     config = yaml.load(f)
@@ -13,9 +13,8 @@ log_level = config['log']['log_level']
 logger = logging.getLogger('LDlink')
 
 # Add the log message handler to the logger
-handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, when='M',  interval=5, backupCount=1)
-# handler.suffix = "%y-%m-%d_%H:%M:%S"
-# handler.extMatch = re.compile(r"^\d{4}$")
+handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, when='M', interval=2, backupCount=0)
+handler.suffix = "%Y-%m-%d_%H:%M:%S.backup"
 logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 handler.setFormatter(logFormatter)
 
