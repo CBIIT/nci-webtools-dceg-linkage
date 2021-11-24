@@ -25,7 +25,7 @@ else:
     logger.setLevel(logging.DEBUG)
 
 # Add the log message handler to the logger
-handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, 'H',  interval=8)
+handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, when='M',  interval=10)
 handler.suffix = "%m-%d-%y_%H:%M:%S"
 logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%m-%d-%Y %I:%M:%S')
 handler.setFormatter(logFormatter)
