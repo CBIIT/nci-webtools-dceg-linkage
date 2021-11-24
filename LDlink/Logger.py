@@ -1,7 +1,6 @@
 import yaml
 import logging
 import logging.handlers
-import re
 
 with open('config.yml', 'r') as f:
     config = yaml.load(f)

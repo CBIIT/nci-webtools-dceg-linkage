@@ -36,7 +36,10 @@ from LDcommon import genome_build_vars
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 # from werkzeug.debug import DebuggedApplication
-from Logger import logger
+# from Logger import logger
+import logging
+import logging.handlers
+
 
 # Ensure tmp directory exists
 with open('config.yml', 'r') as yml_file:
@@ -53,6 +56,33 @@ app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = False
 # app.logger.disabled = True
 # app.logger.removeHandler(default_handler)
+
+log_dir = config['log']['log_dir']
+log_filename = config['log']['filename']
+log_level = config['log']['log_level']
+
+logger = logging.getLogger('LDlink')
+
+# Add the log message handler to the logger
+handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, when='S', interval=30, backupCount=0)
+handler.suffix = "%Y-%m-%d_%H:%M:%S"
+logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+handler.setFormatter(logFormatter)
+
+logger.addHandler(handler)
+
+if (log_level == 'DEBUG'):
+    logger.setLevel(logging.DEBUG)
+elif (log_level == 'INFO'):
+    logger.setLevel(logging.INFO)
+elif (log_level == 'WARNING'):
+    logger.setLevel(logging.WARNING)
+elif (log_level == 'ERROR'):
+    logger.setLevel(logging.ERROR)
+elif (log_level == 'CRITICAL'):
+    logger.setLevel(logging.CRITICAL)
+else:
+    logger.setLevel(logging.DEBUG)
 
 
 # Flask Limiter initialization
