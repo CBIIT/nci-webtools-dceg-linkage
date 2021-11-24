@@ -13,10 +13,10 @@ log_level = config['log']['log_level']
 logger = logging.getLogger('LDlink')
 
 # Add the log message handler to the logger
-handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, when='M',  interval=10)
+handler = logging.handlers.TimedRotatingFileHandler(log_dir + log_filename, when='M',  interval=5, backupCount=1)
 # handler.suffix = "%y-%m-%d_%H:%M:%S"
 # handler.extMatch = re.compile(r"^\d{4}$")
-logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%m-%d-%Y %I:%M:%S')
+logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 handler.setFormatter(logFormatter)
 
 logger.addHandler(handler)
