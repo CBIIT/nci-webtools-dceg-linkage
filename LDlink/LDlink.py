@@ -36,9 +36,7 @@ from LDcommon import genome_build_vars
 from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 # from werkzeug.debug import DebuggedApplication
-# from Logger import logger
 import logging
-# import logging.handlers
 from logging.handlers import TimedRotatingFileHandler
 
 
@@ -62,23 +60,8 @@ log_dir = config['log']['log_dir']
 log_filename = config['log']['filename']
 log_level = config['log']['log_level']
 
-# logger = logging.getLogger('LDlink')
-
-# if (log_level == 'DEBUG'):
-#     logger.setLevel(logging.DEBUG)
-# elif (log_level == 'INFO'):
-#     logger.setLevel(logging.INFO)
-# elif (log_level == 'WARNING'):
-#     logger.setLevel(logging.WARNING)
-# elif (log_level == 'ERROR'):
-#     logger.setLevel(logging.ERROR)
-# elif (log_level == 'CRITICAL'):
-#     logger.setLevel(logging.CRITICAL)
-# else:
-#     logger.setLevel(logging.DEBUG)
-
 # Add the log message handler to the logger
-handler = TimedRotatingFileHandler(log_dir + log_filename, when='S', interval=30, backupCount=0)
+handler = TimedRotatingFileHandler(log_dir + log_filename, when='midnight', interval=1)
 if (log_level == 'DEBUG'):
     app.logger.setLevel(logging.DEBUG)
 elif (log_level == 'INFO'):
