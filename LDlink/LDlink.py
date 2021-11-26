@@ -61,7 +61,7 @@ log_filename = config['log']['filename']
 log_level = config['log']['log_level']
 
 # Add the log message handler to the logger
-handler = TimedRotatingFileHandler(os.path.join(log_dir + log_filename), when='S', interval=30)
+handler = TimedRotatingFileHandler(os.path.join(log_dir + log_filename), when='H', interval=6)
 if (log_level == 'DEBUG'):
     app.logger.setLevel(logging.DEBUG)
 elif (log_level == 'INFO'):
