@@ -279,9 +279,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
             checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
-            tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-            proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-            head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
+            tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+            head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
             
             # Check lowest P SNP is in the 1000G population and not monoallelic from LDassoc.py output file
             vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
@@ -331,9 +330,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
         tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-        proc_h=subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-        head=[x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
-
+        head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
         # Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
         vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()

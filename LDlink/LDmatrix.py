@@ -83,8 +83,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             return("", "")
 
     get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -246,10 +245,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
-
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
         if len(a1) == 1 and len(a2) == 1:
@@ -267,7 +262,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return(a1_n, a2_n)
 
     # Import SNP VCF files
-    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":

@@ -53,8 +53,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             return(json.dumps(output, sort_keys=True, indent=2))
 
     get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))

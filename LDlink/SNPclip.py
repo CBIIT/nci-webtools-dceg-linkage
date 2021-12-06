@@ -89,8 +89,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             return("", "", "")
 
     get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))

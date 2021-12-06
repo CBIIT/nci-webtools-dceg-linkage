@@ -208,8 +208,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
     tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc_h = subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE)
-    head = [x.decode('utf-8') for x in proc_h.stdout.readlines()][0].strip().split()
+    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     tabix_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
         vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

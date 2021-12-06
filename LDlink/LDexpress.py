@@ -89,16 +89,12 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
     tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc_query_snp_h = subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE)
-    head = [x.decode('utf-8') for x in proc_query_snp_h.stdout.readlines()][0].strip().split()
-    # print("head length", len(head))
+    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     subprocess.call(tabix_query_snp, shell=True)
-    # proc_query_snp = subprocess.Popen(tabix_query_snp, shell=True, stdout=subprocess.PIPE)
-    # tabix_query_snp_out = [x.decode('utf-8') for x in proc_query_snp.stdout.readlines()]
     tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-    # print("tabix_query_snp_out length", len(tabix_query_snp_out))
+
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")

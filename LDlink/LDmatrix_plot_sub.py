@@ -53,8 +53,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
             pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
 
     get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -152,10 +151,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
-        vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc = subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE)
-
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
         if len(a1) == 1 and len(a2) == 1:
@@ -173,7 +168,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
         return(a1_n, a2_n)
 
     # Import SNP VCF files
-    vcf = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     h = 0
     while vcf[h][0:2] == "##":

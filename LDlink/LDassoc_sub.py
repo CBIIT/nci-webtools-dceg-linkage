@@ -47,9 +47,6 @@ vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
 coordinates = coords.replace("_", " ")
-tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"])
-proc = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE)
-
 
 # Define function to calculate LD metrics
 def set_alleles(a1, a2):
@@ -150,9 +147,9 @@ bp = geno[1]
 rs = snp
 al = "("+new_alleles[0]+"/"+new_alleles[1]+")"
 
-
 # Import Window around SNP
-vcf = csv.reader([x.decode('utf-8') for x in proc.stdout.readlines()], dialect="excel-tab")
+tabix_snp = export_s3_keys + " cd {2}; tabix -fhD {0} {1} | grep -v -e END".format(vcf_query_snp_file, coordinates, data_dir + genotypes_dir + genome_build_vars[genome_build]["1000G_dir"])
+vcf = csv.reader([x.decode('utf-8') for x in subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE).readlines()], dialect="excel-tab")
 
 # Loop past file information and find header
 head = next(vcf, None)

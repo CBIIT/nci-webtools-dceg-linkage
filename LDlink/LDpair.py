@@ -154,8 +154,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
             return(json.dumps(output, sort_keys=True, indent=2))
 
     get_pops = "cat " + " ".join(pop_dirs)
-    proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
@@ -170,9 +169,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
 
     tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc1_offset = subprocess.Popen(
-        tabix_snp1_offset, shell=True, stdout=subprocess.PIPE)
-    vcf1_offset = [x.decode('utf-8') for x in proc1_offset.stdout.readlines()]
+    vcf1_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     # SNP2
     vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
@@ -182,9 +179,7 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
 
     tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
         vcf_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc2_offset = subprocess.Popen(
-        tabix_snp2_offset, shell=True, stdout=subprocess.PIPE)
-    vcf2_offset = [x.decode('utf-8') for x in proc2_offset.stdout.readlines()]
+    vcf2_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]
     vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]
@@ -301,14 +296,10 @@ def calculate_pair(snp1, snp2, pop, web, genome_build, request=None):
 
     # Get headers
     tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc1_h = subprocess.Popen(
-        tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
+    head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc2_h = subprocess.Popen(
-        tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
+    head2 =  [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     # Combine phased genotypes
     geno = {}

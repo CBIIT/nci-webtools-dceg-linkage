@@ -258,8 +258,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1)
 
     rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir']) 
-    proc1 = subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE)
-    vcf1 = [x.decode('utf-8') for x in proc1.stdout.readlines()]
+    vcf1 = [x.decode('utf-8') for x in subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
     vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
@@ -268,8 +267,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     # need to add | grep -v -e END ???
     rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc2 = subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE)
-    vcf2 = [x.decode('utf-8') for x in proc2.stdout.readlines()]
+    vcf2 = [x.decode('utf-8') for x in subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
     # Check if SNPs are in 1000G reference panel
     # SNP1
@@ -351,12 +349,10 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     # Get headers
     tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc1_h = subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE)
-    head1 = [x.decode('utf-8') for x in proc1_h.stdout.readlines()][0].strip().split()
+    head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    proc2_h = subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE)
-    head2 = [x.decode('utf-8') for x in proc2_h.stdout.readlines()][0].strip().split()
+    head2 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     rs1_dict = dict(list(zip(head1, geno1)))
     rs2_dict = dict(list(zip(head2, geno2)))
