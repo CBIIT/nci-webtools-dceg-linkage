@@ -578,7 +578,7 @@ def ldtrait_timestamp():
         # API REQUEST
         web = False
     try:
-        results = get_platform_request(web)
+        results = get_ldtrait_timestamp(web)
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
