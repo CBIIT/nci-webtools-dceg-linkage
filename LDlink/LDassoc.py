@@ -425,7 +425,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
 			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).readlines()][0].strip().split()
+			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
 			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 			subprocess.call(tabix_snp, shell=True)
@@ -500,7 +500,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
 		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-		head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).readlines()][0].strip().split()
+		head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
 		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 		subprocess.call(tabix_snp, shell=True)
