@@ -111,7 +111,7 @@ def retrieveTabix1000GData(query_file, coords, query_dir):
     export_s3_keys = retrieveAWSCredentials()
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
         query_file, coords, query_dir)
-    print("tabix_snps", tabix_snps)
+    # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
     return vcf
 
