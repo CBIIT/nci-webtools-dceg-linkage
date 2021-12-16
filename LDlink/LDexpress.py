@@ -89,9 +89,11 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
 
     tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    print("tabix_query_snp_h", tabix_query_snp_h)
     head = [x.decode('utf-8') for x in subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    print("tabix_query_snp", tabix_query_snp)
     subprocess.call(tabix_query_snp, shell=True)
     tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
 
