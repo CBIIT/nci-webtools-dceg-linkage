@@ -16,42 +16,49 @@ import os
 import json
 import sys
 from LDcommon import genome_build_vars
+import requests
 
 
 def get_platform_request(web):
 
-    try:
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        env = config['env']
-        api_mongo_addr = config['api']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_readonly']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
+    # try:
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
+    # env = config['env']
+    # api_mongo_addr = config['api']['api_mongo_addr']
+    # mongo_username = config['database']['mongo_user_readonly']
+    # mongo_password = config['database']['mongo_password']
+    # mongo_port = config['database']['mongo_port']
+    opensearch_endpoint = config['aws']['opensearch_endpoint']
+    opensearch_user = config['aws']['opensearch_user']
+    opensearch_password = config['aws']['opensearch_password']
+    #     # Connect to Mongo snp database
+    #     if env == 'local':
+    #         mongo_host = api_mongo_addr
+    #     else: 
+    #         mongo_host = 'localhost'
+    #     if web:
+    #         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+    #     else:
+    #         if env == 'local':
+    #             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+    #         else:
+    #             client = MongoClient('localhost', mongo_port)
+    # except ConnectionFailure:
+    #     print("MongoDB is down")
+    #     print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
+    #     return "Failed to connect to server."
 
-        # Connect to Mongo snp database
-        if env == 'local':
-            mongo_host = api_mongo_addr
-        else: 
-            mongo_host = 'localhost'
-        if web:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            if env == 'local':
-                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-            else:
-                client = MongoClient('localhost', mongo_port)
-    except ConnectionFailure:
-        print("MongoDB is down")
-        print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
-        return "Failed to connect to server."
-
-    db = client["LDLink"]
-    cursor = db.platforms.find(
-        {"platform": {'$regex': '.*'}}).sort("platform", -1)
+    # db = client["LDLink"]
+    # cursor = db.platforms.find(
+    #     {"platform": {'$regex': '.*'}}).sort("platform", -1)
+    # platforms = {}
+    url = opensearch_endpoint + "/" + "platforms" + "/" + "_search?&size=100&pretty&filter_path=hits.hits._source"
+    r = requests.get(url, auth=(opensearch_user, opensearch_password))
+    platforms_raw = json.loads(r.text)
     platforms = {}
-    for document in cursor:
-        platforms[document["code"]] = document["platform"]
+    for document in platforms_raw['hits']['hits']:
+        platforms[document["_source"]["code"]] = document["_source"]["platform"]
     json_output = json.dumps(platforms, sort_keys=True, indent=2)
     return json_output
 
@@ -81,6 +88,7 @@ def convert_codeToPlatforms(platform_query, web):
             client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
     code_array = platform_query.split('+')
+    print("code_array", code_array)
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
         platforms.append(document["platform"])

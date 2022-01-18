@@ -26,11 +26,14 @@ performance:
   # specify number of parallel processes to use in some modules
   num_subprocesses: 4
 aws:
-  bucket: <S3_BUCKET_NAME>
+  bucket: '<S3_BUCKET_NAME>'
   data_subfolder: 'ldlink'
   # use AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY for local development only, otherwise leave empty string
-  aws_access_key_id: <AWS_ACCESS_KEY_ID>
-  aws_secret_access_key: <AWS_SECRET_ACCESS_KEY>
+  aws_access_key_id: '<AWS_ACCESS_KEY_ID>'
+  aws_secret_access_key: '<AWS_SECRET_ACCESS_KEY>'
+  opensearch_endpoint: '<AWS_OPENSEARCH_DOMAIN_ENDPOINT>'
+  opensearch_user: '<USERNAME_READ_WRITE>'
+  opensearch_password: '<PASSWORD>'
 log:
   log_dir: '<ABSOLUTE_PATH_TO_LOG_DIR>'
   filename: 'ldlink.log'

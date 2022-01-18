@@ -1,0 +1,162 @@
+{"index": {}}
+{"platform": "Affymetrix SNP 5.0", "code": "A_SNP5.0"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpress-24v1", "code": "I_OE-24"}
+{"index": {}}
+{"platform": "Illumina HumanOmni2.5Exome-8v1.2", "code": "I_O2.5E-8v1.2"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW CHB2", "code": "A_CHB2"}
+{"index": {}}
+{"platform": "Illumina HumanLinkage-12", "code": "I_Linkage-12"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW AFR", "code": "A_AFR"}
+{"index": {}}
+{"platform": "Illumina HumanOmni2.5Exome-8v1", "code": "I_O2.5E-8v1"}
+{"index": {}}
+{"platform": "Illumina HumanOmni2.5-4v1", "code": "I_O2.5-4"}
+{"index": {}}
+{"platform": "Illumina HumanHap300v1", "code": "I_300"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpressExome-8v1.1", "code": "I_OEE-8v1.1"}
+{"index": {}}
+{"platform": "Illumina HumanOmni5Exome-4v1", "code": "I_O5E-4"}
+{"index": {}}
+{"platform": "Illumina HumanLinkage-24", "code": "I_Linkage-24"}
+{"index": {}}
+{"platform": "Illumina HumanOmniZhongHua-8v1", "code": "I_OZH-8v1"}
+{"index": {}}
+{"platform": "Illumina HumanCoreExome-24v1", "code": "I_CoreE-24v1"}
+{"index": {}}
+{"platform": "Illumina Infinium CytoSNP-850K", "code": "I_Cyto850"}
+{"index": {}}
+{"platform": "Affymetrix DMET Plus", "code": "A_DMETplus"}
+{"index": {}}
+{"platform": "Illumina Infinium PsychArray-24v1", "code": "I_Psyc-24v1"}
+{"index": {}}
+{"platform": "Affymetrix Mapping 250K Sty", "code": "A_250S"}
+{"index": {}}
+{"platform": "Illumina Infinium Human100kv1", "code": "I_100"}
+{"index": {}}
+{"platform": "Illumina HumanOmniZhongHua-8v1.1", "code": "I_OZH-8v1.1"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpress-12v1", "code": "I_OE-12"}
+{"index": {}}
+{"platform": "Affymetrix Axiom Exome 319", "code": "A_Exome319"}
+{"index": {}}
+{"platform": "Illumina HumanImmuno-24v2", "code": "I_Immuno-24v2"}
+{"index": {}}
+{"platform": "Affymetrix Mapping 250K Nsp", "code": "A_250N"}
+{"index": {}}
+{"platform": "Affymetrix Mapping 10K Xba142", "code": "A_10X"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW Hu-CHB", "code": "A_Hu-CHB"}
+{"index": {}}
+{"platform": "Illumina HumanCNV370-Duov1", "code": "I_CNV370-D"}
+{"index": {}}
+{"platform": "Illumina HumanOmni1-Quadv1", "code": "I_O1-Q"}
+{"index": {}}
+{"platform": "Illumina Infinium OncoArray-500K", "code": "I_OncoArray"}
+{"index": {}}
+{"platform": "Illumina HumanExome-12v1.1", "code": "I_Exome-12"}
+{"index": {}}
+{"platform": "Illumina Infinium PsychArray-24v1.1", "code": "I_Psyc-24v1.1"}
+{"index": {}}
+{"platform": "Illumina HumanHap240S", "code": "I_240S"}
+{"index": {}}
+{"platform": "Illumina HumanOmni2.5S-8v1", "code": "I_O2.5S-8"}
+{"index": {}}
+{"platform": "Illumina HumanOmni2.5-8v1.2", "code": "I_O2.5-8"}
+{"index": {}}
+{"platform": "Illumina HumanCytoSNP-12v2.1 FFPE", "code": "I_Cyto-12v2.1f"}
+{"index": {}}
+{"platform": "Illumina HumanCNV370-Quadv3", "code": "I_CNV370-Q"}
+{"index": {}}
+{"platform": "Illumina HumanCore-12v1", "code": "I_Core-12"}
+{"index": {}}
+{"platform": "Illumina HumanExon510Sv1", "code": "I_Exon510S"}
+{"index": {}}
+{"platform": "Illumina HumanNS-12", "code": "I_NS-12"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpressExome-8v1.3", "code": "I_OEE-8v1.3"}
+{"index": {}}
+{"platform": "Illumina HumanImmuno-24v1", "code": "I_Immuno-24v1"}
+{"index": {}}
+{"platform": "Illumina HumanCoreExome-12v1.1", "code": "I_CoreE-12v1.1"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpressExome-8v1.2", "code": "I_OEE-8v1.2"}
+{"index": {}}
+{"platform": "Illumina Human1Mv1", "code": "I_1M"}
+{"index": {}}
+{"platform": "Illumina HumanOmniZhongHua-8v1.2", "code": "I_OZH-8v1.2"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW EUR", "code": "A_EUR"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW ASI", "code": "A_ASI"}
+{"index": {}}
+{"platform": "Illumina HumanOmni1S-8v1", "code": "I_O1S-8"}
+{"index": {}}
+{"platform": "Illumina Infinium Multi-Ethnic Global-8", "code": "I_ME-Global-8"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpressExome-8v1", "code": "I_OEE-8v1"}
+{"index": {}}
+{"platform": "Illumina Human660W-Quadv1", "code": "I_660W-Q"}
+{"index": {}}
+{"platform": "Illumina Cardio-MetaboChip", "code": "I_CardioMetab"}
+{"index": {}}
+{"platform": "Affymetrix OncoScan CNV", "code": "A_OncoCNV"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW EAS", "code": "A_EAS"}
+{"index": {}}
+{"platform": "Illumina HumanCNV-12", "code": "I_CNV-12"}
+{"index": {}}
+{"platform": "Affymetrix OncoScan", "code": "A_Onco"}
+{"index": {}}
+{"platform": "Illumina HumanCytoSNP-12v2.1", "code": "I_Cyto-12v2.1"}
+{"index": {}}
+{"platform": "Illumina Human610-Quadv1", "code": "I_610-Q"}
+{"index": {}}
+{"platform": "Illumina Human1M-Duov3", "code": "I_1M-D"}
+{"index": {}}
+{"platform": "Illumina HumanHap550v3", "code": "I_550v3"}
+{"index": {}}
+{"platform": "Affymetrix Mapping 50K Hind240", "code": "A_50H"}
+{"index": {}}
+{"platform": "Illumina HumanCoreExome-12v1", "code": "I_CoreE-12v1"}
+{"index": {}}
+{"platform": "Illumina HumanCytoSNP-12v2", "code": "I_Cyto-12v2"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW Hu", "code": "A_Hu"}
+{"index": {}}
+{"platform": "Illumina HumanHap300-Duov2", "code": "I_300-D"}
+{"index": {}}
+{"platform": "Illumina HumanCVDv1", "code": "I_CVD"}
+{"index": {}}
+{"platform": "Illumina HumanOmniExpress-12v1 FFPE", "code": "I_OE-12f"}
+{"index": {}}
+{"platform": "Affymetrix SNP 6.0", "code": "A_SNP6.0"}
+{"index": {}}
+{"platform": "Illumina HumanHap550v1", "code": "I_550v1"}
+{"index": {}}
+{"platform": "Affymetrix Mapping 50K Xba240", "code": "A_50X"}
+{"index": {}}
+{"platform": "Illumina HumanOmni5-4v1", "code": "I_O5-4"}
+{"index": {}}
+{"platform": "Affymetrix Axiom Exome 1A", "code": "A_Exome1A"}
+{"index": {}}
+{"platform": "Illumina HumanOmni2.5Exome-8v1.1", "code": "I_O2.5E-8v1.1"}
+{"index": {}}
+{"platform": "Illumina HumanCoreExome-24v1.1", "code": "I_CoreE-24v1.1"}
+{"index": {}}
+{"platform": "Affymetrix Axiom GW LAT", "code": "A_LAT"}
+{"index": {}}
+{"platform": "Illumina HumanHap650Yv3", "code": "I_650Y"}
+{"index": {}}
+{"platform": "Illumina Global Screening Array version 1", "code": "I_GSA-v1"}
+{"index": {}}
+{"platform": "Illumina Global Screening Array version 2", "code": "I_GSA-v2"}
+{"index": {}}
+{"platform": "Illumina Multi-Ethnic Global Array", "code": "I_MEGA"}
+{"index": {}}
+{"platform": "Affymetrix Axiom UK Biobank Array", "code": "A_UKBA"}
+{"index": {}}
+{"platform": "Affymetrix Axiom Precision Medicine Research", "code": "A_PMRA"}
