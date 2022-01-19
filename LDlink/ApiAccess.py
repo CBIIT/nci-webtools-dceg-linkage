@@ -210,7 +210,9 @@ def blockUser(email, url_root):
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
+    update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
+    if update_operation is None:
+        return None
     emailUserBlocked(email, email_account, url_root)
     return out_json
 
@@ -234,7 +236,9 @@ def unblockUser(email):
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
+    update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
+    if update_operation is None:
+        return None
     emailUserUnblocked(email, email_account)
     return out_json
 
@@ -258,8 +262,35 @@ def setUserLock(email, lockValue):
     client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     db = client["LDLink"]
     users = db.api_users
-    users.find_one_and_update({"email": email}, { "$set": {"locked": int(lockValue)}})
+    update_operation = users.find_one_and_update({"email": email}, { "$set": {"locked": int(lockValue)}})
+    if update_operation is None:
+        return None
+    return out_json
 
+
+# sets api2auth attribute of user to authValue
+def setUserApi2Auth(email, authValue):
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
+    env = config['env']
+    api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
+    out_json = {
+        "message": "Email user (" + email + ")'s api2auth has been set to " + str(authValue)
+    }
+    if env == 'local':
+        mongo_host = api_mongo_addr
+    else: 
+        mongo_host = 'localhost'
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
+    db = client["LDLink"]
+    users = db.api_users
+    update_operation = users.find_one_and_update({"email": email}, { "$set": {"api2auth": int(authValue)}})
+    if update_operation is None:
+        return None
     return out_json
 
 # sets locked attribute of all users to 0=false
@@ -321,6 +352,28 @@ def checkToken(token, token_expiration, token_expiration_days):
         registered = record["registered"]
         expiration = getExpiration(registered, token_expiration_days)
         if ((present < expiration) or not token_expiration):
+            return True
+        else:
+            return False
+
+# check if token is authorized to access API server 2
+def checkApiServer2Auth(token):
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
+    api_mongo_addr = config['api']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+    
+    client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    db = client["LDLink"]
+    users = db.api_users
+    record = users.find_one({"token": token})
+
+    if record is None:
+        return False
+    else:
+        if "api2auth" in record and record["api2auth"] == 1:
             return True
         else:
             return False
