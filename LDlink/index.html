@@ -2652,7 +2652,7 @@
 						</pre>
 						<p><i>Note: GET requests only support 1 SNP pair.</i></p>
 						<pre class="apiaccess-examples">
-							curl -k -H "Content-Type: application/json" -X POST -d '{"snp_pairs": [["rs3", "rs4"]], "pop": "CEU+YRI+CHB","genome_build": "grch37", "json_out": true}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?token=faketoken123'
+							curl -k -H "Content-Type: application/json" -X POST -d '{"snp_pairs": [["rs3", "rs4"], ["rs7837688", "rs4242384"]], "pop": "CEU+YRI+CHB","genome_build": "grch37", "json_out": true}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?token=faketoken123'
 						</pre>
 						<p><i>Note: POST requests can support up to 10 SNP pairs. If more than 1 SNP pair is provided, a JSON response will always be returned.</i></p>
 					</p>
