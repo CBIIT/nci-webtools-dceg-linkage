@@ -137,11 +137,16 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
                 return snp
         return snp
 
+    if len(snp_pairs) < 1:
+        output = {}
+        output["error"] = "Missing at least 1 SNP pair input."
+        output_list.append(output)
+
     for pair in snp_pairs:
         output = {}
         output["pair"] = pair
 
-        if len(pair) < 2 or len(pair) > 2:
+        if len(pair) < 2 or len(pair) > 2 or len(pair[0]) < 3 or len(pair[1]) < 3:
             output["error"] = "Missing or additional SNPs in pair."
             output_list.append(output)
             continue
@@ -611,7 +616,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         ldpair_out.close()
 
     # Return output
-    return(json.dumps(output_list if len(output_list) > 1 else output_list[0], sort_keys=True, indent=2))
+    return(json.dumps(output_list, sort_keys=True, indent=2))
 
 def main():
     import json

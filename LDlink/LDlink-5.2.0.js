@@ -3984,14 +3984,14 @@ function updateLDpair() {
     });
 
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
-            ko.mapping.fromJS(data, ldpairModel);
+        if (displayError(id, data[0]) == false) {
+            ko.mapping.fromJS([data[0]], ldpairModel);
             $('#' + id + '-results-container').show();
-            addLDpairHyperLinks(data);
+            addLDpairHyperLinks(data[0]);
         }
         $("#ldpair_results").text("Download Results");
         $('#ldpair_results').css("text-decoration", "underline");
-        $("#ldpair_results").attr("href", "tmp/LDpair_" + data['request'] + ".txt");
+        $("#ldpair_results").attr("href", "tmp/LDpair_" + data[0]['request'] + ".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);

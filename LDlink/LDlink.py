@@ -1073,14 +1073,14 @@ def ldpair():
             data = json.loads(request.stream.read())
         except Exception as e:
             return sendTraceback("Invalid JSON input.")
-        snp_pairs = data['snp_pairs'] if 'snp_pairs' in data else False
+        snp_pairs = data['snp_pairs'] if 'snp_pairs' in data else []
         pop = data['pop'] if 'pop' in data else False
         genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
         json_out = data['json_out'] if 'json_out' in data else False
     else:
         # GET REQUEST
-        var1 = request.args.get('var1', False)
-        var2 = request.args.get('var2', False)
+        var1 = request.args.get('var1', "")
+        var2 = request.args.get('var2', "")
         snp_pairs = [[var1, var2]]
         pop = request.args.get('pop', False)
         genome_build = request.args.get('genome_build', 'grch37')
@@ -1141,7 +1141,7 @@ def ldpair():
             # display api out
             try:
                 # unlock token then display api output
-                if json_out or len(out_json) > 1:
+                if json_out or len(json.loads(out_json)) > 1:
                     toggleLocked(token, 0)
                     end_time = time.time()
                     app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
