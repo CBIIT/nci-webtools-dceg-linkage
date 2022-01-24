@@ -45,17 +45,17 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     
     # Throw max SNP pairs error message
     if len(snp_pairs) > snp_pair_limit:
-        error_out = {
+        error_out = [{
             "error": "Maximum SNP pair list is " + str(snp_pair_limit) + " pairs. Your list contains " + str(len(snp_pairs)) + " pairs."
-        }
+        }]
         return(json.dumps(error_out, sort_keys=True, indent=2))
 
     # Validate genome build param
     # print("genome_build " + genome_build)
     if genome_build not in genome_build_vars['vars']:
-        error_out = {
+        error_out = [{
             "error": "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        }
+        }]
         return(json.dumps(error_out, sort_keys=True, indent=2))
 
     # Select desired ancestral populations
@@ -65,9 +65,9 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
             pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
-            error_out = {
+            error_out = [{
                 "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            }
+            }]
             return(json.dumps(error_out, sort_keys=True, indent=2))
 
     get_pops = "cat " + " ".join(pop_dirs)
@@ -167,7 +167,6 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         # SNP2
         if re.compile(r'rs\d+', re.IGNORECASE).match(snp2) is None and re.compile(r'chr\d+:\d+', re.IGNORECASE).match(snp2) is None and re.compile(r'chr[X|Y]:\d+', re.IGNORECASE).match(snp2) is None:
@@ -180,7 +179,6 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         # Check if SNPs are on the same chromosome
         if snp1_coord['chromosome'] != snp2_coord['chromosome']:
@@ -193,14 +191,12 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
             output_list.append(output) 
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         # SNP2
         if snp2_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
             output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         # Extract 1000 Genomes phased genotypes
 
@@ -236,7 +232,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not in 1000G reference panel."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
+
         elif len(vcf1) > 1:
             geno1 = []
             for i in range(len(vcf1)):
@@ -247,7 +243,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
                 output["error"] = snp1 + " is not in 1000G reference panel."
                 output_list.append(output)
                 continue
-                # return(json.dumps(output, sort_keys=True, indent=2))
+
         else:
             geno1 = vcf1[0].strip().split()
             geno1[0] = geno1[0].lstrip('chr')
@@ -268,7 +264,6 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a biallelic variant."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         if len(geno1[3]) == 1 and len(geno1[4]) == 1:
             snp1_a1 = geno1[3]
@@ -291,7 +286,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp2 + " is not in 1000G reference panel."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
+
         elif len(vcf2) > 1:
             geno2 = []
             for i in range(len(vcf2)):
@@ -302,7 +297,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
                 output["error"] = snp2 + " is not in 1000G reference panel."
                 output_list.append(output)
                 continue
-                # return(json.dumps(output, sort_keys=True, indent=2))
+
         else:
             geno2 = vcf2[0].strip().split()
             geno2[0] = geno2[0].lstrip('chr')
@@ -323,7 +318,6 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp2 + " is not a biallelic variant."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         if len(geno2[3]) == 1 and len(geno2[4]) == 1:
             snp2_a1 = geno2[3]
@@ -345,13 +339,11 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = "VCF File does not match variant coordinates for SNP1."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         if geno2[1] != vcf2_pos:
             output["error"] = "VCF File does not match variant coordinates for SNP2."
             output_list.append(output)
             continue
-            # return(json.dumps(output, sort_keys=True, indent=2))
 
         # Get headers
         tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
@@ -553,7 +545,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     ### OUTPUT ERROR IF ONLY SINGLE SNP PAIR ###
     if len(snp_pairs) == 1 and len(output_list) == 1 and "error" in output_list[0]:
-        return(json.dumps(output_list[0], sort_keys=True, indent=2))
+        return(json.dumps(output_list, sort_keys=True, indent=2))
 
     # Generate output file only for single SNP pair inputs
     if len(snp_pairs) == 1 and len(output_list) == 1:
