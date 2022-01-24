@@ -3963,12 +3963,10 @@ function updateLDpair() {
     //console.log("LD Pair");
     //console.log('population');
     //console.dir(population);
-    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
     var ldpairInputs = {
         var1 : $('#ldpair-snp1').val(),
         var2 : $('#ldpair-snp2').val(),
         pop : population.join("+"),
-        reference : reference,
         genome_build: genomeBuild
     };
     //console.log("ldpairInputs");
@@ -3993,7 +3991,7 @@ function updateLDpair() {
         }
         $("#ldpair_results").text("Download Results");
         $('#ldpair_results').css("text-decoration", "underline");
-        $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+        $("#ldpair_results").attr("href", "tmp/LDpair_" + data['request'] + ".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);

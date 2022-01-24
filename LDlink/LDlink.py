@@ -1061,36 +1061,56 @@ def ldmatrix():
     return out_script + "\n " + out_div
 
 # Web and API route for LDpair
-@app.route('/LDlinkRest/ldpair', methods=['GET'])
-@app.route('/LDlinkRest2/ldpair', methods=['GET'])
+@app.route('/LDlinkRest/ldpair', methods=['GET', 'POST'])
+@app.route('/LDlinkRest2/ldpair', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
 def ldpair():
     start_time = time.time()
-    var1 = request.args.get('var1', False)
-    var2 = request.args.get('var2', False)
-    pop = request.args.get('pop', False)
+    if request.method == 'POST':
+        # POST REQUEST
+        try:
+            data = json.loads(request.stream.read())
+        except Exception as e:
+            return sendTraceback("Invalid JSON input.")
+        snp_pairs = data['snp_pairs'] if 'snp_pairs' in data else False
+        pop = data['pop'] if 'pop' in data else False
+        genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
+        json_out = data['json_out'] if 'json_out' in data else False
+    else:
+        # GET REQUEST
+        var1 = request.args.get('var1', False)
+        var2 = request.args.get('var2', False)
+        snp_pairs = [[var1, var2]]
+        pop = request.args.get('pop', False)
+        genome_build = request.args.get('genome_build', 'grch37')
+        json_out = request.args.get('json_out', False)
+    if json_out in [False, "false", "False"]:
+        json_out = False
+    elif json_out in [True, "true", "True"]:
+        json_out = True
+    else:
+        json_out = False
     token = request.args.get('token', False)
-    genome_build = request.args.get('genome_build', 'grch37')
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = request.args.get('reference', False)
+            reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
             app.logger.debug('ldpair params ' + json.dumps({
-                'var1': var1,
-                'var2': var2,
+                'snp_pairs': snp_pairs,
                 'pop': pop,
                 'token': token,
                 'genome_build': genome_build,
                 'web': web,
-                'reference': reference
+                'reference': reference,
+                'json_out': json_out
             }, indent=4, sort_keys=True))
             # print('request: ' + str(reference))
             try:
-                out_json = calculate_pair(var1, var2, pop, web, genome_build, reference)
+                out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
             except Exception as e:
                 exc_obj = e
                 app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -1102,31 +1122,37 @@ def ldpair():
         web = False
         reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('ldpair params ' + json.dumps({
-            'var1': var1,
-            'var2': var2,
+            'snp_pairs': snp_pairs,
             'pop': pop,
             'token': token,
             'genome_build': genome_build,
             'web': web,
-            'reference': reference
+            'reference': reference,
+            'json_out': json_out
         }, indent=4, sort_keys=True))
         # print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_json = calculate_pair(var1, var2, pop, web, genome_build, reference)
+            out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
             if 'error' in json.loads(out_json):
                 toggleLocked(token, 0)
                 return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try:
                 # unlock token then display api output
-                with open(tmp_dir + 'LDpair_'+reference+'.txt', "r") as fp:
-                    content = fp.read()
-                toggleLocked(token, 0)
-                end_time = time.time()
-                app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
-                return content
+                if json_out or len(out_json) > 1:
+                    toggleLocked(token, 0)
+                    end_time = time.time()
+                    app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
+                    return current_app.response_class(out_json, mimetype='application/json')
+                else:
+                    with open(tmp_dir + 'LDpair_' + reference + '.txt', "r") as fp:
+                        content = fp.read()
+                    toggleLocked(token, 0)
+                    end_time = time.time()
+                    app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
+                    return content
             except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)

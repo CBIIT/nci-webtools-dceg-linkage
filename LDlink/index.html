@@ -2640,14 +2640,22 @@
 						<pre class="apiaccess-examples">
 							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&genome_build=grch38_high_coverage&token=faketoken123'
 						</pre>
-						<p><i>Note: GET request can support up to 300 SNPs.</i></p>
+						<p><i>Note: GET requests can support up to 300 SNPs.</i></p>
 						<pre class="apiaccess-examples">
 							curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\nrs4", "pop": "CEU","r2_d": "d", "genome_build": "grch37"}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldmatrix?token=faketoken123'
 						</pre>
-						<p><i>Note: POST request can support up to 1,000 SNPs.</i></p>
+						<p><i>Note: POST requests can support up to 1,000 SNPs.</i></p>
 					</p>
 					<p><a class="help-anchor-link" href="#LDpair">LDpair</a><br>
-						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&genome_build=grch37&token=faketoken123'</pre></p>
+						<pre class="apiaccess-examples">
+							curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&genome_build=grch37&json_out=false&token=faketoken123'
+						</pre>
+						<p><i>Note: GET requests only support 1 SNP pair.</i></p>
+						<pre class="apiaccess-examples">
+							curl -k -H "Content-Type: application/json" -X POST -d '{"snp_pairs": [["rs3", "rs4"]], "pop": "CEU+YRI+CHB","genome_build": "grch37", "json_out": true}' 'https://ldlink.nci.nih.gov/LDlinkRest/ldpair?token=faketoken123'
+						</pre>
+						<p><i>Note: POST requests can support up to 10 SNP pairs. If more than 1 SNP pair is provided, a JSON response will always be returned.</i></p>
+					</p>
 					<p><a class="help-anchor-link" href="#LDpop">LDpop</a><br>
 						<pre class="apiaccess-examples">curl -k -X GET 'https://ldlink.nci.nih.gov/LDlinkRest/ldpop?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&r2_d=r2&genome_build=grch37&token=faketoken123'</pre></p>	
 					<p><a class="help-anchor-link" href="#LDproxy">LDproxy</a><br>
