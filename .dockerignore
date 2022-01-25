@@ -1,0 +1,6 @@
+.git
+**/old/
+**/data/
+**/logs/
+**/node_modules/
+server/config.yml

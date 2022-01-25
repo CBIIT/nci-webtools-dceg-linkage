@@ -1,0 +1,29 @@
+{
+  "name": "nci-webtools-dceg-linkage",
+  "version": "1.0.0",
+  "description": "Provider: National Institutes of Health (NIH), National Cancer Institute (hereinafter \"NCI\")",
+  "main": "index.js",
+  "scripts": {
+    "flask": "cd LDlink && export FLASK_APP=LDlink.py && export FLASK_ENV=development && python3 -m flask run",
+    "test": "npm run test:unit && npm run test:integration && npm run test:e2e",
+    "test:e2e": "mocha -R xunit -O output=tests/e2e.xml tests/end-to-end/scripts/*test.js",
+    "test:integration": "echo TODO: Implement integration tests",
+    "test:unit": "echo TODO: Implement integration tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CBIIT/nci-webtools-dceg-linkage.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/CBIIT/nci-webtools-dceg-linkage/issues"
+  },
+  "homepage": "https://github.com/CBIIT/nci-webtools-dceg-linkage#readme",
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0",
+    "request": "^2.88.0",
+    "selenium-webdriver": "^4.0.0-alpha.1"
+  }
+}

@@ -4,28 +4,22 @@
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio and Webstorm
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/
 # User-specific stuff:
-.idea/*
-common
-common/
-LDlink/common
-LDlink/common/
+**/common/
 
 .DS_Store
 .vscode
 
-node_modules
+**/node_modules
 tests/*.xml
-package-lock.json
-geckodriver*
-chromedriver*
+**/geckodriver*
+**/chromedriver*
 
 data/
-tmp/
-**logs/
-*ldlink.log*
-LDlink/tmp/
-LDlink/config.yml
-scripts/LDexpress_update/tmp/
-scripts/dbSNP_mongo_update/test/
-scripts/liftOver/test/
-scripts/SNPchip_update/test
+logs/
+**/LDlink/tmp/
+**/config.yml
+**/LDlink/config.yml
+**/scripts/LDexpress_update/tmp/
+**/scripts/dbSNP_mongo_update/test/
+**/scripts/liftOver/test/
+**/scripts/SNPchip_update/test
