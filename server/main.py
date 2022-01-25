@@ -8,16 +8,13 @@ import traceback
 from services.LDhap import calculate_hap
 
 
-api_app = FastAPI()
 app = FastAPI()
-app.mount('/api', api_app)
-app.mount('/', StaticFiles(directory="../client/LDlink", html=True), name="LDlink")
 
 origins = [
     "*"
 ]
 
-api_app.add_middleware(
+app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
@@ -25,15 +22,13 @@ api_app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@api_app.get("/ping")
+@app.get("/ping")
 async def ping():
     return {"message": True}
 
-# @app.get("/api/ldhap")
-@api_app.get('/LDlinkRest/ldhap')
-@api_app.get('/LDlinkRest2/ldhap')
-@api_app.get('/LDlinkRestWeb/ldhap')
+@app.get('/LDlinkRest/ldhap')
+@app.get('/LDlinkRest2/ldhap')
+@app.get('/LDlinkRestWeb/ldhap')
 async def ldhap(
     snps: str = "rs3%0Ars4", 
     pop: str = "YRI", 
@@ -55,3 +50,5 @@ async def ldhap(
     except Exception as e:
         exc_obj = e
         raise HTTPException(status_code=400, detail="Internal server error: %s" % ''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+
+app.mount('/', StaticFiles(directory="../client/LDlink", html=True), name="LDlink")

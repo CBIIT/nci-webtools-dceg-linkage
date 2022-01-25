@@ -3,8 +3,8 @@ var ldlink_version = "Version 5.2";
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
-var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, apiPrefix: "api/", route: 'LDlinkRestWeb'}
-var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.apiPrefix + restService.route;
+var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRestWeb'}
+var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
 
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
 
