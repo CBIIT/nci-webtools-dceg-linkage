@@ -37,7 +37,7 @@ RUN pip3 install --no-cache-dir --upgrade -r /deploy/app/requirements.txt
 
 # install htslib
 RUN cd /tmp \
-    && curl -L https://github.com/samtools/htslib/releases/download/1.14/htslib-1.14.tar.bz2 --output htslib-1.14.tar.bz2 \
+    && curl https://github.com/samtools/htslib/releases/download/1.14/htslib-1.14.tar.bz2 --output htslib-1.14.tar.bz2 \
     && tar xjf htslib-1.14.tar.bz2 \
     && cd htslib-1.14 \
     && ./configure --enable-libcurl --prefix=/tmp/htslib-1.14 \
