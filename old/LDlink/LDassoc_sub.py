@@ -110,7 +110,7 @@ def LD_calcs(hap, allele, allele_n):
         return [maf_q, maf_p, D_prime, r2, match]
 
 # Connect to Mongo snp database
-if env == 'local':
+if env == 'local' or env == 'docker':
     mongo_host = api_mongo_addr
 else: 
     mongo_host = 'localhost'

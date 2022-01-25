@@ -53,7 +53,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             snp=myargsOrigin
 
             # Connect to Mongo snp database
-            if env == 'local':
+            if env == 'local' or env == 'docker':
                 mongo_host = api_mongo_addr
             else: 
                 mongo_host = 'localhost'

@@ -59,7 +59,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'

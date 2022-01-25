@@ -64,7 +64,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
     
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'

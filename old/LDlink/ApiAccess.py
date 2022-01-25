@@ -133,7 +133,7 @@ def getEmailRecord(email, env, api_mongo_addr):
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -150,7 +150,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -203,7 +203,7 @@ def blockUser(email, url_root):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -229,7 +229,7 @@ def unblockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -255,7 +255,7 @@ def setUserLock(email, lockValue):
     out_json = {
         "message": "Email user (" + email + ")'s lock has been set to " + str(lockValue)
     }
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -281,7 +281,7 @@ def setUserApi2Auth(email, authValue):
     out_json = {
         "message": "Email user (" + email + ")'s api2auth has been set to " + str(authValue)
     }
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -310,7 +310,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
     
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -388,7 +388,7 @@ def getToken(email):
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -481,7 +481,7 @@ def checkBlockedEmail(email, env, api_mongo_addr):
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -507,7 +507,7 @@ def checkUniqueToken(token):
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
     
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -634,7 +634,7 @@ def getStats(startdatetime, enddatetime, top):
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -754,7 +754,7 @@ def getLockedUsers():
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -780,7 +780,7 @@ def getBlockedUsers():
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'

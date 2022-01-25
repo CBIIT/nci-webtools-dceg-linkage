@@ -43,14 +43,14 @@ def get_ldtrait_timestamp(web):
         mongo_port = config['database']['mongo_port']
 
         # Connect to Mongo snp database
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             mongo_host = api_mongo_addr
         else: 
             mongo_host = 'localhost'
         if web:
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
         else:
-            if env == 'local':
+            if env == 'local' or env == 'docker':
                 client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
             else:
                 client = MongoClient('localhost', mongo_port)
@@ -235,14 +235,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                 sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)

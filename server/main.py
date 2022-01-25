@@ -12,7 +12,6 @@ api_app = FastAPI()
 app = FastAPI()
 app.mount('/api', api_app)
 app.mount('/', StaticFiles(directory="../client/LDlink", html=True), name="LDlink")
-app.mount('/tmp', StaticFiles(directory="../client/LDlink/tmp"), name="tmp")
 
 origins = [
     "*"

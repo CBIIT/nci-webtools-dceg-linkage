@@ -95,14 +95,14 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)

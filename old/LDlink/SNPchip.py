@@ -30,14 +30,14 @@ def get_platform_request(web):
         mongo_port = config['database']['mongo_port']
 
         # Connect to Mongo snp database
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             mongo_host = api_mongo_addr
         else: 
             mongo_host = 'localhost'
         if web:
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
         else:
-            if env == 'local':
+            if env == 'local' or env == 'docker':
                 client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
             else:
                 client = MongoClient('localhost', mongo_port)
@@ -68,14 +68,14 @@ def convert_codeToPlatforms(platform_query, web):
     mongo_port = config['database']['mongo_port']
     platforms = []
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)
@@ -129,14 +129,14 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
             snps.append(snp)
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)

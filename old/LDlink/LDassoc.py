@@ -70,7 +70,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
-			if env == 'local':
+			if env == 'local' or env == 'docker':
 				mongo_host = api_mongo_addr
 			else: 
 				mongo_host = 'localhost'
@@ -195,7 +195,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				return None
 
 		# Connect to Mongo snp database
-		if env == 'local':
+		if env == 'local' or env == 'docker':
 			mongo_host = api_mongo_addr
 		else: 
 			mongo_host = 'localhost'

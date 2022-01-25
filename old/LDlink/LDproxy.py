@@ -87,14 +87,14 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         return("", "")
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)

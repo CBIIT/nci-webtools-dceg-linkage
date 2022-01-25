@@ -164,7 +164,7 @@ def requires_token(f):
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
         env = config['env']
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             url_root = 'http://localhost:5000/'
         elif env == 'prod':
             url_root = 'https://ldlink.nci.nih.gov/'

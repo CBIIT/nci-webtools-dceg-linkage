@@ -53,14 +53,14 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or env == 'docker':
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or env == 'docker':
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)
