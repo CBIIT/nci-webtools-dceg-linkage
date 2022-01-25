@@ -3,4 +3,5 @@
 **/data/
 **/logs/
 **/node_modules/
+**/scripts/
 server/config.yml
