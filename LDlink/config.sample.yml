@@ -11,13 +11,14 @@ api:
   require_token: True
   restrict_concurrency: True
   # specify mongodb instance where api user records and logs are located, if env is local then use as endpoint for all mongodb calls
-  api_mongo_addr: '<MONGODB_ENDPOINT_ADDRESS>'
   # token_experation_days only applies if token_expiration is True
   token_expiration: False
   token_expiration_days: 365
   email_account: '<EMAIL_HOST_SERVER_ADDRESS>'
   api_superuser: '<YOUR_EMAIL_ADDRESS>'
 database:
+  api_mongo_addr: '<MONGODB_ENDPOINT_ADDRESS>'
+  connect_external: True
   mongo_user_readonly: '<USERNAME_READ_ONLY>'
   mongo_user_api: '<USERNAME_READ_WRITE>'
   mongo_password: '<PASSWORD>'

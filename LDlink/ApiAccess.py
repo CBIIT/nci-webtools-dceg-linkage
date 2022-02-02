@@ -133,7 +133,8 @@ def getEmailRecord(email, env, api_mongo_addr):
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
-    if env == 'local':
+    connect_external = config['database']['connect_external']
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -149,8 +150,8 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
-
-    if env == 'local':
+    connect_external = config['database']['connect_external']
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -173,7 +174,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 def logAccess(token, module):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -194,7 +195,8 @@ def blockUser(email, url_root):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     email_account = config['api']['email_account']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
@@ -203,7 +205,7 @@ def blockUser(email, url_root):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -221,7 +223,8 @@ def unblockUser(email):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     email_account = config['api']['email_account']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
@@ -229,7 +232,7 @@ def unblockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -247,7 +250,8 @@ def setUserLock(email, lockValue):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -255,7 +259,7 @@ def setUserLock(email, lockValue):
     out_json = {
         "message": "Email user (" + email + ")'s lock has been set to " + str(lockValue)
     }
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -273,7 +277,8 @@ def setUserApi2Auth(email, authValue):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -281,7 +286,7 @@ def setUserApi2Auth(email, authValue):
     out_json = {
         "message": "Email user (" + email + ")'s api2auth has been set to " + str(authValue)
     }
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -309,8 +314,8 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
-    
-    if env == 'local':
+    connect_external = config['database']['connect_external']
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -332,7 +337,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 def checkToken(token, token_expiration, token_expiration_days):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -360,7 +365,7 @@ def checkToken(token, token_expiration, token_expiration_days):
 def checkApiServer2Auth(token):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -383,12 +388,13 @@ def getToken(email):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -405,7 +411,7 @@ def getToken(email):
 def checkBlocked(token):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -426,7 +432,7 @@ def checkBlocked(token):
 def checkLocked(token):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -450,7 +456,7 @@ def checkLocked(token):
 def toggleLocked(token, lock):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
@@ -480,8 +486,8 @@ def checkBlockedEmail(email, env, api_mongo_addr):
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
-
-    if env == 'local':
+    connect_external = config['database']['connect_external']
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -502,12 +508,13 @@ def checkUniqueToken(token):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
     
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -541,7 +548,8 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     token_expiration = bool(config['api']['token_expiration'])
     token_expiration_days = config['api']['token_expiration_days']
     email_account = config['api']['email_account']
@@ -629,12 +637,13 @@ def getStats(startdatetime, enddatetime, top):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -749,12 +758,13 @@ def getLockedUsers():
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -775,12 +785,13 @@ def getBlockedUsers():
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']
 
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
@@ -800,7 +811,8 @@ def lookupUser(email):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
 
     user_record = getEmailRecord(email, env, api_mongo_addr)
 

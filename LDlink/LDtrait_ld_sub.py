@@ -18,7 +18,8 @@ genome_build = sys.argv[3]
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
 env = config['env']
-api_mongo_addr = config['api']['api_mongo_addr']
+connect_external = config['database']['connect_external']
+api_mongo_addr = config['database']['api_mongo_addr']
 population_samples_dir = config['data']['population_samples_dir']
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']

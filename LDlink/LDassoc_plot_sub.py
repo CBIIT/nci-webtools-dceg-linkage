@@ -23,7 +23,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     genotypes_dir = config['data']['genotypes_dir']
@@ -53,7 +54,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             snp=myargsOrigin
 
             # Connect to Mongo snp database
-            if env == 'local':
+            if env == 'local' or connect_external:
                 mongo_host = api_mongo_addr
             else: 
                 mongo_host = 'localhost'

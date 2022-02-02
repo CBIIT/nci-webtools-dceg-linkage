@@ -164,7 +164,8 @@ def requires_token(f):
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
         env = config['env']
-        if env == 'local':
+        connect_external = config['database']['connect_external']
+        if env == 'local' or connect_external:
             url_root = 'http://localhost:5000/'
         elif env == 'prod':
             url_root = 'https://ldlink.nci.nih.gov/'
@@ -492,6 +493,7 @@ def root():
     # with open('config.yml', 'r') as yml_file:
     #     config = yaml.load(yml_file)
     # env = config['env']
+    # connect_external = config['database']['connect_external']
     # if env == "local":
         # return app.send_static_file('index.html')
     # else:
