@@ -38,7 +38,7 @@ from werkzeug.utils import secure_filename
 # from werkzeug.debug import DebuggedApplication
 import logging
 from logging.handlers import TimedRotatingFileHandler
-
+from pymongo import MongoClient
 
 # Ensure tmp directory exists
 with open('config.yml', 'r') as yml_file:
@@ -206,16 +206,30 @@ def requires_admin_token(f):
     def decorated_function(*args, **kwargs):
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
-        api_superuser = config['api']['api_superuser']
-        # api_access_dir = config['api']['api_access_dir']
-        api_superuser_token = getToken(api_superuser)
-        # Check if token argument is missing in api call
+        api_mongo_addr = config['api']['api_mongo_addr']
+        mongo_username = config['database']['mongo_user_api']
+        mongo_password = config['database']['mongo_password']
+        mongo_port = config['database']['mongo_port']
+    
+        client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+        db = client["LDLink"]
+        users = db.api_users
+           
         if 'token' not in request.args:
             return sendTraceback('Admin API token missing.')
         token = request.args['token']
-        # Check if token is valid
-        if token != api_superuser_token or token is None:
-            return sendTraceback('Invalid Admin API token.')
+        # Check if token is valid and based on the token to find the user, then check if the user is admin or not, 
+        record = users.find_one({"token": token})
+        
+        if record is None:
+            return sendTraceback('Invalid Admin user.')
+        else:
+            try:
+                admin = record["admin"]
+                if admin == 0:
+                    return sendTraceback('Invalid Admin user with admin value as 0.')
+            except KeyError:
+                return sendTraceback('Invalid Admin user.')
         return f(*args, **kwargs)
     return decorated_function
 
