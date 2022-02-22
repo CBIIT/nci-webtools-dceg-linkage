@@ -204,6 +204,8 @@ def requires_token(f):
 def requires_admin_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        #create connection to database, retrieve api_users to find the user with token
+        #then check if this user has admin value as 1, if it is admin, then grand acess, if not refuse
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
         api_mongo_addr = config['api']['api_mongo_addr']
@@ -227,7 +229,7 @@ def requires_admin_token(f):
             try:
                 admin = record["admin"]
                 if admin == 0:
-                    return sendTraceback('Invalid Admin user with admin value as 0.')
+                    return sendTraceback('Not a valid Admin user(admin value is 0).')
             except KeyError:
                 return sendTraceback('Invalid Admin user.')
         return f(*args, **kwargs)
