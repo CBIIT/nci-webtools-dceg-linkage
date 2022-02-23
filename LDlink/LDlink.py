@@ -230,9 +230,12 @@ def requires_admin_token(f):
                 admin = record["admin"]
                 if admin == 0:
                     return sendTraceback('Not a valid Admin user(admin value is 0).')
+                elif admin == 1:
+                    return f(*args, **kwargs)
+                else:
+                    return sendTraceback('Invalid Admin user(admin value is {}, should be 0 or 1).'.format(admin))
             except KeyError:
                 return sendTraceback('Invalid Admin user.')
-        return f(*args, **kwargs)
     return decorated_function
 
 # Web route to send API token unblock request from front-end
