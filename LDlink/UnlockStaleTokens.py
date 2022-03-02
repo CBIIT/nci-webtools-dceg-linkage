@@ -14,7 +14,7 @@ def getDatetime():
 def main():
     with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['api']['api_mongo_addr']
+    api_mongo_addr = config['database']['api_mongo_addr']
     mongo_username = config['database']['mongo_user_api']
     mongo_password = config['database']['mongo_password']
     mongo_port = config['database']['mongo_port']

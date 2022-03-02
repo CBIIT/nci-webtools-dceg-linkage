@@ -25,7 +25,8 @@ from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
 with open('config.yml', 'r') as yml_file:	
     config = yaml.load(yml_file)	
 env = config['env']
-api_mongo_addr = config['api']['api_mongo_addr']
+connect_external = config['database']['connect_external']
+api_mongo_addr = config['database']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 population_samples_dir = config['data']['population_samples_dir']	
 data_dir = config['data']['data_dir']
@@ -42,20 +43,21 @@ def get_ldexpress_tissues(web):
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
         env = config['env']
-        api_mongo_addr = config['api']['api_mongo_addr']
+        connect_external = config['database']['connect_external']
+        api_mongo_addr = config['database']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
         mongo_password = config['database']['mongo_password']
         mongo_port = config['database']['mongo_port']
 
         # Connect to Mongo database
-        if env == 'local':
+        if env == 'local' or connect_external:
             mongo_host = api_mongo_addr
         else: 
             mongo_host = 'localhost'
         if web:
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
         else:
-            if env == 'local':
+            if env == 'local' or connect_external:
                 client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
             else:
                 client = MongoClient('localhost', mongo_port)
@@ -227,14 +229,14 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             sanitized_query_snps.append([snp])
 
     # Connect to Mongo database
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or connect_external:
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)
