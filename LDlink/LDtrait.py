@@ -21,8 +21,6 @@ from LDcommon import genome_build_vars, get_rsnum
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
     config = yaml.load(yml_file)	
-env = config['env']
-connect_external = config['database']['connect_external']
 api_mongo_addr = config['database']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 data_dir = config['data']['data_dir']
@@ -37,25 +35,14 @@ def get_ldtrait_timestamp(web):
     try:
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
-        env = config['env']
-        connect_external = config['database']['connect_external']
         api_mongo_addr = config['database']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_readonly']
         mongo_password = config['database']['mongo_password']
         mongo_port = config['database']['mongo_port']
 
         # Connect to Mongo snp database
-        if env == 'local' or connect_external:
-            mongo_host = api_mongo_addr
-        else: 
-            mongo_host = 'localhost'
-        if web:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            if env == 'local' or connect_external:
-                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-            else:
-                client = MongoClient('localhost', mongo_port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/admin', mongo_port)
+        
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -237,17 +224,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                 sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+api_mongo_addr+'/admin', mongo_port)
+  
     db = client["LDLink"]
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():

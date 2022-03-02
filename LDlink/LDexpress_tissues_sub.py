@@ -110,17 +110,7 @@ def getGTExTissueAPI(snp, tissue_ids):
 
 def get_tissues(web, windowSNPs, p_threshold, tissues):
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web == "True":
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
     db = client["LDLink"]
 
     gtexQueryRequestCount = 0

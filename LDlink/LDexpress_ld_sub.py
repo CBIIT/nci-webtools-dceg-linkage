@@ -23,7 +23,6 @@ genome_build = sys.argv[10]
 # Set data directories using config.yml
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
-env = config['env']
 connect_external = config['database']['connect_external']
 api_mongo_addr = config['database']['api_mongo_addr']
 data_dir = config['data']['data_dir']
@@ -90,17 +89,7 @@ def LD_calcs(hap, allele_n):
 
 
 # Connect to Mongo database
-if env == 'local' or connect_external:
-    mongo_host = api_mongo_addr
-else: 
-    mongo_host = 'localhost'
-if web == "True":
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-else:
-    if env == 'local' or connect_external:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        client = MongoClient('localhost', mongo_port)
+client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
 db = client["LDLink"]
 
 def get_dbsnp_coord(db, chromosome, position):
