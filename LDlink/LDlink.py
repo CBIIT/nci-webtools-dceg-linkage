@@ -33,7 +33,7 @@ from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from LDcommon import genome_build_vars
-from RegisterAPI import register_user, checkToken, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
+from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 # from werkzeug.debug import DebuggedApplication
 import logging
@@ -164,7 +164,8 @@ def requires_token(f):
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
         env = config['env']
-        if env == 'local':
+        connect_external = config['database']['connect_external']
+        if env == 'local' or connect_external:
             url_root = 'http://localhost:5000/'
         elif env == 'prod':
             url_root = 'https://ldlink.nci.nih.gov/'
@@ -186,9 +187,14 @@ def requires_token(f):
                 # Check if token is blocked
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
-                # Check if token is locked
-                if checkLocked(token):
-                    return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
+                # Check if token is locked (exclude check on api server 2)
+                if ("LDlinkRest2" not in request.full_path):
+                    if checkLocked(token):
+                        return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
+                # Check if token has been authorized to access api server 2
+                if ("LDlinkRest2" in request.full_path):
+                    if not checkApiServer2Auth(token):
+                        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
                 logAccess(token, module)
                 return f(*args, **kwargs)
@@ -312,6 +318,10 @@ def block_user():
     }, indent=4, sort_keys=True))
     try:
         out_json = blockUser(email, request.url_root)
+        if out_json is None:
+            out_json =  {
+                "message": "User email not found: " + str(email)
+            }  
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -330,6 +340,10 @@ def unblock_user():
     }, indent=4, sort_keys=True))
     try:
         out_json = unblockUser(email)
+        if out_json is None:
+            out_json =  {
+                "message": "User email not found: " + str(email)
+            }  
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -337,7 +351,7 @@ def unblock_user():
     app.logger.info("Executed unblock API user (%ss)" % (round(end_time - start_time, 2)))
     return sendJSON(out_json)
 
-# Web route to unlock user's API token
+# Web route to set user's lock status
 @app.route('/LDlinkRestWeb/apiaccess/set_user_lock', methods=['GET'])
 @requires_admin_token
 def set_user_lock():
@@ -353,19 +367,58 @@ def set_user_lock():
         if lockValue == -1 or lockValue == 0:
             try:
                 out_json = setUserLock(email, lockValue)
+                if out_json is None:
+                    out_json =  {
+                        "message": "User email not found: " + str(email)
+                    }   
             except Exception as e:
                 exc_obj = e
                 app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
         else:
             out_json =  {
-                "message": "invalid lock value: " + str(lockValue)
+                "message": "Invalid lock value: " + str(lockValue)
             }
     except:
         out_json =  {
-            "message": "invalid lock value"
+            "message": "Invalid lock value"
         }
     end_time = time.time()
     app.logger.info("Executed set API user lock status (%ss)" % (round(end_time - start_time, 2)))
+    return sendJSON(out_json)
+
+# Web route to grant/revoke user's API server 2 access
+@app.route('/LDlinkRestWeb/apiaccess/set_user_api2auth', methods=['GET'])
+@requires_admin_token
+def set_user_api2auth():
+    start_time = time.time()
+    email = request.args.get('email', "Missing Argument")
+
+    try:
+        authValue = int(request.args.get('authValue', "Missing Argument"))
+        app.logger.debug('set_user_api2auth params ' + json.dumps({
+            'email': email,
+            'authValue': authValue
+        }, indent=4, sort_keys=True))
+        if authValue == 0 or authValue == 1:
+            try:
+                out_json = setUserApi2Auth(email, authValue)
+                if out_json is None:
+                    out_json =  {
+                        "message": "User email not found: " + str(email)
+                    }   
+            except Exception as e:
+                exc_obj = e
+                app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        else:
+            out_json =  {
+                "message": "Invalid auth value: " + str(authValue)
+            }
+    except:
+        out_json =  {
+            "message": "Invalid auth value"
+        }
+    end_time = time.time()
+    app.logger.info("Executed set API user's api server 2 access status (%ss)" % (round(end_time - start_time, 2)))
     return sendJSON(out_json)
 
 # Web route to unlock all users API tokens
@@ -459,6 +512,7 @@ def root():
     # with open('config.yml', 'r') as yml_file:
     #     config = yaml.load(yml_file)
     # env = config['env']
+    # connect_external = config['database']['connect_external']
     # if env == "local":
         # return app.send_static_file('index.html')
     # else:
@@ -477,6 +531,7 @@ def root():
 
 # Ping route for API and Web instances
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
+@app.route('/LDlinkRest2/ping/', strict_slashes=False)
 @app.route('/ping/', strict_slashes=False)
 def ping():
     print("pong")
@@ -493,6 +548,7 @@ def status(filename):
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])
+@app.route('/LDlinkRest2/upload', methods=['POST'])
 @app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():
     print("Processing upload")
@@ -526,6 +582,7 @@ def upload():
 
 # Route for LDassoc example GWAS data
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
+@app.route('/LDlinkRest2/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
     with open('config.yml', 'r') as yml_file:
@@ -542,6 +599,7 @@ def ldassoc_example():
 
 # Route to retrieve LDexpress tissue info
 @app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
+@app.route('/LDlinkRest2/ldexpress_tissues', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldexpress_tissues', methods=['GET'])
 def ldexpress_tissues():
     start_time = time.time()
@@ -563,6 +621,7 @@ def ldexpress_tissues():
 
 # Route to retrieve platform data for SNPchip
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
+@app.route('/LDlinkRest2/snpchip_platforms', methods=['GET'])
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     start_time = time.time()
@@ -585,6 +644,7 @@ def snpchip_platforms():
 
 # Route to retrieve timestamp from last LDtrait data update
 @app.route('/LDlinkRest/ldtrait_timestamp', methods=['GET'])
+@app.route('/LDlinkRest2/ldtrait_timestamp', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldtrait_timestamp', methods=['GET'])
 def ldtrait_timestamp():
     start_time = time.time()
@@ -609,6 +669,7 @@ def ldtrait_timestamp():
 
 # Web and API route for LDassoc
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
+@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     start_time = time.time()
@@ -692,6 +753,7 @@ def ldassoc():
 
 # Web and API route for LDexpress
 @app.route('/LDlinkRest/ldexpress', methods=['POST'])
+@app.route('/LDlinkRest2/ldexpress', methods=['POST'])
 @app.route('/LDlinkRestWeb/ldexpress', methods=['POST'])
 @requires_token
 def ldexpress():
@@ -817,6 +879,7 @@ def ldexpress():
 
 # Web and API route for LDhap
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
+@app.route('/LDlinkRest2/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
 def ldhap():
@@ -906,6 +969,7 @@ def ldhap():
 
 # Web and API route for LDmatrix
 @app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
+@app.route('/LDlinkRest2/ldmatrix', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
 def ldmatrix():
@@ -1018,35 +1082,56 @@ def ldmatrix():
     return out_script + "\n " + out_div
 
 # Web and API route for LDpair
-@app.route('/LDlinkRest/ldpair', methods=['GET'])
+@app.route('/LDlinkRest/ldpair', methods=['GET', 'POST'])
+@app.route('/LDlinkRest2/ldpair', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
 def ldpair():
     start_time = time.time()
-    var1 = request.args.get('var1', False)
-    var2 = request.args.get('var2', False)
-    pop = request.args.get('pop', False)
+    if request.method == 'POST':
+        # POST REQUEST
+        try:
+            data = json.loads(request.stream.read())
+        except Exception as e:
+            return sendTraceback("Invalid JSON input.")
+        snp_pairs = data['snp_pairs'] if 'snp_pairs' in data else []
+        pop = data['pop'] if 'pop' in data else False
+        genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
+        json_out = data['json_out'] if 'json_out' in data else False
+    else:
+        # GET REQUEST
+        var1 = request.args.get('var1', "")
+        var2 = request.args.get('var2', "")
+        snp_pairs = [[var1, var2]]
+        pop = request.args.get('pop', False)
+        genome_build = request.args.get('genome_build', 'grch37')
+        json_out = request.args.get('json_out', False)
+    if json_out in [False, "false", "False"]:
+        json_out = False
+    elif json_out in [True, "true", "True"]:
+        json_out = True
+    else:
+        json_out = False
     token = request.args.get('token', False)
-    genome_build = request.args.get('genome_build', 'grch37')
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = request.args.get('reference', False)
+            reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
             app.logger.debug('ldpair params ' + json.dumps({
-                'var1': var1,
-                'var2': var2,
+                'snp_pairs': snp_pairs,
                 'pop': pop,
                 'token': token,
                 'genome_build': genome_build,
                 'web': web,
-                'reference': reference
+                'reference': reference,
+                'json_out': json_out
             }, indent=4, sort_keys=True))
             # print('request: ' + str(reference))
             try:
-                out_json = calculate_pair(var1, var2, pop, web, genome_build, reference)
+                out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
             except Exception as e:
                 exc_obj = e
                 app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -1058,31 +1143,37 @@ def ldpair():
         web = False
         reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('ldpair params ' + json.dumps({
-            'var1': var1,
-            'var2': var2,
+            'snp_pairs': snp_pairs,
             'pop': pop,
             'token': token,
             'genome_build': genome_build,
             'web': web,
-            'reference': reference
+            'reference': reference,
+            'json_out': json_out
         }, indent=4, sort_keys=True))
         # print('request: ' + str(reference))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_json = calculate_pair(var1, var2, pop, web, genome_build, reference)
+            out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
             if 'error' in json.loads(out_json):
                 toggleLocked(token, 0)
                 return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try:
                 # unlock token then display api output
-                with open(tmp_dir + 'LDpair_'+reference+'.txt', "r") as fp:
-                    content = fp.read()
-                toggleLocked(token, 0)
-                end_time = time.time()
-                app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
-                return content
+                if json_out or len(json.loads(out_json)) > 1:
+                    toggleLocked(token, 0)
+                    end_time = time.time()
+                    app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
+                    return current_app.response_class(out_json, mimetype='application/json')
+                else:
+                    with open(tmp_dir + 'LDpair_' + reference + '.txt', "r") as fp:
+                        content = fp.read()
+                    toggleLocked(token, 0)
+                    end_time = time.time()
+                    app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
+                    return content
             except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)
@@ -1102,6 +1193,7 @@ def ldpair():
 
 # Web and API route for LDpop
 @app.route('/LDlinkRest/ldpop', methods=['GET'])
+@app.route('/LDlinkRest2/ldpop', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
 @requires_token
 def ldpop():
@@ -1186,6 +1278,7 @@ def ldpop():
 
 # Web and API route for LDproxy
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
+@app.route('/LDlinkRest2/ldproxy', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 @requires_token
 def ldproxy():
@@ -1279,6 +1372,7 @@ def ldproxy():
 
 # Web and API route for LDtrait
 @app.route('/LDlinkRest/ldtrait', methods=['POST'])
+@app.route('/LDlinkRest2/ldtrait', methods=['POST'])
 @app.route('/LDlinkRestWeb/ldtrait', methods=['POST'])
 @requires_token
 def ldtrait():
@@ -1416,6 +1510,7 @@ def ldtrait():
 
 # Web and API route for SNPchip
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
+@app.route('/LDlinkRest2/snpchip', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
 def snpchip():
@@ -1505,6 +1600,7 @@ def snpchip():
 
 # Web and API route for SNPclip
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
+@app.route('/LDlinkRest2/snpclip', methods=['POST'])
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
 def snpclip():
