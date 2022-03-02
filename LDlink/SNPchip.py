@@ -57,7 +57,7 @@ def convert_codeToPlatforms(platform_query, web):
     mongo_port = config['database']['mongo_port']
     platforms = []
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
     db = client["LDLink"]
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
@@ -107,7 +107,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
             snps.append(snp)
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
     db = client["LDLink"]
 
     def get_coords(db, rsid):

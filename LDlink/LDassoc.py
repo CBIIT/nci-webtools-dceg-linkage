@@ -21,7 +21,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as yml_file:
 		config = yaml.load(yml_file)
-	connect_external = config['database']['connect_external']
 	api_mongo_addr = config['database']['api_mongo_addr']
 	dbsnp_version = config['data']['dbsnp_version']
 	data_dir = config['data']['data_dir']
