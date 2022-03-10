@@ -14,6 +14,7 @@ aws_info = config['aws']
 connect_external = config['database']['connect_external']
 api_mongo_addr = config['database']['api_mongo_addr']
 mongo_username = config['database']['mongo_user_readonly']
+mongo_username_api = config['database']['mongo_user_api']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 email_account = config['api']['email_account']
@@ -100,7 +101,7 @@ def connectMongoDBReadOnly():
 
 def connectMongoDBWrite():
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
     return db
 

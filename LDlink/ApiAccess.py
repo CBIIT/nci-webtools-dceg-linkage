@@ -135,7 +135,7 @@ def getEmailRecord(email, env, api_mongo_addr):
     return emailRecord
 
 def insertUser(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBWrite()
     user = {
         "firstname": firstname,
         "lastname": lastname,
@@ -168,7 +168,7 @@ def blockUser(email, url_root):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBWrite()
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
     if update_operation is None:
@@ -182,7 +182,7 @@ def unblockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBWrite()
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
     if update_operation is None:
@@ -196,7 +196,6 @@ def setUserLock(email, lockValue):
         "message": "Email user (" + email + ")'s lock has been set to " + str(lockValue)
     }
     db = connectMongoDBWrite()
-    print(db)
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"locked": int(lockValue)}})
     if update_operation is None:
@@ -209,7 +208,7 @@ def setUserApi2Auth(email, authValue):
     out_json = {
         "message": "Email user (" + email + ")'s api2auth has been set to " + str(authValue)
     }
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBWrite()
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"api2auth": int(authValue)}})
     if update_operation is None:
@@ -227,7 +226,7 @@ def unlockAllUsers():
 
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBWrite()
     user = {
         "firstname": firstname,
         "lastname": lastname,
@@ -322,7 +321,7 @@ def toggleLocked(token, lock):
     else: 
         restrict_concurrency = True
     if restrict_concurrency:
-        db = connectMongoDBReadOnly()
+        db = connectMongoDBWrite()
         users = db.api_users
         record = users.find_one({"token": token})
 
@@ -468,7 +467,9 @@ def getStats(startdatetime, enddatetime, top):
     users = db.api_users
     log = db.api_log
     # get number of registered users in total
+    print(users)
     numUsers = users.count()
+    print(numUsers)
     # join api_log and api_users by foreign key to retrieve user info per api_log record
     pipeline = [
         { 
