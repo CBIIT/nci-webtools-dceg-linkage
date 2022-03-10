@@ -10,7 +10,7 @@ import botocore
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
@@ -18,16 +18,12 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    api_mongo_addr = config['database']['api_mongo_addr']
     population_samples_dir = config['data']['population_samples_dir']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
+ 
     export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
@@ -58,8 +54,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly()
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

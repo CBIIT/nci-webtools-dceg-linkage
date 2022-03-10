@@ -15,28 +15,18 @@ import operator
 import os
 import json
 import sys
-from LDcommon import genome_build_vars
+from LDcommon import genome_build_vars,connectMongoDBReadOnly
 
 
 def get_platform_request(web):
 
     try:
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        api_mongo_addr = config['database']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_readonly']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
-
-        # Connect to Mongo snp database
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/admin', mongo_port)
-       
+        db = connectMongoDBReadOnly()       
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
-    db = client["LDLink"]
     cursor = db.platforms.find(
         {"platform": {'$regex': '.*'}}).sort("platform", -1)
     platforms = {}
@@ -51,14 +41,10 @@ def convert_codeToPlatforms(platform_query, web):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     tmp_dir = config['data']['tmp_dir']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
+
     platforms = []
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly()
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
@@ -73,11 +59,8 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     tmp_dir = config['data']['tmp_dir']
-    api_mongo_addr = config['database']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
+
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -107,8 +90,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
             snps.append(snp)
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr+'/admin', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly()
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

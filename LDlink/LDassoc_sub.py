@@ -7,7 +7,7 @@ import botocore
 import subprocess
 import sys
 import yaml
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 
 snp = sys.argv[1]
 chr = sys.argv[2]
@@ -19,16 +19,11 @@ process = sys.argv[6]
 # Set data directories using config.yml
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']
 genotypes_dir = config['data']['genotypes_dir']
 # reg_dir = config['data']['reg_dir']
 aws_info = config['aws']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
 
 export_s3_keys = retrieveAWSCredentials()
 
@@ -110,8 +105,7 @@ def LD_calcs(hap, allele, allele_n):
         return [maf_q, maf_p, D_prime, r2, match]
 
 # Connect to Mongo snp database
-client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/admin', mongo_port)
-db = client["LDLink"]
+db = connectMongoDBReadOnly()
 
 def get_regDB(chr, pos):
     result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]["position"]: int(pos)})

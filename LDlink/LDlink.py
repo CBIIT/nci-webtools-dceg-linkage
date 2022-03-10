@@ -32,7 +32,7 @@ from LDhap import calculate_hap
 from LDassoc import calculate_assoc
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from LDcommon import genome_build_vars
+from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 from werkzeug.utils import secure_filename
 # from werkzeug.debug import DebuggedApplication
@@ -212,15 +212,7 @@ def requires_admin_token(f):
     def decorated_function(*args, **kwargs):
         #create connection to database, retrieve api_users to find the user with token
         #then check if this user has admin value as 1, if it is admin, then grand acess, if not refuse
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        api_mongo_addr = config['api']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_api']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
-    
-        client = MongoClient('mongodb://' + mongo_username+':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
-        db = client["LDLink"]
+        db = connectMongoDBReadOnly()
         users = db.api_users
            
         if 'token' not in request.args:

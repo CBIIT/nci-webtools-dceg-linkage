@@ -15,40 +15,26 @@ from multiprocessing.dummy import Pool
 import sys
 import numpy as np	
 from timeit import default_timer as timer
-from LDcommon import genome_build_vars, get_rsnum
+from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
 
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
     config = yaml.load(yml_file)	
-api_mongo_addr = config['database']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']
 population_samples_dir = config['data']['population_samples_dir']	
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
 num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldtrait_timestamp(web):
     try:
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        api_mongo_addr = config['database']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_readonly']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
-
-        # Connect to Mongo snp database
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/admin', mongo_port)
-        
+        db = connectMongoDBReadOnly()    
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
-    db = client["LDLink"]
     for document in db.gwas_catalog.find().sort("_id", -1).limit(1):
         object_id_datetime = document.get('_id').generation_time
     json_output = json.dumps(object_id_datetime, default=json_util.default, sort_keys=True, indent=2)
@@ -224,9 +210,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                 sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+api_mongo_addr+'/admin', mongo_port)
-  
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly() 
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():
         output["error"] = "GWAS Catalog database is currently being updated. Please check back later."
