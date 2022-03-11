@@ -19,7 +19,7 @@ import numpy as np
 import boto3
 import botocore
 from timeit import default_timer as timer
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDB
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
@@ -34,7 +34,7 @@ num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldexpress_tissues(web):
     try:
-       db = connectMongoDBReadOnly()
+       db = connectMongoDB(True)
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -202,7 +202,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             sanitized_query_snps.append([snp])
 
     # Connect to Mongo database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDB(True)
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."

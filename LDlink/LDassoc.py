@@ -12,7 +12,7 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly,connectMongoDB
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
@@ -65,7 +65,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
-			db = connectMongoDBReadOnly()
+			db = connectMongoDB(True)
 
 			def get_coords_var(db, rsid):
 				rsid = rsid.strip("rs")
@@ -185,7 +185,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				return None
 
 		# Connect to Mongo snp database
-		db = connectMongoDBReadOnly()
+		db = connectMongoDB(True)
 
 		# Find RS number in snp database
 		gene_coord = get_coords_gene(myargs.name, db)

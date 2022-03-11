@@ -6,7 +6,7 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 import requests
-from LDcommon import genome_build_vars,connectMongoDBReadOnly
+from LDcommon import genome_build_vars,connectMongoDBReadOnly,connectMongoDB
 
 web = sys.argv[1]
 request = sys.argv[2]
@@ -105,7 +105,7 @@ def getGTExTissueAPI(snp, tissue_ids):
 
 def get_tissues(web, windowSNPs, p_threshold, tissues):
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDB(True)
 
     gtexQueryRequestCount = 0
     gtexQueryReturnCount = 0

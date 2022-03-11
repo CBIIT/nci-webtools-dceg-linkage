@@ -7,7 +7,7 @@ import botocore
 import subprocess
 import sys
 import yaml
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,connectMongoDB
 
 snp = sys.argv[1]
 chr = sys.argv[2]
@@ -105,7 +105,7 @@ def LD_calcs(hap, allele, allele_n):
         return [maf_q, maf_p, D_prime, r2, match]
 
 # Connect to Mongo snp database
-db = connectMongoDBReadOnly()
+db = connectMongoDB(True)
 
 def get_regDB(chr, pos):
     result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]["position"]: int(pos)})
