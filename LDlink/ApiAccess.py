@@ -467,7 +467,7 @@ def getStats(startdatetime, enddatetime, top):
     users = db.api_users
     log = db.api_log
     # get number of registered users in total
-    numUsers = users.count_documents({})
+    numUsers = users.count()
     # join api_log and api_users by foreign key to retrieve user info per api_log record
     pipeline = [
         { 
