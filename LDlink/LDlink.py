@@ -214,7 +214,7 @@ def requires_admin_token(f):
         #then check if this user has admin value as 1, if it is admin, then grand acess, if not refuse
         with open('config.yml', 'r') as yml_file:
             config = yaml.load(yml_file)
-        api_mongo_addr = config['api']['api_mongo_addr']
+        api_mongo_addr = config['database']['api_mongo_addr']
         mongo_username = config['database']['mongo_user_api']
         mongo_password = config['database']['mongo_password']
         mongo_port = config['database']['mongo_port']
