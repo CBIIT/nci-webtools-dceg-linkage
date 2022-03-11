@@ -463,13 +463,11 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
 def getStats(startdatetime, enddatetime, top):
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBWrite()
     users = db.api_users
     log = db.api_log
     # get number of registered users in total
-    print(users)
-    numUsers = users.count()
-    print(numUsers)
+    numUsers = users.count_documents({})
     # join api_log and api_users by foreign key to retrieve user info per api_log record
     pipeline = [
         { 
