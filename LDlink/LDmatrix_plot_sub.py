@@ -54,7 +54,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

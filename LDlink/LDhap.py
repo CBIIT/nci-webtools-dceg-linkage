@@ -6,7 +6,7 @@ import operator
 from bson import json_util
 import subprocess
 import sys
-from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,connectMongoDB
+from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
@@ -58,7 +58,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    db = connectMongoDB(True)
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

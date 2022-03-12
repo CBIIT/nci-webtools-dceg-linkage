@@ -4,7 +4,7 @@ import dateutil.parser
 import yaml
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
-from LDcommon import connectMongoDBWrite
+from LDcommon import connectMongoDBReadOnly
 
 # get current date and time
 def getDatetime():
@@ -13,7 +13,7 @@ def getDatetime():
 # script to free token locks older than 15 minutes at some scheduled time
 # triggered from CRON job
 def main():
-    db = connectMongoDBWrite()
+    db = connectMongoDBReadOnly(False)
     users = db.api_users
     # current datetime
     present = getDatetime()

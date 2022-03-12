@@ -14,7 +14,7 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,connectMongoDB
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
@@ -48,7 +48,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             snp=myargsOrigin
 
             # Connect to Mongo snp database
-            db = connectMongoDB(True)
+            db = connectMongoDBReadOnly(True)
 
             def get_coords_var(db, rsid):
                 rsid = rsid.strip("rs")

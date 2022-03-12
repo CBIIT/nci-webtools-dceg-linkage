@@ -29,7 +29,7 @@ num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldtrait_timestamp(web):
     try:
-        db = connectMongoDBReadOnly()    
+        db = connectMongoDBReadOnly(True)    
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -210,7 +210,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                 sanitized_query_snps.append([snp])
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly() 
+    db = connectMongoDBReadOnly(True) 
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():
         output["error"] = "GWAS Catalog database is currently being updated. Please check back later."

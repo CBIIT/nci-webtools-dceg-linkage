@@ -59,7 +59,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
     
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

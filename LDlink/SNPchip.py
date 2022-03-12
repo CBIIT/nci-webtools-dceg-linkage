@@ -21,7 +21,7 @@ from LDcommon import genome_build_vars,connectMongoDBReadOnly
 def get_platform_request(web):
 
     try:
-        db = connectMongoDBReadOnly()       
+        db = connectMongoDBReadOnly(True)       
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -44,7 +44,7 @@ def convert_codeToPlatforms(platform_query, web):
 
     platforms = []
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
@@ -90,7 +90,7 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
             snps.append(snp)
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

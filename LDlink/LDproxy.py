@@ -82,7 +82,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         return("", "")
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(rsid):
         rsid = rsid.strip("rs")

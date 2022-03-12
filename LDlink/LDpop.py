@@ -48,7 +48,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_chrom_coords(db, rsid):
         rsid = rsid.strip("rs")

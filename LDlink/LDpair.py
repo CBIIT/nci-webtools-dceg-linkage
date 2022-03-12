@@ -73,7 +73,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

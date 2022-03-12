@@ -84,7 +84,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

@@ -90,7 +90,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly()
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
