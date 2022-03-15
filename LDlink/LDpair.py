@@ -342,7 +342,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             geno1[1] = vcf1_pos
 
         if geno2[1] != vcf2_pos:
-            output["warning"] = "VCF File does not match variant coordinates for SNP2."
+            output["warning"] = output["warning"]+ " VCF File does not match variant coordinates for SNP2."
             output_list.append(output)
             geno2[1] = vcf2_pos 
 
