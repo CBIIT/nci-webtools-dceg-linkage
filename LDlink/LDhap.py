@@ -11,6 +11,7 @@ from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, ret
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
+    print("###############################")
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     dbsnp_version = config['data']['dbsnp_version']
@@ -189,15 +190,19 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
+    # keep track of rs and snp postion after sort
+    rs_snp_pos = []
+    for i in snp_pos_int:
+        rs_snp_pos.append(snp_pos.index(str(i)))
+        
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
-
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-
+    print(tabix_coords)
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Define function to correct indel alleles
@@ -248,6 +253,16 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
+        #print(rs_nums)
+        #print(snp_pos)
+        # print(vcf)
+        # in line 145:rs_nums.append(snp_i[0])
+        # in line 146:snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
+        # rs_nums and sno_pos were added the geno in the same order
+        # the snp_pos contains the position we need to replace if geno[1] is mismatching
+        # g-h-1 will be the value as 0,1,2,... and will be the index to each snp_pos value
+        snp_pos_index = rs_snp_pos[g-h-1]
+        print(snp_pos_index )
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
@@ -255,7 +270,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            continue
+            geno[1] = snp_pos[snp_pos_index]
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
