@@ -237,6 +237,10 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
+     # keep track of rs and snp postion after sort
+    rs_snp_pos = []
+    for i in snp_pos_int:
+        rs_snp_pos.append(snp_pos.index(str(i)))
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
 
@@ -300,6 +304,9 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
+        # g-h-1 will be the value as 0,1,2,... and will be the index to each snp_pos value
+        snp_pos_index = rs_snp_pos[g-h-1]
+
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"] + ". Genomic position (" + geno[1] + ") in VCF file does not match dbSNP" + \
@@ -307,7 +314,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             else:
                 output["warning"] = "Genomic position (" + geno[1] + ") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            continue
+            geno[1] = snp_pos[snp_pos_index]
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
