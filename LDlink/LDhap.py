@@ -11,7 +11,6 @@ from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, ret
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
-    print("###############################")
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     dbsnp_version = config['data']['dbsnp_version']
@@ -194,7 +193,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     rs_snp_pos = []
     for i in snp_pos_int:
         rs_snp_pos.append(snp_pos.index(str(i)))
-        
+    
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
     # # Extract 1000 Genomes phased genotypes
@@ -202,7 +201,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-    print(tabix_coords)
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Define function to correct indel alleles
@@ -253,16 +251,16 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
-        #print(rs_nums)
-        #print(snp_pos)
         # print(vcf)
-        # in line 145:rs_nums.append(snp_i[0])
-        # in line 146:snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
-        # rs_nums and sno_pos were added the geno in the same order
-        # the snp_pos contains the position we need to replace if geno[1] is mismatching
+        # print(rs_nums)
+        # print(snp_pos)
+        # 
+        #
+        #
+        # rs_snp_pos will keep the original order of snp_pos befor sort
         # g-h-1 will be the value as 0,1,2,... and will be the index to each snp_pos value
         snp_pos_index = rs_snp_pos[g-h-1]
-        print(snp_pos_index )
+        
         if geno[1] not in snp_pos:
             if "warning" in output:
                 output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
