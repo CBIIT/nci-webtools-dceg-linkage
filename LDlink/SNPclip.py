@@ -332,7 +332,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            continue
+            geno[1] = snp_pos[g-h-1]
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
