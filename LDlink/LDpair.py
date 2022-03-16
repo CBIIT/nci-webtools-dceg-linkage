@@ -337,14 +337,14 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             snp2_a2, snp2_a2], "0": [snp2_a1, "."], "1": [snp2_a2, "."], "./.": [".", "."], ".": [".", "."]}
 
         if geno1[1] != vcf1_pos:
-            output["warning"] = "VCF File does not match variant coordinates for SNP1."
+            output["error"] = "VCF File does not match variant coordinates for SNP1."
             output_list.append(output)
-            geno1[1] = vcf1_pos
+            continue
 
         if geno2[1] != vcf2_pos:
-            output["warning"] = output["warning"]+ " VCF File does not match variant coordinates for SNP2."
+            output["error"] = "VCF File does not match variant coordinates for SNP2."
             output_list.append(output)
-            geno2[1] = vcf2_pos 
+            continue
 
         # Get headers
         tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
