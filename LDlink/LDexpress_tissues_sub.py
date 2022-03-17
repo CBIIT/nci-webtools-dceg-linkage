@@ -6,7 +6,7 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 import requests
-from LDcommon import genome_build_vars
+from LDcommon import genome_build_vars,connectMongoDBReadOnly
 
 web = sys.argv[1]
 request = sys.argv[2]
@@ -19,13 +19,8 @@ genome_build = sys.argv[6]
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
 env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
 tmp_dir = config['data']['tmp_dir']
 # reg_dir = config['data']['reg_dir']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
 
 windowSNPs = []
 
@@ -110,18 +105,7 @@ def getGTExTissueAPI(snp, tissue_ids):
 
 def get_tissues(web, windowSNPs, p_threshold, tissues):
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web == "True":
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(True)
 
     gtexQueryRequestCount = 0
     gtexQueryReturnCount = 0

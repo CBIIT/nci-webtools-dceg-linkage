@@ -19,54 +19,27 @@ import numpy as np
 import boto3
 import botocore
 from timeit import default_timer as timer
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
     config = yaml.load(yml_file)	
-env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
 dbsnp_version = config['data']['dbsnp_version']	
 population_samples_dir = config['data']['population_samples_dir']	
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']
 genotypes_dir = config['data']['genotypes_dir']
 aws_info = config['aws']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
 num_subprocesses = config['performance']['num_subprocesses']
 
 def get_ldexpress_tissues(web):
     try:
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        env = config['env']
-        connect_external = config['database']['connect_external']
-        api_mongo_addr = config['database']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_readonly']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
-
-        # Connect to Mongo database
-        if env == 'local' or connect_external:
-            mongo_host = api_mongo_addr
-        else: 
-            mongo_host = 'localhost'
-        if web:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            if env == 'local' or connect_external:
-                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-            else:
-                client = MongoClient('localhost', mongo_port)
+       db = connectMongoDBReadOnly(True)
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
-    db = client["LDLink"]
     if "gtex_tissues" in db.list_collection_names():
         documents = list(db.gtex_tissues.find())
         # print("documents", documents)
@@ -229,18 +202,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             sanitized_query_snps.append([snp])
 
     # Connect to Mongo database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(True)
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."
