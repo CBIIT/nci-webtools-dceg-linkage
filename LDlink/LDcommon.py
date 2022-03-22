@@ -96,7 +96,7 @@ def retrieveAWSCredentials():
 def connectMongoDBReadOnly(readonly):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
     if bool(readonly):
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/admin', mongo_port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     else:
         client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
