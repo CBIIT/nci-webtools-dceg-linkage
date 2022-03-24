@@ -11,8 +11,8 @@ import subprocess
 import sys
 import time
 import re
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
-
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,getPopulation,validsnp
+from LDcommon import replace_coord_rsid, get_coords
 # Create LDpair function
 
 def calculate_pair(snp_pairs, pop, web, genome_build, request):
@@ -37,90 +37,14 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     # Create JSON output
     output_list = []
 
-    snp_pair_limit = 10
+    validsnp(None,genome_build,None)
     
-    # Throw max SNP pairs error message
-    if len(snp_pairs) > snp_pair_limit:
-        error_out = [{
-            "error": "Maximum SNP pair list is " + str(snp_pair_limit) + " pairs. Your list contains " + str(len(snp_pairs)) + " pairs."
-        }]
-        return(json.dumps(error_out, sort_keys=True, indent=2))
-
-    # Validate genome build param
-    # print("genome_build " + genome_build)
-    if genome_build not in genome_build_vars['vars']:
-        error_out = [{
-            "error": "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        }]
-        return(json.dumps(error_out, sort_keys=True, indent=2))
-
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            error_out = [{
-                "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            }]
-            return(json.dumps(error_out, sort_keys=True, indent=2))
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
+   
+    pop_ids = getPopulation(pop)
 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
-
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp):
-        if snp[0:2] == "rs":
-            return snp
-        else:
-            snp_info_lst = get_rsnum(db, snp, genome_build)
-            print("snp_info_lst")
-            print(snp_info_lst)
-            if snp_info_lst != None:
-                if len(snp_info_lst) > 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    ref_variants = []
-                    for snp_info in snp_info_lst:
-                        if snp_info['id'] == snp_info['ref_id']:
-                            ref_variants.append(snp_info['id'])
-                    if len(ref_variants) > 1:
-                        var_id = "rs" + ref_variants[0]
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                        else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                        else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                    else:
-                        var_id = "rs" + ref_variants[0]
-                    return var_id
-                elif len(snp_info_lst) == 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    return var_id
-                else:
-                    return snp
-            else:
-                return snp
-        return snp
 
     if len(snp_pairs) < 1:
         output = {}
@@ -146,7 +70,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a valid SNP."
             output_list.append(output)
             continue
-        snp1 = replace_coord_rsid(db, snp1)
+        snp1 = replace_coord_rsid(db, snp1,genome_build)
         snp1_coord = get_coords(db, snp1)
         if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
             output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -158,7 +82,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a valid SNP."
             output_list.append(output)
             continue
-        snp2 = replace_coord_rsid(db, snp2)
+        snp2 = replace_coord_rsid(db, snp2,genome_build)
         snp2_coord = get_coords(db, snp2)
         if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
             output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
