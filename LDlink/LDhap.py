@@ -6,7 +6,8 @@ import operator
 from bson import json_util
 import subprocess
 import sys
-from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,getPopulation,validsnp,replace_coords_rsid_list
+from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
+from LDcommon import validsnp,replace_coords_rsid_list,get_coords
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
@@ -28,11 +29,26 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         return snps
         
     # Select desired ancestral populations
-    pop_ids = getPopulation(pop)
+    pops = pop.split("+")
+    pop_dirs = []
+    for pop_i in pops:
+        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
+        else:
+            error_out = [{
+                "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+            }]
+            return(json.dumps(error_out, sort_keys=True, indent=2))
+
+    get_pops = "cat " + " ".join(pop_dirs)
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+
+    ids = [i.strip() for i in pop_list]
+    pop_ids = list(set(ids))
 
     db = connectMongoDBReadOnly(True)
 
-    snps = replace_coords_rsid_list(db, snps,genome_build)
+    snps = replace_coords_rsid_list(db, snps,genome_build,output)
     
     # print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
     # Find RS numbers and genomic coords in snp database

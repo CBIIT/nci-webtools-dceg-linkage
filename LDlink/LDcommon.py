@@ -247,27 +247,6 @@ def validsnp(snplst,genome_build,snp_limits):
 
         return snps
     return 
-####
-def getPopulation(pop):
-    # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            error_out = [{
-                "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            }]
-            return(json.dumps(error_out, sort_keys=True, indent=2))
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-    return pop_ids
-
 
 def get_coords(db, rsid):
     rsid = rsid.strip("rs")
@@ -276,7 +255,7 @@ def get_coords(db, rsid):
     return query_results_sanitized
 
 # Replace input genomic coordinates with variant ids (rsids)
-def replace_coord_rsid(db, snp,genome_build):
+def replace_coord_rsid(db, snp,genome_build,output):
     if snp[0:2] == "rs":
         return snp
     else:
@@ -315,11 +294,11 @@ def replace_coord_rsid(db, snp,genome_build):
     return snp
 
 
-def replace_coords_rsid_list(db, snp_lst,genome_build):
+def replace_coords_rsid_list(db, snp_lst,genome_build,output):
     new_snp_lst = []
     for snp_raw_i in snp_lst:
         snp = snp_raw_i[0]
-        var_id = replace_coord_rsid(db, snp, genome_build)
+        var_id = replace_coord_rsid(db, snp, genome_build,output)
         if snp != var_id:
             new_snp_lst.append([var_id])
         else:

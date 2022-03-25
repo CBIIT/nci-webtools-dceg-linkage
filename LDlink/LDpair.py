@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import re
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,getPopulation,validsnp
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,validsnp
 from LDcommon import replace_coord_rsid, get_coords
 # Create LDpair function
 
@@ -36,12 +36,24 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     # Create JSON output
     output_list = []
-
     validsnp(None,genome_build,None)
-    
-    # Select desired ancestral populations
-   
-    pop_ids = getPopulation(pop)
+  # Select desired ancestral populations
+    pops = pop.split("+")
+    pop_dirs = []
+    for pop_i in pops:
+        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
+        else:
+            error_out = [{
+                "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+            }]
+            return(json.dumps(error_out, sort_keys=True, indent=2))
+
+    get_pops = "cat " + " ".join(pop_dirs)
+    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+
+    ids = [i.strip() for i in pop_list]
+    pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
@@ -70,7 +82,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a valid SNP."
             output_list.append(output)
             continue
-        snp1 = replace_coord_rsid(db, snp1,genome_build)
+        snp1 = replace_coord_rsid(db, snp1,genome_build,output)
         snp1_coord = get_coords(db, snp1)
         if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
             output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -82,7 +94,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a valid SNP."
             output_list.append(output)
             continue
-        snp2 = replace_coord_rsid(db, snp2,genome_build)
+        snp2 = replace_coord_rsid(db, snp2,genome_build,output)
         snp2_coord = get_coords(db, snp2)
         if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
             output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
