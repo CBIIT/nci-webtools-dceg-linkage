@@ -11,6 +11,7 @@ import subprocess
 import sys
 import time
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
+from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords
 
 # Create LDpop function
 def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
@@ -42,69 +43,22 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     output = {}
 
     # Validate genome build param
-    print("genome_build " + genome_build)
-    if genome_build not in genome_build_vars['vars']:
-        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
+    #if return value is string, then it is error message and need to return the message
+    snps = validsnp(None,genome_build,None)
+    if isinstance(snps, str):
+       return snps
+   
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
 
-    def get_chrom_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp):
-        if snp[0:2] == "rs":
-            return snp
-        else:
-            snp_info_lst = get_rsnum(db, snp, genome_build)
-            # print "snp_info_lst"
-            # print snp_info_lst
-            if snp_info_lst != None:
-                if len(snp_info_lst) > 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    ref_variants = []
-                    for snp_info in snp_info_lst:
-                        if snp_info['id'] == snp_info['ref_id']:
-                            ref_variants.append(snp_info['id'])
-                    if len(ref_variants) > 1:
-                        var_id = "rs" + ref_variants[0]
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                        else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                        else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                    else:
-                        var_id = "rs" + ref_variants[0]
-                    return var_id
-                elif len(snp_info_lst) == 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    return var_id
-                else:
-                    return snp
-            else:
-                return snp
-        return snp
-
-    snp1 = replace_coord_rsid(db, snp1)
-    snp2 = replace_coord_rsid(db, snp2)
+    snp1 = replace_coord_rsid(db, snp1,genome_build,output)
+    snp2 = replace_coord_rsid(db, snp2,genome_build,output)
 
     snp1_ldpair = snp1
     snp2_ldpair = snp2
     
-    snp1_coord = get_chrom_coords(db, snp1)
-    snp2_coord = get_chrom_coords(db, snp2)
+    snp1_coord = get_coords(db, snp1)
+    snp2_coord = get_coords(db, snp2)
 
     # Check if RS numbers are in snp database
     # SNP1

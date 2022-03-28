@@ -13,6 +13,7 @@ import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
+from LDcommon import validsnp,get_coords,get_coords_gene
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
@@ -40,13 +41,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	out_json = open(tmp_dir+'assoc'+request+".json","w")
 	output = {}
 
-	# Validate genome build param
-	if genome_build not in genome_build_vars['vars']:
-		output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-		json_output = json.dumps(output, sort_keys=True, indent=2)
-		print(json_output, file=out_json)
-		out_json.close()
-		return("", "")
+    # Validate genome build param
+	validsnp(None,genome_build,None)
 
 	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
@@ -67,13 +63,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			# Connect to Mongo snp database
 			db = connectMongoDBReadOnly(True)
 
-			def get_coords_var(db, rsid):
-				rsid = rsid.strip("rs")
-				query_results = db.dbsnp.find_one({"id": rsid})
-				query_results_sanitized = json.loads(json_util.dumps(query_results))
-				return query_results_sanitized
-
-			var_coord=get_coords_var(db, snp)
+			var_coord = get_coords(db, snp)
 
 			if var_coord==None:
 				output["error"] = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -172,17 +162,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			print(json_output, file=out_json)
 			out_json.close()
 			return("","")
-
-		def get_coords_gene(gene_raw, db):
-			gene=gene_raw.upper()
-			mongoResult = db.genes_name_coords.find_one({"name": gene})
-
-			#format mongo output
-			if mongoResult != None:
-				geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
-				return geneResult
-			else:
-				return None
 
 		# Connect to Mongo snp database
 		db = connectMongoDBReadOnly(True)

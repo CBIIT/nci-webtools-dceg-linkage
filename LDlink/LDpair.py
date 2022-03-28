@@ -36,7 +36,10 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     # Create JSON output
     output_list = []
-    validsnp(None,genome_build,None)
+    #if return value is string, then it is error message and need to return the message
+    snps = validsnp(None,genome_build,None)
+    if isinstance(snps, str):
+       return snps
   # Select desired ancestral populations
     pops = pop.split("+")
     pop_dirs = []

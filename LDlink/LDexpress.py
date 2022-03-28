@@ -20,6 +20,7 @@ import boto3
 import botocore
 from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import get_coords
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
@@ -125,11 +126,6 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
         
     return(geno, queryVariantWarnings)
 
-def get_coords(db, rsid):
-    rsid = rsid.strip("rs")
-    query_results = db.dbsnp.find_one({"id": rsid})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
 
 def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):

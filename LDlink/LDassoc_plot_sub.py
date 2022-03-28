@@ -14,7 +14,7 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
@@ -50,14 +50,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             # Connect to Mongo snp database
             db = connectMongoDBReadOnly(True)
 
-            def get_coords_var(db, rsid):
-                rsid = rsid.strip("rs")
-                query_results = db.dbsnp.find_one({"id": rsid})
-                query_results_sanitized = json.loads(json_util.dumps(query_results))
-                return query_results_sanitized
-
             # Find RS number in snp database
-            var_coord=get_coords_var(db, snp)
+            var_coord=get_coords(db, snp)
 
             if var_coord==None:
                 return None
@@ -123,17 +117,6 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     elif region=="gene":
         if myargsName=="None":
             return None
-
-        def get_coords_gene(gene_raw, db):
-            gene=gene_raw.upper()
-            mongoResult = db.genes_name_coords.find_one({"name": gene})
-
-            #format mongo output
-            if mongoResult != None:
-                geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
-                return geneResult
-            else:
-                return None
 
         # Find RS number in snp database
         gene_coord = get_coords_gene(myargsName, db)

@@ -232,10 +232,11 @@ def validsnp(snplst,genome_build,snp_limits):
     # if the input list is in a text file 
     if snplst:
         snps_raw = open(snplst).readlines()
-        if len(snps_raw) > snp_limits:
-            output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
-                str(len(snps_raw))+" entries."
-            return(json.dumps(output, sort_keys=True, indent=2))
+        if snp_limits:
+            if len(snps_raw) > snp_limits:
+                output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
+                    str(len(snps_raw))+" entries."
+                return(json.dumps(output, sort_keys=True, indent=2))
 
         # Remove duplicate RS numbers and cast to lower case
         snps = []
@@ -254,6 +255,17 @@ def get_coords(db, rsid):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
+def get_coords_gene(gene_raw, db):
+    gene=gene_raw.upper()
+    mongoResult = db.genes_name_coords.find_one({"name": gene})
+
+    #format mongo output
+    if mongoResult != None:
+        geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
+        return geneResult
+    else:
+        return None
+      
 # Replace input genomic coordinates with variant ids (rsids)
 def replace_coord_rsid(db, snp,genome_build,output):
     if snp[0:2] == "rs":
