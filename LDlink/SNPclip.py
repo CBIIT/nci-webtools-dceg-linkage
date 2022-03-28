@@ -27,7 +27,8 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     population_samples_dir = config['data']['population_samples_dir']
     data_dir = config['data']['data_dir']
@@ -95,14 +96,14 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or connect_external:
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)
@@ -331,7 +332,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            continue
+            geno[1] = snp_pos[g-h-1]
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]

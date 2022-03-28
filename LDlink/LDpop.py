@@ -26,7 +26,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['api']['api_mongo_addr']
+    connect_external = config['database']['connect_external']
+    api_mongo_addr = config['database']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     population_samples_dir = config['data']['population_samples_dir']
     data_dir = config['data']['data_dir']
@@ -53,14 +54,14 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Connect to Mongo snp database
-    if env == 'local':
+    if env == 'local' or connect_external:
         mongo_host = api_mongo_addr
     else: 
         mongo_host = 'localhost'
     if web:
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
     else:
-        if env == 'local':
+        if env == 'local' or connect_external:
             client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)
@@ -291,7 +292,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         geno1 = vcf1[0].strip().split()
         geno1[0] = geno1[0].lstrip('chr')
 
-    if geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]:
+    if (geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]) or (geno1[1] != snp1_coord[genome_build_vars[genome_build]['position']]):
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 ". Genomic position for query variant1 (" + snp1 + \
@@ -301,7 +302,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             output["warning"] = "Genomic position for query variant1 (" + snp1 + \
                 ") does not match RS number at 1000G position (chr" + \
                 geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
-        snp1 = geno1[2]
+        # snp1 = geno1[2]
 
     if "," in geno1[3] or "," in geno1[4]:
         output["error"] = snp1 + " is not a biallelic variant."
@@ -328,7 +329,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         geno2 = vcf2[0].strip().split()
         geno2[0] = geno2[0].lstrip('chr')
 
-    if geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]:
+    if (geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]) or (geno1[1] != snp1_coord[genome_build_vars[genome_build]['position']]):
         if "warning" in output:
             output["warning"] = output["warning"] + \
                 ". Genomic position for query variant2 (" + snp2 + \
@@ -338,7 +339,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             output["warning"] = "Genomic position for query variant2 (" + snp2 + \
                 ") does not match RS number at 1000G position (chr" + \
                 geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
-        snp2 = geno2[2]
+        # snp2 = geno2[2]
 
     if "," in geno2[3] or "," in geno2[4]:
         output["error"] = snp2 + " is not a biallelic variant."

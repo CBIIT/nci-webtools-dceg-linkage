@@ -1,4 +1,4 @@
-var ldlink_version = "Version 5.2";
+var ldlink_version = "Version 5.3";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -67,7 +67,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-5.2.0.html", function (data) {
+    $.get("news-5.3.0.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -1810,7 +1810,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-5.2.0.html');
+    $('#help-tab').load('help-5.3.0.html');
 }
 
 function calculate(e) {
@@ -3963,12 +3963,10 @@ function updateLDpair() {
     //console.log("LD Pair");
     //console.log('population');
     //console.dir(population);
-    var reference="ref" + Math.floor(Math.random() * (99999 - 10000 + 1))+ 10000;
     var ldpairInputs = {
         var1 : $('#ldpair-snp1').val(),
         var2 : $('#ldpair-snp2').val(),
         pop : population.join("+"),
-        reference : reference,
         genome_build: genomeBuild
     };
     //console.log("ldpairInputs");
@@ -3986,14 +3984,14 @@ function updateLDpair() {
     });
 
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
-            ko.mapping.fromJS(data, ldpairModel);
+        if (displayError(id, data[0]) == false) {
+            ko.mapping.fromJS([data[0]], ldpairModel);
             $('#' + id + '-results-container').show();
-            addLDpairHyperLinks(data);
+            addLDpairHyperLinks(data[0]);
         }
         $("#ldpair_results").text("Download Results");
         $('#ldpair_results').css("text-decoration", "underline");
-        $("#ldpair_results").attr("href", "tmp/LDpair_"+reference+".txt");
+        $("#ldpair_results").attr("href", "tmp/LDpair_" + data[0]['request'] + ".txt");
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
