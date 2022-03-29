@@ -11,7 +11,7 @@ from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import get_coords,replace_coord_rsid,validsnp
+from LDcommon import get_coords,replace_coords_rsid_list,validsnp
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
@@ -52,7 +52,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
   
-    snps = replace_coord_rsid(db, snps,None,None)
+    snps = replace_coords_rsid_list(db, snps,None,None)
 
     # Find RS numbers in snp database
     rs_nums = []
