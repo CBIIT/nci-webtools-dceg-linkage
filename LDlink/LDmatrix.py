@@ -43,8 +43,9 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     snps = validsnp(snplst,genome_build,snp_limit)
     #if return value is string, then it is error message and need to return the message
     if isinstance(snps, str):
-        return snps
-
+        print(snps, file=out_json)
+        out_json.close()
+        return("", "")
 
     # Select desired ancestral populations
     pops = pop.split("+")
