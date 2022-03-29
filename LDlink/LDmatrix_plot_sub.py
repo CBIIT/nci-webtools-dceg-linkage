@@ -52,7 +52,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
   
-    snps = replace_coords_rsid(db, snps,None)
+    snps = replace_coord_rsid(db, snps,None,None)
 
     # Find RS numbers in snp database
     rs_nums = []
