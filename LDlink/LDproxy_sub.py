@@ -150,9 +150,9 @@ vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 
 if len(vcf) > 1:
     for i in range(len(vcf)):
-        if vcf[i].strip().split()[2] == snp:
-            geno = vcf[i].strip().split()
-            geno[0] = geno[0].lstrip('chr')
+        # if vcf[i].strip().split()[2] == snp:
+        geno = vcf[i].strip().split()
+        geno[0] = geno[0].lstrip('chr')
 else:
     geno = vcf[0].strip().split()
     geno[0] = geno[0].lstrip('chr')

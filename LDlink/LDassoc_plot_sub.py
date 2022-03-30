@@ -344,10 +344,10 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         elif len(vcf)>1:
             geno=[]
             for i in range(len(vcf)):
-                if vcf[i].strip().split()[2]==snp:
-                    geno=vcf[i].strip().split()
-                    geno[0] = geno[0].lstrip('chr')
-            if geno==[]:
+                # if vcf[i].strip().split()[2] == snp:
+                geno = vcf[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')
+            if geno == []:
                 subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
                 subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
                 return None
