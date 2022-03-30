@@ -196,6 +196,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
+    print("tabix_coords", tabix_coords)
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
@@ -230,7 +231,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         h += 1
 
     head = vcf[h].strip().split()
-
+    # print("head", head)
     # Extract haplotypes
     index = []
     for i in range(9, len(head)):
@@ -248,7 +249,14 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     allele_lst = []
     pos_lst = []
 
+    # print("h", h)
+    print("h+1", h+1)
+    print("len(vcf)", len(vcf))
+    print("vcf", vcf)
+    # print("vcf[246]", vcf[246])
     for g in range(h+1, len(vcf)):
+        print("g", g)
+        print("vcf[g]", vcf[g])
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
         # print(vcf)
@@ -259,6 +267,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         #
         # rs_snp_pos will keep the original order of snp_pos befor sort
         # g-h-1 will be the value as 0,1,2,... and will be the index to each snp_pos value
+        print("rs_snp_pos", rs_snp_pos)
+        print("g-h-1", g-h-1)
         snp_pos_index = rs_snp_pos[g-h-1]
         
         if geno[1] not in snp_pos:

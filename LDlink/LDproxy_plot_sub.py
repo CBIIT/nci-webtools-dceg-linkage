@@ -156,9 +156,9 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     elif len(vcf) > 1:
         geno = []
         for i in range(len(vcf)):
-            if vcf[i].strip().split()[2] == snp:
-                geno = vcf[i].strip().split()
-                geno[0] = geno[0].lstrip('chr')
+            # if vcf[i].strip().split()[2] == snp:
+            geno = vcf[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')
         if geno == []:
             subprocess.call("rm " + tmp_dir + "pops_" +
                             request + ".txt", shell=True)
