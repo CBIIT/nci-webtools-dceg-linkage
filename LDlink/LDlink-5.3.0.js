@@ -3985,7 +3985,7 @@ function updateLDpair() {
 
     ajaxRequest.success(function(data) {
         if (displayError(id, data[0]) == false) {
-            ko.mapping.fromJS([data[0]], ldpairModel);
+            ko.mapping.fromJS(data[0], ldpairModel);
             $('#' + id + '-results-container').show();
             addLDpairHyperLinks(data[0]);
         }
