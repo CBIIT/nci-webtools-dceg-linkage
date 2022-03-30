@@ -231,11 +231,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         h += 1
 
     head = vcf[h].strip().split()
-<<<<<<< HEAD
   
-=======
-    # print("head", head)
->>>>>>> 6618580e71de2440c0ae06d4d98184825297485a
     # Extract haplotypes
     index = []
     for i in range(9, len(head)):
