@@ -253,8 +253,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     dup_vcf = []
     counter_dups = 0
     for g in range(h+1, len(vcf)):
-        print("g", g)
-        print("vcf[g]", vcf[g])
+        #print("g", g)
+        #print("vcf[g]", vcf[g])
         geno = vcf[g].strip().split()
         temp = geno[0]+geno[1]
         if temp not in unique_vcf:
