@@ -249,10 +249,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     allele_lst = []
     pos_lst = []
 
-
     unique_vcf = []
     dup_vcf = []
-
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
@@ -270,6 +268,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     output["warning"] = warningmsg
     
     counter_dups = 0
+    vcf_pos_no_dup = []
     for g in range(h+1, len(vcf)):
         geno = vcf[g - counter_dups].strip().split()
         geno[0] = geno[0].lstrip('chr')
@@ -277,28 +276,29 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         if temp in dup_vcf:
             counter_dups = counter_dups + 1
             vcf.pop(g - counter_dups)
-
+            if geno[1] not in vcf_pos_no_dup:
+                vcf_pos_no_dup.append(geno[1])
+        else:
+            vcf_pos_no_dup.append(geno[1])
+    #the vcf_pos_no_dup looks like ['31829647', '31872705', '31873085'] 
     if len(vcf[h+1:]) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         return(json.dumps(output, sort_keys=True, indent=2))
 
-
-    for g in range(h+1, len(vcf)): # 3 rows
+    for g in range(h+1, len(vcf)): # 2 rows
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
-        
+        #print(dup_pos.index(geno[1]))
         if geno[1] not in snp_pos:
             # counter_dups/2 will be the numbers of dups before this geno[1] in snp_pos, 
-            # g-h-1-counter_dups/2 will be the value as 0,1,2,... and will be the index to each snp_pos value  
-            snp_pos_index = rs_snp_pos[g-h-1]
+            # the index of geno[1] in dup_pos is the same as vcf before removing the dup 
+            snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
             if "warning" in output:
                 output["warning"] = output["warning"] + "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
-            print("snp_pos[snp_pos_index]", snp_pos[snp_pos_index])
-            print("snp_coords", snp_coords)
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             geno[1] = snp_pos[snp_pos_index]
 
