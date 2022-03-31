@@ -281,10 +281,15 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         else:
             vcf_pos_no_dup.append(geno[1])
     #the vcf_pos_no_dup looks like ['31829647', '31872705', '31873085'] 
+    #vcf_pos_no_dup.pop(0) 
     if len(vcf[h+1:]) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         return(json.dumps(output, sort_keys=True, indent=2))
-
+    #print("snp_pos:",snp_pos)
+    #print("rs_nums:",rs_nums)
+    #print("rs_snp_pos:",rs_snp_pos)
+    #print("dup_vcf:",dup_vcf)
+    #print("vcf_pos_no_dup:",vcf_pos_no_dup)
     for g in range(h+1, len(vcf)): # 2 rows
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
@@ -300,7 +305,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
-            geno[1] = snp_pos[snp_pos_index]
+            if len(vcf_pos_no_dup) == len(snp_pos):
+                geno[1] = snp_pos[snp_pos_index]
+            else:
+                continue
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
