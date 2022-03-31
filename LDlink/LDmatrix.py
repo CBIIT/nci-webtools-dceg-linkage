@@ -345,7 +345,10 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
-            geno[1] = snp_pos[snp_pos_index]
+            if len(vcf_pos_no_dup) == len(snp_pos):
+                geno[1] = snp_pos[snp_pos_index]
+            else:
+                continue
 
         if snp_pos.count(geno[1]) == 1:
                 rs_query = rs_nums[snp_pos.index(geno[1])]
