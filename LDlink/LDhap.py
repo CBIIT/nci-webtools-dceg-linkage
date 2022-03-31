@@ -308,7 +308,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[snp_pos_index]
             else:
-                continue
+                output["error"] = "One or more variants is missing from 1000G data. "
+                return(json.dumps(output, sort_keys=True, indent=2))
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]

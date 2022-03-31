@@ -233,10 +233,11 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
          # counter_dups/2 will be the numbers of dups before this geno[1] in snp_pos, 
          # g-h-1-counter_dups/2 will be the value as 0,1,2,... and will be the index to each snp_pos value  
             snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
+             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[snp_pos_index]
             else:
-                continue
+                return
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
