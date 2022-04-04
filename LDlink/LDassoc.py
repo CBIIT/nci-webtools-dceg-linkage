@@ -13,7 +13,7 @@ import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,get_coords_gene
+from LDcommon import validsnp,get_coords,get_coords_gene, get_population
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
@@ -351,31 +351,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		return("","")
 
 	# Select desired ancestral populations
-	pops=pop.split("+")
-	pop_dirs=[]
-	for pop_i in pops:
-		if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-			pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-		else:
-			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			return("","")
-
-	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
-	subprocess.call(get_pops, shell=True)
-
-
-	# Get population ids
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	ids=[]
-	for i in range(len(pop_list)):
-		ids.append(pop_list[i].strip())
-
-	pop_ids=list(set(ids))
-
-
+	pop_ids = get_population(pop,request,output)
+	if isinstance(pop_ids,str):
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print(json_output, file=out_json)
+		out_json.close()
+		return("","")
 	# Define LD origin coordinate
 	try:
 		org_coord
@@ -764,7 +745,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	duration=time.time() - start_time
 
 	statsistics={}
-	statsistics["individuals"] = str(len(pop_list))
+	statsistics["individuals"] = str(len(pop_ids))
 	statsistics["in_region"] = str(len(out_prox))
 	statsistics["runtime"] = str(duration)
 
@@ -1304,7 +1285,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 
 	# Print run time statistics
-	print("Number of Individuals: "+str(len(pop_list)))
+	print("Number of Individuals: "+str(len(pop_ids)))
 	print("SNPs in Region: "+str(len(out_prox)))
 	duration=round(time.time() - start_time,2)
 	print("Run time: "+str(duration)+" seconds\n")

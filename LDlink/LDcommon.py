@@ -9,7 +9,7 @@ from bson import json_util
 
 # retrieve config
 with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
+    config = yaml.safe_load(yml_file)
 aws_info = config['aws']
 connect_external = config['database']['connect_external']
 api_mongo_addr = config['database']['api_mongo_addr']
@@ -227,11 +227,15 @@ def validsnp(snplst,genome_build,snp_limits):
     if genome_build not in genome_build_vars['vars']:
         output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
         return(json.dumps(output, sort_keys=True, indent=2))
-
+    # print(snplst)
     # Open Inputted SNPs list file
     # if the input list is in a text file 
     if snplst:
-        snps_raw = open(snplst).readlines()
+         # for ldexpress, the snplst is array, not file path
+        try:
+            snps_raw = open(snplst).readlines()
+        except:
+            snps_raw = snplst.split("+")
         if snp_limits:
             if len(snps_raw) > snp_limits:
                 output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
@@ -316,3 +320,27 @@ def replace_coords_rsid_list(db, snp_lst,genome_build,output):
         else:
             new_snp_lst.append(snp_raw_i)
     return new_snp_lst
+
+##############################################
+### common function to retrieve population ###
+##############################################
+def get_population(pop, request,output):
+    # Select desired ancestral populations
+    pops = pop.split("+")
+    pop_dirs = []
+    for pop_i in pops:
+        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
+        else:
+            output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+            return(json.dumps(output, sort_keys=True, indent=2))
+
+    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
+    subprocess.call(get_pops, shell=True)
+
+    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
+    ids = [i.strip() for i in pop_list]
+    pop_ids = list(set(ids))
+
+    return pop_ids
+ 

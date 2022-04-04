@@ -16,10 +16,10 @@ import os
 import json
 import sys
 from LDcommon import genome_build_vars,connectMongoDBReadOnly,validsnp,replace_coords_rsid_list,get_coords
+from LDutilites import get_config
 
 
 def get_platform_request(web):
-
     try:
         db = connectMongoDBReadOnly(True)       
     except ConnectionFailure:
@@ -38,9 +38,8 @@ def get_platform_request(web):
 
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    tmp_dir = config['data']['tmp_dir']
+    param_list = get_config()
+    tmp_dir = param_list['tmp_dir']
 
     platforms = []
     # Connect to Mongo snp database
@@ -54,13 +53,10 @@ def convert_codeToPlatforms(platform_query, web):
 
 
 def calculate_chip(snplst, platform_query, web, request, genome_build):
-
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    tmp_dir = config['data']['tmp_dir']
-    dbsnp_version = config['data']['dbsnp_version']
-
+    param_list = get_config()
+    tmp_dir = param_list['tmp_dir']
+    dbsnp_version = param_list['dbsnp_version']
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -187,10 +183,9 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
 
 def createOutputFile(request, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    tmp_dir = config['data']['tmp_dir']
-
+    param_list = get_config()
+    tmp_dir = param_list['tmp_dir']
+ 
     details_file = open(tmp_dir+'details'+request+".txt", "w")
 
     with open(tmp_dir + "proxy"+request+".json") as out_json:

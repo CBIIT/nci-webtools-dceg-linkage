@@ -42,7 +42,7 @@ from pymongo import MongoClient
 
 # Ensure tmp directory exists
 with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
+    config = yaml.safe_load(yml_file)
 tmp_dir = config['data']['tmp_dir']
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)

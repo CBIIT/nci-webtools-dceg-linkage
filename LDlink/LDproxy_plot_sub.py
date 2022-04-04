@@ -39,7 +39,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
+        config = yaml.safe_load(yml_file)
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     genotypes_dir = config['data']['genotypes_dir']

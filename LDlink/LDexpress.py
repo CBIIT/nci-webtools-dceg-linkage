@@ -20,11 +20,11 @@ import boto3
 import botocore
 from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import get_coords
+from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
-    config = yaml.load(yml_file)	
+    config = yaml.safe_load(yml_file)	
 dbsnp_version = config['data']['dbsnp_version']	
 population_samples_dir = config['data']['population_samples_dir']	
 data_dir = config['data']['data_dir']
@@ -171,33 +171,18 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         os.makedirs(tmp_dir)
 
     errors_warnings = {}
-
-    # Validate genome build param
-    if genome_build not in genome_build_vars['vars']:
-        errors_warnings["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return("", "", "", "", "", errors_warnings)
+       # Parse SNPs list
+    sanitized_query_snps = validsnp(snplst,genome_build,max_list)
+    #if return value is string, then it is error message and need to return the message
+    if isinstance(sanitized_query_snps, str):
+        return("", "", "", "", "", sanitized_query_snps)
 
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
         errors_warnings["error"] = "Window value must be a number between 0 and 1,000,000."
         return("", "", "", "", "", errors_warnings)
 
-    # Parse SNPs list
-    snps_raw = snplst.split("+")
-    # Generate error if # of inputted SNPs exceeds limit
-    if len(snps_raw) > max_list:
-        errors_warnings["error"] = "Maximum SNP list is " + \
-            str(max_list)+" RS numbers. Your list contains " + \
-            str(len(snps_raw))+" entries."
-        return("", "", "", "", "", errors_warnings)
-    # Remove duplicate RS numbers
-    sanitized_query_snps = []
-    for snp_raw in snps_raw:
-        snp = snp_raw.strip()
-        if snp not in sanitized_query_snps:
-            sanitized_query_snps.append([snp])
-
-    # Connect to Mongo database
+     # Connect to Mongo database
     db = connectMongoDBReadOnly(True)
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp" not in db.list_collection_names():
@@ -205,81 +190,11 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         return("", "", "", "", "", errors_warnings)
 
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            errors_warnings["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            return("", "", "", "", "", errors_warnings)
+    pop_ids = get_population(pop,request,errors_warnings)
+    if isinstance(pop_ids, str):
+        return("", "", "", "", "", errors_warnings)
 
-    # get_pops = "cat " + " ".join(pop_dirs)
-    # proc = subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE)
-    # pop_list = [x.decode('utf-8') for x in proc.stdout.readlines()]
-
-    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
-    subprocess.call(get_pops, shell=True)
-
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-
-    # tissue_ids = tissue.split("+")
-    # print("tissue_ids", tissue_ids)
-
-    # Get rs number from genomic coordinates from dbsnp
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": str(chro), genome_build_vars[genome_build]['position']: str(pos)})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                new_snp_lst.append(snp_raw_i)
-            else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in errors_warnings:
-                                errors_warnings["warning"] = errors_warnings["warning"] + \
-                                    ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                errors_warnings["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in errors_warnings:
-                                errors_warnings["warning"] = errors_warnings["warning"] + \
-                                    ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                errors_warnings["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    sanitized_query_snps = replace_coords_rsid(db, sanitized_query_snps)
+    sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,errors_warnings)
     print("sanitized_query_snps", sanitized_query_snps)
 
     # Find genomic coords of query snps in dbsnp 

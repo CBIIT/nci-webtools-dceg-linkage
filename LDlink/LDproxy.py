@@ -17,7 +17,7 @@ import botocore
 from multiprocessing.dummy import Pool
 import math
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,replace_coord_rsid
+from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population
 
 def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):
@@ -45,7 +45,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
+        config = yaml.safe_load(yml_file)
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
@@ -99,29 +99,11 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         return("", "")
 
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "")
-
-    get_pops = "cat " + " ".join(pop_dirs) + " > " + \
-        tmp_dir + "pops_" + request + ".txt"
-    subprocess.call(get_pops, shell=True)
-
-    # Get population ids
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
-    ids = []
-    for i in range(len(pop_list)):
-        ids.append(pop_list[i].strip())
-
-    pop_ids = list(set(ids))
+    pop_ids = get_population(pop,request,output)
+    if isinstance(pop_ids,str):
+        print(pop_ids, file=out_json)
+        out_json.close()
+        return("","")
 
     # Extract query SNP phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (snp_coord['chromosome']))

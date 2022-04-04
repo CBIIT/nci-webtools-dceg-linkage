@@ -21,7 +21,7 @@ from LDcommon import validsnp, replace_coords_rsid_list,get_coords
 
 # Set data directories using config.yml	
 with open('config.yml', 'r') as yml_file:	
-    config = yaml.load(yml_file)	
+    config = yaml.safe_load(yml_file)	
 dbsnp_version = config['data']['dbsnp_version']	
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']

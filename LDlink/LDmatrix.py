@@ -11,7 +11,7 @@ import botocore
 import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene,connectMongoDBReadOnly
-from LDcommon import get_coords,replace_coords_rsid_list,validsnp
+from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
@@ -48,24 +48,12 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return("", "")
 
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "")
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-
+    pop_ids = get_population(pop,request,output)
+    if isinstance(pop_ids,str):
+        print(pop_ids, file=out_json)
+        out_json.close()
+        return("","")
+  
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
 

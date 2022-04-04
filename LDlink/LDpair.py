@@ -12,14 +12,14 @@ import sys
 import time
 import re
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,validsnp
-from LDcommon import replace_coord_rsid, get_coords
+from LDcommon import replace_coord_rsid, get_coords,get_population
 # Create LDpair function
 
 def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
+        config = yaml.safe_load(yml_file)
     env = config['env']
     dbsnp_version = config['data']['dbsnp_version']
     population_samples_dir = config['data']['population_samples_dir']
@@ -40,24 +40,12 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     snps = validsnp(None,genome_build,None)
     if isinstance(snps, str):
        return snps
-  # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            error_out = [{
-                "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            }]
-            return(json.dumps(error_out, sort_keys=True, indent=2))
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-
+    # Select desired ancestral populations
+    pop_ids = get_population(pop,request,{})
+    if isinstance(pop_ids, str):
+        error_out = json.loads(pop_ids)
+        return(json.dumps([error_out], sort_keys=True, indent=2))
+ 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
 
