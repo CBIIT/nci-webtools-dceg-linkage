@@ -374,11 +374,10 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            # throw an error in the event of missing query SNPs in 1000G data
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[g-h-1]
             else:
-                output["error"] = "One or more query variants were not found in 1000G VCF file. "
+                output["error"] = "One or more variants is missing from 1000G data."
                 json_output = json.dumps(output, sort_keys=True, indent=2)
                 print(json_output, file=out_json)
                 out_json.close()
