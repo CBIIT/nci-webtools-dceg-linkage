@@ -377,7 +377,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[g-h-1]
             else:
-                output["error"] = "One or more variants is missing from 1000G data."
+                output["error"] = "One or more query variants were not found in 1000G VCF file. "
                 json_output = json.dumps(output, sort_keys=True, indent=2)
                 print(json_output, file=out_json)
                 out_json.close()
