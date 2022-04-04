@@ -262,10 +262,11 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             if snp_pos.count(geno[1]) == 1:
                 rs_query = rs_nums[snp_pos.index(geno[1])]
                 warningmsg = "Variant " + rs_query + " is not biallelic, variant removed. " 
-                if "warning" in output and geno[1] not in output["warning"]:
-                    output["warning"] = output["warning"]+warningmsg
+                if "warning" in output:
+                    output["warning"] = output["warning"] + warningmsg
                 else:
                     output["warning"] = warningmsg
+
     
     counter_dups = 0
     vcf_pos_no_dup = []
@@ -280,16 +281,14 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 vcf_pos_no_dup.append(geno[1])
         else:
             vcf_pos_no_dup.append(geno[1])
+
+    
     #the vcf_pos_no_dup looks like ['31829647', '31872705', '31873085'] 
-    #vcf_pos_no_dup.pop(0) 
+
     if len(vcf[h+1:]) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         return(json.dumps(output, sort_keys=True, indent=2))
-    #print("snp_pos:",snp_pos)
-    #print("rs_nums:",rs_nums)
-    #print("rs_snp_pos:",rs_snp_pos)
-    #print("dup_vcf:",dup_vcf)
-    #print("vcf_pos_no_dup:",vcf_pos_no_dup)
+
     for g in range(h+1, len(vcf)): # 2 rows
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
@@ -308,7 +307,9 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[snp_pos_index]
             else:
-                continue
+                output["error"] = "One or more query variants were not found in 1000G VCF file. "
+                return(json.dumps(output, sort_keys=True, indent=2))
+                # continue
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]

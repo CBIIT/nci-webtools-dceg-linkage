@@ -314,8 +314,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             if snp_pos.count(geno[1]) == 1:
                 rs_query = rs_nums[snp_pos.index(geno[1])]
                 warningmsg = "Variant " + rs_query + " is not biallelic, variant removed. " 
-                if "warning" in output and geno[1] not in output["warning"]:
-                    output["warning"] = output["warning"]+warningmsg
+                if "warning" in output:
+                    output["warning"] = output["warning"] + warningmsg
                 else:
                     output["warning"] = warningmsg
     
