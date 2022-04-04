@@ -270,6 +270,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     
     counter_dups = 0
     vcf_pos_no_dup = []
+    # find if query SNPs yield duplicate results from 1000G data
     for g in range(h+1, len(vcf)):
         geno = vcf[g - counter_dups].strip().split()
         geno[0] = geno[0].lstrip('chr')
@@ -282,9 +283,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         else:
             vcf_pos_no_dup.append(geno[1])
 
-    
-    #the vcf_pos_no_dup looks like ['31829647', '31872705', '31873085'] 
-
+    # throw error if no data is returned from 1000G
     if len(vcf[h+1:]) == 0:
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         return(json.dumps(output, sort_keys=True, indent=2))
@@ -292,10 +291,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     for g in range(h+1, len(vcf)): # 2 rows
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
-        #print(dup_pos.index(geno[1]))
+        # if 1000G position does not match dbSNP position for variant, use dbSNP position
         if geno[1] not in snp_pos:
-            # counter_dups/2 will be the numbers of dups before this geno[1] in snp_pos, 
-            # the index of geno[1] in dup_pos is the same as vcf before removing the dup 
             snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
             if "warning" in output:
                 output["warning"] = output["warning"] + "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
@@ -303,13 +300,12 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
                     dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
-            # if 1000G position does not match dbSNP position for variant, use dbSNP position
+            # throw an error in the event of missing query SNPs in 1000G data
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[snp_pos_index]
             else:
                 output["error"] = "One or more query variants were not found in 1000G VCF file. "
                 return(json.dumps(output, sort_keys=True, indent=2))
-                # continue
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]

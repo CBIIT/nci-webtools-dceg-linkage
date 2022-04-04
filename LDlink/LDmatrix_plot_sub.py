@@ -229,14 +229,14 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
+        # if 1000G position does not match dbSNP position for variant, use dbSNP position
         if geno[1] not in snp_pos:
-         # counter_dups/2 will be the numbers of dups before this geno[1] in snp_pos, 
-         # g-h-1-counter_dups/2 will be the value as 0,1,2,... and will be the index to each snp_pos value  
             snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
+            # throw an error in the event of missing query SNPs in 1000G data
             if len(vcf_pos_no_dup) == len(snp_pos):
                 geno[1] = snp_pos[snp_pos_index]
             else:
-                continue
+                return
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
