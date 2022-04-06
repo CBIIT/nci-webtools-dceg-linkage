@@ -17,16 +17,15 @@ import numpy as np
 from timeit import default_timer as timer
 from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
 from LDcommon import validsnp, replace_coords_rsid_list,get_coords
-
+from LDutilites import get_config
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as yml_file:	
-    config = yaml.safe_load(yml_file)	
-dbsnp_version = config['data']['dbsnp_version']	
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-population_samples_dir = config['data']['population_samples_dir']	
-num_subprocesses = config['performance']['num_subprocesses']
+param_list = get_config()
+population_samples_dir = param_list['population_samples_dir']
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+num_subprocesses = param_list['num_subprocesses']
+dbsnp_version = param_list['dbsnp_version']
 
 def get_ldtrait_timestamp(web):
     try:

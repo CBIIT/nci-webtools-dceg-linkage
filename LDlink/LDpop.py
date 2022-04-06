@@ -12,6 +12,7 @@ import sys
 import time
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
 from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords
+from LDutilites import get_config
 
 # Create LDpop function
 def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
@@ -24,14 +25,13 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     snp2_input = snp2
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    dbsnp_version = config['data']['dbsnp_version']
-    population_samples_dir = config['data']['population_samples_dir']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
+    param_list = get_config()
+    dbsnp_version = param_list['dbsnp_version']
+    population_samples_dir = param_list['population_samples_dir']
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
 
     export_s3_keys = retrieveAWSCredentials()
 
@@ -190,18 +190,18 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
-    vcf_rs1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
+    vcf_filePath1 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
+    vcf_rs1 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath1)
 
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath1)
 
     rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir']) 
     vcf1 = [x.decode('utf-8') for x in subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
-    vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
-    vcf_rs2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
+    vcf_filePath2 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
+    vcf_rs2 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath2)
 
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath2)
 
     # need to add | grep -v -e END ???
     rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

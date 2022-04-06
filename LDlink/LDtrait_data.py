@@ -9,21 +9,18 @@ from pymongo.errors import ConnectionFailure
 import time
 from timeit import default_timer as timer
 import yaml
-
+from LDcommon import connectMongoDBReadOnly
+from LDutilites import get_config
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
-with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as yml_file:
-# with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
-ldtrait_src = config['data']['ldtrait_src']
-tmp_dir = config['data']['tmp_dir']
-mongo_username = config['database']['mongo_user_api']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
+param_list = get_config()
+tmp_dir = param_list['tmp_dir']
+aws_info = param_list['aws_info']
+ldtrait_src = param_list['ldtrait_src']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -47,11 +44,7 @@ def main():
     print(filename + " downloaded.")
 
     # Connect to Mongo snp database
-    if instance == "web":
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@localhost/LDLink', mongo_port)
-    else:
-        client = MongoClient('localhost')
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(True)
     dbsnp = db.dbsnp
 
     # delete old error SNPs file if there is one
