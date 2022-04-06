@@ -15,18 +15,18 @@ from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords
+from LDutilites import get_config
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
-    num_subprocesses = config['performance']['num_subprocesses']
+    param_list = get_config()
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
+    num_subprocesses = param_list['num_subprocesses']
 
     export_s3_keys = retrieveAWSCredentials()
 
@@ -246,10 +246,10 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             snp="chr"+var_p[0].split("-")[0]
 
             # Extract lowest P SNP phased genotypes
-            vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-            vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+            vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+            vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-            checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+            checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
             tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
             head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
@@ -296,10 +296,10 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             
 
         # Extract query SNP phased genotypes
-        vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-        vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+        vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+        vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-        checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+        checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
         tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
         head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()

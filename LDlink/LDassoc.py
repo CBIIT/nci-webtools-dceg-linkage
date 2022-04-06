@@ -14,28 +14,27 @@ from multiprocessing.dummy import Pool
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population
+from LDutilites import get_config
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	start_time=time.time()
 
 	# Set data directories using config.yml
-	with open('config.yml', 'r') as yml_file:
-		config = yaml.load(yml_file)
-	dbsnp_version = config['data']['dbsnp_version']
-	data_dir = config['data']['data_dir']
-	tmp_dir = config['data']['tmp_dir']
-	population_samples_dir = config['data']['population_samples_dir']
-	genotypes_dir = config['data']['genotypes_dir']
-	aws_info = config['aws']
-	num_subprocesses = config['performance']['num_subprocesses']
+	param_list = get_config()
+	dbsnp_version = param_list['dbsnp_version']
+	data_dir = param_list['data_dir']
+	tmp_dir = param_list['tmp_dir']
+	population_samples_dir = param_list['population_samples_dir']
+	genotypes_dir = param_list['genotypes_dir']
+	aws_info = param_list['aws_info']
+	num_subprocesses = param_list['num_subprocesses']
 
 	export_s3_keys = retrieveAWSCredentials()
 
 	# Ensure tmp directory exists
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
-
 
 	# Create JSON output
 	out_json = open(tmp_dir+'assoc'+request+".json","w")
@@ -365,10 +364,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp="chr"+var_p[0].split("-")[0]
 
 			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-			vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+			vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+			vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-			checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+			checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
@@ -440,10 +439,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-		vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+		vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+		vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-		checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+		checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 		head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()

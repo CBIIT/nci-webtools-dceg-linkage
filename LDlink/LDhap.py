@@ -8,18 +8,18 @@ import subprocess
 import sys
 from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
 from LDcommon import validsnp,replace_coords_rsid_list,get_coords,get_population
+from LDutilites import get_config
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    dbsnp_version = config['data']['dbsnp_version']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    population_samples_dir = config['data']['population_samples_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
+    param_list = get_config()
+    dbsnp_version = param_list['dbsnp_version']
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    population_samples_dir = param_list['population_samples_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
 
     # Create JSON output
     output = {}
@@ -111,10 +111,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     tabix_coords = " " + " ".join(snp_coord_str)
 
     # # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 

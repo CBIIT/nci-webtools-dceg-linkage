@@ -8,6 +8,7 @@ import subprocess
 import sys
 import yaml
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDutilites import get_config
 
 snp = sys.argv[1]
 chr = sys.argv[2]
@@ -17,13 +18,11 @@ genome_build = sys.argv[5]
 process = sys.argv[6]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-genotypes_dir = config['data']['genotypes_dir']
-# reg_dir = config['data']['reg_dir']
-aws_info = config['aws']
+param_list = get_config()
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+genotypes_dir = param_list['genotypes_dir']
+aws_info = param_list['aws_info']
 
 export_s3_keys = retrieveAWSCredentials()
 
@@ -36,10 +35,10 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 # Get VCF region
-vcf_filePath = "%s/%s%s/%s"  % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chr))
-vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+vcf_filePath = "%s/%s%s/%s"  % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chr))
+vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 coordinates = coords.replace("_", " ")
 

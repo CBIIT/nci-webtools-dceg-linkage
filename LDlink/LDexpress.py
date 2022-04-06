@@ -21,17 +21,18 @@ import botocore
 from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords
+from LDutilites import get_config
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as yml_file:	
-    config = yaml.safe_load(yml_file)	
-dbsnp_version = config['data']['dbsnp_version']	
-population_samples_dir = config['data']['population_samples_dir']	
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-genotypes_dir = config['data']['genotypes_dir']
-aws_info = config['aws']
-num_subprocesses = config['performance']['num_subprocesses']
+param_list = get_config()
+dbsnp_version = param_list['dbsnp_version']
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+population_samples_dir = param_list['population_samples_dir']
+genotypes_dir = param_list['genotypes_dir']
+aws_info = param_list['aws_info']
+num_subprocesses = param_list['num_subprocesses']
+
 
 def get_ldexpress_tissues(web):
     try:
@@ -56,13 +57,13 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
 
     export_s3_keys = retrieveAWSCredentials()
 
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
-    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
+    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
     queryVariantWarnings = []
     # Extract query SNP phased genotypes
 
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
     tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     # print("tabix_query_snp_h", tabix_query_snp_h)
