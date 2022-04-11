@@ -51,7 +51,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     if len(snp_pairs) < 1:
         output = {}
-        output["error"] = "Missing at least 1 SNP pair input."
+        output["error"] = "Missing at least 1 SNP pair input. " + str(output["warning"] if "warning" in output else "")
         output_list.append(output)
 
     for pair in snp_pairs:
@@ -59,7 +59,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         output["pair"] = pair
 
         if len(pair) < 2 or len(pair) > 2 or len(pair[0]) < 3 or len(pair[1]) < 3:
-            output["error"] = "Missing or additional SNPs in pair."
+            output["error"] = "Missing or additional SNPs in pair. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
@@ -70,43 +70,45 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         # Find RS numbers in snp database
         # SNP1
         if re.compile(r'rs\d+', re.IGNORECASE).match(snp1) is None and re.compile(r'chr\d+:\d+', re.IGNORECASE).match(snp1) is None and re.compile(r'chr[X|Y]:\d+', re.IGNORECASE).match(snp1) is None:
-            output["error"] = snp1 + " is not a valid SNP."
+            output["error"] = snp1 + " is not a valid SNP. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
         snp1 = replace_coord_rsid(db, snp1,genome_build,output)
         snp1_coord = get_coords(db, snp1)
         if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
-            output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
+            output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
         # SNP2
         if re.compile(r'rs\d+', re.IGNORECASE).match(snp2) is None and re.compile(r'chr\d+:\d+', re.IGNORECASE).match(snp2) is None and re.compile(r'chr[X|Y]:\d+', re.IGNORECASE).match(snp2) is None:
-            output["error"] = snp1 + " is not a valid SNP."
+            output["error"] = snp1 + " is not a valid SNP. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
         snp2 = replace_coord_rsid(db, snp2,genome_build,output)
         snp2_coord = get_coords(db, snp2)
         if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
-            output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
+            output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
         # Check if SNPs are on the same chromosome
         if snp1_coord['chromosome'] != snp2_coord['chromosome']:
-            output["warning"] = snp1 + " and " + \
-                snp2 + " are on different chromosomes"
+            if "warning" in output:
+                output["warning"] = output["warning"] + snp1 + " and " + snp2 + " are on different chromosomes. "
+            else:
+                output["warning"] = snp1 + " and " + snp2 + " are on different chromosomes. "
 
         # Check if input SNPs are on chromosome Y while genome build == grch38
         # SNP1
         if snp1_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
-            output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + ")"
+            output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp1_coord['id'] + " - chr" + snp1_coord['chromosome'] + ":" + snp1_coord[genome_build_vars[genome_build]['position']] + "). " + str(output["warning"] if "warning" in output else "")
             output_list.append(output) 
             continue
 
         # SNP2
         if snp2_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
-            output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + ")"
+            output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp2_coord['id'] + " - chr" + snp2_coord['chromosome'] + ":" + snp2_coord[genome_build_vars[genome_build]['position']] + "). " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
@@ -141,18 +143,19 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
         # SNP1
         if len(vcf1) == 0:
-            output["error"] = snp1 + " is not in 1000G reference panel."
+            output["error"] = snp1 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
         elif len(vcf1) > 1:
             geno1 = []
             for i in range(len(vcf1)):
-                if vcf1[i].strip().split()[2] == snp1:
-                    geno1 = vcf1[i].strip().split()
-                    geno1[0] = geno1[0].lstrip('chr')
+                geno1 = vcf1[i].strip().split()
+                geno1[0] = geno1[0].lstrip('chr')
+                if not (geno1[0] == snp1_coord['chromosome'] and geno1[1] == snp1_coord[genome_build_vars[genome_build]['position']]):
+                    geno1 = []
             if geno1 == []:
-                output["error"] = snp1 + " is not in 1000G reference panel."
+                output["error"] = snp1 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
                 output_list.append(output)
                 continue
 
@@ -163,17 +166,17 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         if geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]:
             if "warning" in output:
                 output["warning"] = output["warning"] + \
-                    ". Genomic position for query variant1 (" + snp1 + \
+                    "Genomic position for query variant1 (" + snp1 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+"). "
             else:
                 output["warning"] = "Genomic position for query variant1 (" + snp1 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
+                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+"). "
             snp1 = geno1[2]
 
         if "," in geno1[3] or "," in geno1[4]:
-            output["error"] = snp1 + " is not a biallelic variant."
+            output["error"] = snp1 + " is not a biallelic variant. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
@@ -195,18 +198,19 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
         # SNP2
         if len(vcf2) == 0:
-            output["error"] = snp2 + " is not in 1000G reference panel."
+            output["error"] = snp2 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
         elif len(vcf2) > 1:
             geno2 = []
             for i in range(len(vcf2)):
-                if vcf2[i].strip().split()[2] == snp2:
-                    geno2 = vcf2[i].strip().split()
-                    geno2[0] = geno2[0].lstrip('chr')
+                geno2 = vcf1[i].strip().split()
+                geno2[0] = geno2[0].lstrip('chr')
+                if not (geno2[0] == snp1_coord['chromosome'] and geno2[1] == snp2_coord[genome_build_vars[genome_build]['position']]):
+                    geno2 = []
             if geno2 == []:
-                output["error"] = snp2 + " is not in 1000G reference panel."
+                output["error"] = snp2 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
                 output_list.append(output)
                 continue
 
@@ -217,17 +221,17 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         if geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]:
             if "warning" in output:
                 output["warning"] = output["warning"] + \
-                    ". Genomic position for query variant2 (" + snp2 + \
+                    "Genomic position for query variant2 (" + snp2 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+"). "
             else:
                 output["warning"] = "Genomic position for query variant2 (" + snp2 + \
                     ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
+                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+"). "
             snp2 = geno2[2]
 
         if "," in geno2[3] or "," in geno2[4]:
-            output["error"] = snp2 + " is not a biallelic variant."
+            output["error"] = snp2 + " is not a biallelic variant. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
 
@@ -248,14 +252,20 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             snp2_a2, snp2_a2], "0": [snp2_a1, "."], "1": [snp2_a2, "."], "./.": [".", "."], ".": [".", "."]}
 
         if geno1[1] != vcf1_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP1."
+            if "warning" in output:
+                output["warning"] =  output["warning"] + "VCF File does not match variant coordinates for SNP1. "
+            else:
+                output["warning"] = "VCF File does not match variant coordinates for SNP1. "
             output_list.append(output)
-            continue
+            geno1[1] = vcf1_pos
 
         if geno2[1] != vcf2_pos:
-            output["error"] = "VCF File does not match variant coordinates for SNP2."
+            if "warning" in output:
+                output["warning"] = output["warning"] + "VCF File does not match variant coordinates for SNP2. "
+            else:
+                output["warning"] = "VCF File does not match variant coordinates for SNP2. "
             output_list.append(output)
-            continue
+            geno2[1] = vcf2_pos
 
         # Get headers
         tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

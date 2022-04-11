@@ -55,9 +55,9 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                         if snp_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
                             if "warning" in output:
                                 output["warning"] = output["warning"] + \
-                                    ". " + "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                    "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + "). "
                             else:
-                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + ")"
+                                output["warning"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + snp_coord['id'] + " = chr" + snp_coord['chromosome'] + ":" + snp_coord[genome_build_vars[genome_build]['position']] + "). "
                             warn.append(snp_i[0])
                         else:
                             rs_nums.append(snp_i[0])
@@ -74,12 +74,12 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     if warn != []:
         if "warning" in output:
             output["warning"] = output["warning"] + \
-                ". The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+                "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn) + ". "
         else:
-            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
+            output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn) + ". "
 
     if len(rs_nums) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + output["warning"]
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome
@@ -87,7 +87,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         if snp_coords[0][1] != snp_coords[i][1]:
             output["error"] = "Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr" + \
                 str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
-                "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
+                "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+". " + str(output["warning"] if "warning" in output else "")
             return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check max distance between SNPs
@@ -98,18 +98,23 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     if distance_max > 1000000:
         if "warning" in output:
             output["warning"] = output["warning"] + \
-                ". Switch rate errors become more common as distance between query variants increases (Query range = "+str(
-                    distance_max)+" bp)"
+                "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
+                    distance_max)+" bp). "
         else:
             output["warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
-                distance_max)+" bp)"
+                distance_max)+" bp). "
 
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
+    # keep track of rs and snp postion after sort
+    rs_snp_pos = []
+    for i in snp_pos_int:
+        rs_snp_pos.append(snp_pos.index(str(i)))
+    
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
-
+    print("tabix_coords", tabix_coords)
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
@@ -137,7 +142,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
 
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
-        output["error"] = "No query variants were found in 1000G VCF file"
+        output["error"] = "No query variants were found in 1000G VCF file. " + str(output["warning"] if "warning" in output else "")
         return(json.dumps(output, sort_keys=True, indent=2))
 
     h = 0
@@ -145,7 +150,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         h += 1
 
     head = vcf[h].strip().split()
-
+  
     # Extract haplotypes
     index = []
     for i in range(9, len(head)):
@@ -163,17 +168,63 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     allele_lst = []
     pos_lst = []
 
+    unique_vcf = []
+    dup_vcf = []
     for g in range(h+1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
+        temp = geno[0]+geno[1]
+        if temp not in unique_vcf:
+            unique_vcf.append(temp)
+        else:
+            dup_vcf.append(temp)
+            if snp_pos.count(geno[1]) == 1:
+                rs_query = rs_nums[snp_pos.index(geno[1])]
+                warningmsg = "Variant " + rs_query + " is not biallelic, variant removed. " 
+                if "warning" in output:
+                    output["warning"] = output["warning"] + warningmsg
+                else:
+                    output["warning"] = warningmsg
+
+    
+    counter_dups = 0
+    vcf_pos_no_dup = []
+    # find if query SNPs yield duplicate results from 1000G data
+    for g in range(h+1, len(vcf)):
+        geno = vcf[g - counter_dups].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+        temp = geno[0]+geno[1]
+        if temp in dup_vcf:
+            counter_dups = counter_dups + 1
+            vcf.pop(g - counter_dups)
+            if geno[1] not in vcf_pos_no_dup:
+                vcf_pos_no_dup.append(geno[1])
+        else:
+            vcf_pos_no_dup.append(geno[1])
+
+    # throw error if no data is returned from 1000G
+    if len(vcf[h+1:]) == 0:
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
+        return(json.dumps(output, sort_keys=True, indent=2))
+
+    for g in range(h+1, len(vcf)): # 2 rows
+        geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+        # if 1000G position does not match dbSNP position for variant, use dbSNP position
         if geno[1] not in snp_pos:
+            snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
             if "warning" in output:
-                output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
+                output["warning"] = output["warning"] + "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
             else:
                 output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            continue
+                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
+            # throw an error in the event of missing query SNPs in 1000G data
+            if len(vcf_pos_no_dup) == len(snp_pos):
+                geno[1] = snp_pos[snp_pos_index]
+            else:
+                output["error"] = "One or more query variants were not found in 1000G VCF file. "
+                return(json.dumps(output, sort_keys=True, indent=2))
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]
@@ -210,13 +261,13 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 if "rs" in rs_1000g:
                     if "warning" in output:
                         output["warning"] = output["warning"] + \
-                            ". Genomic position for query variant ("+rs_query + \
+                            "Genomic position for query variant ("+rs_query + \
                             ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+"). "
                     else:
                         output["warning"] = "Genomic position for query variant ("+rs_query + \
                             ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+                            geno[0]+":"+geno[1]+" = "+rs_1000g+"). "
 
                 indx = [i[0] for i in snps].index(rs_query)
                 # snps[indx][0]=geno[2]
@@ -275,6 +326,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 alleles = a2+"="+str(round(f1, 3))+", " + \
                     a1+"="+str(round(f0, 3))
             allele_lst.append(alleles)
+
 
     haps = {}
     for i in range(len(index)):

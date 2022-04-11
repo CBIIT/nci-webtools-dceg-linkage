@@ -122,6 +122,9 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # monoallelic
     vcf = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
 
+    print("vcf", vcf)
+    print("len(vcf)", len(vcf))
+
     if len(vcf) == 0:
         output["error"] = snp + " is not in 1000G reference panel."
         json_output = json.dumps(output, sort_keys=True, indent=2)
@@ -135,9 +138,9 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     elif len(vcf) > 1:
         geno = []
         for i in range(len(vcf)):
-            if vcf[i].strip().split()[2] == snp:
-                geno = vcf[i].strip().split()
-                geno[0] = geno[0].lstrip('chr')
+            # if vcf[i].strip().split()[2] == snp:
+            geno = vcf[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')
         if geno == []:
             output["error"] = snp + " is not in 1000G reference panel."
             json_output = json.dumps(output, sort_keys=True, indent=2)

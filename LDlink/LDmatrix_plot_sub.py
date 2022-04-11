@@ -73,6 +73,10 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
+     # keep track of rs and snp postion after sort
+    rs_snp_pos = []
+    for i in snp_pos_int:
+        rs_snp_pos.append(snp_pos.index(str(i)))
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
 
@@ -125,11 +129,44 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     allele_lst = []
     pos_lst = []
 
+    unique_vcf = []
+    dup_vcf = []
+    for g in range(h+1, len(vcf)):
+        geno = vcf[g].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+        temp = geno[0]+geno[1]
+        if temp not in unique_vcf:
+            unique_vcf.append(temp)
+        else:
+            dup_vcf.append(temp)
+            if snp_pos.count(geno[1]) == 1:
+                rs_query = rs_nums[snp_pos.index(geno[1])]
+                    
+    counter_dups = 0
+    vcf_pos_no_dup = []
+    for g in range(h+1, len(vcf)):
+        geno = vcf[g - counter_dups].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+        temp = geno[0]+geno[1]
+        if temp in dup_vcf:
+            counter_dups = counter_dups + 1
+            vcf.pop(g - counter_dups)
+            if geno[1] not in vcf_pos_no_dup:
+                vcf_pos_no_dup.append(geno[1])
+        else:
+            vcf_pos_no_dup.append(geno[1])
+    
     for g in range(h + 1, len(vcf)):
         geno = vcf[g].strip().split()
         geno[0] = geno[0].lstrip('chr')
+        # if 1000G position does not match dbSNP position for variant, use dbSNP position
         if geno[1] not in snp_pos:
-            continue
+            snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
+            # throw an error in the event of missing query SNPs in 1000G data
+            if len(vcf_pos_no_dup) == len(snp_pos):
+                geno[1] = snp_pos[snp_pos_index]
+            else:
+                return
 
         if snp_pos.count(geno[1]) == 1:
             rs_query = rs_nums[snp_pos.index(geno[1])]

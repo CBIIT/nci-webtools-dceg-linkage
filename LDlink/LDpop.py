@@ -217,9 +217,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     elif len(vcf1) > 1:
         geno1 = []
         for i in range(len(vcf1)):
-            if vcf1[i].strip().split()[2] == snp1:
-                geno1 = vcf1[i].strip().split()
-                geno1[0] = geno1[0].lstrip('chr')
+            # if vcf1[i].strip().split()[2] == snp1:
+            geno1 = vcf1[i].strip().split()
+            geno1[0] = geno1[0].lstrip('chr')
         if geno1 == []:
             output["error"] = snp1 + " is not in 1000G reference panel."
             if web:
@@ -254,9 +254,9 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     elif len(vcf2) > 1:
         geno2 = []
         for i in range(len(vcf2)):
-            if vcf2[i].strip().split()[2] == snp2:
-                geno2 = vcf2[i].strip().split()
-                geno2[0] = geno2[0].lstrip('chr')
+            # if vcf2[i].strip().split()[2] == snp2:
+            geno2 = vcf2[i].strip().split()
+            geno2[0] = geno2[0].lstrip('chr')
         if geno2 == []:
             output["error"] = snp2 + " is not in 1000G reference panel."
             if web:

@@ -85,9 +85,9 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     elif len(tabix_query_snp_out) > 1:
         geno = []
         for i in range(len(tabix_query_snp_out)):
-            if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
-                geno = tabix_query_snp_out[i].strip().split()
-                geno[0] = geno[0].lstrip('chr')
+            # if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
+            geno = tabix_query_snp_out[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')
         if geno == []:
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."

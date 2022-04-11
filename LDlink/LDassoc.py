@@ -467,10 +467,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		elif len(vcf)>1:
 			geno=[]
 			for i in range(len(vcf)):
-				if vcf[i].strip().split()[2]==snp:
-					geno = vcf[i].strip().split()
-					geno[0] = geno[0].lstrip('chr')
-			if geno==[]:
+				# if vcf[i].strip().split()[2] == snp:
+				geno = vcf[i].strip().split()
+				geno[0] = geno[0].lstrip('chr')
+			if geno == []:
 				output["error"]=snp+" is not in 1000G reference panel."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
