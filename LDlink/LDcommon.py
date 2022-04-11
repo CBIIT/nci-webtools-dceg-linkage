@@ -9,7 +9,7 @@ from bson import json_util
 
 # retrieve config
 with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
+    config = yaml.safe_load(yml_file)
 aws_info = config['aws']
 connect_external = config['database']['connect_external']
 api_mongo_addr = config['database']['api_mongo_addr']
@@ -18,6 +18,12 @@ mongo_username_api = config['database']['mongo_user_api']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
 email_account = config['api']['email_account']
+env = config['env']
+dbsnp_version = config['data']['dbsnp_version']
+population_samples_dir = config['data']['population_samples_dir']
+data_dir = config['data']['data_dir']
+tmp_dir = config['data']['tmp_dir']
+genotypes_dir = config['data']['genotypes_dir']
 
 genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
@@ -211,3 +217,130 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
 
 def getEmail():
     return  email_account
+
+#################################################################
+#define common functions to Validate & retrieve SNP coordinates #
+#################################################################
+def validsnp(snplst,genome_build,snp_limits):
+    # Validate genome build param
+    output = {}
+    if genome_build not in genome_build_vars['vars']:
+        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
+        return(json.dumps(output, sort_keys=True, indent=2))
+    # print(snplst)
+    # Open Inputted SNPs list file
+    # if the input list is in a text file 
+    if snplst:
+         # for ldexpress, the snplst is array, not file path
+        try:
+            snps_raw = open(snplst).readlines()
+        except:
+            snps_raw = snplst.split("+")
+        if snp_limits:
+            if len(snps_raw) > snp_limits:
+                output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
+                    str(len(snps_raw))+" entries."
+                return(json.dumps(output, sort_keys=True, indent=2))
+
+        # Remove duplicate RS numbers and cast to lower case
+        snps = []
+        for snp_raw in snps_raw:
+            if snp_raw:
+                snp = snp_raw.lower().strip().split()
+                if snp not in snps:
+                    snps.append(snp)
+
+        return snps
+    return 
+
+def get_coords(db, rsid):
+    rsid = rsid.strip("rs")
+    query_results = db.dbsnp.find_one({"id": rsid})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
+def get_coords_gene(gene_raw, db):
+    gene=gene_raw.upper()
+    mongoResult = db.genes_name_coords.find_one({"name": gene})
+
+    #format mongo output
+    if mongoResult != None:
+        geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
+        return geneResult
+    else:
+        return None
+      
+# Replace input genomic coordinates with variant ids (rsids)
+def replace_coord_rsid(db, snp,genome_build,output):
+    if snp[0:2] == "rs":
+        return snp
+    else:
+        snp_info_lst = get_rsnum(db, snp, genome_build)
+        if snp_info_lst != None:
+            if len(snp_info_lst) > 1:
+                var_id = "rs" + snp_info_lst[0]['id']
+                ref_variants = []
+                for snp_info in snp_info_lst:
+                    if snp_info['id'] == snp_info['ref_id']:
+                        ref_variants.append(snp_info['id'])
+                if len(ref_variants) > 1:
+                    var_id = "rs" + ref_variants[0]
+                    if "warning" in output:
+                        output["warning"] = output["warning"] + \
+                        ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                    else:
+                        output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
+                    var_id = "rs" + snp_info_lst[0]['id']
+                    if "warning" in output:
+                        output["warning"] = output["warning"] + \
+                        ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                    else:
+                        output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
+                else:
+                    var_id = "rs" + ref_variants[0]
+                return var_id
+            elif len(snp_info_lst) == 1:
+                var_id = "rs" + snp_info_lst[0]['id']
+                return var_id
+            else:
+                return snp
+        else:
+            return snp
+    return snp
+
+
+def replace_coords_rsid_list(db, snp_lst,genome_build,output):
+    new_snp_lst = []
+    for snp_raw_i in snp_lst:
+        snp = snp_raw_i[0]
+        var_id = replace_coord_rsid(db, snp, genome_build,output)
+        if snp != var_id:
+            new_snp_lst.append([var_id])
+        else:
+            new_snp_lst.append(snp_raw_i)
+    return new_snp_lst
+
+##############################################
+### common function to retrieve population ###
+##############################################
+def get_population(pop, request,output):
+    # Select desired ancestral populations
+    pops = pop.split("+")
+    pop_dirs = []
+    for pop_i in pops:
+        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
+            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
+        else:
+            output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
+            return(json.dumps(output, sort_keys=True, indent=2))
+
+    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
+    subprocess.call(get_pops, shell=True)
+
+    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
+    ids = [i.strip() for i in pop_list]
+    pop_ids = list(set(ids))
+
+    return pop_ids
+ 

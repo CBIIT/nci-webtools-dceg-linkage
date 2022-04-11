@@ -13,21 +13,22 @@ import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
+from LDcommon import validsnp,get_coords,get_coords_gene, get_population
+from LDutilites import get_config
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	start_time=time.time()
 
 	# Set data directories using config.yml
-	with open('config.yml', 'r') as yml_file:
-		config = yaml.load(yml_file)
-	dbsnp_version = config['data']['dbsnp_version']
-	data_dir = config['data']['data_dir']
-	tmp_dir = config['data']['tmp_dir']
-	population_samples_dir = config['data']['population_samples_dir']
-	genotypes_dir = config['data']['genotypes_dir']
-	aws_info = config['aws']
-	num_subprocesses = config['performance']['num_subprocesses']
+	param_list = get_config()
+	dbsnp_version = param_list['dbsnp_version']
+	data_dir = param_list['data_dir']
+	tmp_dir = param_list['tmp_dir']
+	population_samples_dir = param_list['population_samples_dir']
+	genotypes_dir = param_list['genotypes_dir']
+	aws_info = param_list['aws_info']
+	num_subprocesses = param_list['num_subprocesses']
 
 	export_s3_keys = retrieveAWSCredentials()
 
@@ -35,18 +36,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
 
-
 	# Create JSON output
 	out_json = open(tmp_dir+'assoc'+request+".json","w")
 	output = {}
 
-	# Validate genome build param
-	if genome_build not in genome_build_vars['vars']:
-		output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-		json_output = json.dumps(output, sort_keys=True, indent=2)
-		print(json_output, file=out_json)
-		out_json.close()
-		return("", "")
+    # Validate genome build param
+	validsnp(None,genome_build,None)
 
 	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
@@ -67,13 +62,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			# Connect to Mongo snp database
 			db = connectMongoDBReadOnly(True)
 
-			def get_coords_var(db, rsid):
-				rsid = rsid.strip("rs")
-				query_results = db.dbsnp.find_one({"id": rsid})
-				query_results_sanitized = json.loads(json_util.dumps(query_results))
-				return query_results_sanitized
-
-			var_coord=get_coords_var(db, snp)
+			var_coord = get_coords(db, snp)
 
 			if var_coord==None:
 				output["error"] = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -172,17 +161,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			print(json_output, file=out_json)
 			out_json.close()
 			return("","")
-
-		def get_coords_gene(gene_raw, db):
-			gene=gene_raw.upper()
-			mongoResult = db.genes_name_coords.find_one({"name": gene})
-
-			#format mongo output
-			if mongoResult != None:
-				geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
-				return geneResult
-			else:
-				return None
 
 		# Connect to Mongo snp database
 		db = connectMongoDBReadOnly(True)
@@ -372,31 +350,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		return("","")
 
 	# Select desired ancestral populations
-	pops=pop.split("+")
-	pop_dirs=[]
-	for pop_i in pops:
-		if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-			pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-		else:
-			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			return("","")
-
-	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
-	subprocess.call(get_pops, shell=True)
-
-
-	# Get population ids
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	ids=[]
-	for i in range(len(pop_list)):
-		ids.append(pop_list[i].strip())
-
-	pop_ids=list(set(ids))
-
-
+	pop_ids = get_population(pop,request,output)
+	if isinstance(pop_ids,str):
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print(json_output, file=out_json)
+		out_json.close()
+		return("","")
 	# Define LD origin coordinate
 	try:
 		org_coord
@@ -405,10 +364,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp="chr"+var_p[0].split("-")[0]
 
 			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-			vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+			vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+			vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-			checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+			checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
@@ -480,10 +439,10 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-		vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+		vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+		vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-		checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+		checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 		head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
@@ -785,7 +744,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	duration=time.time() - start_time
 
 	statsistics={}
-	statsistics["individuals"] = str(len(pop_list))
+	statsistics["individuals"] = str(len(pop_ids))
 	statsistics["in_region"] = str(len(out_prox))
 	statsistics["runtime"] = str(duration)
 
@@ -1325,7 +1284,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 
 	# Print run time statistics
-	print("Number of Individuals: "+str(len(pop_list)))
+	print("Number of Individuals: "+str(len(pop_ids)))
 	print("SNPs in Region: "+str(len(out_prox)))
 	duration=round(time.time() - start_time,2)
 	print("Run time: "+str(duration)+" seconds\n")

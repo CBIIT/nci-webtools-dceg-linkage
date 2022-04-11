@@ -7,6 +7,7 @@ import subprocess
 import sys
 import requests
 from LDcommon import genome_build_vars,connectMongoDBReadOnly
+from LDutilites import get_config
 
 web = sys.argv[1]
 request = sys.argv[2]
@@ -16,11 +17,9 @@ tissues = sys.argv[5]
 genome_build = sys.argv[6]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
-env = config['env']
-tmp_dir = config['data']['tmp_dir']
-# reg_dir = config['data']['reg_dir']
+param_list = get_config()
+env = param_list['env']
+tmp_dir = param_list['tmp_dir']
 
 windowSNPs = []
 

@@ -16,16 +16,16 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
-
+from LDcommon import validsnp, replace_coords_rsid_list,get_coords
+from LDutilites import get_config
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as yml_file:	
-    config = yaml.load(yml_file)	
-dbsnp_version = config['data']['dbsnp_version']	
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-population_samples_dir = config['data']['population_samples_dir']	
-num_subprocesses = config['performance']['num_subprocesses']
+param_list = get_config()
+population_samples_dir = param_list['population_samples_dir']
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+num_subprocesses = param_list['num_subprocesses']
+dbsnp_version = param_list['dbsnp_version']
 
 def get_ldtrait_timestamp(web):
     try:
@@ -175,13 +175,13 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     output = {}
 
     # Validate genome build param
-    if genome_build not in genome_build_vars['vars']:
-        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+    sanitized_query_snps=validsnp(snplst,genome_build,max_list)
+      #if return value is string, then it is error message and need to return the message
+    if isinstance(sanitized_query_snps, str):
+        print(sanitized_query_snps, file=out_json)
         out_json.close()
         return("", "", "")
-
+     
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
         output["error"] = "Window value must be a number between 0 and 1,000,000."
@@ -190,24 +190,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         out_json.close()
         return("", "", "")
 
-    # open snps file
-    with open(snplst, 'r') as fp:
-        snps_raw = fp.readlines()
-        # Generate error if # of inputted SNPs exceeds limit
-        if len(snps_raw) > max_list:
-            output["error"] = "Maximum SNP list is " + \
-            str(max_list)+" RS numbers. Your list contains " + \
-            str(len(snps_raw))+" entries."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
-        # Remove duplicate RS numbers
-        sanitized_query_snps = []
-        for snp_raw in snps_raw:
-            snp = snp_raw.strip()
-            if snp not in sanitized_query_snps:
-                sanitized_query_snps.append([snp])
+   
 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True) 
@@ -240,58 +223,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    # Get genomic coordinates from rs number from dbsnp
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                # print "reached 1", snp_raw_i
-                new_snp_lst.append(snp_raw_i)
-            else:
-                # print "reached 2", snp_raw_i
-                snp_info_lst = get_rsnum(db, snp_raw_i[0], genome_build)
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    sanitized_query_snps = replace_coords_rsid(db, sanitized_query_snps)
-
+    sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,output)
 
     # find genomic coords of query snps in dbsnp 
     # query_snp_details = []

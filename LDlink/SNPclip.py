@@ -12,7 +12,8 @@ import subprocess
 import sys
 import collections
 from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,connectMongoDBReadOnly
-
+from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
+from LDutilites import get_config
 ###########
 # SNPclip #
 ###########
@@ -20,18 +21,15 @@ from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData
 # Create SNPtip function
 
 def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, maf_threshold=0.01):
-
     max_list = 5000
-
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    dbsnp_version = config['data']['dbsnp_version']
-    population_samples_dir = config['data']['population_samples_dir']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
+    param_list = get_config()
+    dbsnp_version = param_list['dbsnp_version']
+    population_samples_dir = param_list['population_samples_dir']
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
    
     export_s3_keys = retrieveAWSCredentials()
 
@@ -43,105 +41,26 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     out_json = open(tmp_dir+"clip"+request+".json", "w")
     output = {}
 
-    # Validate genome build param
-    print("genome_build " + genome_build)
-    if genome_build not in genome_build_vars['vars']:
-        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+   # Validate genome build param
+    snps=validsnp(snplst,genome_build,max_list)
+      #if return value is string, then it is error message and need to return the message
+    if isinstance(snps, str):
+        print(snps, file=out_json)
         out_json.close()
         return("", "", "")
-
-    # Open SNP list file
-    snps_raw = open(snplst).readlines()
-    if len(snps_raw) > max_list:
-        output["error"] = "Maximum SNP list is " + \
-            str(max_list)+" RS numbers. Your list contains " + \
-            str(len(snps_raw))+" entries."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "", "")
-
-    # Remove duplicate RS numbers
-    snps = []
-    for snp_raw in snps_raw:
-        snp = snp_raw.strip().split()
-        if snp not in snps:
-            snps.append(snp)
 
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
+    pop_ids = get_population(pop,request,output)
+    if isinstance(pop_ids,str):
+        print("AAA")
+        print(pop_ids, file=out_json)
+        out_json.close()
+        return("","","")
 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
 
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                new_snp_lst.append(snp_raw_i)
-            else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0], genome_build)
-                print("snp_info_lst")
-                print(snp_info_lst)
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    snps = replace_coords_rsid(db, snps)
+    snps = replace_coords_rsid_list(db, snps,genome_build,output)
 
     # Find RS numbers in snp database
     details = collections.OrderedDict()
@@ -218,10 +137,10 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     tabix_coords = " "+" ".join(snp_coord_str)
 
     # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 

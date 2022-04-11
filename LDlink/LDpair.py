@@ -11,22 +11,22 @@ import subprocess
 import sys
 import time
 import re
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
-
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,validsnp
+from LDcommon import replace_coord_rsid, get_coords,get_population
+from LDutilites import get_config
 # Create LDpair function
 
 def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    dbsnp_version = config['data']['dbsnp_version']
-    population_samples_dir = config['data']['population_samples_dir']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
+    param_list = get_config()
+    env = param_list['env']
+    dbsnp_version = param_list['dbsnp_version']
+    population_samples_dir = param_list['population_samples_dir']
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
 
     export_s3_keys = retrieveAWSCredentials()
 
@@ -36,91 +36,18 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     # Create JSON output
     output_list = []
-
-    snp_pair_limit = 10
-    
-    # Throw max SNP pairs error message
-    if len(snp_pairs) > snp_pair_limit:
-        error_out = [{
-            "error": "Maximum SNP pair list is " + str(snp_pair_limit) + " pairs. Your list contains " + str(len(snp_pairs)) + " pairs."
-        }]
-        return(json.dumps(error_out, sort_keys=True, indent=2))
-
-    # Validate genome build param
-    # print("genome_build " + genome_build)
-    if genome_build not in genome_build_vars['vars']:
-        error_out = [{
-            "error": "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        }]
-        return(json.dumps(error_out, sort_keys=True, indent=2))
-
+    #if return value is string, then it is error message and need to return the message
+    snps = validsnp(None,genome_build,None)
+    if isinstance(snps, str):
+       return snps
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            error_out = [{
-                "error": pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            }]
-            return(json.dumps(error_out, sort_keys=True, indent=2))
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-
+    pop_ids = get_population(pop,request,{})
+    if isinstance(pop_ids, str):
+        error_out = json.loads(pop_ids)
+        return(json.dumps([error_out], sort_keys=True, indent=2))
+ 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
-
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp):
-        if snp[0:2] == "rs":
-            return snp
-        else:
-            snp_info_lst = get_rsnum(db, snp, genome_build)
-            print("snp_info_lst")
-            print(snp_info_lst)
-            if snp_info_lst != None:
-                if len(snp_info_lst) > 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    ref_variants = []
-                    for snp_info in snp_info_lst:
-                        if snp_info['id'] == snp_info['ref_id']:
-                            ref_variants.append(snp_info['id'])
-                    if len(ref_variants) > 1:
-                        var_id = "rs" + ref_variants[0]
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                        else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                            ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                        else:
-                            output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp
-                    else:
-                        var_id = "rs" + ref_variants[0]
-                    return var_id
-                elif len(snp_info_lst) == 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    return var_id
-                else:
-                    return snp
-            else:
-                return snp
-        return snp
 
     if len(snp_pairs) < 1:
         output = {}
@@ -146,7 +73,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a valid SNP."
             output_list.append(output)
             continue
-        snp1 = replace_coord_rsid(db, snp1)
+        snp1 = replace_coord_rsid(db, snp1,genome_build,output)
         snp1_coord = get_coords(db, snp1)
         if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
             output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -158,7 +85,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp1 + " is not a valid SNP."
             output_list.append(output)
             continue
-        snp2 = replace_coord_rsid(db, snp2)
+        snp2 = replace_coord_rsid(db, snp2,genome_build,output)
         snp2_coord = get_coords(db, snp2)
         if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
             output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -186,20 +113,20 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         # Extract 1000 Genomes phased genotypes
 
         # SNP1
-        vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
-        vcf_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
+        vcf_filePath1 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
+        vcf_file1 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath1)
 
-        checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1)
+        checkS3File(aws_info, aws_info['bucket'], vcf_filePath1)
 
         tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
             vcf_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
         vcf1_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
         # SNP2
-        vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
-        vcf_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
+        vcf_filePath2 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
+        vcf_file2 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath2)
 
-        checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2)
+        checkS3File(aws_info, aws_info['bucket'], vcf_filePath2)
 
         tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
             vcf_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
