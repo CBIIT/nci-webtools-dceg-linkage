@@ -18,5 +18,25 @@ def get_config():
     param_list['aws_info'] = config['aws']
     param_list['num_subprocesses'] = config['performance']['num_subprocesses']
    
+    return (param_list)
+
+def get_config_admin():
+    param_list = {}
+    with open('config.yml', 'r') as yml_file:
+        config = yaml.safe_load(yml_file)
+    
+    param_list['api_mongo_addr'] = config['database']['api_mongo_addr']
+    param_list['mongo_username'] = config['database']['mongo_user_readonly']
+    param_list['mongo_username_api'] = config['database']['mongo_user_api']
+    param_list['mongo_password'] = config['database']['mongo_password']
+    param_list['mongo_port'] = config['database']['mongo_port']
+    param_list['email_account'] = config['api']['email_account']
+        
+    param_list['require_token'] = config['api']['require_token']
+    param_list['token_expiration'] = config['api']['token_expiration']
+    param_list['token_expiration_days'] = config['api']['token_expiration_days']
+    param_list['log_dir'] = config['log']['log_dir']
+    param_list['log_filename'] = config['log']['filename']
+    param_list['log_level'] = config['log']['log_level']
 
     return (param_list)

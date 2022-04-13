@@ -9,6 +9,7 @@ import botocore
 import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import set_alleles
 from LDutilites import get_config
 
 web = sys.argv[1]
@@ -43,22 +44,6 @@ vcf_filePath = "%s/%s%s/%s"  % (aws_info['data_subfolder'], genotypes_dir, genom
 vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
 checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-# Define function to calculate LD metrics
-def set_alleles(a1, a2):
-    if len(a1) == 1 and len(a2) == 1:
-        a1_n = a1
-        a2_n = a2
-    elif len(a1) == 1 and len(a2) > 1:
-        a1_n = "-"
-        a2_n = a2[1:]
-    elif len(a1) > 1 and len(a2) == 1:
-        a1_n = a1[1:]
-        a2_n = "-"
-    elif len(a1) > 1 and len(a2) > 1:
-        a1_n = a1[1:]
-        a2_n = a2[1:]
-    return(a1_n, a2_n)
 
 def LD_calcs(hap, allele, allele_n):
     # Extract haplotypes

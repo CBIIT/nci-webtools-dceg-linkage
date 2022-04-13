@@ -39,11 +39,12 @@ from werkzeug.utils import secure_filename
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from pymongo import MongoClient
-
+from LDutilites import get_config,get_config_admin
+# retrieve config
+param_list = get_config()
 # Ensure tmp directory exists
-with open('config.yml', 'r') as yml_file:
-    config = yaml.safe_load(yml_file)
-tmp_dir = config['data']['tmp_dir']
+tmp_dir = param_list['tmp_dir']
+
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
 
@@ -55,10 +56,10 @@ app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = False
 # app.logger.disabled = True
 # app.logger.removeHandler(default_handler)
-
-log_dir = config['log']['log_dir']
-log_filename = config['log']['filename']
-log_level = config['log']['log_level']
+param_list_admin = get_config_admin()
+log_dir = param_list_admin['log_dir']
+log_filename = param_list_admin['log_filename']
+log_level = param_list_admin['log_level']
 
 # Add the log message handler to the logger
 handler = TimedRotatingFileHandler(os.path.join(log_dir + log_filename), when='H', interval=6)
@@ -161,19 +162,16 @@ def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Set data directories using config.yml
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        env = config['env']
-        connect_external = config['database']['connect_external']
-        if env == 'local' or connect_external:
+        env = param_list['env']
+        if env == 'local' :
             url_root = 'http://localhost:5000/'
         elif env == 'prod':
             url_root = 'https://ldlink.nci.nih.gov/'
         else:
             url_root = 'https://ldlink-' + env + '.nci.nih.gov/'
-        require_token = bool(config['api']['require_token'])
-        token_expiration = bool(config['api']['token_expiration'])
-        token_expiration_days = config['api']['token_expiration_days']
+        require_token = bool(param_list_admin['require_token'])
+        token_expiration = bool(param_list_admin['token_expiration'])
+        token_expiration_days = param_list_admin['token_expiration_days']
         if ("LDlinkRestWeb" not in request.full_path):
             # Web server access does not require token
             if require_token:
@@ -578,11 +576,9 @@ def upload():
 @app.route('/LDlinkRest2/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
     genome_build = request.args.get('genome_build', 'grch37')
-    ldassoc_example_dir = config['data']['ldassoc_example_dir']
-    data_dir = config['data']['data_dir']
+    ldassoc_example_dir = param_list['ldassoc_example_dir']
+    data_dir = param_list['data_dir']
     example_filepath = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
     example = {
         'filename': os.path.basename(example_filepath),
@@ -666,10 +662,8 @@ def ldtrait_timestamp():
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     start_time = time.time()
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    ldassoc_example_dir = config['data']['ldassoc_example_dir']
-    data_dir = config['data']['data_dir']
+    ldassoc_example_dir = param_list['ldassoc_example_dir']
+    data_dir = param_list['data_dir']
     myargs = argparse.Namespace()
     myargs.window = None
     filename = secure_filename(request.args.get('filename', False))

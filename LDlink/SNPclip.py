@@ -13,6 +13,7 @@ import sys
 import collections
 from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
+from LDcommon import set_alleles
 from LDutilites import get_config
 ###########
 # SNPclip #
@@ -161,22 +162,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
         return f0, f1, maf
 
-    # Define function to correct indel alleles
-    def set_alleles(a1, a2):
-        if len(a1) == 1 and len(a2) == 1:
-            a1_n = a1
-            a2_n = a2
-        elif len(a1) == 1 and len(a2) > 1:
-            a1_n = "-"
-            a2_n = a2[1:]
-        elif len(a1) > 1 and len(a2) == 1:
-            a1_n = a1[1:]
-            a2_n = "-"
-        elif len(a1) > 1 and len(a2) > 1:
-            a1_n = a1[1:]
-            a2_n = a2[1:]
-        return(a1_n, a2_n)
-
+  
     # Make R2 function
     def calc_r2(var1, var2):
         hap_vals = {"0|0-0|0": 0, "0|0-0|1": 0, "0|0-1|0": 0, "0|0-1|1": 0, "0|1-0|0": 0, "0|1-0|1": 0, "0|1-1|0": 0, "0|1-1|1": 0, "1|0-0|0": 0,

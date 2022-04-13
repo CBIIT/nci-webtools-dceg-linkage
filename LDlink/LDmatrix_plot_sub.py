@@ -12,6 +12,7 @@ from bson import json_util, ObjectId
 import subprocess
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
+from LDcommon import set_alleles
 from LDutilites import get_config
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
@@ -86,23 +87,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
-    # Define function to correct indel alleles
-    def set_alleles(a1, a2):
-        if len(a1) == 1 and len(a2) == 1:
-            a1_n = a1
-            a2_n = a2
-        elif len(a1) == 1 and len(a2) > 1:
-            a1_n = "-"
-            a2_n = a2[1:]
-        elif len(a1) > 1 and len(a2) == 1:
-            a1_n = a1[1:]
-            a2_n = "-"
-        elif len(a1) > 1 and len(a2) > 1:
-            a1_n = a1[1:]
-            a2_n = a2[1:]
-        return(a1_n, a2_n)
-
-    # Import SNP VCF files
+     # Import SNP VCF files
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
 
