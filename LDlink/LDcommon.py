@@ -365,9 +365,10 @@ def set_alleles(a1, a2):
 # get the genotype ###
 #################################################
 def get_query_variant(snp_coord, pop_ids, request, genome_build):
-
-    export_s3_keys = retrieveAWSCredentials()
-
+    
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
+    tabix_coords = " " + " ".join(snp_coord_str)
+    
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
@@ -384,6 +385,8 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     # print("tabix_query_snp", tabix_query_snp)
     subprocess.call(tabix_query_snp, shell=True)
     tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
+
+    #vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Validate error
     if len(tabix_query_snp_out) == 0:

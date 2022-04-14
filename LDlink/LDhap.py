@@ -123,7 +123,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
     vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-
+    print(vcf)
     # Make sure there are genotype data in VCF file
     if vcf[-1][0:6] == "#CHROM":
         output["error"] = "No query variants were found in 1000G VCF file. " + str(output["warning"] if "warning" in output else "")
