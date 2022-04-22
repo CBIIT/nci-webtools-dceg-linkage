@@ -99,10 +99,10 @@ def connectMongoDBReadOnly(web):
     else: 
         mongo_host = 'localhost'
     if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
     else:
         if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
         else:
             client = MongoClient('localhost', mongo_port)
     db = client["LDLink"]
@@ -110,11 +110,14 @@ def connectMongoDBReadOnly(web):
 
 def retrieveTabix1000GData(query_file, coords, query_dir):
     export_s3_keys = retrieveAWSCredentials()
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
         query_file, coords, query_dir)
     # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    return vcf
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    return vcf,h
 
 # Query genomic coordinates
 def get_rsnum(db, coord, genome_build):
@@ -214,3 +217,30 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
                 genome_build_vars[genome_build]['position']: recomb_obj[genome_build_vars[genome_build]['position']]
             }) + '\n')
     return recomb_results_sanitized
+
+def parse_vcf(vcf,snp_coords):
+    delimiter = "#"
+    snp_lists = str(','.join(vcf)).split(delimiter)
+    snp_dict = {}
+    missing_snp = []
+    missing_rs = []    
+    #print(vcf)
+    print(missing_snp)
+    for snp in snp_lists[1:]:
+        snp_tuple = snp.split(",")
+        snp_key = snp_tuple[0].split("-")[-1].strip()
+        vcf_list = []  
+        for v in snp_tuple[1:2]:#only choose the first one if dup
+            if len(v) > 0:
+                vcf_list.append(v)
+            else:
+                missing_snp.append(snp_key)
+        #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
+        snp_dict[snp_key] = vcf_list
+    for miss in missing_snp:
+        for snp_coord in snp_coords:
+            if miss == snp_coord[2]:
+                missing_rs.append(snp_coord[0])
+
+    #print(snp_dict)
+    return snp_dict," ".join(missing_rs)
