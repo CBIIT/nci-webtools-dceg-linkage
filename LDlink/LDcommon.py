@@ -48,7 +48,7 @@ genome_build_vars = {
     },
     "grch38_high_coverage": {
         "title": "GRCh38 High Coverage",
-        "title_hg": "hg38",
+        "title_hg": "hg38_HC",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
         "gene_begin": "begin_grch38",
