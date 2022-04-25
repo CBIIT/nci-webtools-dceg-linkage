@@ -258,12 +258,12 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
    
     # Make sure there are genotype data in VCF file
-    if vcf[-1][0:6] == "#CHROM":
-        output["error"] = "No query variants were found in 1000G VCF file"
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "")
+    #if vcf[-1][0:6] == "#CHROM":
+    #    output["error"] = "No query variants were found in 1000G VCF file"
+    #    json_output = json.dumps(output, sort_keys=True, indent=2)
+    #    print(json_output, file=out_json)
+    #    out_json.close()
+    #    return("", "")
 
     head = vcf[h].strip().split()
 
@@ -279,20 +279,21 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     hap2 = [[]]
     for i in range(len(index) - 1):
         hap2.append([])
+   
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
 
-   # throw error if no data is returned from 1000G
-    if len(vcf[h+1:]) == 0:
+    # all lists does not contain data which is returned from 1000G
+    if len(missing_snp.split()) == len(snp_pos):
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
         return("", "")
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
-  
-    if len(missing_snp) > 0:
+    if len(missing_snp) > 0 :
         output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
  
+
     rsnum_lst = []
     allele_lst = []
     pos_lst = []

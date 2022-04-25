@@ -307,18 +307,20 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
     snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
   
-    if len(missing_snp) > 0:
-        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
-    
-    rsnum_lst = []
-
-    # throw error if no data is returned from 1000G
-    if len(vcf[h+1:]) == 0:
+   # throw error if no data is returned from 1000G
+    if len(missing_snp.split()) == len(snp_pos):
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
         return("", "", "")
+        
+    if len(missing_snp) > 0:
+        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+    
+    rsnum_lst = []
+
+   
 
     for s_key in snp_dict:
         # parse snp_key such as chr7:pos_rs4

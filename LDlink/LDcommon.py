@@ -241,9 +241,9 @@ def parse_vcf(vcf,snp_coords):
                 geno = v.strip().split()
                 if geno[1] == snp_key:
                     match_v = v
-        
-        vcf_list.append(match_v)
-        snp_found_list.append(snp_key)   
+        if len(match_v) > 0:
+            vcf_list.append(match_v)
+            snp_found_list.append(snp_key)   
                 
         #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
         #create snp_key as chr7:pos_rs4
@@ -256,5 +256,4 @@ def parse_vcf(vcf,snp_coords):
             s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
             snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
     del snp_dict
-    
     return snp_rs_dict," ".join(missing_rs)
