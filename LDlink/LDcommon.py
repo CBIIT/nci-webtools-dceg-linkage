@@ -220,27 +220,34 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
 
 def parse_vcf(vcf,snp_coords):
     delimiter = "#"
-    snp_lists = str(','.join(vcf)).split(delimiter)
+    snp_lists = str('**'.join(vcf)).split(delimiter)
     snp_dict = {}
+    snp_rs_dict = {}
     missing_snp = []
     missing_rs = []    
+    snp_found_list = [] 
     #print(vcf)
-    print(missing_snp)
+    #print(snp_lists)
+
     for snp in snp_lists[1:]:
-        snp_tuple = snp.split(",")
+        snp_tuple = snp.split("**")
         snp_key = snp_tuple[0].split("-")[-1].strip()
-        vcf_list = []  
+        vcf_list = [] 
+        #print(snp_tuple)
         for v in snp_tuple[1:2]:#only choose the first one if dup
             if len(v) > 0:
                 vcf_list.append(v)
-            else:
-                missing_snp.append(snp_key)
+                snp_found_list.append(snp_key)
         #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
+        #create snp_key as chr7:pos_rs4
         snp_dict[snp_key] = vcf_list
-    for miss in missing_snp:
-        for snp_coord in snp_coords:
-            if miss == snp_coord[2]:
-                missing_rs.append(snp_coord[0])
-
-    #print(snp_dict)
-    return snp_dict," ".join(missing_rs)
+    
+    for snp_coord in snp_coords:
+        if snp_coord[-1] not in snp_found_list:
+            missing_rs.append(snp_coord[0])
+        else:
+            s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
+            snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
+    del snp_dict
+    
+    return snp_rs_dict," ".join(missing_rs)

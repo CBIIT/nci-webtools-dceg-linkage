@@ -196,7 +196,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
-    print("tabix_coords", tabix_coords)
+    #print("tabix_coords", tabix_coords)
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
@@ -245,15 +245,20 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         return(json.dumps(output, sort_keys=True, indent=2))
     # parse vcf
     snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
-    print(missing_snp)
+  
     if len(missing_snp) > 0:
-        output["warning"] = str(missing_snp) + " were missing from 1000G data. "
+        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+    
     rsnum_lst = []
     allele_lst = []
     pos_lst = []
     
-    for snp_key in snp_dict:
-        geno_list = snp_dict[snp_key] 
+    for s_key in snp_dict:
+        # parse snp_key such as chr7:pos_rs4
+        snp_keys = s_key.split("_")
+        snp_key = snp_keys[0].split(':')[1]
+        rs_input = snp_keys[1]
+        geno_list = snp_dict[s_key] 
         g = -1
         for geno in geno_list:
             g = g+1
@@ -262,8 +267,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if geno[1] != snp_key:
                 mismatch_msg = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant " +\
-                        rs_nums[snp_pos.index(snp_key)] + ". "
+                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant(" +\
+                        rs_input + "). "
                 if "warning" in output:
                     output["warning"] = output["warning"] + mismatch_msg
                 else:
@@ -272,7 +277,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 geno[1] = snp_key
             #print(geno[1])
             if snp_pos.count(geno[1]) == 1:
-                rs_query = rs_nums[snp_pos.index(geno[1])]
+                rs_query = rs_input
             else:
                 pos_index = []
                 for p in range(len(snp_pos)):
@@ -320,6 +325,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 a1, a2 = set_alleles(geno[3], geno[4])
                 count0 = 0
                 count1 = 0
+                #print(geno)
                 for i in range(len(index)):
                     if geno[index[i]] == "0|0":
                         hap1[i].append(a1)
