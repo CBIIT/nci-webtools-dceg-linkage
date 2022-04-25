@@ -234,10 +234,17 @@ def parse_vcf(vcf,snp_coords):
         snp_key = snp_tuple[0].split("-")[-1].strip()
         vcf_list = [] 
         #print(snp_tuple)
-        for v in snp_tuple[1:2]:#only choose the first one if dup
+        match_v = ''
+        for v in snp_tuple[1:]:#choose the matched one for dup; if no matched, choose first
             if len(v) > 0:
-                vcf_list.append(v)
-                snp_found_list.append(snp_key)
+                match_v = v
+                geno = v.strip().split()
+                if geno[1] == snp_key:
+                    match_v = v
+        
+        vcf_list.append(match_v)
+        snp_found_list.append(snp_key)   
+                
         #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
         #create snp_key as chr7:pos_rs4
         snp_dict[snp_key] = vcf_list
