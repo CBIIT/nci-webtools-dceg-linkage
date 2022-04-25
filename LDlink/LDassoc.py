@@ -75,7 +75,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				mongo_host = api_mongo_addr
 			else: 
 				mongo_host = 'localhost'
-			client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/LDLink', mongo_port)
+			client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
 			db = client["LDLink"]
 			
 			def get_coords_var(db, rsid):
