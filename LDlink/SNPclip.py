@@ -15,6 +15,8 @@ from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
+from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,parse_vcf,connectMongoDBReadOnly
+
 ###########
 # SNPclip #
 ###########
@@ -143,7 +145,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
-    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Make MAF function
     def calc_maf(genos):
@@ -196,10 +198,6 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
     # Import SNP VCF file
     hap_dict = {}
-    h = 0
-    while vcf[h][0:2] == "##":
-        h += 1
-
     head = vcf[h].strip().split()
 
     # Extract population specific haplotypes
@@ -208,149 +206,125 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         if head[i] in pop_ids:
             pop_index.append(i)
 
-    rsnum_lst = []
-
-    unique_vcf = []
-    dup_vcf = []
-    for g in range(h+1, len(vcf)):
-        geno = vcf[g].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-        temp = geno[0]+geno[1]
-        if temp not in unique_vcf:
-            unique_vcf.append(temp)
-        else:
-            dup_vcf.append(temp)
-            if snp_pos.count(geno[1]) == 1:
-                rs_query = rs_nums[snp_pos.index(geno[1])]
-                warningmsg = "Variant " + rs_query + " is not biallelic, variant removed. " 
-                if "warning" in output and geno[1] not in output["warning"]:
-                    output["warning"] = output["warning"]+warningmsg
-                else:
-                    output["warning"] = warningmsg
-    
-    counter_dups = 0
-    vcf_pos_no_dup = []
-    # find if query SNPs yield duplicate results from 1000G data
-    for g in range(h+1, len(vcf)):
-        geno = vcf[g - counter_dups].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-        temp = geno[0]+geno[1]
-        if temp in dup_vcf:
-            counter_dups = counter_dups + 1
-            vcf.pop(g - counter_dups)
-            if geno[1] not in vcf_pos_no_dup:
-                vcf_pos_no_dup.append(geno[1])
-        else:
-            vcf_pos_no_dup.append(geno[1])
-
-    # throw error if no data is returned from 1000G
-    if len(vcf[h+1:]) == 0:
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+  
+   # throw error if no data is returned from 1000G
+    if len(missing_snp.split()) == len(snp_pos):
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
         return("", "", "")
+        
+    if len(missing_snp) > 0:
+        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+    
+    rsnum_lst = []
 
-    for g in range(h+1, len(vcf)):
-        geno = vcf[g].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-        # if 1000G position does not match dbSNP position for variant, use dbSNP position
-        if geno[1] not in snp_pos:
-            if "warning" in output:
-                output["warning"] = output["warning"]+". Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
+   
+
+    for s_key in snp_dict:
+        # parse snp_key such as chr7:pos_rs4
+        snp_keys = s_key.split("_")
+        snp_key = snp_keys[0].split(':')[1]
+        rs_input = snp_keys[1]
+        geno_list = snp_dict[s_key] 
+        g = -1
+        for geno in geno_list:
+            g = g+1
+            geno = geno.strip().split()
+            geno[0] = geno[0].lstrip('chr')
+            # if 1000G position does not match dbSNP position for variant, use dbSNP position
+            if geno[1] != snp_key:
+                mismatch_msg = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
+                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant(" + \
+                        rs_input + "). "
+                if "warning" in output:
+                    output["warning"] = output["warning"]+". "+ mismatch_msg
+                else:
+                    output["warning"] = mismatch_msg
+                geno[1] = snp_key    
+
+            if snp_pos.count(geno[1]) == 1:
+                rs_query = rs_input
+
             else:
-                output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
-                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant"
-            if len(vcf_pos_no_dup) == len(snp_pos):
-                geno[1] = snp_pos[g-h-1]
-            else:
-                output["error"] = "One or more query variants were not found in 1000G VCF file. "
-                json_output = json.dumps(output, sort_keys=True, indent=2)
-                print(json_output, file=out_json)
-                out_json.close()
-                return("", "", "")        
+                pos_index = []
+                for p in range(len(snp_pos)):
+                    if snp_pos[p] == geno[1]:
+                        pos_index.append(p)
+                for p in pos_index:
+                    if rs_nums[p] not in rsnum_lst:
+                        rs_query = rs_nums[p]
+                        break
 
-        if snp_pos.count(geno[1]) == 1:
-            rs_query = rs_nums[snp_pos.index(geno[1])]
-
-        else:
-            pos_index = []
-            for p in range(len(snp_pos)):
-                if snp_pos[p] == geno[1]:
-                    pos_index.append(p)
-            for p in pos_index:
-                if rs_nums[p] not in rsnum_lst:
-                    rs_query = rs_nums[p]
-                    break
-
-        if rs_query in rsnum_lst:
-            continue
-
-        rs_1000g = geno[2]
-
-        if rs_query == rs_1000g:
-            rsnum = rs_1000g
-        else:
-            count = -2
-            found = "false"
-            while count <= 2 and count+g < len(vcf):
-                geno_next = vcf[g+count].strip().split()
-                geno_next[0] = geno_next[0].lstrip('chr')
-                if len(geno_next) >= 3 and rs_query == geno_next[2]:
-                    found = "true"
-                    break
-                count += 1
-
-            if found == "false":
-                if "rs" in rs_1000g:
-                    if "warning" in output:
-                        output["warning"] = output["warning"] + \
-                            ". Genomic position for query variant ("+rs_query + \
-                            ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
-                    else:
-                        output["warning"] = "Genomic position for query variant ("+rs_query + \
-                            ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+" = "+rs_1000g+")"
-
-                indx = [i[0] for i in snps].index(rs_query)
-                # snps[indx][0]=geno[2]
-                # rsnum=geno[2]
-                snps[indx][0] = rs_query
-                rsnum = rs_query
-                # try:
-                # 	indx=[i[0] for i in snps].index(rs_query)
-                # 	snps[indx][0]=geno[2]
-                # 	rsnum=geno[2]
-                # except ValueError:
-                # 	print("List does not contain value:")
-                # 	print "#####"
-                # 	print "variable rs_query " + rs_query
-                # 	print "variable snps " + str(snps)
-                # 	print "#####"
-            else:
+            if rs_query in rsnum_lst:
                 continue
 
-        details[rsnum] = ["chr"+geno[0]+":"+geno[1]]
+            rs_1000g = geno[2]
 
-        if "," not in geno[3] and "," not in geno[4]:
-            temp_genos = []
-            for i in range(len(pop_index)):
-                temp_genos.append(geno[pop_index[i]])
-            f0, f1, maf = calc_maf(temp_genos)
-            a0, a1 = set_alleles(geno[3], geno[4])
-            details[rsnum].append(
-                a0+"="+str(round(f0, 3))+", "+a1+"="+str(round(f1, 3)))
-            if maf_threshold <= maf:
-                hap_dict[rsnum] = [temp_genos]
-                rsnum_lst.append(rsnum)
+            if rs_query == rs_1000g:
+                rsnum = rs_1000g
             else:
+                count = -2
+                found = "false"
+                while count <= 2 and count+g < len(vcf):
+                    geno_next = vcf[g+count].strip().split()
+                    geno_next[0] = geno_next[0].lstrip('chr')
+                    if len(geno_next) >= 3 and rs_query == geno_next[2]:
+                        found = "true"
+                        break
+                    count += 1
+
+                if found == "false":
+                    if "rs" in rs_1000g:
+                        if "warning" in output:
+                            output["warning"] = output["warning"] + \
+                                ". Genomic position for query variant ("+rs_query + \
+                                ") does not match RS number at 1000G position (chr" + \
+                                geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+                        else:
+                            output["warning"] = "Genomic position for query variant ("+rs_query + \
+                                ") does not match RS number at 1000G position (chr" + \
+                                geno[0]+":"+geno[1]+" = "+rs_1000g+")"
+
+                    indx = [i[0] for i in snps].index(rs_query)
+                    # snps[indx][0]=geno[2]
+                    # rsnum=geno[2]
+                    snps[indx][0] = rs_query
+                    rsnum = rs_query
+                    # try:
+                    # 	indx=[i[0] for i in snps].index(rs_query)
+                    # 	snps[indx][0]=geno[2]
+                    # 	rsnum=geno[2]
+                    # except ValueError:
+                    # 	print("List does not contain value:")
+                    # 	print "#####"
+                    # 	print "variable rs_query " + rs_query
+                    # 	print "variable snps " + str(snps)
+                    # 	print "#####"
+                else:
+                    continue
+
+            details[rsnum] = ["chr"+geno[0]+":"+geno[1]]
+
+            if "," not in geno[3] and "," not in geno[4]:
+                temp_genos = []
+                for i in range(len(pop_index)):
+                    temp_genos.append(geno[pop_index[i]])
+                f0, f1, maf = calc_maf(temp_genos)
+                a0, a1 = set_alleles(geno[3], geno[4])
                 details[rsnum].append(
-                    "Variant MAF is "+str(round(maf, 4))+", variant removed.")
-        else:
-            details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
-            details[rsnum].append("Variant is not biallelic, variant removed.")
+                    a0+"="+str(round(f0, 3))+", "+a1+"="+str(round(f1, 3)))
+                if maf_threshold <= maf:
+                    hap_dict[rsnum] = [temp_genos]
+                    rsnum_lst.append(rsnum)
+                else:
+                    details[rsnum].append(
+                        "Variant MAF is "+str(round(maf, 4))+", variant removed.")
+            else:
+                details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
+                details[rsnum].append("Variant is not biallelic, variant removed.")
 
     for i in rs_nums:
         if i not in rsnum_lst:
