@@ -291,7 +291,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return("", "")
 
     if len(missing_snp) > 0 :
-        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
  
 
     rsnum_lst = []
@@ -600,7 +600,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
         # Generate error if less than two SNPs
         if len(x) < 2:
-            output["error"] = "Less than two variants to plot."
+            output["error"] = "Less than two variants to plot. " + str(output["warning"] if "warning" in output else "")
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print(json_output, file=out_json)
             out_json.close()

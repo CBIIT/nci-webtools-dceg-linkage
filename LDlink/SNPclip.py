@@ -316,7 +316,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         return("", "", "")
         
     if len(missing_snp) > 0:
-        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
     
     rsnum_lst = []
 

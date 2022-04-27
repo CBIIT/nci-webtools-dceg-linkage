@@ -247,7 +247,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         return(json.dumps(output, sort_keys=True, indent=2))
         
     if len(missing_snp) > 0:
-        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
     
     rsnum_lst = []
     allele_lst = []
