@@ -164,7 +164,6 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
         return f0, f1, maf
 
-  
     # Make R2 function
     def calc_r2(var1, var2):
         hap_vals = {"0|0-0|0": 0, "0|0-0|1": 0, "0|0-1|0": 0, "0|0-1|1": 0, "0|1-0|0": 0, "0|1-0|1": 0, "0|1-1|0": 0, "0|1-1|1": 0, "1|0-0|0": 0,
@@ -221,8 +220,6 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     
     rsnum_lst = []
 
-   
-
     for s_key in snp_dict:
         # parse snp_key such as chr7:pos_rs4
         snp_keys = s_key.split("_")
@@ -240,7 +237,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                         dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant(" + \
                         rs_input + "). "
                 if "warning" in output:
-                    output["warning"] = output["warning"]+". "+ mismatch_msg
+                    output["warning"] = output["warning"]+ mismatch_msg
                 else:
                     output["warning"] = mismatch_msg
                 geno[1] = snp_key    

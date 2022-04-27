@@ -147,23 +147,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
   
-    # Define function to correct indel alleles
-    def set_alleles(a1, a2):
-        if len(a1) == 1 and len(a2) == 1:
-            a1_n = a1
-            a2_n = a2
-        elif len(a1) == 1 and len(a2) > 1:
-            a1_n = "-"
-            a2_n = a2[1:]
-        elif len(a1) > 1 and len(a2) == 1:
-            a1_n = a1[1:]
-            a2_n = "-"
-        elif len(a1) > 1 and len(a2) > 1:
-            a1_n = a1[1:]
-            a2_n = a2[1:]
-        return(a1_n, a2_n)
-
-   
     # Make sure there are genotype data in VCF file
     #if vcf[-1][0:6] == "#CHROM":
     #    output["error"] = "No query variants were found in 1000G VCF file"
