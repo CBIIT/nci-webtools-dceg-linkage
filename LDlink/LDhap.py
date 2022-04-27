@@ -267,8 +267,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if geno[1] != snp_key:
                 mismatch_msg = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant(" +\
-                        rs_input + "). "
+                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant " +\
+                        rs_input + ". "
                 if "warning" in output:
                     output["warning"] = output["warning"] + mismatch_msg
                 else:
