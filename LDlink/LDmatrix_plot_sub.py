@@ -229,27 +229,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
             rs_1000g = geno[2]
 
-            if rs_query == rs_1000g:
-                rsnum = rs_1000g
-            else:
-                count = -2
-                found = "false"
-                while count <= 2 and count + g < len(vcf):
-                    geno_next = vcf[g + count].strip().split()
-                    geno_next[0] = geno_next[0].lstrip('chr')
-                    if len(geno_next) >= 3 and rs_query == geno_next[2]:
-                        found = "true"
-                        break
-                    count += 1
-
-                if found == "false":
-                    indx = [i[0] for i in snps].index(rs_query)
-                    # snps[indx][0] = geno[2]
-                    # rsnum = geno[2]
-                    snps[indx][0] = rs_query
-                    rsnum = rs_query
-                else:
-                    continue
+            rsnum = rs_query
 
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])

@@ -290,37 +290,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             if rs_query in rsnum_lst:
                 continue
             rs_1000g = geno[2]
-            #print(rs_query, rs_1000g)
-            if rs_query == rs_1000g:
-                rsnum = rs_1000g
-            else:
-                count = -2
-                found = "false"
-                while count <= 2 and count+g < len(vcf):
-                    geno_next = vcf[g+count].strip().split()
-                    geno_next[0] = geno_next[0].lstrip('chr')
-                    if len(geno_next) >= 3 and rs_query == geno_next[2]:
-                        found = "true"
-                        break
-                    count += 1
-                if found == "false":
-                    if "rs" in rs_1000g:
-                        if "warning" in output:
-                            output["warning"] = output["warning"] + \
-                                "Genomic position for query variant ("+rs_query + \
-                                ") does not match RS number at 1000G position (chr" + \
-                                geno[0]+":"+geno[1]+" = "+rs_1000g+"). "
-                        else:
-                            output["warning"] = "Genomic position for query variant ("+rs_query + \
-                                ") does not match RS number at 1000G position (chr" + \
-                                geno[0]+":"+geno[1]+" = "+rs_1000g+"). "
-                    indx = [i[0] for i in snps].index(rs_query)
-                    # snps[indx][0]=geno[2]
-                    # rsnum=geno[2]
-                    snps[indx][0] = rs_query
-                    rsnum = rs_query
-                else:
-                    continue
+            rsnum = rs_query
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])
                 count0 = 0
