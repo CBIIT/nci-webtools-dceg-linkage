@@ -335,7 +335,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             geno[0] = geno[0].lstrip('chr')
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if geno[1] != snp_key:
-                mismatch_msg = "Genomic position ("+geno[1]+") in VCF file does not match db" + \
+                mismatch_msg = "Genomic position ("+geno[1]+") in 1000G data does not match db" + \
                         dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant " + \
                         rs_input + ". "
                 if "warning" in output:
@@ -343,27 +343,8 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                 else:
                     output["warning"] = mismatch_msg
                 geno[1] = snp_key    
-
-            if snp_pos.count(geno[1]) == 1:
-                rs_query = rs_input
-
-            else:
-                pos_index = []
-                for p in range(len(snp_pos)):
-                    if snp_pos[p] == geno[1]:
-                        pos_index.append(p)
-                for p in pos_index:
-                    if rs_nums[p] not in rsnum_lst:
-                        rs_query = rs_nums[p]
-                        break
-
-            if rs_query in rsnum_lst:
-                continue
-
-            rs_1000g = geno[2]
-            rsnum = rs_query
           
-            details[rsnum] = ["chr"+geno[0]+":"+geno[1]]
+            details[rs_input] = ["chr"+geno[0]+":"+geno[1]]
 
             if "," not in geno[3] and "," not in geno[4]:
                 temp_genos = []
@@ -371,24 +352,24 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                     temp_genos.append(geno[pop_index[i]])
                 f0, f1, maf = calc_maf(temp_genos)
                 a0, a1 = set_alleles(geno[3], geno[4])
-                details[rsnum].append(
+                details[rs_input].append(
                     a0+"="+str(round(f0, 3))+", "+a1+"="+str(round(f1, 3)))
                 if maf_threshold <= maf:
-                    hap_dict[rsnum] = [temp_genos]
-                    rsnum_lst.append(rsnum)
+                    hap_dict[rs_input] = [temp_genos]
+                    rsnum_lst.append(rs_input)
                 else:
-                    details[rsnum].append(
+                    details[rs_input].append(
                         "Variant MAF is "+str(round(maf, 4))+", variant removed.")
             else:
-                details[rsnum].append(geno[3]+"=NA, "+geno[4]+"=NA")
-                details[rsnum].append("Variant is not biallelic, variant removed.")
+                details[rs_input].append(geno[3]+"=NA, "+geno[4]+"=NA")
+                details[rs_input].append("Variant is not biallelic, variant removed.")
 
     for i in rs_nums:
         if i not in rsnum_lst:
             if i not in details:
                 index_i = rs_nums.index(i)
                 details[i] = ["chr"+snp_coords[index_i][1]+":"+snp_coords[index_i][2]+"-" +
-                              snp_coords[index_i][2], "NA", "Variant not in 1000G VCF file, variant removed."]
+                              snp_coords[index_i][2], "NA", "Variant not in 1000G data, variant removed."]
 
     # Thin the SNPs
     # sup_2=u"\u00B2"

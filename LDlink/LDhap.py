@@ -266,7 +266,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             geno[0] = geno[0].lstrip('chr')
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if geno[1] != snp_key:
-                mismatch_msg = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
+                mismatch_msg = "Genomic position ("+geno[1]+") in 1000G data does not match dbSNP" + \
                         dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant " +\
                         rs_input + ". "
                 if "warning" in output:
@@ -275,22 +275,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     output["warning"] = mismatch_msg
                 # throw an error in the event of missing query SNPs in 1000G data
                 geno[1] = snp_key
-            #print(geno[1])
-            if snp_pos.count(geno[1]) == 1:
-                rs_query = rs_input
-            else:
-                pos_index = []
-                for p in range(len(snp_pos)):
-                    if snp_pos[p] == geno[1]:
-                        pos_index.append(p)
-                for p in pos_index:
-                    if rs_nums[p] not in rsnum_lst:
-                        rs_query = rs_nums[p]
-                        break
-            if rs_query in rsnum_lst:
-                continue
-            rs_1000g = geno[2]
-            rsnum = rs_query
+
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])
                 count0 = 0
@@ -326,7 +311,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     else:
                         hap1[i].append(".")
                         hap2[i].append(".")
-                rsnum_lst.append(rsnum)
+                rsnum_lst.append(rs_input)
                 position = "chr"+geno[0]+":"+geno[1]
                 pos_lst.append(position)
                 f0 = round(float(count0)/(count0+count1), 4)

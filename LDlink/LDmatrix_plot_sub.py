@@ -211,26 +211,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
             if geno[1] != snp_key:
                geno[1] = snp_key
                
-            if snp_pos.count(geno[1]) == 1:
-                rs_query = rs_input
-
-            else:
-                pos_index = []
-                for p in range(len(snp_pos)):
-                    if snp_pos[p] == geno[1]:
-                        pos_index.append(p)
-                for p in pos_index:
-                    if rs_nums[p] not in rsnum_lst:
-                        rs_query = rs_nums[p]
-                        break
-
-            if rs_query in rsnum_lst:
-                continue
-
-            rs_1000g = geno[2]
-
-            rsnum = rs_query
-
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])
                 for i in range(len(index)):
@@ -256,7 +236,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
                         hap1[i].append(".")
                         hap2[i].append(".")
 
-                rsnum_lst.append(rsnum)
+                rsnum_lst.append(rs_input)
 
                 position = "chr" + geno[0] + ":" + geno[1] + "-" + geno[1]
                 pos_lst.append(position)
