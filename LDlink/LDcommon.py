@@ -48,7 +48,7 @@ genome_build_vars = {
     },
     "grch38_high_coverage": {
         "title": "GRCh38 High Coverage",
-        "title_hg": "hg38",
+        "title_hg": "hg38_HC",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
         "gene_begin": "begin_grch38",
@@ -110,11 +110,14 @@ def connectMongoDBReadOnly(web):
 
 def retrieveTabix1000GData(query_file, coords, query_dir):
     export_s3_keys = retrieveAWSCredentials()
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
         query_file, coords, query_dir)
     # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    return vcf
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    return vcf,h
 
 # Query genomic coordinates
 def get_rsnum(db, coord, genome_build):
@@ -214,3 +217,43 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
                 genome_build_vars[genome_build]['position']: recomb_obj[genome_build_vars[genome_build]['position']]
             }) + '\n')
     return recomb_results_sanitized
+
+def parse_vcf(vcf,snp_coords):
+    delimiter = "#"
+    snp_lists = str('**'.join(vcf)).split(delimiter)
+    snp_dict = {}
+    snp_rs_dict = {}
+    missing_snp = []
+    missing_rs = []    
+    snp_found_list = [] 
+    #print(vcf)
+    #print(snp_lists)
+
+    for snp in snp_lists[1:]:
+        snp_tuple = snp.split("**")
+        snp_key = snp_tuple[0].split("-")[-1].strip()
+        vcf_list = [] 
+        #print(snp_tuple)
+        match_v = ''
+        for v in snp_tuple[1:]:#choose the matched one for dup; if no matched, choose first
+            if len(v) > 0:
+                match_v = v
+                geno = v.strip().split()
+                if geno[1] == snp_key:
+                    match_v = v
+        if len(match_v) > 0:
+            vcf_list.append(match_v)
+            snp_found_list.append(snp_key)   
+                
+        #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
+        #create snp_key as chr7:pos_rs4
+        snp_dict[snp_key] = vcf_list
+    
+    for snp_coord in snp_coords:
+        if snp_coord[-1] not in snp_found_list:
+            missing_rs.append(snp_coord[0])
+        else:
+            s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
+            snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
+    del snp_dict
+    return snp_rs_dict," ".join(missing_rs)

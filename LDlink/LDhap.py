@@ -6,7 +6,7 @@ import operator
 from bson import json_util
 import subprocess
 import sys
-from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
+from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,parse_vcf
 
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
@@ -196,14 +196,13 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     
     snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
     tabix_coords = " " + " ".join(snp_coord_str)
-    print("tabix_coords", tabix_coords)
+    #print("tabix_coords", tabix_coords)
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
 
     checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-    vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-
+    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
     # Define function to correct indel alleles
     def set_alleles(a1, a2):
         if len(a1) == 1 and len(a2) == 1:
@@ -220,15 +219,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             a2_n = a2[1:]
         return(a1_n, a2_n)
 
-
     # Make sure there are genotype data in VCF file
-    if vcf[-1][0:6] == "#CHROM":
-        output["error"] = "No query variants were found in 1000G VCF file. " + str(output["warning"] if "warning" in output else "")
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    h = 0
-    while vcf[h][0:2] == "##":
-        h += 1
+    #if vcf[-1][0:6] == "#CHROM":
+    #    output["error"] = "No query variants were found in 1000G VCF file. " + str(output["warning"] if "warning" in output else "")
+    #    return(json.dumps(output, sort_keys=True, indent=2))
 
     head = vcf[h].strip().split()
   
@@ -245,169 +239,90 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     for i in range(len(index)-1):
         hap2.append([])
 
+    # parse vcf
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+   # throw error if no data is returned from 1000G
+    if len(missing_snp.split()) == len(snp_pos):
+        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
+        return(json.dumps(output, sort_keys=True, indent=2))
+        
+    if len(missing_snp) > 0:
+        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
+    
     rsnum_lst = []
     allele_lst = []
     pos_lst = []
-
-    unique_vcf = []
-    dup_vcf = []
-    for g in range(h+1, len(vcf)):
-        geno = vcf[g].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-        temp = geno[0]+geno[1]
-        if temp not in unique_vcf:
-            unique_vcf.append(temp)
-        else:
-            dup_vcf.append(temp)
-            if snp_pos.count(geno[1]) == 1:
-                rs_query = rs_nums[snp_pos.index(geno[1])]
-                warningmsg = "Variant " + rs_query + " is not biallelic, variant removed. " 
-                if "warning" in output:
-                    output["warning"] = output["warning"] + warningmsg
-                else:
-                    output["warning"] = warningmsg
-
     
-    counter_dups = 0
-    vcf_pos_no_dup = []
-    # find if query SNPs yield duplicate results from 1000G data
-    for g in range(h+1, len(vcf)):
-        geno = vcf[g - counter_dups].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-        temp = geno[0]+geno[1]
-        if temp in dup_vcf:
-            counter_dups = counter_dups + 1
-            vcf.pop(g - counter_dups)
-            if geno[1] not in vcf_pos_no_dup:
-                vcf_pos_no_dup.append(geno[1])
-        else:
-            vcf_pos_no_dup.append(geno[1])
-
-    # throw error if no data is returned from 1000G
-    if len(vcf[h+1:]) == 0:
-        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    for g in range(h+1, len(vcf)): # 2 rows
-        geno = vcf[g].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-        # if 1000G position does not match dbSNP position for variant, use dbSNP position
-        if geno[1] not in snp_pos:
-            snp_pos_index = rs_snp_pos[vcf_pos_no_dup.index(geno[1])]
-            if "warning" in output:
-                output["warning"] = output["warning"] + "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
-            else:
-                output["warning"] = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                    dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant. "
-            # throw an error in the event of missing query SNPs in 1000G data
-            if len(vcf_pos_no_dup) == len(snp_pos):
-                geno[1] = snp_pos[snp_pos_index]
-            else:
-                output["error"] = "One or more query variants were not found in 1000G VCF file. "
-                return(json.dumps(output, sort_keys=True, indent=2))
-
-        if snp_pos.count(geno[1]) == 1:
-            rs_query = rs_nums[snp_pos.index(geno[1])]
-
-        else:
-            pos_index = []
-            for p in range(len(snp_pos)):
-                if snp_pos[p] == geno[1]:
-                    pos_index.append(p)
-            for p in pos_index:
-                if rs_nums[p] not in rsnum_lst:
-                    rs_query = rs_nums[p]
-                    break
-
-        if rs_query in rsnum_lst:
-            continue
-
-        rs_1000g = geno[2]
-
-        if rs_query == rs_1000g:
-            rsnum = rs_1000g
-        else:
-            count = -2
-            found = "false"
-            while count <= 2 and count+g < len(vcf):
-                geno_next = vcf[g+count].strip().split()
-                geno_next[0] = geno_next[0].lstrip('chr')
-                if len(geno_next) >= 3 and rs_query == geno_next[2]:
-                    found = "true"
-                    break
-                count += 1
-
-            if found == "false":
-                if "rs" in rs_1000g:
-                    if "warning" in output:
-                        output["warning"] = output["warning"] + \
-                            "Genomic position for query variant ("+rs_query + \
-                            ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+" = "+rs_1000g+"). "
-                    else:
-                        output["warning"] = "Genomic position for query variant ("+rs_query + \
-                            ") does not match RS number at 1000G position (chr" + \
-                            geno[0]+":"+geno[1]+" = "+rs_1000g+"). "
-
-                indx = [i[0] for i in snps].index(rs_query)
-                # snps[indx][0]=geno[2]
-                # rsnum=geno[2]
-                snps[indx][0] = rs_query
-                rsnum = rs_query
-            else:
-                continue
-
-        if "," not in geno[3] and "," not in geno[4]:
-            a1, a2 = set_alleles(geno[3], geno[4])
-            count0 = 0
-            count1 = 0
-            for i in range(len(index)):
-                if geno[index[i]] == "0|0":
-                    hap1[i].append(a1)
-                    hap2[i].append(a1)
-                    count0 += 2
-                elif geno[index[i]] == "0|1":
-                    hap1[i].append(a1)
-                    hap2[i].append(a2)
-                    count0 += 1
-                    count1 += 1
-                elif geno[index[i]] == "1|0":
-                    hap1[i].append(a2)
-                    hap2[i].append(a1)
-                    count0 += 1
-                    count1 += 1
-                elif geno[index[i]] == "1|1":
-                    hap1[i].append(a2)
-                    hap2[i].append(a2)
-                    count1 += 2
-                elif geno[index[i]] == "0":
-                    hap1[i].append(a1)
-                    hap2[i].append(".")
-                    count0 += 1
-                elif geno[index[i]] == "1":
-                    hap1[i].append(a2)
-                    hap2[i].append(".")
-                    count1 += 1
+    for s_key in snp_dict:
+        # parse snp_key such as chr7:pos_rs4
+        snp_keys = s_key.split("_")
+        snp_key = snp_keys[0].split(':')[1]
+        rs_input = snp_keys[1]
+        geno_list = snp_dict[s_key] 
+        g = -1
+        for geno in geno_list:
+            g = g+1
+            geno = geno.strip().split()
+            geno[0] = geno[0].lstrip('chr')
+            # if 1000G position does not match dbSNP position for variant, use dbSNP position
+            if geno[1] != snp_key:
+                mismatch_msg = "Genomic position ("+geno[1]+") in 1000G data does not match dbSNP" + \
+                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant " +\
+                        rs_input + ". "
+                if "warning" in output:
+                    output["warning"] = output["warning"] + mismatch_msg
                 else:
-                    hap1[i].append(".")
-                    hap2[i].append(".")
+                    output["warning"] = mismatch_msg
+                # throw an error in the event of missing query SNPs in 1000G data
+                geno[1] = snp_key
 
-            rsnum_lst.append(rsnum)
-
-            position = "chr"+geno[0]+":"+geno[1]
-            pos_lst.append(position)
-
-            f0 = round(float(count0)/(count0+count1), 4)
-            f1 = round(float(count1)/(count0+count1), 4)
-            if f0 >= f1:
-                alleles = a1+"="+str(round(f0, 3))+", " + \
-                    a2+"="+str(round(f1, 3))
-            else:
-                alleles = a2+"="+str(round(f1, 3))+", " + \
-                    a1+"="+str(round(f0, 3))
-            allele_lst.append(alleles)
-
+            if "," not in geno[3] and "," not in geno[4]:
+                a1, a2 = set_alleles(geno[3], geno[4])
+                count0 = 0
+                count1 = 0
+                #print(geno)
+                for i in range(len(index)):
+                    if geno[index[i]] == "0|0":
+                        hap1[i].append(a1)
+                        hap2[i].append(a1)
+                        count0 += 2
+                    elif geno[index[i]] == "0|1":
+                        hap1[i].append(a1)
+                        hap2[i].append(a2)
+                        count0 += 1
+                        count1 += 1
+                    elif geno[index[i]] == "1|0":
+                        hap1[i].append(a2)
+                        hap2[i].append(a1)
+                        count0 += 1
+                        count1 += 1
+                    elif geno[index[i]] == "1|1":
+                        hap1[i].append(a2)
+                        hap2[i].append(a2)
+                        count1 += 2
+                    elif geno[index[i]] == "0":
+                        hap1[i].append(a1)
+                        hap2[i].append(".")
+                        count0 += 1
+                    elif geno[index[i]] == "1":
+                        hap1[i].append(a2)
+                        hap2[i].append(".")
+                        count1 += 1
+                    else:
+                        hap1[i].append(".")
+                        hap2[i].append(".")
+                rsnum_lst.append(rs_input)
+                position = "chr"+geno[0]+":"+geno[1]
+                pos_lst.append(position)
+                f0 = round(float(count0)/(count0+count1), 4)
+                f1 = round(float(count1)/(count0+count1), 4)
+                if f0 >= f1:
+                    alleles = a1+"="+str(round(f0, 3))+", " + \
+                        a2+"="+str(round(f1, 3))
+                else:
+                    alleles = a2+"="+str(round(f1, 3))+", " + \
+                        a1+"="+str(round(f0, 3))
+                allele_lst.append(alleles)
 
     haps = {}
     for i in range(len(index)):
