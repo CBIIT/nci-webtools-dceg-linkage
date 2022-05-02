@@ -181,7 +181,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return("", "")
 
     if len(missing_snp) > 0 :
-        output["warning"] = str(missing_snp) + " were missing from 1000G data. " + str(output["warning"] if "warning" in output else "")
+        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
  
 
     rsnum_lst = []
@@ -202,64 +202,16 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             #print(geno)
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if geno[1] != snp_key:
-                mismatch_msg = "Genomic position ("+geno[1]+") in VCF file does not match dbSNP" + \
-                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant(" + \
-                         rs_input + "). "
+                mismatch_msg = "Genomic position ("+geno[1]+") in 1000G data does not match dbSNP" + \
+                        dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ") search coordinates for query variant " + \
+                         rs_input + ". "
                 if "warning" in output:
                     output["warning"] = output["warning"] + mismatch_msg
                 else:
                     output["warning"] = mismatch_msg
                 # throw an error in the event of missing query SNPs in 1000G data
                 geno[1] = snp_key
-                
-            if snp_pos.count(geno[1]) == 1:
-                    rs_query = rs_input
-
-            else:
-                pos_index = []
-                for p in range(len(snp_pos)):
-                    if snp_pos[p] == geno[1]:
-                        pos_index.append(p)
-                for p in pos_index:
-                    if rs_nums[p] not in rsnum_lst:
-                        rs_query = rs_nums[p]
-                        break
-
-            if rs_query in rsnum_lst:
-                continue
-
-            rs_1000g = geno[2]
-
-            if rs_query == rs_1000g:
-                rsnum = rs_1000g
-            else:
-                count = -2
-                found = "false"
-                while count <= 2 and count + g < len(vcf):
-                    geno_next = vcf[g + count].strip().split()
-                    geno_next[0] = geno_next[0].lstrip('chr')
-                    if len(geno_next) >= 3 and rs_query == geno_next[2]:
-                        found = "true"
-                        break
-                    count += 1
-
-                if found == "false":
-                    if "rs" in rs_1000g:
-                        if "warning" in output:
-                            output["warning"] = output[
-                                "warning"] + ". Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
-                        else:
-                            output[
-                                "warning"] = "Genomic position for query variant (" + rs_query + ") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+rs_1000g+")"
-
-                    indx = [i[0] for i in snps].index(rs_query)
-                    # snps[indx][0] = geno[2]
-                    # rsnum = geno[2]
-                    snps[indx][0] = rs_query
-                    rsnum = rs_query
-                else:
-                    continue
-
+           
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])
                 for i in range(len(index)):
@@ -285,7 +237,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
                         hap1[i].append(".")
                         hap2[i].append(".")
 
-                rsnum_lst.append(rsnum)
+                rsnum_lst.append(rs_input)
 
                 position = "chr" + geno[0] + ":" + geno[1] + "-" + geno[1]
                 pos_lst.append(position)
@@ -490,7 +442,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
         # Generate error if less than two SNPs
         if len(x) < 2:
-            output["error"] = "Less than two variants to plot."
+            output["error"] = "Less than two variants to plot. " + str(output["warning"] if "warning" in output else "")
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print(json_output, file=out_json)
             out_json.close()
