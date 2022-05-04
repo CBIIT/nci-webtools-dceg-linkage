@@ -6,12 +6,12 @@ import operator
 from bson import json_util
 import subprocess
 import sys
-from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
+
 from LDcommon import validsnp,replace_coords_rsid_list,get_coords,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,parse_vcf
-
+from LDcommon import get_vcf_snp_params
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
@@ -105,31 +105,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         else:
             output["warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
                 distance_max)+" bp). "
-
-    # Sort coordinates and make tabix formatted coordinates
-    snp_pos_int = [int(i) for i in snp_pos]
-    snp_pos_int.sort()
-    # keep track of rs and snp postion after sort
-    rs_snp_pos = []
-    for i in snp_pos_int:
-        rs_snp_pos.append(snp_pos.index(str(i)))
-    
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
-    tabix_coords = " " + " ".join(snp_coord_str)
-    #print("tabix_coords", tabix_coords)
-    # # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
+ 
+    vcf_filePath,tabix_coords,vcf_query_snp_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-  
-    # Make sure there are genotype data in VCF file
-    #if vcf[-1][0:6] == "#CHROM":
-    #    output["error"] = "No query variants were found in 1000G VCF file. " + str(output["warning"] if "warning" in output else "")
-    #    return(json.dumps(output, sort_keys=True, indent=2))
-
-    head = vcf[h].strip().split()
+    vcf,head = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
   
     # Extract haplotypes
     index = []
@@ -145,15 +124,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         hap2.append([])
 
     # parse vcf
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
-   # throw error if no data is returned from 1000G
-    if len(missing_snp.split()) == len(snp_pos):
-        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build)
+    if "error" in output:
         return(json.dumps(output, sort_keys=True, indent=2))
-        
-    if len(missing_snp) > 0:
-        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
-    
+           
     rsnum_lst = []
     allele_lst = []
     pos_lst = []

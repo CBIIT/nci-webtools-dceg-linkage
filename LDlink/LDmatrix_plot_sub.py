@@ -12,7 +12,7 @@ from bson import json_util, ObjectId
 import subprocess
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population,retrieveTabix1000GData,parse_vcf
-from LDcommon import set_alleles
+from LDcommon import set_alleles,get_vcf_snp_params
 from LDutilites import get_config 
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
@@ -70,24 +70,9 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(snp_coords)):
         distance_bp.append(int(snp_coords[i][2]))
 
-    # Sort coordinates and make tabix formatted coordinates
-    snp_pos_int = [int(i) for i in snp_pos]
-    snp_pos_int.sort()
-     # keep track of rs and snp postion after sort
-    rs_snp_pos = []
-    for i in snp_pos_int:
-        rs_snp_pos.append(snp_pos.index(str(i)))
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
-    tabix_coords = " " + " ".join(snp_coord_str)
-
-    # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
+    vcf_filePath,tabix_coords,vcf_query_snp_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-  
-    head = vcf[h].strip().split()
+    vcf,head = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Extract haplotypes
     index = []
@@ -102,8 +87,9 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(index) - 1):
         hap2.append([])
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
-
+       # parse vcf
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,None,None)
+    
     rsnum_lst = []
     allele_lst = []
     pos_lst = []

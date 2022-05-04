@@ -15,7 +15,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,parse_vcf,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,parse_vcf,get_vcf_snp_params
 
 ###########
 # SNPclip #
@@ -135,18 +135,10 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             out_json.close()
             return("", "", "")
 
-    # Make tabix formatted coordinates
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1]+":"+i+"-"+i for i in snp_pos]
-    tabix_coords = " "+" ".join(snp_coord_str)
-
-    # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
+    vcf_filePath,tabix_coords,vcf_query_snp_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-
+    vcf,head = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+  
     # Make MAF function
     def calc_maf(genos):
         vals = {"0|0": 0, "0|1": 0, "1|0": 0, "1|1": 0, "0": 0, "1": 0}
@@ -197,27 +189,21 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
 
     # Import SNP VCF file
     hap_dict = {}
-    head = vcf[h].strip().split()
-
+ 
     # Extract population specific haplotypes
     pop_index = []
     for i in range(9, len(head)):
         if head[i] in pop_ids:
             pop_index.append(i)
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build)
   
-   # throw error if no data is returned from 1000G
-    if len(missing_snp.split()) == len(snp_pos):
-        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
+    if "error" in output:
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
-        out_json.close()
-        return("", "", "")
-        
-    if len(missing_snp) > 0:
-        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
-    
+        out_json.close() 
+        return("", "","")    
+     
     rsnum_lst = []
 
     for s_key in snp_dict:
