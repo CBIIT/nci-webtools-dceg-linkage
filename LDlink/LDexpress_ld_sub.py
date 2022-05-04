@@ -9,6 +9,8 @@ import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDutilites import get_config
+from LDcommon import set_alleles,LD_calcs,get_dbsnp_coord
+
 
 web = sys.argv[1]
 snp = sys.argv[2]
@@ -44,61 +46,20 @@ vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
 checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
-# Define function to calculate LD metrics
-def set_alleles(a1, a2):
-    if len(a1) >= 1:
-        a1_n = a1
-    else:
-        a1_n = "-"
-    if len(a2) >= 1:
-        a2_n = a2
-    else:
-        a2_n = "_"
-    return(a1_n, a2_n)
-
-def LD_calcs(hap, allele_n):
-    # Extract haplotypes
-    A = hap["00"]
-    B = hap["01"]
-    C = hap["10"]
-    D = hap["11"]
-    N = A + B + C + D
-    delta = float(A*D-B*C)
-    Ms = float((A+C)*(B+D)*(A+B)*(C+D))
-    if Ms != 0:
-        # D prime
-        if delta < 0:
-            D_prime = abs(delta/min((A+C)*(A+B), (B+D)*(C+D)))
-        else:
-            D_prime = abs(delta/min((A+C)*(C+D), (A+B)*(B+D)))
-        # R2
-        r2 = (delta**2)/Ms
-        # Non-effect and Effect Alleles and their Allele Frequencies
-        allele1 = str(allele_n["0"])
-        allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
-
-        allele2 = str(allele_n["1"])
-        allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
-        return [r2, D_prime, "=".join([allele1, allele1_freq]), "=".join([allele2, allele2_freq])]
-
-
 # Connect to Mongo database
 db = connectMongoDBReadOnly(True)
 
-def get_dbsnp_coord(db, chromosome, position):
-    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
-
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
+h = 0
+while vcf[h][0:2] == "##":
+    h += 1
+vcf = vcf[h+1:]
 if len(vcf) > 1:
     for i in range(len(vcf)):
         # if vcf[i].strip().split()[2] == snp:
         geno = vcf[i].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-            
+        geno[0] = geno[0].lstrip('chr')          
 else:
     geno = vcf[0].strip().split()
     geno[0] = geno[0].lstrip('chr')
@@ -142,7 +103,7 @@ for geno_n in vcf:
                 if geno_n[2][0:2] == "rs":
                     rs_n = geno_n[2]
                 else: 
-                    snp_coord = get_dbsnp_coord(db, chromosome, bp_n)
+                    snp_coord = get_dbsnp_coord(db, chromosome, bp_n,genome_build)
                     if snp_coord is not None:
                         rs_n = "rs" + snp_coord['id']
                     else: 

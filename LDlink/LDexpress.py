@@ -22,7 +22,7 @@ from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords
 from LDutilites import get_config
-
+from LDcommon import get_query_variant_c,get_vcf_snp_params,retrieveTabix1000GDataSingle,parse_vcf
 # Set data directories using config.yml	
 param_list = get_config()
 dbsnp_version = param_list['dbsnp_version']
@@ -73,15 +73,15 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     # print("tabix_query_snp", tabix_query_snp)
     subprocess.call(tabix_query_snp, shell=True)
     tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-    print(snp_coord)
-    print(tabix_query_snp_out)
+    #print(snp_coord)
+    #print(tabix_query_snp_out)
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
         subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        #subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return (None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         #??? which should be the biallelic,??
@@ -97,7 +97,7 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
             subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+            #subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
             return (None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
@@ -229,7 +229,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
                     else:
                         rs_nums.append(snp_i[0])
                         snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
-                        temp = [snp_i[0], str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
+                        temp = [snp_i[0], str(snp_coord['chromosome']), (snp_coord[genome_build_vars[genome_build]['position']])]
                         snp_coords.append(temp)
                 else:
                     # Generate warning if query variant is not found in dbsnp
@@ -260,25 +260,41 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         return("", "", "", "", "", errors_warnings)
 
     thinned_snps = []
-
-    print("##### FIND GWAS VARIANTS IN WINDOW #####")	
+    output = {}
+    print("##### FIND GWAS VARIANTS IN WINDOW #####",request)	
+    vcf_filePath,tabix_coords,vcf_query_snp_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
+    vcf,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request)
+    
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build)
+    #print(snp_dict)
+    #if "error" in output:
+    #    return(json.dumps(output, sort_keys=True, indent=2))
+    
     # establish low/high window for each query snp
     # ex: window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     combined_matched_snps = []
-    for snp_coord in snp_coords:
+    for s_key in snp_dict:
         find_window_ld_start = timer()
 
-        (geno, queryVariantWarnings) = get_query_variant(snp_coord, pop_ids, str(request), genome_build)
+        snp_keys = s_key.split("_")
+        snp_key = snp_keys[0].split(':')[1]
+        rs_input = snp_keys[1]
+        geno_list = snp_dict[s_key] 
+        geno = geno_list[0]
+        snp_chr = snp_keys[0].split(':')[0].lstrip('chr')
+        snp_coord = [rs_input,snp_chr,int(snp_key)]
+        #(geno, queryVariantWarnings) = get_query_variant_c(snp_coord, pop_ids, str(request), genome_build)
         # print("geno", geno)
         # print("queryVariantWarnings", queryVariantWarnings)
-        if (len(queryVariantWarnings) > 0):
-            queryWarnings += queryVariantWarnings
+        #if (len(queryVariantWarnings) > 0):
+        #    queryWarnings += queryVariantWarnings
         if (geno is not None):
             ###### SPLIT TASK UP INTO # PARALLEL SUBPROCESSES ######
-
+            
             # find query window snps via tabix, calculate LD and apply R2/D' thresholds
             windowChunkRanges = chunkWindow(snp_coord[2], window, num_subprocesses)
-            
+
             ld_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
                 getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold), str(genome_build)])
@@ -286,6 +302,9 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
                 ld_subprocess_commands.append("python3 LDexpress_ld_sub.py " + getWindowVariantsArgs)
 
             ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
+            #for subp in ld_subprocesses:
+            #    for line in subp.stdout:
+            #        print(line.decode().strip())
             # collect output in parallel
             pool = Pool(len(ld_subprocesses))
             windowLDSubsets = pool.map(get_output, ld_subprocesses)
@@ -347,7 +366,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             query_window_tissues_end = timer()
             print("QUERY WINDOW TISSUES TIME ELAPSED:", str(query_window_tissues_end - query_window_tissues_start) + "(s)")
         # clean up tmp files generated by each query snp
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        #subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         subprocess.call("rm " + tmp_dir + "express_ld_*_" + str(request) + ".txt", shell=True)
     
     # add full results

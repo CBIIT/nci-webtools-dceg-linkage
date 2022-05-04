@@ -118,9 +118,21 @@ def retrieveTabix1000GData(query_file, coords, query_dir):
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
-    head = vcf[h].strip().split()
-    
+    head = vcf[h].strip().split() 
     return vcf[h+1:],head
+
+def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request):
+    export_s3_keys = retrieveAWSCredentials()
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END > {3}".format(query_file, coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
+    [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+    vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    head = vcf[h].strip().split() 
+    vcf = vcf[h+1:]
+   
+    return vcf,head
 
 # Query genomic coordinates
 def get_rsnum(db, coord, genome_build):
@@ -377,11 +389,9 @@ def set_alleles(a1, a2):
 #################################################
 # get the genotype ###
 #################################################
-def get_query_variant(snp_coord, pop_ids, request, genome_build):
-    
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
-    tabix_coords = " " + " ".join(snp_coord_str)
-    
+def get_query_variant_c(snp_coord, pop_ids, request, genome_build):
+    snp_coord_str = genome_build_vars[genome_build]['1000G_chr_prefix'] + str(snp_coord[1]) + ":" + str(snp_coord[2]) + "-" + str(snp_coord[2]) 
+    tabix_coords = " " + (snp_coord_str)
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
@@ -389,17 +399,8 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     # Extract query SNP phased genotypes
 
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    # print("tabix_query_snp_h", tabix_query_snp_h)
-    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    # print("tabix_query_snp", tabix_query_snp)
-    subprocess.call(tabix_query_snp, shell=True)
-    tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-
-    #vcf = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+ 
+    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request)
 
     # Validate error
     if len(tabix_query_snp_out) == 0:
@@ -451,8 +452,9 @@ def get_query_variant(snp_coord, pop_ids, request, genome_build):
     if genotypes["0"] == 0 or genotypes["1"] == 0:
         # print('handle error: snp + " is monoallelic in the " + pop + " population."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
-        
-    return(geno, queryVariantWarnings,vcf)
+
+      
+    return(geno, queryVariantWarnings)
 
 ###################################################
 ######## parse vcf using --separate-regions   #####
@@ -466,7 +468,6 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
     snp_found_list = [] 
     #print(vcf)
     #print(snp_lists)
-
     for snp in snp_lists[1:]:
         snp_tuple = snp.split("**")
         snp_key = snp_tuple[0].split("-")[-1].strip()
@@ -486,7 +487,7 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
         #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
         #create snp_key as chr7:pos_rs4
         snp_dict[snp_key] = vcf_list
-   
+
     for snp_coord in snp_coords:
         if snp_coord[-1] not in snp_found_list:
             missing_rs.append(snp_coord[0])
@@ -518,17 +519,6 @@ def get_vcf_snp_params(snp_pos,snp_coords,genome_build):
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
     return vcf_filePath,tabix_coords,vcf_query_snp_file
 
-def get_vcf_single(snp_coord,genome_build,):
-    print(snp_coord)
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + str(snp_coord[1]) + ":" + str(snp_coord[2])+"-"+str(snp_coord[2]) ]
-    tabix_coords = " " + " ".join(snp_coord_str)
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    return retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-
-
 def LD_calcs(hap, allele_n):
     # Extract haplotypes
     A = hap["00"]
@@ -553,3 +543,9 @@ def LD_calcs(hap, allele_n):
         allele2 = str(allele_n["1"])
         allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
         return [r2, D_prime, "=".join([allele1, allele1_freq]), "=".join([allele2, allele2_freq])]
+
+def get_dbsnp_coord(db, chromosome, position,genome_build):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
