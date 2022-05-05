@@ -9,7 +9,7 @@ import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDutilites import get_config
-from LDcommon import set_alleles,LD_calcs,get_dbsnp_coord
+from LDcommon import set_alleles,LD_calcs,get_dbsnp_coord,parse_vcf
 
 
 web = sys.argv[1]
@@ -22,7 +22,7 @@ subprocess_id = sys.argv[7]
 r2_d = sys.argv[8]
 r2_d_threshold = sys.argv[9]
 genome_build = sys.argv[10]
-
+snp_key = sys.argv[11]
 # Set data directories using config.yml
 param_list = get_config()
 data_dir = param_list['data_dir']
@@ -50,19 +50,22 @@ checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 db = connectMongoDBReadOnly(True)
 
 # Import SNP VCF files
+output = {}
+snp_coords = []
+vcf_list = []
+snp_coord = [snp,chromosome,snp_key]
+snp_coords.append(snp_coord)
+snp_key = "chr"+str(chromosome)+":"+str(snp_key)+"_"+str(snp)
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 h = 0
 while vcf[h][0:2] == "##":
     h += 1
 vcf = vcf[h+1:]
-if len(vcf) > 1:
-    for i in range(len(vcf)):
-        # if vcf[i].strip().split()[2] == snp:
-        geno = vcf[i].strip().split()
-        geno[0] = geno[0].lstrip('chr')          
-else:
-    geno = vcf[0].strip().split()
-    geno[0] = geno[0].lstrip('chr')
+
+snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,"",genome_build)
+vcf = snp_dict[snp_key]
+geno = vcf[0].strip().split()
+geno[0] = geno[0].lstrip('chr')    
 
 # Import Window around SNP
 tabix_snp = export_s3_keys + " cd {4}; tabix -fhD {0} {1}:{2}-{3} | grep -v -e END".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome, start, stop, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])

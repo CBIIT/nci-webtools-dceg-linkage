@@ -297,8 +297,8 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
 
             ld_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
-                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold), str(genome_build)])
-                # print("getWindowVariantsArgs", getWindowVariantsArgs)
+                getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold), str(genome_build),str(snp_key)])
+                #print("getWindowVariantsArgs", getWindowVariantsArgs)
                 ld_subprocess_commands.append("python3 LDexpress_ld_sub.py " + getWindowVariantsArgs)
 
             ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
