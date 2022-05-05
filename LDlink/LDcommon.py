@@ -6,7 +6,7 @@ from pymongo import MongoClient
 import json
 import subprocess
 from bson import json_util
-
+from collections import OrderedDict
 # retrieve config
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
@@ -258,15 +258,11 @@ def parse_vcf(vcf,snp_coords):
             snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
     del snp_dict
 
-    sorted_snp_rs_keys = sorted(snp_rs_dict,key=customsort)
-    sorted_snp_rs_dict = {}
-    #sorted_snp_rs_dict = {key in snp_rs_dict[key] for key in sorted_snp_rs_keys}
-    for sort_key in sorted_snp_rs_keys:
-        sorted_snp_rs_dict[sort_key] = snp_rs_dict[sort_key]
-    #print("sorted:",sorted_snp_rs_dict)
-    return sorted_snp_rs_dict," ".join(missing_rs)
+    sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+    
+    return sorted_snp_rs," ".join(missing_rs)
 
 def customsort(key_snp1):
-    k = key_snp1.split("_")[0].split(':')[1]
+    k = key_snp1[0].split("_")[0].split(':')[1]
     k = int(k)
     return k
