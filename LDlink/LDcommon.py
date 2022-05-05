@@ -6,7 +6,7 @@ from pymongo import MongoClient
 import json
 import subprocess
 from bson import json_util
-
+from collections import OrderedDict
 # retrieve config
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
@@ -226,9 +226,10 @@ def parse_vcf(vcf,snp_coords):
     missing_snp = []
     missing_rs = []    
     snp_found_list = [] 
+   
     #print(vcf)
     #print(snp_lists)
-
+    
     for snp in snp_lists[1:]:
         snp_tuple = snp.split("**")
         snp_key = snp_tuple[0].split("-")[-1].strip()
@@ -256,4 +257,12 @@ def parse_vcf(vcf,snp_coords):
             s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
             snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
     del snp_dict
-    return snp_rs_dict," ".join(missing_rs)
+
+    sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+    
+    return sorted_snp_rs," ".join(missing_rs)
+
+def customsort(key_snp1):
+    k = key_snp1[0].split("_")[0].split(':')[1]
+    k = int(k)
+    return k
