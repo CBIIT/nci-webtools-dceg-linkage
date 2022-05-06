@@ -482,9 +482,7 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
                     match_v = v
         if len(match_v) > 0:
             vcf_list.append(match_v)
-            snp_found_list.append(snp_key)   
-                
-        #vcf_list.append(snp_tuple.pop()) #always use the last one, even dup
+            snp_found_list.append(snp_key)        
         #create snp_key as chr7:pos_rs4
         snp_dict[snp_key] = vcf_list
    
@@ -493,19 +491,22 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
             missing_rs.append(snp_coord[0])
         else:
             s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
-            snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
-    del snp_dict
-   
+            snp_rs_dict[s_key] = snp_dict[snp_coord[2]]      
     if output != None:
         if len(missing_rs) == len(snp_coords):
             output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
             return "","",output
-            
         if len(missing_rs) > 0:
             output["warning"] = "Query variant " + " ".join(missing_rs) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
     
-    return OrderedDict(sorted(snp_rs_dict.items()))," ".join(missing_rs),output
+    del snp_dict
+    sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+    return sorted_snp_rs," ".join(missing_rs)
 
+def customsort(key_snp1):
+    k = key_snp1[0].split("_")[0].split(':')[1]
+    k = int(k)
+    return k
 
 def get_vcf_snp_params(snp_pos,snp_coords,genome_build):
      # Sort coordinates and make tabix formatted coordinates
