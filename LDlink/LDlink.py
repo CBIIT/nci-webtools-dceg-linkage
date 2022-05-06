@@ -785,6 +785,7 @@ def ldexpress():
                 express["details"] = details
 
                 if "error" in errors_warnings:
+                    print(errors_warnings)
                     express["error"] = errors_warnings["error"]
                 else:
                     with open(tmp_dir + 'express_variants_annotated' + reference + '.txt', 'w') as f:

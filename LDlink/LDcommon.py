@@ -501,7 +501,7 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
     
     del snp_dict
     sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
-    return sorted_snp_rs," ".join(missing_rs)
+    return sorted_snp_rs," ".join(missing_rs),output
 
 def customsort(key_snp1):
     k = key_snp1[0].split("_")[0].split(':')[1]
