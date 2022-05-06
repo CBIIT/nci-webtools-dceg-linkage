@@ -337,12 +337,13 @@ def replace_coord_rsid(db, snp,genome_build,output):
 def replace_coords_rsid_list(db, snp_lst,genome_build,output):
     new_snp_lst = []
     for snp_raw_i in snp_lst:
-        snp = snp_raw_i[0]
-        var_id = replace_coord_rsid(db, snp, genome_build,output)
-        if snp != var_id:
-            new_snp_lst.append([var_id])
-        else:
-            new_snp_lst.append(snp_raw_i)
+        if len(snp_raw_i) > 0:
+            snp = snp_raw_i[0]
+            var_id = replace_coord_rsid(db, snp, genome_build,output)
+            if snp != var_id:
+                new_snp_lst.append([var_id])
+            else:
+                new_snp_lst.append(snp_raw_i)
     return new_snp_lst
 
 ##############################################
@@ -485,10 +486,12 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
             snp_found_list.append(snp_key)        
         #create snp_key as chr7:pos_rs4
         snp_dict[snp_key] = vcf_list
-   
+    
+    missing_rs_snp = []
     for snp_coord in snp_coords:
         if snp_coord[-1] not in snp_found_list:
             missing_rs.append(snp_coord[0])
+            missing_rs_snp.append([snp_coord[0],"chr"+snp_coord[1]+":"+snp_coord[2]])
         else:
             s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
             snp_rs_dict[s_key] = snp_dict[snp_coord[2]]      
@@ -501,7 +504,7 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
     
     del snp_dict
     sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
-    return sorted_snp_rs," ".join(missing_rs),output
+    return sorted_snp_rs,missing_rs_snp,output
 
 def customsort(key_snp1):
     k = key_snp1[0].split("_")[0].split(':')[1]
