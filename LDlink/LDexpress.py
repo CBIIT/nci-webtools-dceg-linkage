@@ -293,7 +293,31 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         #    queryWarnings += queryVariantWarnings
         if (geno is not None):
             ###### SPLIT TASK UP INTO # PARALLEL SUBPROCESSES ######
-            
+            geno = geno.strip().split()
+            if geno[2] != snp_coord[0] and "rs" in geno[2]:
+                queryWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
+  
+            if "," in geno[3] or "," in geno[4]:
+                queryWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
+
+            index = []
+            for i in range(9, len(head)):
+                if head[i] in pop_ids:
+                    index.append(i)
+
+            genotypes = {"0": 0, "1": 0}
+            for i in index:
+                sub_geno = geno[i].split("|")
+                for j in sub_geno:
+                    if j in genotypes:
+                        genotypes[j] += 1
+                    else:
+                        genotypes[j] = 1
+
+            if genotypes["0"] == 0 or genotypes["1"] == 0:
+                # print('handle error: snp + " is monoallelic in the " + pop + " population."')
+                queryWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
+           
             # find query window snps via tabix, calculate LD and apply R2/D' thresholds
             windowChunkRanges = chunkWindow(snp_coord[2], window, num_subprocesses)
 
