@@ -1,29 +1,30 @@
 import boto3
 import botocore
+import csv
 from numpy import False_
 import yaml
 from pymongo import MongoClient
 import json
 import subprocess
 from bson import json_util
-
+from LDutilites import get_config,get_config_admin
+from collections import OrderedDict
 # retrieve config
-with open('config.yml', 'r') as yml_file:
-    config = yaml.safe_load(yml_file)
-aws_info = config['aws']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_username_api = config['database']['mongo_user_api']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
-email_account = config['api']['email_account']
-env = config['env']
-dbsnp_version = config['data']['dbsnp_version']
-population_samples_dir = config['data']['population_samples_dir']
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-genotypes_dir = config['data']['genotypes_dir']
+param_list = get_config()
+param_list_db = get_config_admin()
+api_mongo_addr = param_list_db['api_mongo_addr']
+mongo_username = param_list_db['mongo_username']
+mongo_username_api = param_list_db['mongo_username_api']
+mongo_password = param_list_db['mongo_password']
+mongo_port = param_list_db['mongo_port']
+email_account = param_list_db['email_account']
+aws_info = param_list['aws_info']
+env = param_list['env']
+dbsnp_version = param_list['dbsnp_version']
+population_samples_dir = param_list['population_samples_dir']
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+genotypes_dir = param_list['genotypes_dir']
 
 genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
@@ -55,7 +56,7 @@ genome_build_vars = {
     },
     "grch38_high_coverage": {
         "title": "GRCh38 High Coverage",
-        "title_hg": "hg38",
+        "title_hg": "hg38_HC",
         "chromosome": "chromosome_grch38",
         "position": "position_grch38",
         "gene_begin": "begin_grch38",
@@ -110,11 +111,28 @@ def connectMongoDBReadOnly(readonly):
 
 def retrieveTabix1000GData(query_file, coords, query_dir):
     export_s3_keys = retrieveAWSCredentials()
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD {0}{1} | grep -v -e END".format(
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
         query_file, coords, query_dir)
     # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    return vcf
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    head = vcf[h].strip().split() 
+    return vcf[h+1:],head
+
+def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request):
+    export_s3_keys = retrieveAWSCredentials()
+    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END > {3}".format(query_file, coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
+    [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+    vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    head = vcf[h].strip().split() 
+    vcf = vcf[h+1:]
+   
+    return vcf,head
 
 # Query genomic coordinates
 def get_rsnum(db, coord, genome_build):
@@ -269,7 +287,13 @@ def get_coords_gene(gene_raw, db):
         return geneResult
     else:
         return None
-      
+
+
+def get_dbsnp_coord(db, chromosome, position):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
 # Replace input genomic coordinates with variant ids (rsids)
 def replace_coord_rsid(db, snp,genome_build,output):
     if snp[0:2] == "rs":
@@ -313,12 +337,13 @@ def replace_coord_rsid(db, snp,genome_build,output):
 def replace_coords_rsid_list(db, snp_lst,genome_build,output):
     new_snp_lst = []
     for snp_raw_i in snp_lst:
-        snp = snp_raw_i[0]
-        var_id = replace_coord_rsid(db, snp, genome_build,output)
-        if snp != var_id:
-            new_snp_lst.append([var_id])
-        else:
-            new_snp_lst.append(snp_raw_i)
+        if len(snp_raw_i) > 0:
+            snp = snp_raw_i[0]
+            var_id = replace_coord_rsid(db, snp, genome_build,output)
+            if snp != var_id:
+                new_snp_lst.append([var_id])
+            else:
+                new_snp_lst.append(snp_raw_i)
     return new_snp_lst
 
 ##############################################
@@ -344,3 +369,187 @@ def get_population(pop, request,output):
 
     return pop_ids
  
+ #####################################################
+ ##   Define function to correct indel alleles     ###
+ #####################################################
+def set_alleles(a1, a2):
+    if len(a1) == 1 and len(a2) == 1:
+        a1_n = a1
+        a2_n = a2
+    elif len(a1) == 1 and len(a2) > 1:
+        a1_n = "-"
+        a2_n = a2[1:]
+    elif len(a1) > 1 and len(a2) == 1:
+        a1_n = a1[1:]
+        a2_n = "-"
+    elif len(a1) > 1 and len(a2) > 1:
+        a1_n = a1[1:]
+        a2_n = a2[1:]
+    return(a1_n, a2_n)
+
+#################################################
+# get the genotype ###
+#################################################
+def get_query_variant_c(snp_coord, pop_ids, request, genome_build):
+    snp_coord_str = genome_build_vars[genome_build]['1000G_chr_prefix'] + str(snp_coord[1]) + ":" + str(snp_coord[2]) + "-" + str(snp_coord[2]) 
+    tabix_coords = " " + (snp_coord_str)
+    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
+    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
+
+    queryVariantWarnings = []
+    # Extract query SNP phased genotypes
+
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
+ 
+    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request)
+
+    # Validate error
+    if len(tabix_query_snp_out) == 0:
+        # print("ERROR", "len(tabix_query_snp_out) == 0")
+        # handle error: snp + " is not in 1000G reference panel."
+        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        return (None, queryVariantWarnings)
+    elif len(tabix_query_snp_out) > 1:
+        geno = []
+        for i in range(len(tabix_query_snp_out)):
+            # if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
+            geno = tabix_query_snp_out[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')
+        if geno == []:
+            # print("ERROR", "geno == []")
+            # handle error: snp + " is not in 1000G reference panel."
+            queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+            return (None, queryVariantWarnings)
+    else:
+        geno = tabix_query_snp_out[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+    
+    if geno[2] != snp_coord[0] and "rs" in geno[2]:
+            queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
+            # snp = geno[2]
+
+    if "," in geno[3] or "," in geno[4]:
+        # print('handle error: snp + " is not a biallelic variant."')
+        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
+
+    index = []
+    for i in range(9, len(head)):
+        if head[i] in pop_ids:
+            index.append(i)
+
+    genotypes = {"0": 0, "1": 0}
+    for i in index:
+        sub_geno = geno[i].split("|")
+        for j in sub_geno:
+            if j in genotypes:
+                genotypes[j] += 1
+            else:
+                genotypes[j] = 1
+
+    if genotypes["0"] == 0 or genotypes["1"] == 0:
+        # print('handle error: snp + " is monoallelic in the " + pop + " population."')
+        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
+
+      
+    return(geno, queryVariantWarnings)
+
+###################################################
+######## parse vcf using --separate-regions   #####
+###################################################
+def parse_vcf(vcf,snp_coords,output,genome_build):
+    delimiter = "#"
+    snp_lists = str('**'.join(vcf)).split(delimiter)
+    snp_dict = {}
+    snp_rs_dict = {}
+    missing_rs = []    
+    snp_found_list = [] 
+    #print(vcf)
+    #print(snp_lists)
+    for snp in snp_lists[1:]:
+        snp_tuple = snp.split("**")
+        snp_key = snp_tuple[0].split("-")[-1].strip()
+        vcf_list = [] 
+        #print(snp_tuple)
+        match_v = ''
+        for v in snp_tuple[1:]:#choose the matched one for dup; if no matched, choose first
+            if len(v) > 0:
+                match_v = v
+                geno = v.strip().split()
+                if geno[1] == snp_key:
+                    match_v = v
+        if len(match_v) > 0:
+            vcf_list.append(match_v)
+            snp_found_list.append(snp_key)        
+        #create snp_key as chr7:pos_rs4
+        snp_dict[snp_key] = vcf_list
+    
+    missing_rs_snp = []
+    for snp_coord in snp_coords:
+        if snp_coord[-1] not in snp_found_list:
+            missing_rs.append(snp_coord[0])
+            missing_rs_snp.append([snp_coord[0],"chr"+snp_coord[1]+":"+snp_coord[2]])
+        else:
+            s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
+            snp_rs_dict[s_key] = snp_dict[snp_coord[2]]      
+    if output != None:
+        if len(missing_rs) == len(snp_coords):
+            output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
+            return "","",output
+        if len(missing_rs) > 0:
+            output["warning"] = "Query variant " + " ".join(missing_rs) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
+    
+    del snp_dict
+    sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+    return sorted_snp_rs,missing_rs_snp,output
+
+def customsort(key_snp1):
+    k = key_snp1[0].split("_")[0].split(':')[1]
+    k = int(k)
+    return k
+
+def get_vcf_snp_params(snp_pos,snp_coords,genome_build):
+     # Sort coordinates and make tabix formatted coordinates
+    snp_pos_int = [int(i) for i in snp_pos]
+    snp_pos_int.sort()
+    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
+    tabix_coords = " " + " ".join(snp_coord_str)
+    #print("tabix_coords", tabix_coords)
+    # # Extract 1000 Genomes phased genotypes
+    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
+    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
+    return vcf_filePath,tabix_coords,vcf_query_snp_file
+
+def LD_calcs(hap, allele_n):
+    # Extract haplotypes
+    A = hap["00"]
+    B = hap["01"]
+    C = hap["10"]
+    D = hap["11"]
+    N = A + B + C + D
+    delta = float(A*D-B*C)
+    Ms = float((A+C)*(B+D)*(A+B)*(C+D))
+    if Ms != 0:
+        # D prime
+        if delta < 0:
+            D_prime = abs(delta/min((A+C)*(A+B), (B+D)*(C+D)))
+        else:
+            D_prime = abs(delta/min((A+C)*(C+D), (A+B)*(B+D)))
+        # R2
+        r2 = (delta**2)/Ms
+        # Non-effect and Effect Alleles and their Allele Frequencies
+        allele1 = str(allele_n["0"])
+        allele1_freq = str(round(float(A + C) / N, 3)) if N > float(A + C) else "NA"
+
+        allele2 = str(allele_n["1"])
+        allele2_freq = str(round(float(B + D) / N, 3)) if N > float(B + D) else "NA"
+        return [r2, D_prime, "=".join([allele1, allele1_freq]), "=".join([allele2, allele2_freq])]
+
+def get_dbsnp_coord(db, chromosome, position,genome_build):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
