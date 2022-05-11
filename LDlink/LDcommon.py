@@ -121,11 +121,17 @@ def retrieveTabix1000GData(query_file, coords, query_dir):
     head = vcf[h].strip().split() 
     return vcf[h+1:],head
 
-def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request):
+def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request,is_output):
     export_s3_keys = retrieveAWSCredentials()
-    tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END > {3}".format(query_file, coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
+    if is_output:
+        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END > {3}".format(query_file, coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
+    else:
+        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, coords, query_dir)
+
+    tabix_snps = export_s3_keys + retrieve_command
     [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
     vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+      
     h = 0
     while vcf[h][0:2] == "##":
         h += 1
@@ -392,7 +398,7 @@ def set_alleles(a1, a2):
 #################################################
 # get the genotype ###
 #################################################
-def get_query_variant_c(snp_coord, pop_ids, request, genome_build):
+def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
     snp_coord_str = genome_build_vars[genome_build]['1000G_chr_prefix'] + str(snp_coord[1]) + ":" + str(snp_coord[2]) + "-" + str(snp_coord[2]) 
     tabix_coords = " " + (snp_coord_str)
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
@@ -403,15 +409,16 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build):
 
     checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
  
-    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request)
+    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
 
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
-        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+        if is_output:
+            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return (None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         geno = []
@@ -423,8 +430,9 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build):
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
-            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
+            if is_output:
+                subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+                subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
             return (None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
