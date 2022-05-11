@@ -38,7 +38,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     db = connectMongoDBReadOnly(True)
 
     snps = replace_coords_rsid_list(db, snps,genome_build,output)
-    
+
+
     # print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
     # Find RS numbers and genomic coords in snp database
     rs_nums = []

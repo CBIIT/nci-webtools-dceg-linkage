@@ -64,7 +64,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     db = connectMongoDBReadOnly(True)
 
     snps = replace_coords_rsid_list(db, snps,genome_build,output)
-
+  
     # Find RS numbers in snp database
     details = collections.OrderedDict()
     rs_nums = []
@@ -118,7 +118,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
             output["warning"] = "The following RS number(s) or coordinate(s) inputs have warnings: " + ", ".join(warn)
 
     if len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()

@@ -137,6 +137,8 @@ def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request):
 # Query genomic coordinates
 def get_rsnum(db, coord, genome_build):
     temp_coord = coord.strip("chr").split(":")
+    if len(temp_coord)<=1:
+        return 
     chro = temp_coord[0]
     pos = temp_coord[1]
     query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
@@ -515,9 +517,11 @@ def get_vcf_snp_params(snp_pos,snp_coords,genome_build):
      # Sort coordinates and make tabix formatted coordinates
     snp_pos_int = [int(i) for i in snp_pos]
     snp_pos_int.sort()
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
-    tabix_coords = " " + " ".join(snp_coord_str)
-    #print("tabix_coords", tabix_coords)
+    tabix_coords=""
+    for i in range(len(snp_pos_int)):
+        snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[i][1] + ":" + snp_coords[i][2] + "-" + snp_coords[i][2]]
+        tabix_coords = tabix_coords+" " + " ".join(snp_coord_str)
+    print("tabix_coords", tabix_coords)
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
@@ -553,3 +557,12 @@ def get_dbsnp_coord(db, chromosome, position,genome_build):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
+def check_same_chromosome(snp_coords,output):
+    # Check SNPs are all on the same chromosome
+    for i in range(len(snp_coords)):
+        if snp_coords[0][1] != snp_coords[i][1]:
+            output["error"] = "Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr" + \
+                str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
+                "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+". " + str(output["warning"] if "warning" in output else "")
+            return(json.dumps(output, sort_keys=True, indent=2))
+    return

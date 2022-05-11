@@ -22,7 +22,8 @@ from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords
 from LDutilites import get_config
-from LDcommon import get_query_variant_c,get_vcf_snp_params,retrieveTabix1000GDataSingle,parse_vcf
+from LDcommon import get_query_variant_c,get_vcf_snp_params,retrieveTabix1000GDataSingle,parse_vcf,check_same_chromosome
+
 # Set data directories using config.yml	
 param_list = get_config()
 dbsnp_version = param_list['dbsnp_version']
@@ -52,86 +53,6 @@ def get_ldexpress_tissues(web):
         return json_output
     else:
         return None
-
-def get_query_variant(snp_coord, pop_ids, request, genome_build):
-
-    export_s3_keys = retrieveAWSCredentials()
-
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
-    queryVariantWarnings = []
-    # Extract query SNP phased genotypes
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    # print("tabix_query_snp_h", tabix_query_snp_h)
-    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    # print("tabix_query_snp", tabix_query_snp)
-    subprocess.call(tabix_query_snp, shell=True)
-    tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-    #print(snp_coord)
-    #print(tabix_query_snp_out)
-    # Validate error
-    if len(tabix_query_snp_out) == 0:
-        # print("ERROR", "len(tabix_query_snp_out) == 0")
-        # handle error: snp + " is not in 1000G reference panel."
-        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
-        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-        #subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return (None, queryVariantWarnings)
-    elif len(tabix_query_snp_out) > 1:
-        #??? which should be the biallelic,??
-        geno = []
-        for i in range(len(tabix_query_snp_out)):
-            # if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
-            geno = tabix_query_snp_out[i].strip().split()
-            geno[0] = geno[0].lstrip('chr')
-        #???? what's the following parts means???
-        if geno == []: 
-            # print("ERROR", "geno == []")
-            # handle error: snp + " is not in 1000G reference panel."
-            queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
-            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            #subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-            return (None, queryVariantWarnings)
-    else:
-        geno = tabix_query_snp_out[0].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-    #print("#####geno:", geno[0],geno[1],geno[2])
-    #geno[2] does not have 'rs', grch37 has rs, but not grch38 and grch38 high coverage, 
-    #only mismatch in grch37 will be reported warning, 
-    if geno[2] != snp_coord[0] and "rs" in geno[2]:
-            queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
-            # snp = geno[2]
-    #print("####: geno[3]",geno)
-    if "," in geno[3] or "," in geno[4]:
-        # print('handle error: snp + " is not a biallelic variant."')
-        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
-
-    index = []
-    for i in range(9, len(head)):
-        if head[i] in pop_ids:
-            index.append(i)
-
-    genotypes = {"0": 0, "1": 0}
-    for i in index:
-        sub_geno = geno[i].split("|")
-        for j in sub_geno:
-            if j in genotypes:
-                genotypes[j] += 1
-            else:
-                genotypes[j] = 1
-
-    if genotypes["0"] == 0 or genotypes["1"] == 0:
-        # print('handle error: snp + " is monoallelic in the " + pop + " population."')
-        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
-      
-    return(geno, queryVariantWarnings)
-
 
 def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):
@@ -202,8 +123,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         return("", "", "", "", "", errors_warnings)
 
     sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,errors_warnings)
-    print("sanitized_query_snps", sanitized_query_snps)
-
+    
     # Find genomic coords of query snps in dbsnp 
     details = {}
     rs_nums = []
@@ -258,6 +178,11 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         errors_warnings["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + errors_warnings["warning"]
         subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
         return("", "", "", "", "", errors_warnings)
+
+    #if len(rs_nums) > 1:
+    #    is_not_same = check_same_chromosome(snp_coords,errors_warnings)
+    #    if is_not_same: 
+    #        return("", "", "", "", "", errors_warnings)
 
     thinned_snps = []
     output = {}

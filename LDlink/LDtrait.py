@@ -16,7 +16,7 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
-from LDcommon import validsnp, replace_coords_rsid_list,get_coords
+from LDcommon import validsnp, replace_coords_rsid_list,get_coords,get_population
 from LDutilites import get_config
 
 # Set data directories using config.yml	
@@ -204,24 +204,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
 
     # Select desired ancestral populations
     pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
-
-    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
-    subprocess.call(get_pops, shell=True)
-    
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
+    pop_ids = get_population(pop, request,output)
 
     sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,output)
 
@@ -281,7 +264,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -295,6 +278,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     found = {}	
     # calculate and store LD info for all LD pairs	
     ldPairs = []
+    snp_coords_gwas = []
     # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
         # print(snp_coord)
@@ -302,13 +286,17 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         # print("found", snp_coord[0], len(found[snp_coord[0]]))
         if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
+            snp_coords_gwas.append(snp_coord)
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found[snp_coord[0]]:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record[genome_build_vars[genome_build]['position']])])	
+                snp_coords_gwas.append(["rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record[genome_build_vars[genome_build]['position']])])
         else:	
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
                 
-    ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
+    ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
+    snp_coords_gwas_unique = [list(x) for x in set(tuple(x) for x in ldPairs)]
+    #print(snp_coords_gwas)	
     # print("ldPairsUnique", ldPairsUnique)	
     # print("ldPairsUnique length", len(ldPairsUnique))	
     # print("##### BEGIN MULTIPROCESSING LD CALCULATIONS #####")	
