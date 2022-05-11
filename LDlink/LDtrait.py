@@ -316,6 +316,10 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         ld_subprocess_commands.append("python3 LDtrait_ld_sub.py " + getPairLDArgs)
 
     ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
+
+    #for subp in ld_subprocesses:
+    #    for line in subp.stdout:
+    #        print(line.decode().strip())
     # collect output in parallel
     pool = Pool(len(ld_subprocesses))
     ldInfoSubsets = pool.map(get_output, ld_subprocesses)

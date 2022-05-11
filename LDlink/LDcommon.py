@@ -129,8 +129,9 @@ def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request,is_output
         retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, coords, query_dir)
 
     tabix_snps = export_s3_keys + retrieve_command
-    [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+    vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
+    if is_output:
+        vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
       
     h = 0
     while vcf[h][0:2] == "##":
@@ -531,6 +532,7 @@ def get_vcf_snp_params(snp_pos,snp_coords,genome_build):
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
+    #print("vcf_filePath",vcf_filePath,"snp_coords",snp_coords)
     return vcf_filePath,tabix_coords,vcf_query_snp_file
 
 def LD_calcs(hap, allele_n):
