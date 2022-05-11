@@ -48,68 +48,6 @@ def get_ldexpress_tissues(web):
         return json_output
     else:
         return None
-def get_query_variant(snp_coord, pop_ids, request, genome_build):
-    export_s3_keys = retrieveAWSCredentials()
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-    queryVariantWarnings = []
-    # Extract query SNP phased genotypes
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    tabix_query_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    # print("tabix_query_snp_h", tabix_query_snp_h)
-    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_query_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-    tabix_query_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord[1], snp_coord[2], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    # print("tabix_query_snp", tabix_query_snp)
-    subprocess.call(tabix_query_snp, shell=True)
-    tabix_query_snp_out = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-    # Validate error
-    if len(tabix_query_snp_out) == 0:
-        # print("ERROR", "len(tabix_query_snp_out) == 0")
-        # handle error: snp + " is not in 1000G reference panel."
-        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
-        subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return (None, queryVariantWarnings)
-    elif len(tabix_query_snp_out) > 1:
-        geno = []
-        for i in range(len(tabix_query_snp_out)):
-            if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
-                geno = tabix_query_snp_out[i].strip().split()
-                geno[0] = geno[0].lstrip('chr')
-        if geno == []:
-            # print("ERROR", "geno == []")
-            # handle error: snp + " is not in 1000G reference panel."
-            queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
-            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-            return (None, queryVariantWarnings)
-    else:
-        geno = tabix_query_snp_out[0].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-    
-    if geno[2] != snp_coord[0] and "rs" in geno[2]:
-            queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
-            # snp = geno[2]
-    if "," in geno[3] or "," in geno[4]:
-        # print('handle error: snp + " is not a biallelic variant."')
-        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
-    index = []
-    for i in range(9, len(head)):
-        if head[i] in pop_ids:
-            index.append(i)
-    genotypes = {"0": 0, "1": 0}
-    for i in index:
-        sub_geno = geno[i].split("|")
-        for j in sub_geno:
-            if j in genotypes:
-                genotypes[j] += 1
-            else:
-                genotypes[j] = 1
-    if genotypes["0"] == 0 or genotypes["1"] == 0:
-        # print('handle error: snp + " is monoallelic in the " + pop + " population."')
-        queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
-        
-    return(geno, queryVariantWarnings)
 
 def chunkWindow(pos, window, num_subprocesses):
     if (pos - window <= 0):

@@ -464,7 +464,6 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
         # print('handle error: snp + " is monoallelic in the " + pop + " population."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
 
-      
     return(geno, queryVariantWarnings)
 
 ###################################################
@@ -529,7 +528,6 @@ def get_vcf_snp_params(snp_pos,snp_coords,genome_build):
     for i in range(len(snp_pos_int)):
         snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[i][1] + ":" + snp_coords[i][2] + "-" + snp_coords[i][2]]
         tabix_coords = tabix_coords+" " + " ".join(snp_coord_str)
-    print("tabix_coords", tabix_coords)
     # # Extract 1000 Genomes phased genotypes
     vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
     vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
