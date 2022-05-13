@@ -91,7 +91,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + "). " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
-
+       
         # Check if SNPs are on the same chromosome
         if snp1_coord['chromosome'] != snp2_coord['chromosome']:
             if "warning" in output:
@@ -140,7 +140,6 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         vcf2 = vcf2_offset
 
         # Import SNP VCF files
-
         # SNP1
         if len(vcf1) == 0:
             output["error"] = snp1 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
@@ -205,7 +204,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         elif len(vcf2) > 1:
             geno2 = []
             for i in range(len(vcf2)):
-                geno2 = vcf1[i].strip().split()
+                geno2 = vcf2[i].strip().split()
                 geno2[0] = geno2[0].lstrip('chr')
                 if not (geno2[0] == snp1_coord['chromosome'] and geno2[1] == snp2_coord[genome_build_vars[genome_build]['position']]):
                     geno2 = []

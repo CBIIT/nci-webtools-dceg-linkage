@@ -125,7 +125,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         hap2.append([])
 
     # parse vcf
-    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build)
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,True)
     if "error" in output:
         return(json.dumps(output, sort_keys=True, indent=2))
            
@@ -139,9 +139,9 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         snp_key = snp_keys[0].split(':')[1]
         rs_input = snp_keys[1]
         geno_list = snp_dict[s_key] 
-        g = -1
+        
         for geno in geno_list:
-            g = g+1
+            #print("geno,",geno)
             geno = geno.strip().split()
             geno[0] = geno[0].lstrip('chr')
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
@@ -155,7 +155,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     output["warning"] = mismatch_msg
                 # throw an error in the event of missing query SNPs in 1000G data
                 geno[1] = snp_key
-
+    
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])
                 count0 = 0

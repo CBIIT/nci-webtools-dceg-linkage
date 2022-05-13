@@ -17,7 +17,7 @@ import botocore
 from multiprocessing.dummy import Pool
 import math
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population
+from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population,get_query_variant_c
 from LDutilites import get_config
 
 def chunkWindow(pos, window, num_subprocesses):
@@ -67,7 +67,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
 
-    validsnp(None,genome_build,None)
+    validsnp(None,genome_build,output)
 
     if window < 0 or window > 1000000:
         output["error"] = "Window value must be a number between 0 and 1,000,000."
@@ -105,98 +105,24 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         out_json.close()
         return("","")
 
-    # Extract query SNP phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (snp_coord['chromosome']))
-    vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-    tabix_snp = export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    subprocess.call(tabix_snp, shell=True)
-
-    # Check SNP is in the 1000G population, has the correct RS number, and not
-    # monoallelic
-    vcf = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-
-    print("vcf", vcf)
-    print("len(vcf)", len(vcf))
-
-    if len(vcf) == 0:
-        output["error"] = snp + " is not in 1000G reference panel."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        subprocess.call("rm " + tmp_dir + "pops_" +
-                        request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return("", "")
-
-    elif len(vcf) > 1:
-        geno = []
-        for i in range(len(vcf)):
-            # if vcf[i].strip().split()[2] == snp:
-            geno = vcf[i].strip().split()
-            geno[0] = geno[0].lstrip('chr')
-        if geno == []:
-            output["error"] = snp + " is not in 1000G reference panel."
+    temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
+    #print(temp)
+    (geno, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
+    #print(geno,warningmsg)
+    for msg in warningmsg:
+        if msg[1] == "NA":
+            output["error"] = str(output["error"] if "error" in output else "") + msg[2]
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print(json_output, file=out_json)
             out_json.close()
-            subprocess.call("rm " + tmp_dir + "pops_" +
-                            request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" +
-                            request + "*.vcf", shell=True)
+            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+            subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
             return("", "")
-
-    else:
-        geno = vcf[0].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-
-    if geno[2] != snp and snp[0:2]=="rs" and "rs" in geno[2]:
-            output["warning"] = "Genomic position for query variant (" + snp + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno[0]+":"+geno[1]+" = "+geno[2]+")"
+        else:
+            output["warning"] = str(output["warning"] if "warning" in output else "") + msg[2]
             snp = geno[2]
 
-    if "," in geno[3] or "," in geno[4]:
-        output["error"] = snp + " is not a biallelic variant."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        subprocess.call("rm " + tmp_dir + "pops_" +
-                        request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return("", "")
-
-    index = []
-    for i in range(9, len(head)):
-        if head[i] in pop_ids:
-            index.append(i)
-
-    genotypes = {"0": 0, "1": 0}
-    for i in index:
-        sub_geno = geno[i].split("|")
-        for j in sub_geno:
-            if j in genotypes:
-                genotypes[j] += 1
-            else:
-                genotypes[j] = 1
-
-    if genotypes["0"] == 0 or genotypes["1"] == 0:
-        output["error"] = snp + \
-            " is monoallelic in the " + pop + " population."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        subprocess.call("rm " + tmp_dir + "pops_" +
-                        request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return("", "")
-
+  
     # Define window of interest around query SNP
     # window = 500000
     coord1 = int(snp_coord[genome_build_vars[genome_build]['position']]) - window

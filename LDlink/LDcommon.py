@@ -440,7 +440,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
         geno[0] = geno[0].lstrip('chr')
     
     if geno[2] != snp_coord[0] and "rs" in geno[2]:
-            queryVariantWarnings.append([snp_coord[0], "NA", "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
+            queryVariantWarnings.append([snp_coord[0], geno[2], "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
             # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
@@ -470,7 +470,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
 ###################################################
 ######## parse vcf using --separate-regions   #####
 ###################################################
-def parse_vcf(vcf,snp_coords,output,genome_build):
+def parse_vcf(vcf,snp_coords,output,genome_build,is_multi):
     delimiter = "#"
     snp_lists = str('**'.join(vcf)).split(delimiter)
     snp_dict = {}
@@ -487,10 +487,14 @@ def parse_vcf(vcf,snp_coords,output,genome_build):
         match_v = ''
         for v in snp_tuple[1:]:#choose the matched one for dup; if no matched, choose first
             if len(v) > 0:
-                match_v = v
-                geno = v.strip().split()
-                if geno[1] == snp_key:
+                if is_multi:
+                    vcf_list.append(v)
+                    snp_found_list.append(snp_key)  
+                else:
                     match_v = v
+                    geno = v.strip().split()
+                    if geno[1] == snp_key:
+                        match_v = v
         if len(match_v) > 0:
             vcf_list.append(match_v)
             snp_found_list.append(snp_key)        

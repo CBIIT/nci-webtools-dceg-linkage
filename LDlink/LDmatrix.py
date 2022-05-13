@@ -148,7 +148,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         hap2.append([])
    
        # parse vcf
-    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build)
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,False)
      # all lists does not contain data which is returned from 1000G
  
     if "error" in output:

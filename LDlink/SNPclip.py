@@ -196,7 +196,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         if head[i] in pop_ids:
             pop_index.append(i)
 
-    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build)
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,True)
   
     if "error" in output:
         json_output = json.dumps(output, sort_keys=True, indent=2)
