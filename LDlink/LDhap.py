@@ -58,7 +58,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     ids = [i.strip() for i in pop_list]
     pop_ids = list(set(ids))
 
-    db = connectMongoDBReadOnly(web)
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

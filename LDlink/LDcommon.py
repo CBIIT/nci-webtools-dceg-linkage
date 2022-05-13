@@ -11,12 +11,13 @@ from collections import OrderedDict
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
 aws_info = config['aws']
-env = config['env']
 connect_external = config['database']['connect_external']
 api_mongo_addr = config['database']['api_mongo_addr']
 mongo_username = config['database']['mongo_user_readonly']
+mongo_username_api = config['database']['mongo_user_api']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+email_account = config['api']['email_account']
 
 genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
@@ -92,19 +93,12 @@ def retrieveAWSCredentials():
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
     return export_s3_keys
 
-def connectMongoDBReadOnly(web):
+def connectMongoDBReadOnly(readonly):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+    if bool(readonly):
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
+        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
     db = client["LDLink"]
     return db
 
@@ -266,3 +260,5 @@ def customsort(key_snp1):
     k = key_snp1[0].split("_")[0].split(':')[1]
     k = int(k)
     return k
+def getEmail():
+    return  email_account

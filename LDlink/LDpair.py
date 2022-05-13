@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 import re
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
 
 # Create LDpair function
 
@@ -21,17 +21,12 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
     env = config['env']
-    connect_external = config['database']['connect_external']
-    api_mongo_addr = config['database']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     population_samples_dir = config['data']['population_samples_dir']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
 
     export_s3_keys = retrieveAWSCredentials()
 
@@ -78,18 +73,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")
@@ -294,7 +278,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         elif len(vcf2) > 1:
             geno2 = []
             for i in range(len(vcf2)):
-                geno2 = vcf1[i].strip().split()
+                geno2 = vcf2[i].strip().split()
                 geno2[0] = geno2[0].lstrip('chr')
                 if not (geno2[0] == snp1_coord['chromosome'] and geno2[1] == snp2_coord[genome_build_vars[genome_build]['position']]):
                     geno2 = []

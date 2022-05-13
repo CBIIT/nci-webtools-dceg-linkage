@@ -10,26 +10,21 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
 from LDcommon import connectMongoDBReadOnly,retrieveTabix1000GData,parse_vcf
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene,connectMongoDBReadOnly
+
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
     with open('config.yml', 'r') as yml_file:
         config = yaml.load(yml_file)
-    env = config['env']
-    connect_external = config['database']['connect_external']
-    api_mongo_addr = config['database']['api_mongo_addr']
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
     population_samples_dir = config['data']['population_samples_dir']
     genotypes_dir = config['data']['genotypes_dir']
     aws_info = config['aws']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
+    
     export_s3_keys = retrieveAWSCredentials()
     
 
@@ -90,7 +85,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     pop_ids = list(set(ids))
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(web)
+    db = connectMongoDBReadOnly(True)
 
     def get_coords(db, rsid):
         rsid = rsid.strip("rs")

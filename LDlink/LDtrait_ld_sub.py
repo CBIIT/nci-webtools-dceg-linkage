@@ -17,18 +17,12 @@ genome_build = sys.argv[3]
 # Set data directories using config.yml
 with open('config.yml', 'r') as yml_file:
     config = yaml.load(yml_file)
-env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
 population_samples_dir = config['data']['population_samples_dir']
 data_dir = config['data']['data_dir']
 tmp_dir = config['data']['tmp_dir']
 genotypes_dir = config['data']['genotypes_dir']
 # reg_dir = config['data']['reg_dir']
 aws_info = config['aws']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
 
 export_s3_keys = retrieveAWSCredentials()
 

@@ -12,7 +12,7 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
@@ -21,18 +21,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# Set data directories using config.yml
 	with open('config.yml', 'r') as yml_file:
 		config = yaml.load(yml_file)
-	env = config['env']
-	connect_external = config['database']['connect_external']
-	api_mongo_addr = config['database']['api_mongo_addr']
 	dbsnp_version = config['data']['dbsnp_version']
 	data_dir = config['data']['data_dir']
 	tmp_dir = config['data']['tmp_dir']
 	population_samples_dir = config['data']['population_samples_dir']
 	genotypes_dir = config['data']['genotypes_dir']
 	aws_info = config['aws']
-	mongo_username = config['database']['mongo_user_readonly']
-	mongo_password = config['database']['mongo_password']
-	mongo_port = config['database']['mongo_port']
 	num_subprocesses = config['performance']['num_subprocesses']
 
 	export_s3_keys = retrieveAWSCredentials()
@@ -71,13 +65,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
-			if env == 'local' or connect_external:
-				mongo_host = api_mongo_addr
-			else: 
-				mongo_host = 'localhost'
-			client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-			db = client["LDLink"]
-			
+			db = connectMongoDBReadOnly(True)
+
 			def get_coords_var(db, rsid):
 				rsid = rsid.strip("rs")
 				query_results = db.dbsnp.find_one({"id": rsid})
@@ -196,12 +185,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				return None
 
 		# Connect to Mongo snp database
-		if env == 'local' or connect_external:
-			mongo_host = api_mongo_addr
-		else: 
-			mongo_host = 'localhost'
-		client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-		db = client["LDLink"]
+		db = connectMongoDBReadOnly(True)
+		
 
 		# Find RS number in snp database
 		gene_coord = get_coords_gene(myargs.name, db)
