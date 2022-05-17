@@ -24,6 +24,7 @@ tmp_dir = config['data']['tmp_dir']
 mongo_username = config['database']['mongo_user_api']
 mongo_password = config['database']['mongo_password']
 mongo_port = config['database']['mongo_port']
+api_mongo_addr = config['database']['api_mongo_addr']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
