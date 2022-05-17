@@ -9,23 +9,18 @@ from pymongo.errors import ConnectionFailure
 def getDatetime():
     return datetime.datetime.now()
 
-def connectMongoDB():
-    with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    api_mongo_addr = config['database']['api_mongo_addr']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_username_api = config['database']['mongo_user_api']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
-    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
-    db = client["LDLink"]
-    return db
-
 # script to free token locks older than 15 minutes at some scheduled time
 # triggered from CRON job
 def main():
-    db = connectMongoDB()
+    with open('/analysistools/public_html/apps/LDlink/app/config.yml', 'r') as yml_file:
+        config = yaml.load(yml_file)
+    api_mongo_addr = config['database']['api_mongo_addr']
+    mongo_username = config['database']['mongo_user_api']
+    mongo_password = config['database']['mongo_password']
+    mongo_port = config['database']['mongo_port']
+
+    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    db = client["LDLink"]
     users = db.api_users
     # current datetime
     present = getDatetime()
