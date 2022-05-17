@@ -294,7 +294,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         elif len(vcf2) > 1:
             geno2 = []
             for i in range(len(vcf2)):
-                geno2 = vcf1[i].strip().split()
+                geno2 = vcf2[i].strip().split()
                 geno2[0] = geno2[0].lstrip('chr')
                 if not (geno2[0] == snp1_coord['chromosome'] and geno2[1] == snp2_coord[genome_build_vars[genome_build]['position']]):
                     geno2 = []
