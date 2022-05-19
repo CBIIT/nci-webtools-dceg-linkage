@@ -151,7 +151,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 
 # log token's api call to api_log table
 def logAccess(token, module):
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(False)
     accessed = getDatetime()
     
     log = {
