@@ -106,8 +106,8 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0], genome_build)
-                print("snp_info_lst")
-                print(snp_info_lst)
+                #print("snp_info_lst")
+                #print(snp_info_lst)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -299,7 +299,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         if head[i] in pop_ids:
             pop_index.append(i)
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,False)
   
    # throw error if no data is returned from 1000G
     if len(missing_snp.split()) == len(snp_pos):

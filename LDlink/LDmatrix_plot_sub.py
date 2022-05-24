@@ -80,8 +80,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
+                #print("snp_info_lst")
+                #print(snp_info_lst)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
@@ -179,7 +179,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(index) - 1):
         hap2.append([])
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,True)
 
     rsnum_lst = []
     allele_lst = []

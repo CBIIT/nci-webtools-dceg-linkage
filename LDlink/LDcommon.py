@@ -212,7 +212,7 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
             }) + '\n')
     return recomb_results_sanitized
 
-def parse_vcf(vcf,snp_coords):
+def parse_vcf(vcf,snp_coords,ifsorted):
     delimiter = "#"
     snp_lists = str('**'.join(vcf)).split(delimiter)
     snp_dict = {}
@@ -251,14 +251,19 @@ def parse_vcf(vcf,snp_coords):
             s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
             snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
     del snp_dict
-
-    sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
     
+    sorted_snp_rs = snp_rs_dict
+    if ifsorted:
+        sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+
+    #print(sorted_snp_rs)
     return sorted_snp_rs," ".join(missing_rs)
 
 def customsort(key_snp1):
     k = key_snp1[0].split("_")[0].split(':')[1]
     k = int(k)
     return k
+
+
 def getEmail():
     return  email_account
