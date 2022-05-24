@@ -90,8 +90,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
                 new_snp_lst.append(snp_raw_i)
             else:
                 snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
+                #print("snp_info_lst")
+                #print(snp_info_lst)
                 if snp_info_lst != None:
                     if len(snp_info_lst) > 1:
                         var_id = "rs" + snp_info_lst[0]['id']
