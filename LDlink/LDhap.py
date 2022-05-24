@@ -240,7 +240,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         hap2.append([])
 
     # parse vcf
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,True)
    # throw error if no data is returned from 1000G
     if len(missing_snp.split()) == len(snp_pos):
         output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")

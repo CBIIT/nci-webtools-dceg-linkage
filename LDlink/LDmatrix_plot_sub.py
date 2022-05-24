@@ -189,7 +189,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(index) - 1):
         hap2.append([])
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,True)
 
     rsnum_lst = []
     allele_lst = []

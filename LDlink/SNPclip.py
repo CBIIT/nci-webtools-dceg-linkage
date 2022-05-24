@@ -305,7 +305,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         if head[i] in pop_ids:
             pop_index.append(i)
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords)
+    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,False)
   
    # throw error if no data is returned from 1000G
     if len(missing_snp.split()) == len(snp_pos):
