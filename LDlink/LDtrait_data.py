@@ -17,10 +17,11 @@ filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
-param_list = get_config()
+param_list = get_config('/analysistools/public_html/apps/LDlink/app/config.yml')
 tmp_dir = param_list['tmp_dir']
 aws_info = param_list['aws_info']
 ldtrait_src = param_list['ldtrait_src']
+
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -45,6 +46,8 @@ def main():
 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
+    #client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    #db = client["LDLink"]
     dbsnp = db.dbsnp
 
     # delete old error SNPs file if there is one

@@ -470,7 +470,8 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
 ###################################################
 ######## parse vcf using --separate-regions   #####
 ###################################################
-def parse_vcf(vcf,snp_coords,output,genome_build,is_multi):
+#def parse_vcf(vcf,snp_coords,output,genome_build,is_multi):
+def parse_vcf(vcf,snp_coords,output,genome_build,ifsorted):
     delimiter = "#"
     snp_lists = str('**'.join(vcf)).split(delimiter)
     snp_dict = {}
@@ -487,14 +488,18 @@ def parse_vcf(vcf,snp_coords,output,genome_build,is_multi):
         match_v = ''
         for v in snp_tuple[1:]:#choose the matched one for dup; if no matched, choose first
             if len(v) > 0:
-                if is_multi:
-                    vcf_list.append(v)
-                    snp_found_list.append(snp_key)  
-                else:
+                match_v = v
+                geno = v.strip().split()
+                if geno[1] == snp_key:
                     match_v = v
-                    geno = v.strip().split()
-                    if geno[1] == snp_key:
-                        match_v = v
+                # if is_multi:
+                #     vcf_list.append(v)
+                #     snp_found_list.append(snp_key)  
+                # else:
+                #     match_v = v
+                #     geno = v.strip().split()
+                #     if geno[1] == snp_key:
+                #         match_v = v
         if len(match_v) > 0:
             vcf_list.append(match_v)
             snp_found_list.append(snp_key)        
@@ -517,7 +522,12 @@ def parse_vcf(vcf,snp_coords,output,genome_build,is_multi):
             output["warning"] = "Query variant " + " ".join(missing_rs) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
     
     del snp_dict
-    sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+       
+    sorted_snp_rs = snp_rs_dict
+    if ifsorted:
+        sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
+
+    #print(sorted_snp_rs)
     return sorted_snp_rs,missing_rs_snp,output
 
 def customsort(key_snp1):
@@ -578,3 +588,6 @@ def check_same_chromosome(snp_coords,output):
                 "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+". " + str(output["warning"] if "warning" in output else "")
             return(json.dumps(output, sort_keys=True, indent=2))
     return
+
+def getEmail():
+    return  email_account

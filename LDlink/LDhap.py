@@ -125,10 +125,12 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         hap2.append([])
 
     # parse vcf
+    #snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,True)
     snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,True)
     if "error" in output:
-        return(json.dumps(output, sort_keys=True, indent=2))
-           
+       return(json.dumps(output, sort_keys=True, indent=2))
+    # throw error if no data is returned from 1000G
+              
     rsnum_lst = []
     allele_lst = []
     pos_lst = []

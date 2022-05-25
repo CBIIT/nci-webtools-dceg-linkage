@@ -3,9 +3,9 @@ import yaml
 
 
 # Set data directories using config.yml
-def get_config():
+def get_config(path='config.yml'):
     param_list = {}
-    with open('config.yml', 'r') as yml_file:
+    with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)
     
     param_list['env'] = config['env']
