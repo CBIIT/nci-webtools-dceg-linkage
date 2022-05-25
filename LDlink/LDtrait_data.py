@@ -9,19 +9,24 @@ from pymongo.errors import ConnectionFailure
 import time
 from timeit import default_timer as timer
 import yaml
-from LDcommon import connectMongoDBReadOnly
-from LDutilites import get_config
+from LDutilites import get_config,get_config_admin
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
-param_list = get_config('/analysistools/public_html/apps/LDlink/app/config.yml')
+path = '/analysistools/public_html/apps/LDlink/app/config.yml'
+param_list = get_config(path)
+param_list_db = get_config_admin(path)
 tmp_dir = param_list['tmp_dir']
 aws_info = param_list['aws_info']
 ldtrait_src = param_list['ldtrait_src']
 
+api_mongo_addr = param_list_db['api_mongo_addr']
+mongo_username_api = param_list_db['mongo_username_api']
+mongo_password = param_list_db['mongo_password']
+mongo_port = param_list_db['mongo_port']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -37,17 +42,14 @@ def downloadGWASCatalog():
     return filename
 
 def main():
-
     instance = sys.argv[1]
-
     print("Downloading GWAS catalog...")
     filename = downloadGWASCatalog()
     print(filename + " downloaded.")
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(True)
-    #client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
-    #db = client["LDLink"]
+    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    db = client["LDLink"]
     dbsnp = db.dbsnp
 
     # delete old error SNPs file if there is one

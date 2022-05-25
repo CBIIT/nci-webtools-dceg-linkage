@@ -22,9 +22,9 @@ def get_config(path='config.yml'):
    
     return (param_list)
 
-def get_config_admin():
+def get_config_admin(path='config.yml'):
     param_list = {}
-    with open('config.yml', 'r') as yml_file:
+    with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)
     
     param_list['api_mongo_addr'] = config['database']['api_mongo_addr']
