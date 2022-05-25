@@ -251,7 +251,7 @@ def parse_vcf(vcf,snp_coords,ifsorted):
             s_key = "chr"+snp_coord[1]+":"+snp_coord[2]+"_"+snp_coord[0]
             snp_rs_dict[s_key] = snp_dict[snp_coord[2]]
     del snp_dict
-    
+   
     sorted_snp_rs = snp_rs_dict
     if ifsorted:
         sorted_snp_rs = OrderedDict(sorted(snp_rs_dict.items(),key=customsort))
