@@ -436,7 +436,6 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
     else:
         geno = tabix_query_snp_out[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
-    
     if geno[2] != snp_coord[0] and "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], geno[2], "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
             output["warning"] = "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")." + str(output["warning"] if "warning" in output else "")

@@ -16,7 +16,6 @@ from LDutilites import get_config
 
 # Create LDpop function
 def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
-
     # trim any whitespace
     snp1 = snp1.lower().strip()
     snp2 = snp2.lower().strip() 
@@ -190,7 +189,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    temp = [snp1_coord['id'], str(snp1_coord['chromosome']), snp1_coord[genome_build_vars[genome_build]['position']]]
+    temp = [snp1, str(snp1_coord['chromosome']), snp1_coord[genome_build_vars[genome_build]['position']]]
     #vcf1,head1 = retrieveTabix1000GDataSingle(temp[2],temp, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
     (vcf1, rs1_dict, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
     if vcf1 == None:
@@ -198,7 +197,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
 
-    temp = [snp2_coord['id'], str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
+    temp = [snp2, str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
     (vcf2, rs2_dict, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
     if vcf2 == None:
         if web:
