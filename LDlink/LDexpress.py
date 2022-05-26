@@ -169,7 +169,6 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     for snp_coord in snp_coords:
         find_window_ld_start = timer()
         (geno, queryVariantWarnings) = get_query_variant_c(snp_coord, pop_ids, str(request), genome_build, True)
-        # print("geno", geno)
         # print("queryVariantWarnings", queryVariantWarnings)
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings

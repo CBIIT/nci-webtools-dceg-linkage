@@ -109,10 +109,12 @@ def connectMongoDBReadOnly(readonly):
     db = client["LDLink"]
     return db
 
-def retrieveTabix1000GData(query_file, coords, query_dir):
+def retrieveTabix1000GData(snp_pos, snp_coords, genome_build,query_dir):
+    vcf_filePath,tabix_coords,query_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     export_s3_keys = retrieveAWSCredentials()
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
-        query_file, coords, query_dir)
+        query_file, tabix_coords, query_dir)
     # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
     h = 0
@@ -121,12 +123,14 @@ def retrieveTabix1000GData(query_file, coords, query_dir):
     head = vcf[h].strip().split() 
     return vcf[h+1:],head
 
-def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request,is_output):
+def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,request,is_output):
+    vcf_filePath,tabix_coords,query_file=get_vcf_snp_params([vcf_pos],[snp_coord],genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     export_s3_keys = retrieveAWSCredentials()
     if is_output:
-        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END > {3}".format(query_file, coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
+        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END > {3}".format(query_file, tabix_coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
     else:
-        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, coords, query_dir)
+        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, tabix_coords, query_dir)
 
     tabix_snps = export_s3_keys + retrieve_command
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
@@ -400,18 +404,10 @@ def set_alleles(a1, a2):
 # get the genotype ###
 #################################################
 def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
-    snp_coord_str = genome_build_vars[genome_build]['1000G_chr_prefix'] + str(snp_coord[1]) + ":" + str(snp_coord[2]) + "-" + str(snp_coord[2]) 
-    tabix_coords = " " + (snp_coord_str)
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
     queryVariantWarnings = []
-    # Extract query SNP phased genotypes
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
- 
-    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
-
+    #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
+    tmp_coord = [str(x) for x in snp_coord]
+    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(str(snp_coord[2]),tmp_coord, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")
