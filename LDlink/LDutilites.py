@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 import yaml
 
-
+config_path='config.yml'
+config_abs_path= '/analysistools/public_html/apps/LDlink/app/config.yml'
 # Set data directories using config.yml
-def get_config(path='config.yml'):
+def get_config(path=config_path):
     param_list = {}
     with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)
@@ -22,7 +23,7 @@ def get_config(path='config.yml'):
    
     return (param_list)
 
-def get_config_admin(path='config.yml'):
+def get_config_admin(path=config_path):
     param_list = {}
     with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)

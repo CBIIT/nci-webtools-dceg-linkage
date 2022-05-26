@@ -5,7 +5,7 @@ import yaml
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure
 from LDutilites import get_config_admin
-
+import LDutilites
 # get current date and time
 def getDatetime():
     return datetime.datetime.now()
@@ -13,7 +13,7 @@ def getDatetime():
 # script to free token locks older than 15 minutes at some scheduled time
 # triggered from CRON job
 def main():
-    path = '/analysistools/public_html/apps/LDlink/app/config.yml'
+    path = LDutilites.config_abs_path
     param_list_db = get_config_admin(path)
     api_mongo_addr = param_list_db['api_mongo_addr']
     mongo_username_api = param_list_db['mongo_username_api']

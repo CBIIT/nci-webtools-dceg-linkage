@@ -10,13 +10,14 @@ import time
 from timeit import default_timer as timer
 import yaml
 from LDutilites import get_config,get_config_admin
+import LDutilites
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
-path = '/analysistools/public_html/apps/LDlink/app/config.yml'
+path = LDutilites.config_abs_path
 param_list = get_config(path)
 param_list_db = get_config_admin(path)
 tmp_dir = param_list['tmp_dir']
