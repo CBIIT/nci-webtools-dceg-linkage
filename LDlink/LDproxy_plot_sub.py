@@ -15,7 +15,7 @@ import weakref
 from multiprocessing.dummy import Pool
 import math
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import get_coords,replace_coord_rsid,,get_query_variant_c,LD_calcs
+from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,LD_calcs
 from LDutilites import get_config
 
 # LDproxy subprocess to export bokeh to high quality images in the background
@@ -76,7 +76,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
     #print(temp)
-    (geno, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
+    (geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
     #print(geno,warningmsg)
     for msg in warningmsg:
         if msg[1] != "NA":

@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
-from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords
+from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords,retrieveTabix1000GDataSingle,get_query_variant_c
 from LDutilites import get_config
 
 # Create LDpop function
@@ -190,111 +190,21 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     
     # Extract 1000 Genomes phased genotypes
     # SNP1
-    vcf_filePath1 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
-    vcf_rs1 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath1)
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath1)
-
-    rs1_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir']) 
-    vcf1 = [x.decode('utf-8') for x in subprocess.Popen(rs1_test, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    vcf_filePath2 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
-    vcf_rs2 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath2)
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath2)
-
-    # need to add | grep -v -e END ???
-    rs2_test = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(vcf_rs2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    vcf2 = [x.decode('utf-8') for x in subprocess.Popen(rs2_test, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    # Check if SNPs are in 1000G reference panel
-    # SNP1
-    if len(vcf1) == 0:
-        output["error"] = snp1 + " is not in 1000G reference panel."
+    temp = [snp1_coord['id'], str(snp1_coord['chromosome']), snp1_coord[genome_build_vars[genome_build]['position']]]
+    #vcf1,head1 = retrieveTabix1000GDataSingle(temp[2],temp, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+    (vcf1, rs1_dict, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
+    if vcf1 == None:
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
-    elif len(vcf1) > 1:
-        geno1 = []
-        for i in range(len(vcf1)):
-            # if vcf1[i].strip().split()[2] == snp1:
-            geno1 = vcf1[i].strip().split()
-            geno1[0] = geno1[0].lstrip('chr')
-        if geno1 == []:
-            output["error"] = snp1 + " is not in 1000G reference panel."
-            if web:
-                output = json.dumps(output, sort_keys=True, indent=2)
-            return output
-    else:
-        geno1 = vcf1[0].strip().split()
-        geno1[0] = geno1[0].lstrip('chr')
 
-    if geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
-        else:
-            output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno1[0]+":"+geno1[1]+" = "+geno1[2]+")"
-        snp1 = geno1[2]
-
-    if "," in geno1[3] or "," in geno1[4]:
-        output["error"] = snp1 + " is not a biallelic variant."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    # SNP2
-    if len(vcf2) == 0:
-        output["error"] = snp2 + " is not in 1000G reference panel."
+    temp = [snp2_coord['id'], str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
+    (vcf2, rs2_dict, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
+    if vcf2 == None:
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
-    elif len(vcf2) > 1:
-        geno2 = []
-        for i in range(len(vcf2)):
-            # if vcf2[i].strip().split()[2] == snp2:
-            geno2 = vcf2[i].strip().split()
-            geno2[0] = geno2[0].lstrip('chr')
-        if geno2 == []:
-            output["error"] = snp2 + " is not in 1000G reference panel."
-            if web:
-                output = json.dumps(output, sort_keys=True, indent=2)
-            return output
-    else:
-        geno2 = vcf2[0].strip().split()
-        geno2[0] = geno2[0].lstrip('chr')
-
-    if geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]:
-        if "warning" in output:
-            output["warning"] = output["warning"] + \
-                ". Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
-        else:
-            output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                ") does not match RS number at 1000G position (chr" + \
-                geno2[0]+":"+geno2[1]+" = "+geno2[2]+")"
-        snp2 = geno2[2]
-
-    if "," in geno2[3] or "," in geno2[4]:
-        output["error"] = snp2 + " is not a biallelic variant."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    # vcf1 = vcf1[0].strip().split()
-    # vcf2 = vcf2[0].strip().split()
-
-    # Get headers
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_rs2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    head2 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-    rs1_dict = dict(list(zip(head1, geno1)))
-    rs2_dict = dict(list(zip(head2, geno2)))
-    
+ 
     if "<" in rs1_dict["REF"]:
         if "warning" in output:
             output["warning"] = output["warning"] + \

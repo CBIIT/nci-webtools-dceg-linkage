@@ -403,7 +403,7 @@ def set_alleles(a1, a2):
 #################################################
 # get the genotype ###
 #################################################
-def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
+def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,output=[]):
     queryVariantWarnings = []
     #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
     tmp_coord = [str(x) for x in snp_coord]
@@ -413,10 +413,11 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+        output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
         if is_output:
             subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
             subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return (None, queryVariantWarnings)
+        return (None, None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         geno = []
         for i in range(len(tabix_query_snp_out)):
@@ -427,16 +428,19 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+            output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
             if is_output:
                 subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
                 subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-            return (None, queryVariantWarnings)
+            return (None,None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
     
     if geno[2] != snp_coord[0] and "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], geno[2], "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
+            output["warning"] = "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")." + str(output["warning"] if "warning" in output else "")
+
             # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
@@ -460,8 +464,9 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
     if genotypes["0"] == 0 or genotypes["1"] == 0:
         # print('handle error: snp + " is monoallelic in the " + pop + " population."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
-
-    return(geno, queryVariantWarnings)
+    
+    rs_dict = dict(list(zip(head, geno)))
+    return(geno,rs_dict,queryVariantWarnings)
 
 ###################################################
 ######## parse vcf using --separate-regions   #####
