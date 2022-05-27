@@ -74,8 +74,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         return output
     # Check if SNPs are on the same chromosome
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
-        output["warning"] = snp1 + " and " + \
-            snp2 + " are on different chromosomes"
+        output["warning"] = snp1 + " and " + snp2 + " are on different chromosomes"
 
     # Check if input SNPs are on chromosome Y while genome build == grch38
     # SNP1
@@ -191,19 +190,21 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # SNP1
     temp = [snp1, str(snp1_coord['chromosome']), snp1_coord[genome_build_vars[genome_build]['position']]]
     #vcf1,head1 = retrieveTabix1000GDataSingle(temp[2],temp, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
-    (vcf1, rs1_dict, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
+    (vcf1, head1, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
     if vcf1 == None:
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
 
     temp = [snp2, str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
-    (vcf2, rs2_dict, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
+    (vcf2, head2, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
     if vcf2 == None:
         if web:
             output = json.dumps(output, sort_keys=True, indent=2)
         return output
- 
+    
+    rs1_dict = dict(list(zip(head1, vcf1)))
+    rs2_dict = dict(list(zip(head2, vcf2)))
     if "<" in rs1_dict["REF"]:
         if "warning" in output:
             output["warning"] = output["warning"] + \

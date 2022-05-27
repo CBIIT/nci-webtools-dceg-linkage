@@ -12,7 +12,7 @@ import sys
 import time
 import re
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,validsnp
-from LDcommon import replace_coord_rsid, get_coords,get_population
+from LDcommon import replace_coord_rsid, get_coords,get_population,get_query_variant_c,check_allele
 from LDutilites import get_config
 # Create LDpair function
 
@@ -115,140 +115,23 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         # Extract 1000 Genomes phased genotypes
 
         # SNP1
-        vcf_filePath1 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
-        vcf_file1 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath1)
-
-        checkS3File(aws_info, aws_info['bucket'], vcf_filePath1)
-
-        tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-            vcf_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-        vcf1_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-        # SNP2
-        vcf_filePath2 = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
-        vcf_file2 = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath2)
-
-        checkS3File(aws_info, aws_info['bucket'], vcf_filePath2)
-
-        tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(
-            vcf_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-        vcf2_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
+        temp = [snp1, str(snp1_coord['chromosome']), snp1_coord[genome_build_vars[genome_build]['position']]]
+        #vcf1,head1 = retrieveTabix1000GDataSingle(temp[2],temp, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+        (vcf1, head1, output2) = get_query_variant_c(temp, pop_ids, str(request), genome_build, False,output)   
+        output_list.append(output)
+       
+        temp = [snp2, str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
+        (vcf2, head2, output2) = get_query_variant_c(temp, pop_ids, str(request), genome_build, False,output)   
+        output_list.append(output)
+      
         vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]
         vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]
-        vcf1 = vcf1_offset
-        vcf2 = vcf2_offset
 
-        # Import SNP VCF files
-        # SNP1
-        if len(vcf1) == 0:
-            output["error"] = snp1 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
-            output_list.append(output)
-            continue
-
-        elif len(vcf1) > 1:
-            geno1 = []
-            for i in range(len(vcf1)):
-                geno1 = vcf1[i].strip().split()
-                geno1[0] = geno1[0].lstrip('chr')
-                if not (geno1[0] == snp1_coord['chromosome'] and geno1[1] == snp1_coord[genome_build_vars[genome_build]['position']]):
-                    geno1 = []
-            if geno1 == []:
-                output["error"] = snp1 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
-                output_list.append(output)
-                continue
-
-        else:
-            geno1 = vcf1[0].strip().split()
-            geno1[0] = geno1[0].lstrip('chr')
-
-        if geno1[2] != snp1 and snp1[0:2] == "rs" and "rs" in geno1[2]:
-            if "warning" in output:
-                output["warning"] = output["warning"] + \
-                    "Genomic position for query variant1 (" + snp1 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+"). "
-            else:
-                output["warning"] = "Genomic position for query variant1 (" + snp1 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno1[0]+":"+geno1[1]+" = "+geno1[2]+"). "
-            snp1 = geno1[2]
-
-        if "," in geno1[3] or "," in geno1[4]:
-            output["error"] = snp1 + " is not a biallelic variant. " + str(output["warning"] if "warning" in output else "")
-            output_list.append(output)
-            continue
-
-        if len(geno1[3]) == 1 and len(geno1[4]) == 1:
-            snp1_a1 = geno1[3]
-            snp1_a2 = geno1[4]
-        elif len(geno1[3]) == 1 and len(geno1[4]) > 1:
-            snp1_a1 = "-"
-            snp1_a2 = geno1[4][1:]
-        elif len(geno1[3]) > 1 and len(geno1[4]) == 1:
-            snp1_a1 = geno1[3][1:]
-            snp1_a2 = "-"
-        elif len(geno1[3]) > 1 and len(geno1[4]) > 1:
-            snp1_a1 = geno1[3][1:]
-            snp1_a2 = geno1[4][1:]
-
-        allele1 = {"0|0": [snp1_a1, snp1_a1], "0|1": [snp1_a1, snp1_a2], "1|0": [snp1_a2, snp1_a1], "1|1": [
-            snp1_a2, snp1_a2], "0": [snp1_a1, "."], "1": [snp1_a2, "."], "./.": [".", "."], ".": [".", "."]}
-
-        # SNP2
-        if len(vcf2) == 0:
-            output["error"] = snp2 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
-            output_list.append(output)
-            continue
-
-        elif len(vcf2) > 1:
-            geno2 = []
-            for i in range(len(vcf2)):
-                geno2 = vcf2[i].strip().split()
-                geno2[0] = geno2[0].lstrip('chr')
-                if not (geno2[0] == snp1_coord['chromosome'] and geno2[1] == snp2_coord[genome_build_vars[genome_build]['position']]):
-                    geno2 = []
-            if geno2 == []:
-                output["error"] = snp2 + " is not in 1000G reference panel. " + str(output["warning"] if "warning" in output else "")
-                output_list.append(output)
-                continue
-
-        else:
-            geno2 = vcf2[0].strip().split()
-            geno2[0] = geno2[0].lstrip('chr')
-
-        if geno2[2] != snp2 and snp2[0:2] == "rs" and "rs" in geno2[2]:
-            if "warning" in output:
-                output["warning"] = output["warning"] + \
-                    "Genomic position for query variant2 (" + snp2 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+"). "
-            else:
-                output["warning"] = "Genomic position for query variant2 (" + snp2 + \
-                    ") does not match RS number at 1000G position (chr" + \
-                    geno2[0]+":"+geno2[1]+" = "+geno2[2]+"). "
-            snp2 = geno2[2]
-
-        if "," in geno2[3] or "," in geno2[4]:
-            output["error"] = snp2 + " is not a biallelic variant. " + str(output["warning"] if "warning" in output else "")
-            output_list.append(output)
-            continue
-
-        if len(geno2[3]) == 1 and len(geno2[4]) == 1:
-            snp2_a1 = geno2[3]
-            snp2_a2 = geno2[4]
-        elif len(geno2[3]) == 1 and len(geno2[4]) > 1:
-            snp2_a1 = "-"
-            snp2_a2 = geno2[4][1:]
-        elif len(geno2[3]) > 1 and len(geno2[4]) == 1:
-            snp2_a1 = geno2[3][1:]
-            snp2_a2 = "-"
-        elif len(geno2[3]) > 1 and len(geno2[4]) > 1:
-            snp2_a1 = geno2[3][1:]
-            snp2_a2 = geno2[4][1:]
-
-        allele2 = {"0|0": [snp2_a1, snp2_a1], "0|1": [snp2_a1, snp2_a2], "1|0": [snp2_a2, snp2_a1], "1|1": [
-            snp2_a2, snp2_a2], "0": [snp2_a1, "."], "1": [snp2_a2, "."], "./.": [".", "."], ".": [".", "."]}
+        geno1 = vcf1
+        geno2 = vcf2
+   
+        allele1,snp1_a1, snp1_a2 = check_allele(geno1)
+        allele2,snp2_a1, snp2_a2 = check_allele(geno2)
 
         if geno1[1] != vcf1_pos:
             if "warning" in output:
@@ -266,13 +149,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
             output_list.append(output)
             geno2[1] = vcf2_pos
 
-        # Get headers
-        tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-        head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-        tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-        head2 =  [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
+    
         # Combine phased genotypes
         geno = {}
         for i in range(9, len(head1)):

@@ -464,8 +464,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
         # print('handle error: snp + " is monoallelic in the " + pop + " population."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
     
-    rs_dict = dict(list(zip(head, geno)))
-    return(geno,rs_dict,queryVariantWarnings)
+    return(geno,head,queryVariantWarnings)
 
 ###################################################
 ######## parse vcf using --separate-regions   #####
@@ -591,3 +590,21 @@ def check_same_chromosome(snp_coords,output):
 
 def getEmail():
     return  email_account
+
+def check_allele(geno):
+    if len(geno[3]) == 1 and len(geno[4]) == 1:
+        snp_a1 = geno[3]
+        snp_a2 = geno[4]
+    elif len(geno[3]) == 1 and len(geno[4]) > 1:
+        snp_a1 = "-"
+        snp_a2 = geno[4][1:]
+    elif len(geno[3]) > 1 and len(geno[4]) == 1:
+        snp_a1 = geno[3][1:]
+        snp_a2 = "-"
+    elif len(geno[3]) > 1 and len(geno[4]) > 1:
+        snp_a1 = geno[3][1:]
+        snp_a2 = geno[4][1:]
+
+    allele = {"0|0": [snp_a1, snp_a1], "0|1": [snp_a1, snp_a2], "1|0": [snp_a2, snp_a1], "1|1": [
+        snp_a2, snp_a2], "0": [snp_a1, "."], "1": [snp_a2, "."], "./.": [".", "."], ".": [".", "."]}
+    return allele,snp_a1,snp_a2
