@@ -74,8 +74,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
         return output
     # Check if SNPs are on the same chromosome
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
-        output["warning"] = snp1 + " and " + snp2 + " are on different chromosomes"
-
+        output["warning"] = str(output["warning"] if "warning" in output else "") + snp1 + " and " + snp2 + " are on different chromosomes. "
+ 
     # Check if input SNPs are on chromosome Y while genome build == grch38
     # SNP1
     if snp1_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):

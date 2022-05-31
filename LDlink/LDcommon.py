@@ -266,7 +266,11 @@ def validsnp(snplst,genome_build,snp_limits):
         try:
             snps_raw = open(snplst).readlines()
         except:
-            snps_raw = snplst.split("+")
+            try:
+                snps_raw = snplst.split("+")
+            except: # for ldpair post input as array
+                snps_raw = snplst
+
         if snp_limits:
             if len(snps_raw) > snp_limits:
                 output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
@@ -276,11 +280,12 @@ def validsnp(snplst,genome_build,snp_limits):
         # Remove duplicate RS numbers and cast to lower case
         snps = []
         for snp_raw in snps_raw:
-            if snp_raw:
+            if type(snp_raw) is str:
                 snp = snp_raw.lower().strip().split()
                 if snp not in snps:
                     snps.append(snp)
-
+            else:
+                snps.append(snp_raw)
         return snps
     return 
 
@@ -403,7 +408,7 @@ def set_alleles(a1, a2):
 #################################################
 # get the genotype ###
 #################################################
-def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,output=[]):
+def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,output={}):
     queryVariantWarnings = []
     #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
     tmp_coord = [str(x) for x in snp_coord]
@@ -424,6 +429,9 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
             # if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
             geno = tabix_query_snp_out[i].strip().split()
             geno[0] = geno[0].lstrip('chr')
+            #skip the geno did not on the same chromesome??
+            #if not (geno[0] == snp_coord[1] and geno[1] == snp_coord[2]):
+            #        geno = []
         if geno == []:
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
@@ -608,3 +616,5 @@ def check_allele(geno):
     allele = {"0|0": [snp_a1, snp_a1], "0|1": [snp_a1, snp_a2], "1|0": [snp_a2, snp_a1], "1|1": [
         snp_a2, snp_a2], "0": [snp_a1, "."], "1": [snp_a2, "."], "./.": [".", "."], ".": [".", "."]}
     return allele,snp_a1,snp_a2
+
+

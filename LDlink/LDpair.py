@@ -36,8 +36,17 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
     # Create JSON output
     output_list = []
+    snp_pair_limit = 10
+    
+    # # Throw max SNP pairs error message
+    # if len(snp_pairs) > snp_pair_limit:
+    #     error_out = [{
+    #         "error": "Maximum SNP pair list is " + str(snp_pair_limit) + " pairs. Your list contains " + str(len(snp_pairs)) + " pairs."
+    #     }]
+    #     return(json.dumps(error_out, sort_keys=True, indent=2))
+
     #if return value is string, then it is error message and need to return the message
-    snps = validsnp(None,genome_build,None)
+    snps = validsnp(snp_pairs,genome_build,snp_pair_limit)
     if isinstance(snps, str):
        return snps
     # Select desired ancestral populations
@@ -94,11 +103,8 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
        
         # Check if SNPs are on the same chromosome
         if snp1_coord['chromosome'] != snp2_coord['chromosome']:
-            if "warning" in output:
-                output["warning"] = output["warning"] + snp1 + " and " + snp2 + " are on different chromosomes. "
-            else:
-                output["warning"] = snp1 + " and " + snp2 + " are on different chromosomes. "
-
+            output["warning"] = str(output["warning"] if "warning" in output else "") + snp1 + " and " + snp2 + " are on different chromosomes. "
+ 
         # Check if input SNPs are on chromosome Y while genome build == grch38
         # SNP1
         if snp1_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
@@ -134,18 +140,12 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         allele2,snp2_a1, snp2_a2 = check_allele(geno2)
 
         if geno1[1] != vcf1_pos:
-            if "warning" in output:
-                output["warning"] =  output["warning"] + "VCF File does not match variant coordinates for SNP1. "
-            else:
-                output["warning"] = "VCF File does not match variant coordinates for SNP1. "
+            output["warning"] = str(output["warning"] if "warning" in output else "")  + "VCF File does not match variant coordinates for SNP1. "
             output_list.append(output)
             geno1[1] = vcf1_pos
 
         if geno2[1] != vcf2_pos:
-            if "warning" in output:
-                output["warning"] = output["warning"] + "VCF File does not match variant coordinates for SNP2. "
-            else:
-                output["warning"] = "VCF File does not match variant coordinates for SNP2. "
+            output["warning"] = str(output["warning"] if "warning" in output else "")  + "VCF File does not match variant coordinates for SNP1. "
             output_list.append(output)
             geno2[1] = vcf2_pos
 

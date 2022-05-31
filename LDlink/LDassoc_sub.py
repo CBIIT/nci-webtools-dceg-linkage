@@ -8,7 +8,7 @@ import subprocess
 import sys
 import yaml
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import set_alleles
+from LDcommon import set_alleles,get_dbsnp_coord,get_coords
 from LDutilites import get_config
 
 snp = sys.argv[1]
@@ -97,17 +97,6 @@ def get_regDB(chr, pos):
     else:
         return result["score"]
 
-def get_dbsnp_rsid(db, rsid):
-    rsid = rsid.strip("rs")
-    query_results = db.dbsnp.find_one({"id": rsid})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
-
-def get_dbsnp_coord(db, chromosome, position):
-    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
-
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 geno = vcf[0].strip().split()
@@ -168,7 +157,7 @@ for geno_n in vcf:
 
             # Get dbSNP function
             if rs_n[0:2] == "rs":
-                snp_coord = get_dbsnp_rsid(db, rs_n)
+                snp_coord = get_coords(db, rs_n)
 
                 if snp_coord != None:
                     funct = snp_coord['function']

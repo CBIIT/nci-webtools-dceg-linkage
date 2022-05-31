@@ -115,6 +115,10 @@ def get_dbsnp_coord(db, chromosome, position):
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+h = 0
+while vcf[h][0:2] == "##":
+    h += 1
+vcf = vcf[h+1:]
 
 if len(vcf) > 1:
     for i in range(len(vcf)):

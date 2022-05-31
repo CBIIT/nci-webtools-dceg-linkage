@@ -14,7 +14,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import retrieveTabix1000GData,parse_vcf,get_vcf_snp_params
+from LDcommon import retrieveTabix1000GData,parse_vcf,get_vcf_snp_params,check_same_chromosome
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
@@ -107,15 +107,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return("", "")
 
     # Check SNPs are all on the same chromosome
-    for i in range(len(snp_coords)):
-        if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(
-                snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "")
-
+    check_same_chromosome(snp_coords,output)
     # Check max distance between SNPs
     distance_bp = []
     for i in range(len(snp_coords)):

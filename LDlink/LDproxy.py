@@ -67,7 +67,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
 
-    validsnp(None,genome_build,output)
+    validsnp(None,genome_build,None)
 
     if window < 0 or window > 1000000:
         output["error"] = "Window value must be a number between 0 and 1,000,000."
@@ -108,7 +108,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
     #print(temp)
     (geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
-    print(warningmsg)
+    #print(warningmsg)
     for msg in warningmsg:
         if msg[1] == "NA":
             output["error"] = str(output["error"] if "error" in output else "") + msg[2]
@@ -145,8 +145,10 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]
-
-    # collect output in parallel
+    # for subp in processes:
+    #    for line in subp.stdout:
+    #        print(line.decode().strip())
+ 
     def get_output(process):
         return process.communicate()[0].splitlines()
 

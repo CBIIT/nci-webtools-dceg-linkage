@@ -108,7 +108,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     if isinstance(pop_ids, str):
         return("", "", "", "", "", errors_warnings)
     sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,errors_warnings)
-    print("sanitized_query_snps", sanitized_query_snps)
+    # print("sanitized_query_snps", sanitized_query_snps)
     # Find genomic coords of query snps in dbsnp 
     details = {}
     rs_nums = []
@@ -176,7 +176,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             ###### SPLIT TASK UP INTO # PARALLEL SUBPROCESSES ######
             # find query window snps via tabix, calculate LD and apply R2/D' thresholds
             windowChunkRanges = chunkWindow(snp_coord[2], window, num_subprocesses)
-            
+
             ld_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
                 getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold), str(genome_build)])
@@ -203,6 +203,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             tissues_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
                 getTissuesArgs = " ".join([str(web), str(request), str(subprocess_id), str(p_threshold), str(tissues), str(genome_build)])
+                #print(getTissuesArgs)
                 tissues_subprocess_commands.append("python3 LDexpress_tissues_sub.py " + getTissuesArgs)
             tissues_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in tissues_subprocess_commands]
             # getTissuesArgs = []   
