@@ -99,6 +99,11 @@ def get_regDB(chr, pos):
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+h = 0
+while vcf[h][0:2] == "##":
+    h += 1
+vcf = vcf[h+1:]
+
 geno = vcf[0].strip().split()
 geno[0] = geno[0].lstrip('chr')
 

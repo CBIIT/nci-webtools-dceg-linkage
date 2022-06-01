@@ -14,7 +14,7 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c
 from LDutilites import get_config
 
 # LDassoc subprocess to export bokeh to high quality images in the background
@@ -244,120 +244,11 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     except NameError:
         for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
             snp="chr"+var_p[0].split("-")[0]
-
-            # Extract lowest P SNP phased genotypes
-            vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-            vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
-            checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-            tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-            head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-            
-            # Check lowest P SNP is in the 1000G population and not monoallelic from LDassoc.py output file
-            vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
-            if len(vcf)==0:
-                continue
-            elif len(vcf)>1:
-                geno=vcf[0].strip().split()
-                geno[0] = geno[0].lstrip('chr')
-            else:
-                geno=vcf[0].strip().split()
-                geno[0] = geno[0].lstrip('chr')
-
-            if "," in geno[3] or "," in geno[4]:
-                continue
-
-            index=[]
-            for i in range(9,len(head)):
-                if head[i] in pop_ids:
-                    index.append(i)
-
-            genotypes={"0":0, "1":0}
-            for i in index:
-                sub_geno=geno[i].split("|")
-                for j in sub_geno:
-                    if j in genotypes:
-                        genotypes[j]+=1
-                    else:
-                        genotypes[j]=1
-
-            if genotypes["0"]==0 or genotypes["1"]==0:
-                continue
-
-            org_coord=var_p[0].split("-")[1]
-            break
-
-
+       
     else:
         if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome+":"+org_coord+"-"+org_coord not in assoc_coords:
             return None
-            
-
-        # Extract query SNP phased genotypes
-        vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-        vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
-        checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-        tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-        head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-        # Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
-        vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
-        if len(vcf)==0:
-            subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-            subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-            return None
-            
-        elif len(vcf)>1:
-            geno=[]
-            for i in range(len(vcf)):
-                # if vcf[i].strip().split()[2] == snp:
-                geno = vcf[i].strip().split()
-                geno[0] = geno[0].lstrip('chr')
-            if geno == []:
-                subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-                subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-                return None
-                
-        else:
-            geno=vcf[0].strip().split()
-            geno[0] = geno[0].lstrip('chr')
-
-        if geno[2]!=snp and snp[0:2]=="rs" and "rs" in geno[2]:
-            snp = geno[2]
-
-        if "," in geno[3] or "," in geno[4]:
-            subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-            subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-            return None
-            
-
-
-        index=[]
-        for i in range(9,len(head)):
-            if head[i] in pop_ids:
-                index.append(i)
-
-        genotypes={"0":0, "1":0}
-        for i in index:
-            sub_geno=geno[i].split("|")
-            for j in sub_geno:
-                if j in genotypes:
-                    genotypes[j]+=1
-                else:
-                    genotypes[j]=1
-
-        if genotypes["0"]==0 or genotypes["1"]==0:
-            subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-            subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-            return None
-            
-
-
+  
     # Calculate proxy LD statistics in parallel
     if len(assoc_coords) < 60:
         num_subprocesses = 1
