@@ -17,24 +17,8 @@ import botocore
 from multiprocessing.dummy import Pool
 import math
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population,get_query_variant_c
+from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population,get_query_variant_c,chunkWindow,get_output
 from LDutilites import get_config
-
-def chunkWindow(pos, window, num_subprocesses):
-    if (pos - window <= 0):
-        minPos = 0
-    else:
-        minPos = pos - window
-    maxPos = pos + window
-    windowRange = maxPos - minPos
-    chunks = []
-    newMin = minPos
-    newMax = 0
-    for _ in range(num_subprocesses):
-        newMax = newMin + (windowRange / num_subprocesses)
-        chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax + 1
-    return chunks
 
 # Create LDproxy function
 def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
@@ -67,7 +51,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
 
-    validsnp(None,genome_build,output)
+    validsnp(None,genome_build,None)
 
     if window < 0 or window > 1000000:
         output["error"] = "Window value must be a number between 0 and 1,000,000."
@@ -107,8 +91,8 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
     #print(temp)
-    (geno, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
-    #print(geno,warningmsg)
+    (geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
+    #print(warningmsg)
     for msg in warningmsg:
         if msg[1] == "NA":
             output["error"] = str(output["error"] if "error" in output else "") + msg[2]
@@ -121,7 +105,6 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         else:
             output["warning"] = str(output["warning"] if "warning" in output else "") + msg[2]
             snp = geno[2]
-
   
     # Define window of interest around query SNP
     # window = 500000
@@ -146,11 +129,10 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]
-
-    # collect output in parallel
-    def get_output(process):
-        return process.communicate()[0].splitlines()
-
+    # for subp in processes:
+    #    for line in subp.stdout:
+    #        print(line.decode().strip())
+ 
     if not hasattr(threading.current_thread(), "_children"):
         threading.current_thread()._children = weakref.WeakKeyDictionary()
 

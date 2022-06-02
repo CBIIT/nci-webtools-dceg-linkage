@@ -13,7 +13,7 @@ import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,get_coords_gene, get_population
+from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
 from LDutilites import get_config
 
 # Create LDproxy function
@@ -362,23 +362,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	except NameError:
 		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
 			snp="chr"+var_p[0].split("-")[0]
-
-			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-			vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
-			checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-			subprocess.call(tabix_snp, shell=True)
-
-
-			# Check lowest P SNP is in the 1000G population and not monoallelic
-			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
+			# Extract query SNP phased genotypes
+			temp = [snp, str(chromosome), org_coord]
+			#print(temp)
+			(geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
+			vcf = geno
 			if len(vcf)==0:
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
@@ -428,8 +416,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 			org_coord=var_p[0].split("-")[1]
 			break
-
-
 	else:
 		if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + org_coord + "-" + org_coord not in assoc_coords:
 			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
@@ -439,92 +425,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-		vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
-		checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-
-		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-		head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-		subprocess.call(tabix_snp, shell=True)
+		temp = [snp, str(chromosome), org_coord]
+		#print(temp)
+		(geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
 
 
-		# Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
-		vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
-		if len(vcf)==0:
-			output["error"]=snp+" is not in 1000G reference panel."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			print("Temporary population file removed.")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
-			
-		elif len(vcf)>1:
-			geno=[]
-			for i in range(len(vcf)):
-				# if vcf[i].strip().split()[2] == snp:
-				geno = vcf[i].strip().split()
-				geno[0] = geno[0].lstrip('chr')
-			if geno == []:
-				output["error"]=snp+" is not in 1000G reference panel."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print(json_output, file=out_json)
-				out_json.close()
-				print("Temporary population file removed.")
-				subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-				subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-				return("","")
-				
-		else:
-			geno=vcf[0].strip().split()
-			geno[0] = geno[0].lstrip('chr')
-
-		if geno[2]!=snp and snp[0:2]=="rs" and "rs" in geno[2]:
-			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-			else:
-				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-			snp = geno[2]
-
-		if "," in geno[3] or "," in geno[4]:
-			output["error"]=snp+" is not a biallelic variant."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			print("Temporary population file removed.")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
-
-
-		index=[]
-		for i in range(9,len(head)):
-			if head[i] in pop_ids:
-				index.append(i)
-
-		genotypes={"0":0, "1":0}
-		for i in index:
-			sub_geno=geno[i].split("|")
-			for j in sub_geno:
-				if j in genotypes:
-					genotypes[j]+=1
-				else:
-					genotypes[j]=1
-
-		if genotypes["0"]==0 or genotypes["1"]==0:
-			output["error"]=snp+" is monoallelic in the "+pop+" population."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			print("Temporary population file removed.")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
 
 	# print "[ldassoc debug] begin calculating LD in parallel"
 	# Calculate proxy LD statistics in parallel
@@ -549,14 +454,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	for subprocess_id in range(num_subprocesses):
 		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
 		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+		print(subprocessArgs)
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
 	# print "[ldassoc debug] collect output in parallel" 
-
-	# collect output in parallel
-	def get_output(process):
-		return process.communicate()[0].splitlines()
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)

@@ -15,26 +15,10 @@ import weakref
 from multiprocessing.dummy import Pool
 import math
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import get_coords,replace_coord_rsid,,get_query_variant_c,LD_calcs
+from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,LD_calcs,chunkWindow,get_output
 from LDutilites import get_config
 
 # LDproxy subprocess to export bokeh to high quality images in the background
-
-def chunkWindow(pos, window, num_subprocesses):
-    if (pos - window <= 0):
-        minPos = 0
-    else:
-        minPos = pos - window
-    maxPos = pos + window
-    windowRange = maxPos - minPos
-    chunks = []
-    newMin = minPos
-    newMax = 0
-    for _ in range(num_subprocesses):
-        newMax = newMin + (windowRange / num_subprocesses)
-        chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax + 1
-    return chunks
 
 def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
     # Set data directories using config.yml
@@ -76,7 +60,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
     #print(temp)
-    (geno, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
+    (geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
     #print(geno,warningmsg)
     for msg in warningmsg:
         if msg[1] != "NA":
@@ -119,10 +103,6 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]
-
-    # collect output in parallel
-    def get_output(process):
-        return process.communicate()[0].splitlines()
 
     if not hasattr(threading.current_thread(), "_children"):
         threading.current_thread()._children = weakref.WeakKeyDictionary()

@@ -11,7 +11,7 @@ from LDcommon import validsnp,replace_coords_rsid_list,get_coords,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,parse_vcf
-from LDcommon import get_vcf_snp_params
+from LDcommon import get_vcf_snp_params,check_same_chromosome
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
@@ -86,13 +86,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         return(json.dumps(output, sort_keys=True, indent=2))
 
     # Check SNPs are all on the same chromosome
-    for i in range(len(snp_coords)):
-        if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr" + \
-                str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
-                "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+". " + str(output["warning"] if "warning" in output else "")
-            return(json.dumps(output, sort_keys=True, indent=2))
-
+    check_same_chromosome(snp_coords,output)
     # Check max distance between SNPs
     distance_bp = []
     for i in range(len(snp_coords)):
@@ -107,10 +101,8 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             output["warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
                 distance_max)+" bp). "
  
-    vcf_filePath,tabix_coords,vcf_query_snp_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    vcf,head = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-  
+    vcf,head = retrieveTabix1000GData(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+
     # Extract haplotypes
     index = []
     for i in range(9, len(head)):

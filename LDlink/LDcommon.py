@@ -6,6 +6,7 @@ from numpy import False_
 import yaml
 from pymongo import MongoClient
 import json
+import math
 import subprocess
 from bson import json_util
 from LDutilites import get_config,get_config_admin
@@ -145,51 +146,55 @@ def parse_vcf(vcf_lines):
     head = vcf_lines[h].strip().split()
     return vcf_lines[h + 1 :], head
 
-def get_1000g_data(query_file, coords, query_dir):
-    output = tabix("-fhD", "--separate-regions", query_file + coords, cwd=query_dir)
-    vcf = [line for line in output if "END" in line]
+def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
+    vcf_filepath, tabix_coords, query_file = get_vcf_snp_params(snp_pos, snp_coords, genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
+
+    output = tabix("-fhD", "--separate-regions", query_file + tabix_coords, cwd=query_dir)
+    vcf = [line for line in output if "END" not in line]
+    
     return parse_vcf(vcf)
 
-def get_1000g_single_data(query_file, coords, query_dir, request, is_output):
-    output = tabix("-fhD", query_file + coords, cwd=query_dir)
-    vcf = [line for line in output if "END" in line]
+def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, write_output):
+    vcf_filepath, tabix_coords, query_file = get_vcf_snp_params([vcf_pos], [snp_coord], genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
 
-    if is_output:
+    output = tabix("-fhD", query_file + tabix_coords, cwd=query_dir)
+    vcf = [line for line in output if "END" not in line]
+
+    if write_output:
         temp_filepath = tmp_dir + "snp_no_dups_" + request + ".vcf"
         with open(temp_filepath, "w") as f:
             f.write("\n".join(vcf))
             
     return parse_vcf(vcf)
 
-def retrieveTabix1000GData(query_file, coords, query_dir):
+def retrieveTabix1000GData(snp_pos, snp_coords, genome_build,query_dir):
+    vcf_filePath,tabix_coords,query_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     export_s3_keys = retrieveAWSCredentials()
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
-        query_file, coords, query_dir)
+        query_file, tabix_coords, query_dir)
+    # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    h = 0
-    while vcf[h][0:2] == "##":
-        h += 1
-    head = vcf[h].strip().split() 
-    return vcf[h+1:],head
+    vcf,head = get_head(vcf)
+    return vcf,head
 
-def retrieveTabix1000GDataSingle(query_file, coords, query_dir,request,is_output):
+def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,request,is_output):
+    vcf_filePath,tabix_coords,query_file=get_vcf_snp_params([vcf_pos],[snp_coord],genome_build)
+    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     export_s3_keys = retrieveAWSCredentials()
     if is_output:
-        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END > {3}".format(query_file, coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
+        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END > {3}".format(query_file, tabix_coords, query_dir,tmp_dir + "snp_no_dups_" + request + ".vcf")
     else:
-        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, coords, query_dir)
+        retrieve_command = " cd {2}; tabix -fhD  {0}{1} | grep -v -e END".format(query_file, tabix_coords, query_dir)
 
     tabix_snps = export_s3_keys + retrieve_command
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
     if is_output:
         vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
       
-    h = 0
-    while vcf[h][0:2] == "##":
-        h += 1
-    head = vcf[h].strip().split() 
-    vcf = vcf[h+1:]
-   
+    vcf,head = get_head(vcf)
     return vcf,head
 
 # Query genomic coordinates
@@ -313,7 +318,11 @@ def validsnp(snplst,genome_build,snp_limits):
         try:
             snps_raw = open(snplst).readlines()
         except:
-            snps_raw = snplst.split("+")
+            try:
+                snps_raw = snplst.split("+")
+            except: # for ldpair post input as array
+                snps_raw = snplst
+
         if snp_limits:
             if len(snps_raw) > snp_limits:
                 output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
@@ -323,11 +332,12 @@ def validsnp(snplst,genome_build,snp_limits):
         # Remove duplicate RS numbers and cast to lower case
         snps = []
         for snp_raw in snps_raw:
-            if snp_raw:
+            if type(snp_raw) is str:
                 snp = snp_raw.lower().strip().split()
                 if snp not in snps:
                     snps.append(snp)
-
+            else:
+                snps.append(snp_raw)
         return snps
     return 
 
@@ -450,48 +460,46 @@ def set_alleles(a1, a2):
 #################################################
 # get the genotype ###
 #################################################
-def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
-    snp_coord_str = genome_build_vars[genome_build]['1000G_chr_prefix'] + str(snp_coord[1]) + ":" + str(snp_coord[2]) + "-" + str(snp_coord[2]) 
-    tabix_coords = " " + (snp_coord_str)
-    vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord[1]))
-    vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
-
+def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,output={}):
     queryVariantWarnings = []
-    # Extract query SNP phased genotypes
-
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
- 
-    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
-
+    #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
+    tmp_coord = [str(x) for x in snp_coord]
+    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(str(snp_coord[2]),tmp_coord, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")
         # handle error: snp + " is not in 1000G reference panel."
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+        output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
         if is_output:
             subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
             subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return (None, queryVariantWarnings)
+        return (None, None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
         geno = []
         for i in range(len(tabix_query_snp_out)):
             # if tabix_query_snp_out[i].strip().split()[2] == snp_coord[0]:
             geno = tabix_query_snp_out[i].strip().split()
             geno[0] = geno[0].lstrip('chr')
+            #skip the geno did not on the same chromesome??
+            #if not (geno[0] == snp_coord[1] and geno[1] == snp_coord[2]):
+            #        geno = []
         if geno == []:
             # print("ERROR", "geno == []")
             # handle error: snp + " is not in 1000G reference panel."
             queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not in 1000G reference panel."])
+            output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
             if is_output:
                 subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
                 subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-            return (None, queryVariantWarnings)
+            return (None,None, queryVariantWarnings)
     else:
         geno = tabix_query_snp_out[0].strip().split()
         geno[0] = geno[0].lstrip('chr')
-    
     if geno[2] != snp_coord[0] and "rs" in geno[2]:
             queryVariantWarnings.append([snp_coord[0], geno[2], "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")."])
+            output["warning"] = "Genomic position does not match RS number at 1000G position (chr" + geno[0] + ":" + geno[1] + " = " + geno[2] + ")." + str(output["warning"] if "warning" in output else "")
+
             # snp = geno[2]
 
     if "," in geno[3] or "," in geno[4]:
@@ -515,8 +523,8 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output):
     if genotypes["0"] == 0 or genotypes["1"] == 0:
         # print('handle error: snp + " is monoallelic in the " + pop + " population."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
-
-    return(geno, queryVariantWarnings)
+    
+    return(geno,head,queryVariantWarnings)
 
 ###################################################
 ######## parse vcf using --separate-regions   #####
@@ -642,3 +650,62 @@ def check_same_chromosome(snp_coords,output):
 
 def getEmail():
     return  email_account
+
+def check_allele(geno):
+    if len(geno[3]) == 1 and len(geno[4]) == 1:
+        snp_a1 = geno[3]
+        snp_a2 = geno[4]
+    elif len(geno[3]) == 1 and len(geno[4]) > 1:
+        snp_a1 = "-"
+        snp_a2 = geno[4][1:]
+    elif len(geno[3]) > 1 and len(geno[4]) == 1:
+        snp_a1 = geno[3][1:]
+        snp_a2 = "-"
+    elif len(geno[3]) > 1 and len(geno[4]) > 1:
+        snp_a1 = geno[3][1:]
+        snp_a2 = geno[4][1:]
+
+    allele = {"0|0": [snp_a1, snp_a1], "0|1": [snp_a1, snp_a2], "1|0": [snp_a2, snp_a1], "1|1": [
+        snp_a2, snp_a2], "0": [snp_a1, "."], "1": [snp_a2, "."], "./.": [".", "."], ".": [".", "."]}
+    return allele,snp_a1,snp_a2
+
+def get_head(vcf):
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    head = vcf[h].strip().split() 
+    vcf = vcf[h+1:]
+    return vcf, head
+
+def get_geno(vcf):
+    vcf,h = get_head(vcf)
+
+    if len(vcf) > 1:
+        for i in range(len(vcf)):
+            if vcf[i].strip().split()[2] == snp:
+                geno = vcf[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')     
+    else:
+        geno = vcf[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+    return geno
+
+def chunkWindow(pos, window, num_subprocesses):
+    if (pos - window <= 0):
+        minPos = 0
+    else:
+        minPos = pos - window
+    maxPos = pos + window
+    windowRange = maxPos - minPos
+    chunks = []
+    newMin = minPos
+    newMax = 0
+    for _ in range(num_subprocesses):
+        newMax = newMin + (windowRange / num_subprocesses)
+        chunks.append([math.ceil(newMin), math.ceil(newMax)])
+        newMin = newMax + 1
+    return chunks
+
+# collect output in parallel
+def get_output(process):
+    return process.communicate()[0].splitlines()

@@ -62,25 +62,21 @@ def get_ld_stats(variantPair, pop_ids):
     output = {	
         "error": [],	
         "warning": []	
-    }	
+    }
+    #vcf1_pos: 60697654; snp_coord_1: ['rs4672393', '2', '60697654']
     # Extract 1000 Genomes phased genotypes	
     # SNP1
     # vcf_filePath,tabix_coords,vcf_query_snp_file=get_vcf_snp_params([vcf1_pos],[snp_coord_1],genome_build)
     # checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     # vcf1_offset,head1 = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
- 
     if snp1 not in retrieved_variant.keys():
-        vcf_filePath,tabix_coords,vcf_query_snp_file=get_vcf_snp_params([vcf1_pos],[snp_coord_1],genome_build)
-        checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-        vcf1_offset,head1 = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+        vcf1_offset,head1 = retrieveTabix1000GDataSingle(vcf1_pos,snp_coord_1, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
         retrieved_variant[snp1] = [vcf1_offset,head1]
     else :
         vcf1_offset = retrieved_variant[snp1][0]
         head1 = retrieved_variant[snp1][1]    
     # SNP2
-    vcf_filePath,tabix_coords,vcf_query_snp_file=get_vcf_snp_params([vcf2_pos],[snp_coord_2],genome_build)
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    vcf2_offset,head2 = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+    vcf2_offset,head2 = retrieveTabix1000GDataSingle(vcf2_pos,snp_coord_2, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
 
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	

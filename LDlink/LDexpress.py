@@ -19,7 +19,7 @@ import boto3
 import botocore
 from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords,get_query_variant_c
+from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords,get_query_variant_c,chunkWindow,get_output
 from LDutilites import get_config
 # Set data directories using config.yml 
 param_list = get_config()
@@ -49,24 +49,6 @@ def get_ldexpress_tissues(web):
     else:
         return None
 
-def chunkWindow(pos, window, num_subprocesses):
-    if (pos - window <= 0):
-        minPos = 0
-    else:
-        minPos = pos - window
-    maxPos = pos + window
-    windowRange = maxPos - minPos
-    chunks = []
-    newMin = minPos
-    newMax = 0
-    for _ in range(num_subprocesses):
-        newMax = newMin + (windowRange / num_subprocesses)
-        chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax + 1
-    return chunks
-# collect output in parallel
-def get_output(process):
-    return process.communicate()[0].splitlines()
 # Create LDexpress function
 def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
     print("##### START LD EXPRESS CALCULATION #####")   
@@ -108,7 +90,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     if isinstance(pop_ids, str):
         return("", "", "", "", "", errors_warnings)
     sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,errors_warnings)
-    print("sanitized_query_snps", sanitized_query_snps)
+    # print("sanitized_query_snps", sanitized_query_snps)
     # Find genomic coords of query snps in dbsnp 
     details = {}
     rs_nums = []
@@ -168,8 +150,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     combined_matched_snps = []
     for snp_coord in snp_coords:
         find_window_ld_start = timer()
-        (geno, queryVariantWarnings) = get_query_variant_c(snp_coord, pop_ids, str(request), genome_build, True)
-        # print("geno", geno)
+        (geno, tmpdist, queryVariantWarnings) = get_query_variant_c(snp_coord, pop_ids, str(request), genome_build, True)
         # print("queryVariantWarnings", queryVariantWarnings)
         if (len(queryVariantWarnings) > 0):
             queryWarnings += queryVariantWarnings
@@ -177,7 +158,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             ###### SPLIT TASK UP INTO # PARALLEL SUBPROCESSES ######
             # find query window snps via tabix, calculate LD and apply R2/D' thresholds
             windowChunkRanges = chunkWindow(snp_coord[2], window, num_subprocesses)
-            
+
             ld_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
                 getWindowVariantsArgs = " ".join([str(web), str(snp_coord[0]), str(snp_coord[1]), str(windowChunkRanges[subprocess_id][0]), str(windowChunkRanges[subprocess_id][1]), str(request), str(subprocess_id), str(r2_d), str(r2_d_threshold), str(genome_build)])
@@ -204,6 +185,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             tissues_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
                 getTissuesArgs = " ".join([str(web), str(request), str(subprocess_id), str(p_threshold), str(tissues), str(genome_build)])
+                #print(getTissuesArgs)
                 tissues_subprocess_commands.append("python3 LDexpress_tissues_sub.py " + getTissuesArgs)
             tissues_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in tissues_subprocess_commands]
             # getTissuesArgs = []   

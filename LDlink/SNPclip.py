@@ -13,7 +13,7 @@ import sys
 import collections
 from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
-from LDcommon import set_alleles
+from LDcommon import set_alleles,check_same_chromosome
 from LDutilites import get_config
 from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,parse_vcf,get_vcf_snp_params
 
@@ -125,19 +125,9 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         return("", "", "")
 
     # Check SNPs are all on the same chromosome
-    for i in range(len(snp_coords)):
-        if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: "+snp_coords[i-1][0]+"=chr" + \
-                str(snp_coords[i-1][1])+":"+str(snp_coords[i-1][2])+", "+snp_coords[i][0] + \
-                "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+"."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
+    check_same_chromosome(snp_coords,output)
 
-    vcf_filePath,tabix_coords,vcf_query_snp_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
-    checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-    vcf,head = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf,head = retrieveTabix1000GData(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
   
     # Make MAF function
     def calc_maf(genos):
