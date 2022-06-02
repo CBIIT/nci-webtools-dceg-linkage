@@ -10,7 +10,7 @@ import sys
 from LDcommon import validsnp,replace_coords_rsid_list,get_coords,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,parse_vcf
+from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,parse_vcf,get_1000g_data
 from LDcommon import get_vcf_snp_params,check_same_chromosome
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
@@ -101,7 +101,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
             output["warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
                 distance_max)+" bp). "
  
-    vcf,head = retrieveTabix1000GData(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf,head = get_1000g_data(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Extract haplotypes
     index = []
