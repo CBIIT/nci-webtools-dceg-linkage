@@ -132,19 +132,12 @@ def get_aws_credentials():
 
 def get_command_output(*cmd, **subprocess_args):
     output = subprocess.check_output(cmd, **subprocess_args)
-    return [line.decode() for line in output.splitlines()]
+    return [line.decode("utf-8") for line in output.splitlines()]
 
 def tabix(*tabix_args, **subprocess_args):
     cmd = ["tabix", *tabix_args]
     args = {"shell": True, "env": get_aws_credentials(), **subprocess_args}
     return get_command_output(*cmd, **args)
-
-def parse_vcf(vcf_lines):
-    h = 0
-    while vcf_lines[h][0:2] == "##":
-        h += 1
-    head = vcf_lines[h].strip().split()
-    return vcf_lines[h + 1 :], head
 
 def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params(snp_pos, snp_coords, genome_build)
@@ -152,8 +145,8 @@ def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
 
     output = tabix("-fhD", "--separate-regions", query_file + tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
-    
-    return parse_vcf(vcf)
+
+    return get_head(vcf)
 
 def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, write_output):
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params([vcf_pos], [snp_coord], genome_build)
@@ -167,7 +160,7 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
         with open(temp_filepath, "w") as f:
             f.write("\n".join(vcf))
             
-    return parse_vcf(vcf)
+    return get_head(vcf)
 
 def retrieveTabix1000GData(snp_pos, snp_coords, genome_build,query_dir):
     vcf_filePath,tabix_coords,query_file = get_vcf_snp_params(snp_pos,snp_coords,genome_build)
