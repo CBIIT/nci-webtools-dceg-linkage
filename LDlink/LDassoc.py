@@ -13,7 +13,7 @@ import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c
+from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
 from LDutilites import get_config
 
 # Create LDproxy function
@@ -459,10 +459,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
 	# print "[ldassoc debug] collect output in parallel" 
-
-	# collect output in parallel
-	def get_output(process):
-		return process.communicate()[0].splitlines()
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)

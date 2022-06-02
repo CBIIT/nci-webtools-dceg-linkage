@@ -14,7 +14,7 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c,get_output
 from LDutilites import get_config
 
 # LDassoc subprocess to export bokeh to high quality images in the background
@@ -275,10 +275,6 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         commands.append("python3 LDassoc_sub.py " + subprocessArgs)
 
     processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
-
-    # collect output in parallel
-    def get_output(process):
-        return process.communicate()[0].splitlines()
 
     pool = Pool(len(processes))
     out_raw=pool.map(get_output, processes)

@@ -16,7 +16,7 @@ import sys
 import numpy as np	
 from timeit import default_timer as timer
 from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
-from LDcommon import validsnp, replace_coords_rsid_list,get_coords,get_population
+from LDcommon import validsnp, replace_coords_rsid_list,get_coords,get_population,get_output
 from LDutilites import get_config
 
 # Set data directories using config.yml	
@@ -153,10 +153,6 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
             problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
-
-# collect output in parallel
-def get_output(process):
-    return process.communicate()[0].splitlines()
 
 # Create LDtrait function
 def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold=0.1, window=500000):

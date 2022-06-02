@@ -9,7 +9,7 @@ import botocore
 import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import set_alleles
+from LDcommon import set_alleles,get_geno
 from LDutilites import get_config
 
 web = sys.argv[1]
@@ -115,19 +115,7 @@ def get_dbsnp_coord(db, chromosome, position):
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-h = 0
-while vcf[h][0:2] == "##":
-    h += 1
-vcf = vcf[h+1:]
-
-if len(vcf) > 1:
-    for i in range(len(vcf)):
-        # if vcf[i].strip().split()[2] == snp:
-        geno = vcf[i].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-else:
-    geno = vcf[0].strip().split()
-    geno[0] = geno[0].lstrip('chr')
+geno = get_geno(vcf)
 
 new_alleles = set_alleles(geno[3], geno[4])
 allele = {"0": new_alleles[0], "1": new_alleles[1]}

@@ -19,7 +19,7 @@ import boto3
 import botocore
 from timeit import default_timer as timer
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords,get_query_variant_c
+from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords,get_query_variant_c,chunkWindow,get_output
 from LDutilites import get_config
 # Set data directories using config.yml 
 param_list = get_config()
@@ -49,24 +49,6 @@ def get_ldexpress_tissues(web):
     else:
         return None
 
-def chunkWindow(pos, window, num_subprocesses):
-    if (pos - window <= 0):
-        minPos = 0
-    else:
-        minPos = pos - window
-    maxPos = pos + window
-    windowRange = maxPos - minPos
-    chunks = []
-    newMin = minPos
-    newMax = 0
-    for _ in range(num_subprocesses):
-        newMax = newMin + (windowRange / num_subprocesses)
-        chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax + 1
-    return chunks
-# collect output in parallel
-def get_output(process):
-    return process.communicate()[0].splitlines()
 # Create LDexpress function
 def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2_d_threshold=0.1, p_threshold=0.1, window=500000):
     print("##### START LD EXPRESS CALCULATION #####")   

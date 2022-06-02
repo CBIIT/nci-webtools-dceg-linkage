@@ -117,11 +117,8 @@ def retrieveTabix1000GData(snp_pos, snp_coords, genome_build,query_dir):
         query_file, tabix_coords, query_dir)
     # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-    h = 0
-    while vcf[h][0:2] == "##":
-        h += 1
-    head = vcf[h].strip().split() 
-    return vcf[h+1:],head
+    vcf,head = get_head(vcf)
+    return vcf,head
 
 def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,request,is_output):
     vcf_filePath,tabix_coords,query_file=get_vcf_snp_params([vcf_pos],[snp_coord],genome_build)
@@ -137,12 +134,7 @@ def retrieveTabix1000GDataSingle(vcf_pos,snp_coord,genome_build, query_dir,reque
     if is_output:
         vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
       
-    h = 0
-    while vcf[h][0:2] == "##":
-        h += 1
-    head = vcf[h].strip().split() 
-    vcf = vcf[h+1:]
-   
+    vcf,head = get_head(vcf)
     return vcf,head
 
 # Query genomic coordinates
@@ -617,4 +609,43 @@ def check_allele(geno):
         snp_a2, snp_a2], "0": [snp_a1, "."], "1": [snp_a2, "."], "./.": [".", "."], ".": [".", "."]}
     return allele,snp_a1,snp_a2
 
+def get_head(vcf):
+    h = 0
+    while vcf[h][0:2] == "##":
+        h += 1
+    head = vcf[h].strip().split() 
+    vcf = vcf[h+1:]
+    return vcf, head
 
+def get_geno(vcf):
+    vcf,h = get_head(vcf)
+
+    if len(vcf) > 1:
+        for i in range(len(vcf)):
+            if vcf[i].strip().split()[2] == snp:
+                geno = vcf[i].strip().split()
+                geno[0] = geno[0].lstrip('chr')     
+    else:
+        geno = vcf[0].strip().split()
+        geno[0] = geno[0].lstrip('chr')
+    return geno
+
+def chunkWindow(pos, window, num_subprocesses):
+    if (pos - window <= 0):
+        minPos = 0
+    else:
+        minPos = pos - window
+    maxPos = pos + window
+    windowRange = maxPos - minPos
+    chunks = []
+    newMin = minPos
+    newMax = 0
+    for _ in range(num_subprocesses):
+        newMax = newMin + (windowRange / num_subprocesses)
+        chunks.append([math.ceil(newMin), math.ceil(newMax)])
+        newMin = newMax + 1
+    return chunks
+
+# collect output in parallel
+def get_output(process):
+    return process.communicate()[0].splitlines()
