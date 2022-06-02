@@ -1,6 +1,7 @@
 import boto3
 import botocore
 import csv
+import os
 from numpy import False_
 import yaml
 from pymongo import MongoClient
@@ -109,11 +110,61 @@ def connectMongoDBReadOnly(readonly):
     db = client["LDLink"]
     return db
 
+def get_aws_credentials():
+    if (
+        "aws_access_key_id" in aws_info
+        and len(aws_info["aws_access_key_id"]) > 0
+        and "aws_secret_access_key" in aws_info
+        and len(aws_info["aws_secret_access_key"]) > 0
+    ):
+        return {
+            "AWS_ACCESS_KEY_ID": aws_info["aws_access_key_id"],
+            "AWS_SECRET_ACCESS_KEY": aws_info["aws_secret_access_key"],
+        }
+    else:
+        credentials = boto3.Session().get_credentials().get_frozen_credentials()
+        return {
+            "AWS_ACCESS_KEY_ID": credentials.access_key,
+            "AWS_SECRET_ACCESS_KEY": credentials.secret_key,
+            "AWS_SESSION_TOKEN": credentials.token,
+        }
+
+def get_command_output(*cmd, **subprocess_args):
+    output = subprocess.check_output(cmd, **subprocess_args)
+    return [line.decode() for line in output.splitlines()]
+
+def tabix(*tabix_args, **subprocess_args):
+    cmd = ["tabix", *tabix_args]
+    args = {"shell": True, "env": get_aws_credentials(), **subprocess_args}
+    return get_command_output(*cmd, **args)
+
+def parse_vcf(vcf_lines):
+    h = 0
+    while vcf_lines[h][0:2] == "##":
+        h += 1
+    head = vcf_lines[h].strip().split()
+    return vcf_lines[h + 1 :], head
+
+def get_1000g_data(query_file, coords, query_dir):
+    output = tabix("-fhD", "--separate-regions", query_file + coords, cwd=query_dir)
+    vcf = [line for line in output if "END" in line]
+    return parse_vcf(vcf)
+
+def get_1000g_single_data(query_file, coords, query_dir, request, is_output):
+    output = tabix("-fhD", query_file + coords, cwd=query_dir)
+    vcf = [line for line in output if "END" in line]
+
+    if is_output:
+        temp_filepath = tmp_dir + "snp_no_dups_" + request + ".vcf"
+        with open(temp_filepath, "w") as f:
+            f.write("\n".join(vcf))
+            
+    return parse_vcf(vcf)
+
 def retrieveTabix1000GData(query_file, coords, query_dir):
     export_s3_keys = retrieveAWSCredentials()
     tabix_snps = export_s3_keys + " cd {2}; tabix -fhD --separate-regions {0}{1} | grep -v -e END".format(
         query_file, coords, query_dir)
-    # print("tabix_snps", tabix_snps)
     vcf = [x.decode('utf-8') for x in subprocess.Popen(tabix_snps, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
     h = 0
     while vcf[h][0:2] == "##":
