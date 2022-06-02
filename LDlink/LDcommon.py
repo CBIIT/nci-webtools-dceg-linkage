@@ -136,14 +136,14 @@ def get_command_output(*cmd, **subprocess_args):
 
 def tabix(*tabix_args, **subprocess_args):
     cmd = ["tabix", *tabix_args]
-    args = {"shell": True, "env": get_aws_credentials(), **subprocess_args}
+    args = {"env": get_aws_credentials(), **subprocess_args}
     return get_command_output(*cmd, **args)
 
 def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params(snp_pos, snp_coords, genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
 
-    output = tabix("-fhD", "--separate-regions", query_file + tabix_coords, cwd=query_dir)
+    output = tabix("-fhD", "--separate-regions", query_file, tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
 
     return get_head(vcf)
@@ -152,7 +152,7 @@ def get_1000g_data_single(vcf_pos, snp_coord, genome_build, query_dir, request, 
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params([vcf_pos], [snp_coord], genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
 
-    output = tabix("-fhD", query_file + tabix_coords, cwd=query_dir)
+    output = tabix("-fhD", query_file, tabix_coords, cwd=query_dir)
     vcf = [line for line in output if "END" not in line]
 
     if write_output:
