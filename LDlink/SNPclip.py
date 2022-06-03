@@ -11,11 +11,11 @@ import botocore
 import subprocess
 import sys
 import collections
-from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
 from LDcommon import set_alleles,check_same_chromosome
 from LDutilites import get_config
-from LDcommon import checkS3File, retrieveAWSCredentials, retrieveTabix1000GData, genome_build_vars, get_rsnum,parse_vcf,get_vcf_snp_params
+from LDcommon import get_1000g_data,get_rsnum,parse_vcf,get_vcf_snp_params
 
 ###########
 # SNPclip #
@@ -127,7 +127,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
     # Check SNPs are all on the same chromosome
     check_same_chromosome(snp_coords,output)
 
-    vcf,head = retrieveTabix1000GData(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf,head = get_1000g_data(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
   
     # Make MAF function
     def calc_maf(genos):

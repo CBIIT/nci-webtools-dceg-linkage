@@ -463,7 +463,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
     queryVariantWarnings = []
     #vcf1_pos: 60697654; snp_coord: ['rs4672393', '2', '60697654']
     tmp_coord = [str(x) for x in snp_coord]
-    tabix_query_snp_out,head = retrieveTabix1000GDataSingle(str(snp_coord[2]),tmp_coord, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
+    tabix_query_snp_out,head = get_1000g_data_single(str(snp_coord[2]),tmp_coord, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, is_output)
     # Validate error
     if len(tabix_query_snp_out) == 0:
         # print("ERROR", "len(tabix_query_snp_out) == 0")

@@ -8,7 +8,7 @@ import botocore
 import subprocess
 import sys
 import requests
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,get_vcf_snp_params,retrieveTabix1000GDataSingle
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,get_vcf_snp_params,get_1000g_data_single
 from LDutilites import get_config
 
 request = sys.argv[1]
@@ -70,13 +70,13 @@ def get_ld_stats(variantPair, pop_ids):
     # checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
     # vcf1_offset,head1 = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
     if snp1 not in retrieved_variant.keys():
-        vcf1_offset,head1 = retrieveTabix1000GDataSingle(vcf1_pos,snp_coord_1, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+        vcf1_offset,head1 = get_1000g_data_single(vcf1_pos,snp_coord_1, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
         retrieved_variant[snp1] = [vcf1_offset,head1]
     else :
         vcf1_offset = retrieved_variant[snp1][0]
         head1 = retrieved_variant[snp1][1]    
     # SNP2
-    vcf2_offset,head2 = retrieveTabix1000GDataSingle(vcf2_pos,snp_coord_2, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+    vcf2_offset,head2 = get_1000g_data_single(vcf2_pos,snp_coord_2, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
 
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	

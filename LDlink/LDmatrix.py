@@ -14,7 +14,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import retrieveTabix1000GData,parse_vcf,get_vcf_snp_params,check_same_chromosome
+from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
@@ -122,7 +122,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             output[
                 "warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
 
-    vcf,head = retrieveTabix1000GData(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+    vcf,head = get_1000g_data(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Extract haplotypes
     index = []

@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
-from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords,retrieveTabix1000GDataSingle,get_query_variant_c
+from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords,get_query_variant_c
 from LDutilites import get_config
 
 # Create LDpop function
