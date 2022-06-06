@@ -454,7 +454,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	for subprocess_id in range(num_subprocesses):
 		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
 		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
-		print(subprocessArgs)
+		#print(subprocessArgs)
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
