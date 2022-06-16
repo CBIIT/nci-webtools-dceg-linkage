@@ -676,14 +676,13 @@ def get_head(vcf):
     vcf = vcf[h+1:]
     return vcf, head
 
-def get_geno(vcf):
+def get_geno(vcf,snp):
     vcf,h = get_head(vcf)
-
     if len(vcf) > 1:
         for i in range(len(vcf)):
-            if vcf[i].strip().split()[2] == snp:
-                geno = vcf[i].strip().split()
-                geno[0] = geno[0].lstrip('chr')     
+            #if vcf[i].strip().split()[2] == snp:
+            geno = vcf[i].strip().split()
+            geno[0] = geno[0].lstrip('chr')     
     else:
         geno = vcf[0].strip().split()
         geno[0] = geno[0].lstrip('chr')

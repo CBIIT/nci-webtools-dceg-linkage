@@ -115,7 +115,7 @@ def get_dbsnp_coord(db, chromosome, position):
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-geno = get_geno(vcf)
+geno = get_geno(vcf,snp)
 
 new_alleles = set_alleles(geno[3], geno[4])
 allele = {"0": new_alleles[0], "1": new_alleles[1]}

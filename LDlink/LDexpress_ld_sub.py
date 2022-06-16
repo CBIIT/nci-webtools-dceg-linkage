@@ -41,7 +41,7 @@ db = connectMongoDBReadOnly(True)
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-geno = get_geno(vcf)
+geno = get_geno(vcf,snp)
 
 # Get VCF region
 vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (chromosome))
