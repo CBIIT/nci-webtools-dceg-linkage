@@ -10,6 +10,7 @@ import sys
 import requests
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,get_vcf_snp_params,get_1000g_data_single
 from LDutilites import get_config
+#import cache from functools
 
 request = sys.argv[1]
 subprocess_id = sys.argv[2]
@@ -316,7 +317,7 @@ def get_ld_stats(variantPair, pop_ids):
         "alleles": alleles,
         "output": output
     }
-
+#@cache
 def get_ld_pairs(pop_ids, variantPairs):
     ldInfoSubset = {}	
     for variantPair in variantPairs:

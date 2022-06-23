@@ -169,7 +169,7 @@ for geno_n in vcf:
                 else:
                     funct = "."
             elif rs_n[0:2] != "rs":
-                snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
+                snp_coord = get_dbsnp_coord(db, chr_n, bp_n,genome_build)
 
                 if snp_coord != None:
                     funct = snp_coord['function']

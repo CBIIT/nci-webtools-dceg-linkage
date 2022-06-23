@@ -358,10 +358,10 @@ def get_coords_gene(gene_raw, db):
         return None
 
 
-def get_dbsnp_coord(db, chromosome, position):
-    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
+# def get_dbsnp_coord(db, chromosome, position):
+#     query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
+#     query_results_sanitized = json.loads(json_util.dumps(query_results))
+#     return query_results_sanitized
 
 # Replace input genomic coordinates with variant ids (rsids)
 def replace_coord_rsid(db, snp,genome_build,output):
@@ -646,9 +646,6 @@ def check_same_chromosome(snp_coords,output):
                 "=chr"+str(snp_coords[i][1])+":"+str(snp_coords[i][2])+". " + str(output["warning"] if "warning" in output else "")
             return(json.dumps(output, sort_keys=True, indent=2))
     return
-
-def getEmail():
-    return  email_account
 
 def check_allele(geno):
     if len(geno[3]) == 1 and len(geno[4]) == 1:

@@ -8,7 +8,7 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord
 from LDcommon import set_alleles,get_geno
 from LDutilites import get_config
 
@@ -108,11 +108,6 @@ def get_dbsnp_rsid(db, rsid):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-def get_dbsnp_coord(db, chromosome, position):
-    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
-
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 geno = get_geno(vcf,snp)
@@ -180,7 +175,7 @@ for geno_n in vcf:
                 else:
                     funct = "."
             elif rs_n[0:2] != "rs":
-                snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
+                snp_coord = get_dbsnp_coord(db, chr_n, bp_n,genome_build)
 
                 if snp_coord != None:
                     funct = snp_coord['function']
