@@ -27,12 +27,18 @@ def get_config_admin(path=config_path):
     with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)
     
+    db_name = ''
+    if 'mongo_db_name' not in config['database']:
+        db_name = 'admin'
+    else:
+        db_name = config['database']['mongo_db_name']
+
     param_list['api_mongo_addr'] = config['database']['api_mongo_addr']
     param_list['mongo_username'] = config['database']['mongo_user_readonly']
     param_list['mongo_username_api'] = config['database']['mongo_user_api']
     param_list['mongo_password'] = config['database']['mongo_password']
     param_list['mongo_port'] = config['database']['mongo_port']
-    param_list['mongo_db_name'] = config['database']['mongo_db_name'] if 'mongo_db_name' in config else ''
+    param_list['mongo_db_name'] = db_name
     param_list['email_account'] = config['api']['email_account']
    
     param_list['require_token'] = config['api']['require_token']

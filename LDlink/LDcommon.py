@@ -109,9 +109,9 @@ def connectMongoDBReadOnly(readonly):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
 
     if bool(readonly):
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr + "/"+ mongo_db_name if mongo_db_name else 'admin', mongo_port)
+        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/'+ mongo_db_name, mongo_port)
     else:
-        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + "/"+ mongo_db_name if mongo_db_name else 'admin', mongo_port)
+        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/'+ mongo_db_name, mongo_port)
     db = client["LDLink"]
     return db
 
