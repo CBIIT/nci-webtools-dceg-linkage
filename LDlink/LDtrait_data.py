@@ -28,6 +28,7 @@ api_mongo_addr = param_list_db['api_mongo_addr']
 mongo_username_api = param_list_db['mongo_username_api']
 mongo_password = param_list_db['mongo_password']
 mongo_port = param_list_db['mongo_port']
+mongo_db_name = param_list_db['mongo_db_name']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -49,7 +50,7 @@ def main():
     print(filename + " downloaded.")
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/' mongo_db_name, mongo_port)
     db = client["LDLink"]
     dbsnp = db.dbsnp
 
