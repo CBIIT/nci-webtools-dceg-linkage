@@ -27,12 +27,10 @@ def get_config_admin(path=config_path):
     with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)
     
-    db_name = ''
-    if 'mongo_db_name' not in config['database']:
-        db_name = 'admin'
-    else:
-        db_name = config['database']['mongo_db_name']
-
+    db_name = 'admin'
+    if config['env'] == 'dev' or config['env'] == 'qa':
+        db_name = 'LDLink'
+    
     param_list['api_mongo_addr'] = config['database']['api_mongo_addr']
     param_list['mongo_username'] = config['database']['mongo_user_readonly']
     param_list['mongo_username_api'] = config['database']['mongo_user_api']
