@@ -30,7 +30,9 @@ def get_config_admin(path=config_path):
     db_name = 'admin'
     if config['env'] == 'dev' or config['env'] == 'qa':
         db_name = 'LDLink'
-    
+    if 'mongo_db_name' in config['database']:
+        db_name = config['database']['mongo_db_name']
+        
     param_list['api_mongo_addr'] = config['database']['api_mongo_addr']
     param_list['mongo_username'] = config['database']['mongo_user_readonly']
     param_list['mongo_username_api'] = config['database']['mongo_user_api']
