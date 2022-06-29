@@ -50,7 +50,7 @@ def main():
     print(filename + " downloaded.")
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/' mongo_db_name, mongo_port)
+    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/'+ mongo_db_name, mongo_port)
     db = client["LDLink"]
     dbsnp = db.dbsnp
 
