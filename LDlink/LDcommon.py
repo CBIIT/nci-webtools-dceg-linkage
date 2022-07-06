@@ -111,7 +111,7 @@ def connectMongoDBReadOnly(readonly):
     if bool(readonly):
         client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/'+ mongo_db_name, mongo_port)
     else:
-        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/'+ mongo_db_name, mongo_port)
+        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
     db = client["LDLink"]
     return db
 

@@ -27,9 +27,7 @@ def get_config_admin(path=config_path):
     with open(path, 'r') as yml_file:
         config = yaml.safe_load(yml_file)
     
-    db_name = 'admin'
-    if config['env'] == 'dev' or config['env'] == 'qa':
-        db_name = 'LDLink'
+    db_name = 'LDLink'
     if 'mongo_db_name' in config['database']:
         db_name = config['database']['mongo_db_name']
         
