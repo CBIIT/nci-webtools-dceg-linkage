@@ -18,6 +18,7 @@ errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
 path = LDutilites.config_abs_path
+path = LDutilites.config_path
 param_list = get_config(path)
 param_list_db = get_config_admin(path)
 tmp_dir = param_list['tmp_dir']
@@ -29,6 +30,7 @@ mongo_username_api = param_list_db['mongo_username_api']
 mongo_password = param_list_db['mongo_password']
 mongo_port = param_list_db['mongo_port']
 mongo_db_name = param_list_db['mongo_db_name']
+is_centralized = param_list_db['connect_external']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -50,10 +52,17 @@ def main():
     print(filename + " downloaded.")
 
     # Connect to Mongo snp database
-    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/'+ mongo_db_name, mongo_port)
+    if is_centralized:
+        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/'+ mongo_db_name, mongo_port)
+    else:
+        if instance == "web":
+            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@localhost/LDLink', mongo_port)
+        else:
+            client = MongoClient('localhost')
+
     db = client["LDLink"]
     dbsnp = db.dbsnp
-
+    print(db)
     # delete old error SNPs file if there is one
     if (os.path.isfile(tmp_dir + errFilename)):
         print("Deleting existing error SNPs file...")
