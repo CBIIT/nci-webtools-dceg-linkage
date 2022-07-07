@@ -116,7 +116,17 @@ def connectMongoDBReadOnly(readonly):
         else:
             client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
     else:
-        print("use local")  
+        if env == 'local':
+            mongo_host = api_mongo_addr
+        else: 
+            mongo_host = 'localhost'
+        if readonly:
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+        else:
+            if env == 'local':
+                client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + mongo_host + "/LDLink", mongo_port)
+            else:
+                client = MongoClient('localhost', mongo_port)  
     db = client["LDLink"]
     return db
 
