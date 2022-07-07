@@ -18,7 +18,7 @@ errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
 path = LDutilites.config_abs_path
-path = LDutilites.config_path
+#path = LDutilites.config_path
 param_list = get_config(path)
 param_list_db = get_config_admin(path)
 tmp_dir = param_list['tmp_dir']
