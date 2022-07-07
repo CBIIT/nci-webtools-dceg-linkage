@@ -23,6 +23,8 @@ mongo_password = param_list_db['mongo_password']
 mongo_port = param_list_db['mongo_port']
 mongo_db_name = param_list_db['mongo_db_name']
 email_account = param_list_db['email_account']
+is_centralized = param_list_db['connect_external']
+
 aws_info = param_list['aws_info']
 env = param_list['env']
 dbsnp_version = param_list['dbsnp_version']
@@ -30,6 +32,7 @@ population_samples_dir = param_list['population_samples_dir']
 data_dir = param_list['data_dir']
 tmp_dir = param_list['tmp_dir']
 genotypes_dir = param_list['genotypes_dir']
+
 
 genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
@@ -107,11 +110,13 @@ def retrieveAWSCredentials():
 
 def connectMongoDBReadOnly(readonly):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
-
-    if bool(readonly):
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/'+ mongo_db_name, mongo_port)
+    if is_centralized:
+        if bool(readonly):
+            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/'+ mongo_db_name, mongo_port)
+        else:
+            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
     else:
-        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
+        print("use local")  
     db = client["LDLink"]
     return db
 

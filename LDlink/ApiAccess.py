@@ -620,7 +620,9 @@ def lookupUser(email):
             "token": user_record["token"],
             "registered": format_registered,
             "blocked": user_record["blocked"],
-            "locked": format_locked
+            "locked": format_locked,
+            "admin":user_record["admin"] if "admin" in user_record else "NA",
+            "api2auth":user_record["api2auth"] if "api2auth" in user_record else "NA"
         }
     else:
         out_json = "No record found"

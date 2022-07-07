@@ -36,8 +36,10 @@ def get_config_admin(path=config_path):
     param_list['mongo_username_api'] = config['database']['mongo_user_api']
     param_list['mongo_password'] = config['database']['mongo_password']
     param_list['mongo_port'] = config['database']['mongo_port']
+    param_list['connect_external'] = config['database']['connect_external']
     param_list['mongo_db_name'] = db_name
     param_list['email_account'] = config['api']['email_account']
+    
    
     param_list['require_token'] = config['api']['require_token']
     param_list['token_expiration'] = config['api']['token_expiration']
