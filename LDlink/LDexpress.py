@@ -33,7 +33,7 @@ num_subprocesses = param_list['num_subprocesses']
 
 def get_ldexpress_tissues(web):
     try:
-       db = connectMongoDBReadOnly(True)
+       db = connectMongoDBReadOnly(web)
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -80,7 +80,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
         errors_warnings["error"] = "Window value must be a number between 0 and 1,000,000."
         return("", "", "", "", "", errors_warnings)
      # Connect to Mongo database
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(web)
     # Check if dbsnp collection in MongoDB exists, if not, display error
     if "dbsnp" not in db.list_collection_names():
         errors_warnings["error"] = "dbSNP is currently unavailable. Please contact support."

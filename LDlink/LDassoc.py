@@ -60,7 +60,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
-			db = connectMongoDBReadOnly(True)
+			db = connectMongoDBReadOnly(web)
 
 			var_coord = get_coords(db, snp)
 
@@ -163,7 +163,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 		# Connect to Mongo snp database
-		db = connectMongoDBReadOnly(True)
+		db = connectMongoDBReadOnly(web)
 		
 
 		# Find RS number in snp database

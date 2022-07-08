@@ -61,7 +61,7 @@ def calculate_clip(snplst, pop, request, web, genome_build, r2_threshold=0.1, ma
         return("","","")
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(web)
 
     snps = replace_coords_rsid_list(db, snps,genome_build,output)
   

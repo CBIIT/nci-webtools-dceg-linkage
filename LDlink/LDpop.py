@@ -48,7 +48,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
        return snps
    
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(web)
 
     snp1 = replace_coord_rsid(db, snp1,genome_build,output)
     snp2 = replace_coord_rsid(db, snp2,genome_build,output)

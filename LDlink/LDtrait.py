@@ -29,7 +29,7 @@ dbsnp_version = param_list['dbsnp_version']
 
 def get_ldtrait_timestamp(web):
     try:
-        db = connectMongoDBReadOnly(True)    
+        db = connectMongoDBReadOnly(web)    
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
@@ -189,7 +189,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
    
 
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(True) 
+    db = connectMongoDBReadOnly(web) 
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():
         output["error"] = "GWAS Catalog database is currently being updated. Please check back later."

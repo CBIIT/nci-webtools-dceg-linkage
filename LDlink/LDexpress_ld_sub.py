@@ -37,7 +37,7 @@ pop_ids = list(set(ids))
 # Define function to calculate LD metrics
 
 # Connect to Mongo database
-db = connectMongoDBReadOnly(True)
+db = connectMongoDBReadOnly(web)
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()

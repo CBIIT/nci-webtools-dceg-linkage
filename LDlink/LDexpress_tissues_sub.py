@@ -96,7 +96,7 @@ def getGTExTissueAPI(snp, tissue_ids):
     return (json.loads(r.text))
 def get_tissues(web, windowSNPs, p_threshold, tissues):
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(web)
     gtexQueryRequestCount = 0
     gtexQueryReturnCount = 0
     out = []

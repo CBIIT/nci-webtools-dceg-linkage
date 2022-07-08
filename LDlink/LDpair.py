@@ -56,7 +56,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         return(json.dumps([error_out], sort_keys=True, indent=2))
  
     # Connect to Mongo snp database
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(web)
 
     if len(snp_pairs) < 1:
         output = {}

@@ -35,7 +35,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     if isinstance(pop_ids, str):
         return pop_ids
 
-    db = connectMongoDBReadOnly(True)
+    db = connectMongoDBReadOnly(web)
 
     snps = replace_coords_rsid_list(db, snps,genome_build,output)
 
