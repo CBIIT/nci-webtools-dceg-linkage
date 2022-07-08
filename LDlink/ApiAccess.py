@@ -129,13 +129,13 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
 
 # check if user email record exists
 def getEmailRecord(email, env, api_mongo_addr):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     emailRecord = users.find_one({"email": email})
     return emailRecord
 
 def insertUser(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     user = {
         "firstname": firstname,
         "lastname": lastname,
@@ -151,7 +151,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 
 # log token's api call to api_log table
 def logAccess(token, module):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     accessed = getDatetime()
     
     log = {
@@ -168,7 +168,7 @@ def blockUser(email, url_root):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been blocked. An email has been sent to the user."
     }
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 1}})
     if update_operation is None:
@@ -182,7 +182,7 @@ def unblockUser(email):
     out_json = {
         "message": "Email user (" + email + ")'s API token access has been unblocked. An email has been sent to the user."
     }
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"blocked": 0}})
     if update_operation is None:
@@ -195,7 +195,7 @@ def setUserLock(email, lockValue):
     out_json = {
         "message": "Email user (" + email + ")'s lock has been set to " + str(lockValue)
     }
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"locked": int(lockValue)}})
     if update_operation is None:
@@ -208,7 +208,7 @@ def setUserApi2Auth(email, authValue):
     out_json = {
         "message": "Email user (" + email + ")'s api2auth has been set to " + str(authValue)
     }
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     update_operation = users.find_one_and_update({"email": email}, { "$set": {"api2auth": int(authValue)}})
     if update_operation is None:
@@ -226,7 +226,7 @@ def unlockAllUsers():
 
 # update record only if email's token is expired and user re-registers
 def updateRecord(firstname, lastname, email, institution, token, registered, blocked, env, api_mongo_addr):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     user = {
         "firstname": firstname,
         "lastname": lastname,
@@ -241,7 +241,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 
 # check if token is valid when hitting API route and not expired
 def checkToken(token, token_expiration, token_expiration_days):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"token": token})
 
@@ -260,7 +260,7 @@ def checkToken(token, token_expiration, token_expiration_days):
 
 # check if token is authorized to access API server 2
 def checkApiServer2Auth(token):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"token": token})
 
@@ -274,7 +274,7 @@ def checkApiServer2Auth(token):
 
 # given email, return token
 def getToken(email):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"email": email})
     if record is None:
@@ -284,7 +284,7 @@ def getToken(email):
 
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
 def checkBlocked(token):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"token": token})
     if record is None:
@@ -297,7 +297,7 @@ def checkBlocked(token):
 
 # check if token is locked (1=locked, 0=not locked, -1=never locked). returns true (1) if token is locked
 def checkLocked(token):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"token": token})
 
@@ -321,7 +321,7 @@ def toggleLocked(token, lock):
     else: 
         restrict_concurrency = True
     if restrict_concurrency:
-        db = connectMongoDBReadOnly(False)
+        db = connectMongoDBReadOnly(False,True)
         users = db.api_users
         record = users.find_one({"token": token})
 
@@ -335,7 +335,7 @@ def toggleLocked(token, lock):
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
 def checkBlockedEmail(email, env, api_mongo_addr):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"email": email})
     print(record)
@@ -349,7 +349,7 @@ def checkBlockedEmail(email, env, api_mongo_addr):
 
 # check if token is already in db
 def checkUniqueToken(token):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"token": token})
     if record is None:
@@ -463,7 +463,7 @@ def register_user(firstname, lastname, email, institution, reference, url_root):
 # returns stats of total number of calls per registered api users with optional arguments
 # optional arguments: startdatetime of api calls, enddatetime of api calls, top # users with most calls
 def getStats(startdatetime, enddatetime, top):
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     log = db.api_log
     # get number of registered users in total
@@ -570,7 +570,7 @@ def getStats(startdatetime, enddatetime, top):
 
 # returns stats of api users with locked tokens
 def getLockedUsers():
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     locked_users_json = users.find({"locked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "locked": 1,  "_id": 0 })
     locked_users_json_sanitized = json.loads(json_util.dumps(locked_users_json))
@@ -583,7 +583,7 @@ def getLockedUsers():
 
 # returns stats of api users with blocked tokens
 def getBlockedUsers():
-    db = connectMongoDBReadOnly(False)
+    db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     blocked_users_json = users.find({"blocked": {"$exists": True, "$ne": 0}},  { "firstname": 1, "lastname": 1, "email": 1, "blocked": 1,  "_id": 0 })
     blocked_users_json_sanitized = json.loads(json_util.dumps(blocked_users_json))

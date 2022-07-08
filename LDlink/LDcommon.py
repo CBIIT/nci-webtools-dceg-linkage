@@ -108,7 +108,7 @@ def retrieveAWSCredentials():
         export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
     return export_s3_keys
 
-def connectMongoDBReadOnly(readonly):
+def connectMongoDBReadOnly(readonly, api=False):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
     if is_centralized:
         if bool(readonly):
@@ -120,13 +120,17 @@ def connectMongoDBReadOnly(readonly):
             mongo_host = api_mongo_addr
         else: 
             mongo_host = 'localhost'
-        if readonly:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
+       
+        if api:
+            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
         else:
-            if env == 'local':
-                client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + mongo_host + "/LDLink", mongo_port)
+            if readonly:
+                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
             else:
-                client = MongoClient('localhost', mongo_port)  
+                if env == 'local':
+                    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + "/admin", mongo_port)
+                else:
+                    client = MongoClient('localhost', mongo_port)  
     db = client["LDLink"]
     return db
 

@@ -210,7 +210,7 @@ def requires_admin_token(f):
     def decorated_function(*args, **kwargs):
         #create connection to database, retrieve api_users to find the user with token
         #then check if this user has admin value as 1, if it is admin, then grand acess, if not refuse
-        db = connectMongoDBReadOnly(False)
+        db = connectMongoDBReadOnly(False,True)
 
         users = db.api_users
            
