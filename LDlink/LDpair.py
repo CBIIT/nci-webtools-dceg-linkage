@@ -344,7 +344,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     ### OUTPUT ERROR IF ONLY SINGLE SNP PAIR ###
     if len(snp_pairs) == 1 and len(output_list) == 1 and "error" in output_list[0]:
         return(json.dumps(output_list, sort_keys=True, indent=2))
-    print("#####", output_list)
+ 
     # Generate output file only for single SNP pair inputs
     if len(snp_pairs) == 1 and len(output_list) == 1:
         ldpair_out = open(tmp_dir + "LDpair_" + request + ".txt", "w")
