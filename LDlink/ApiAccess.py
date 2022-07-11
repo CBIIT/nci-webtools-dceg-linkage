@@ -151,7 +151,7 @@ def insertUser(firstname, lastname, email, institution, token, registered, block
 
 # log token's api call to api_log table
 def logAccess(token, module):
-    db = connectMongoDBReadOnly(False,True)
+    db = connectMongoDBReadOnly(False,True,True)
     accessed = getDatetime()
     
     log = {
@@ -241,7 +241,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 
 # check if token is valid when hitting API route and not expired
 def checkToken(token, token_expiration, token_expiration_days):
-    db = connectMongoDBReadOnly(False,True)
+    db = connectMongoDBReadOnly(False,True,True)
     users = db.api_users
     record = users.find_one({"token": token})
 
@@ -260,7 +260,7 @@ def checkToken(token, token_expiration, token_expiration_days):
 
 # check if token is authorized to access API server 2
 def checkApiServer2Auth(token):
-    db = connectMongoDBReadOnly(False,True)
+    db = connectMongoDBReadOnly(False,True,True)
     users = db.api_users
     record = users.find_one({"token": token})
 
@@ -284,7 +284,7 @@ def getToken(email):
 
 # check if token is blocked (1=blocked, 0=not blocked). returns true if token is blocked
 def checkBlocked(token):
-    db = connectMongoDBReadOnly(False,True)
+    db = connectMongoDBReadOnly(False,True,True)
     users = db.api_users
     record = users.find_one({"token": token})
     if record is None:
@@ -297,7 +297,7 @@ def checkBlocked(token):
 
 # check if token is locked (1=locked, 0=not locked, -1=never locked). returns true (1) if token is locked
 def checkLocked(token):
-    db = connectMongoDBReadOnly(False,True)
+    db = connectMongoDBReadOnly(False,True,True)
     users = db.api_users
     record = users.find_one({"token": token})
 
@@ -321,7 +321,7 @@ def toggleLocked(token, lock):
     else: 
         restrict_concurrency = True
     if restrict_concurrency:
-        db = connectMongoDBReadOnly(False,True)
+        db = connectMongoDBReadOnly(False,True,True)
         users = db.api_users
         record = users.find_one({"token": token})
 
