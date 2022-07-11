@@ -74,7 +74,8 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
     sanitized_query_snps = validsnp(snplst,genome_build,max_list)
     #if return value is string, then it is error message and need to return the message
     if isinstance(sanitized_query_snps, str):
-        return("", "", "", "", "", sanitized_query_snps)
+        errors_warnings["error"] = json.loads(sanitized_query_snps)["error"]
+        return("", "", "", "", "", errors_warnings)
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
         errors_warnings["error"] = "Window value must be a number between 0 and 1,000,000."
