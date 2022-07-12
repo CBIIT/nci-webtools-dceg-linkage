@@ -50,7 +50,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Create JSON output
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
-
+    print("######",request)
     validsnp(None,genome_build,None)
 
     if window < 0 or window > 1000000:
