@@ -50,7 +50,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Create JSON output
     out_json = open(tmp_dir + 'proxy' + request + ".json", "w")
     output = {}
-    print("######",request)
+
     validsnp(None,genome_build,None)
 
     if window < 0 or window > 1000000:
@@ -112,6 +112,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     if coord1 < 0:
         coord1 = 0
     coord2 = int(snp_coord[genome_build_vars[genome_build]['position']]) + window
+    #print("#########",coord1,coord2)
     print("")
 
     # Calculate proxy LD statistics in parallel
@@ -697,7 +698,6 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         else:
             genes_c_file = tmp_dir + "genes_c_" + request + ".json"
             genes_c_json = getRefGene(db, genes_c_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, True)
-
             genes_c_plot_start=[]
             genes_c_plot_end=[]
             genes_c_plot_y=[]
@@ -764,7 +764,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
 
             data_gene_c_plot = {'exons_c_plot_x': exons_c_plot_x, 'exons_c_plot_yn': exons_c_plot_yn, 'exons_c_plot_w': exons_c_plot_w, 'exons_c_plot_h': exons_c_plot_h, 'exons_c_plot_name': exons_c_plot_name, 'exons_c_plot_id': exons_c_plot_id}
             source_gene_c_plot=ColumnDataSource(data_gene_c_plot)
-
+  
             max_genes_c = 40
             # if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
             if len(lines_c) < 3:

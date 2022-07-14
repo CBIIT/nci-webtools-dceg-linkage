@@ -276,9 +276,10 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
                 "txEnd": {"$gte": int(end)}
             }
         ]
-    })
+    })#.sort([("cdsEnd",1),("txStart",1)])
     if collapseTranscript:
         query_results_sanitized = json.loads(json_util.dumps(query_results)) 
+        #print("$$$$$$",query_results_sanitized)
         group_by_gene_name = {}
         for gene in query_results_sanitized:
             # new gene name
@@ -288,13 +289,17 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
             # same gene name as another's
             else:
                 group_by_gene_name[gene['name2']].append(gene)
-        # print(json.dumps(group_by_gene_name, indent=4, sort_keys=True))
+        print(json.dumps(group_by_gene_name, indent=4, sort_keys=False))
         query_results_sanitized = []
         for gene_name_key in group_by_gene_name.keys():
+            #print("#",gene_name_key)
             query_results_sanitized.append(processCollapsedTranscript(group_by_gene_name[gene_name_key]))
         # print(json.dumps(query_results_sanitized, indent=4, sort_keys=True))
     else:
         query_results_sanitized = json.loads(json_util.dumps(query_results)) 
+    #temp = query_results_sanitized.pop(0)
+    #query_results_sanitized.append(temp)
+    print(query_results_sanitized)
     with open(filename, "w") as f:
         for x in query_results_sanitized:
             f.write(json.dumps(x) + '\n')
