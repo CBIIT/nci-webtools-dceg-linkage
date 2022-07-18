@@ -299,7 +299,7 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
         query_results_sanitized = json.loads(json_util.dumps(query_results)) 
     #temp = query_results_sanitized.pop(0)
     #query_results_sanitized.append(temp)
-    print(query_results_sanitized)
+    #print(query_results_sanitized)
     with open(filename, "w") as f:
         for x in query_results_sanitized:
             f.write(json.dumps(x) + '\n')

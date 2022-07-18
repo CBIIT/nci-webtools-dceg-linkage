@@ -2121,8 +2121,6 @@ function updateLDassoc() {
         annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
         useEx: $('#example-gwas').is(':checked')? "True" :"False"
     };
-
-
     ldInputs.columns.chromosome = $("#assoc-chromosome > button").val();
     ldInputs.columns.position = $("#assoc-position > button").val();
     ldInputs.columns.pvalue = $("#assoc-p-value > button").val();
@@ -2138,6 +2136,11 @@ function updateLDassoc() {
     ldInputs.variant.index = $("#region-variant-index").val();
     ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
 
+    var msg = ""
+    if (ldInputs.gene.index.length > 0) msg = " gene:"+JSON.stringify(ldInputs.gene)
+    else if (ldInputs.region.index.length > 0) msg = " region:("+ "start:"+ldInputs.region.start+", end:"+ldInputs.region.end+", index:"+ldInputs.region.index+")"
+    else if (ldInputs.variant.index.length > 0) msg = " variant:(rsid:"+ldInputs.variant.index+", basepair:"+ldInputs.variant.basepair+")"
+    $('#ldassoc_input').html("Result for "+ldInputs.genome_build+" pop:"+ldInputs.pop+msg)
     $('#ldassoc-genome').attr('href',
         'http://genome.ucsc.edu/cgi-bin/hgTracks?db=' + genomeBuild == 'grch37' ? 'hg19' : 'hg38' + '&hgt.customText=http://'+location.hostname+'/tmp/track'
         + ldInputs.reference + '.txt');
@@ -2257,6 +2260,8 @@ function updateLDhap() {
         contentType : 'application/json' // JSON
     });
 
+    $('#ldhap_input').html("Result for "+ldInputs.genome_build+" pop:"+ldInputs.pop)
+ 
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         //JSON.parse() cleans up this json string.
@@ -2374,6 +2379,8 @@ function updateLDexpress() {
     // Set populations on LDThinned
     //$('.ldexpress-populations').empty().append(explodeLegalArray(population));
 
+    $('#ldexpress_input').html("Result for "+ldInputs.genome_build+" pop:"+ldInputs.pop+" tissues:"+ldInputs.tissues +" Snps:"+snps)
+   
     var url = restServerUrl + "/ldexpress";
     var ajaxRequest = $.ajax({
         type : 'POST',
@@ -2462,7 +2469,7 @@ function updateLDtrait() {
 
     // Set populations on LDThinned
     //$('.ldtrait-populations').empty().append(explodeLegalArray(population));
-
+    $('#ldtrait_input').html("Result for "+ldInputs.genome_build+" pop:"+ldInputs.pop)
     var url = restServerUrl + "/ldtrait";
     var ajaxRequest = $.ajax({
         type : 'POST',
@@ -2532,7 +2539,7 @@ function updateSNPclip() {
 
     // Set populations on LDThinned
     //$('.snpclip-populations').empty().append(explodeLegalArray(population));
-
+    $('#snpclip_input').html("Result for "+ldInputs.genome_build+" pop:"+ldInputs.pop)
     var url = restServerUrl + "/snpclip";
     var ajaxRequest = $.ajax({
         type : 'POST',
@@ -2596,6 +2603,7 @@ function updateSNPchip() {
     $('#snp_chip_list').attr('href', "tmp/details"+ldInputs.reference+".txt");
     $('#snp_chip_list').attr('target', "chip_details"+ldInputs.reference+".txt");
     //console.dir(ldInputs);
+    $('#snpchip_input').html("Result for "+ldInputs.genome_build)
     var url = restServerUrl + "/snpchip";
     var ajaxRequest = $.ajax({
         type : 'POST',
@@ -3513,7 +3521,7 @@ function updateLDmatrix() {
     };
     //console.log('ldmatrixInputs');
     //console.dir(ldmatrixInputs);
-
+    $('#ldmatrix_input').html("Result for "+ldmatrixInputs.genome_build+" pop:"+ldmatrixInputs.pop)
     var url = restServerUrl + "/ldmatrix";
     var ajaxRequest = $.ajax({
         type : 'GET',
@@ -3713,7 +3721,7 @@ function updateLDproxy() {
         window: windowSize,
         collapseTranscript: $("#proxy_collapse_transcripts").hasClass('active')
     };
-
+    $('#ldproxy_input').html("Result for "+ldproxyInputs.genome_build+" pop:"+ldproxyInputs.pop+" variant:"+ldproxyInputs.var)
     updateHistoryURL(id, ldproxyInputs);
 
     //console.log(location.hostname);
@@ -3971,7 +3979,7 @@ function updateLDpair() {
     };
     //console.log("ldpairInputs");
     //console.dir(ldpairInputs);
-
+    $('#ldpair_input').html("Result for "+ldpairInputs.genome_build+" pop:"+ldpairInputs.pop)
     updateHistoryURL(id, ldpairInputs);
 
     var url = restServerUrl + "/ldpair";
@@ -4375,7 +4383,7 @@ function updateLDpop() {
         reference : reference,
         r2_d: r2_d
     };
-
+    $('#ldpop_input').html("Result for "+ldpopInputs.genome_build+" pop:"+ldpopInputs.pop)
     updateHistoryURL(id, ldpopInputs);
 
     var url = restServerUrl + "/ldpop";
