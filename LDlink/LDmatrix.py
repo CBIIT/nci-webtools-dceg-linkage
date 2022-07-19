@@ -64,11 +64,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return("", "")
 
     # Remove duplicate RS numbers
-    snps = []
-    for snp_raw in snps_raw:
-        snp = snp_raw.strip().split()
-        if snp not in snps:
-            snps.append(snp)
+    snps = set(snp_raw.strip().split() for snp_raw in snps_raw)
 
     # Select desired ancestral populations
     pops = pop.split("+")
