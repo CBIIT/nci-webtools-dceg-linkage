@@ -7,9 +7,20 @@ import json
 import subprocess
 from bson import json_util
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from pyaml_env import parse_config
+
+#create a .key folder as /usrs/yaox5/.key/ and put the .env file
+dotenv_path = Path(os.path.expanduser('~')+'/.key/.env')
+load_dotenv(dotenv_path=dotenv_path)
+
+config = parse_config('config.yml')
+#print(config)
 # retrieve config
-with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
+#with open('config.yml', 'r') as yml_file:
+#    config = yaml.load(yml_file)
 aws_info = config['aws']
 env = config['env']
 api_mongo_addr = config['api']['api_mongo_addr']

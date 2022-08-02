@@ -10,3 +10,6 @@ tornado
 selenium 
 svgutils 
 boto3
+pyaml-env
+python-dotenv
+pathlib

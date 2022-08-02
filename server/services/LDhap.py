@@ -8,11 +8,21 @@ import subprocess
 import sys
 from services.LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+from pyaml_env import parse_config
+
+dotenv_path = Path(os.path.expanduser('~')+'/.key/.env')
+load_dotenv(dotenv_path=dotenv_path)
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
+    #with open('config.yml', 'r') as yml_file:
+    #    config = yaml.load(yml_file)
+    config = parse_config('config.yml')
+
+
     dbsnp_version = config['data']['dbsnp_version']
     data_dir = config['data']['data_dir']
     tmp_dir = config['data']['tmp_dir']
