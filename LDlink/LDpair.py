@@ -91,7 +91,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
 
         # SNP2
         if re.compile(r'rs\d+', re.IGNORECASE).match(snp2) is None and re.compile(r'chr\d+:\d+', re.IGNORECASE).match(snp2) is None and re.compile(r'chr[X|Y]:\d+', re.IGNORECASE).match(snp2) is None:
-            output["error"] = snp1 + " is not a valid SNP. " + str(output["warning"] if "warning" in output else "")
+            output["error"] = snp2 + " is not a valid SNP. " + str(output["warning"] if "warning" in output else "")
             output_list.append(output)
             continue
         snp2 = replace_coord_rsid(db, snp2,genome_build,output)
