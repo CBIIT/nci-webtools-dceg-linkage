@@ -8,7 +8,9 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord
+from LDcommon import set_alleles,get_geno
+from LDutilites import get_config
 
 web = sys.argv[1]
 snp = sys.argv[2]
@@ -21,18 +23,11 @@ process = sys.argv[8]
 
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
-env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-genotypes_dir = config['data']['genotypes_dir']
-aws_info = config['aws']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
+param_list = get_config()
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+genotypes_dir = param_list['genotypes_dir']
+aws_info = param_list['aws_info']
 
 export_s3_keys = retrieveAWSCredentials()
 
@@ -45,26 +40,10 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 # Get VCF region
-vcf_filePath = "%s/%s%s/%s"  % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]["1000G_file"] % (chr))
-vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
+vcf_filePath = "%s/%s%s/%s"  % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]["1000G_file"] % (chr))
+vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
-checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-
-# Define function to calculate LD metrics
-def set_alleles(a1, a2):
-    if len(a1) == 1 and len(a2) == 1:
-        a1_n = a1
-        a2_n = a2
-    elif len(a1) == 1 and len(a2) > 1:
-        a1_n = "-"
-        a2_n = a2[1:]
-    elif len(a1) > 1 and len(a2) == 1:
-        a1_n = a1[1:]
-        a2_n = "-"
-    elif len(a1) > 1 and len(a2) > 1:
-        a1_n = a1[1:]
-        a2_n = a2[1:]
-    return(a1_n, a2_n)
+checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 def LD_calcs(hap, allele, allele_n):
     # Extract haplotypes
@@ -114,18 +93,7 @@ def LD_calcs(hap, allele, allele_n):
         return [maf_q, maf_p, D_prime, r2, match]
 
 # Connect to Mongo snp database
-if env == 'local' or connect_external:
-    mongo_host = api_mongo_addr
-else: 
-    mongo_host = 'localhost'
-if web == "True":
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-else:
-    if env == 'local' or connect_external:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        client = MongoClient('localhost', mongo_port)
-db = client["LDLink"]
+db = connectMongoDBReadOnly(web)
 
 def get_regDB(chr, pos):
     result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]['position']: int(pos)})
@@ -140,22 +108,9 @@ def get_dbsnp_rsid(db, rsid):
     query_results_sanitized = json.loads(json_util.dumps(query_results))
     return query_results_sanitized
 
-def get_dbsnp_coord(db, chromosome, position):
-    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
-    query_results_sanitized = json.loads(json_util.dumps(query_results))
-    return query_results_sanitized
-
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
-if len(vcf) > 1:
-    for i in range(len(vcf)):
-        # if vcf[i].strip().split()[2] == snp:
-        geno = vcf[i].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-else:
-    geno = vcf[0].strip().split()
-    geno[0] = geno[0].lstrip('chr')
+geno = get_geno(vcf,snp)
 
 new_alleles = set_alleles(geno[3], geno[4])
 allele = {"0": new_alleles[0], "1": new_alleles[1]}
@@ -220,7 +175,7 @@ for geno_n in vcf:
                 else:
                     funct = "."
             elif rs_n[0:2] != "rs":
-                snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
+                snp_coord = get_dbsnp_coord(db, chr_n, bp_n,genome_build)
 
                 if snp_coord != None:
                     funct = snp_coord['function']

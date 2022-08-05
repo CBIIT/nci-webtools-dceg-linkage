@@ -15,53 +15,26 @@ from multiprocessing.dummy import Pool
 import sys
 import numpy as np	
 from timeit import default_timer as timer
-from LDcommon import genome_build_vars, get_rsnum
-
+from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
+from LDcommon import validsnp, replace_coords_rsid_list,get_coords,get_population,get_output
+from LDutilites import get_config
 
 # Set data directories using config.yml	
-with open('config.yml', 'r') as yml_file:	
-    config = yaml.load(yml_file)	
-env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
-dbsnp_version = config['data']['dbsnp_version']	
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-population_samples_dir = config['data']['population_samples_dir']	
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
-num_subprocesses = config['performance']['num_subprocesses']
+param_list = get_config()
+population_samples_dir = param_list['population_samples_dir']
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+num_subprocesses = param_list['num_subprocesses']
+dbsnp_version = param_list['dbsnp_version']
 
 def get_ldtrait_timestamp(web):
     try:
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        env = config['env']
-        connect_external = config['database']['connect_external']
-        api_mongo_addr = config['database']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_readonly']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
-
-        # Connect to Mongo snp database
-        if env == 'local' or connect_external:
-            mongo_host = api_mongo_addr
-        else: 
-            mongo_host = 'localhost'
-        if web:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            if env == 'local' or connect_external:
-                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-            else:
-                client = MongoClient('localhost', mongo_port)
+        db = connectMongoDBReadOnly(web)    
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
-    db = client["LDLink"]
     for document in db.gwas_catalog.find().sort("_id", -1).limit(1):
         object_id_datetime = document.get('_id').generation_time
     json_output = json.dumps(object_id_datetime, default=json_util.default, sort_keys=True, indent=2)
@@ -181,10 +154,6 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
 
-# collect output in parallel
-def get_output(process):
-    return process.communicate()[0].splitlines()
-
 # Create LDtrait function
 def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold=0.1, window=500000):
     print("##### START LD TRAIT CALCULATION #####")	
@@ -202,13 +171,13 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     output = {}
 
     # Validate genome build param
-    if genome_build not in genome_build_vars['vars']:
-        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+    sanitized_query_snps=validsnp(snplst,genome_build,max_list)
+      #if return value is string, then it is error message and need to return the message
+    if isinstance(sanitized_query_snps, str):
+        print(sanitized_query_snps, file=out_json)
         out_json.close()
         return("", "", "")
-
+     
     # Validate window size is between 0 and 1,000,000
     if window < 0 or window > 1000000:
         output["error"] = "Window value must be a number between 0 and 1,000,000."
@@ -217,38 +186,10 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         out_json.close()
         return("", "", "")
 
-    # open snps file
-    with open(snplst, 'r') as fp:
-        snps_raw = fp.readlines()
-        # Generate error if # of inputted SNPs exceeds limit
-        if len(snps_raw) > max_list:
-            output["error"] = "Maximum SNP list is " + \
-            str(max_list)+" RS numbers. Your list contains " + \
-            str(len(snps_raw))+" entries."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
-        # Remove duplicate RS numbers
-        sanitized_query_snps = []
-        for snp_raw in snps_raw:
-            snp = snp_raw.strip()
-            if snp not in sanitized_query_snps:
-                sanitized_query_snps.append([snp])
+   
 
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@'+mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(web) 
     # Check if gwas_catalog collection in MongoDB exists, if not, display error
     if "gwas_catalog" not in db.list_collection_names():
         output["error"] = "GWAS Catalog database is currently being updated. Please check back later."
@@ -259,77 +200,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
 
     # Select desired ancestral populations
     pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            output["error"] = pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "", "")
+    pop_ids = get_population(pop, request,output)
 
-    get_pops = "cat " + " ".join(pop_dirs) + " > " + tmp_dir + "pops_" + request + ".txt"
-    subprocess.call(get_pops, shell=True)
-    
-    pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-
-    # Get genomic coordinates from rs number from dbsnp
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                # print "reached 1", snp_raw_i
-                new_snp_lst.append(snp_raw_i)
-            else:
-                # print "reached 2", snp_raw_i
-                snp_info_lst = get_rsnum(db, snp_raw_i[0], genome_build)
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    sanitized_query_snps = replace_coords_rsid(db, sanitized_query_snps)
-
+    sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,output)
 
     # find genomic coords of query snps in dbsnp 
     # query_snp_details = []
@@ -387,7 +260,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
 
     # Generate errors if no query variants are valid in dbsnp
     if len(rs_nums) == 0:
-        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + output["warning"]
+        output["error"] = "Input SNP list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
@@ -401,6 +274,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     found = {}	
     # calculate and store LD info for all LD pairs	
     ldPairs = []
+    snp_coords_gwas = []
     # search query snp windows in gwas_catalog
     for snp_coord in snp_coords:
         # print(snp_coord)
@@ -408,13 +282,17 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         # print("found", snp_coord[0], len(found[snp_coord[0]]))
         if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
+            snp_coords_gwas.append(snp_coord)
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found[snp_coord[0]]:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record[genome_build_vars[genome_build]['position']])])	
+                snp_coords_gwas.append(["rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record[genome_build_vars[genome_build]['position']])])
         else:	
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
                 
-    ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]	
+    ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
+    snp_coords_gwas_unique = [list(x) for x in set(tuple(x) for x in ldPairs)]
+    #print(snp_coords_gwas)	
     # print("ldPairsUnique", ldPairsUnique)	
     # print("ldPairsUnique length", len(ldPairsUnique))	
     # print("##### BEGIN MULTIPROCESSING LD CALCULATIONS #####")	
@@ -434,6 +312,10 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         ld_subprocess_commands.append("python3 LDtrait_ld_sub.py " + getPairLDArgs)
 
     ld_subprocesses = [subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in ld_subprocess_commands]
+
+    #for subp in ld_subprocesses:
+    #    for line in subp.stdout:
+    #        print(line.decode().strip())
     # collect output in parallel
     pool = Pool(len(ld_subprocesses))
     ldInfoSubsets = pool.map(get_output, ld_subprocesses)

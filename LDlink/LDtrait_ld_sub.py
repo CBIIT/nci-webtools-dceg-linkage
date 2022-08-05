@@ -8,27 +8,21 @@ import botocore
 import subprocess
 import sys
 import requests
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,get_vcf_snp_params,get_1000g_data_single
+from LDutilites import get_config
+#import cache from functools
 
 request = sys.argv[1]
 subprocess_id = sys.argv[2]
 genome_build = sys.argv[3]
 
 # Set data directories using config.yml
-with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
-env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
-population_samples_dir = config['data']['population_samples_dir']
-data_dir = config['data']['data_dir']
-tmp_dir = config['data']['tmp_dir']
-genotypes_dir = config['data']['genotypes_dir']
-# reg_dir = config['data']['reg_dir']
-aws_info = config['aws']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
+param_list = get_config()
+population_samples_dir = param_list['population_samples_dir']
+data_dir = param_list['data_dir']
+tmp_dir = param_list['tmp_dir']
+genotypes_dir = param_list['genotypes_dir']
+aws_info = param_list['aws_info']
 
 export_s3_keys = retrieveAWSCredentials()
 
@@ -41,6 +35,7 @@ for i in range(len(pop_list)):
 pop_ids = list(set(ids))
 
 variantPairs = []
+retrieved_variant = {}
 
 with open(tmp_dir + 'trait_ld_' + str(subprocess_id) + '_' + str(request) + '.txt') as snpPairsFile: 
     lines = snpPairsFile.readlines() 
@@ -54,40 +49,36 @@ def get_ld_stats(variantPair, pop_ids):
         "chromosome": variantPair[1], 
         genome_build_vars[genome_build]['position']: variantPair[2]
     }
+    snp_coord_1 = [str(variantPair[0]),str(variantPair[1]),str(variantPair[2])]
     snp2 = variantPair[3]
     snp2_coord = {
         "chromosome": variantPair[4], 
         genome_build_vars[genome_build]['position']: variantPair[5]
     }
+    snp_coord_2 = [variantPair[3],variantPair[4],variantPair[5]]
 
+    vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]	
+    vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]	
     # errors/warnings encountered	
     output = {	
         "error": [],	
         "warning": []	
-    }	
+    }
+    #vcf1_pos: 60697654; snp_coord_1: ['rs4672393', '2', '60697654']
     # Extract 1000 Genomes phased genotypes	
     # SNP1
-    vcf_filePath1 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp1_coord['chromosome'])
-    vcf_query_snp_file1 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath1)
-
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath1)
-
-    tabix_snp1_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file1, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp1_coord['chromosome'], snp1_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
-    vcf1_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
+    # vcf_filePath,tabix_coords,vcf_query_snp_file=get_vcf_snp_params([vcf1_pos],[snp_coord_1],genome_build)
+    # checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
+    # vcf1_offset,head1 = retrieveTabix1000GDataSingle(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+    if snp1 not in retrieved_variant.keys():
+        vcf1_offset,head1 = get_1000g_data_single(vcf1_pos,snp_coord_1, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
+        retrieved_variant[snp1] = [vcf1_offset,head1]
+    else :
+        vcf1_offset = retrieved_variant[snp1][0]
+        head1 = retrieved_variant[snp1][1]    
     # SNP2
-    vcf_filePath2 = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % snp2_coord['chromosome'])
-    vcf_query_snp_file2 = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath2)
+    vcf2_offset,head2 = get_1000g_data_single(vcf2_pos,snp_coord_2, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
 
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath2)
-
-    tabix_snp2_offset = export_s3_keys + " cd {3}; tabix -D {0} {1}:{2}-{2} | grep -v -e END".format(	
-        vcf_query_snp_file2, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp2_coord['chromosome'], snp2_coord[genome_build_vars[genome_build]['position']], data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
-    vcf2_offset = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_offset, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]	
-    vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]	
     vcf1 = vcf1_offset	
     vcf2 = vcf2_offset	
 
@@ -236,10 +227,10 @@ def get_ld_stats(variantPair, pop_ids):
         }	
 
     # Get headers	
-    tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
-    head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-    tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
-    head2 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
+    #tabix_snp1_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file1, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
+    #head1 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp1_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
+    #tabix_snp2_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file2, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])	
+    #head2 = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp2_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 
     # Combine phased genotypes	
     geno = {}	
@@ -326,7 +317,7 @@ def get_ld_stats(variantPair, pop_ids):
         "alleles": alleles,
         "output": output
     }
-
+#@cache
 def get_ld_pairs(pop_ids, variantPairs):
     ldInfoSubset = {}	
     for variantPair in variantPairs:

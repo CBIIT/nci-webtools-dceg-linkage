@@ -14,42 +14,20 @@ import threading
 import weakref
 from multiprocessing.dummy import Pool
 import math
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import get_coords,replace_coord_rsid,get_query_variant_c,LD_calcs,chunkWindow,get_output
+from LDutilites import get_config
 
 # LDproxy subprocess to export bokeh to high quality images in the background
 
-def chunkWindow(pos, window, num_subprocesses):
-    if (pos - window <= 0):
-        minPos = 0
-    else:
-        minPos = pos - window
-    maxPos = pos + window
-    windowRange = maxPos - minPos
-    chunks = []
-    newMin = minPos
-    newMax = 0
-    for _ in range(num_subprocesses):
-        newMax = newMin + (windowRange / num_subprocesses)
-        chunks.append([math.ceil(newMin), math.ceil(newMax)])
-        newMin = newMax + 1
-    return chunks
-
 def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
-
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    connect_external = config['database']['connect_external']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-    aws_info = config['aws']
-    num_subprocesses = config['performance']['num_subprocesses']
+    param_list = get_config()
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
+    num_subprocesses = param_list['num_subprocesses']
 
     export_s3_keys = retrieveAWSCredentials()
 
@@ -65,60 +43,9 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     # Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
     
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(True)
 
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coord_rsid(db, snp):
-        if snp[0:2] == "rs":
-            return snp
-        else:
-            snp_info_lst = get_rsnum(db, snp)
-            print("snp_info_lst")
-            print(snp_info_lst)
-            if snp_info_lst != None:
-                if len(snp_info_lst) > 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    ref_variants = []
-                    for snp_info in snp_info_lst:
-                        if snp_info['id'] == snp_info['ref_id']:
-                            ref_variants.append(snp_info['id'])
-                    if len(ref_variants) > 1:
-                        var_id = "rs" + ref_variants[0]
-                    elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                    else:
-                        var_id = "rs" + ref_variants[0]
-                    return var_id
-                elif len(snp_info_lst) == 1:
-                    var_id = "rs" + snp_info_lst[0]['id']
-                    return var_id
-                else:
-                    return snp
-            else:
-                return snp
-        return snp
-
-    snp = replace_coord_rsid(db, snp)
+    snp = replace_coord_rsid(db, snp,genome_build,None)
 
     # Find RS number in snp database
     snp_coord = get_coords(db, snp)
@@ -131,72 +58,13 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     pop_ids = list(set(ids))
 
-    # Extract query SNP phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coord['chromosome']))
-    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
-
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-
-    tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_query_snp_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-    tabix_snp =  export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(
-        vcf_query_snp_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']], tmp_dir + "snp_no_dups_" + request + ".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-    subprocess.call(tabix_snp, shell=True)
-
-    # Check SNP is in the 1000G population, has the correct RS number, and not
-    # monoallelic
-    vcf = open(tmp_dir + "snp_no_dups_" + request + ".vcf").readlines()
-
-    if len(vcf) == 0:
-        subprocess.call("rm " + tmp_dir + "pops_" +
-                        request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return None
-    elif len(vcf) > 1:
-        geno = []
-        for i in range(len(vcf)):
-            # if vcf[i].strip().split()[2] == snp:
-            geno = vcf[i].strip().split()
-            geno[0] = geno[0].lstrip('chr')
-        if geno == []:
-            subprocess.call("rm " + tmp_dir + "pops_" +
-                            request + ".txt", shell=True)
-            subprocess.call("rm " + tmp_dir + "*" +
-                            request + "*.vcf", shell=True)
-            return None
-    else:
-        geno = vcf[0].strip().split()
-        geno[0] = geno[0].lstrip('chr')
-
-    if geno[2] != snp and snp[0:2]=="rs" and "rs" in geno[2]:
+    temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
+    #print(temp)
+    (geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True)
+    #print(geno,warningmsg)
+    for msg in warningmsg:
+        if msg[1] != "NA":
             snp = geno[2]
-
-    if "," in geno[3] or "," in geno[4]:
-        subprocess.call("rm " + tmp_dir + "pops_" +
-                        request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return None
-
-    index = []
-    for i in range(9, len(head)):
-        if head[i] in pop_ids:
-            index.append(i)
-
-    genotypes = {"0": 0, "1": 0}
-    for i in index:
-        sub_geno = geno[i].split("|")
-        for j in sub_geno:
-            if j in genotypes:
-                genotypes[j] += 1
-            else:
-                genotypes[j] = 1
-
-    if genotypes["0"] == 0 or genotypes["1"] == 0:
-        subprocess.call("rm " + tmp_dir + "pops_" +
-                        request + ".txt", shell=True)
-        subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
-        return None
 
     # Define window of interest around query SNP
     # window = 500000
@@ -235,10 +103,6 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 
     processes = [subprocess.Popen(
         command, shell=True, stdout=subprocess.PIPE) for command in commands]
-
-    # collect output in parallel
-    def get_output(process):
-        return process.communicate()[0].splitlines()
 
     if not hasattr(threading.current_thread(), "_children"):
         threading.current_thread()._children = weakref.WeakKeyDictionary()

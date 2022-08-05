@@ -12,28 +12,23 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
+from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
+from LDutilites import get_config
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	start_time=time.time()
 
 	# Set data directories using config.yml
-	with open('config.yml', 'r') as yml_file:
-		config = yaml.load(yml_file)
-	env = config['env']
-	connect_external = config['database']['connect_external']
-	api_mongo_addr = config['database']['api_mongo_addr']
-	dbsnp_version = config['data']['dbsnp_version']
-	data_dir = config['data']['data_dir']
-	tmp_dir = config['data']['tmp_dir']
-	population_samples_dir = config['data']['population_samples_dir']
-	genotypes_dir = config['data']['genotypes_dir']
-	aws_info = config['aws']
-	mongo_username = config['database']['mongo_user_readonly']
-	mongo_password = config['database']['mongo_password']
-	mongo_port = config['database']['mongo_port']
-	num_subprocesses = config['performance']['num_subprocesses']
+	param_list = get_config()
+	dbsnp_version = param_list['dbsnp_version']
+	data_dir = param_list['data_dir']
+	tmp_dir = param_list['tmp_dir']
+	population_samples_dir = param_list['population_samples_dir']
+	genotypes_dir = param_list['genotypes_dir']
+	aws_info = param_list['aws_info']
+	num_subprocesses = param_list['num_subprocesses']
 
 	export_s3_keys = retrieveAWSCredentials()
 
@@ -41,18 +36,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
 
-
 	# Create JSON output
 	out_json = open(tmp_dir+'assoc'+request+".json","w")
 	output = {}
 
-	# Validate genome build param
-	if genome_build not in genome_build_vars['vars']:
-		output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-		json_output = json.dumps(output, sort_keys=True, indent=2)
-		print(json_output, file=out_json)
-		out_json.close()
-		return("", "")
+    # Validate genome build param
+	validsnp(None,genome_build,None)
 
 	chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
@@ -71,20 +60,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			snp=myargs.origin
 
 			# Connect to Mongo snp database
-			if env == 'local' or connect_external:
-				mongo_host = api_mongo_addr
-			else: 
-				mongo_host = 'localhost'
-			client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-			db = client["LDLink"]
-			
-			def get_coords_var(db, rsid):
-				rsid = rsid.strip("rs")
-				query_results = db.dbsnp.find_one({"id": rsid})
-				query_results_sanitized = json.loads(json_util.dumps(query_results))
-				return query_results_sanitized
+			db = connectMongoDBReadOnly(web)
 
-			var_coord=get_coords_var(db, snp)
+			var_coord = get_coords(db, snp)
 
 			if var_coord==None:
 				output["error"] = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
@@ -184,24 +162,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			out_json.close()
 			return("","")
 
-		def get_coords_gene(gene_raw, db):
-			gene=gene_raw.upper()
-			mongoResult = db.genes_name_coords.find_one({"name": gene})
-
-			#format mongo output
-			if mongoResult != None:
-				geneResult = [mongoResult["name"], mongoResult[genome_build_vars[genome_build]['chromosome']], mongoResult[genome_build_vars[genome_build]['gene_begin']], mongoResult[genome_build_vars[genome_build]['gene_end']]]
-				return geneResult
-			else:
-				return None
-
 		# Connect to Mongo snp database
-		if env == 'local' or connect_external:
-			mongo_host = api_mongo_addr
-		else: 
-			mongo_host = 'localhost'
-		client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-		db = client["LDLink"]
+		db = connectMongoDBReadOnly(web)
+		
 
 		# Find RS number in snp database
 		gene_coord = get_coords_gene(myargs.name, db)
@@ -387,54 +350,23 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		return("","")
 
 	# Select desired ancestral populations
-	pops=pop.split("+")
-	pop_dirs=[]
-	for pop_i in pops:
-		if pop_i in ["ALL","AFR","AMR","EAS","EUR","SAS","ACB","ASW","BEB","CDX","CEU","CHB","CHS","CLM","ESN","FIN","GBR","GIH","GWD","IBS","ITU","JPT","KHV","LWK","MSL","MXL","PEL","PJL","PUR","STU","TSI","YRI"]:
-			pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-		else:
-			output["error"]=pop_i+" is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			return("","")
-
-	get_pops="cat "+" ".join(pop_dirs)+" > "+tmp_dir+"pops_"+request+".txt"
-	subprocess.call(get_pops, shell=True)
-
-
-	# Get population ids
-	pop_list=open(tmp_dir+"pops_"+request+".txt").readlines()
-	ids=[]
-	for i in range(len(pop_list)):
-		ids.append(pop_list[i].strip())
-
-	pop_ids=list(set(ids))
-
-
+	pop_ids = get_population(pop,request,output)
+	if isinstance(pop_ids,str):
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print(json_output, file=out_json)
+		out_json.close()
+		return("","")
 	# Define LD origin coordinate
 	try:
 		org_coord
 	except NameError:
 		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
 			snp="chr"+var_p[0].split("-")[0]
-
-			# Extract lowest P SNP phased genotypes
-			vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-			vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
-
-			checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-
-			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-			subprocess.call(tabix_snp, shell=True)
-
-
-			# Check lowest P SNP is in the 1000G population and not monoallelic
-			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
+			# Extract query SNP phased genotypes
+			temp = [snp, str(chromosome), org_coord]
+			#print(temp)
+			(geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
+			vcf = geno
 			if len(vcf)==0:
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
@@ -484,8 +416,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 			org_coord=var_p[0].split("-")[1]
 			break
-
-
 	else:
 		if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + org_coord + "-" + org_coord not in assoc_coords:
 			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
@@ -495,92 +425,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			return("","")
 
 		# Extract query SNP phased genotypes
-		vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
-		vcf_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
-
-		checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-
-		tabix_snp_h = export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-		head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
-
-		tabix_snp=export_s3_keys + " cd {4}; tabix -D {0} {1}:{2}-{2} | grep -v -e END > {3}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome, org_coord, tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-		subprocess.call(tabix_snp, shell=True)
+		temp = [snp, str(chromosome), org_coord]
+		#print(temp)
+		(geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
 
 
-		# Check query SNP is in the 1000G population, has the correct RS number, and not monoallelic
-		vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-
-		if len(vcf)==0:
-			output["error"]=snp+" is not in 1000G reference panel."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			print("Temporary population file removed.")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
-			
-		elif len(vcf)>1:
-			geno=[]
-			for i in range(len(vcf)):
-				# if vcf[i].strip().split()[2] == snp:
-				geno = vcf[i].strip().split()
-				geno[0] = geno[0].lstrip('chr')
-			if geno == []:
-				output["error"]=snp+" is not in 1000G reference panel."
-				json_output=json.dumps(output, sort_keys=True, indent=2)
-				print(json_output, file=out_json)
-				out_json.close()
-				print("Temporary population file removed.")
-				subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-				subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-				return("","")
-				
-		else:
-			geno=vcf[0].strip().split()
-			geno[0] = geno[0].lstrip('chr')
-
-		if geno[2]!=snp and snp[0:2]=="rs" and "rs" in geno[2]:
-			if "warning" in output:
-				output["warning"]=output["warning"]+". Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-			else:
-				output["warning"]="Genomic position for query variant ("+snp+") does not match RS number at 1000G position (chr"+geno[0]+":"+geno[1]+" = "+geno[2]+")"
-			snp = geno[2]
-
-		if "," in geno[3] or "," in geno[4]:
-			output["error"]=snp+" is not a biallelic variant."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			print("Temporary population file removed.")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
-
-
-		index=[]
-		for i in range(9,len(head)):
-			if head[i] in pop_ids:
-				index.append(i)
-
-		genotypes={"0":0, "1":0}
-		for i in index:
-			sub_geno=geno[i].split("|")
-			for j in sub_geno:
-				if j in genotypes:
-					genotypes[j]+=1
-				else:
-					genotypes[j]=1
-
-		if genotypes["0"]==0 or genotypes["1"]==0:
-			output["error"]=snp+" is monoallelic in the "+pop+" population."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			print("Temporary population file removed.")
-			subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
-			subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
-			return("","")
 
 	# print "[ldassoc debug] begin calculating LD in parallel"
 	# Calculate proxy LD statistics in parallel
@@ -605,14 +454,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	for subprocess_id in range(num_subprocesses):
 		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
 		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+		#print(subprocessArgs)
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
 	# print "[ldassoc debug] collect output in parallel" 
-
-	# collect output in parallel
-	def get_output(process):
-		return process.communicate()[0].splitlines()
 
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
@@ -800,7 +646,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	duration=time.time() - start_time
 
 	statsistics={}
-	statsistics["individuals"] = str(len(pop_list))
+	statsistics["individuals"] = str(len(pop_ids))
 	statsistics["in_region"] = str(len(out_prox))
 	statsistics["runtime"] = str(duration)
 
@@ -1340,7 +1186,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 
 	# Print run time statistics
-	print("Number of Individuals: "+str(len(pop_list)))
+	print("Number of Individuals: "+str(len(pop_ids)))
 	print("SNPs in Region: "+str(len(out_prox)))
 	duration=round(time.time() - start_time,2)
 	print("Run time: "+str(duration)+" seconds\n")

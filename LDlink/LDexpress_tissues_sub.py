@@ -1,3 +1,4 @@
+
 import yaml
 import csv
 import json
@@ -6,34 +7,23 @@ from bson import json_util, ObjectId
 import subprocess
 import sys
 import requests
-from LDcommon import genome_build_vars
-
+from LDcommon import genome_build_vars,connectMongoDBReadOnly
+from LDutilites import get_config
 web = sys.argv[1]
 request = sys.argv[2]
 subprocess_id = sys.argv[3]
 p_threshold = sys.argv[4]
 tissues = sys.argv[5]
 genome_build = sys.argv[6]
-
 # Set data directories using config.yml
-with open('config.yml', 'r') as yml_file:
-    config = yaml.load(yml_file)
-env = config['env']
-connect_external = config['database']['connect_external']
-api_mongo_addr = config['database']['api_mongo_addr']
-tmp_dir = config['data']['tmp_dir']
-# reg_dir = config['data']['reg_dir']
-mongo_username = config['database']['mongo_user_readonly']
-mongo_password = config['database']['mongo_password']
-mongo_port = config['database']['mongo_port']
-
+param_list = get_config()
+env = param_list['env']
+tmp_dir = param_list['tmp_dir']
 windowSNPs = []
-
 with open(tmp_dir + 'express_ld_' + str(subprocess_id) + '_' + str(request) + '.txt') as snpsLDFile: 
     lines = snpsLDFile.readlines() 
     for line in lines: 
         windowSNPs.append(line.strip().split("\t"))
-
 def getGTExTissueMongoDB(db, chromosome, position, tissues):
     if "gtex_tissue_eqtl" in db.list_collection_names():
         tissue_ids_query = []
@@ -85,9 +75,7 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
                 } 
             },
         ]
-
         documents = list(db.gtex_tissue_eqtl.aggregate(pipeline))
-
         tissues = {
             "singleTissueEqtl": documents
         }
@@ -95,7 +83,6 @@ def getGTExTissueMongoDB(db, chromosome, position, tissues):
         return tissues
     else:
         return None
-
 def getGTExTissueAPI(snp, tissue_ids):
     PAYLOAD = {
         "format" : "json",
@@ -107,22 +94,9 @@ def getGTExTissueAPI(snp, tissue_ids):
     r = requests.get(REQUEST_URL, params=PAYLOAD)
     # print(json.loads(r.text))
     return (json.loads(r.text))
-
 def get_tissues(web, windowSNPs, p_threshold, tissues):
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web == "True":
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
-
+    db = connectMongoDBReadOnly(web)
     gtexQueryRequestCount = 0
     gtexQueryReturnCount = 0
     out = []
@@ -164,8 +138,6 @@ def get_tissues(web, windowSNPs, p_threshold, tissues):
     # print("# of gtex queries made (gtexQueryRequestCount)", gtexQueryRequestCount)
     # print("# of gtex queries returned (gtexQueryReturnCount)", gtexQueryReturnCount)
     return out
-
 out = get_tissues(web, windowSNPs, p_threshold, tissues)
-
 for line in out:
     print("\t".join([str(val) for val in line]))

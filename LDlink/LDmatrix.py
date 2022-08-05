@@ -10,29 +10,24 @@ import boto3
 import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene
-from LDcommon import connectMongoDBReadOnly,retrieveTabix1000GData,parse_vcf
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene,connectMongoDBReadOnly
+from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
+from LDcommon import set_alleles
+from LDutilites import get_config
+from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    connect_external = config['database']['connect_external']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    dbsnp_version = config['data']['dbsnp_version']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    population_samples_dir = config['data']['population_samples_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
+    param_list = get_config()
+    dbsnp_version = param_list['dbsnp_version']
+    population_samples_dir = param_list['population_samples_dir']
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
+    
     export_s3_keys = retrieveAWSCredentials()
     
-
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
@@ -41,116 +36,28 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     out_json = open(tmp_dir + "matrix" + request + ".json", "w")
     output = {}
 
-    # Validate genome build param
-    if genome_build not in genome_build_vars['vars']:
-        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
-        out_json.close()
-        return("", "")
-
-    # Open SNP list file
-    snps_raw = open(snplst).readlines()
     if web or request_method == "GET":
         snp_limit = 300
     else:
         snp_limit = 1000
-    if len(snps_raw) > snp_limit:
-        output["error"] = "Maximum variant list is " + str(snp_limit) + " RS numbers. Your list contains " + \
-            str(len(snps_raw)) + " entries."
-        json_output = json.dumps(output, sort_keys=True, indent=2)
-        print(json_output, file=out_json)
+    snps = validsnp(snplst,genome_build,snp_limit)
+    #if return value is string, then it is error message and need to return the message
+    if isinstance(snps, str):
+        print(snps, file=out_json)
         out_json.close()
         return("", "")
 
-    # Remove duplicate RS numbers
-    snps = []
-    for snp_raw in snps_raw:
-        snp = snp_raw.strip().split()
-        if snp not in snps:
-            snps.append(snp)
-
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-        else:
-            output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "")
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
-
+    pop_ids = get_population(pop,request,output)
+    if isinstance(pop_ids,str):
+        print(pop_ids, file=out_json)
+        out_json.close()
+        return("","")
+  
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(web)
 
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                new_snp_lst.append(snp_raw_i)
-            else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    snps = replace_coords_rsid(db, snps)
+    snps = replace_coords_rsid_list(db, snps,genome_build,output)
 
     # Find RS numbers in snp database
     rs_nums = []
@@ -200,15 +107,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         return("", "")
 
     # Check SNPs are all on the same chromosome
-    for i in range(len(snp_coords)):
-        if snp_coords[0][1] != snp_coords[i][1]:
-            output["error"] = "Not all input variants are on the same chromosome: " + snp_coords[i - 1][0] + "=chr" + str(snp_coords[i - 1][1]) + ":" + str(
-                snp_coords[i - 1][2]) + ", " + snp_coords[i][0] + "=chr" + str(snp_coords[i][1]) + ":" + str(snp_coords[i][2]) + "."
-            json_output = json.dumps(output, sort_keys=True, indent=2)
-            print(json_output, file=out_json)
-            out_json.close()
-            return("", "")
-
+    check_same_chromosome(snp_coords,output)
     # Check max distance between SNPs
     distance_bp = []
     for i in range(len(snp_coords)):
@@ -223,49 +122,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             output[
                 "warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = " + str(distance_max) + " bp)"
 
-    # Sort coordinates and make tabix formatted coordinates
-    snp_pos_int = [int(i) for i in snp_pos]
-    snp_pos_int.sort()
-     # keep track of rs and snp postion after sort
-    rs_snp_pos = []
-    for i in snp_pos_int:
-        rs_snp_pos.append(snp_pos.index(str(i)))
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
-    tabix_coords = " " + " ".join(snp_coord_str)
-
-    # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
-
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-  
-    # Define function to correct indel alleles
-    def set_alleles(a1, a2):
-        if len(a1) == 1 and len(a2) == 1:
-            a1_n = a1
-            a2_n = a2
-        elif len(a1) == 1 and len(a2) > 1:
-            a1_n = "-"
-            a2_n = a2[1:]
-        elif len(a1) > 1 and len(a2) == 1:
-            a1_n = a1[1:]
-            a2_n = "-"
-        elif len(a1) > 1 and len(a2) > 1:
-            a1_n = a1[1:]
-            a2_n = a2[1:]
-        return(a1_n, a2_n)
-
-   
-    # Make sure there are genotype data in VCF file
-    #if vcf[-1][0:6] == "#CHROM":
-    #    output["error"] = "No query variants were found in 1000G VCF file"
-    #    json_output = json.dumps(output, sort_keys=True, indent=2)
-    #    print(json_output, file=out_json)
-    #    out_json.close()
-    #    return("", "")
-
-    head = vcf[h].strip().split()
+    vcf,head = get_1000g_data(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Extract haplotypes
     index = []
@@ -280,19 +137,15 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     for i in range(len(index) - 1):
         hap2.append([])
    
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,True)
-
-    # all lists does not contain data which is returned from 1000G
-    if len(missing_snp.split()) == len(snp_pos):
-        output["error"] = "Input variant list does not contain any valid RS numbers or coordinates. " + str(output["warning"] if "warning" in output else "")
+       # parse vcf
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,True)
+     # all lists does not contain data which is returned from 1000G
+ 
+    if "error" in output:
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
         out_json.close()
         return("", "")
-
-    if len(missing_snp) > 0 :
-        output["warning"] = "Query variant " + str(missing_snp) + " is missing from 1000G (" + genome_build_vars[genome_build]['title'] + ") data. " + str(output["warning"] if "warning" in output else "")
- 
 
     rsnum_lst = []
     allele_lst = []
@@ -304,9 +157,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         snp_key = snp_keys[0].split(':')[1]
         rs_input = snp_keys[1]
         geno_list = snp_dict[s_key]
-        g = -1
         for geno in geno_list:
-            g = g+1
             geno = geno.strip().split()
             geno[0] = geno[0].lstrip('chr')
             #print(geno)

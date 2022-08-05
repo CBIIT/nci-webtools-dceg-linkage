@@ -10,112 +10,42 @@ import botocore
 from pymongo import MongoClient
 from bson import json_util, ObjectId
 import subprocess
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars
-from LDcommon import retrieveTabix1000GData,parse_vcf
+from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population,get_1000g_data,parse_vcf
+from LDcommon import set_alleles,get_vcf_snp_params
+from LDutilites import get_config 
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
 
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    connect_external = config['database']['connect_external']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    population_samples_dir = config['data']['population_samples_dir']
-    data_dir = config['data']['data_dir']
-    tmp_dir = config['data']['tmp_dir']
-    genotypes_dir = config['data']['genotypes_dir']
-    aws_info = config['aws']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
-
+    param_list = get_config()
+    dbsnp_version = param_list['dbsnp_version']
+    population_samples_dir = param_list['population_samples_dir']
+    data_dir = param_list['data_dir']
+    tmp_dir = param_list['tmp_dir']
+    genotypes_dir = param_list['genotypes_dir']
+    aws_info = param_list['aws_info']
+ 
     export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
 
-    # Open SNP list file
-    snps_raw = open(snplst).readlines()
-
-    # Remove duplicate RS numbers
-    snps = []
-    for snp_raw in snps_raw:
-        snp = snp_raw.strip().split()
-        if snp not in snps:
-            snps.append(snp)
-
+    snps = validsnp(snplst,genome_build,None)
+    #if return value is string, then it is error message and need to return the message
+    if isinstance(snps, str):
+        return snps
+    
     # Select desired ancestral populations
-    pops = pop.split("+")
-    pop_dirs = []
-    for pop_i in pops:
-        if pop_i in ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS", "ACB", "ASW", "BEB", "CDX", "CEU", "CHB", "CHS", "CLM", "ESN", "FIN", "GBR", "GIH", "GWD", "IBS", "ITU", "JPT", "KHV", "LWK", "MSL", "MXL", "PEL", "PJL", "PUR", "STU", "TSI", "YRI"]:
-            pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
-
-    get_pops = "cat " + " ".join(pop_dirs)
-    pop_list = [x.decode('utf-8') for x in subprocess.Popen(get_pops, shell=True, stdout=subprocess.PIPE).stdout.readlines()]
-
-    ids = [i.strip() for i in pop_list]
-    pop_ids = list(set(ids))
+    pop_ids = get_population(pop,request,None)
+    if isinstance(pop_ids,str):
+        return(pop_ids)
 
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    db = client["LDLink"]
-
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-        
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                new_snp_lst.append(snp_raw_i)
-            else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                #print("snp_info_lst")
-                #print(snp_info_lst)
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    snps = replace_coords_rsid(db, snps)
+    db = connectMongoDBReadOnly(True)
+  
+    snps = replace_coords_rsid_list(db, snps,None,None)
 
     # Find RS numbers in snp database
     rs_nums = []
@@ -140,41 +70,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(snp_coords)):
         distance_bp.append(int(snp_coords[i][2]))
 
-    # Sort coordinates and make tabix formatted coordinates
-    snp_pos_int = [int(i) for i in snp_pos]
-    snp_pos_int.sort()
-     # keep track of rs and snp postion after sort
-    rs_snp_pos = []
-    for i in snp_pos_int:
-        rs_snp_pos.append(snp_pos.index(str(i)))
-    snp_coord_str = [genome_build_vars[genome_build]['1000G_chr_prefix'] + snp_coords[0][1] + ":" + str(i) + "-" + str(i) for i in snp_pos_int]
-    tabix_coords = " " + " ".join(snp_coord_str)
-
-    # Extract 1000 Genomes phased genotypes
-    vcf_filePath = "%s/%s%s/%s" % (config['aws']['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]['1000G_dir'], genome_build_vars[genome_build]['1000G_file'] % (snp_coords[0][1]))
-    vcf_query_snp_file = "s3://%s/%s" % (config['aws']['bucket'], vcf_filePath)
-
-    checkS3File(aws_info, config['aws']['bucket'], vcf_filePath)
-    vcf,h = retrieveTabix1000GData(vcf_query_snp_file, tabix_coords, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-  
-    # Define function to correct indel alleles
-    def set_alleles(a1, a2):
-        if len(a1) == 1 and len(a2) == 1:
-            a1_n = a1
-            a2_n = a2
-        elif len(a1) == 1 and len(a2) > 1:
-            a1_n = "-"
-            a2_n = a2[1:]
-        elif len(a1) > 1 and len(a2) == 1:
-            a1_n = a1[1:]
-            a2_n = "-"
-        elif len(a1) > 1 and len(a2) > 1:
-            a1_n = a1[1:]
-            a2_n = a2[1:]
-        return(a1_n, a2_n)
-
-    
-    head = vcf[h].strip().split()
+    vcf,head = get_1000g_data(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 
     # Extract haplotypes
     index = []
@@ -189,8 +85,9 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(index) - 1):
         hap2.append([])
 
-    snp_dict,missing_snp = parse_vcf(vcf[h+1:],snp_coords,True)
-
+       # parse vcf
+    snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,None,None,True)
+    
     rsnum_lst = []
     allele_lst = []
     pos_lst = []

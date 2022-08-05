@@ -15,39 +15,18 @@ import operator
 import os
 import json
 import sys
-from LDcommon import genome_build_vars
+from LDcommon import genome_build_vars,connectMongoDBReadOnly,validsnp,replace_coords_rsid_list,get_coords
+from LDutilites import get_config
 
 
 def get_platform_request(web):
-
     try:
-        with open('config.yml', 'r') as yml_file:
-            config = yaml.load(yml_file)
-        env = config['env']
-        connect_external = config['database']['connect_external']
-        api_mongo_addr = config['database']['api_mongo_addr']
-        mongo_username = config['database']['mongo_user_readonly']
-        mongo_password = config['database']['mongo_password']
-        mongo_port = config['database']['mongo_port']
-
-        # Connect to Mongo snp database
-        if env == 'local' or connect_external:
-            mongo_host = api_mongo_addr
-        else: 
-            mongo_host = 'localhost'
-        if web:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-        else:
-            if env == 'local' or connect_external:
-                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-            else:
-                client = MongoClient('localhost', mongo_port)
+        db = connectMongoDBReadOnly(web)       
     except ConnectionFailure:
         print("MongoDB is down")
         print("syntax: mongod --dbpath /local/content/analysistools/public_html/apps/LDlink/data/mongo/data/db/ --auth")
         return "Failed to connect to server."
 
-    db = client["LDLink"]
     cursor = db.platforms.find(
         {"platform": {'$regex': '.*'}}).sort("platform", -1)
     platforms = {}
@@ -59,29 +38,12 @@ def get_platform_request(web):
 
 # Create SNPchip function
 def convert_codeToPlatforms(platform_query, web):
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    connect_external = config['database']['connect_external']
-    tmp_dir = config['data']['tmp_dir']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
+    param_list = get_config()
+    tmp_dir = param_list['tmp_dir']
+
     platforms = []
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly(web)
     code_array = platform_query.split('+')
     cursor = db.platforms.find({"code": {'$in': code_array}})
     for document in cursor:
@@ -91,18 +53,10 @@ def convert_codeToPlatforms(platform_query, web):
 
 
 def calculate_chip(snplst, platform_query, web, request, genome_build):
-
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    connect_external = config['database']['connect_external']
-    tmp_dir = config['data']['tmp_dir']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    dbsnp_version = config['data']['dbsnp_version']
-    mongo_username = config['database']['mongo_user_readonly']
-    mongo_password = config['database']['mongo_password']
-    mongo_port = config['database']['mongo_port']
+    param_list = get_config()
+    tmp_dir = param_list['tmp_dir']
+    dbsnp_version = param_list['dbsnp_version']
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
@@ -112,98 +66,14 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
     out_json = open(tmp_dir+'proxy'+request+".json", "w")
     output = {}
 
-    # Validate genome build param
-    if genome_build not in genome_build_vars['vars']:
-        output["error"] = "Invalid genome build. Please specify either " + ", ".join(genome_build_vars['vars']) + "."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    # Open SNP list file
-    snps_raw = open(snplst).readlines()
-    if len(snps_raw) > 5000:
-        output["error"] = "Maximum SNP list is 5,000 RS numbers. Your list contains " + \
-            str(len(snps_raw))+" entries."
-        return(json.dumps(output, sort_keys=True, indent=2))
-
-    # Remove duplicate RS numbers
-    snps = []
-    for snp_raw in snps_raw:
-        snp = snp_raw.strip().split()
-        if snp not in snps:
-            snps.append(snp)
-
+    snps = validsnp(snplst,genome_build,5000)
+    #if return value is string, then it is error message and need to return the message
+    if isinstance(snps, str):
+        return snps
+        
     # Connect to Mongo snp database
-    if env == 'local' or connect_external:
-        mongo_host = api_mongo_addr
-    else: 
-        mongo_host = 'localhost'
-    if web:
-        client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-    else:
-        if env == 'local' or connect_external:
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host+'/admin', mongo_port)
-        else:
-            client = MongoClient('localhost', mongo_port)
-    db = client["LDLink"]
-
-    def get_coords(db, rsid):
-        rsid = rsid.strip("rs")
-        query_results = db.dbsnp.find_one({"id": rsid})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Query genomic coordinates
-    def get_rsnum(db, coord):
-        temp_coord = coord.strip("chr").split(":")
-        chro = temp_coord[0]
-        pos = temp_coord[1]
-        query_results = db.dbsnp.find({"chromosome": chro.upper() if chro == 'x' or chro == 'y' else str(chro), genome_build_vars[genome_build]['position']: str(pos)})
-        query_results_sanitized = json.loads(json_util.dumps(query_results))
-        return query_results_sanitized
-
-    # Replace input genomic coordinates with variant ids (rsids)
-    def replace_coords_rsid(db, snp_lst):
-        new_snp_lst = []
-        for snp_raw_i in snp_lst:
-            if snp_raw_i[0][0:2] == "rs":
-                new_snp_lst.append(snp_raw_i)
-            else:
-                snp_info_lst = get_rsnum(db, snp_raw_i[0])
-                print("snp_info_lst")
-                print(snp_info_lst)
-                if snp_info_lst != None:
-                    if len(snp_info_lst) > 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        ref_variants = []
-                        for snp_info in snp_info_lst:
-                            if snp_info['id'] == snp_info['ref_id']:
-                                ref_variants.append(snp_info['id'])
-                        if len(ref_variants) > 1:
-                            var_id = "rs" + ref_variants[0]
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        elif len(ref_variants) == 0 and len(snp_info_lst) > 1:
-                            var_id = "rs" + snp_info_lst[0]['id']
-                            if "warning" in output:
-                                output["warning"] = output["warning"] + \
-                                ". Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                            else:
-                                output["warning"] = "Multiple rsIDs (" + ", ".join(["rs" + ref_id for ref_id in ref_variants]) + ") map to genomic coordinates " + snp_raw_i[0]
-                        else:
-                            var_id = "rs" + ref_variants[0]
-                        new_snp_lst.append([var_id])
-                    elif len(snp_info_lst) == 1:
-                        var_id = "rs" + snp_info_lst[0]['id']
-                        new_snp_lst.append([var_id])
-                    else:
-                        new_snp_lst.append(snp_raw_i)
-                else:
-                    new_snp_lst.append(snp_raw_i)
-        return new_snp_lst
-
-    snps = replace_coords_rsid(db, snps)
+    db = connectMongoDBReadOnly(web)
+    snps = replace_coords_rsid_list(db, snps,genome_build,output)
 
     # Find RS numbers in snp database
     rs_nums = []
@@ -313,10 +183,9 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
 
 def createOutputFile(request, genome_build):
     # Set data directories using config.yml
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    tmp_dir = config['data']['tmp_dir']
-
+    param_list = get_config()
+    tmp_dir = param_list['tmp_dir']
+ 
     details_file = open(tmp_dir+'details'+request+".txt", "w")
 
     with open(tmp_dir + "proxy"+request+".json") as out_json:
