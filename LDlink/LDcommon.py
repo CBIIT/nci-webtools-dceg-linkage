@@ -4,6 +4,7 @@ import csv
 import os
 from numpy import False_
 import yaml
+import dns
 from pymongo import MongoClient
 import json
 import math
@@ -110,11 +111,15 @@ def retrieveAWSCredentials():
 
 def connectMongoDBReadOnly(readonly, api=False, connect_db_server=False):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
+    uri_api = 'mongodb+srv://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority'
+    uri_user = 'mongodb+srv://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority'
     if is_centralized:
         if bool(readonly):
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
+            client = MongoClient(uri_user)
+            #client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
         else:
-            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
+            client = MongoClient(uri_api)
+            #client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
     else:
         if env == 'local' or connect_db_server:
             mongo_host = api_mongo_addr
@@ -276,7 +281,7 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
                 "txEnd": {"$gte": int(end)}
             }
         ]
-    })#.sort([("cdsEnd",1),("txStart",1)])
+    }).sort([("cdsEnd",1),("txStart",1)])
     if collapseTranscript:
         query_results_sanitized = json.loads(json_util.dumps(query_results)) 
         #print("$$$$$$",query_results_sanitized)
