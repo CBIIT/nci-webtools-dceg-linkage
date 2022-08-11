@@ -53,7 +53,9 @@ def main():
 
     # Connect to Mongo snp database
     if is_centralized:
-        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/'+ mongo_db_name, mongo_port)
+        uri_api = 'mongodb+srv://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority'
+        client = MongoClient(uri_api)
+        #client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/'+ mongo_db_name, mongo_port)
     else:
         if instance == "web":
             client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@localhost/LDLink', mongo_port)

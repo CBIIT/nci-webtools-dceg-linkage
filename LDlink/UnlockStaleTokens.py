@@ -21,7 +21,9 @@ def main():
     mongo_port = param_list_db['mongo_port']
     mongo_db_name = param_list_db['mongo_db_name']
   
-    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    #client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
+    uri_api = 'mongodb+srv://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority'
+    client = MongoClient(uri_api)
     db = client["LDLink"]
     users = db.api_users
     # current datetime

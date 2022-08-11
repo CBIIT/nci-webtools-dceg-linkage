@@ -806,7 +806,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	recomb_x=[]
 	recomb_y=[]
 
-	recomb_json.sort(key=lambda x: x[genome_build_vars[genome_build]['position']])
+	#recomb_json.sort(key=lambda x: x[genome_build_vars[genome_build]['position']])
 	for recomb_obj in recomb_json:
 		recomb_x.append(int(recomb_obj[genome_build_vars[genome_build]['position']]) / 1000000.0)
 		recomb_y.append(float(recomb_obj['rate']) / 100 * max(y))

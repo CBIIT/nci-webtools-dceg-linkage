@@ -280,7 +280,7 @@ def getRefGene(db, filename, chromosome, begin, end, genome_build, collapseTrans
                 "txEnd": {"$gte": int(end)}
             }
         ]
-    }).sort([("cdsEnd",1),("txStart",1)])
+    })#.sort([("cdsEnd",1),("txStart",1)])
     if collapseTranscript:
         query_results_sanitized = json.loads(json_util.dumps(query_results)) 
         #print("$$$$$$",query_results_sanitized)
