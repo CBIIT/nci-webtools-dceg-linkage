@@ -439,7 +439,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     recomb_x=[]
     recomb_y=[]
-    recomb_raw.sort(key=lambda x: x[genome_build_vars[genome_build]['position']])
+    #recomb_raw.sort(key=lambda x: x[genome_build_vars[genome_build]['position']])
 
     for recomb_raw_obj in recomb_raw:
         recomb_obj = json.loads(recomb_raw_obj)
