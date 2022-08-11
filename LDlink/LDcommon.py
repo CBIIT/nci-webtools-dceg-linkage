@@ -4,7 +4,6 @@ import csv
 import os
 from numpy import False_
 import yaml
-import dns
 from pymongo import MongoClient
 import json
 import math
