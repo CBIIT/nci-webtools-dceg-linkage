@@ -110,7 +110,7 @@ def retrieveAWSCredentials():
 
 def connectMongoDBReadOnly(readonly, api=False, connect_db_server=False):
     # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
-    uri_api = 'mongodb+srv://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority'
+    uri_api = 'mongodb+srv://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority&authSource=admin&authMechanism=SCRAM-SHA-256'
     uri_user = 'mongodb+srv://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/?retryWrites=true&w=majority'
     if is_centralized:
         if bool(readonly):
