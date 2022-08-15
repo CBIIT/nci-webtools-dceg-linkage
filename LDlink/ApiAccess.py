@@ -242,10 +242,7 @@ def updateRecord(firstname, lastname, email, institution, token, registered, blo
 # check if token is valid when hitting API route and not expired
 def checkToken(token, token_expiration, token_expiration_days):
     db = connectMongoDBReadOnly(False,True,True)
-    print("######",db,token)
     users = db.api_users
-    print(users.find_one())
-    print(users.find_one({'token':'c1ca68322775'}))
     record = users.find_one({"token": token})
 
     if record is None:
