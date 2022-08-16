@@ -1147,6 +1147,7 @@ def ldpair():
                 toggleLocked(token, 0)
                 return sendTraceback(json.loads(out_json)["error"])
             # display api out
+            print("####",out_json)
             try:
                 # unlock token then display api output
                 if json_out or len(json.loads(out_json)) > 1:
