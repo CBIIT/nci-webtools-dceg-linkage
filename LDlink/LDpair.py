@@ -53,7 +53,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     pop_ids = get_population(pop,request,{})
     if isinstance(pop_ids, str):
         error_out = json.loads(pop_ids)
-        return(json.dumps([error_out], sort_keys=True, indent=2))
+        return(json.dumps(error_out, sort_keys=True, indent=2))
  
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(web)
