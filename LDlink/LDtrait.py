@@ -201,6 +201,11 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     # Select desired ancestral populations
     pops = pop.split("+")
     pop_ids = get_population(pop, request,output)
+    if 'error' in output:
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
 
     sanitized_query_snps = replace_coords_rsid_list(db, sanitized_query_snps,genome_build,output)
 

@@ -1143,7 +1143,6 @@ def ldpair():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
-            print("####",json.loads(out_json))
             if 'error' in json.loads(out_json):
                 toggleLocked(token, 0)
                 return sendTraceback(json.loads(out_json)["error"])
