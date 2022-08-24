@@ -1148,7 +1148,7 @@ def ldpair():
             # display api out
             try:
                 # unlock token then display api output
-                if json_out or len(json.loads(out_json)) > 1:
+                if json_out or len(json.loads(out_json)) >= 1:
                     toggleLocked(token, 0)
                     end_time = time.time()
                     app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))

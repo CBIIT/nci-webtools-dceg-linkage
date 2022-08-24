@@ -124,12 +124,13 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         temp = [snp1, str(snp1_coord['chromosome']), snp1_coord[genome_build_vars[genome_build]['position']]]
         #vcf1,head1 = retrieveTabix1000GDataSingle(temp[2],temp, genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'],request, False)
         (vcf1, head1, output2) = get_query_variant_c(temp, pop_ids, str(request), genome_build, False,output)   
-        #output_list.append(output)
        
         temp = [snp2, str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
         (vcf2, head2, output2) = get_query_variant_c(temp, pop_ids, str(request), genome_build, False,output)   
-        #output_list.append(output)
-      
+        if "error" in output:
+            output_list.append(output)
+            print(output)
+            continue
         vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]
         vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]
 
@@ -340,11 +341,12 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         output["corr_alleles"] = corr_alleles
         output["request"] = request
         output_list.append(output)
-
     ### OUTPUT ERROR IF ONLY SINGLE SNP PAIR ###
     if len(snp_pairs) == 1 and len(output_list) == 1 and "error" in output_list[0]:
-        return(json.dumps(output_list, sort_keys=True, indent=2))
- 
+        if web:
+            return(json.dumps(output_list, sort_keys=True, indent=2))
+        else:
+            return(json.dumps(output_list[0], sort_keys=True, indent=2))
     # Generate output file only for single SNP pair inputs
     if len(snp_pairs) == 1 and len(output_list) == 1:
         ldpair_out = open(tmp_dir + "LDpair_" + request + ".txt", "w")
