@@ -2,4 +2,4 @@
 docker build -t ldlink:app -f docker/app.dockerfile .
 
 ##### RUN APP CONTAINER #####
-docker run -d -p 80:80 -v /Users/jiangk3/Desktop/dev/nci-webtools-dceg-linkage/data:/deploy/app/data -v /Users/jiangk3/Desktop/dev/nci-webtools-dceg-linkage/client/LDlink/tmp:/deploy/app/client/LDlink/tmp -v /Users/jiangk3/Desktop/dev/nci-webtools-dceg-linkage/docker/config.yml:/deploy/app/server/config.yml --name ldlink-app --restart always ldlink:app
+docker run -d -p 80:80 -v /Users/yaox5/workspace/analysisTools/ldlink-6.0.0-docker-test-non-docker/nci-webtools-dceg-linkage/data:/deploy/app/data -v /Users/yaox5/workspace/analysisTools/ldlink-6.0.0-docker-test-non-docker/nci-webtools-dceg-linkage/client/LDlink/tmp:/deploy/app/client/LDlink/tmp -v /Users/yaox5/workspace/analysisTools/ldlink-6.0.0-docker-test-non-docker/nci-webtools-dceg-linkage/docker/config.yml:/deploy/app/server/config.yml --name ldlink-app --restart always ldlink:app
