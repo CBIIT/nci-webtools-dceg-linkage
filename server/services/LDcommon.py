@@ -11,7 +11,7 @@ import re
 import shutil
 import subprocess
 from bson import json_util
-from LDutilites import get_config,get_config_admin
+from services.LDutilites import get_config,get_config_admin
 from collections import OrderedDict
 # retrieve config
 param_list = get_config()

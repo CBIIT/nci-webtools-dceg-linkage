@@ -8,7 +8,7 @@ from pyaml_env import parse_config
 #dotenv_path = Path(os.path.expanduser('~')+'/.key/.env')
 #load_dotenv(dotenv_path=dotenv_path)
 
-config_path='config.yml'
+config_path='/deploy/app/server/services/config.yml'
 config_abs_path= '/analysistools/public_html/apps/LDlink/app/config.yml'
 # Set data directories using config.yml
 def get_config(path=config_path):
