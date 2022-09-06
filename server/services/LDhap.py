@@ -12,6 +12,7 @@ from services.LDcommon import connectMongoDBReadOnly, genome_build_vars, parse_v
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml
+    #print("calculate_hap",snplst)
     param_list = get_config()
     dbsnp_version = param_list['dbsnp_version']
     data_dir = param_list['data_dir']
@@ -26,17 +27,13 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     #if return value is string, then it is error message and need to return the message
     if isinstance(snps, str):
         return snps
-        
     # Select desired ancestral populations
     pop_ids = get_population(pop,request,output)
     if isinstance(pop_ids, str):
         return pop_ids
 
     db = connectMongoDBReadOnly(web)
-
     snps = replace_coords_rsid_list(db, snps,genome_build,output)
-
-
     # print("Input SNPs (replace genomic coords with RSIDs)", str(snps))
     # Find RS numbers and genomic coords in snp database
     rs_nums = []
@@ -45,6 +42,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     warn = []
     tabix_coords = ""
     for snp_i in snps:
+        print("###snp_i",snp_i)
         if len(snp_i) > 0:  # Length entire list of snps
             if len(snp_i[0]) > 2:  # Length of each snp in snps
                 # Check first two charcters are rs and last charcter of each snp
@@ -64,13 +62,13 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                             snp_pos.append(snp_coord[genome_build_vars[genome_build]['position']])
                             temp = [snp_i[0], snp_coord['chromosome'], snp_coord[genome_build_vars[genome_build]['position']]]
                             snp_coords.append(temp)
+                            print("###",snp_pos,snp_coords)
                     else:
                         warn.append(snp_i[0])
                 else:
                     warn.append(snp_i[0])
             else:
                 warn.append(snp_i[0])
-
     if warn != []:
         if "warning" in output:
             output["warning"] = output["warning"] + \
@@ -97,10 +95,9 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         else:
             output["warning"] = "Switch rate errors become more common as distance between query variants increases (Query range = "+str(
                 distance_max)+" bp). "
- 
     vcf,head = get_1000g_data(snp_pos, snp_coords,genome_build, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-
     # Extract haplotypes
+    #print("###",vcf)
     index = []
     for i in range(9, len(head)):
         if head[i] in pop_ids:
@@ -118,8 +115,7 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,output,genome_build,True)
     if "error" in output:
        return(json.dumps(output, sort_keys=True, indent=2))
-    # throw error if no data is returned from 1000G
-              
+    # throw error if no data is returned from 1000G        
     rsnum_lst = []
     allele_lst = []
     pos_lst = []
@@ -220,7 +216,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
     for hap in haps:
         temp = [hap, haps[hap]]
         results.append(temp)
-
     total_haps = sum(haps.values())
 
     results_sort1 = sorted(results, key=operator.itemgetter(0))
@@ -271,7 +266,6 @@ def calculate_hap(snplst, pop, request, web, genome_build):
         temp_k = [hap_k, count_k, freq_k]
         print("\t".join(temp_k), file=hap_out)
     hap_out.close()
-
     # Return JSON output
     return(json.dumps(output, sort_keys=True, indent=2))
 

@@ -166,7 +166,6 @@ def tabix(*tabix_args, **subprocess_args):
 def get_1000g_data(snp_pos, snp_coords, genome_build, query_dir):
     vcf_filepath, tabix_coords, query_file = get_vcf_snp_params(snp_pos, snp_coords, genome_build)
     checkS3File(aws_info, aws_info['bucket'], vcf_filepath)
-
     # ensure tabix_coords is a list
     tabix_coords = re.split('\s+', tabix_coords.strip())
     output = tabix("-fhD", "--separate-regions", query_file, *tabix_coords, cwd=query_dir)
@@ -347,7 +346,7 @@ def validsnp(snplst,genome_build,snp_limits):
                 snps_raw = snplst.split("+")
             except: # for ldpair post input as array
                 snps_raw = snplst
-
+        snps_raw = snplst.splitlines()
         if snp_limits:
             if len(snps_raw) > snp_limits:
                 output["error"] = "Maximum variant list is "+ str(snp_limits) +"  RS numbers or coordinates. Your list contains " + \
@@ -370,6 +369,7 @@ def get_coords(db, rsid):
     rsid = rsid.strip("rs")
     query_results = db.dbsnp.find_one({"id": rsid})
     query_results_sanitized = json.loads(json_util.dumps(query_results))
+    print("###get_coords",query_results_sanitized)
     return query_results_sanitized
 
 def get_coords_gene(gene_raw, db):
@@ -564,7 +564,6 @@ def parse_vcf(vcf,snp_coords,output,genome_build,ifsorted):
     snp_rs_dict = {}
     missing_rs = []    
     snp_found_list = [] 
-    #print(vcf)
     #print(snp_lists)
     for snp in snp_lists[1:]:
         snp_tuple = snp.split("**")

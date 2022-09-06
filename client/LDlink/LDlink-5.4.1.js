@@ -1,4 +1,4 @@
-var ldlink_version = "Version 5.2";
+var ldlink_version = "Version 5.4";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -67,7 +67,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-5.2.0.html", function (data) {
+    $.get("news-5.4.1.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -1810,7 +1810,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-5.2.0.html');
+    $('#help-tab').load('help-5.4.1.html');
 }
 
 function calculate(e) {
@@ -2246,7 +2246,7 @@ function updateLDhap() {
     var ldInputs = {
         snps : snps,
         pop : population.join("+"),
-        // reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
+        reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
         genome_build: genomeBuild
     };
     var url = restServerUrl + "/ldhap";
@@ -2258,7 +2258,16 @@ function updateLDhap() {
     });
 
     ajaxRequest.success(function(data) {
-        if (displayError(id, data) == false) {
+        //data is returned as a string representation of JSON instead of JSON obj
+        //JSON.parse() cleans up this json string.
+        var jsonObj;
+        if(typeof data == 'string') {
+            jsonObj = JSON.parse(data);
+        } else {
+            jsonObj = data;
+        }
+
+        if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
                     $('.' + id + '-position-genome-build-header').text("GRCh37");
@@ -2272,10 +2281,10 @@ function updateLDhap() {
             }
             $('#' + id + '-results-container').show();
             $('#' + id + '-links-container').show();
-            var ldhapTable = formatLDhapData(data);
+            var ldhapTable = formatLDhapData($.parseJSON(data));
             $('#ldhap-haplotypes-column').attr('colspan',ldhapTable.footer.length);
             ko.mapping.fromJS(ldhapTable, ldhapModel);
-            addLDHapHyperLinks(data.request_id, ldhapTable);
+            addLDHapHyperLinks(ldInputs.reference, ldhapTable);
         }
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
@@ -3412,7 +3421,7 @@ function initClip(data) {
 }
 
 function formatLDhapData(data) {
-
+    //alert(data)
     //console.log("get the two main parts of the data as hplotypes and snps");
     //var indels = [];
     var haplotypes = data.haplotypes;
@@ -3976,7 +3985,7 @@ function updateLDpair() {
 
     ajaxRequest.success(function(data) {
         if (displayError(id, data[0]) == false) {
-            ko.mapping.fromJS([data[0]], ldpairModel);
+            ko.mapping.fromJS(data[0], ldpairModel);
             $('#' + id + '-results-container').show();
             addLDpairHyperLinks(data[0]);
         }

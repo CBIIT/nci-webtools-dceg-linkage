@@ -10,20 +10,37 @@
 	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDassoc, LDexpress, LDhap, LDmatrix, LDpair, LDpop, LDproxy, LDtrait, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
 	<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 	<link rel="/LDlink/shortcut icon" href="LD.ico">
+	<link rel="/LDlink/favicon.ico" href="LD.ico">
+	<link rel="/LDlink/apple-touch-icon-precomposed.png" href="LD.ico">
+	<link rel="/LDlink/apple-touch-icon.png" href="LD.ico">
+
+	<link rel="shortcut icon" href="LD.ico" type="image/x-icon">
+	<link rel="apple-touch-icon-precomposed.png" href="LD.ico">
+	<link rel="apple-touch-icon.png" href="LD.ico">
+	<link rel="favicon.ico" href="LD.ico">
 	<!-- DAP code -->
 	<script src="//assets.adobedtm.com/f1bfa9f7170c81b1a9a9ecdcc6c5215ee0b03c84/satelliteLib-4b219b82c4737db0e1797b6c511cf10c802c95cb.js"></script>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=G-JKSF0J7NH9"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+
+		gtag('config', 'G-JKSF0J7NH9');
+	</script>
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.5/dist/css/bootstrap.min.css" integrity="sha256-MfvZlkHCEqatNoGiOXveE8FIwMzZg4W85qfrfIFBfYc=" crossorigin="anonymous">	
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.3.5/dist/css/bootstrap-theme.min.css" integrity="sha256-bHQiqcFbnJb1Qhh61RY9cMh6kR0gTuQY6iFOBj1yj00=" crossorigin="anonymous">	
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.3.0/css/font-awesome.min.css" integrity="sha256-VBrFgheoreGl4pKmWgZh3J23pJrhNlSUOBek+8Z2Gv0=" crossorigin="anonymous">	
-	<link rel="stylesheet" href="./common/css/bootstrap-multiselect.css">
+	<link rel="stylesheet" href="/common/css/bootstrap-multiselect.css">
 	<!-- Bokeh CSS -->
 	<link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.13.0.min.css">
 	<!-- Other CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/datatables@1.10.8/media/css/jquery.dataTables.min.css" integrity="sha256-4vA/Qvj3cRozXbsauVemzsbGBdKSD4GVsVaaMjYTuRk=" crossorigin="anonymous">	
-	<link rel="stylesheet" href="./common/css/style.css">
-	<link rel="stylesheet" href="./common/css/social.css">
-	<link rel="stylesheet" href="LDlink-5.2.0.css">
+	<link rel="stylesheet" href="/common/css/style.css">
+	<link rel="stylesheet" href="/common/css/social.css">
+	<link rel="stylesheet" href="LDlink-5.4.1.css">
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
@@ -1130,8 +1147,7 @@
 						</div>
 					</div>
 					<div id="ldhap-links-container" class="col-md-12" style="display:none;">
-						<span> <a target="_blank" id="ldhap-snps" href="">Download
-								Variant File</a>
+						<span> <a target="_blank" id="ldhap-snps" href="">Download Variant File</a>
 						</span>&nbsp;&nbsp;&nbsp;&nbsp;<span> <a target="_blank" id="ldhap-haplotypes" href="">
 								Download Haplotype File</a>
 						</span>
@@ -2489,7 +2505,14 @@
 							Warning: Please only make sequential (not parallel) API calls to avoid disrupting the API server.<br>Abuse of API access will result in a warning or potential termination of API access.
 						</div> -->
 						<div id="api-alert" class="alert alert-api" role="alert">
-							Important: API access is limited to sequential requests only. Please wait until calculation results are returned before making another request.
+							Important: API access is limited to sequential requests only. 
+							Please wait until calculation results are returned before making another request.
+							Contact 
+							<a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top"
+								title="Support">
+								support
+							</a>
+							 if you plan to make large volumes of API requests.
 						</div>
 					</div>
 
@@ -2761,6 +2784,10 @@
 			</li>
 			<li class="pb-1 d-none d-md-inline">|</li>
 			<li class="pb-1 d-block d-md-inline">
+				<a class=" text-light m-1" target="_blank" href="https://www.hhs.gov/vulnerability-disclosure-policy/">HHS Vulnerability Disclosure</a>
+			</li>
+			<li class="pb-1 d-none d-md-inline">|</li>
+			<li class="pb-1 d-block d-md-inline">
 				<a class=" text-light m-1" target="_blank" href="https://usa.gov">USA.gov</a>
 			</li>
 			</ul>
@@ -2808,9 +2835,9 @@
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.5/dist/js/bootstrap.min.js" integrity="sha256-Sk3nkD6mLTMOF0EOpNtsIry+s1CsaqQC1rVLTAy+0yc=" crossorigin="anonymous"></script>	
 	<script src="https://cdn.jsdelivr.net/npm/knockout@3.1.0/build/output/knockout-latest.js" integrity="sha256-TwqMvYd1Dm109PGsukUkZ5vwLfsPCzY0YGG9eBMPBOE=" crossorigin="anonymous"></script>
 	<script src="https://cdn.jsdelivr.net/npm/knockout.mapping@2.4.3/knockout.mapping.js" integrity="sha256-TUlOKeuoLfKJnB2YhKMgopAf5JurOPSCdfqw0jBlkXw=" crossorigin="anonymous"></script>
-	<script type="text/javascript" src="LDlink-5.2.0.js"></script>
-	<script type="text/javascript" src="./common/js/purify.js"></script>
-	<script type="text/javascript" src="./common/js/bootstrap-multiselect.js"></script>
+	<script type="text/javascript" src="LDlink-5.4.1.js"></script>
+	<script type="text/javascript" src="/common/js/purify.js"></script>
+	<script type="text/javascript" src="/common/js/bootstrap-multiselect.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery.browser@0.0.7/dist/jquery.browser.min.js" integrity="sha256-Rr2aTI0oGDN2yUVggLBqR2hq8L33245rgO7SdZXj3po=" crossorigin="anonymous"></script>	
 	<script src="https://cdn.jsdelivr.net/npm/datatables@1.10.8/media/js/jquery.dataTables.js" integrity="sha256-ojDleAFId+/2BrRqihwB+yOT4332VlLjLcPvrsTVOOA=" crossorigin="anonymous"></script>
 	<script src="html2canvas.min.js"></script>
@@ -2818,17 +2845,6 @@
 	<!-- Google Maps API -->
 	<script src="https://maps.googleapis.com/maps/api/js?key=@gmap_key@"></script>
 
-	<!-- Google Analytics -->
-	<script async src='//www.google-analytics.com/analytics.js'></script>
-	<script>
-		window.ga = window.ga || function () {
-			(ga.q = ga.q || []).push(arguments)
-		};
-		ga.l = +new Date;
-		ga('create', 'UA-62346354-1', 'auto');
-		ga('send', 'pageview');
-	</script>
-	<!-- End Google Analytics -->
 	<script type="text/javascript">_satellite.pageBottom();</script>
 </body>
 

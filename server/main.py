@@ -46,6 +46,7 @@ async def ldhap(
             "token": token
         })
         out_json = calculate_hap(snps, pop, request_id, True, genome_build)
+        print(out_json)
         return out_json
     except Exception as e:
         exc_obj = e
