@@ -319,15 +319,24 @@ def get_ld_stats(variantPair, pop_ids):
     }
 #@cache
 def get_ld_pairs(pop_ids, variantPairs):
-    ldInfoSubset = {}	
-    for variantPair in variantPairs:
-        ld = get_ld_stats(variantPair, pop_ids)		
-        if variantPair[0] not in ldInfoSubset:		
-            ldInfoSubset[variantPair[0]] = {}		
-            ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
-        else:		
-            ldInfoSubset[variantPair[0]][variantPair[3]] = ld
-    return ldInfoSubset
+    ldInfoSubset = {}
+    try:	
+        for variantPair in variantPairs:
+            ld = get_ld_stats(variantPair, pop_ids)		
+            if variantPair[0] not in ldInfoSubset:		
+                ldInfoSubset[variantPair[0]] = {}		
+                ldInfoSubset[variantPair[0]][variantPair[3]] = ld		
+            else:		
+                ldInfoSubset[variantPair[0]][variantPair[3]] = ld
+        return ldInfoSubset
+    except:
+        return {
+            "r2": "NA",	
+            "D_prime": "NA",	
+            "p": "NA",	
+            "alleles": "NA",	
+            "output": {"error":"timeout error"}
+        }
 
 out = get_ld_pairs(pop_ids, variantPairs)
 
