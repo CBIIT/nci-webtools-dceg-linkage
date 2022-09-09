@@ -4563,10 +4563,11 @@ function displayError(id, data) {
 function displayCommFail(id, jqXHR, textStatus) {
     //console.log(textStatus);
     //console.dir(jqXHR);
-    console.warn("CommFail\n"+"Status: "+textStatus);
+    console.warn("CommFail\n"+"Status: "+textStatus+"\n"+jqXHR.status);
     // var message = jqXHR.responseText;
     // message += "<p>Internal Server Error: " + jqXHR.status + " - " + textStatus + "</p>";
     // message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
+
     var message = "<p>Internal server error. Please contact LDlink admin.</p>"
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
