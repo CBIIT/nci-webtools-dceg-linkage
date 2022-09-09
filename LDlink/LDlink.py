@@ -1453,8 +1453,13 @@ def ldtrait():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             app.logger.debug('begin to call trait')
-            (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
-            app.logger.debug('after call trait',details)
+            try:
+                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
+            except Exception as e:
+                app.logger.debug('after call trait',e)
+            except :
+                app.logger.debug('timeout error')
+
             with open(tmp_dir + "trait" + reference + ".json") as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
