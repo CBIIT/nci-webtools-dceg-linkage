@@ -1452,7 +1452,9 @@ def ldtrait():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
+            app.logger.debug('begin to call trait')
             (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
+            app.logger.debug('after call trait',details)
             with open(tmp_dir + "trait" + reference + ".json") as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
@@ -1480,16 +1482,13 @@ def ldtrait():
                     return content
                 except Exception as e:
                     # unlock token then display error message
-                    app.logger.error(e)
-                    print("1484",e)
                     toggleLocked(token, 0)
                     exc_obj = e
                     app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
                     return sendTraceback(None)
         except Exception as e:
             # unlock token if internal error w/ calculation
-            app.logger.error(e)
-            print(e)
+            app.logger.debug('error to call trait',e)
             toggleLocked(token, 0)
             exc_obj = e
             app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
