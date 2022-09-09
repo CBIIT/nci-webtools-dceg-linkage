@@ -1480,12 +1480,16 @@ def ldtrait():
                     return content
                 except Exception as e:
                     # unlock token then display error message
+                    app.logger.error(e)
+                    print("1484",e)
                     toggleLocked(token, 0)
                     exc_obj = e
                     app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
                     return sendTraceback(None)
         except Exception as e:
             # unlock token if internal error w/ calculation
+            app.logger.error(e)
+            print(e)
             toggleLocked(token, 0)
             exc_obj = e
             app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
