@@ -1493,6 +1493,13 @@ def ldtrait():
             exc_obj = e
             app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
             return sendTraceback(None)
+        except:
+            app.logger.debug('timeout except')
+            toggleLocked(token, 0)
+            print("timeout error")
+        else:
+            app.logger.debug('time out else')
+            print("time out")
     end_time = time.time()
     app.logger.info("Executed LDtrait (%ss)" % (round(end_time - start_time, 2)))
     return current_app.response_class(out_json, mimetype='application/json')
