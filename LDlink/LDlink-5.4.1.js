@@ -284,9 +284,9 @@ $(document).ready(function() {
 
     var new_proxy_data = {
         "aaData": [
-            ["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-            ["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"],
-            [".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","NA"]
+            ["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","HaploReg link","NA"],
+            ["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","HaploReg link","NA"],
+            [".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","HaploReg link","NA"]
         ]
     };
 
@@ -869,13 +869,19 @@ function createProxyTable() {
                 },
                 "targets": 9
             },
+             {
+                "render": function ( data, type, row ) {
+                    return ldproxy_FORGEdb_link(data, type, row);
+                },
+                "targets": 10
+            },
             {
                 "render": function ( data, type, row ) {
                     return ldproxy_haploreg_link(data, type, row);
                 },
-                "targets": 10
+                "targets": 11
             },
-            { className: "dt-body-center", "targets": [ 1, 9, 10 ] }
+            { className: "dt-body-center", "targets": [ 1, 9, 10,11 ] }
         ]
     });
 
@@ -1674,6 +1680,21 @@ function ldproxy_haploreg_link(data, type, row) {
     var target = 'haploreg_' + Math.floor(Math.random() * (99999 - 10000 + 1));
     var img = '<img src="LDproxy_external_link.png" alt="HaploReg Details" title="HaploReg Details" class="haploreg_external_link" style="width:16px;height:16px;">';
     var link = '<a href="'+href+'" target="'+target+'">'+img+'</a>';
+
+    return link;
+
+}
+
+function ldproxy_FORGEdb_link(data, type, row) {
+
+    // Create RegulomeDB links
+
+    var server = 'https://forge2.altiusinstitute.org/files/';
+
+    var snp = row[0];
+    var href = server + snp.substring(0,6) + "/summary.table."+ snp + ".html"
+    var img = '<img src="LDproxy_external_link.png" alt=FORGEdb Details" title="FORGEdb Details" class="haploreg_external_link" style="width:16px;height:16px;">';
+    var link = '<a href="' + href + '" target="_blank">'+img+'</a>';
 
     return link;
 
@@ -4570,7 +4591,11 @@ function displayCommFail(id, jqXHR, textStatus) {
    var message = "<p>Internal server error. Please contact LDlink admin.</p>"
     if (jqXHR.status === 504){
         message = "<p>The input list is too long and the computation time is over 15 minutes. Server has no response.</p>"
+<<<<<<< HEAD
         message += "<p>Please split the list or try it later"
+=======
+        message += "<p>Please split the list or try it"
+>>>>>>> ldlink-5.4.1
     }
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
