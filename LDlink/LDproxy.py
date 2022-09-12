@@ -151,7 +151,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             col[8] = float(col[8])
             col.append(abs(int(col[6])))
             out_prox.append(col)
-
+    print(len(out_prox),len(out_prox[0]))
     # Sort output
     if r2_d not in ["r2", "d"]:
         if "warning" in output:
@@ -174,7 +174,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Populate JSON and text output
     outfile = open(tmp_dir + "proxy" + request + ".txt", "w")
     header = ["RS_Number", "Coord", "Alleles", "MAF", "Distance",
-              "Dprime", "R2", "Correlated_Alleles", "RegulomeDB", "Function"]
+              "Dprime", "R2", "Correlated_Alleles", "RegulomeDB", "FORGEdb links","Function"]
     print("\t".join(header), file=outfile)
 
     ucsc_track = {}
@@ -245,6 +245,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             row.append(str(round(float(proxy_info["R2"]), 4)))
             row.append(proxy_info["Corr_Alleles"])
             row.append(proxy_info["RegulomeDB"])
+            row.append("FORGEdb link")
             row.append("HaploReg link")
             row.append(proxy_info["Function"])
             rows.append(row)
