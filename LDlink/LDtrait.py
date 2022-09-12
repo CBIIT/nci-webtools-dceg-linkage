@@ -296,6 +296,14 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
                 
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
+    print("length:",len(ldPairsUnique))
+    numSplit = math.ceil(len(ldPairsUnique)/4000)
+    if len(ldPairsUnique) > 5000:
+        output["error"] = "Input list found too many pairs and will cause timeout of the server. Please split the list around " + str(numSplit)+ str(output["error"] if "error" in output else "")
+        json_output = json.dumps(output, sort_keys=True, indent=2)
+        print(json_output, file=out_json)
+        out_json.close()
+        return("", "", "")
     snp_coords_gwas_unique = [list(x) for x in set(tuple(x) for x in ldPairs)]
     #print(snp_coords_gwas)	
     # print("ldPairsUnique", ldPairsUnique)	
