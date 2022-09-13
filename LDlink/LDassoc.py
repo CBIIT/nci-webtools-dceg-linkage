@@ -363,9 +363,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
 			snp="chr"+var_p[0].split("-")[0]
 			# Extract query SNP phased genotypes
-			temp = [snp, str(chromosome), org_coord]
+			temp = [snp, str(chromosome), chromosome]
 			#print(temp)
-			(geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
+			(geno,head, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
 			vcf = geno
 			if len(vcf)==0:
 				if "warning" in output:
