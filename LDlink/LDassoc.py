@@ -362,11 +362,25 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	except NameError:
 		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
 			snp="chr"+var_p[0].split("-")[0]
-			# Extract query SNP phased genotypes
-			temp = [snp, str(chromosome), chromosome]
-			#print(temp)
-			(geno,head, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
-			vcf = geno
+
+			# Extract lowest P SNP phased genotypes
+			vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
+			vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
+
+			checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
+
+			tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+			head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
+
+			tabix_snp= export_s3_keys + " cd {3}; tabix -D {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
+			subprocess.call(tabix_snp, shell=True)
+
+			# Check lowest P SNP is in the 1000G population and not monoallelic
+			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
+			#h = 0
+			#while vcf[h][0:2] == "##":
+			#	h += 1
+			#vcf = vcf[h+1:]
 			if len(vcf)==0:
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
@@ -416,6 +430,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 			org_coord=var_p[0].split("-")[1]
 			break
+
 	else:
 		if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + org_coord + "-" + org_coord not in assoc_coords:
 			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
@@ -453,6 +468,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	for subprocess_id in range(num_subprocesses):
 		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
+		print(subprocessArgs)
 		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
 		#print(subprocessArgs)
 
