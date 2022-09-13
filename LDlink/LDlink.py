@@ -1234,9 +1234,9 @@ def ldpop():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pop(var1, var2, pop, r2_d, web, genome_build, reference)
-            if 'error' in out_json:
+            if 'error' in json.loads(out_json):
                 toggleLocked(token, 0)
-                return sendTraceback(out_json["error"])
+                return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try:
                 # unlock token then display api output

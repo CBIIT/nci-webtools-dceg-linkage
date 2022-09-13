@@ -53,7 +53,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     pop_ids = get_population(pop,request,{})
     if isinstance(pop_ids, str):
         error_out = json.loads(pop_ids)
-        return(json.dumps(error_out, sort_keys=True, indent=2))
+        return(json.dumps([error_out], sort_keys=True, indent=2))
  
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(web)
@@ -343,10 +343,8 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         output_list.append(output)
     ### OUTPUT ERROR IF ONLY SINGLE SNP PAIR ###
     if len(snp_pairs) == 1 and len(output_list) == 1 and "error" in output_list[0]:
-        if web:
-            return(json.dumps(output_list, sort_keys=True, indent=2))
-        else:
-            return(json.dumps(output_list[0], sort_keys=True, indent=2))
+        return(json.dumps(output_list, sort_keys=True, indent=2))
+       
     # Generate output file only for single SNP pair inputs
     if len(snp_pairs) == 1 and len(output_list) == 1:
         ldpair_out = open(tmp_dir + "LDpair_" + request + ".txt", "w")
