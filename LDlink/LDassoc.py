@@ -167,7 +167,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		
 
 		# Find RS number in snp database
-		gene_coord = get_coords_gene(myargs.name, db)
+		gene_coord = get_coords_gene(myargs.name, db,genome_build)
 
 		if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
 			output["error"]="Gene name " + myargs.name + " is not in RefSeq database."
@@ -185,7 +185,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		# Run with --origin option
 		if myargs.origin!=None:
 			if gene_coord[1]!=chromosome:
-				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as "+myargs.gene+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
+				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as "+myargs.name+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
@@ -468,8 +468,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	for subprocess_id in range(num_subprocesses):
 		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
-		print(subprocessArgs)
-		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+		#print(subprocessArgs)
+		if myargs.origin!=None:
+			commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+		else:
+			commands.append("python3 LDassoc_sub_temp.py " + subprocessArgs)
 		#print(subprocessArgs)
 
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
@@ -817,6 +820,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# Add recombination rate
 	recomb_file = tmp_dir + "recomb_" + request + ".json"
+	db = connectMongoDBReadOnly(True)
 	recomb_json = getRecomb(db, recomb_file, chromosome, coord1 - whitespace, coord2 + whitespace, genome_build)
 
 	recomb_x=[]

@@ -19,6 +19,7 @@ genome_build = sys.argv[5]
 process = sys.argv[6]
 
 # Set data directories using config.yml
+# Set data directories using config.yml
 param_list = get_config()
 data_dir = param_list['data_dir']
 tmp_dir = param_list['tmp_dir']
@@ -42,6 +43,23 @@ vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 coordinates = coords.replace("_", " ")
+
+# Define function to calculate LD metrics
+def set_alleles(a1, a2):
+    if len(a1) == 1 and len(a2) == 1:
+        a1_n = a1
+        a2_n = a2
+    elif len(a1) == 1 and len(a2) > 1:
+        a1_n = "-"
+        a2_n = a2[1:]
+    elif len(a1) > 1 and len(a2) == 1:
+        a1_n = a1[1:]
+        a2_n = "-"
+    elif len(a1) > 1 and len(a2) > 1:
+        a1_n = a1[1:]
+        a2_n = a2[1:]
+    return(a1_n, a2_n)
+
 
 def LD_calcs(hap, allele, allele_n):
     # Extract haplotypes
@@ -88,6 +106,7 @@ def LD_calcs(hap, allele, allele_n):
         return [maf_q, maf_p, D_prime, r2, match]
 
 # Connect to Mongo snp database
+
 db = connectMongoDBReadOnly(True)
 
 def get_regDB(chr, pos):
@@ -97,13 +116,19 @@ def get_regDB(chr, pos):
     else:
         return result["score"]
 
+def get_dbsnp_rsid(db, rsid):
+    rsid = rsid.strip("rs")
+    query_results = db.dbsnp.find_one({"id": rsid})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
+def get_dbsnp_coord(db, chromosome, position):
+    query_results = db.dbsnp.find_one({"chromosome": str(chromosome), genome_build_vars[genome_build]['position']: str(position)})
+    query_results_sanitized = json.loads(json_util.dumps(query_results))
+    return query_results_sanitized
+
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
-h = 0
-while vcf[h][0:2] == "##":
-    h += 1
-vcf = vcf[h+1:]
-
 geno = vcf[0].strip().split()
 geno[0] = geno[0].lstrip('chr')
 
@@ -162,14 +187,14 @@ for geno_n in vcf:
 
             # Get dbSNP function
             if rs_n[0:2] == "rs":
-                snp_coord = get_coords(db, rs_n)
+                snp_coord = get_dbsnp_rsid(db, rs_n)
 
                 if snp_coord != None:
                     funct = snp_coord['function']
                 else:
                     funct = "."
             elif rs_n[0:2] != "rs":
-                snp_coord = get_dbsnp_coord(db, chr_n, bp_n,genome_build)
+                snp_coord = get_dbsnp_coord(db, chr_n, bp_n)
 
                 if snp_coord != None:
                     funct = snp_coord['function']

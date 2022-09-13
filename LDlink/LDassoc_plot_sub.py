@@ -14,7 +14,7 @@ import botocore
 from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c,get_output
+from LDcommon import checkS3File, retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c,get_output
 from LDutilites import get_config
 
 # LDassoc subprocess to export bokeh to high quality images in the background
@@ -119,7 +119,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             return None
 
         # Find RS number in snp database
-        gene_coord = get_coords_gene(myargsName, db)
+        gene_coord = get_coords_gene(myargsName, db,genome_build)
 
         if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
             return None
