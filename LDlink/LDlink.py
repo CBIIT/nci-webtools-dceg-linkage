@@ -1452,7 +1452,14 @@ def ldtrait():
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
+            app.logger.debug('begin to call trait')
+            try:
+                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
+            except Exception as e:
+                app.logger.debug('after call trait',e)
+            except :
+                app.logger.debug('timeout error')
+
             with open(tmp_dir + "trait" + reference + ".json") as f:
                 json_dict = json.load(f)
             if "error" in json_dict:
@@ -1486,10 +1493,18 @@ def ldtrait():
                     return sendTraceback(None)
         except Exception as e:
             # unlock token if internal error w/ calculation
+            app.logger.debug('error to call trait',e)
             toggleLocked(token, 0)
             exc_obj = e
             app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
             return sendTraceback(None)
+        except:
+            app.logger.debug('timeout except')
+            toggleLocked(token, 0)
+            print("timeout error")
+        else:
+            app.logger.debug('time out else')
+            print("time out")
     end_time = time.time()
     app.logger.info("Executed LDtrait (%ss)" % (round(end_time - start_time, 2)))
     return current_app.response_class(out_json, mimetype='application/json')

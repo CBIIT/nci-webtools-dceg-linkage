@@ -151,7 +151,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             col[8] = float(col[8])
             col.append(abs(int(col[6])))
             out_prox.append(col)
-
+    #print(len(out_prox),len(out_prox[0]))
     # Sort output
     if r2_d not in ["r2", "d"]:
         if "warning" in output:
@@ -216,7 +216,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     proxies = {}
     rows = []
     digits = len(str(len(out_ld_sort)))
-
+    
     for i in range(1, len(out_ld_sort)):
         if float(out_ld_sort[i][8]) > 0.01 and out_ld_sort[i][3] != snp:
             proxy_info = {}
@@ -248,6 +248,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             row.append(proxy_info["Corr_Alleles"])
             row.append(proxy_info["RegulomeDB"])
             row.append(proxy_info["ForageDB"])
+            row.append("HaploReg link")
             row.append(proxy_info["Function"])
             rows.append(row)
 
@@ -385,11 +386,12 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         r2_round = []
         corr_alleles = []
         regdb = []
+        foragedb = []
         funct = []
         color = []
         size = []
         for i in range(len(out_ld_sort)):
-            q_rs_i, q_allele_i, q_coord_i, p_rs_i, p_allele_i, p_coord_i, dist_i, d_prime_i, r2_i, corr_alleles_i, regdb_i, q_maf_i, p_maf_i, funct_i, dist_abs = out_ld_sort[
+            q_rs_i, q_allele_i, q_coord_i, p_rs_i, p_allele_i, p_coord_i, dist_i, d_prime_i, r2_i, corr_alleles_i, regdb_i, foragedb_i,q_maf_i, p_maf_i, funct_i, dist_abs = out_ld_sort[
                 i]
 
             if float(r2_i) > 0.01:
@@ -414,6 +416,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
                 if regdb_i == ".":
                     regdb_i = ""
                 regdb.append(regdb_i)
+                foragedb.append(foragedb_i)
                 if funct_i == ".":
                     funct_i = ""
                 if funct_i == "NA":
@@ -491,6 +494,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             'd': d_prime_round,
             'alleles': corr_alleles,
             'regdb': regdb,
+            'foragedb':foragedb,
             'funct': funct,
             'size': size,
             'color': color
@@ -512,6 +516,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             ("D\'", "@d"),
             ("Correlated Alleles", "@alleles"),
             ("RegulomeDB", "@regdb"),
+            ("ForageDB", "@foragedb"),
             ("Functional Class", "@funct"),
         ])
 
@@ -548,6 +553,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             'd': d_prime_round,
             'alleles': corr_alleles,
             'regdb': regdb,
+            'foragedb':foragedb,
             'funct': funct,
             'size': size,
             'color': color
