@@ -732,3 +732,10 @@ def chunkWindow(pos, window, num_subprocesses):
 # collect output in parallel
 def get_output(process):
     return process.communicate()[0].splitlines()
+
+def get_forgeDB(db,rs):
+    result = db.forge_score.find_one({"snp_id": rs})
+    if result is None:
+        return ""   
+    else:
+        return result["score"]

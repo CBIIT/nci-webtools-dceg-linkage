@@ -97,6 +97,13 @@ def get_regDB(chr, pos):
     else:
         return result["score"]
 
+def get_forgeDB(rs):
+    result = db.forge_score.find_one({"snp_id": rs})
+    if result is None:
+        return ""   
+    else:
+        return result["score"]
+
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 h = 0

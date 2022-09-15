@@ -9,7 +9,7 @@ import botocore
 import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,get_dbsnp_coord
-from LDcommon import set_alleles,get_geno
+from LDcommon import set_alleles,get_geno,get_forgeDB
 from LDutilites import get_config
 
 web = sys.argv[1]
@@ -165,7 +165,7 @@ for geno_n in vcf:
 
             # Get RegulomeDB score
             score = get_regDB("chr"+geno_n[0], geno_n[1])
-
+            score_forage = get_forgeDB(db,rs)
             # Get dbSNP function
             if rs_n[0:2] == "rs": 
                 snp_coord = get_dbsnp_rsid(db, rs_n)
@@ -191,7 +191,7 @@ for geno_n in vcf:
                 funct = "."
 
             temp = [rs, al, "chr"+chr+":"+bp, rs_n, al_n, "chr"+chr_n+":" +
-                    bp_n, dist, D_prime, r2, match, score, maf_q, maf_p, funct]
+                    bp_n, dist, D_prime, r2, match, score,score_forage, maf_q, maf_p, funct]
             out.append(temp)
 
 
