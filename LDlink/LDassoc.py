@@ -703,6 +703,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	r2=[]
 	r2_round=[]
 	corr_alleles=[]
+	forgedb=[]
 	regdb=[]
 	funct=[]
 	color=[]
@@ -857,7 +858,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	assoc_plot.add_tools(hover)
 
 	# Annotate RebulomeDB scores
-	if myargs.annotate==True:
+	if myargs.annotate=="forge":
+		assoc_plot.text(x, y, text=forgedb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
+	elif myargs.annotate=="regulome":
 		assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 
 	assoc_plot.yaxis.axis_label="-log10 P-value"

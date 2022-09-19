@@ -191,7 +191,7 @@ for geno_n in vcf:
                 funct = "."
 
             temp = [rs, al, "chr"+chr+":"+bp, rs_n, al_n, "chr"+chr_n+":" +
-                    bp_n, dist, D_prime, r2, match, score,score_forage, maf_q, maf_p, funct]
+                    bp_n, dist, D_prime, r2, match, score_forage,score, maf_q, maf_p, funct]
             out.append(temp)
 
 

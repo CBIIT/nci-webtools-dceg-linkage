@@ -706,8 +706,9 @@ def ldassoc():
         myargs.end = str(request.args.get('region[end]'))
     myargs.transcript = bool(request.args.get("transcript") == "True")
     # print("transcript: " + str(myargs.transcript))
-    myargs.annotate = bool(request.args.get("annotate") == "True")
-    # print("annotate: " + str(myargs.annotate))
+    #myargs.annotate = bool(request.args.get("annotate") == "True")
+    myargs.annotate = request.args.get("annotate")
+    #print("annotate: " + str(myargs.annotate))
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1277,6 +1278,8 @@ def ldproxy():
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
     collapseTranscript = request.args.get('collapseTranscript', True)
+    #annotateText = request.args.get('annotate', False)
+    annotate = request.args.get('annotate', False)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1294,10 +1297,11 @@ def ldproxy():
                 'collapseTranscript': collapseTranscript,
                 'genome_build': genome_build,
                 'web': web,
-                'reference': reference
+                'reference': reference,
+                'annotate': annotate
             }, indent=4, sort_keys=True))
             try:
-                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
+                out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript,annotate)
             except Exception as e:
                 exc_obj = e
                 app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -1318,12 +1322,13 @@ def ldproxy():
             'collapseTranscript': collapseTranscript,
             'genome_build': genome_build,
             'web': web,
-            'reference': reference
+            'reference': reference,
+            'annotate': annotate
         }, indent=4, sort_keys=True))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
+            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript,annotate)
             with open(tmp_dir + "proxy" + reference + ".json") as f:
                 json_dict = json.load(f)
             if "error" in json_dict:

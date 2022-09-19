@@ -284,9 +284,9 @@ $(document).ready(function() {
 
     var new_proxy_data = {
         "aaData": [
-            ["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","HaploReg link","NA"],
-            ["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","HaploReg link","NA"],
-            [".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","7","HaploReg link","HaploReg link","NA"]
+            ["rs125","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","8","7","HaploReg link","NA"],
+            ["rs128","chr7","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","9","7","HaploReg link","NA"],
+            [".","chr4","24958977","(C/T)","0.2037",-726,"1.0","1.0","C-C,T-T","9","7","HaploReg link","NA"]
         ]
     };
 
@@ -863,15 +863,15 @@ function createProxyTable() {
                 },
                 "targets": 2
             },
-            {
-                "render": function ( data, type, row ) {
-                    return ldproxy_regulome_link(data, type, row);
-                },
-                "targets": 9
-            },
              {
                 "render": function ( data, type, row ) {
                     return ldproxy_FORGEdb_link(data, type, row);
+                },
+                "targets": 9
+            },
+            {
+                "render": function ( data, type, row ) {
+                    return ldproxy_regulome_link(data, type, row);
                 },
                 "targets": 10
             },
@@ -1687,12 +1687,12 @@ function ldproxy_haploreg_link(data, type, row) {
 
 function ldproxy_FORGEdb_link(data, type, row) {
 
-    // Create RegulomeDB links
+    // Create FORGEDB links
 
     var server = 'https://forge2.altiusinstitute.org/files/';
 
     var snp = row[0];
-    var score = row[10];
+    var score = row[9];
     
     var href = server + snp.substring(0,6) + "/summary.table."+ snp + ".html"
     //var img = '<img src="LDproxy_external_link.png" alt=FORGEdb Details" title="FORGEdb Details" class="haploreg_external_link" style="width:16px;height:16px;">';
@@ -2141,7 +2141,9 @@ function updateLDassoc() {
         genome_build: genomeBuild,
         dprime: $("#assoc-matrix-color-r2").hasClass('active') ? "False" :"True",
         transcript: $("#assoc-transcript").hasClass('active') ? "False" :"True",
-        annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
+        //annotate: $("#assoc-annotate").hasClass('active') ? "True" :"False",
+        //annotate: $("#assoc-annotate").val(),
+        annotate: document.querySelector('input[name="ldassoc_options"]:checked').value,
         useEx: $('#example-gwas').is(':checked')? "True" :"False"
     };
 
@@ -2168,7 +2170,7 @@ function updateLDassoc() {
     //console.dir(ldproxyInputs);
     $('#ldassoc-results-link').attr('href','tmp/assoc' + ldInputs.reference + '.txt');
 
-
+    console.log(ldInputs);
     var url = restServerUrl + "/ldassoc";
     var ajaxRequest = $.ajax({
         type : 'GET',
@@ -3734,11 +3736,12 @@ function updateLDproxy() {
         genome_build: genomeBuild,
         r2_d : r2_d,
         window: windowSize,
-        collapseTranscript: $("#proxy_collapse_transcripts").hasClass('active')
+        collapseTranscript: $("#proxy_collapse_transcripts").hasClass('active'),
+        annotate: document.querySelector('input[name="ldproxy_options"]:checked').value
     };
 
     updateHistoryURL(id, ldproxyInputs);
-
+    console.log(ldproxyInputs)
     //console.log(location.hostname);
 
     $('#ldproxy-genome').attr('href',

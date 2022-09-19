@@ -21,7 +21,7 @@ from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population,get_q
 from LDutilites import get_config
 
 # Create LDproxy function
-def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
+def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=500000, collapseTranscript=True, annotate="forge"):
 
     # trim any whitespace
     snp = snp.lower().strip()
@@ -174,7 +174,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Populate JSON and text output
     outfile = open(tmp_dir + "proxy" + request + ".txt", "w")
     header = ["RS_Number", "Coord", "Alleles", "MAF", "Distance",
-              "Dprime", "R2", "Correlated_Alleles", "RegulomeDB", "ForageDB", "Function"]
+              "Dprime", "R2", "Correlated_Alleles", "ForageDB","RegulomeDB",  "Function"]
     print("\t".join(header), file=outfile)
 
     ucsc_track = {}
@@ -188,15 +188,15 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     query_snp["Dprime"] = str(round(float(out_ld_sort[0][7]), 4))
     query_snp["R2"] = str(round(float(out_ld_sort[0][8]), 4))
     query_snp["Corr_Alleles"] = out_ld_sort[0][9]
-    query_snp["RegulomeDB"] = out_ld_sort[0][10]
-    query_snp["ForageDB"] = out_ld_sort[0][11]
+    query_snp["ForgeDB"] = out_ld_sort[0][10]
+    query_snp["RegulomeDB"] = out_ld_sort[0][11]
     query_snp["MAF"] = str(round(float(out_ld_sort[0][13]), 4))
     query_snp["Function"] = out_ld_sort[0][14]
 
     output["query_snp"] = query_snp
 
     temp = [query_snp["RS"], query_snp["Coord"], query_snp["Alleles"], query_snp["MAF"], str(query_snp["Dist"]), str(
-            query_snp["Dprime"]), str(query_snp["R2"]), query_snp["Corr_Alleles"], query_snp["RegulomeDB"], query_snp["ForageDB"],query_snp["Function"]]
+            query_snp["Dprime"]), str(query_snp["R2"]), query_snp["Corr_Alleles"], query_snp["ForgeDB"],query_snp["RegulomeDB"], query_snp["Function"]]
     print("\t".join(temp), file=outfile)
 
     chr, pos = query_snp["Coord"].split(':')
@@ -228,8 +228,8 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             proxy_info["Dprime"] = str(round(float(out_ld_sort[i][7]), 4))
             proxy_info["R2"] = str(round(float(out_ld_sort[i][8]), 4))
             proxy_info["Corr_Alleles"] = out_ld_sort[i][9]
-            proxy_info["RegulomeDB"] = out_ld_sort[i][10]
-            proxy_info["ForageDB"] = out_ld_sort[i][11]
+            proxy_info["ForgeDB"] = out_ld_sort[i][10]
+            proxy_info["RegulomeDB"] = out_ld_sort[i][11]
             proxy_info["MAF"] = str(round(float(out_ld_sort[i][13]), 4))
             proxy_info["Function"] = out_ld_sort[i][14]
             proxies["proxy_" + (digits - len(str(i))) *
@@ -246,14 +246,14 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             row.append(str(round(float(proxy_info["Dprime"]), 4)))
             row.append(str(round(float(proxy_info["R2"]), 4)))
             row.append(proxy_info["Corr_Alleles"])
+            row.append(proxy_info["ForgeDB"])
             row.append(proxy_info["RegulomeDB"])
-            row.append(proxy_info["ForageDB"])
             row.append("HaploReg link")
             row.append(proxy_info["Function"])
             rows.append(row)
 
             temp = [proxy_info["RS"], proxy_info["Coord"], proxy_info["Alleles"], proxy_info["MAF"], str(proxy_info["Dist"]), str(
-                    proxy_info["Dprime"]), str(proxy_info["R2"]), proxy_info["Corr_Alleles"], proxy_info["RegulomeDB"],proxy_info["ForageDB"], proxy_info["Function"]]
+                    proxy_info["Dprime"]), str(proxy_info["R2"]), proxy_info["Corr_Alleles"], proxy_info["ForgeDB"],proxy_info["RegulomeDB"], proxy_info["Function"]]
             print("\t".join(temp), file=outfile)
 
             chr, pos = proxy_info["Coord"].split(':')
@@ -373,7 +373,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         # Organize scatter plot data
         
         #out_grid = ldproxy_figue(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript)
-        out_grid,proxy_plot,gene_plot,rug,plot_h_pix = ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript)
+        out_grid,proxy_plot,gene_plot,rug,plot_h_pix = ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript,annotate)
 
         # Generate high quality images only if accessed via web instance
         

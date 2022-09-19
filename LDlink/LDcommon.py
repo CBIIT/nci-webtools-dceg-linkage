@@ -741,7 +741,7 @@ def get_forgeDB(db,rs):
         return result["score"]
 
 #################
-def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript):
+def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript,annotate):
     q_rs = []
     q_allele = []
     q_coord = []
@@ -757,12 +757,12 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
     r2_round = []
     corr_alleles = []
     regdb = []
-    foragedb = []
+    forgedb = []
     funct = []
     color = []
     size = []
     for i in range(len(out_ld_sort)):
-        q_rs_i, q_allele_i, q_coord_i, p_rs_i, p_allele_i, p_coord_i, dist_i, d_prime_i, r2_i, corr_alleles_i, regdb_i, foragedb_i,q_maf_i, p_maf_i, funct_i, dist_abs = out_ld_sort[
+        q_rs_i, q_allele_i, q_coord_i, p_rs_i, p_allele_i, p_coord_i, dist_i, d_prime_i, r2_i, corr_alleles_i, forgedb_i,regdb_i,q_maf_i, p_maf_i, funct_i, dist_abs = out_ld_sort[
             i]
 
         if float(r2_i) > 0.01:
@@ -787,7 +787,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
             if regdb_i == ".":
                 regdb_i = ""
             regdb.append(regdb_i)
-            foragedb.append(foragedb_i)
+            forgedb.append(forgedb_i)
             if funct_i == ".":
                 funct_i = ""
             if funct_i == "NA":
@@ -864,8 +864,8 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         'r': r2_round,
         'd': d_prime_round,
         'alleles': corr_alleles,
+        'forgedb':forgedb,
         'regdb': regdb,
-        'foragedb':foragedb,
         'funct': funct,
         'size': size,
         'color': color
@@ -886,14 +886,18 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         ("R" + sup_2, "@r"),
         ("D\'", "@d"),
         ("Correlated Alleles", "@alleles"),
-        ("RegulomeDB", "@regdb"),
-        ("ForageDB", "@foragedb"),
+        ("ForgeDB Score", "@forgedb"),
+        ("RegulomeDB Rank", "@regdb"),
         ("Functional Class", "@funct"),
     ])
 
-    proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
+    if annotate == "regulome":
+        proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
                     text_baseline="middle", text_align="center", angle=0)
-
+    elif annotate == "forge":
+        proxy_plot.text(x, y, text=forgedb, alpha=1, text_font_size="7pt",
+                    text_baseline="middle", text_align="center", angle=0)
+   
     if r2_d == "r2":
         proxy_plot.yaxis.axis_label = "R" + sup_2
     else:
@@ -923,8 +927,8 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         'r': r2_round,
         'd': d_prime_round,
         'alleles': corr_alleles,
+        'forgedb':forgedb,
         'regdb': regdb,
-        'foragedb':foragedb,
         'funct': funct,
         'size': size,
         'color': color
