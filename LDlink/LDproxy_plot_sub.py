@@ -20,7 +20,7 @@ from LDutilites import get_config
 
 # LDproxy subprocess to export bokeh to high quality images in the background
 
-def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True):
+def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=500000, collapseTranscript=True,annotate="forge"):
     # Set data directories using config.yml
     param_list = get_config()
     data_dir = param_list['data_dir']
@@ -136,7 +136,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
             out_dist_sort, key=operator.itemgetter(7), reverse=True)
 
 
-    out_grid,proxy_plot,gene_plot,rug,plot_h_pix = ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript)
+    out_grid,proxy_plot,gene_plot,rug,plot_h_pix = ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript,annotate)
     import svgutils.compose as sg
     from bokeh.io import export_svgs
     # Change output backend to SVG temporarily for headless export
