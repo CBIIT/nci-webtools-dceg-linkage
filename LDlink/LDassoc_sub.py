@@ -8,7 +8,7 @@ import subprocess
 import sys
 import yaml
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
-from LDcommon import set_alleles,get_dbsnp_coord,get_coords
+from LDcommon import set_alleles,get_dbsnp_coord,get_coords,get_regDB,get_forgeDB
 from LDutilites import get_config
 
 snp = sys.argv[1]
@@ -90,19 +90,6 @@ def LD_calcs(hap, allele, allele_n):
 # Connect to Mongo snp database
 db = connectMongoDBReadOnly(True)
 
-def get_regDB(chr, pos):
-    result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]["position"]: int(pos)})
-    if result is None:
-        return "."   
-    else:
-        return result["score"]
-
-def get_forgeDB(rs):
-    result = db.forge_score.find_one({"snp_id": rs})
-    if result is None:
-        return ""   
-    else:
-        return result["score"]
 
 # Import SNP VCF files
 vcf = open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
@@ -165,7 +152,7 @@ for geno_n in vcf:
             dist = str(int(geno_n[1])-int(geno[1]))
 
             # Get RegulomeDB score
-            score = get_regDB("chr"+geno_n[0], geno_n[1])
+            score = get_regDB(db,genome_build,"chr"+geno_n[0], geno_n[1])
 
             # Get dbSNP function
             if rs_n[0:2] == "rs":
@@ -190,8 +177,8 @@ for geno_n in vcf:
                     rs_n = "."
             else:
                 funct = "."
-
-            temp = [rs, al, "chr" + chr + ":" + bp, rs_n, al_n, "chr" + chr_n + ":" + bp_n, dist, D_prime, r2, match, score, maf_q, maf_p, funct]
+            score_forage = get_forgeDB(db,rs_n)
+            temp = [rs, al, "chr" + chr + ":" + bp, rs_n, al_n, "chr" + chr_n + ":" + bp_n, dist, D_prime, r2, match,score_forage,score, maf_q, maf_p, funct]
             out.append(temp)
 
 

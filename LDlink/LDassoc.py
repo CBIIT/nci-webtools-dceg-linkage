@@ -497,15 +497,15 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				col.append(float(assoc_dict[coord_i_j][0]))
 				out_prox.append(col)
 
-	out_dist_sort=sorted(out_prox, key=operator.itemgetter(14))
-	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(15), reverse=False)
+	out_dist_sort=sorted(out_prox, key=operator.itemgetter(15))
+	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(16), reverse=False)
 
 
 	# Populate JSON and text output
 	from math import log10
 
 	outfile=open(tmp_dir+"assoc"+request+".txt","w")
-	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","P-value","RegulomeDB","Function"]
+	header=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","P-value","FORGEdb","RegulomeDB","Function"]
 	print("\t".join(header), file=outfile)
 
 	ucsc_track={}
@@ -519,10 +519,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	query_snp["Dprime"]=str(round(float(out_p_sort[0][7]),4))
 	query_snp["R2"]=str(round(float(out_p_sort[0][8]),4))
 	query_snp["Corr_Alleles"]=out_p_sort[0][9]
-	query_snp["RegulomeDB"]=out_p_sort[0][10]
-	query_snp["MAF"]=str(round(float(out_p_sort[0][11]),4))
-	query_snp["Function"]=out_p_sort[0][13]
-	query_snp["P-value"]=out_p_sort[0][15]
+	query_snp["FORGEdb"] = out_p_sort[0][10]
+	query_snp["RegulomeDB"]=out_p_sort[0][11]
+	query_snp["MAF"]=str(round(float(out_p_sort[0][12]),4))
+	query_snp["Function"]=out_p_sort[0][14]
+	query_snp["P-value"]=out_p_sort[0][16]
 
 	output["query_snp"]=query_snp
 
@@ -539,12 +540,13 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	row.append(str(round(float(query_snp["R2"]),4)))
 	row.append(query_snp["Corr_Alleles"])
 	row.append(query_snp["P-value"])
+	row.append(query_snp["FORGEdb"])
 	row.append(query_snp["RegulomeDB"])
 	row.append("HaploReg link")
 	row.append(query_snp["Function"])
 	rows.append(row)
 
-	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["RegulomeDB"],query_snp["Function"]]
+	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["FORGEdb"],query_snp["RegulomeDB"],query_snp["Function"]]
 	print("\t".join(temp), file=outfile)
 
 	temp2=[chr,pos,query_snp["RS"],-log10(query_snp["P-value"])]
@@ -569,10 +571,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			proxy_info["Dprime"]=str(round(float(out_p_sort[i][7]),4))
 			proxy_info["R2"]=str(round(float(out_p_sort[i][8]),4))
 			proxy_info["Corr_Alleles"]=out_p_sort[i][9]
-			proxy_info["RegulomeDB"]=out_p_sort[i][10]
-			proxy_info["MAF"]=str(round(float(out_p_sort[i][12]),4))
-			proxy_info["Function"]=out_p_sort[i][13]
-			proxy_info["P-value"]=out_p_sort[i][15]
+			proxy_info["FORGEdb"]=out_p_sort[i][10]
+			proxy_info["RegulomeDB"]=out_p_sort[i][11]
+			proxy_info["MAF"]=str(round(float(out_p_sort[i][13]),4))
+			proxy_info["Function"]=out_p_sort[i][14]
+			proxy_info["P-value"]=out_p_sort[i][16]
 			proxies["proxy_"+(digits-len(str(i)))*"0"+str(i)]=proxy_info
 			chr,pos=proxy_info["Coord"].split(':')
 
@@ -587,12 +590,13 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			row.append(str(round(float(proxy_info["R2"]),4)))
 			row.append(proxy_info["Corr_Alleles"])
 			row.append(proxy_info["P-value"])
+			row.append(proxy_info["FORGEdb"])
 			row.append(proxy_info["RegulomeDB"])
 			row.append("HaploReg link")
 			row.append(proxy_info["Function"])
 			rows.append(row)
 
-			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["RegulomeDB"],proxy_info["Function"]]
+			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["FORGEdb"],proxy_info["RegulomeDB"],proxy_info["Function"]]
 			print("\t".join(temp), file=outfile)
 
 			chr,pos=proxy_info["Coord"].split(':')
@@ -706,7 +710,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	p_val=[]
 	neg_log_p=[]
 	for i in range(len(out_p_sort)):
-		q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs,p_val_i=out_p_sort[i]
+		q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,forgedb_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs,p_val_i=out_p_sort[i]
 
 		q_rs.append(q_rs_i)
 		q_allele.append(q_allele_i)
@@ -734,6 +738,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		if regdb_i==".":
 			regdb_i=""
 		regdb.append(regdb_i)
+		forgedb.append(forgedb_i)
 		if funct_i==".":
 			funct_i=""
 		if funct_i=="NA":
@@ -794,7 +799,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	x=p_coord
 	y=neg_log_p
 
-	data = {'x': x, 'y': y, 'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
+	data = {'x': x, 'y': y, 'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'forgedb':forgedb,'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
 	source = ColumnDataSource(data)
 
 	whitespace=0.01
@@ -845,7 +850,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		("R"+sup_2+" ("+q_rs[0]+")", "@r"),
 		("D\' ("+q_rs[0]+")", "@d"),
 		("Correlated Alleles", "@alleles"),
-		("RegulomeDB", "@regdb"),
+		("FORGEdb Score", "@forgedb"),
+		("RegulomeDB Rank", "@regdb"),
 		("Functional Class", "@funct"),
 	])
 
@@ -868,7 +874,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	y2_ul=[1.03]*len(x)
 	yr_rug=Range1d(start=-0.03, end=1.03)
 
-	data_rug = {'x': x, 'y': y, 'y2_ll': y2_ll, 'y2_ul': y2_ul,'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
+	data_rug = {'x': x, 'y': y, 'y2_ll': y2_ll, 'y2_ul': y2_ul,'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'forgedb':forgedb,'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
 	source_rug = ColumnDataSource(data_rug)
 
 	rug=figure(
@@ -1270,12 +1276,12 @@ def main():
 			json_dict["error"]
 
 		except KeyError:
-			head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","RegulomeDB","Functional_Class"]
+			head=["RS_Number","Coord","Alleles","MAF","Distance","Dprime","R2","Correlated_Alleles","Association P-value","FORGEdb","RegulomeDB","Functional_Class"]
 			print("\t".join(head))
-			temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
+			temp=[json_dict["query_snp"]["RS"],json_dict["query_snp"]["Coord"],json_dict["query_snp"]["Alleles"],json_dict["query_snp"]["MAF"],str(json_dict["query_snp"]["Dist"]),str(json_dict["query_snp"]["Dprime"]),str(json_dict["query_snp"]["R2"]),json_dict["query_snp"]["Corr_Alleles"],str(json_dict["query_snp"]["P-value"]),json_dict["query_snp"]["FORGEdb"],json_dict["query_snp"]["RegulomeDB"],json_dict["query_snp"]["Function"]]
 			print("\t".join(temp))
 			for k in sorted(json_dict["proxy_snps"].keys())[0:10]:
-				temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
+				temp=[json_dict["proxy_snps"][k]["RS"],json_dict["proxy_snps"][k]["Coord"],json_dict["proxy_snps"][k]["Alleles"],json_dict["proxy_snps"][k]["MAF"],str(json_dict["proxy_snps"][k]["Dist"]),str(json_dict["proxy_snps"][k]["Dprime"]),str(json_dict["proxy_snps"][k]["R2"]),json_dict["proxy_snps"][k]["Corr_Alleles"],str(json_dict["proxy_snps"][k]["P-value"]),json_dict["proxy_snps"][k]["FORGEdb"],json_dict["proxy_snps"][k]["RegulomeDB"],json_dict["proxy_snps"][k]["Function"]]
 				print("\t".join(temp))
 
 		else:

@@ -739,7 +739,12 @@ def get_forgeDB(db,rs):
         return ""   
     else:
         return result["score"]
-
+def get_regDB(db,genome_build,chr, pos):
+    result = db.regulome.find_one({genome_build_vars[genome_build]['chromosome']: str(chr), genome_build_vars[genome_build]['position']: int(pos)})
+    if result is None:
+        return "."   
+    else:
+        return result["score"]
 #################
 def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,genome_build,collapseTranscript,annotate):
     q_rs = []

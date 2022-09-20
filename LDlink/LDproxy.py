@@ -151,7 +151,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             col[8] = float(col[8])
             col.append(abs(int(col[6])))
             out_prox.append(col)
-    #print(len(out_prox),len(out_prox[0]))
+    print(len(out_prox),(out_prox[0]))
     # Sort output
     if r2_d not in ["r2", "d"]:
         if "warning" in output:
@@ -162,7 +162,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
                 " is not an acceptable value for r2_d (r2 or d required). r2 is used by default"
         r2_d = "r2"
 
-    out_dist_sort = sorted(out_prox, key=operator.itemgetter(14))
+    out_dist_sort = sorted(out_prox, key=operator.itemgetter(15))
 
     if r2_d == "r2":
         out_ld_sort = sorted(

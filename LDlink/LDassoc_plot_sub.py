@@ -318,6 +318,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     r2=[]
     r2_round=[]
     corr_alleles=[]
+    forgedb=[]
     regdb=[]
     funct=[]
     color=[]
@@ -326,7 +327,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     p_val=[]
     neg_log_p=[]
     for i in range(len(out_p_sort)):
-        q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs,p_val_i=out_p_sort[i]
+        q_rs_i,q_allele_i,q_coord_i,p_rs_i,p_allele_i,p_coord_i,dist_i,d_prime_i,r2_i,corr_alleles_i,forgedb_i,regdb_i,q_maf_i,p_maf_i,funct_i,dist_abs,p_val_i=out_p_sort[i]
 
         q_rs.append(q_rs_i)
         q_allele.append(q_allele_i)
@@ -354,6 +355,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         if regdb_i==".":
             regdb_i=""
         regdb.append(regdb_i)
+        forgedb.append(forgedb_i)
         if funct_i==".":
             funct_i=""
         if funct_i=="NA":
@@ -415,7 +417,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     x=p_coord
     y=neg_log_p
 
-    data = {'x': x, 'y': y, 'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
+    data = {'x': x, 'y': y, 'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'forgedb':forgedb,'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
     source = ColumnDataSource(data)
 
     whitespace=0.01
@@ -466,6 +468,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         ("R"+sup_2+" ("+q_rs[0]+")", "@r"),
         ("D\' ("+q_rs[0]+")", "@d"),
         ("Correlated Alleles", "@alleles"),
+        ("ForgeDB Score", "@forgedb"),
         ("RegulomeDB", "@regdb"),
         ("Functional Class", "@funct"),
     ])
@@ -473,7 +476,9 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     assoc_plot.add_tools(hover)
 
     # Annotate RebulomeDB scores
-    if myargs['annotate']==True:
+    if myargs['annotate']=="forge":
+        assoc_plot.text(x, y, text=forgedb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
+    elif myargs['annotate']=="regulome":
         assoc_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)
 
     assoc_plot.yaxis.axis_label="-log10 P-value"
@@ -487,7 +492,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     y2_ul=[1.03]*len(x)
     yr_rug=Range1d(start=-0.03, end=1.03)
 
-    data_rug = {'x': x, 'y': y, 'y2_ll': y2_ll, 'y2_ul': y2_ul,'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
+    data_rug = {'x': x, 'y': y, 'y2_ll': y2_ll, 'y2_ul': y2_ul,'qrs': q_rs, 'q_alle': q_allele, 'q_maf': q_maf, 'prs': p_rs, 'p_alle': p_allele, 'p_maf': p_maf, 'dist': dist, 'r': r2_round, 'd': d_prime_round, 'alleles': corr_alleles,'forgedb':forgedb, 'regdb': regdb, 'funct': funct, 'p_val': p_val, 'size': size, 'color': color, 'alpha': alpha}
     source_rug = ColumnDataSource(data_rug)
 
     rug=figure(

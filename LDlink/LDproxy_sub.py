@@ -165,7 +165,7 @@ for geno_n in vcf:
 
             # Get RegulomeDB score
             score = get_regDB("chr"+geno_n[0], geno_n[1])
-            score_forage = get_forgeDB(db,rs_n)
+            
             # Get dbSNP function
             if rs_n[0:2] == "rs": 
                 snp_coord = get_dbsnp_rsid(db, rs_n)
@@ -189,7 +189,7 @@ for geno_n in vcf:
                     rs_n = "."
             else:
                 funct = "."
-
+            score_forage = get_forgeDB(db,rs_n)
             temp = [rs, al, "chr"+chr+":"+bp, rs_n, al_n, "chr"+chr_n+":" +
                     bp_n, dist, D_prime, r2, match, score_forage,score, maf_q, maf_p, funct]
             out.append(temp)
