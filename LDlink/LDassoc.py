@@ -360,8 +360,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	try:
 		org_coord
 	except NameError:
+		counterMissing = 0
 		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
-			snp="chr"+var_p[0].split("-")[0]
+			snp=var_p[0].split("-")[0]
 			# Extract lowest P SNP phased genotypes
 			vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
 			vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
@@ -370,7 +371,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			#head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 			tabix_snp= export_s3_keys + " cd {3}; tabix -hD {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 			subprocess.call(tabix_snp, shell=True)
-
+			#print(snp,var_p)
 			# Check lowest P SNP is in the 1000G population and not monoallelic
 			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 			h = 0
@@ -380,6 +381,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			vcf = vcf[h+1:]
 			#print("vcf length:",len(vcf))
 			if len(vcf)==0:
+				counterMissing = counterMissing +1
 				if "warning" in output:
 					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
 				else:
@@ -428,6 +430,13 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 			org_coord=var_p[0].split("-")[1]
 			break
+		#print(counterMissing,len(assoc_list))
+		if counterMissing == len(assoc_list):
+			output["error"]="Association file Lowest P-value variant ("+snp+") is not in 1000G reference panel"
+			json_output=json.dumps(output, sort_keys=True, indent=2)
+			print(json_output, file=out_json)
+			out_json.close()
+			return("","")
 
 	else:
 		if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + org_coord + "-" + org_coord not in assoc_coords:
