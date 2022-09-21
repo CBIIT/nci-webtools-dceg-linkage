@@ -92,6 +92,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     temp = [snp, str(snp_coord['chromosome']), int(snp_coord[genome_build_vars[genome_build]['position']])]
     #print(temp)
     (geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
+    #print(warningmsg)
     for msg in warningmsg:
         if msg[1] == "NA":
             #output["error"] = str(output["error"] if "error" in output else "") + msg[2]

@@ -532,6 +532,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
     if "," in geno[3] or "," in geno[4]:
         # print('handle error: snp + " is not a biallelic variant."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
+        output["error"] = "Variant is not a biallelic." + str(output["error"] if "error" in output else "")
 
     index = []
     for i in range(9, len(head)):
@@ -550,6 +551,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
     if genotypes["0"] == 0 or genotypes["1"] == 0:
         # print('handle error: snp + " is monoallelic in the " + pop + " population."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is monoallelic in the chosen population(s)."])
+        output["error"] = "Variant is monoallelic in the chosen population(s)." + str(output["error"] if "error" in output else "")
     
     return(geno,head,queryVariantWarnings)
 
