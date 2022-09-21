@@ -95,7 +95,8 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     #print(warningmsg)
     for msg in warningmsg:
         if msg[1] == "NA":
-            #output["error"] = str(output["error"] if "error" in output else "") + msg[2]
+            if "biallelic" in msg[2] or "monoallelic" in msg[2]:
+                output["error"] = str(output["error"] if "error" in output else "") + msg[2]
             json_output = json.dumps(output, sort_keys=True, indent=2)
             print(json_output, file=out_json)
             out_json.close()
