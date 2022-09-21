@@ -891,7 +891,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         ("R" + sup_2, "@r"),
         ("D\'", "@d"),
         ("Correlated Alleles", "@alleles"),
-        ("ForgeDB Score", "@forgedb"),
+        ("FORGEdb Score", "@forgedb"),
         ("RegulomeDB Rank", "@regdb"),
         ("Functional Class", "@funct"),
     ])
@@ -953,7 +953,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         # Gene Plot (All Transcripts)
         genes_file = tmp_dir + "genes_" + request + ".json"
         genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
-
+        #genes_json = open(genes_file).readlines()
         genes_plot_start = []
         genes_plot_end = []
         genes_plot_y = []
@@ -1085,6 +1085,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
     else:
         genes_c_file = tmp_dir + "genes_c_" + request + ".json"
         genes_c_json = getRefGene(db, genes_c_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, True)
+        #genes_c_json = open(genes_c_file).readlines()
         genes_c_plot_start=[]
         genes_c_plot_end=[]
         genes_c_plot_y=[]
@@ -1101,6 +1102,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         tall=0.75
         if genes_c_json != None and len(genes_c_json) > 0:
             for gene_c_obj in genes_c_json:
+                #gene_c_obj = json.loads(gene_c_raw_obj)
                 chrom = gene_c_obj["chrom"]
                 txStart = gene_c_obj["txStart"]
                 txEnd = gene_c_obj["txEnd"]
@@ -1155,14 +1157,14 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         max_genes_c = 40
         # if len(lines_c) < 3 or len(genes_c_raw) > max_genes_c:
         if len(lines_c) < 3:
-            plot_c_h_pix = 250
+            plot_h_pix = 250
         else:
-            plot_c_h_pix = 250 + (len(lines_c) - 2) * 50
+            plot_h_pix = 250 + (len(lines_c) - 2) * 50
 
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                         x_range=xr, y_range=yr2_c, border_fill_color='white',
                         title="", h_symmetry=False, v_symmetry=False, logo=None,
-                        plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                        plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,

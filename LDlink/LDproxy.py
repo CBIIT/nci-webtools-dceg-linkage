@@ -151,7 +151,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             col[8] = float(col[8])
             col.append(abs(int(col[6])))
             out_prox.append(col)
-    print(len(out_prox),(out_prox[0]))
+    #print(len(out_prox),(out_prox[0]))
     # Sort output
     if r2_d not in ["r2", "d"]:
         if "warning" in output:
@@ -378,7 +378,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         # Generate high quality images only if accessed via web instance
         
         # Open thread for high quality image exports
-        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window) + " " + collapseTranscript
+        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window) + " " + collapseTranscript+" "+annotate
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
         ###########################

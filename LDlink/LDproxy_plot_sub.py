@@ -127,7 +127,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     if r2_d not in ["r2", "d"]:
         r2_d = "r2"
 
-    out_dist_sort = sorted(out_prox, key=operator.itemgetter(14))
+    out_dist_sort = sorted(out_prox, key=operator.itemgetter(15))
     if r2_d == "r2":
         out_ld_sort = sorted(
             out_dist_sort, key=operator.itemgetter(8), reverse=True)
@@ -144,10 +144,8 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     proxy_plot.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(proxy_plot, filename=tmp_dir +
-                "proxy_plot_1_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir +
-                "gene_plot_1_" + request + ".svg")
+    export_svgs(proxy_plot, filename=tmp_dir + "proxy_plot_1_" + request + ".svg")
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
     # 1 pixel = 0.0264583333 cm
     svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
@@ -197,7 +195,7 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
 def main():
 
     # Import LDproxy options
-    if len(sys.argv) == 8:
+    if len(sys.argv) == 9:
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
@@ -205,11 +203,12 @@ def main():
         r2_d = sys.argv[5]
         window = sys.argv[6]
         collapseTranscript = sys.argv[7]
+        annotate = sys.argv[8]
     else:
         sys.exit()
 
     # Run function
-    calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript)
+    calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript, annotate)
 
 
 if __name__ == "__main__":
