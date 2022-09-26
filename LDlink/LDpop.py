@@ -63,14 +63,14 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     # SNP1
     if snp1_coord == None or snp1_coord[genome_build_vars[genome_build]['position']] == "NA":
         output["error"] = snp1 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
-        if web:
-            output = json.dumps(output, sort_keys=True, indent=2)
+        #if web:
+        output = json.dumps(output, sort_keys=True, indent=2)
         return output
     # SNP2
     if snp2_coord == None or snp2_coord[genome_build_vars[genome_build]['position']] == "NA":
         output["error"] = snp2 + " is not in dbSNP build " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
-        if web:
-            output = json.dumps(output, sort_keys=True, indent=2)
+        #if web:
+        output = json.dumps(output, sort_keys=True, indent=2)
         return output
     # Check if SNPs are on the same chromosome
     if snp1_coord['chromosome'] != snp2_coord['chromosome']:
@@ -168,8 +168,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             pop_dirs.append(data_dir + population_samples_dir + pop_i + ".txt")
         else:
             output["error"] = pop_i + " is not an ancestral population. Choose one of the following ancestral populations: AFR, AMR, EAS, EUR, or SAS; or one of the following sub-populations: ACB, ASW, BEB, CDX, CEU, CHB, CHS, CLM, ESN, FIN, GBR, GIH, GWD, IBS, ITU, JPT, KHV, LWK, MSL, MXL, PEL, PJL, PUR, STU, TSI, or YRI."
-            if web:
-                output = json.dumps(output, sort_keys=True, indent=2)
+            #if web:
+            output = json.dumps(output, sort_keys=True, indent=2)
             return output
            
     #make empty dictionary to keep sample IDs in for each wanted population 
@@ -195,8 +195,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
     temp = [snp2, str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
     (vcf2, head2, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
     if vcf1 == None or vcf2 == None:
-        if web:
-            output = json.dumps(output, sort_keys=True, indent=2)
+        #if web:
+        output = json.dumps(output, sort_keys=True, indent=2)
         return output
     
     rs1_dict = dict(list(zip(head1, vcf1)))
@@ -250,8 +250,8 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
             pop_freqs["alt_freq_snp2"][key] = round(((2*geno_ind["rs2"][key].count("1|1") + geno_ind["rs2"][key].count("0|1") + geno_ind["rs2"][key].count("1|0") + geno_ind["rs2"][key].count("1|.") + geno_ind["rs2"][key].count("0|."))/ float(pop_freqs["total_alleles"][key])) *100, 2)
         else :
             output["error"] = "Insufficient haplotype data for " + snp1 + " and " + snp2 + " in 1000G reference panel."
-            if web:
-                output = json.dumps(output, sort_keys=True, indent=2)
+            #if web:
+            output = json.dumps(output, sort_keys=True, indent=2)
             return output
         
     #get sample size for each population

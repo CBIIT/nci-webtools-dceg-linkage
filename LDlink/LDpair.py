@@ -343,7 +343,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         output_list.append(output)
     ### OUTPUT ERROR IF ONLY SINGLE SNP PAIR ###
     if len(snp_pairs) == 1 and len(output_list) == 1 and "error" in output_list[0]:
-        return(json.dumps(output_list, sort_keys=True, indent=2))
+        return(json.dumps(output_list[0], sort_keys=True, indent=2))
        
     # Generate output file only for single SNP pair inputs
     if len(snp_pairs) == 1 and len(output_list) == 1:
