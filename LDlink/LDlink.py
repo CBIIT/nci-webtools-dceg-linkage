@@ -1144,18 +1144,21 @@ def ldpair():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
+            #if there is error, the out_json should be json format not as array
             if 'error' in json.loads(out_json):
                 toggleLocked(token, 0)
                 return sendTraceback(json.loads(out_json)["error"])
             # display api out
             try:
                 # unlock token then display api output
+                # if user set json=true, output format is json
                 if json_out or len(json.loads(out_json)) > 1:
                     toggleLocked(token, 0)
                     end_time = time.time()
                     app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
                     return current_app.response_class(out_json, mimetype='application/json')
                 else:
+                    #right inputs output as text
                     with open(tmp_dir + 'LDpair_' + reference + '.txt', "r") as fp:
                         content = fp.read()
                     toggleLocked(token, 0)

@@ -53,7 +53,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     pop_ids = get_population(pop,request,{})
     if isinstance(pop_ids, str):
         error_out = json.loads(pop_ids)
-        return(json.dumps([error_out], sort_keys=True, indent=2))
+        return(json.dumps(error_out, sort_keys=True, indent=2))
  
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(web)
@@ -129,7 +129,6 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         (vcf2, head2, output2) = get_query_variant_c(temp, pop_ids, str(request), genome_build, False,output)   
         if "error" in output:
             output_list.append(output)
-            print(output)
             continue
         vcf1_pos = snp1_coord[genome_build_vars[genome_build]['position']]
         vcf2_pos = snp2_coord[genome_build_vars[genome_build]['position']]
@@ -343,8 +342,9 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
         output_list.append(output)
     ### OUTPUT ERROR IF ONLY SINGLE SNP PAIR ###
     # api call, output error needs json.loads to call 'error', so return json format for error
-    print("###",output_list)
     if len(snp_pairs) == 1 and len(output_list) == 1 and "error" in output_list[0]:
+        # if web, out_json array format can be loaded to current_app.response_class(out_json, mimetype='application/json') 
+        # if api, with error, it needs json format and output_list[0] is the json format
         if web:
             return(json.dumps(output_list, sort_keys=True, indent=2))
         return(json.dumps(output_list[0], sort_keys=True, indent=2))
