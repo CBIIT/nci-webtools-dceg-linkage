@@ -176,7 +176,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     # Populate JSON and text output
     outfile = open(tmp_dir + "proxy" + request + ".txt", "w")
     header = ["RS_Number", "Coord", "Alleles", "MAF", "Distance",
-              "Dprime", "R2", "Correlated_Alleles", "ForageDB","RegulomeDB",  "Function"]
+              "Dprime", "R2", "Correlated_Alleles", "FORGEdb","RegulomeDB",  "Function"]
     print("\t".join(header), file=outfile)
 
     ucsc_track = {}
