@@ -2522,7 +2522,7 @@ function updateLDtrait() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
-        // console.log(data);
+        console.log(data.warning);
         if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
@@ -2539,6 +2539,13 @@ function updateLDtrait() {
             $('#' + id + '-links-container').show();
             $('#'+id+"-loading").hide();
             initTrait(data, r2_d);
+        }
+        if(data.warning.includes("timeout")){
+            $('#' + id + '-results-container').hide();
+            $('#' + id + '-links-container').hide();
+            $('#'+id+"-loading").hide();
+            $('#ldtrait-continue').attr("style","display:block")
+            $('#ldtrait-cancel').attr("style","display:block")
         }
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
