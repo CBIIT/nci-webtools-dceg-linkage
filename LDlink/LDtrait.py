@@ -155,7 +155,7 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     return (matched_snps, window_problematic_snps)
 
 # Create LDtrait function
-def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold=0.1, window=500000):
+def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshold=0.1, window=500000,ifContinue=True):
     print("##### START LD TRAIT CALCULATION #####")	
     start = timer()
     
@@ -298,7 +298,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
     print("length:",len(ldPairsUnique))
     numSplit = math.ceil(len(ldPairsUnique)/4000)
-    if len(ldPairsUnique) > 4000:
+    if len(ldPairsUnique) > 4000 and ifContinue and web:
         #str(numSplit)
         output["warning"] = 'Too many pairs found within window for input list and might cause timeout of the server.'\
             ' Please click "Continue" if you want the calculation process and if server is finally timeout,'\

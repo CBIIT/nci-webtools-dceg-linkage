@@ -2470,7 +2470,8 @@ function updateLDtrait() {
     var population = getPopulationCodes(id+'-population-codes');
     var r2_d;
     var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
-
+    var ifContinue = document.getElementById("ldtrait-continue").innerHTML
+    
     if($('#ldtrait_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
     } else {
@@ -2494,7 +2495,8 @@ function updateLDtrait() {
         r2_d_threshold: $("#"+id+"_r2_d_threshold").val(),
         window: window,
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
-        genome_build: genomeBuild
+        genome_build: genomeBuild,
+        ifContinue : ifContinue
     };
 
     //Show inital message
@@ -2522,7 +2524,6 @@ function updateLDtrait() {
     ajaxRequest.success(function(data) {
         //data is returned as a string representation of JSON instead of JSON obj
         var jsonObj=data;
-        console.log(data.warning);
         if (displayError(id, jsonObj) == false) {
             switch(genomeBuild) {
                 case "grch37":
@@ -2556,6 +2557,18 @@ function updateLDtrait() {
     });
 
     hideLoadingIcon(ajaxRequest, id);
+}
+
+function ldtraitContinue() {
+  document.getElementById("ldtrait-continue").innerHTML = "False";
+  updateLDtrait()
+  $('#ldtrait-results-container').hide();
+  $('#ldtrait-links-container').hide();
+  $('#ldtrait-loading').hide();
+  $('#ldtrait-continue').attr("style","display:none")
+  $('#ldtrait-cancel').attr("style","display:none")
+  $('#ldtrait-message-warning').hide();
+  $('#ldtrait-loading').show();
 }
 
 function updateSNPclip() {
