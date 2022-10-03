@@ -237,6 +237,13 @@ html body .footer {
 	border-bottom: 0px;
 }
 
+#ldpairTable > thead > tr > th,
+#ldpairTable > tbody > tr > td,
+#ldpairTable > tfoot > tr > th {
+	border: 1px solid grey;
+	border-bottom: 1px solid grey;
+}
+
 .left td {
 	text-align: left;
 }

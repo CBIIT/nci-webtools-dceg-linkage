@@ -619,7 +619,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
         rug.toolbar_location = None
 
-        if collapseTranscript == "false":
+        if collapseTranscript == "true":
             # Gene Plot (All Transcripts)
             genes_file = tmp_dir + "genes_" + request + ".json"
             genes_json = getRefGene(db, genes_file, snp_coords[1][1], int((x[0] - buffer) * 1000000), int((x[-1] + buffer) * 1000000), genome_build, False)
