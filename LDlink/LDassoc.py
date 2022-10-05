@@ -865,7 +865,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	])
 
 	assoc_plot.add_tools(hover)
-
 	# Annotate RebulomeDB scores
 	if myargs.annotate=="forge":
 		assoc_plot.text(x, y, text=forgedb, alpha=1, text_font_size="7pt", text_baseline="middle", text_align="center", angle=0)

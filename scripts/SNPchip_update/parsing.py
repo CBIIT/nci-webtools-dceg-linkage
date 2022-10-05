@@ -3,12 +3,12 @@ import csv
 client = MongoClient()
 print(client)
 db = client['LDLink']
-collections = db['snp_col']
+collections = db['snp_col_test']
 #print(db.list_collection_names())
 #print(collections)
 i = 0
 #choose the csv file to open
-with open('Multi-EthnicGlobal_D1.csv') as csv_file:
+with open('/users/yaox5/workspace/analysistools/rawData/GDAConfluence_20032938X375356_A1.csv') as csv_file:
     csv_reader = csv.reader(csv_file, delimiter=',')
     line_count = 0
     for row in csv_reader:
@@ -20,8 +20,11 @@ with open('Multi-EthnicGlobal_D1.csv') as csv_file:
         #this is where the data starts, change based on file
         if(line_count >= 8 and len(row) > 10):
             temp = {}
-            temp['platform'] = 'Illumina Multi-Ethnic Global'
-            temp['chr'] = row[9]
+            temp['platform'] = 'Illumina Global Diversity Array_Confluence'
+            chr = row[9]
+            genomebuild=row[8]
+            temp['chr'] = chr
+            temp['genome'] = genomebuild
             pos = row[10]
             if(collections.find_one({'pos':pos})!=None):
                 item = collections.find_one_and_delete({'pos':pos})['data']
