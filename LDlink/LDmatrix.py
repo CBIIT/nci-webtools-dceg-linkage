@@ -399,8 +399,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             alleles_snp_plot.append(xA[i])
             
 
-        print("early x", x)
-        print("snp", rsnum_lst)
+        #print("early x", x)
+        #print("snp", rsnum_lst)
         rs_forge_score = []
         for rs_forge in rsnum_lst:
             rs_forge_score.append(get_forgeDB(db,rs_forge))
@@ -558,12 +558,13 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         start_x = x[0] - buffer+spacing/2
         ycount = 0
         total_y=len(y)
+        num_font = total_y if total_y < 50 else int(total_y/3)
         for y_y in y:
             y_text.append(total_y - y_y-ycount)
             x_text.append(start_x+spacing*ycount)
             ycount += 1        
-        text_font = str(int(20*10/total_y))+'pt'
-        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0)
+        text_font = str(int(20*10/num_font))+'pt'
+        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey",text_font_style="bold")
         
         sup_2 = "\u00B2"
 
@@ -969,3 +970,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
