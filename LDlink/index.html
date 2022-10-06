@@ -1220,10 +1220,10 @@
 								</div>
 								<div class="col-sm-2">
 									<div title="Choose to show all or collapse transcripts" data-toggle="buttons" class="btn-group flag-switches">
-										<label class="btn btn-default active" id="matrix_collapse_transcripts" title="Collapse transcripts">
+										<label class="btn btn-default" id="matrix_collapse_transcripts" title="Collapse transcripts">
 											<input type="radio" checked="" autocomplete="off" name="options">Yes
 										</label>
-										<label class="btn btn-default" title="Show transcripts">
+										<label class="btn btn-default active" title="Show transcripts">
 											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
@@ -1390,7 +1390,7 @@
 
 									<td colspan="2" rowspan="2">
 										<!-- two-by-two sub table -->
-										<table style="width:100%" class="table table-condensed table-bordered two-by-two">
+										<table id = "ldpairTable" style="width:100%" class="table table-condensed table-bordered two-by-two">
 											<tbody>
 												<tr>
 													<td class="ldpair-results cell-center" width="50%" data-bind="text: two_by_two.cells.c11"></td>
@@ -2057,12 +2057,11 @@
 						</div>
 					</div>
 					<div class="row">
-						<div class="col-sm-7 col-sm-offset-2">
+						<div class="col-sm-7 col-sm-offset-2 btn-group">
 							<button id="ldtrait-continue" value="Continue" style="display:none;" class="btn btn-default calculate" onclick="ldtraitContinue()">Continue</button>
+							<button id="ldtrait-cancel" value="Cancel" style="display:none;" class="btn btn-default calculate" onclick="ldtraitCancel()">Cancel</button>
 						</div>
-						<div class="col-sm-9 col-sm-offset-2">
-							<button id="ldtrait-cancel" value="Cancel" style="display:none;" class="btn btn-default calculate" >Cancel</button>
-						</div>
+						
 					</div>
 				</div>
 				<!-- ldtrait CONTAINER -->

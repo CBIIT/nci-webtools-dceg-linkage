@@ -2470,7 +2470,7 @@ function updateLDtrait() {
     var population = getPopulationCodes(id+'-population-codes');
     var r2_d;
     var window = $("#" + id + "-bp-window").val().replace(/\,/g, '');
-    var ifContinue = document.getElementById("ldtrait-continue").innerHTML
+    var ifContinue = document.getElementById("ldtrait-continue").value
     
     if($('#ldtrait_ld_r2').hasClass('active')) {
         r2_d = 'r2'; // i.e. R2
@@ -2503,7 +2503,8 @@ function updateLDtrait() {
     $('#new-ldtrait_wrapper').hide();
     $('#new-ldtrait-query-warnings_wrapper').hide();
     $('#ldtrait-initial-message').show();
-
+    $('#ldtrait-continue').attr("style","display:none")
+    $('#ldtrait-cancel').attr("style","display:none")
     //Update href on
     //Set file links
     $("#ldtrait-variants-annotated-link").attr('href', 'tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
@@ -2541,13 +2542,16 @@ function updateLDtrait() {
             $('#'+id+"-loading").hide();
             initTrait(data, r2_d);
         }
-        if(data.warning.includes("timeout")){
-            $('#' + id + '-results-container').hide();
-            $('#' + id + '-links-container').hide();
-            $('#'+id+"-loading").hide();
-            $('#ldtrait-continue').attr("style","display:block")
-            $('#ldtrait-cancel').attr("style","display:block")
+        if(data.warning != null){
+            if(data.warning.includes("timeout")){
+                $('#' + id + '-results-container').hide();
+                $('#' + id + '-links-container').hide();
+                $('#'+id+"-loading").hide();
+                $('#ldtrait-continue').attr("style","display:block")
+                $('#ldtrait-cancel').attr("style","display:block")
+            }
         }
+        
     });
     ajaxRequest.fail(function(jqXHR, textStatus) {
         displayCommFail(id, jqXHR, textStatus);
@@ -2557,10 +2561,12 @@ function updateLDtrait() {
     });
 
     hideLoadingIcon(ajaxRequest, id);
+    document.getElementById("ldtrait-continue").value = "Continue";
 }
 
 function ldtraitContinue() {
-  document.getElementById("ldtrait-continue").innerHTML = "False";
+  document.getElementById("ldtrait-continue").value = "False";
+  //console.log("after click continue:"+document.getElementById("ldtrait-continue").value)
   updateLDtrait()
   $('#ldtrait-results-container').hide();
   $('#ldtrait-links-container').hide();
@@ -2569,6 +2575,16 @@ function ldtraitContinue() {
   $('#ldtrait-cancel').attr("style","display:none")
   $('#ldtrait-message-warning').hide();
   $('#ldtrait-loading').show();
+}
+
+function ldtraitCancel() {
+  document.getElementById("ldtrait-continue").value = "Continue";
+  $('#ldtrait-results-container').hide();
+  $('#ldtrait-links-container').hide();
+  $('#ldtrait-loading').hide();
+  $('#ldtrait-continue').attr("style","display:none")
+  $('#ldtrait-cancel').attr("style","display:none")
+  $('#ldtrait-message-warning').hide();
 }
 
 function updateSNPclip() {
