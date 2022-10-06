@@ -558,7 +558,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         start_x = x[0] - buffer+spacing/2
         ycount = 0
         total_y=len(y)
-        num_font = total_y if total_y < 50 else int(total_y/3)
+        num_font = 2*total_y if total_y < 50 else int(total_y/3)
         for y_y in y:
             y_text.append(total_y - y_y-ycount)
             x_text.append(start_x+spacing*ycount)
