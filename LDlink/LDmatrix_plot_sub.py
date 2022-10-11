@@ -389,13 +389,20 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     start_x = x[0] - buffer+spacing/2
     ycount = 0
     total_y=len(y)
-    num_font = 2*total_y if total_y < 50 else int(total_y/3)
+    font_divider = 0
+    if total_y < 20:
+        font_divider= total_y
+    elif total_y>=20 and total_y < 50:
+        font_divider = total_y/2
+    else:
+        font_divider = total_y/3
+    #print("#####",total_y,num_font)
     for y_y in y:
         y_text.append(total_y - y_y-ycount)
         x_text.append(start_x+spacing*ycount)
         ycount += 1        
-    text_font = str(int(20*10/num_font))+'pt'
-    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey",text_font_style="bold")
+    text_font = str(int(20*10/font_divider))+'pt'
+    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
 
     sup_2 = "\u00B2"
 
