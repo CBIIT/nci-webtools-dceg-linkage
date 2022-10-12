@@ -566,7 +566,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         else:
             font_divider = total_y/3
         #num_font = total_y if total_y < 40 else int(total_y/3)
-        print("####", total_y, font_divider)
+        #print("####", total_y, font_divider)
         for y_y in y:
             y_text.append(total_y - y_y-ycount)
             x_text.append(start_x+spacing*ycount)
