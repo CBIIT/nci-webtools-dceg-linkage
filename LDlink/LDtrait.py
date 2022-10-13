@@ -297,8 +297,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
                 
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
     print("length:",len(ldPairsUnique))
-    numSplit = math.ceil(len(ldPairsUnique)/4000)
-    if len(ldPairsUnique) > 4000 and ifContinue and web:
+    limitpairs = 5500
+    numSplit = math.ceil(len(ldPairsUnique)/limitpairs)
+    if len(ldPairsUnique) > limitpairs and ifContinue and web:
         #str(numSplit)
         output["warning"] = 'Too many pairs found within window for input list and might cause timeout of the server.'\
             ' Please click "Continue" if you want the calculation process and if server is finally timeout,'\
