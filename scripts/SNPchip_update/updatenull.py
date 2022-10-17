@@ -6,7 +6,7 @@
 #db = client['LDLink']
 #collections = db['snp_col']
 
-#clientremote = MongoClient('mongodb://ldlink_app:Biodev1!@ncias-q2882-c.nci.nih.gov/LDLink', 27017)
+#
 #print(clientremote)
 #dbremote = clientremote['LDLink']
 #dbsnp = dbremote['dbsnp']
@@ -48,7 +48,7 @@ print(client)
 db = client['LDLink']
 collections = db['snp_col']
 
-clientremote = MongoClient('mongodb://ldlink_app:Biodev1!@ncias-q2882-c.nci.nih.gov/LDLink', 27017)
+
 print(clientremote)
 dbremote = clientremote['LDLink']
 dbsnp = dbremote['dbsnp']
