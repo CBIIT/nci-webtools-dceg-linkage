@@ -1,3 +1,45 @@
+#from platform import platform
+#from pymongo import MongoClient
+#import csv
+#client = MongoClient()
+#print(client)
+#db = client['LDLink']
+#collections = db['snp_col']
+
+#clientremote = MongoClient('mongodb://ldlink_app:Biodev1!@ncias-q2882-c.nci.nih.gov/LDLink', 27017)
+#print(clientremote)
+#dbremote = clientremote['LDLink']
+#dbsnp = dbremote['dbsnp']
+#print(db.list_collection_names())
+#print(collections)
+#i = 0
+#results = collections.find({"position_grch38":{"$type":"string"}})
+#results = collections.find({"position_grch38":None})
+#test = dbsnp.find_one({"chromosome":"16","position_grch37":"28614993"})
+#print("find")
+#for res in results:
+    #pos = str(res["position_grch37"])
+    #chr = str(res["chromosome_grch37"])
+    #snp = dbsnp.find_one({"chromosome":chr,"position_grch37":pos})
+    #print(chr,pos)
+    #if snp != None:
+        #print(snp["id"])
+    #    collections.update_one({'_id':res["_id"]},{"$set":{"position_grch38":int(snp["position_grch38"])}})
+    #    i += 1
+    #    if i%100 ==0:
+    #       print("updating:",i)
+#    if res["position_grch38"] != None:
+#        collections.update_one({'_id':res["_id"]},{"$set":{"position_grch38":int(res["position_grch38"])}})
+#        i += 1
+#        if i%100 ==0:
+#          print("updating:",i)
+#    elif res["position_grch38"] == None:
+#         collections.update_one({'_id':res["_id"]},{"$set":{"position_grch38":"NA"}})
+    
+#print("updated null 38:",i)
+
+
+
 from platform import platform
 from pymongo import MongoClient
 import csv
@@ -5,7 +47,12 @@ client = MongoClient()
 print(client)
 db = client['LDLink']
 collections = db['snp_col']
-dbsnp = db['dbsnp']
+
+clientremote = MongoClient('mongodb://ldlink_app:Biodev1!@ncias-q2882-c.nci.nih.gov/LDLink', 27017)
+print(clientremote)
+dbremote = clientremote['LDLink']
+dbsnp = dbremote['dbsnp']
+
 #print(db.list_collection_names())
 #print(collections)
 i = 0
@@ -80,3 +127,4 @@ with open('/users/yaox5/workspace/analysistools/rawData/GSAv3Confluence_20032937
         if (line_count % 100000 == 0):
             print(line_count)
     print(f'GSAv3Confluence_20032937X371431_A2:Processed {line_count} lines. update:{updatecount} new:{newcount} 38:{count38} 37:{count37} found37:{found37} found38:{found38} dup:{countdup}')
+    
