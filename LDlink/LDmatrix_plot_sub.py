@@ -12,7 +12,7 @@ from bson import json_util, ObjectId
 import subprocess
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population,get_1000g_data,parse_vcf
-from LDcommon import set_alleles,get_vcf_snp_params
+from LDcommon import set_alleles,get_vcf_snp_params,get_forgeDB
 from LDutilites import get_config 
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
@@ -380,6 +380,29 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     matrix_plot.axis.major_label_text_font_style = "normal"
     matrix_plot.xaxis.major_label_standoff = 0
+
+    rs_forge_score = []
+    for rs_forge in rsnum_lst:
+        rs_forge_score.append(get_forgeDB(db,rs_forge))
+    y_text = []
+    x_text = []
+    start_x = x[0] - buffer+spacing/2
+    ycount = 0
+    total_y=len(y)
+    font_divider = 0
+    if total_y < 20:
+        font_divider= total_y
+    elif total_y>=20 and total_y < 50:
+        font_divider = total_y/2
+    else:
+        font_divider = total_y/3
+    #print("#####",total_y,num_font)
+    for y_y in y:
+        y_text.append(total_y - y_y-ycount)
+        x_text.append(start_x+spacing*ycount)
+        ycount += 1        
+    text_font = str(int(20*10/font_divider))+'pt'
+    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
 
     sup_2 = "\u00B2"
 

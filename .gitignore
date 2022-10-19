@@ -29,3 +29,4 @@ scripts/LDexpress_update/tmp/
 scripts/dbSNP_mongo_update/test/
 scripts/liftOver/test/
 scripts/SNPchip_update/test
+scripts/SNPchip_update/updatenull

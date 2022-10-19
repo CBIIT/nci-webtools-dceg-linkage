@@ -14,7 +14,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome
+from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome,get_forgeDB
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
     # Set data directories using config.yml
@@ -399,8 +399,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             alleles_snp_plot.append(xA[i])
             
 
-        print("early x", x)
-
+        #print("early x", x)
+        #print("snp", rsnum_lst)
+        rs_forge_score = []
+        for rs_forge in rsnum_lst:
+            rs_forge_score.append(get_forgeDB(db,rs_forge))
         # Generate error if less than two SNPs
         if len(x) < 2:
             output["error"] = "Less than two variants to plot. " + str(output["warning"] if "warning" in output else "")
@@ -412,6 +415,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         buffer = (x[-1] - x[0]) * 0.025
         xr = Range1d(start=x[0] - buffer, end=x[-1] + buffer)
         yr = Range1d(start=-0.03, end=1.03)
+        
         y2_ll = [-0.03] * len(x)
         y2_ul = [1.03] * len(x)
 
@@ -506,7 +510,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
         # source = ColumnDataSource(new_data)
         source = ColumnDataSource(data)
-
         threshold = 70
         if len(snps) < threshold:
             matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
@@ -549,7 +552,28 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
         matrix_plot.axis.major_label_text_font_style = "normal"
         matrix_plot.xaxis.major_label_standoff = 0
-
+        
+        y_text = []
+        x_text = []
+        start_x = x[0] - buffer+spacing/2
+        ycount = 0
+        total_y=len(y)
+        font_divider = 0
+        if total_y < 20:
+            font_divider= total_y
+        elif total_y>=20 and total_y < 50:
+            font_divider = total_y/2
+        else:
+            font_divider = total_y/3
+        #num_font = total_y if total_y < 40 else int(total_y/3)
+        #print("####", total_y, font_divider)
+        for y_y in y:
+            y_text.append(total_y - y_y-ycount)
+            x_text.append(start_x+spacing*ycount)
+            ycount += 1        
+        text_font = str(int(20*10/font_divider))+'pt'
+        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
+        
         sup_2 = "\u00B2"
 
         hover = matrix_plot.select(dict(type=HoverTool))
@@ -618,7 +642,6 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         ])
 
         rug.toolbar_location = None
-
         if collapseTranscript == "false":
             # Gene Plot (All Transcripts)
             genes_file = tmp_dir + "genes_" + request + ".json"
@@ -688,7 +711,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
                         width = (int(e_end[i]) - int(e_start[i])) / 1000000.0
                         x_coord = int(e_start[i]) / 1000000.0 + (width / 2)
-
+                        
                         exons_plot_x.append(x_coord)
                         exons_plot_y.append(y_coord)
                         exons_plot_w.append(width)
@@ -955,3 +978,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
