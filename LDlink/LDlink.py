@@ -1381,14 +1381,15 @@ def ldtrait():
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
-    print(data['ifContinue'])
-    ifContinue = data['ifContinue'] 
-    ifContinue = bool(ifContinue!="False")
+   
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
+            if data['ifContinue']:
+                ifContinue = data['ifContinue'] 
+                ifContinue = bool(ifContinue!="False")
             reference = str(data['reference'])
             app.logger.debug('ldtrait params ' + json.dumps({
                 'snps': snps,
