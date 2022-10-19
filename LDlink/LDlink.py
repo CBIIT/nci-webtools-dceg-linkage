@@ -1381,11 +1381,15 @@ def ldtrait():
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
+   
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
+            if data['ifContinue']:
+                ifContinue = data['ifContinue'] 
+                ifContinue = bool(ifContinue!="False")
             reference = str(data['reference'])
             app.logger.debug('ldtrait params ' + json.dumps({
                 'snps': snps,
@@ -1396,7 +1400,8 @@ def ldtrait():
                 'window': window,
                 'genome_build': genome_build,
                 'web': web,
-                'reference': reference
+                'reference': reference,
+                'continue':ifContinue
             }, indent=4, sort_keys=True))
             snpfile = str(tmp_dir + 'snps' + reference + '.txt')
             snplist = snps.splitlines()
@@ -1408,7 +1413,7 @@ def ldtrait():
             try:
                 trait = {}
                 # snplst, pop, request, web, r2_d, threshold
-                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window))
+                (query_snps, thinned_snps, details) = calculate_trait(snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window),ifContinue)
                 trait["query_snps"] = query_snps
                 trait["thinned_snps"] = thinned_snps
                 trait["details"] = details
