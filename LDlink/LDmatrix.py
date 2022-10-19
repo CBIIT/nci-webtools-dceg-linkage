@@ -560,11 +560,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         total_y=len(y)
         font_divider = 0
         if total_y < 20:
-            font_divider= total_y
+            font_divider= 1.25*total_y
         elif total_y>=20 and total_y < 50:
-            font_divider = total_y/2
+            font_divider = 0.7*total_y
         else:
-            font_divider = total_y/3
+            font_divider = 0.5*total_y
         #num_font = total_y if total_y < 40 else int(total_y/3)
         #print("####", total_y, font_divider)
         for y_y in y:
@@ -572,7 +572,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             x_text.append(start_x+spacing*ycount)
             ycount += 1        
         text_font = str(int(20*10/font_divider))+'pt'
-        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
+        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="white")
         
         sup_2 = "\u00B2"
 

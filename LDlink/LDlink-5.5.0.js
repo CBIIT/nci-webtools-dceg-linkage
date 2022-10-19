@@ -3541,8 +3541,9 @@ function updateLDmatrix() {
     var snps = DOMPurify.sanitize($('#' + id + '-file-snp-numbers').val());
     var population = getPopulationCodes(id+'-population-codes');
     var r2_d;
-    $("#ldmatrix-legend-r2").attr('src', 'LDmatrix_legend_R2.png');
-    $("#ldmatrix-legend-d").attr('src', 'LDmatrix_legend_Dprime_Blue.png');
+    $("#ldmatrix-legend-r2").attr('src', 'LDmatrix_legend.png');
+    //$("#ldmatrix-legend-r2").attr('src', 'LDmatrix_legend_R2.png');
+    //$("#ldmatrix-legend-d").attr('src', 'LDmatrix_legend_Dprime_Blue.png');
 
     if($('#matrix_color_r2').hasClass('active')) {
         r2_d='r2'; // i.e. R2

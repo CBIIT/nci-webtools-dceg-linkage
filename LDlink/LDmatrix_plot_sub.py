@@ -391,11 +391,11 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     total_y=len(y)
     font_divider = 0
     if total_y < 20:
-        font_divider= total_y
+        font_divider= 1.25*total_y
     elif total_y>=20 and total_y < 50:
-        font_divider = total_y/2
+        font_divider = 0.7*total_y
     else:
-        font_divider = total_y/3
+        font_divider = 0.5*total_y
     #print("#####",total_y,num_font)
     for y_y in y:
         y_text.append(total_y - y_y-ycount)
