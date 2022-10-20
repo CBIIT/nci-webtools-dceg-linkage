@@ -906,7 +906,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         # Generate high quality images only if accessed via web instance
         
         # Open thread for high quality image exports
-        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript
+        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript + " "+ annotate
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
         ###########################

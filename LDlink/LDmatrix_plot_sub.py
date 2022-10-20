@@ -15,7 +15,7 @@ from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles,get_vcf_snp_params,get_forgeDB
 from LDutilites import get_config 
 # LDmatrix subprocess to export bokeh to high quality images in the background
-def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
+def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
 
     # Set data directories using config.yml
     param_list = get_config()
@@ -382,8 +382,11 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     matrix_plot.xaxis.major_label_standoff = 0
 
     rs_forge_score = []
-    for rs_forge in rsnum_lst:
-        rs_forge_score.append(get_forgeDB(db,rs_forge))
+    if annotate == "forge":
+        for rs_forge in rsnum_lst:
+            rs_forge_score.append(get_forgeDB(db,rs_forge))
+    else:
+        rs_forge_score = []
     y_text = []
     x_text = []
     start_x = x[0] - buffer+spacing/2
@@ -791,7 +794,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     return None
 
 def main():
-
     # Import LDmatrix options
     if len(sys.argv) == 5:
         snplst = sys.argv[1]
@@ -800,18 +802,19 @@ def main():
         genome_build = sys.argv[4]
         r2_d = "r2"
         collapseTranscript = True
-    elif len(sys.argv) == 7:
+    elif len(sys.argv) == 8:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         genome_build = sys.argv[4]
         r2_d = sys.argv[5]
         collapseTranscript = sys.argv[6]
+        annotate = sys.argv[7]
     else:
         sys.exit()
 
     # Run function
-    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript)
+    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript,annotate)
 
 
 if __name__ == "__main__":
