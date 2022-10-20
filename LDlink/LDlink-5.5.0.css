@@ -1183,26 +1183,6 @@ textarea:invalid,
 #ldassoc-flag-switch {
 	text-align: left;
 }
-#ldassoc-flag-switches {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: horizontal;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: row;
-	flex-direction: row;
-	padding-bottom: 5px;
-}
-#ldproxy-flag-switches {
-	display: -webkit-box;
-	display: -ms-flexbox;
-	display: flex;
-	-webkit-box-orient: horizontal;
-	-webkit-box-direction: normal;
-	-ms-flex-direction: row;
-	flex-direction: row;
-	padding-bottom: 5px;
-}
 .flag-switches {
 	display: -webkit-box;
 	display: -ms-flexbox;

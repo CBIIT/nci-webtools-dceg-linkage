@@ -988,6 +988,7 @@ def ldmatrix():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
+            annotate = request.args.get('annotate',True)
             # print('request: ' + str(reference))
             app.logger.debug('ldmatrix params ' + json.dumps({
                 'snps': snps,
@@ -997,13 +998,14 @@ def ldmatrix():
                 'genome_build': genome_build,
                 'collapseTranscript': collapseTranscript,
                 'web': web,
-                'reference': reference
+                'reference': reference,
+                'annotate' : annotate
             }, indent=4, sort_keys=True))
             snplst = tmp_dir + 'snps' + str(reference) + '.txt'
             with open(snplst, 'w') as f:
                 f.write(snps.lower())
             try:
-                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript)
+                out_script, out_div = calculate_matrix(snplst, pop, reference, web, str(request.method), genome_build, r2_d, collapseTranscript,annotate)
             except Exception as e:
                 exc_obj = e
                 app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -1282,7 +1284,6 @@ def ldproxy():
     genome_build = request.args.get('genome_build', 'grch37')
     collapseTranscript = request.args.get('collapseTranscript', True)
     #annotateText = request.args.get('annotate', False)
-    annotate = request.args.get('annotate', False)
     web = False
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
@@ -1290,6 +1291,7 @@ def ldproxy():
         if request.user_agent.browser is not None:
             web = True
             reference = request.args.get('reference', False)
+            annotate = request.args.get('annotate', False)
             # print('request: ' + str(reference))
             app.logger.debug('ldproxy params ' + json.dumps({
                 'var': var,
@@ -1325,13 +1327,12 @@ def ldproxy():
             'collapseTranscript': collapseTranscript,
             'genome_build': genome_build,
             'web': web,
-            'reference': reference,
-            'annotate': annotate
+            'reference': reference
         }, indent=4, sort_keys=True))
         try:
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
-            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript,annotate)
+            out_script, out_div = calculate_proxy(var, pop, reference, web, genome_build, r2_d, int(window), collapseTranscript)
             with open(tmp_dir + "proxy" + reference + ".json") as f:
                 json_dict = json.load(f)
             if "error" in json_dict:

@@ -402,7 +402,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
         x_text.append(start_x+spacing*ycount)
         ycount += 1        
     text_font = str(int(20*10/font_divider))+'pt'
-    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
+    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="white")
 
     sup_2 = "\u00B2"
 

@@ -16,7 +16,7 @@ from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome,get_forgeDB
 # Create LDmatrix function
-def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
+def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
     # Set data directories using config.yml
     param_list = get_config()
     dbsnp_version = param_list['dbsnp_version']
@@ -402,8 +402,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         #print("early x", x)
         #print("snp", rsnum_lst)
         rs_forge_score = []
-        for rs_forge in rsnum_lst:
-            rs_forge_score.append(get_forgeDB(db,rs_forge))
+        if annotate == "forge":
+            for rs_forge in rsnum_lst:
+                rs_forge_score.append(get_forgeDB(db,rs_forge))
+        else:
+            rs_forge_score = []
         # Generate error if less than two SNPs
         if len(x) < 2:
             output["error"] = "Less than two variants to plot. " + str(output["warning"] if "warning" in output else "")

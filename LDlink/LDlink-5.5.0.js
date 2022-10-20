@@ -3559,7 +3559,8 @@ function updateLDmatrix() {
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
         genome_build: genomeBuild,
         r2_d : r2_d,
-        collapseTranscript: $("#matrix_collapse_transcripts").hasClass('active')
+        collapseTranscript: $("#matrix_collapse_transcripts").hasClass('active'),
+        annotate: document.querySelector('input[name="ldmatrix_options"]:checked').value
     };
     //console.log('ldmatrixInputs');
     //console.dir(ldmatrixInputs);
