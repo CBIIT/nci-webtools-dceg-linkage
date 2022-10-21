@@ -4657,8 +4657,8 @@ function displayCommFail(id, jqXHR, textStatus) {
     // message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
    var message = "<p>Internal server error. Please contact LDlink admin.</p>"
     if (jqXHR.status === 504){
-        message = "<p>Too many pairs found within window for input list. The computation time is over 15 minutes. Server has no response.</p>"
-        message += "<p>Please split the list and retry each sub list"
+        message = "<p>The computation time is over 15 minutes. Server has no response.</p>"
+        message += "<p>Please split the list and try each sub list"
     }
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
