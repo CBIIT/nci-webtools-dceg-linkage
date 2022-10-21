@@ -16,7 +16,7 @@ from LDcommon import set_alleles
 from LDutilites import get_config
 from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome,get_forgeDB
 # Create LDmatrix function
-def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True):
+def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
     # Set data directories using config.yml
     param_list = get_config()
     dbsnp_version = param_list['dbsnp_version']
@@ -402,8 +402,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         #print("early x", x)
         #print("snp", rsnum_lst)
         rs_forge_score = []
-        for rs_forge in rsnum_lst:
-            rs_forge_score.append(get_forgeDB(db,rs_forge))
+        if annotate == "forge":
+            for rs_forge in rsnum_lst:
+                rs_forge_score.append(get_forgeDB(db,rs_forge))
+        else:
+            rs_forge_score = []
         # Generate error if less than two SNPs
         if len(x) < 2:
             output["error"] = "Less than two variants to plot. " + str(output["warning"] if "warning" in output else "")
@@ -560,11 +563,11 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         total_y=len(y)
         font_divider = 0
         if total_y < 20:
-            font_divider= total_y
+            font_divider= 1.25*total_y
         elif total_y>=20 and total_y < 50:
-            font_divider = total_y/2
+            font_divider = 0.7*total_y
         else:
-            font_divider = total_y/3
+            font_divider = 0.5*total_y
         #num_font = total_y if total_y < 40 else int(total_y/3)
         #print("####", total_y, font_divider)
         for y_y in y:
@@ -572,7 +575,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             x_text.append(start_x+spacing*ycount)
             ycount += 1        
         text_font = str(int(20*10/font_divider))+'pt'
-        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
+        matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="white")
         
         sup_2 = "\u00B2"
 
@@ -903,7 +906,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         # Generate high quality images only if accessed via web instance
         
         # Open thread for high quality image exports
-        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript
+        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript + " "+ annotate
         subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
 
         ###########################

@@ -606,7 +606,7 @@
 										</div>
 									</div>
 									<div class="col-sm-2">
-										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group">
+										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
 											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
 												<label title="Select R-squared attribute" class="btn btn-default active" id="assoc-matrix-color-r2">
 													<input type="radio" checked="" autocomplete="off" name="options">R<sup>2</sup>
@@ -618,7 +618,7 @@
 												</label>
 											</div>
 										</div>
-										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group">
+										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
 											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
 												<label title="Collapse transcripts" class="btn btn-default active" id="assoc-transcript">
 													<input type="radio" checked="" autocomplete="off" name="options">Yes
@@ -630,7 +630,7 @@
 												</label>
 											</div>
 										</div>
-										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group">
+										<div id="ldassoc-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
 											<div class="ldassoc-flag-switch" id="ldassoc-flag-switch">
 												<label title="Show ForgeDB annotation" class="btn btn-default active" >
 													<input id="assoc-annotate-forage" type="radio" value="forge" checked="" autocomplete="off" name="ldassoc_options">FORGEdb
@@ -690,7 +690,7 @@
 					<div class="container-fluid" id="ldassoc-results-container">
 						<div id="row-button" class="row overflowy">
 							<div id="ldassoc-export-dropdown"></div>
-							<div class="col-sm-11 col-sm-offset-1">
+							<div class="col-sm-10 col-sm-offset-1">
 								<div id="ldassoc-bokeh-graph"></div>
 								<br />
 								<div>
@@ -1217,6 +1217,9 @@
 									<div id="toggle-label">
 										<a class="help-anchor-link" href="#LDmatrix">Collapse transcripts: </a>
 									</div>
+									<div id="toggle-label">
+										<a class="help-anchor-link" href="#LDmatrix">Annotation: </a>
+									</div>
 								</div>
 								<div class="col-sm-2">
 									<div title="Choose to show all or collapse transcripts" data-toggle="buttons" class="btn-group flag-switches">
@@ -1227,8 +1230,24 @@
 											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
+									<div id="ldmatrix-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
+										<div class="ldassoc-flag-switch" id="ldmatrix-flag-switch">
+											<label title="Show ForgeDB annotation" class="btn btn-default active" id="ldmatrix-annotate-forage">
+												<input type="radio" id="ldmatrix_forgedb" checked="" autocomplete="off" value="forge"
+													name="ldmatrix_options">FORGEdb </label>
+										</div>
+										
+										<div class="ldassoc-flag-switch" id="ldmatrix-flag-switch">
+											<label title="Hide FORGEdb annotation" class="btn btn-default">
+												<input type="radio" id="ldmatrix_none" autocomplete="off" value="no" name="ldmatrix_options">None
+											</label>
+										</div>
+									</div>
 								</div>
 							</div>
+
+
+							
 							<div class="form-group">
 								<!-- COLUMN5 - sm-2 -->
 								<div class="col-sm-1">
@@ -1272,7 +1291,7 @@
 								<div style = "margin:auto">
 									<div style="width:800px;margin:auto;">
 										<img id="ldmatrix-legend-r2" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend">
-										<img id="ldmatrix-legend-d" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend">
+										<!-- <img id="ldmatrix-legend-d" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend"> -->
 									</div>
 								</div>
 							</div>
@@ -1814,14 +1833,14 @@
 											<input type="radio" autocomplete="off" name="options">No
 										</label>
 									</div>
-									<div id="ldproxy-flag-switches" data-toggle="buttons" class="btn-group">
+									<div id="ldproxy-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
 										<div class="ldassoc-flag-switch" id="ldproxy-flag-switch">
 											<label title="Show ForgeDB annotation" class="btn btn-default active" id="proxy-annotate-forage">
 												<input type="radio" id="proxy_forgedb" checked="" autocomplete="off" value="forge" name="ldproxy_options">FORGEdb </label>
 										</div>
 										<div class="ldassoc-flag-switch" id="ldproxy-flag-switch">
 											<label title="Show RegulomeDB annotation" class="btn btn-default " id="proxy-annotate-regulome">
-												<input type="radio" id="proxy_regulomedb" autocomplete="off" value="regulome" name="ldproxy_options">Regulome											</label>
+												<input type="radio" id="proxy_regulomedb" autocomplete="off" value="regulome" name="ldproxy_options">RegulomeDB											</label>
 										</div>
 										<div class="ldassoc-flag-switch" id="ldproxy-flag-switch">
 											<label title="Hide RegulomeDB annotation" class="btn btn-default">
@@ -1879,7 +1898,7 @@
 					<div class="container-fluid" id="ldproxy-results-container">
 						<div id="row-button" class="row overflowy" style="overflow-x: hidden;">
 							<div id="ldproxy-export-dropdown"></div>
-							<div class="col-sm-12" style="left:15px">
+							<div class="col-sm-10" style="left:15px">
 								<div id="ldproxy-bokeh-graph"></div>
 								<br />
 								<div>

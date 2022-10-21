@@ -15,7 +15,7 @@ from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles,get_vcf_snp_params,get_forgeDB
 from LDutilites import get_config 
 # LDmatrix subprocess to export bokeh to high quality images in the background
-def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True):
+def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
 
     # Set data directories using config.yml
     param_list = get_config()
@@ -382,8 +382,11 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     matrix_plot.xaxis.major_label_standoff = 0
 
     rs_forge_score = []
-    for rs_forge in rsnum_lst:
-        rs_forge_score.append(get_forgeDB(db,rs_forge))
+    if annotate == "forge":
+        for rs_forge in rsnum_lst:
+            rs_forge_score.append(get_forgeDB(db,rs_forge))
+    else:
+        rs_forge_score = []
     y_text = []
     x_text = []
     start_x = x[0] - buffer+spacing/2
@@ -391,18 +394,18 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     total_y=len(y)
     font_divider = 0
     if total_y < 20:
-        font_divider= total_y
+        font_divider= 1.25*total_y
     elif total_y>=20 and total_y < 50:
-        font_divider = total_y/2
+        font_divider = 0.7*total_y
     else:
-        font_divider = total_y/3
+        font_divider = 0.5*total_y
     #print("#####",total_y,num_font)
     for y_y in y:
         y_text.append(total_y - y_y-ycount)
         x_text.append(start_x+spacing*ycount)
         ycount += 1        
     text_font = str(int(20*10/font_divider))+'pt'
-    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="grey")
+    matrix_plot.text(x_text, y_text, text=rs_forge_score, alpha=1, text_font_size=text_font, text_baseline="middle", text_align="center", angle=0,text_color="white")
 
     sup_2 = "\u00B2"
 
@@ -791,7 +794,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     return None
 
 def main():
-
     # Import LDmatrix options
     if len(sys.argv) == 5:
         snplst = sys.argv[1]
@@ -800,18 +802,19 @@ def main():
         genome_build = sys.argv[4]
         r2_d = "r2"
         collapseTranscript = True
-    elif len(sys.argv) == 7:
+    elif len(sys.argv) == 8:
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         genome_build = sys.argv[4]
         r2_d = sys.argv[5]
         collapseTranscript = sys.argv[6]
+        annotate = sys.argv[7]
     else:
         sys.exit()
 
     # Run function
-    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript)
+    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript,annotate)
 
 
 if __name__ == "__main__":
