@@ -198,7 +198,7 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
     output["query_snp"] = query_snp
 
     temp = [query_snp["RS"], query_snp["Coord"], query_snp["Alleles"], query_snp["MAF"], str(query_snp["Dist"]), str(
-            query_snp["Dprime"]), str(query_snp["R2"]), query_snp["Corr_Alleles"], query_snp["ForgeDB"],query_snp["RegulomeDB"], query_snp["Function"]]
+            query_snp["Dprime"]), str(query_snp["R2"]), query_snp["Corr_Alleles"], query_snp["ForgeDB"] if len(query_snp["ForgeDB"]) >0 else "NA",query_snp["RegulomeDB"], query_snp["Function"]]
     print("\t".join(temp), file=outfile)
 
     chr, pos = query_snp["Coord"].split(':')
@@ -253,9 +253,9 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             row.append("HaploReg link")
             row.append(proxy_info["Function"])
             rows.append(row)
-
+            
             temp = [proxy_info["RS"], proxy_info["Coord"], proxy_info["Alleles"], proxy_info["MAF"], str(proxy_info["Dist"]), str(
-                    proxy_info["Dprime"]), str(proxy_info["R2"]), proxy_info["Corr_Alleles"], proxy_info["ForgeDB"],proxy_info["RegulomeDB"], proxy_info["Function"]]
+                    proxy_info["Dprime"]), str(proxy_info["R2"]), proxy_info["Corr_Alleles"], proxy_info["ForgeDB"] if len(proxy_info["ForgeDB"]) >0 else "NA",proxy_info["RegulomeDB"], proxy_info["Function"]]
             print("\t".join(temp), file=outfile)
 
             chr, pos = proxy_info["Coord"].split(':')

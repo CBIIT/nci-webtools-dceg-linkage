@@ -555,7 +555,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	row.append(query_snp["Function"])
 	rows.append(row)
 
-	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["FORGEdb"],query_snp["RegulomeDB"],query_snp["Function"]]
+	temp=[query_snp["RS"],query_snp["Coord"],query_snp["Alleles"],query_snp["MAF"],str(query_snp["Dist"]),str(query_snp["Dprime"]),str(query_snp["R2"]),query_snp["Corr_Alleles"],str(query_snp["P-value"]),query_snp["FORGEdb"] if len(query_snp["FORGEdb"])>0 else "NA",query_snp["RegulomeDB"],query_snp["Function"]]
 	print("\t".join(temp), file=outfile)
 
 	temp2=[chr,pos,query_snp["RS"],-log10(query_snp["P-value"])]
@@ -605,7 +605,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			row.append(proxy_info["Function"])
 			rows.append(row)
 
-			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["FORGEdb"],proxy_info["RegulomeDB"],proxy_info["Function"]]
+			temp=[proxy_info["RS"],proxy_info["Coord"],proxy_info["Alleles"],proxy_info["MAF"],str(proxy_info["Dist"]),str(proxy_info["Dprime"]),str(proxy_info["R2"]),proxy_info["Corr_Alleles"],str(proxy_info["P-value"]),proxy_info["FORGEdb"] if len(proxy_info["FORGEdb"]) > 0 else "NA",proxy_info["RegulomeDB"],proxy_info["Function"]]
 			print("\t".join(temp), file=outfile)
 
 			chr,pos=proxy_info["Coord"].split(':')
