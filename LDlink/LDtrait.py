@@ -301,10 +301,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     numSplit = math.ceil(len(ldPairsUnique)/limitpairs)
     if len(ldPairsUnique) > limitpairs and ifContinue and web:
         #str(numSplit)
-        output["warning"] = 'Too many pairs found within window for input list and might cause timeout of the server.'\
-            ' Please click "Cancel", split the input list as small lists and retry each sub list. ' + \
-            ' If you still want to calculate current list, click "Continue" and if error occurs,'\
-            ' please split the input list to retry each sub list' + \
+        output["warning"] = 'Too many snp pairs found within the specified base pair window which might cause server timeout.'+\
+            ' You might want to split the input in multiple runs to avoid timeout. ' +\
+            ' If you still want to proceed with the current list, click "Continue".' + \
                               str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)
