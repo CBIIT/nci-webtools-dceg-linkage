@@ -1623,7 +1623,7 @@ function ldproxy_position_link(data, type, row) {
     // Cluster Report:
     //
     var server = 'https://genome.ucsc.edu/cgi-bin/hgTracks';
-    // http://genome.ucsc.edu/cgi-bin/hgTracks?
+    // https://genome.ucsc.edu/cgi-bin/hgTracks?
     // position=chr4:103554686-104554686
     // &snp141=pack
     // &hgFind.matches=rs2720460
