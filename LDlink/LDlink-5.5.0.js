@@ -80,14 +80,14 @@ $(document).ready(function() {
         let lastNews = "";
         let versionNews=newsHTMLList[0].replace("<br>","");
         let numFound = 0;
-        for(let i = 0; i < 2; i++){
+        for(let i = 0; i < 1; i++){
             if(versionNews.indexOf("</li>") != -1){
                 lastNews += versionNews.substring(0, versionNews.indexOf("</li>") + 5);
                 versionNews = versionNews.substring(versionNews.indexOf("</li>") + 6);
                 numFound += 1;
             }
             else{
-                i = 2;
+                i = 1;
             }
         }
         if(versionNews.indexOf("</li>") != -1){
