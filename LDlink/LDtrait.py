@@ -296,7 +296,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
             queryWarnings.append([snp_coord[0], "chr" + str(snp_coord[1]) + ":" + str(snp_coord[2]), "No variants found within window, variant removed."])
                 
     ldPairsUnique = [list(x) for x in set(tuple(x) for x in ldPairs)]
-    #print("length:",len(ldPairsUnique),len(ldPairs))
+    print("length:",len(ldPairsUnique),len(ldPairs))
     limitpairs = 5500
     numSplit = math.ceil(len(ldPairsUnique)/limitpairs)
     if len(ldPairsUnique) > limitpairs and ifContinue and web:

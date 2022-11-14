@@ -4658,7 +4658,7 @@ function displayCommFail(id, jqXHR, textStatus) {
    var message = "<p>Internal server error. Please contact LDlink admin.</p>"
     if (jqXHR.status === 504){
         message = "<p>The computation time is over 15 minutes. Server has no response.</p>"
-        message += "<p>Please split the list and try each sub list"
+        message += "<p>Please split the input in multiple runs to avoid timeout"
     }
     $('#' + id + '-message').show();
     $('#' + id + '-message-content').empty().append(message);
