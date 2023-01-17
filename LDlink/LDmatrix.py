@@ -39,7 +39,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
     if web or request_method == "GET":
         snp_limit = 300
     else:
-        snp_limit = 1000
+        snp_limit = 3000
     snps = validsnp(snplst,genome_build,snp_limit)
     #if return value is string, then it is error message and need to return the message
     if isinstance(snps, str):
