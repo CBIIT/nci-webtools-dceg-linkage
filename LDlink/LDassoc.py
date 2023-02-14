@@ -11,10 +11,10 @@ import time
 import boto3
 import botocore
 from multiprocessing.dummy import Pool
-import numpy as np
+#import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output,get_1000g_data_single
-from LDutilites import get_config
+from LDutilites import get_config,array_split
 
 # Create LDproxy function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
@@ -467,7 +467,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# print("####################")
 
 	# block=len(assoc_coords) // num_subprocesses
-	assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
+	# assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
+	assoc_coords_subset_chunks = array_split(assoc_coords, num_subprocesses)
 	# print(assoc_coords_subset_chunks)
 
 	commands=[]

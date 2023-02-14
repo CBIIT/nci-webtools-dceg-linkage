@@ -1,6 +1,6 @@
 #!flask/bin/python3
 import pandas as pd
-import numpy as np
+#import numpy as np
 import sys
 import getopt
 import cgi

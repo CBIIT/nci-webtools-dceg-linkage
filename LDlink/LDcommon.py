@@ -2,7 +2,6 @@ import boto3
 import botocore
 import csv
 import os
-from numpy import False_
 import yaml
 from pymongo import MongoClient
 import json

@@ -13,7 +13,7 @@ import boto3
 import botocore
 from multiprocessing.dummy import Pool
 from math import log10
-import numpy as np
+#import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c,get_output
 from LDutilites import get_config, array_split
 

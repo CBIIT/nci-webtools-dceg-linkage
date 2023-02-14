@@ -13,11 +13,11 @@ from bson import json_util, ObjectId
 import subprocess
 from multiprocessing.dummy import Pool
 import sys
-import numpy as np	
+#import numpy as np	
 from timeit import default_timer as timer
 from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
 from LDcommon import validsnp, replace_coords_rsid_list,get_coords,get_population,get_output
-from LDutilites import get_config
+from LDutilites import get_config,array_split
 
 # Set data directories using config.yml	
 param_list = get_config()
@@ -316,7 +316,8 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     # print("##### BEGIN MULTIPROCESSING LD CALCULATIONS #####")	
     # start = timer()	
     # leverage multiprocessing to calculate all LDpairs	
-    splitLDPairsUnique = np.array_split(ldPairsUnique, num_subprocesses)
+    # splitLDPairsUnique = np.array_split(ldPairsUnique, num_subprocesses)
+    splitLDPairsUnique = array_split(ldPairsUnique, num_subprocesses)
 
     # write ld pairs to tmp files to be picked up by ld calculation subprocesses
     for subprocess_id in range(num_subprocesses):
