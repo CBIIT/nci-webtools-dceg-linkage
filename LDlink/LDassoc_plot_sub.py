@@ -15,7 +15,7 @@ from multiprocessing.dummy import Pool
 from math import log10
 import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c,get_output
-from LDutilites import get_config
+from LDutilites import get_config, array_split
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
@@ -256,7 +256,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     # else:
     #     threads=4
 
-    assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
+    # assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
+    assoc_coords_subset_chunks = array_split(assoc_coords, num_subprocesses)
 
     # block=len(assoc_coords) // num_subprocesses
     commands=[]
