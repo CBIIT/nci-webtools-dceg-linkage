@@ -322,7 +322,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     # write ld pairs to tmp files to be picked up by ld calculation subprocesses
     for subprocess_id in range(num_subprocesses):
         with open(tmp_dir + 'trait_ld_' + str(subprocess_id) + '_' + str(request) + '.txt', 'w') as snpsPairFile:
-            for snps_pair in splitLDPairsUnique[subprocess_id].tolist():
+            for snps_pair in splitLDPairsUnique[subprocess_id]:
                 snpsPairFile.write("\t".join(snps_pair) + "\n")
 
     ld_subprocess_commands = []

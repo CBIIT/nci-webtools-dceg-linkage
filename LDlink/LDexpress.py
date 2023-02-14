@@ -182,7 +182,7 @@ def calculate_express(snplst, pop, request, web, tissues, r2_d, genome_build, r2
             windowLDSubsetsChunks = array_split(windowLDSubsetsFlat, num_subprocesses)
             for subprocess_id in range(num_subprocesses):
                 with open(tmp_dir + 'express_ld_' + str(subprocess_id) + '_' + str(request) + '.txt', 'w') as snpsLDFile:
-                    for snp_ld_data in windowLDSubsetsChunks[subprocess_id].tolist():
+                    for snp_ld_data in windowLDSubsetsChunks[subprocess_id]:
                         snpsLDFile.write("\t".join(snp_ld_data) + "\n")
             tissues_subprocess_commands = []
             for subprocess_id in range(num_subprocesses):
