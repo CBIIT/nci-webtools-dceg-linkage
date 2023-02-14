@@ -49,3 +49,7 @@ def get_config_admin(path=config_path):
     param_list['log_level'] = config['log']['log_level']
 
     return (param_list)
+
+def array_split(arr, n):
+    size, rem = divmod(len(arr), n)
+    return [arr[i * size + min(i, rem):(i + 1) * size + min(i + 1, rem)] for i in range(n)]
