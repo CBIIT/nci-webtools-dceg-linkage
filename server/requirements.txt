@@ -1,5 +1,6 @@
 bokeh==0.13.0
 boto3
+dotenv
 Flask
 mod_wsgi
 pymongo
