@@ -1,0 +1,27 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: docker/backend.dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/opt/ldlink/data
+    env_file:
+      - server/.env
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/frontend.dockerfile
+    ports:
+      - "9080:80"
+    environment:
+      API_HOST: "http://backend:8000"
+    
+  database:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./database:/data/db
