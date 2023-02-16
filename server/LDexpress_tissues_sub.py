@@ -1,14 +1,9 @@
-
-import yaml
-import csv
 import json
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import subprocess
 import sys
 import requests
 from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from LDutilites import get_config
+
 web = sys.argv[1]
 request = sys.argv[2]
 subprocess_id = sys.argv[3]

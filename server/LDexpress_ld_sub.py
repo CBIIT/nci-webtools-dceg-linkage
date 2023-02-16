@@ -1,15 +1,9 @@
-
-import yaml
 import csv
-import json
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import boto3
-import botocore
 import subprocess
 import sys
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly,set_alleles,LD_calcs,get_dbsnp_coord,get_geno
 from LDutilites import get_config
+
 web = sys.argv[1]
 snp = sys.argv[2]
 chromosome = sys.argv[3]

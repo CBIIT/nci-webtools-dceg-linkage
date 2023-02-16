@@ -1,11 +1,7 @@
 #!/usr/bin/env python
-import yaml
 import json
-import math
-import os
 import sqlite3
 import subprocess
-import sys
 # import time
 # import pandas
 

@@ -1,21 +1,13 @@
 #!/usr/bin/env python3
-import yaml
 import json
-import math
-import operator
 import os
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import boto3
-import botocore
-import subprocess
 import sys
 import collections
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coords_rsid_list,get_population
 from LDcommon import set_alleles,check_same_chromosome
 from LDutilites import get_config
-from LDcommon import get_1000g_data,get_rsnum,parse_vcf,get_vcf_snp_params
+from LDcommon import get_1000g_data,parse_vcf
 
 ###########
 # SNPclip #

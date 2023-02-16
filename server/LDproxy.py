@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
-import yaml
-import csv
 import json
 import operator
 import os
-from pymongo import MongoClient
-from bson import json_util, ObjectId
 import subprocess
 import sys
 import time
 import threading
 import weakref
 import time
-import boto3
-import botocore
 from multiprocessing.dummy import Pool
-import math
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population,get_query_variant_c,chunkWindow,get_output,ldproxy_figure
 from LDutilites import get_config
 

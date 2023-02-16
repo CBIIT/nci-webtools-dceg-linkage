@@ -2,17 +2,14 @@
 import json
 import os.path
 import binascii
-import yaml
 import smtplib
-from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import datetime
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
-from bson import json_util, ObjectId
+from bson import json_util
 import UnlockStaleTokens
 from LDcommon import connectMongoDBReadOnly,getEmail
+import yaml
 
 # blocked users attribute: 0=false, 1=true
 

@@ -1,0 +1,31 @@
+env: 'dev'
+data:
+  dbsnp_version: '155'
+  data_dir: '/opt/ldlink/data'
+  tmp_dir: '/opt/ldlink/tmp'
+  ldassoc_example_dir: 'ldassoc_example/'
+  population_samples_dir: '1000G_population_samples/'
+  genotypes_dir: '1000G/'
+  ldtrait_src: 'https://www.ebi.ac.uk/gwas/api/search/downloads/alternative'
+api:
+  require_token: False
+  restrict_concurrency: False
+database:
+  # specify mongodb instance where api user records and logs are located, if env is local then use as endpoint for all mongodb calls
+  api_mongo_addr: 'database'
+  connect_external: True
+  mongo_user_readonly: 
+  mongo_user_api:
+  mongo_password:
+  mongo_port: 27017
+  mongo_db_name:
+performance:
+  # specify number of parallel processes to use in some modules
+  num_subprocesses: 4
+aws:
+  bucket: '<public-ldlink-s3-bucket>'
+  data_subfolder: 'ldlink'
+log:
+  log_dir: '/opt/ldlink/logs/'
+  filename: 'ldlink.log'
+  log_level: 'DEBUG'

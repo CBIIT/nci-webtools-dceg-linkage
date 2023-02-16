@@ -1,16 +1,9 @@
 #!/usr/bin/env python3
-import yaml
 import json
 import math
 import os
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import boto3
-import botocore
-import subprocess
 import sys
-import time
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import replace_coord_rsid,validsnp,get_coords,get_coords,get_query_variant_c
 from LDutilites import get_config
 

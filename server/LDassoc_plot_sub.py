@@ -1,20 +1,11 @@
-import yaml
-import argparse
 import json
 import sys
-import csv
 import operator
 import os
-import sqlite3
-from pymongo import MongoClient
-from bson import json_util, ObjectId
 import subprocess
-import boto3
-import botocore
 from multiprocessing.dummy import Pool
 from math import log10
-#import numpy as np
-from LDcommon import checkS3File, retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_query_variant_c,get_output
+from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
 from LDutilites import get_config, array_split
 
 # LDassoc subprocess to export bokeh to high quality images in the background

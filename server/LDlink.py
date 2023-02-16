@@ -1,27 +1,17 @@
 #!flask/bin/python3
-import pandas as pd
-#import numpy as np
-import sys
-import getopt
-import cgi
-import shutil
 import os
 import traceback
-import urllib
 import collections
 import argparse
 import json
 import time
 import random
-import requests
-import yaml
-from flask import Flask, render_template, Response, abort, request, make_response, url_for, jsonify, redirect, current_app, jsonify
-# from flask_limiter import Limiter
-# from flask_limiter.util import get_remote_address
+import logging
+from logging.handlers import TimedRotatingFileHandler
 from functools import wraps
-from xml.sax.saxutils import escape, unescape
 from socket import gethostname
-from pandas import DataFrame
+from flask import Flask, request, jsonify, current_app
+from werkzeug.utils import secure_filename
 from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
@@ -30,16 +20,12 @@ from LDexpress import calculate_express, get_ldexpress_tissues
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
+from LDutilites import get_config,get_config_admin
+from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from LDcommon import genome_build_vars,connectMongoDBReadOnly
-from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getToken, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
-from werkzeug.utils import secure_filename
-# from werkzeug.debug import DebuggedApplication
-import logging
-from logging.handlers import TimedRotatingFileHandler
-from pymongo import MongoClient
-from LDutilites import get_config,get_config_admin
+from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
+
 # retrieve config
 param_list = get_config()
 # Ensure tmp directory exists
@@ -50,7 +36,8 @@ if not os.path.exists(tmp_dir):
 
 ### Initialize Flask App ###
 
-app = Flask(__name__, static_folder='', static_url_path='/')
+is_main = __name__ == '__main__'
+app = Flask(__name__, static_folder='', static_url_path='/') if is_main else Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = False
@@ -62,7 +49,7 @@ log_filename = param_list_admin['log_filename']
 log_level = param_list_admin['log_level']
 
 # Add the log message handler to the logger
-handler = TimedRotatingFileHandler(os.path.join(log_dir + log_filename), when='H', interval=6)
+# handler = TimedRotatingFileHandler(os.path.join(log_dir + log_filename), when='H', interval=6)
 if (log_level == 'DEBUG'):
     app.logger.setLevel(logging.DEBUG)
 elif (log_level == 'INFO'):
@@ -75,12 +62,12 @@ elif (log_level == 'CRITICAL'):
     app.logger.setLevel(logging.CRITICAL)
 else:
     app.logger.setLevel(logging.DEBUG)
-handler.suffix = "%Y-%m-%d_%H:%M:%S"
-logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-handler.setFormatter(logFormatter)
+# handler.suffix = "%Y-%m-%d_%H:%M:%S"
+# logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+# handler.setFormatter(logFormatter)
 
 # logger.addHandler(handler)
-app.logger.addHandler(handler)
+# app.logger.addHandler(handler)
 
 
 
@@ -1759,7 +1746,7 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
 
-if __name__ == '__main__':
+if is_main:
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", dest="port_number",
                         default="9982", help="Sets the Port")

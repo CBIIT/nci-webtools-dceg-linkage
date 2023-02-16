@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
-import yaml
 import json
 import math
 import os
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import boto3
-import botocore
-import subprocess
-import sys
 import time
 import re
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get_rsnum,connectMongoDBReadOnly,validsnp
+from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly,validsnp
 from LDcommon import replace_coord_rsid, get_coords,get_population,get_query_variant_c,check_allele
 from LDutilites import get_config
 # Create LDpair function

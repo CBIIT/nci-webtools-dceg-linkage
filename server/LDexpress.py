@@ -1,26 +1,15 @@
 #!/usr/bin/env python3
-import yaml
 import json
-import copy
-import math
 import os
-import collections
-import re
-import requests
-import csv
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
-from bson import json_util, ObjectId
 import subprocess
 from multiprocessing.dummy import Pool
-import sys
-#import numpy as np
-import boto3
-import botocore
 from timeit import default_timer as timer
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from pymongo.errors import ConnectionFailure
+from bson import json_util
+from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,get_population,validsnp,replace_coords_rsid_list,get_coords,get_query_variant_c,chunkWindow,get_output
 from LDutilites import get_config,array_split
+
 # Set data directories using config.yml 
 param_list = get_config()
 dbsnp_version = param_list['dbsnp_version']

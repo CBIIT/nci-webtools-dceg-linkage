@@ -1,19 +1,14 @@
-import yaml
 import json
 import sys
 import json
 import math
-import operator
 import os
-import boto3
-import botocore
-from pymongo import MongoClient
-from bson import json_util, ObjectId
 import subprocess
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population,get_1000g_data,parse_vcf
-from LDcommon import set_alleles,get_vcf_snp_params,get_forgeDB
-from LDutilites import get_config 
+from LDcommon import set_alleles,get_forgeDB
+from LDutilites import get_config
+
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
 

@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
 import datetime
 import dateutil.parser
-import yaml
 from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
 from LDutilites import get_config_admin
 import LDutilites
+
 # get current date and time
 def getDatetime():
     return datetime.datetime.now()

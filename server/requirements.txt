@@ -1,0 +1,8 @@
+bokeh==0.13.0
+boto3
+Flask
+mod_wsgi
+pymongo
+python-dateutil
+PyYAML
+requests

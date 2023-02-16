@@ -1,17 +1,14 @@
 #!/usr/bin/env python3
 
-import yaml
 import json
 import operator
-from bson import json_util
-import subprocess
 import sys
-
 from LDcommon import validsnp,replace_coords_rsid_list,get_coords,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import checkS3File, connectMongoDBReadOnly, genome_build_vars, retrieveTabix1000GData,parse_vcf,get_1000g_data
-from LDcommon import get_vcf_snp_params,check_same_chromosome
+from LDcommon import connectMongoDBReadOnly, genome_build_vars, parse_vcf,get_1000g_data
+from LDcommon import check_same_chromosome
+
 # Create LDhap function
 def calculate_hap(snplst, pop, request, web, genome_build):
     # Set data directories using config.yml

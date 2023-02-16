@@ -5,10 +5,7 @@ import os
 import sys
 import json
 from pymongo import MongoClient, ASCENDING
-from pymongo.errors import ConnectionFailure
-import time
 from timeit import default_timer as timer
-import yaml
 from LDutilites import get_config,get_config_admin
 import LDutilites
 

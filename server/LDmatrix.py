@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
-import yaml
 import json
 import math
-import operator
 import os
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import boto3
-import botocore
 import subprocess
 import sys
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene,connectMongoDBReadOnly
+from LDcommon import retrieveAWSCredentials, genome_build_vars, getRefGene,connectMongoDBReadOnly
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles
 from LDutilites import get_config
-from LDcommon import get_1000g_data,parse_vcf,get_vcf_snp_params,check_same_chromosome,get_forgeDB
+from LDcommon import get_1000g_data,parse_vcf,check_same_chromosome,get_forgeDB
+
 # Create LDmatrix function
 def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
     # Set data directories using config.yml

@@ -1,21 +1,16 @@
 #!/usr/bin/env python3
 
-import yaml
 import json
 import copy
 import math
 import os
-import collections
 import re
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
-from bson import json_util, ObjectId
 import subprocess
 from multiprocessing.dummy import Pool
-import sys
-#import numpy as np	
 from timeit import default_timer as timer
-from LDcommon import genome_build_vars, get_rsnum,connectMongoDBReadOnly
+from pymongo.errors import ConnectionFailure
+from bson import json_util
+from LDcommon import genome_build_vars, connectMongoDBReadOnly
 from LDcommon import validsnp, replace_coords_rsid_list,get_coords,get_population,get_output
 from LDutilites import get_config,array_split
 

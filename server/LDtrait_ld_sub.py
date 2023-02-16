@@ -1,14 +1,6 @@
-import yaml
-import csv
 import json
-from pymongo import MongoClient
-from bson import json_util, ObjectId
-import boto3
-import botocore
-import subprocess
 import sys
-import requests
-from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,get_vcf_snp_params,get_1000g_data_single
+from LDcommon import retrieveAWSCredentials, genome_build_vars,get_1000g_data_single
 from LDutilites import get_config
 #import cache from functools
 

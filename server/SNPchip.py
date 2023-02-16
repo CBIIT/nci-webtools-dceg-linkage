@@ -4,17 +4,12 @@
 # SNPchip #
 ###########
 
-import yaml
 
-from pymongo import MongoClient
-from pymongo.errors import ConnectionFailure
-from bson import json_util, ObjectId
 import os
-import bson.regex
 import operator
-import os
 import json
 import sys
+from pymongo.errors import ConnectionFailure
 from LDcommon import genome_build_vars,connectMongoDBReadOnly,validsnp,replace_coords_rsid_list,get_coords
 from LDutilites import get_config
 

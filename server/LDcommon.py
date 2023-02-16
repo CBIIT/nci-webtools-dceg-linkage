@@ -1,17 +1,15 @@
-import boto3
-import botocore
-import csv
-import os
-import yaml
-from pymongo import MongoClient
 import json
 import math
 import re
 import shutil
 import subprocess
-from bson import json_util
-from LDutilites import get_config,get_config_admin
 from collections import OrderedDict
+from bson import json_util
+import boto3
+import botocore
+from pymongo import MongoClient
+from LDutilites import get_config,get_config_admin
+
 # retrieve config
 param_list = get_config()
 param_list_db = get_config_admin()

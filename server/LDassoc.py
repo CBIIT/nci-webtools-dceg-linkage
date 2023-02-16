@@ -1,19 +1,12 @@
 #!/usr/bin/env python3
-import yaml
-import csv
 import json
 import operator
 import os
-from pymongo import MongoClient
-from bson import json_util, ObjectId
 import subprocess
 import time
-import boto3
-import botocore
 from multiprocessing.dummy import Pool
-#import numpy as np
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
-from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output,get_1000g_data_single
+from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
 from LDutilites import get_config,array_split
 
 # Create LDproxy function
