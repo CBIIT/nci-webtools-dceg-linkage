@@ -5,11 +5,6 @@
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/
 # User-specific stuff:
 .idea/*
-common
-common/
-LDlink/common
-LDlink/common/
-
 .DS_Store
 .vscode
 
@@ -30,3 +25,5 @@ scripts/dbSNP_mongo_update/test/
 scripts/liftOver/test/
 scripts/SNPchip_update/test
 scripts/SNPchip_update/updatenull
+database/
+config.yml
