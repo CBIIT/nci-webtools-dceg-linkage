@@ -166,9 +166,9 @@ def requires_token(f):
         if env == 'local' :
             url_root = 'http://localhost:5000/'
         elif env == 'prod':
-            url_root = 'https://ldlink.nci.nih.gov/'
+            url_root = 'https://ldlink.nih.gov/'
         else:
-            url_root = 'https://ldlink-' + env + '.nci.nih.gov/'
+            url_root = 'https://ldlink-' + env + '.nih.gov/'
         require_token = bool(param_list_admin['require_token'])
         token_expiration = bool(param_list_admin['token_expiration'])
         token_expiration_days = param_list_admin['token_expiration_days']
