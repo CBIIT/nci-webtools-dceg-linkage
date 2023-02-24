@@ -1730,8 +1730,8 @@ input:checked + .slider:before {
 
 .close-button{
 	position: absolute;
-	top: 30%;
-	right: 1%;
+	top: 10px;
+	right: 10px;
 	padding: 5px 10px;
 	background-color: rgba(0, 0, 0, 0);
 	border: none;
@@ -1739,18 +1739,15 @@ input:checked + .slider:before {
 	cursor: pointer;
 }
 .popup-flash {
-	gap: 5rem;
-	display: flex;
-	align-items: flex-start;
-	background-color: rgba(255, 254, 254, 0.5);
+	background-color: rgba(80, 183, 197, 0);
 	border-radius: 0.1rem;
-	padding: 5rem 1.5rem 10rem 5rem;
+	padding: 1rem 1rem 1rem 1rem;
 	position: absolute;
-	z-index: 5;
+	z-index:1000 !important;
 	width: 50%;
-	height: 5%;
 	border: 0px solid #ccc;
-	margin: 1rem 1.5rem 5rem 5rem;
-	left: 45% !important;
-	top:-3% !important;
+	margin: 0.5rem 0.5rem 1rem 1rem;
+	left: 50% !important;
+	top: 0px !important;
+
 }
