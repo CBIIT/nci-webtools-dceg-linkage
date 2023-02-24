@@ -1727,3 +1727,30 @@ input:checked + .slider:before {
 		height: 240px;
 	}
 }
+
+.close-button{
+	position: absolute;
+	top: 30%;
+	right: 1%;
+	padding: 5px 10px;
+	background-color: rgba(0, 0, 0, 0);
+	border: none;
+	font-size: 20px;
+	cursor: pointer;
+}
+.popup-flash {
+	gap: 5rem;
+	display: flex;
+	align-items: flex-start;
+	background-color: rgba(255, 254, 254, 0.5);
+	border-radius: 0.1rem;
+	padding: 5rem 1.5rem 10rem 5rem;
+	position: absolute;
+	z-index: 5;
+	width: 50%;
+	height: 5%;
+	border: 0px solid #ccc;
+	margin: 1rem 1.5rem 5rem 5rem;
+	left: 45% !important;
+	top:-3% !important;
+}

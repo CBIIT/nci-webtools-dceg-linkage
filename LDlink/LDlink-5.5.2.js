@@ -5712,3 +5712,14 @@ $("#news-link").on('click',function(){
     console.log( $("#news-container").offset())
     window.scrollTo(0,40000);
 })
+
+const closeBtn = document.querySelector('.close-button')
+const flashBanner = document.querySelector('.popup-flash')
+
+closeBtn.addEventListener('click', ()=>{
+  flashBanner.style.transform = "translateY(-70vh)";
+})
+setTimeout(()=>{
+    flashBanner.style.transform = "translateY(-70vh)";
+},10000)
+
