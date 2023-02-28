@@ -1740,14 +1740,12 @@ input:checked + .slider:before {
 }
 .popup-flash {
 	background-color: rgba(80, 183, 197, 0);
-	border-radius: 0.1rem;
-	padding: 1rem 1rem 1rem 1rem;
-	position: absolute;
-	z-index:1000 !important;
-	width: 50%;
-	border: 0px solid #ccc;
-	margin: 0.5rem 0.5rem 1rem 1rem;
-	left: 50% !important;
-	top: 0px !important;
+	
+	padding: 0rem 0rem 0rem 0rem;
+	position: relative;
 
+
+	border: 0px solid #ccc;
+	margin: -2rem 0rem -1rem 0rem;
+	
 }

@@ -5717,9 +5717,11 @@ const closeBtn = document.querySelector('.close-button')
 const flashBanner = document.querySelector('.popup-flash')
 
 closeBtn.addEventListener('click', ()=>{
-  flashBanner.style.transform = "translateY(-70vh)";
+  //flashBanner.style.transform = "translateY(-70vh)";
+  flashBanner.style.display="none";
 })
 setTimeout(()=>{
-    flashBanner.style.transform = "translateY(-70vh)";
-},10000)
+    //flashBanner.style.transform = "translateY(-70vh)";
+    flashBanner.style.display="none";
+},30000)
 
