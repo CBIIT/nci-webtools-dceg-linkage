@@ -1,9 +1,7 @@
 #!/usr/bin/env python3
 import datetime
 import dateutil.parser
-from pymongo import MongoClient
-from LDutilites import get_config_admin
-import LDutilites
+from LDcommon import connectMongoDBReadOnly
 
 # get current date and time
 def getDatetime():
@@ -12,16 +10,7 @@ def getDatetime():
 # script to free token locks older than 15 minutes at some scheduled time
 # triggered from CRON job
 def main():
-    path = LDutilites.config_abs_path
-    param_list_db = get_config_admin(path)
-    api_mongo_addr = param_list_db['api_mongo_addr']
-    mongo_username_api = param_list_db['mongo_username_api']
-    mongo_password = param_list_db['mongo_password']
-    mongo_port = param_list_db['mongo_port']
-    mongo_db_name = param_list_db['mongo_db_name']
-  
-    client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/LDLink', mongo_port)
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly()
     users = db.api_users
     # current datetime
     present = getDatetime()
