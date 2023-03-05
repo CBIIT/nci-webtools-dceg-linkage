@@ -8,10 +8,11 @@ from email.mime.text import MIMEText
 import datetime
 from bson import json_util
 import UnlockStaleTokens
-from LDcommon import connectMongoDBReadOnly,getEmail
-import yaml
+from LDcommon import connectMongoDBReadOnly,getEmail,get_config
 
 # blocked users attribute: 0=false, 1=true
+
+config = get_config()
 
 # connect to email account
 def smtp_connect(email_account):
@@ -88,10 +89,8 @@ def emailUserUnblocked(email, email_account):
 
 # email unblock request to list of web admins
 def emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_root):
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    email_account = config['api']['email_account']
-    api_superuser = config['api']['api_superuser']
+    email_account = config["email_smtp_host"]
+    api_superuser = config["email_superuser"]
     api_superuser_token = getToken(api_superuser)
     print("sending message justification")
     new_url_root = url_root.replace('http://', 'https://')
@@ -125,7 +124,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     return out_json
 
 # check if user email record exists
-def getEmailRecord(email, env, api_mongo_addr):
+def getEmailRecord(email):
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     emailRecord = users.find_one({"email": email})
@@ -310,14 +309,7 @@ def checkLocked(token):
             return False
 
 def toggleLocked(token, lock):
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-       
-    if "restrict_concurrency" in config['api']:
-        restrict_concurrency = config['api']['restrict_concurrency']
-    else: 
-        restrict_concurrency = True
-    if restrict_concurrency:
+    if config['restrict_concurrency']:
         db = connectMongoDBReadOnly(False,True,True)
         users = db.api_users
         record = users.find_one({"token": token})
@@ -331,7 +323,7 @@ def toggleLocked(token, lock):
                 users.find_one_and_update({"token": token}, { "$set": {"locked": lock}})
 
 # check if email is blocked (1=blocked, 0=not blocked). returns true if email is blocked
-def checkBlockedEmail(email, env, api_mongo_addr):
+def checkBlockedEmail(email):
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
     record = users.find_one({"email": email})
@@ -372,21 +364,21 @@ def getExpiration(registered, token_expiration_days):
 
 # registers new users and emails generated token for WEB
 def register_user(firstname, lastname, email, institution, reference, url_root):
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
+    # with open('config.yml', 'r') as yml_file:
+    #     config = yaml.load(yml_file)
     env = config['env']
-    api_mongo_addr = config['database']['api_mongo_addr']
-    token_expiration = bool(config['api']['token_expiration'])
-    token_expiration_days = config['api']['token_expiration_days']
-    email_account = config['api']['email_account']
+    api_mongo_addr = config['mongodb_host']
+    token_expiration = config['token_expiration']
+    token_expiration_days = config['token_expiration_days']
+    email_account = config["email_smtp_host"]
     out_json = {}
     # by default, users are not blocked
     blocked = 0
-    record = getEmailRecord(email, env, api_mongo_addr)
+    record = getEmailRecord(email)
     # print record
     # if email record exists, do not insert to db
     if record != None:
-        if checkBlockedEmail(record["email"], env, api_mongo_addr):
+        if checkBlockedEmail(record["email"]):
             registered = record["registered"]
             format_registered = registered.strftime("%Y-%m-%d %H:%M:%S")
             out_json = {
@@ -592,12 +584,7 @@ def getBlockedUsers():
     return out_json
 
 def lookupUser(email):
-    with open('config.yml', 'r') as yml_file:
-        config = yaml.load(yml_file)
-    env = config['env']
-    api_mongo_addr = config['database']['api_mongo_addr']
-
-    user_record = getEmailRecord(email, env, api_mongo_addr)
+    user_record = getEmailRecord(email)
 
     if user_record != None:
         registered = user_record["registered"]
