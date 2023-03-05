@@ -10,8 +10,9 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app
+from flask import Flask, request, jsonify, current_app, send_from_directory
 from werkzeug.utils import secure_filename
+from werkzeug.security import safe_join
 from LDpair import calculate_pair
 from LDpop import calculate_pop
 from LDproxy import calculate_proxy
@@ -20,7 +21,7 @@ from LDexpress import calculate_express, get_ldexpress_tissues
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
-from LDutilites import get_config,get_config_admin
+from LDutilites import get_config
 from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
@@ -30,6 +31,7 @@ from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlock
 param_list = get_config()
 # Ensure tmp directory exists
 tmp_dir = param_list['tmp_dir']
+log_level = param_list['log_level']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -37,40 +39,11 @@ if not os.path.exists(tmp_dir):
 ### Initialize Flask App ###
 
 is_main = __name__ == '__main__'
-app = Flask(__name__, static_folder='', static_url_path='/') if is_main else Flask(__name__)
+app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
 app.debug = False
-# app.logger.disabled = True
-# app.logger.removeHandler(default_handler)
-param_list_admin = get_config_admin()
-log_dir = param_list_admin['log_dir']
-log_filename = param_list_admin['log_filename']
-log_level = param_list_admin['log_level']
-
-# Add the log message handler to the logger
-# handler = TimedRotatingFileHandler(os.path.join(log_dir + log_filename), when='H', interval=6)
-if (log_level == 'DEBUG'):
-    app.logger.setLevel(logging.DEBUG)
-elif (log_level == 'INFO'):
-    app.logger.setLevel(logging.INFO)
-elif (log_level == 'WARNING'):
-    app.logger.setLevel(logging.WARNING)
-elif (log_level == 'ERROR'):
-    app.logger.setLevel(logging.ERROR)
-elif (log_level == 'CRITICAL'):
-    app.logger.setLevel(logging.CRITICAL)
-else:
-    app.logger.setLevel(logging.DEBUG)
-# handler.suffix = "%Y-%m-%d_%H:%M:%S"
-# logFormatter = logging.Formatter('[%(asctime)s] [%(levelname)s] %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-# handler.setFormatter(logFormatter)
-
-# logger.addHandler(handler)
-# app.logger.addHandler(handler)
-
-
-
+app.logger.setLevel(log_level)
 
 # Flask Limiter initialization
 # def get_token():
@@ -156,9 +129,9 @@ def requires_token(f):
             url_root = 'https://ldlink.nci.nih.gov/'
         else:
             url_root = 'https://ldlink-' + env + '.nci.nih.gov/'
-        require_token = bool(param_list_admin['require_token'])
-        token_expiration = bool(param_list_admin['token_expiration'])
-        token_expiration_days = param_list_admin['token_expiration_days']
+        require_token = bool(param_list['require_token'])
+        token_expiration = bool(param_list['token_expiration'])
+        token_expiration_days = param_list['token_expiration_days']
         if ("LDlinkRestWeb" not in request.full_path):
             # Web server access does not require token
             if require_token:
@@ -520,9 +493,18 @@ def ping():
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
 
 # Route to check file exist status 
+@app.route('/LDlinkRestWeb/status/<path:filename>', strict_slashes=False)
 @app.route('/status/<path:filename>', strict_slashes=False)
 def status(filename):
-    return jsonify(os.path.isfile(filename))
+    filepath = safe_join(tmp_dir, filename)
+    return jsonify(os.path.isfile(filepath))
+
+
+# Route to serve temporary files
+@app.route('/LDlinkRestWeb/tmp/<path:filename>', strict_slashes=False)
+@app.route('/tmp/<path:filename>', strict_slashes=False)
+def send_temp_file(filename):
+    return send_from_directory(tmp_dir, filename, as_attachment=True)
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])

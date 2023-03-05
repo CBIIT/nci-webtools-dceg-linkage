@@ -4,30 +4,21 @@ import requests
 import os
 import sys
 import json
-from pymongo import MongoClient, ASCENDING
+from pymongo import ASCENDING
 from timeit import default_timer as timer
-from LDutilites import get_config,get_config_admin
-import LDutilites
+from LDutilites import get_config
+from LDcommon import connectMongoDBReadOnly
 
 start_time = timer() # measure script's run time
 filename = "gwas_catalog_" + datetime.today().strftime('%Y-%m-%d') + ".tsv"
 errFilename = "ldtrait_error_snps.json"
 
 # Load variables from config file
-path = LDutilites.config_abs_path
 #path = LDutilites.config_path
-param_list = get_config(path)
-param_list_db = get_config_admin(path)
+param_list = get_config()
 tmp_dir = param_list['tmp_dir']
-aws_info = param_list['aws_info']
 ldtrait_src = param_list['ldtrait_src']
 
-api_mongo_addr = param_list_db['api_mongo_addr']
-mongo_username_api = param_list_db['mongo_username_api']
-mongo_password = param_list_db['mongo_password']
-mongo_port = param_list_db['mongo_port']
-mongo_db_name = param_list_db['mongo_db_name']
-is_centralized = param_list_db['connect_external']
 
 if not os.path.exists(tmp_dir):
     os.makedirs(tmp_dir)
@@ -48,16 +39,7 @@ def main():
     filename = downloadGWASCatalog()
     print(filename + " downloaded.")
 
-    # Connect to Mongo snp database
-    if is_centralized:
-        client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr + '/'+ mongo_db_name, mongo_port)
-    else:
-        if instance == "web":
-            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@localhost/LDLink', mongo_port)
-        else:
-            client = MongoClient('localhost')
-
-    db = client["LDLink"]
+    db = connectMongoDBReadOnly()
     dbsnp = db.dbsnp
     print(db)
     # delete old error SNPs file if there is one

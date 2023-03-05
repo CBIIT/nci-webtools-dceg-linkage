@@ -8,28 +8,15 @@ from bson import json_util
 import boto3
 import botocore
 from pymongo import MongoClient
-from LDutilites import get_config,get_config_admin
+from LDutilites import get_config
 
 # retrieve config
-param_list = get_config()
-param_list_db = get_config_admin()
-api_mongo_addr = param_list_db['api_mongo_addr']
-mongo_username = param_list_db['mongo_username']
-mongo_username_api = param_list_db['mongo_username_api']
-mongo_password = param_list_db['mongo_password']
-mongo_port = param_list_db['mongo_port']
-mongo_db_name = param_list_db['mongo_db_name']
-email_account = param_list_db['email_account']
-is_centralized = param_list_db['connect_external']
-
-aws_info = param_list['aws_info']
-env = param_list['env']
-dbsnp_version = param_list['dbsnp_version']
-population_samples_dir = param_list['population_samples_dir']
-data_dir = param_list['data_dir']
-tmp_dir = param_list['tmp_dir']
-genotypes_dir = param_list['genotypes_dir']
-
+config = get_config()
+aws_info = config['aws_info']
+population_samples_dir = config['population_samples_dir']
+data_dir = config['data_dir']
+tmp_dir = config['tmp_dir']
+genotypes_dir = config['genotypes_dir']
 
 genome_build_vars = {
     "vars": ['grch37', 'grch38', 'grch38_high_coverage'],
@@ -75,80 +62,35 @@ genome_build_vars = {
 }
 
 def checkS3File(aws_info, bucket, filePath):
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        session = boto3.Session(
-            aws_access_key_id=aws_info['aws_access_key_id'],
-            aws_secret_access_key=aws_info['aws_secret_access_key'],
-        )
-        s3 = session.resource('s3')
-    else: 
-        s3 = boto3.resource('s3')
     try:
-        s3.Object(bucket, filePath).load()
-    except botocore.exceptions.ClientError as e:
-        if e.response['Error']['Code'] == "404":
-            raise Exception("File not found in AWS S3.")
-            # return False
-        else:
-            raise Exception("File not found in AWS S3.")
-            # return False
-    else: 
+        boto3.client('s3').head_object(Bucket=bucket, Key=filePath)
         return True
+    except botocore.exceptions.ClientError as e:
+        raise Exception(f"{bucket} {filePath} not found in AWS S3.")
+        # return False
 
 def retrieveAWSCredentials():
-    if ('aws_access_key_id' in aws_info and len(aws_info['aws_access_key_id']) > 0 and 'aws_secret_access_key' in aws_info and len(aws_info['aws_secret_access_key']) > 0):
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s;" % (aws_info['aws_access_key_id'], aws_info['aws_secret_access_key'])
-    else:
-        # retrieve aws credentials here
-        session = boto3.Session()
-        credentials = session.get_credentials().get_frozen_credentials()
-        export_s3_keys = "export AWS_ACCESS_KEY_ID=%s; export AWS_SECRET_ACCESS_KEY=%s; export AWS_SESSION_TOKEN=%s;" % (credentials.access_key, credentials.secret_key, credentials.token)
-    return export_s3_keys
+    credentials = get_aws_credentials()
+    return ' '.join([ f"export {k}={v};" for k, v in credentials.items() ])
 
-def connectMongoDBReadOnly(readonly, api=False, connect_db_server=False):
-    # Connect to 'api_mongo_addr' MongoDB endpoint if app started locally (specified in config.yml)
-    if is_centralized:
-        if bool(readonly):
-            client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
-        else:
-            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + api_mongo_addr +'/LDLink', mongo_port)
-    else:
-        if env == 'local' or connect_db_server:
-            mongo_host = api_mongo_addr
-        else: 
-            mongo_host = 'localhost'
-       
-        if api:
-            client = MongoClient('mongodb://' + mongo_username_api + ':' + mongo_password + '@' + mongo_host + '/LDLink', mongo_port)
-        else:
-            if readonly:
-                client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + '/admin', mongo_port)
-            else:
-                if env == 'local':
-                    client = MongoClient('mongodb://' + mongo_username + ':' + mongo_password + '@' + mongo_host + "/admin", mongo_port)
-                else:
-                    client = MongoClient('localhost', mongo_port)  
-    db = client["LDLink"]
-    return db
+def connectMongoDBReadOnly(readonly=True, api=False, connect_db_server=False):
+    return MongoClient(
+        host = config['mongodb_host'],
+        port = config['mongodb_port'],
+        username = config['mongodb_username'],
+        password = config['mongodb_password'],
+        authSource = config['mongodb_database'],
+    )[config['mongodb_database']]
 
 def get_aws_credentials():
-    if (
-        "aws_access_key_id" in aws_info
-        and len(aws_info["aws_access_key_id"]) > 0
-        and "aws_secret_access_key" in aws_info
-        and len(aws_info["aws_secret_access_key"]) > 0
-    ):
-        return {
-            "AWS_ACCESS_KEY_ID": aws_info["aws_access_key_id"],
-            "AWS_SECRET_ACCESS_KEY": aws_info["aws_secret_access_key"],
-        }
-    else:
-        credentials = boto3.Session().get_credentials().get_frozen_credentials()
-        return {
-            "AWS_ACCESS_KEY_ID": credentials.access_key,
-            "AWS_SECRET_ACCESS_KEY": credentials.secret_key,
-            "AWS_SESSION_TOKEN": credentials.token,
-        }
+    frozen_credentials = boto3.Session().get_credentials().get_frozen_credentials()
+    credentials = {
+        "AWS_ACCESS_KEY_ID": frozen_credentials.access_key,
+        "AWS_SECRET_ACCESS_KEY": frozen_credentials.secret_key,
+        "AWS_SESSION_TOKEN": frozen_credentials.token,
+    }
+    return { k: v for k, v in credentials.items() if v is not None }
+
 
 def get_command_output(*cmd, **subprocess_args):
     output = subprocess.check_output(cmd, **subprocess_args)
@@ -321,7 +263,7 @@ def getRecomb(db, filename, chromosome, begin, end, genome_build):
     return recomb_results_sanitized
 
 def getEmail():
-    return  email_account
+    return  config['email_smtp_host']
 
 #################################################################
 #define common functions to Validate & retrieve SNP coordinates #
