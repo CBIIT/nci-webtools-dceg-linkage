@@ -6,7 +6,7 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./data:/opt/ldlink/data
+      - ./data:/data
     env_file:
       - server/.env
 
@@ -15,7 +15,7 @@ services:
       context: .
       dockerfile: docker/frontend.dockerfile
     ports:
-      - "9080:80"
+      - "9000:80"
     environment:
       API_HOST: "http://backend:8000"
     
