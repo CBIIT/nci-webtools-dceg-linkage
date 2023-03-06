@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: docker/backend.dockerfile
     ports:
-      - "8000:8000"
+      - "8000:80"
     volumes:
       - ./data:/data
     env_file:
@@ -17,7 +17,7 @@ services:
     ports:
       - "9000:80"
     environment:
-      API_HOST: "http://backend:8000"
+      API_HOST: "http://backend:80"
     
   database:
     image: mongo:latest
