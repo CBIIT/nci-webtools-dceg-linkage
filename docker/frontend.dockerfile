@@ -10,6 +10,10 @@ WORKDIR /var/www/html
 
 COPY client .
 
+ARG GOOGLE_MAPS_API_KEY=example
+
+RUN sed -i "s|@gmap_key@|${GOOGLE_MAPS_API_KEY}|g" index.html
+
 RUN chown -R apache:apache .
 
 EXPOSE 80
