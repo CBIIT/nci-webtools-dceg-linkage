@@ -48,11 +48,6 @@ RUN cd /tmp \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64
 
-# update locale
-
-
-RUN 
-
 ENV LDLINK_HOME=/opt/ldlink
 
 RUN mkdir -p ${LDLINK_HOME}
