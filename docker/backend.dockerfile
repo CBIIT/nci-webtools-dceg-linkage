@@ -35,8 +35,6 @@ RUN cd /tmp \
     && popd \
     && rm -rf htslib-${HTSLIB_VERSION}
 
-ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
-
 # install phantomjs
 ENV PHANTOMJS_VERSION=2.1.1
 
@@ -47,6 +45,8 @@ RUN cd /tmp \
     && curl -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -xj \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64
+
+ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
 
 ENV LDLINK_HOME=/opt/ldlink
 
