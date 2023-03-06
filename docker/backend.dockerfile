@@ -7,6 +7,7 @@ RUN dnf -y update \
     bzip2-devel \
     fontconfig \
     gcc \
+    glibc-langpack-en \
     httpd \
     httpd-devel \
     libcurl-devel \
@@ -47,6 +48,11 @@ RUN cd /tmp \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64
 
+# update locale
+
+
+RUN 
+
 ENV LDLINK_HOME=/opt/ldlink
 
 RUN mkdir -p ${LDLINK_HOME}
@@ -67,7 +73,7 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --user apache \
     --group apache \
     --log-to-terminal \
-    --port 8000 \
+    --port 80 \
     --working-directory ${LDLINK_HOME} \
     --header-buffer-size 50000000 \
     --response-buffer-size 50000000 \
