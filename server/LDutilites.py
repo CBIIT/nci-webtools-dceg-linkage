@@ -11,6 +11,7 @@ load_dotenv()
 def get_config():
     config = {}
     config['env'] = environ.get('ENV')
+    config['base_url'] = environ.get('BASE_URL')
     config['log_level'] = environ.get('LOG_LEVEL')
     config['num_subprocesses'] = int(environ.get('NUM_SUBPROCESSES'))
 

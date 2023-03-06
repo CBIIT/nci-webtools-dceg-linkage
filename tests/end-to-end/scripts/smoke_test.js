@@ -14,7 +14,7 @@ describe('LDlink Smoke Test', function() {
             .setFirefoxOptions(new firefox.Options().headless()) // comment out to see browser locally
             .build();
         this.website = process.env.TEST_WEBSITE.replace(/\/$/, ''); // comment out to test locally
-        // this.website = 'https://ldlink-dev.nci.nih.gov/'; // comment in to test locally
+        // this.website = 'https://ldlink-dev.nih.gov/'; // comment in to test locally
     });
 
     it('should specify the correct website', async function() {

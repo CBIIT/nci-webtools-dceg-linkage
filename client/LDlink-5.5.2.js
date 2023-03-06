@@ -1,7 +1,7 @@
 var ldlink_version = "Version 5.5.2";
 
 
-// var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
+// var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nih.gov",port:9090,route : "LDlinkRestWeb"}
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
 var restService = {protocol: window.location.protocol, hostname: window.location.host, pathname: window.location.pathname, route: 'LDlinkRestWeb'}
 var restServerUrl = restService.protocol + "//" + restService.hostname + restService.pathname + restService.route;
@@ -531,7 +531,7 @@ function checkFile(id, fileURL, retries) {
 }
 function initAPIExamples() {
     $(".apiaccess-examples").each( function(index) { 
-        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nci.nih.gov', window.location.origin);
+        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nih.gov', window.location.origin);
     });
 }
 function setBootstrapSelector(id, value) {
@@ -5712,3 +5712,16 @@ $("#news-link").on('click',function(){
     console.log( $("#news-container").offset())
     window.scrollTo(0,40000);
 })
+
+const closeBtn = document.querySelector('.close-button')
+const flashBanner = document.querySelector('.popup-flash')
+
+closeBtn.addEventListener('click', ()=>{
+  //flashBanner.style.transform = "translateY(-70vh)";
+  flashBanner.style.display="none";
+})
+setTimeout(()=>{
+    //flashBanner.style.transform = "translateY(-70vh)";
+    flashBanner.style.display="none";
+},30000)
+
