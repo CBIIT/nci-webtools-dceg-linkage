@@ -511,7 +511,7 @@ function checkFile(id, fileURL, retries) {
         var countdown = retries - 1
         $.ajax({
             // type : 'GET',
-            url : 'status' + fileURL + '?_=' + new Date().getTime(),
+            url : 'LDlinkRestWeb/status' + fileURL + '?_=' + new Date().getTime(),
             contentType : 'application/json', // JSON
             cache: false
         }).done(function(response) {
@@ -2188,12 +2188,12 @@ function updateLDassoc() {
     ldInputs.variant.basepair = $("#region-variant-base-pair-window").val();
 
     var tempbuild = genomeBuild == 'grch37' ? 'hg19' : 'hg38'
-    var r2url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + tempbuild  + '&hgt.customText=http://'+location.hostname+'/tmp/track' + ldInputs.reference + '.txt'
+    var r2url = 'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + tempbuild  + '&hgt.customText=http://'+location.hostname+'/LDlinkRestWeb/tmp/track' + ldInputs.reference + '.txt'
     //console.log(r2url)
     $('#ldassoc-genome').prop('href',r2url);
     
     //console.dir(ldproxyInputs);
-    $('#ldassoc-results-link').attr('href','tmp/assoc' + ldInputs.reference + '.txt');
+    $('#ldassoc-results-link').attr('href','LDlinkRestWeb/tmp/assoc' + ldInputs.reference + '.txt');
     //console.log( $('#ldassoc-genome'))
     //console.log(ldInputs);
     var url = restServerUrl + "/ldassoc";
@@ -2239,27 +2239,27 @@ function updateLDassoc() {
 	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldassoc-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="ldassoc-menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" >SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" >PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" >PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a></li></ul></div>');
             $("#ldassoc-downloadSVG").click(function(e) {
                 e.preventDefault();
-                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".svg";
+                var assoc_plot = "LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".svg";
                 window.open( assoc_plot, "_blank" )
             });
             $("#ldassoc-downloadPDF").click(function(e) {
                 e.preventDefault();
-                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".pdf";
+                var assoc_plot = "LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".pdf";
                 window.open( assoc_plot, "_blank" )
             });
             $("#ldassoc-downloadPNG").click(function(e) {
                 e.preventDefault();
-                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".png";
+                var assoc_plot = "LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".png";
                 window.open( assoc_plot, "_blank" )
             });
             $("#ldassoc-downloadJPEG").click(function(e) {
                 e.preventDefault();
-                var assoc_plot = "tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
+                var assoc_plot = "LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
                 window.open( assoc_plot, "_blank" )
             });
 
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
+            var fileURL = "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
             checkFile(id, fileURL, 180);
 
             $('#' + id + '-results-container').show();
@@ -2270,8 +2270,8 @@ function updateLDassoc() {
         $("#"+id+"-loading").hide();
 
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2337,8 +2337,8 @@ function updateLDhap() {
             addLDHapHyperLinks(ldInputs.reference, ldhapTable);
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2416,9 +2416,9 @@ function updateLDexpress() {
 
     //Update href on
     //Set file links
-    $("#ldexpress-variants-annotated-link").attr('href', 'tmp/express_variants_annotated' + ldInputs.reference + '.txt');
+    $("#ldexpress-variants-annotated-link").attr('href', 'LDlinkRestWeb/tmp/express_variants_annotated' + ldInputs.reference + '.txt');
     $("#ldexpress-variants-annotated-link").attr('target', 'express_variants_annotated' + ldInputs.reference);
-    // $("#ldexpress-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
+    // $("#ldexpress-details-link").attr('href', 'LDlinkRestWeb/tmp/details'+ldInputs.reference+'.txt');
     // $("#ldexpress-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
     // Set populations on LDThinned
@@ -2453,8 +2453,8 @@ function updateLDexpress() {
             initExpress(data, r2_d);
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2508,9 +2508,9 @@ function updateLDtrait() {
     $('#ldtrait-cancel').attr("style","display:none")
     //Update href on
     //Set file links
-    $("#ldtrait-variants-annotated-link").attr('href', 'tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
+    $("#ldtrait-variants-annotated-link").attr('href', 'LDlinkRestWeb/tmp/trait_variants_annotated' + ldInputs.reference + '.txt');
     $("#ldtrait-variants-annotated-link").attr('target', 'trait_variants_annotated' + ldInputs.reference);
-    // $("#ldtrait-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
+    // $("#ldtrait-details-link").attr('href', 'LDlinkRestWeb/tmp/details'+ldInputs.reference+'.txt');
     // $("#ldtrait-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
     // Set populations on LDThinned
@@ -2554,8 +2554,8 @@ function updateLDtrait() {
         }
         
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2611,9 +2611,9 @@ function updateSNPclip() {
 
     //Update href on
     //Set file links
-    $("#snpclip-snps-link").attr('href', 'tmp/snp_list'+ldInputs.reference+'.txt');
+    $("#snpclip-snps-link").attr('href', 'LDlinkRestWeb/tmp/snp_list'+ldInputs.reference+'.txt');
     $("#snpclip-snps-link").attr('target', 'snp_thin_list_'+ldInputs.reference);
-    $("#snpclip-details-link").attr('href', 'tmp/details'+ldInputs.reference+'.txt');
+    $("#snpclip-details-link").attr('href', 'LDlinkRestWeb/tmp/details'+ldInputs.reference+'.txt');
     $("#snpclip-details-link").attr('target', 'snp_details_'+ldInputs.reference);
 
     // Set populations on LDThinned
@@ -2647,8 +2647,8 @@ function updateSNPclip() {
             initClip(data);
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2679,7 +2679,7 @@ function updateSNPchip() {
         reference : Math.floor(Math.random() * (99999 - 10000 + 1)),
         genome_build: genomeBuild
     };
-    $('#snp_chip_list').attr('href', "tmp/details"+ldInputs.reference+".txt");
+    $('#snp_chip_list').attr('href', "LDlinkRestWeb/tmp/details"+ldInputs.reference+".txt");
     $('#snp_chip_list').attr('target', "chip_details"+ldInputs.reference+".txt");
     //console.dir(ldInputs);
     var url = restServerUrl + "/snpchip";
@@ -2711,8 +2711,8 @@ function updateSNPchip() {
             loadSNPChip(data);
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -2738,8 +2738,8 @@ function initChip() {
             buildPlatformSNPchip(data);
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
 
 }
@@ -3460,13 +3460,13 @@ function initExpressTissues() {
             buildTissueDropdown("ldexpress-tissue-codes", data);
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
+    ajaxRequest.fail(function(jqXHR, textstatus) {
         var errorObj = {
             "error": "Failed to retrieve tissues from database."
         }
         displayError(id, errorObj)
         buildTissueDropdown("ldexpress-tissue-codes", "{}");
-        // displayCommFail(id, jqXHR, textStatus);
+        // displayCommFail(id, jqXHR, textstatus);
     });
 }
 
@@ -3487,8 +3487,8 @@ function initTraitTimestamp() {
             $('#ldtrait-timestamp').text(date + ", " + time + " (" + timezone + ")");
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
 }
 
@@ -3639,27 +3639,27 @@ function updateLDmatrix() {
 	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldmatrix-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldmatrix-downloadSVG" class="text-center" tabindex="-1" >SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPDF" class="text-center" tabindex="-1" >PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadPNG" class="text-center" tabindex="-1" >PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldmatrix-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a></li></ul></div>');
             $("#ldmatrix-downloadSVG").click(function(e) {
                 e.preventDefault();
-                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
+                var matrix_plot = "LDlinkRestWeb/tmp/matrix_plot_" + ldmatrixInputs.reference + ".svg";
                 window.open( matrix_plot, "_blank" )
             });
             $("#ldmatrix-downloadPDF").click(function(e) {
                 e.preventDefault();
-                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
+                var matrix_plot = "LDlinkRestWeb/tmp/matrix_plot_" + ldmatrixInputs.reference + ".pdf";
                 window.open( matrix_plot, "_blank" )
             });
             $("#ldmatrix-downloadPNG").click(function(e) {
                 e.preventDefault();
-                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".png";
+                var matrix_plot = "LDlinkRestWeb/tmp/matrix_plot_" + ldmatrixInputs.reference + ".png";
                 window.open( matrix_plot, "_blank" )
             });
             $("#ldmatrix-downloadJPEG").click(function(e) {
                 e.preventDefault();
-                var matrix_plot = "tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
+                var matrix_plot = "LDlinkRestWeb/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
                 window.open( matrix_plot, "_blank" )
             });
             
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
+            var fileURL = "/LDlinkRestWeb/tmp/matrix_plot_" + ldmatrixInputs.reference + ".jpeg";
             checkFile(id, fileURL, 180);
 
             $('#' + id + '-results-container').show();
@@ -3671,8 +3671,8 @@ function updateLDmatrix() {
         $("#"+id+"-loading").hide();
 
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -3685,8 +3685,8 @@ function updateLDmatrix() {
 }
 
 function addLDMatrixHyperLinks(request) {
-    $('#ldmatrix-DPrime').attr('href', 'tmp/d_prime_' + request + '.txt');
-    $('#ldmatrix-R2').attr('href', 'tmp/r2_' + request + '.txt');
+    $('#ldmatrix-DPrime').attr('href', 'LDlinkRestWeb/tmp/d_prime_' + request + '.txt');
+    $('#ldmatrix-R2').attr('href', 'LDlinkRestWeb/tmp/r2_' + request + '.txt');
 }
 /*
 function updateLDproxyProgressBar(id, seconds) {
@@ -3809,10 +3809,10 @@ function updateLDproxy() {
 
     var proxy_build = genomeBuild == 'grch37' ? 'hg19' : 'hg38'
     $('#ldproxy-genome').attr('href',
-        'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + proxy_build + '&hgt.customText=http://'+location.hostname+'/tmp/track'
+        'https://genome.ucsc.edu/cgi-bin/hgTracks?db=' + proxy_build + '&hgt.customText=http://'+location.hostname+'/LDlinkRestWeb/tmp/track'
         + ldproxyInputs.reference + '.txt');
    
-    $('#ldproxy-results-link').attr('href','tmp/proxy' + ldproxyInputs.reference + '.txt');
+    $('#ldproxy-results-link').attr('href','LDlinkRestWeb/tmp/proxy' + ldproxyInputs.reference + '.txt');
     var url = restServerUrl + "/ldproxy";
     var ajaxRequest = $.ajax({
         type : "GET",
@@ -3859,27 +3859,27 @@ function updateLDproxy() {
 	        $('#' + id + '-export-dropdown').empty().prepend('<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldproxy-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldproxy-downloadSVG" class="text-center" tabindex="-1" >SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPDF" class="text-center" tabindex="-1" >PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadPNG" class="text-center" tabindex="-1" >PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldproxy-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a></li></ul></div>');
             $("#ldproxy-downloadSVG").click(function(e) {
                 e.preventDefault();
-                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
+                var proxy_plot = "LDlinkRestWeb/tmp/proxy_plot_" + ldproxyInputs.reference + ".svg";
                 window.open( proxy_plot, "_blank" )
             });
             $("#ldproxy-downloadPDF").click(function(e) {
                 e.preventDefault();
-                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
+                var proxy_plot = "LDlinkRestWeb/tmp/proxy_plot_" + ldproxyInputs.reference + ".pdf";
                 window.open( proxy_plot, "_blank" )
             });
             $("#ldproxy-downloadPNG").click(function(e) {
                 e.preventDefault();
-                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".png";
+                var proxy_plot = "LDlinkRestWeb/tmp/proxy_plot_" + ldproxyInputs.reference + ".png";
                 window.open( proxy_plot, "_blank" )
             });
             $("#ldproxy-downloadJPEG").click(function(e) {
                 e.preventDefault();
-                var proxy_plot = "tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
+                var proxy_plot = "LDlinkRestWeb/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
                 window.open( proxy_plot, "_blank" )
             });
 
             // enable button once .svg file is generated from subprocess
-            var fileURL = "/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
+            var fileURL = "/LDlinkRestWeb/tmp/proxy_plot_" + ldproxyInputs.reference + ".jpeg";
             checkFile(id, fileURL, 180);
 
             $('#' + id + '-results-container').show();
@@ -3890,8 +3890,8 @@ function updateLDproxy() {
         $("#"+id+"-loading").hide();
 
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -3910,7 +3910,7 @@ function hideLoadingIcon(ajaxRequest, id) {
 
 function getLDProxyResults(jsonfile) {
     var id = "ldproxy";
-    var url = "tmp/"+jsonfile;
+    var url = "LDlinkRestWeb/tmp/"+jsonfile;
     //console.info("Here is the LOG file");
     //console.log(url);
 
@@ -3925,15 +3925,15 @@ function getLDProxyResults(jsonfile) {
         }
 
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     hideLoadingIcon(ajaxRequest, id);
 }
 
 function getLDAssocResults(jsonfile) {
     var id = "ldassoc";
-    var url = "tmp/"+jsonfile;
+    var url = "LDlinkRestWeb/tmp/"+jsonfile;
     //console.info("Here is the LOG file");
     //console.log(url);
 
@@ -3992,15 +3992,15 @@ function getLDAssocResults(jsonfile) {
 
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     hideLoadingIcon(ajaxRequest, id);
 }
 
 function getLDmatrixResults(jsonfile, request) {
     var id = "ldmatrix";
-    var url = "tmp/matrix"+jsonfile;
+    var url = "LDlinkRestWeb/tmp/matrix"+jsonfile;
 
     var ajaxRequest = $.ajax({
         type : "GET",
@@ -4014,8 +4014,8 @@ function getLDmatrixResults(jsonfile, request) {
             $('#'+id+"-download-links").show();
         }
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
     });
@@ -4080,10 +4080,10 @@ function updateLDpair() {
         }
         $("#ldpair_results").text("Download Results");
         $('#ldpair_results').css("text-decoration", "underline");
-        $("#ldpair_results").attr("href", "tmp/LDpair_" + data[0]['request'] + ".txt");
+        $("#ldpair_results").attr("href", "LDlinkRestWeb/tmp/LDpair_" + data[0]['request'] + ".txt");
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -4492,7 +4492,7 @@ function updateLDpop() {
         }
         $("#ldpop_results").text("Download Table");
         $('#ldpop_results').css("text-decoration", "underline");
-        $("#ldpop_results").attr("href", "tmp/LDpop_"+reference+".txt");
+        $("#ldpop_results").attr("href", "LDlinkRestWeb/tmp/LDpop_"+reference+".txt");
         $("#new-ldpop_filter").after($("#ldpop-download-table"));
         if(!$('#new-ldpop_topInfo').length) {
             $('<div id="new-ldpop_topInfo"></div>').prependTo('#new-ldpop_wrapper');
@@ -4500,8 +4500,8 @@ function updateLDpop() {
         $("#new-ldpop_topInfo").html($("#new-ldpop_info").clone().prop('id', 'new-ldpop_info_clone'));
         $("#new-ldpop_info_clone").css("padding", "0px 10px 0px 0px");
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -4559,8 +4559,8 @@ function updateAPIaccess() {
         }
         $('#' + id + '-loading').hide();
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -4609,8 +4609,8 @@ function updateAPIblocked() {
         // change cancel to done button
         $('#apiblocked-done').val("Done");
     });
-    ajaxRequest.fail(function(jqXHR, textStatus) {
-        displayCommFail(id, jqXHR, textStatus);
+    ajaxRequest.fail(function(jqXHR, textstatus) {
+        displayCommFail(id, jqXHR, textstatus);
     });
     ajaxRequest.always(function() {
         $btn.button('reset');
@@ -4649,12 +4649,12 @@ function displayError(id, data) {
     return error;
 }
 
-function displayCommFail(id, jqXHR, textStatus) {
-    //console.log(textStatus);
+function displayCommFail(id, jqXHR, textstatus) {
+    //console.log(textstatus);
     //console.dir(jqXHR);
-    console.warn("CommFail\n"+"Status: "+textStatus+"\n"+jqXHR.statusText);
+    console.warn("CommFail\n"+"status: "+textstatus+"\n"+jqXHR.statusText);
     // var message = jqXHR.responseText;
-    // message += "<p>Internal Server Error: " + jqXHR.status + " - " + textStatus + "</p>";
+    // message += "<p>Internal Server Error: " + jqXHR.status + " - " + textstatus + "</p>";
     // message = message.replace("[no address given]", "NCILDlinkWebAdmin@mail.nih.gov");
    var message = "<p>Internal server error. Please contact LDlink admin.</p>"
     if (jqXHR.status === 504){
@@ -4670,24 +4670,24 @@ function displayCommFail(id, jqXHR, textStatus) {
 }
 
 
-// function displayCommFail(id, jqXHR, textStatus) {
+// function displayCommFail(id, jqXHR, textstatus) {
 //     console.dir(jqXHR);
-//     console.warn("CommFail\n"+"Status: "+textStatus);
+//     console.warn("CommFail\n"+"status: "+textstatus);
 
 //     var message;
 //     var errorThrown = "";
 //     console.warn("header: " + jqXHR
-//     + "\ntextStatus: " + textStatus
+//     + "\ntextstatus: " + textstatus
 //     + "\nerrorThrown: " + errorThrown);
-//     //alert('Communication problem: ' + textStatus);
+//     //alert('Communication problem: ' + textstatus);
 //     // ERROR
 //     if(jqXHR.status == 500) {
-//         message = 'Internal Server Error: ' + textStatus + "<br>";
+//         message = 'Internal Server Error: ' + textstatus + "<br>";
 //         message += jqXHR.responseText;
 //         message += "<br>code("+jqXHR.status+")";
 //         message_type = 'warning';
 //     } else {
-//         message = jqXHR.statusText+" ("+ textStatus + ")<br><br>";
+//         message = jqXHR.statusText+" ("+ textstatus + ")<br><br>";
 //         message += "The server is temporarily unable to service your request due to maintenance downtime or capacity problems. Please try again later.<br>";
 //         message += "<br>code("+jqXHR.status+")";
 //         message_type = 'error';
@@ -4744,8 +4744,8 @@ function displayCommFail(id, jqXHR, textStatus) {
 // }
 
 function addLDHapHyperLinks(request, ldhapTable) {
-    $('#ldhap-snps').attr('href', 'tmp/snps_' + request + '.txt');
-    $('#ldhap-haplotypes').attr('href', 'tmp/haplotypes_' + request + '.txt');
+    $('#ldhap-snps').attr('href', 'LDlinkRestWeb/tmp/snps_' + request + '.txt');
+    $('#ldhap-haplotypes').attr('href', 'LDlinkRestWeb/tmp/haplotypes_' + request + '.txt');
 
     var server;
     var params = {};
