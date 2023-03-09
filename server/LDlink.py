@@ -6,8 +6,7 @@ import argparse
 import json
 import time
 import random
-import logging
-from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
 from functools import wraps
 from socket import gethostname
 from flask import Flask, request, jsonify, current_app, send_from_directory
@@ -33,8 +32,7 @@ param_list = get_config()
 tmp_dir = param_list['tmp_dir']
 log_level = param_list['log_level']
 
-if not os.path.exists(tmp_dir):
-    os.makedirs(tmp_dir)
+Path(tmp_dir).mkdir(parents=True, exist_ok=True) 
 
 ### Initialize Flask App ###
 
@@ -122,13 +120,7 @@ def requires_token(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         # Set data directories using config.yml
-        env = param_list['env']
-        if env == 'local' :
-            url_root = 'http://localhost:5000/'
-        elif env == 'prod':
-            url_root = 'https://ldlink.nci.nih.gov/'
-        else:
-            url_root = 'https://ldlink-' + env + '.nci.nih.gov/'
+        url_root = param_list['base_url']
         require_token = bool(param_list['require_token'])
         token_expiration = bool(param_list['token_expiration'])
         token_expiration_days = param_list['token_expiration_days']
