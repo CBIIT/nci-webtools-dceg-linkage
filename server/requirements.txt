@@ -10,4 +10,4 @@ python-dateutil
 python-dotenv
 requests
 selenium==3.3.0
-svgutils
+svgutils==0.3.0
