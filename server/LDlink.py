@@ -485,16 +485,16 @@ def ping():
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
 
 # Route to check file exist status 
-@app.route('/LDlinkRestWeb/status/<path:filename>', strict_slashes=False)
-@app.route('/status/<path:filename>', strict_slashes=False)
+@app.route('/LDlinkRestWeb/status/<filename>', strict_slashes=False)
+@app.route('/status/<filename>', strict_slashes=False)
 def status(filename):
     filepath = safe_join(tmp_dir, filename)
     return jsonify(os.path.isfile(filepath))
 
 
 # Route to serve temporary files
-@app.route('/LDlinkRestWeb/tmp/<path:filename>', strict_slashes=False)
-@app.route('/tmp/<path:filename>', strict_slashes=False)
+@app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
+@app.route('/tmp/<filename>', strict_slashes=False)
 def send_temp_file(filename):
     return send_from_directory(tmp_dir, filename, as_attachment=True)
 
