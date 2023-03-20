@@ -5723,5 +5723,5 @@ closeBtn.addEventListener('click', ()=>{
 setTimeout(()=>{
     //flashBanner.style.transform = "translateY(-70vh)";
     flashBanner.style.display="none";
-},30000)
+},20000)
 
