@@ -1182,6 +1182,7 @@ def ldpair():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
+ 
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDpop
@@ -1267,6 +1268,7 @@ def ldpop():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDpop (%ss)" % (round(end_time - start_time, 2)))
+    print("ERRR",out_json)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDproxy

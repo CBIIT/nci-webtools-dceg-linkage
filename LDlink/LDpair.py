@@ -152,6 +152,7 @@ def calculate_pair(snp_pairs, pop, web, genome_build, request):
     
         # Combine phased genotypes
         geno = {}
+        #print(head1,"allele:",allele1,"geno",geno1)
         for i in range(9, len(head1)):
             geno[head1[i]] = [allele1[geno1[i]], ".."]
 
