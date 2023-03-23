@@ -532,6 +532,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
     if "," in geno[3] or "," in geno[4]:
         # print('handle error: snp + " is not a biallelic variant."')
         queryVariantWarnings.append([snp_coord[0], "NA", "Variant is not a biallelic."])
+        output["error"]= snp_coord[0] + " variant is not a biallelic." + str(output["warning"] if "warning" in output else "")
   
     index = []
     for i in range(9, len(head)):

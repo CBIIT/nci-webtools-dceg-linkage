@@ -194,7 +194,7 @@ def calculate_pop(snp1, snp2, pop, r2_d, web, genome_build, request=None):
 
     temp = [snp2, str(snp2_coord['chromosome']), snp2_coord[genome_build_vars[genome_build]['position']]]
     (vcf2, head2, output2) = get_query_variant_c(temp, pop_split, str(request), genome_build, False,output)   
-    if vcf1 == None or vcf2 == None:
+    if vcf1 == None or vcf2 == None or "error" in output:
         #if web:
         output = json.dumps(output, sort_keys=True, indent=2)
         return output

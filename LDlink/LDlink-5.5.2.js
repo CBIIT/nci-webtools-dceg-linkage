@@ -1,4 +1,4 @@
-var ldlink_version = "Version 5.5.1";
+var ldlink_version = "Version 5.5.2";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nci.nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -67,7 +67,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-5.5.1.html", function (data) {
+    $.get("news-5.5.2.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -1469,12 +1469,13 @@ function ldproxy_rs_results_link(data, type, row) {
     if(!data.includes("rs") || data.length <= 2) {
         return ".";
     }
-    var server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+    var server = 'http://www.ncbi.nlm.nih.gov/snp/';
     var rs_number = data.substring(2);
     var params = {
         rs : rs_number
     };
-    var href = server + "?" + $.param(params);
+    //var href = server + "?" + $.param(params);
+    var href = server  + data;
     var target = 'rs_number_' + Math.floor(Math.random() * (99999 - 10000 + 1));
 //  var href = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=128';
     var link;
@@ -1856,7 +1857,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-5.5.1.html');
+    $('#help-tab').load('help-5.5.2.html');
 }
 
 function calculate(e) {
@@ -2990,14 +2991,14 @@ function populateSNPlist(data) {
 }
 
 function anchorRSnumber(rs_number) {
-    var server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
-
+    //var server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+    var server = 'http://www.ncbi.nlm.nih.gov/snp/';
     var raw_rs_number = rs_number.substring(2);
     var params = {
         rs : raw_rs_number
     };
-    var url = server + "?" + $.param(params);
-
+    //var url = server + "?" + $.param(params);
+    var url = server + rs_number;
     return '<a href="'+url+'" target="rs_number_'+rs_number+'">'+rs_number+'</a>';
 }
 
@@ -4757,7 +4758,8 @@ function addLDHapHyperLinks(request, ldhapTable) {
     $.each(ldhapTable.rows, function(index, value) {
         //console.log(index + ": " + value);
         // Create RSnumber link (Cluster Report)
-        server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+        //server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+        var server = 'http://www.ncbi.nlm.nih.gov/snp/';
         // snp1-rsum
         rs_number = value.RS.substring(2);
         params = {
@@ -4782,6 +4784,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
             'hgFind.matches' : rs_number
         };
         url = server + "?" + $.param(params);
+        //url = server  + value.RS;
         $('#Coord_hap_' + index + ' a:first-child').attr('href', url);
     });
 
@@ -4797,9 +4800,12 @@ function addLDpairHyperLinks(data) {
     //
     // Cluster Report:
     //
-    server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+    //server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
+    var server = 'http://www.ncbi.nlm.nih.gov/snp/';
+    //url = server + rs_number;
     // snp1-rsum
     rs_number = data.snp1.rsnum.substring(2);
+    console.log(data)
     params = {
         rs : rs_number
     };

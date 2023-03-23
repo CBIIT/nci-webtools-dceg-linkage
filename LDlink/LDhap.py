@@ -197,7 +197,12 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                     alleles = a2+"="+str(round(f1, 3))+", " + \
                         a1+"="+str(round(f0, 3))
                 allele_lst.append(alleles)
-
+            else:
+                if len(snp_dict) > 1:
+                    output["warning"] = str(output["warning"] if "warning" in output else "")  + rs_input+ " variant is not a biallelic"
+                else:
+                    output["error"] = str(output["error"] if "error" in output else "")  + rs_input+ " variant is not a biallelic"
+                    return(json.dumps(output, sort_keys=True, indent=2))
     haps = {}
     for i in range(len(index)):
         h1 = "_".join(hap1[i])
