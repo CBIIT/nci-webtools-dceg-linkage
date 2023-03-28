@@ -273,12 +273,15 @@ def register_web():
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
+    print(request)
+    print(request.url_root)
     app.logger.debug('register_web params ' + json.dumps({
         'firstname': firstname,
         'lastname': lastname,
         'email': email,
         'institution': institution,
-        'reference': reference
+        'reference': reference,
+        'URL_root':request.url_root
     }, indent=4, sort_keys=True))
     try:
         out_json = register_user(firstname, lastname, email, institution, reference, request.url_root)
