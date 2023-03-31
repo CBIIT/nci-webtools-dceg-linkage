@@ -203,7 +203,10 @@ def calculate_hap(snplst, pop, request, web, genome_build):
                 else:
                     output["error"] = str(output["error"] if "error" in output else "")  + rs_input+ " variant is not a biallelic"
                     return(json.dumps(output, sort_keys=True, indent=2))
+<<<<<<< HEAD
 
+=======
+>>>>>>> ldlink_5.5.2-dev
     haps = {}
     for i in range(len(index)):
         h1 = "_".join(hap1[i])

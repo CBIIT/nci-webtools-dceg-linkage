@@ -4759,7 +4759,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
         //console.log(index + ": " + value);
         // Create RSnumber link (Cluster Report)
         //server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
-         var server = 'http://www.ncbi.nlm.nih.gov/snp/';
+        var server = 'http://www.ncbi.nlm.nih.gov/snp/';
         // snp1-rsum
         rs_number = value.RS.substring(2);
         params = {
@@ -4785,6 +4785,7 @@ function addLDHapHyperLinks(request, ldhapTable) {
             'hgFind.matches' : rs_number
         };
         url = server + "?" + $.param(params);
+        //url = server  + value.RS;
         $('#Coord_hap_' + index + ' a:first-child').attr('href', url);
     });
 
@@ -4802,8 +4803,10 @@ function addLDpairHyperLinks(data) {
     //
     //server = 'http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi';
     var server = 'http://www.ncbi.nlm.nih.gov/snp/';
+    //url = server + rs_number;
     // snp1-rsum
     rs_number = data.snp1.rsnum.substring(2);
+    console.log(data)
     params = {
         rs : rs_number
     };
