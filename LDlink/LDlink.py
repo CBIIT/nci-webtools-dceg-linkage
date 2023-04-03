@@ -274,6 +274,7 @@ def register_web():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
     url_path = request.headers.get('Referer')
+    print(request.headers)
     #will return http://nciws-d971-c.nci.nih.gov:8090/
     #print(request.url_root) 
     app.logger.debug('register_web params ' + json.dumps({
@@ -311,7 +312,7 @@ def block_user():
     app.logger.debug('block_user params ' + json.dumps({
         'email': email
     }, indent=4, sort_keys=True))
-    print("request host:"+request.headers.get('Referer'))
+    print("request host:"+request.headers)
     try:
         out_json = blockUser(email, request.headers.get('Host'))
         if out_json is None:
