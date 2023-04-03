@@ -273,7 +273,8 @@ def register_web():
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
-    print(request)
+    print(request.path)
+    print(request.headers.get('Referer'))
     print(request.url_root)
     app.logger.debug('register_web params ' + json.dumps({
         'firstname': firstname,
