@@ -311,6 +311,7 @@ def block_user():
     app.logger.debug('block_user params ' + json.dumps({
         'email': email
     }, indent=4, sort_keys=True))
+    print("request host:"+request.headers.get('Referer'))
     try:
         out_json = blockUser(email, request.headers.get('Host'))
         if out_json is None:
