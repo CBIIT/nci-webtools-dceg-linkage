@@ -62,7 +62,7 @@ def emailUserBlocked(email, email_account, url_root):
     print("sending message blocked")
     new_url_root = url_root.replace('http://', 'https://')
     if ("https" not in new_url_root):
-        new_url_root = "https:"+new_url_root
+        new_url_root = "https://"+new_url_root
     #print(new_url_root)
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Blocked"
@@ -104,7 +104,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     print("sending message justification")
     new_url_root = url_root.replace('http://', 'https://').replace('?tab=apiaccess','')
     if ("https" not in new_url_root):
-        new_url_root = "https:"+new_url_root
+        new_url_root = "https://"+new_url_root
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
