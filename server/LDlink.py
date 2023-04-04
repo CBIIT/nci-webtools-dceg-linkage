@@ -197,7 +197,7 @@ def apiblocked_web():
     institution = request.args.get('institution', False)
     registered = request.args.get('registered', False)
     blocked = request.args.get('blocked', False)
-    justification = request.args.get('justification', False)
+    justification = request.args.get('justification', False) 
     app.logger.debug('apiblocked_web params ' + json.dumps({
         'firstname': firstname,
         'lastname': lastname,
@@ -208,7 +208,7 @@ def apiblocked_web():
         'justification': justification
     }, indent=4, sort_keys=True))
     try:
-        out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.url_root)
+        out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.headers.get('Host'))
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -225,15 +225,20 @@ def register_web():
     email = request.args.get('email', False)
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
+    url_path = request.headers.get('Referer')
+    print(request.headers)
+    #will return http://nciws-d971-c.nci.nih.gov:8090/
+    #print(request.url_root) 
     app.logger.debug('register_web params ' + json.dumps({
         'firstname': firstname,
         'lastname': lastname,
         'email': email,
         'institution': institution,
-        'reference': reference
+        'reference': reference,
+        'URL_root':url_path
     }, indent=4, sort_keys=True))
     try:
-        out_json = register_user(firstname, lastname, email, institution, reference, request.url_root)
+        out_json = register_user(firstname, lastname, email, institution, reference, url_path)
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -259,8 +264,9 @@ def block_user():
     app.logger.debug('block_user params ' + json.dumps({
         'email': email
     }, indent=4, sort_keys=True))
+    print(request.headers)
     try:
-        out_json = blockUser(email, request.url_root)
+        out_json = blockUser(email, request.headers.get('Host'))
         if out_json is None:
             out_json =  {
                 "message": "User email not found: " + str(email)
@@ -1143,6 +1149,7 @@ def ldpair():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
+ 
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDpop
@@ -1228,6 +1235,7 @@ def ldpop():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDpop (%ss)" % (round(end_time - start_time, 2)))
+    print("ERRR",out_json)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDproxy

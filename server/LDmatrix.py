@@ -200,6 +200,16 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
                 alleles = a1 + "/" + a2
                 allele_lst.append(alleles)
 
+            else:
+                if len(snp_dict) > 1:
+                    output["warning"] = str(output["warning"] if "warning" in output else "")  + rs_input+ " variant is not a biallelic"
+                else:
+                    output["error"] = str(output["error"] if "error" in output else "")  + rs_input+ " variant is not a biallelic"
+                    json_output = json.dumps(output, sort_keys=True, indent=2)
+                    print(json_output, file=out_json)
+                    out_json.close()
+                    return("", "")
+
     
     # Calculate Pairwise LD Statistics
     all_haps = hap1 + hap2

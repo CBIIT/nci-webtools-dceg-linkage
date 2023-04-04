@@ -47,9 +47,10 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
     packet['To'] = email
     message = ''
     if token_expiration:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="'+ new_url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br>' + 'Your token expires on: ' + expiration + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="'+ new_url_root + '"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
     else:
-        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="' + new_url_root + '?tab=apiaccess"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
+        message = 'Dear ' + firstname + ', ' + '<br><br>' + 'Thank you for registering to use the LDlink API! <br><br>' + 'Your token is: ' + token + '<br><br>' + 'Please include this token as part of the submitted argument in your LDlink API requests. Examples of how to use a LDlink token are described in the <a href="' + new_url_root + '"><u>API Access</u></a> tab. Please do not share this token with other users as misuse of this token will result in potential blocking or termination of API use. <br><br>Thanks again for your interest in LDlink,<br><br>' + 'LDlink Web Admin'
+    #print(MIMEText(message, 'html'))
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, email, packet)
@@ -58,15 +59,19 @@ def emailUser(email, token, expiration, firstname, token_expiration, email_accou
 def emailUserBlocked(email, email_account, url_root):
     print("sending message blocked")
     new_url_root = url_root.replace('http://', 'https://')
+    if ("https" not in new_url_root):
+        new_url_root = "https:"+new_url_root
+    print(new_url_root)
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Blocked"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
     packet['To'] = email
     message = "Dear " + str(email) + ", " + "<br><br>"
     message += "Your LDlink API access token has been blocked.<br><br>"
-    message += "To unblock, resubmit a request in LDlink's <a href=\"" + new_url_root + "?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
+    message += "To unblock, resubmit a request in LDlink's <a href=\"" + new_url_root + "/?tab=apiaccess\"><u>API Access</u></a> tab with the same email address.<br><br>"
     message += "Please contact the LDlink Web Admin (NCILDlinkWebAdmin@mail.nih.gov) for any questions or concerns.<br><br>"
     message += "LDlink Web Admin"
+    print(MIMEText(message, 'html'))
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, email, packet)
@@ -93,7 +98,9 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     api_superuser = config["email_superuser"]
     api_superuser_token = getToken(api_superuser)
     print("sending message justification")
-    new_url_root = url_root.replace('http://', 'https://')
+    new_url_root = url_root.replace('http://', 'https://').replace('?tab=apiaccess','')
+    if ("https" not in new_url_root):
+        new_url_root = "https:"+new_url_root
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
@@ -113,7 +120,8 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     message += "<br>Blocked: " + str(bool_blocked)
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
-    message += '<br><br><u><a href="' + new_url_root + 'LDlinkRestWeb/apiaccess/unblock_user?email=' + email + '&token=' + api_superuser_token + '">Click here to unblock user.</a></u>'
+    message += '<br><br><u><a href="' + str(new_url_root) + '/LDlinkRestWeb/apiaccess/unblock_user?email=' + str(email) + '&token=' + str(api_superuser_token) + '">Click here to unblock user.</a></u>'
+    print(MIMEText(message, 'html'))
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, api_superuser, packet)
