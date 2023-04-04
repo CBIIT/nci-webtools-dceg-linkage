@@ -1,4 +1,4 @@
-var ldlink_version = "Version 5.5.2";
+var ldlink_version = "Version 5.5.3";
 
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nih.gov",port:9090,route : "LDlinkRestWeb"}
@@ -67,7 +67,7 @@ $(document).ready(function() {
     });
 
     // Load news text from news.html to news-container div
-    $.get("news-5.5.2.html", function (data) {
+    $.get("news-5.5.3.html", function (data) {
         let tmpData = data.split("<p>")
         let i = 0;
         var newsHTMLList = [];
@@ -1857,7 +1857,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-    $('#help-tab').load('help-5.5.2.html');
+    $('#help-tab').load('help-5.5.3.html');
 }
 
 function calculate(e) {
