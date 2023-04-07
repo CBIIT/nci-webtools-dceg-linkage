@@ -207,8 +207,11 @@ def apiblocked_web():
         'blocked': blocked,
         'justification': justification
     }, indent=4, sort_keys=True))
+    url_path = request.headers.get('X-Forwarded-Host')
+    if url_path== None:
+        url_path= request.url_root
     try:
-        out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, request.headers.get('Host'))
+        out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_path)
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -226,7 +229,10 @@ def register_web():
     institution = request.args.get('institution', False)
     reference = request.args.get('reference', False)
     url_path = request.headers.get('Referer')
-    print(request.headers)
+    if url_path == None:
+        url_path == request.url_root
+
+    #print(request.headers)
     #will return http://nciws-d971-c.nci.nih.gov:8090/
     #print(request.url_root) 
     app.logger.debug('register_web params ' + json.dumps({
@@ -264,9 +270,11 @@ def block_user():
     app.logger.debug('block_user params ' + json.dumps({
         'email': email
     }, indent=4, sort_keys=True))
-    print(request.headers)
+    url_path = request.headers.get('X-Forwarded-Host')
+    if url_path== None:
+        url_path= request.url_root
     try:
-        out_json = blockUser(email, request.headers.get('Host'))
+        out_json = blockUser(email, url_path)
         if out_json is None:
             out_json =  {
                 "message": "User email not found: " + str(email)

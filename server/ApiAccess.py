@@ -60,8 +60,8 @@ def emailUserBlocked(email, email_account, url_root):
     print("sending message blocked")
     new_url_root = url_root.replace('http://', 'https://')
     if ("https" not in new_url_root):
-        new_url_root = "https:"+new_url_root
-    print(new_url_root)
+        new_url_root = "https://"+new_url_root
+    #print(new_url_root)
     packet = MIMEMultipart()
     packet['Subject'] = "LDLink API Access Token Blocked"
     packet['From'] = "NCI LDlink Web Admin" + " <NCILDlinkWebAdmin@mail.nih.gov>"
@@ -100,7 +100,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     print("sending message justification")
     new_url_root = url_root.replace('http://', 'https://').replace('?tab=apiaccess','')
     if ("https" not in new_url_root):
-        new_url_root = "https:"+new_url_root
+        new_url_root = "https://"+new_url_root
     bool_blocked = ""
     if blocked == "1":
         bool_blocked = "True"
@@ -121,7 +121,7 @@ def emailJustification(firstname, lastname, email, institution, registered, bloc
     message += "<br><br>Justification: " + str(justification)
     message += "<br><br>Please review user details and justification. To unblock the user, click the link below."
     message += '<br><br><u><a href="' + str(new_url_root) + '/LDlinkRestWeb/apiaccess/unblock_user?email=' + str(email) + '&token=' + str(api_superuser_token) + '">Click here to unblock user.</a></u>'
-    print(MIMEText(message, 'html'))
+    #print(MIMEText(message, 'html'))
     packet.attach(MIMEText(message, 'html'))
     smtp = smtp_connect(email_account)
     smtp_send(smtp, email_account, api_superuser, packet)
