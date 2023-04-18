@@ -138,13 +138,13 @@ def requires_token(f):
                 if checkBlocked(token):
                     return sendTraceback("Your API token has been blocked. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 # Check if token is locked (exclude check on api server 2)
-                if ("LDlinkRest2" not in request.full_path):
+                if ("LDlinkRest" in request.full_path):
                     if checkLocked(token):
                         return sendTraceback("Concurrent API requests restricted. Please limit usage to sequential requests only. Contact system administrator if you have issues accessing API: NCILDlinkWebAdmin@mail.nih.gov")
                 # Check if token has been authorized to access api server 2
-                if ("LDlinkRest2" in request.full_path):
-                    if not checkApiServer2Auth(token):
-                        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
+                #if ("LDlinkRest2" in request.full_path):
+                #    if not checkApiServer2Auth(token):
+                #        return sendTraceback("Your token is not authorized to access this API endpoint. Please contact system administrator: NCILDlinkWebAdmin@mail.nih.gov")
                 module = getModule(request.full_path)
                 logAccess(token, module)
                 return f(*args, **kwargs)
@@ -488,7 +488,7 @@ def root():
 
 # Ping route for API and Web instances
 @app.route('/LDlinkRest/ping/', strict_slashes=False)
-@app.route('/LDlinkRest2/ping/', strict_slashes=False)
+#@app.route('/LDlinkRest2/ping/', strict_slashes=False)
 @app.route('/ping/', strict_slashes=False)
 def ping():
     print("pong")
@@ -514,7 +514,7 @@ def send_temp_file(filename):
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])
-@app.route('/LDlinkRest2/upload', methods=['POST'])
+#@app.route('/LDlinkRest2/upload', methods=['POST'])
 @app.route('/LDlinkRestWeb/upload', methods=['POST'])
 def upload():
     print("Processing upload")
@@ -548,7 +548,7 @@ def upload():
 
 # Route for LDassoc example GWAS data
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
-@app.route('/LDlinkRest2/ldassoc_example', methods=['GET'])
+#@app.route('/LDlinkRest2/ldassoc_example', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc_example', methods=['GET'])
 def ldassoc_example():
     genome_build = request.args.get('genome_build', 'grch37')
@@ -563,7 +563,7 @@ def ldassoc_example():
 
 # Route to retrieve LDexpress tissue info
 @app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
-@app.route('/LDlinkRest2/ldexpress_tissues', methods=['GET'])
+#@app.route('/LDlinkRest2/ldexpress_tissues', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldexpress_tissues', methods=['GET'])
 def ldexpress_tissues():
     start_time = time.time()
@@ -585,7 +585,7 @@ def ldexpress_tissues():
 
 # Route to retrieve platform data for SNPchip
 @app.route('/LDlinkRest/snpchip_platforms', methods=['GET'])
-@app.route('/LDlinkRest2/snpchip_platforms', methods=['GET'])
+#@app.route('/LDlinkRest2/snpchip_platforms', methods=['GET'])
 @app.route('/LDlinkRestWeb/snpchip_platforms', methods=['GET'])
 def snpchip_platforms():
     start_time = time.time()
@@ -608,7 +608,7 @@ def snpchip_platforms():
 
 # Route to retrieve timestamp from last LDtrait data update
 @app.route('/LDlinkRest/ldtrait_timestamp', methods=['GET'])
-@app.route('/LDlinkRest2/ldtrait_timestamp', methods=['GET'])
+#@app.route('/LDlinkRest2/ldtrait_timestamp', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldtrait_timestamp', methods=['GET'])
 def ldtrait_timestamp():
     start_time = time.time()
@@ -633,7 +633,7 @@ def ldtrait_timestamp():
 
 # Web and API route for LDassoc
 @app.route('/LDlinkRest/ldassoc', methods=['GET'])
-@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
+#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldassoc', methods=['GET'])
 def ldassoc():
     start_time = time.time()
@@ -716,7 +716,7 @@ def ldassoc():
 
 # Web and API route for LDexpress
 @app.route('/LDlinkRest/ldexpress', methods=['POST'])
-@app.route('/LDlinkRest2/ldexpress', methods=['POST'])
+#@app.route('/LDlinkRest2/ldexpress', methods=['POST'])
 @app.route('/LDlinkRestWeb/ldexpress', methods=['POST'])
 @requires_token
 def ldexpress():
@@ -842,7 +842,7 @@ def ldexpress():
 
 # Web and API route for LDhap
 @app.route('/LDlinkRest/ldhap', methods=['GET'])
-@app.route('/LDlinkRest2/ldhap', methods=['GET'])
+#@app.route('/LDlinkRest2/ldhap', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldhap', methods=['GET'])
 @requires_token
 def ldhap():
@@ -932,7 +932,7 @@ def ldhap():
 
 # Web and API route for LDmatrix
 @app.route('/LDlinkRest/ldmatrix', methods=['GET', 'POST'])
-@app.route('/LDlinkRest2/ldmatrix', methods=['GET', 'POST'])
+#@app.route('/LDlinkRest2/ldmatrix', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldmatrix', methods=['GET'])
 @requires_token
 def ldmatrix():
@@ -1048,7 +1048,7 @@ def ldmatrix():
 
 # Web and API route for LDpair
 @app.route('/LDlinkRest/ldpair', methods=['GET', 'POST'])
-@app.route('/LDlinkRest2/ldpair', methods=['GET', 'POST'])
+#@app.route('/LDlinkRest2/ldpair', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/ldpair', methods=['GET'])
 @requires_token
 def ldpair():
@@ -1162,7 +1162,7 @@ def ldpair():
 
 # Web and API route for LDpop
 @app.route('/LDlinkRest/ldpop', methods=['GET'])
-@app.route('/LDlinkRest2/ldpop', methods=['GET'])
+#@app.route('/LDlinkRest2/ldpop', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldpop', methods=['GET'])
 @requires_token
 def ldpop():
@@ -1248,7 +1248,7 @@ def ldpop():
 
 # Web and API route for LDproxy
 @app.route('/LDlinkRest/ldproxy', methods=['GET'])
-@app.route('/LDlinkRest2/ldproxy', methods=['GET'])
+#@app.route('/LDlinkRest2/ldproxy', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldproxy', methods=['GET'])
 @requires_token
 def ldproxy():
@@ -1345,7 +1345,7 @@ def ldproxy():
 
 # Web and API route for LDtrait
 @app.route('/LDlinkRest/ldtrait', methods=['POST'])
-@app.route('/LDlinkRest2/ldtrait', methods=['POST'])
+#@app.route('/LDlinkRest2/ldtrait', methods=['POST'])
 @app.route('/LDlinkRestWeb/ldtrait', methods=['POST'])
 @requires_token
 def ldtrait():
@@ -1503,7 +1503,7 @@ def ldtrait():
 
 # Web and API route for SNPchip
 @app.route('/LDlinkRest/snpchip', methods=['GET', 'POST'])
-@app.route('/LDlinkRest2/snpchip', methods=['GET', 'POST'])
+#@app.route('/LDlinkRest2/snpchip', methods=['GET', 'POST'])
 @app.route('/LDlinkRestWeb/snpchip', methods=['GET', 'POST'])
 @requires_token
 def snpchip():
@@ -1593,7 +1593,7 @@ def snpchip():
 
 # Web and API route for SNPclip
 @app.route('/LDlinkRest/snpclip', methods=['POST'])
-@app.route('/LDlinkRest2/snpclip', methods=['POST'])
+#@app.route('/LDlinkRest2/snpclip', methods=['POST'])
 @app.route('/LDlinkRestWeb/snpclip', methods=['POST'])
 @requires_token
 def snpclip():
