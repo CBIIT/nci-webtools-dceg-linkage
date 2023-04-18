@@ -73,6 +73,7 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --header-buffer-size 50000000 \
     --response-buffer-size 50000000 \
     --limit-request-body 5368709120 \
+    --max-clients 100 \
     --initial-workers 1 \
     --socket-timeout 9000 \
     --queue-timeout 9000 \
