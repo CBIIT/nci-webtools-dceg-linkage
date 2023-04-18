@@ -214,7 +214,10 @@ def setUserApi2Auth(email, authValue):
     }
     db = connectMongoDBReadOnly(False,True)
     users = db.api_users
-    update_operation = users.find_one_and_update({"email": email}, { "$set": {"api2auth": int(authValue)}})
+    locked = 0
+    if int(authValue) == 1:
+        locked = -1
+    update_operation = users.find_one_and_update({"email": email}, { "$set": {"api2auth": int(authValue),"locked":locked}})
     if update_operation is None:
         return None
     return out_json
