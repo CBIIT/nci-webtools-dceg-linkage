@@ -80,6 +80,17 @@ body {
 	background: transparent;
 }
 
+.navbar-nav > li {
+	border-top: 4px solid transparent;
+	border-bottom: 4px solid transparent;
+}
+
+.navbar-nav > li:hover {
+	border-top: 4px solid grey;
+	border-bottom: 4px solid #f5ab35;
+	background-color: grey;
+}
+
 /* Create yellow bar on active nav button */
 .navbar-nav li.active {
 	border-bottom: 4px solid #f5ab35;
