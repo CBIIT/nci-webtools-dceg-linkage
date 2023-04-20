@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
-from dotenv import load_dotenv
+import datetime
+import dateutil.parser
 from os import environ
+from dotenv import load_dotenv
+from LDcommon import connectMongoDBReadOnly
 
 load_dotenv()
 
@@ -50,3 +53,30 @@ def get_config():
 def array_split(arr, n):
     size, rem = divmod(len(arr), n)
     return [arr[i * size + min(i, rem):(i + 1) * size + min(i + 1, rem)] for i in range(n)]
+
+# get current date and time
+def getDatetime():
+    return datetime.datetime.now()
+
+# unlock stale tokens at scheduled time
+def unlock_stale_tokens():
+    db = connectMongoDBReadOnly()
+    users = db.api_users
+    # current datetime
+    present = getDatetime()
+    unlockTokens = []
+    # look at each token
+    for user in users.find():
+        if "locked" in user:
+            locked = user["locked"]
+            if locked != 0 and locked != -1:
+                if isinstance(locked, datetime.datetime):
+                    diff = present - locked
+                else:
+                    diff = present - dateutil.parser.parse(locked, ignoretz=True)
+                diffMinutes = (diff.seconds % 3600) // 60.0
+                # if token is locked for over 15 mins, unlock
+                if diffMinutes > 15.0:
+                    unlockTokens.append(user["token"])
+    for token in unlockTokens:
+        users.find_one_and_update({"token": token}, { "$set": {"locked": 0}})

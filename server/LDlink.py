@@ -20,7 +20,7 @@ from LDexpress import calculate_express, get_ldexpress_tissues
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
-from LDutilites import get_config
+from LDutilites import get_config, unlock_stale_tokens
 from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
@@ -493,6 +493,7 @@ def root():
 def ping():
     print("pong")
     try:
+        unlock_stale_tokens()
         return "true"
     except Exception as e:
         exc_obj = e
