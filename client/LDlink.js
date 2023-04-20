@@ -532,7 +532,7 @@ function checkFile(id, fileURL, retries) {
 }
 function initAPIExamples() {
     $(".apiaccess-examples").each( function(index) { 
-        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nih.gov', window.location.origin);
+        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nci.nih.gov', window.location.origin);
     });
 }
 function setBootstrapSelector(id, value) {
