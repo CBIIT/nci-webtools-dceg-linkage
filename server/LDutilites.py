@@ -38,6 +38,7 @@ def get_config():
     config['token_expiration'] = environ.get('TOKEN_EXPIRATION') == 'YES'
     config['token_expiration_days'] = int(environ.get('TOKEN_EXPIRATION_DAYS'))
     config['restrict_concurrency'] = environ.get('RESTRICT_CONCURRENCY') == 'YES'
+    config['token_lock_timeout'] = int(environ.get('TOKEN_LOCK_TIMEOUT', 900))
 
     config['email_smtp_host'] = environ.get('EMAIL_SMTP_HOST')
     config['email_admin'] = environ.get('EMAIL_ADMIN')
@@ -59,7 +60,7 @@ def getDatetime():
     return datetime.datetime.now()
 
 # unlock stale tokens at scheduled time
-def unlock_stale_tokens():
+def unlock_stale_tokens(lock_timeout = 15 * 60):
     db = connectMongoDBReadOnly()
     users = db.api_users
     # current datetime
@@ -74,9 +75,9 @@ def unlock_stale_tokens():
                     diff = present - locked
                 else:
                     diff = present - dateutil.parser.parse(locked, ignoretz=True)
-                diffMinutes = (diff.seconds % 3600) // 60.0
+                diffSeconds = (diff.seconds % 3600)
                 # if token is locked for over 15 mins, unlock
-                if diffMinutes > 15.0:
+                if diffSeconds > lock_timeout:
                     unlockTokens.append(user["token"])
     for token in unlockTokens:
         users.find_one_and_update({"token": token}, { "$set": {"locked": 0}})

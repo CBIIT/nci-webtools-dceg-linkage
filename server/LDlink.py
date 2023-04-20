@@ -6,6 +6,7 @@ import argparse
 import json
 import time
 import random
+from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
@@ -493,7 +494,6 @@ def root():
 def ping():
     print("pong")
     try:
-        unlock_stale_tokens()
         return "true"
     except Exception as e:
         exc_obj = e
@@ -1736,6 +1736,18 @@ def after_request(response):
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE')
     return response
+
+def unlock_tokens_background():
+    while True:
+        config = get_config()
+        lock_timeout =  config['token_lock_timeout']
+        try:
+            unlock_stale_tokens(lock_timeout)
+        except Exception as e:
+            print(e)
+        time.sleep(lock_timeout / 2)
+
+Thread(name='unlock_tokens_background', target=unlock_tokens_background).start()
 
 if is_main:
     parser = argparse.ArgumentParser()
