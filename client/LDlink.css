@@ -92,7 +92,7 @@ body {
 }
 
 /* Create yellow bar on active nav button */
-.navbar-nav li.active {
+.navbar-nav li.active, .navbar-nav li.active-link {
 	border-bottom: 4px solid #f5ab35;
 	background-color: grey;
 }
@@ -1705,10 +1705,6 @@ input:checked + .slider:before {
 .navbar-nav .dropdown-menu > .active > a:hover {
 	background-image: none;
 	background-color: lightgrey;
-}
-
-.active-drop {
-	border-bottom: 4px solid #f5ab35;
 }
 
 .navbar .navbar-nav .open .dropdown-menu > .active > a {

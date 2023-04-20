@@ -1174,10 +1174,10 @@ function setupTabs() {
         }
     });
     if(found == true){
-        $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
+        $("#dropdown-tools").addClass("active-link")
     }
     else{
-        $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
+        $("#dropdown-tools").removeClass("active-link")
     }
     
     if(typeof url.inputs !="undefined") {
@@ -5692,13 +5692,11 @@ function clearTabs(currentTab){
             found = true;
         }
     });
-    // console.log("found: " + found);
     if(found == true){
-        // console.log()
-        $(".dropdown-nav .dropdown-toggle").addClass("active-drop")
+        $("#dropdown-tools").addClass("active-link")
     }
     else{
-        $(".dropdown-nav .dropdown-toggle").removeClass("active-drop")
+        $("#dropdown-tools").removeClass("active-link")
     }
 
     if (headerModules.includes(currentTab)) {
