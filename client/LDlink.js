@@ -4807,7 +4807,7 @@ function addLDpairHyperLinks(data) {
     //url = server + rs_number;
     // snp1-rsum
     rs_number = data.snp1.rsnum.substring(2);
-    console.log(data)
+    //console.log(data)
     params = {
         rs : rs_number
     };
