@@ -3,7 +3,6 @@ import datetime
 import dateutil.parser
 from os import environ
 from dotenv import load_dotenv
-from LDcommon import connectMongoDBReadOnly
 
 load_dotenv()
 
@@ -60,8 +59,7 @@ def getDatetime():
     return datetime.datetime.now()
 
 # unlock stale tokens at scheduled time
-def unlock_stale_tokens(lock_timeout = 15 * 60):
-    db = connectMongoDBReadOnly()
+def unlock_stale_tokens(db, lock_timeout = 15 * 60):
     users = db.api_users
     # current datetime
     present = getDatetime()

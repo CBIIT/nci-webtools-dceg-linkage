@@ -1738,11 +1738,12 @@ def after_request(response):
     return response
 
 def unlock_tokens_background():
+    db = connectMongoDBReadOnly()
     while True:
         config = get_config()
         lock_timeout =  config['token_lock_timeout']
         try:
-            unlock_stale_tokens(lock_timeout)
+            unlock_stale_tokens(db, lock_timeout)
         except Exception as e:
             print(e)
         time.sleep(lock_timeout / 2)
