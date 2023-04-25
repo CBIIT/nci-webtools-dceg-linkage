@@ -60,21 +60,19 @@ RUN python3 -m pip install -r requirements.txt
 
 COPY server/ .
 
-COPY docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
-
 RUN chown -R apache:apache ${LDLINK_HOME}
 
 CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
-    --modules-directory /usr/lib64/httpd/modules/ \
-    --include-file /etc/httpd/conf.d/wsgi.conf \
+    --modules-directory /etc/httpd/modules/ \
     --user apache \
     --group apache \
+    --compress-responses \
+    --trust-proxy-header X-Forwarded-For \
     --log-to-terminal \
     --access-log \
-    --startup-log \
+    --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" \
     --port 80 \
-    --trust-proxy-header X-Forwarded-For \
     --working-directory ${LDLINK_HOME} \
     --header-buffer-size 50000000 \
     --response-buffer-size 50000000 \
