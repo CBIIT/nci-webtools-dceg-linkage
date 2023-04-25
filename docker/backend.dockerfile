@@ -71,7 +71,7 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --trust-proxy-header X-Forwarded-For \
     --log-to-terminal \
     --access-log \
-    --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" \
+    --access-log-format "%h %{X-Forwarded-For}i %l %u %t \"%r\" %>s %b %T \"%{Referer}i\" \"%{User-Agent}i\"" \
     --port 80 \
     --working-directory ${LDLINK_HOME} \
     --header-buffer-size 50000000 \
