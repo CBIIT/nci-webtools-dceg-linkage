@@ -50,6 +50,10 @@ ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
 
 ENV LDLINK_HOME=/opt/ldlink
 
+ENV LDLINK_HEALTHCHECK_PATH=/LDlinkRest/ping
+
+ENV PYTHONPATH=${LDLINK_HOME}:${PYTHONPATH}
+
 RUN mkdir -p ${LDLINK_HOME}
 
 WORKDIR ${LDLINK_HOME}
@@ -60,11 +64,18 @@ RUN python3 -m pip install -r requirements.txt
 
 COPY server/ .
 
+COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
+
 RUN chown -R apache:apache ${LDLINK_HOME}
+
+EXPOSE 80
+
+EXPOSE 8080
 
 CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
     --modules-directory /etc/httpd/modules/ \
+    --include-file /etc/httpd/conf.d/wsgi.conf \
     --user apache \
     --group apache \
     --compress-responses \
@@ -77,7 +88,6 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --header-buffer-size 50000000 \
     --response-buffer-size 50000000 \
     --limit-request-body 5368709120 \
-    --max-clients 100 \
     --initial-workers 1 \
     --socket-timeout 9000 \
     --queue-timeout 9000 \
