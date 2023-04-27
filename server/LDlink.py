@@ -234,7 +234,7 @@ def register_web():
         url_path == request.url_root
 
     #print(request.headers)
-    #will return http://nciws-d971-c.nci.nih.gov:8090/
+    #will return http://nciws-d971-c.nih.gov:8090/
     #print(request.url_root) 
     app.logger.debug('register_web params ' + json.dumps({
         'firstname': firstname,
