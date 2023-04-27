@@ -1,0 +1,146 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    color: #444;
+}
+
+a.help {
+    background-image: url('/common/images/help.png');
+    background-repeat: no-repeat;
+    background-size: 16px 16px;
+    padding-left: 22px;
+    padding-bottom: 5px;
+    text-decoration: none;
+}
+
+#helpGlossaryLinks {
+    float: right;
+}
+
+.termToDefine {
+    text-decoration: underline;
+    cursor: help;
+}
+
+.popupDefinition {
+    display: none;
+    position: absolute;
+    border: solid #C4C4C0 1px;
+    padding: 10px;
+    background-color: #FFFFEB;
+    text-align: left;
+    font-size: 12px;
+    width: 250px;
+    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+}
+
+.enlarge {
+    text-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
+    transform: scale(1.1);
+}
+
+
+#landing-blockcontent h3  {
+    font-weight: bold;
+}
+
+.tools-owner-title {
+    margin-top: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    background-color: #F5FAFF;
+    color: #0C5C97;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.tools-main-title {
+    padding: 10px 0;
+    background-color: #2A71A5;
+    color: white;
+    font-weight: bold;
+    font-size: 2.5rem;
+}
+
+.tools-section {
+    padding: 0 20px 10px 20px;
+}
+
+.tools-section h3 {
+    margin: 7px 0px 4px;
+    font-size: 90%;
+}
+
+.tools-section h3 a {
+    font-weight: bold;
+    text-decoration: underline;
+    color: #0C5C97;
+}
+
+.main-div {
+     width: 1200px;
+     margin-left: auto;
+     margin-right: auto;
+}
+
+/* Overriding Bootstrap Styles */
+a {
+    cursor: pointer;
+}
+
+h2, h3 {
+    margin-top: 0;
+}
+
+header {
+    margin: 25px 0;
+}
+
+header img {
+    width: 60%;
+}
+
+.row-blue {
+    background-color: #2A71A5;
+    height: 2em;
+}
+
+.footer {
+    margin-top: 20px;
+    bottom: 0;
+    color: white;
+    padding:25px 0;
+    background-color: #2A71A5;
+}
+
+.footer ul {
+    text-align: center;
+}
+
+.footer ul li a {
+    color: white;
+}
+
+.division-logo {
+    max-width:60%;
+    min-width:400px;
+}
+
+.default-tooltip {
+    border-radius: 10px !important;
+    border-width: 2px !important;
+    font-size: 0.9em !important;
+    max-width: 300px !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    z-index: 10000 !important;
+}
+.default-tooltip-title {
+    padding: 5px;
+    background: lightblue;
+    font-weight: bold;
+}
+.default-tooltip-content {
+    padding: 10px 5px;
+    background: azure;
+}
