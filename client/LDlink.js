@@ -99,7 +99,7 @@ $(document).ready(function() {
         newsList.push(lastNews + "<p style=\"margin-bottom:0px; margin-top:5px;\">(See <a class=\"version-link\">Version History</a>)</p>");
         newsList.push("<p><b>LDlinkR</b><br></p><div style=\"height:4px;\"/><p style=\"margin:0;\">Interested in accessing LDlink's API using R? <br style=\"margin-bottom:5px;\">Check out the new LDlinkR package now available on <a href=\"https://cran.r-project.org/web/packages/LDlinkR/index.html\" title=\"LDlinkR CRAN\" target=\"_blank\">CRAN</a>.</p>")
         newsList.push("<p><b>GWAS Explorer</b><br></p><div style=\"height:4px;\"/><p>Visualize and interact with genome-wide association study results from PLCO Atlas.</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://exploregwas.cancer.gov/plco-atlas/\" title=\"GWAS Explorer\" target=\"_blank\">GWAS Explorer</a>. </p>")
-        newsList.push("<p><b>AuthorArranger</b><br></p><div style=\"height:4px;\"/><p>Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nci.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
+        newsList.push("<p><b>AuthorArranger</b><br></p><div style=\"height:4px;\"/><p>Bogged down organizing authors and affiliations on journal title pages for large studies?</b> <br style=\"margin-bottom:5px;\">Check out <a href=\"https://authorarranger.nih.gov/\" title=\"Author Arranger\" target=\"_blank\">AuthorArranger</a> and conquer title pages in seconds! </p>")
 
         $("#news-card-1").html(newsList[0].replace("<br>",""));
         $("#news-card-2").html(newsList[1]);
@@ -532,7 +532,7 @@ function checkFile(id, fileURL, retries) {
 }
 function initAPIExamples() {
     $(".apiaccess-examples").each( function(index) { 
-        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nci.nih.gov', window.location.origin);
+        $(".apiaccess-examples")[index].innerText = $(".apiaccess-examples")[index].innerText.replace('https://ldlink.nih.gov', window.location.origin);
     });
 }
 function setBootstrapSelector(id, value) {
