@@ -511,7 +511,7 @@ def status(filename):
 @app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
 @app.route('/tmp/<filename>', strict_slashes=False)
 def send_temp_file(filename):
-    return send_from_directory(tmp_dir, filename, as_attachment=True)
+    return send_from_directory(tmp_dir, filename)
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])
