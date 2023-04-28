@@ -3,7 +3,6 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023
 # install dependencies
 RUN dnf -y update \
     && dnf -y install \
-    bc \
     bzip2 \
     bzip2-devel \
     fontconfig \
