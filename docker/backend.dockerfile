@@ -97,5 +97,5 @@ CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --graceful-timeout 9000 \
     --connect-timeout 9000 \
     --request-timeout 9000 \
-    --processes $((`nproc` / 2)) \
+    --processes $((1 + `nproc` / 2)) \
     --threads 1
