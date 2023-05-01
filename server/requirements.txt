@@ -1,7 +1,7 @@
 
 bokeh==0.13.0
 boto3
-Flask==1.1.4
+Flask==2.3.2
 jinja2==2.11.3
 MarkupSafe==1.1.1
 mod_wsgi
