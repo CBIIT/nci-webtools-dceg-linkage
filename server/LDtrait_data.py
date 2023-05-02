@@ -34,7 +34,6 @@ def downloadGWASCatalog():
     return filename
 
 def main():
-    instance = sys.argv[1]
     print("Downloading GWAS catalog...")
     filename = downloadGWASCatalog()
     print(filename + " downloaded.")
