@@ -41,6 +41,8 @@ ENV LDLINK_HOME=/opt/ldlink
 
 ENV PYTHONPATH=${LDLINK_HOME}:${PYTHONPATH}
 
+ENV PYTHONUNBUFFERED=1
+
 RUN mkdir -p ${LDLINK_HOME}
 
 WORKDIR ${LDLINK_HOME}
@@ -51,4 +53,4 @@ RUN python3 -m pip install -r requirements.txt
 
 COPY server/ .
 
-CMD python3 LDtrait_data.py
+CMD ["python3", "LDtrait_data.py"]
