@@ -40,9 +40,11 @@ Path(tmp_dir).mkdir(parents=True, exist_ok=True)
 is_main = __name__ == '__main__'
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
-app.config['UPLOAD_DIR'] = os.path.join(os.getcwd(), 'tmp')
+app.config['UPLOAD_DIR'] = os.path.join(tmp_dir, 'uploads')
 app.debug = False
 app.logger.setLevel(log_level)
+
+os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
 
 # Flask Limiter initialization
 # def get_token():
