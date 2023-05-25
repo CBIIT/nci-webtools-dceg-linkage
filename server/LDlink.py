@@ -546,6 +546,7 @@ def upload():
             filename = secure_filename(file.filename)
             print("About to SAVE file")
             print("filename = " + filename)
+            os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
             file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
             return 'File was saved'
 
