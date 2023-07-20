@@ -1406,7 +1406,7 @@ def ldtrait():
                     trait["error"] = json_dict["error"]
                 else:
                     with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                        f.write("Query\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                        f.write("Query\tPMID\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
