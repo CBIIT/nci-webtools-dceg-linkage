@@ -109,10 +109,10 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                 matched_record = []
                 # Query SNP
                 # matched_record.append(query_snp)
-                # GWAS Trait
+                matched_record.append(record["DISEASE/TRAIT"]) 
+                  # GWAS Trait
                 # add PMID on Jul 19 2023 
                 matched_record.append(record["PUBMEDID"]) 
-                matched_record.append(record["DISEASE/TRAIT"]) 
                 # RS Number
                 matched_record.append("rs" + record["SNP_ID_CURRENT"]) 
                 # Position
