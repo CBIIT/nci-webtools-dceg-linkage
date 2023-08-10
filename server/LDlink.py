@@ -1410,7 +1410,7 @@ def ldtrait():
                         for snp in thinned_snps:
                             for matched_gwas in details[snp]["aaData"]:
                                 f.write(snp + "\t")
-                                f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 11}]) + "\n")
+                                f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {7, 12}]) + "\n")
                         if "warning" in json_dict:
                             trait["warning"] = json_dict["warning"]
                             f.write("Warning(s):\n")
@@ -1463,11 +1463,11 @@ def ldtrait():
                 return sendTraceback(json_dict["error"])
             else:
                 with open(tmp_dir + 'trait_variants_annotated' + reference + '.txt', 'w') as f:
-                    f.write("Query\tPMID\tGWAS Trait\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
+                    f.write("Query\tGWAS Trait\tPMID\tRS Number\tPosition (" + genome_build_vars[genome_build]['title'] + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n")
                     for snp in thinned_snps:
                         for matched_gwas in details[snp]["aaData"]:
                             f.write(snp + "\t")
-                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {6, 11}]) + "\n")
+                            f.write("\t".join([str(element) for i, element in enumerate(matched_gwas) if i not in {7, 12}]) + "\n")
                     if "warning" in json_dict:
                         # trait["warning"] = json_dict["warning"]
                         f.write("Warning(s):\n")

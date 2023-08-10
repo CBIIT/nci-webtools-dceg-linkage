@@ -1740,7 +1740,7 @@ function createTraitDetailsTable() {
 				render: function (data, type, row) {
 					return ldtrait_parse_float(data);
 				},
-				targets: [8],
+				targets: [9],
 			},
 			{
 				render: function (data, type, row) {
@@ -1751,7 +1751,7 @@ function createTraitDetailsTable() {
 						return data;
 					}
 				},
-				targets: [7],
+				targets: [8],
 			},
 			{
 				render: function (data, type, row) {
@@ -1782,7 +1782,7 @@ function createTraitDetailsTable() {
 						return data;
 					}
 				},
-				targets: [10],
+				targets: [11],
 			},
 			{
 				render: function (data, type, row) {
@@ -1792,23 +1792,23 @@ function createTraitDetailsTable() {
 					var pops = row[6][2];
 					return ldtrait_ldpair_results_link(snp1, snp2, pops, data);
 				},
-				targets: [4, 5],
+				targets: [5, 6],
 			},
 			{
 				bVisible: false,
-				targets: 6,
+				targets: 7,
 			},
 			{
 				render: function (data, type, row) {
 					// Provide link to gwas catalog
 					return ldtrait_gwas_catalog_link(data, type, row);
 				},
-				targets: 11,
+				targets: 12,
 			},
 			{
 				className: 'dt-head-left',
 				className: 'dt-body-left',
-				targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+				targets: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
 			},
 		],
 	});
