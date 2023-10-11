@@ -2466,7 +2466,7 @@ function ldproxy_haploreg_link(data, type, row) {
 	// Create RegulomeDB links
 
 	var server =
-		'http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.1.php';
+		'http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php';
 
 	var rs_number = row[0];
 	var params = {
@@ -2485,12 +2485,13 @@ function ldproxy_haploreg_link(data, type, row) {
 function ldproxy_FORGEdb_link(data, type, row) {
 	// Create FORGEDB links
 
-	var server = 'https://forge2.altiusinstitute.org/files/';
+	var server = 'https://forgedb.cancer.gov/explore?rsid=';
 
 	var snp = row[0];
 	var score = row[9];
 
-	var href = server + snp.substring(0, 6) + '/summary.table.' + snp + '.html';
+	//var href = server + snp.substring(0, 6) + '/summary.table.' + snp + '.html';
+	var href = server + snp;
 	//var img = '<img src="LDproxy_external_link.png" alt=FORGEdb Details" title="FORGEdb Details" class="haploreg_external_link" style="width:16px;height:16px;">';
 	var link = '<a href="' + href + '" target="_blank">' + score + '</a>';
 
@@ -2500,12 +2501,13 @@ function ldproxy_FORGEdb_link(data, type, row) {
 function ldassoc_FORGEdb_link(data, type, row) {
 	// Create FORGEDB links
 
-	var server = 'https://forge2.altiusinstitute.org/files/';
+	var server = 'https://forgedb.cancer.gov/explore?rsid=';
 
 	var snp = row[0];
 	var score = row[10];
 
-	var href = server + snp.substring(0, 6) + '/summary.table.' + snp + '.html';
+	//var href = server + snp.substring(0, 6) + '/summary.table.' + snp + '.html';
+	var href = server + snp;
 	//var img = '<img src="LDproxy_external_link.png" alt=FORGEdb Details" title="FORGEdb Details" class="haploreg_external_link" style="width:16px;height:16px;">';
 	var link = '<a href="' + href + '" target="_blank">' + score + '</a>';
 

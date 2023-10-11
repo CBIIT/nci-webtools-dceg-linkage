@@ -23,6 +23,8 @@
 		gtag('js', new Date());
 		gtag('config', 'G-JKSF0J7NH9');
 	</script>
+	<!-- Import web component -->
+	<script src="https://cbiit.github.io/nci-softwaresolutions-elements/components/include-html.js"></script>
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="lib/bootstrap@3.3.5/bootstrap.min.css">	
 	<link rel="stylesheet" href="lib/bootstrap@3.3.5/bootstrap-theme.min.css">	
@@ -32,11 +34,16 @@
 	<link rel="stylesheet" href="lib/datatables@1.10.8/jquery.dataTables.min.css">	
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/social.css">
-	<link rel="stylesheet" href="LDlink.css?v=5.6.5">
+	<link rel="stylesheet" href="LDlink.css?v=5.6.6">
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
 <body role="document">
+	<header>
+		<!-- Set component's src attribute to url of html snippet -->
+		<include-html
+			src="https://cbiit.github.io/nci-softwaresolutions-elements/banners/government-shutdown-test.html"></include-html>
+	</header>
 	<a class="sr-only sr-only-focusable" href="#content">Skip to main content</a>
 	<h1 class="sr-only sr-only-focusable">L D link Webtool</h1>
 
@@ -704,7 +711,7 @@
 						<br />
 						<a id="ldassoc-genome" class="ldproxy-link" href="https://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://ldlink.nih.gov/LDLinkRestWeb/tmp/track78816.txt"
 						 target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
-						<a class="ldproxy-link" href="https://forge2.altiusinstitute.org/files/FORGEdb_scores.html" target="LDassoc-forgedb-browser_FOREGEdb"
+						<a class="ldproxy-link" href="https://forgedb.cancer.gov/about/" target="LDassoc-forgedb-browser_FOREGEdb"
 							title="FORGEdb scoring scheme">View scoring scheme for FORGEdb scores</a>
 						<a class="ldproxy-link" href="https://www.regulomedb.org/regulome-help/" target="LDassoc-genome-browser_RegulomeDB"
 						 title="RegulomeDB scoring scheme">View scoring scheme for RegulomeDB scores</a> <br>
@@ -1912,7 +1919,7 @@
 						<br />
 						<a id="ldproxy-genome" class="ldproxy-link" href="https://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://ldlink.nih.gov/LDLinkRestWeb/tmp/track78816.txt"
 						 target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
-						<a class="ldproxy-link" href="https://forge2.altiusinstitute.org/files/FORGEdb_scores.html"
+						<a class="ldproxy-link" href="https://forgedb.cancer.gov/about/"
 							target="LDproxy-forgedb-browser_FOREGEdb" title="FORGEdb scoring scheme">View scoring scheme for FORGEdb scores</a>
 						 <a class="ldproxy-link" href="https://www.regulomedb.org/regulome-help/" target="LDproxy-genome-browser_RegulomeDB"
 						 title="RegulomeDB scoring scheme">View scoring scheme for RegulomeDB scores</a> <br>
