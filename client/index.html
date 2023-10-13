@@ -1302,7 +1302,11 @@
 									<div style="width:800px;margin:auto;">
 										<img id="ldmatrix-legend-r2" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend">
 										<!-- <img id="ldmatrix-legend-d" src="LDmatrix_legend_R2.png" title="LDmatrix Legend" alt="LDmatrix legend" class="graph-legend"> -->
+									<br><br>
+										<a class="ldproxy-link" href="https://forgedb.cancer.gov/about/" target="LDassoc-forgedb-browser_FOREGEdb"
+										title="FORGEdb scoring scheme">View scoring scheme for FORGEdb scores</a>
 									</div>
+
 								</div>
 							</div>
 							<div class="col-md-11 col-md-offset-1" id="ldmatrix-download-links">
@@ -1326,7 +1330,7 @@
 							<div class="form-group">
 								<div class="col-sm-3">
 									<input id="ldpair-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RSID or CHR:POS"
-									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 title="Enter ONE RSID or CHR:POS" pattern="^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$"
 									 required />
 								</div>
 							</div>
@@ -1334,7 +1338,7 @@
 							<div class="form-group">
 								<div class="col-sm-3">
 									<input id="ldpair-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RSID or CHR:POS"
-									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 title="Enter ONE RSID or CHR:POS" pattern="^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$"
 									 required />
 								</div>
 							</div>
@@ -1506,7 +1510,7 @@
 							<div class="form-group">
 								<div class="col-sm-3">
 									<input id="ldpop-snp1" name="snp1" type="text" class="form-control" placeholder="Variant1 RSID or CHR:POS"
-									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 title="Enter ONE RSID or CHR:POS" pattern="^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$"
 									 required />
 								</div>
 							</div>
@@ -1514,7 +1518,7 @@
 							<div class="form-group">
 								<div class="col-sm-3">
 									<input id="ldpop-snp2" name="snp2" type="text" class="form-control" placeholder="Variant2 RSID or CHR:POS"
-									 title="Enter a RSID or CHR:POS" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 title="Enter ONE RSID or CHR:POS" pattern="^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$"
 									 required />
 								</div>
 							</div>
@@ -1796,7 +1800,7 @@
 							<div class="form-group">
 								<div class="col-sm-2">
 									<input id="ldproxy-snp" name="snp" type="text" class="form-control" placeholder="Variant RSID or CHR:POS"
-									 title="rs followed by 1 or more digits (ex: rs12345), no spaces permitted" style="width:180px;" pattern="^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$"
+									 title="rs followed by 1 or more digits (ex: rs12345) or CHR:POS, no spaces permitted" style="width:180px;" pattern="^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$"
 									 required />
 								</div>
 							</div>
