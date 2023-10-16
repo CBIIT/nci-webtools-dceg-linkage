@@ -1787,9 +1787,9 @@ function createTraitDetailsTable() {
 			{
 				render: function (data, type, row) {
 					// Provide link to LDpair
-					var snp1 = row[6][0];
-					var snp2 = row[6][1];
-					var pops = row[6][2];
+					var snp1 = row[7][0];
+					var snp2 = row[7][1];
+					var pops = row[7][2];
 					return ldtrait_ldpair_results_link(snp1, snp2, pops, data);
 				},
 				targets: [5, 6],
