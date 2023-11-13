@@ -437,7 +437,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
         output["error"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
         #output["warning"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["warning"] if "warning" in output else "")
         if is_output:
-            subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+            #subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
             subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
         return (None, None, queryVariantWarnings)
     elif len(tabix_query_snp_out) > 1:
@@ -456,7 +456,7 @@ def get_query_variant_c(snp_coord, pop_ids, request, genome_build, is_output,out
             output["error"] = "Variant is not in 1000G reference panel." + str(output["error"] if "error" in output else "")
             #output["warning"] = snp_coord[0]+" Variant is not in 1000G reference panel." + str(output["warning"] if "warning" in output else "")
             if is_output:
-                subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
+                #subprocess.call("rm " + tmp_dir + "pops_" + request + ".txt", shell=True)
                 subprocess.call("rm " + tmp_dir + "*" + request + "*.vcf", shell=True)
             return (None,None, queryVariantWarnings)
     else:
