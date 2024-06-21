@@ -42,7 +42,7 @@ line-height: 1.6;
 
 .usa-banner__header {
     font-weight: 400;
-    margin-left: 2.5rem !important;
+    margin-left: 0rem !important;
     margin-right: auto;
     max-width: 87.5rem;
     min-height: 3rem;
