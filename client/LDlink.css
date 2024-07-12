@@ -1140,6 +1140,10 @@ textarea:invalid,
 	color: #800000;
 }
 
+#ldscoreForm button.dropdown-toggle {
+	color: #800000;
+}
+
 #region-gene-container > div *,
 #region-region-container > div *,
 #region-variant-container > div * {
@@ -1699,6 +1703,7 @@ input:checked + .slider:before {
 		min-height: 50px;
 	}
 }
+
 
 .navbar-nav .dropdown-menu > .active > a,
 .navbar-nav .dropdown-menu > .active > a:focus,
