@@ -565,6 +565,20 @@ def ldassoc_example():
     }
     return json.dumps(example)
 
+# Route for LDassoc example GWAS data
+@app.route('/LDlinkRest/ldscore_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldscore_example', methods=['GET'])
+def ldscore_example():
+    genome_build = request.args.get('genome_build', 'grch37')
+    ldassoc_example_dir = param_list['ldassoc_example_dir']
+    data_dir = param_list['data_dir']
+    example_filepath = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {
+        'filename': os.path.basename(example_filepath),
+        'headers': read_csv_headers(example_filepath)
+    }
+    return json.dumps(example)
+
 # Route to retrieve LDexpress tissue info
 @app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
 #@app.route('/LDlinkRest2/ldexpress_tissues', methods=['GET'])

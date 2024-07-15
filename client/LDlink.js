@@ -16,6 +16,7 @@ var restServerUrl =
   restService.route;
 
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
+var dropdowns2 = ["score-chromosome", "score-position", "score-p-value"];
 
 var populations = {
   AFR: {
@@ -742,6 +743,12 @@ $(document).ready(function () {
       setBootstrapSelector(id, $(this).text());
     });
   });
+  $.each(dropdowns2, function (i, id) {
+    $("#" + id + " > .dropdown-menu").on("click", "li a", function () {
+      createCookie(id, $(this).text(), 10);
+      setBootstrapSelector(id, $(this).text());
+    });
+  });
   $("#assoc-region > .dropdown-menu li a").click(function (e) {
     $("#assoc-region > .btn:first-child").html(
       $(this).text() + '&nbsp;<span class="caret"></span>'
@@ -855,8 +862,8 @@ $(document).ready(function () {
     setupLDassocExample();
   });
 
-  $("#example-gwas").click(function (e) {
-    setupLDassocExample();
+  $("#example-gwas2").click(function (e) {
+    setupLDscoreExample();
   });
 
   updateVersion(ldlink_version);
@@ -1214,7 +1221,7 @@ function setupLDassocExample() {
 
 function setupLDscoreExample() {
   //   console.log("Use example GWAS data.");
-  var useEx = document.getElementById("example-gwas");
+  var useEx = document.getElementById("example-gwas2");
   // var exampleHeaders = ['A', 'B', 'C'];
   if (useEx.checked) {
     var url = restServerUrl + "/ldscore_example";
@@ -1228,8 +1235,9 @@ function setupLDscoreExample() {
     }).success(function (response) {
       var data = JSON.parse(response);
       $("#ldscore-file-label").val(data.filename);
-      populateAssocDropDown(data.headers);
-      $("#header-values").show();
+      populateScoreDropDown(data.headers);
+      console.log("ldscore_example url call success", data.header);
+      $("#header-values2").show();
       $("#score-chromosome > button").val("chr");
       $("#score-chromosome > button").text("Chromosome: chr column");
       $("#score-position > button").val("pos");
@@ -1294,7 +1302,7 @@ function setupLDscoreExample() {
     );
 
     $("#ldscore-file-label").val("");
-    populateAssocDropDown([]);
+    populateScoreDropDown([]);
     $("#header-values").hide();
     $("#ldscore-file").val("");
     // console.log("Don't use example GWAS data.");
@@ -2714,6 +2722,30 @@ function populateAssocDropDown(headers) {
   });
 }
 
+function populateScoreDropDown(headers) {
+  $.each(dropdowns2, function (i, id) {
+    $("#" + id)
+      .find("ul")
+      .empty();
+    $.each(headers, function (key, value) {
+      $("#" + id)
+        .find("ul")
+        .append(
+          '<li role="presentation"><a role="menuitem" tabindex="-1">' +
+            value +
+            "</a></li>"
+        );
+    });
+    var previous_value = readCookie(id);
+    //console.log("You previous selected: "+previous_value);
+    if ($.inArray(previous_value, headers) != -1) {
+      setBootstrapSelector(id, previous_value);
+    } else {
+      resetBootstrapSelector(id);
+    }
+  });
+}
+
 function parseHeaderValues(header_line) {
   //alert(header_line);
   //Assumption: No spaces in the header title for each column.  Either a space or comma between header titles.
@@ -2731,6 +2763,7 @@ function parseHeaderValues(header_line) {
   //console.log(new_headers);
 
   populateAssocDropDown(new_headers);
+  populateScoreDropDown(new_headers);
 }
 
 function getHeaderLine(header) {
@@ -2804,6 +2837,17 @@ function updateData(id) {
       ) {
         $("#" + id + "-loading").show();
         updateLDassoc();
+      }
+      break;
+    case "ldscore":
+      if (
+        isBrowseSet(id) &&
+        isRegionSet(id) &&
+        areRegionDetailsSet(id) &&
+        isPopulationSet(id)
+      ) {
+        $("#" + id + "-loading").show();
+        updateLDscore();
       }
       break;
     case "ldexpress":
@@ -3231,6 +3275,164 @@ function updateLDassoc() {
     } else {
       displayError(id, dataCanvas);
     }
+    $("#" + id + "-loading").hide();
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+    setTimeout(function () {
+      var checkbox = $(".bk-toolbar-inspector").children().first();
+      $(checkbox).attr("id", "hover");
+      $(checkbox).append(
+        '<label for="hover" class="sr-only">Hover Tool</label>'
+      );
+    }, 100);
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
+}
+
+function updateLDscore() {
+  var id = "ldscore";
+
+  var $btn = $("#" + id).button("loading");
+  var population = getPopulationCodes(id + "-population-codes");
+  var ldInputs = {
+    pop: population.join("+"),
+    filename: $("#ldscore-file-label").val(),
+    reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
+    columns: new Object(),
+    calculateRegion: $("#score-region > button").val(),
+    gene: new Object(),
+    region: new Object(),
+    variant: new Object(),
+    genome_build: genomeBuild,
+    dprime: $("#score-matrix-color-r2").hasClass("active") ? "False" : "True",
+    transcript: $("#score-transcript").hasClass("active") ? "False" : "True",
+
+    annotate: document.querySelector('input[name="ldscore_options"]:checked')
+      .value,
+    useEx: $("#example-gwas2").is(":checked") ? "True" : "False",
+  };
+
+  ldInputs.columns.chromosome = $("#score-chromosome > button").val();
+  ldInputs.columns.position = $("#score-position > button").val();
+  ldInputs.columns.pvalue = $("#score-p-value > button").val();
+  //gene
+  ldInputs.gene.name = $("#region-gene-name2").val();
+  ldInputs.gene.basepair = $("#region-gene-base-pair-window2").val();
+  ldInputs.gene.index = $("#region-gene-index2").val();
+  //region
+  ldInputs.region.start = $("#region-region-start-coord2").val();
+  ldInputs.region.end = $("#region-region-end-coord2").val();
+  ldInputs.region.index = $("#region-region-index2").val();
+  //variant
+  ldInputs.variant.index = $("#region-variant-index2").val();
+  ldInputs.variant.basepair = $("#region-variant-base-pair-window2").val();
+
+  var tempbuild = genomeBuild == "grch37" ? "hg19" : "hg38";
+  var r2url =
+    "https://genome.ucsc.edu/cgi-bin/hgTracks?db=" +
+    tempbuild +
+    "&hgt.customText=http://" +
+    location.hostname +
+    "/LDlinkRestWeb/tmp/track" +
+    ldInputs.reference +
+    ".txt";
+  //console.log(r2url)
+  $("#ldscore-genome").prop("href", r2url);
+
+  //console.dir(ldproxyInputs);
+  $("#ldscore-results-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
+  );
+  //console.log( $('#ldassoc-genome'))
+  //console.log(ldInputs);
+  var url = restServerUrl + "/ldscore";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+    data: ldInputs,
+    contentType: "application/json", // JSON
+  });
+
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    //JSON.parse() cleans up this json string.
+
+    // create bokeh object with output_backend=canvas from svg
+    var dataString = data[0];
+    var dataCanvas = new Object([dataString, data[1]]);
+
+    var jsonObjCanvas;
+    if (typeof dataCanvas == "string") {
+      jsonObjCanvas = JSON.parse(dataCanvas);
+    } else {
+      jsonObjCanvas = dataCanvas;
+    }
+
+    // display graph if no errors
+    // if (displayError(id, jsonObjCanvas) == false) {
+    //   switch (genomeBuild) {
+    //     case "grch37":
+    //       $("." + id + "-position-genome-build-header").text("GRCh37");
+    //       break;
+    //     case "grch38":
+    //       $("." + id + "-position-genome-build-header").text("GRCh38");
+    //       break;
+    //     case "grch38_high_coverage":
+    //       $("." + id + "-position-genome-build-header").text(
+    //         "GRCh38 High Coverage"
+    //       );
+    //       break;
+    //   }
+
+    //   $("#ldassoc-bokeh-graph").empty().append(dataCanvas);
+
+    //   // place Download PDF button
+    //   $("#" + id + "-export-dropdown")
+    //     .empty()
+    //     .prepend(
+    //       '<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldassoc-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="ldassoc-menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" >SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" >PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" >PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a></li></ul></div>'
+    //     );
+    //   $("#ldassoc-downloadSVG").click(function (e) {
+    //     e.preventDefault();
+    //     var assoc_plot =
+    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".svg";
+    //     window.open(assoc_plot, "_blank");
+    //   });
+    //   $("#ldassoc-downloadPDF").click(function (e) {
+    //     e.preventDefault();
+    //     var assoc_plot =
+    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".pdf";
+    //     window.open(assoc_plot, "_blank");
+    //   });
+    //   $("#ldassoc-downloadPNG").click(function (e) {
+    //     e.preventDefault();
+    //     var assoc_plot =
+    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".png";
+    //     window.open(assoc_plot, "_blank");
+    //   });
+    //   $("#ldassoc-downloadJPEG").click(function (e) {
+    //     e.preventDefault();
+    //     var assoc_plot =
+    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
+    //     window.open(assoc_plot, "_blank");
+    //   });
+
+    // enable button once .svg file is generated from subprocess
+    //   var fileURL =
+    //     "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
+    //   checkFile(id, fileURL, 180);
+
+    //   $("#" + id + "-results-container").show();
+    //   getLDAssocResults("assoc" + ldInputs.reference + ".json");
+    // } else {
+    //   displayError(id, dataCanvas);
+    // }
     $("#" + id + "-loading").hide();
   });
   ajaxRequest.fail(function (jqXHR, textstatus) {
