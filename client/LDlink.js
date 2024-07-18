@@ -729,6 +729,14 @@ $(document).ready(function () {
     console.log(e.percent);
   });
 
+  $("#progressbar2").progressbar();
+  //$('#progressbar').progressbar('setPosition', 85);
+  //$('#ldassoc-progressbar').progressbar('reset');
+  $("#ldscore-progressbar").on("positionChanged", function (e) {
+    console.log(e.position);
+    console.log(e.percent);
+  });
+
   $(":file").change(function () {
     var file = this.files[0];
     var name = file.name;
@@ -1303,7 +1311,7 @@ function setupLDscoreExample() {
 
     $("#ldscore-file-label").val("");
     populateScoreDropDown([]);
-    $("#header-values").hide();
+    $("#header-values2").hide();
     $("#ldscore-file").val("");
     // console.log("Don't use example GWAS data.");
     $("#region-gene-container2").hide();
@@ -1467,6 +1475,9 @@ function progressHandlingFunction(e) {
     $("#progressbar").progressbar({ value: percent });
     $("#progressbar").css("width", percent + "%");
     $("#progressbar").html(percent + "% Completed");
+    $("#progressbar2").progressbar({ value: percent });
+    $("#progressbar2").css("width", percent + "%");
+    $("#progressbar2").html(percent + "% Completed");
   }
 }
 function beforeSendHandler() {
@@ -1525,6 +1536,7 @@ function createFileSelectEvent() {
     populateHeaderValues(event, numFiles, label);
     uploadFile2();
     $("#header-values").show();
+    $("#header-values2").show();
     //Changing loadCSVFile because the file size is 722Meg
     //loadCSVFile(event);
   });
@@ -7180,5 +7192,7 @@ if (closeBtn !== null) {
 
 setTimeout(() => {
   //flashBanner.style.transform = "translateY(-70vh)";
-  flashBanner.style.display = "none";
+  if (flashBanner !== null) {
+    flashBanner.style.display = "none";
+  }
 }, 20000);

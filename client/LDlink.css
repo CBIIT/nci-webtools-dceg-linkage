@@ -415,7 +415,7 @@ img.graph-legend {
 	margin-left: auto;
 	margin-right: auto;
 }
-#ldassoc-legend {
+#ldassoc-legend, #ldscore-legend {
 	width: 700px;
 }
 #ldproxy-legend {
@@ -1150,43 +1150,56 @@ textarea:invalid,
 	margin-top: 5px;
 	white-space: nowrap;
 }
-#header-values {
+
+#region-gene-container2 > div *,
+#region-region-container2 > div *,
+#region-variant-container2 > div * {
+	margin-top: 5px;
+	white-space: nowrap;
+}
+
+#header-values, #header-values2 {
 	margin-top: 30px;
 }
 #header-values > div > div * {
 	margin-top: 5px;
 	white-space: nowrap;
 }
-#assoc-region {
+#header-values2 > div > div * {
+	margin-top: 5px;
+	white-space: nowrap;
+}
+#assoc-region, #score-region {
 	margin-bottom: 20px;
 }
-#ldassoc-files {
+#ldassoc-files, #ldscore-files {
 	float: right;
 	margin-top: -4px;
 }
-#ldassoc-browse-button {
+#ldassoc-browse-button, #ldscore-browse-button {
 	float: left;
 }
-#ldassoc-sample {
+#ldassoc-sample, #ldscore-sample {
 	position: absolute;
 	float: left;
 	clear: left;
 	margin-top: 40px;
 	margin-left: -172px;
 }
-#ldassoc-sample-label {
+#ldassoc-sample-label, #ldscore-sample-label {
 	float: right;
 }
 
-#ldassoc-gr-toggle {
+#ldassoc-gr-toggle, #ldscore-gr-toggle {
 	position: absolute;
 	float: left;
 	clear: left;
 }
 
-#ldassoc-file-container {
+#ldassoc-file-container, #ldscore-file-container {
 	margin-top: 4px;
 }
+
 .toggle-labels {
 	position: relative;
 	float: left;
@@ -1195,7 +1208,7 @@ textarea:invalid,
 	line-height: 37px;
 	text-align: right;
 }
-#ldassoc-flag-switch {
+#ldassoc-flag-switch, #ldscore-flag-switch {
 	text-align: left;
 }
 .flag-switches {
@@ -1211,6 +1224,7 @@ textarea:invalid,
 .ldassoc-flag-switch input {
 	display: none;
 }
+
 .switch {
 	position: relative;
 	display: inline-block;

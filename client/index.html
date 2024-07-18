@@ -547,7 +547,7 @@
 											<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
 											<div class="" style="width:300px;">
 												<!--
-										<div style="clear:both;"></div>
+										 <div style="clear:both;"></div>
 										  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
 										  </div>
 										  -->
@@ -2277,35 +2277,27 @@
 											<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
 											<label for="ldscore-file" style="display:none;">Browse for RS File</label>
 											<div id="ldscore-files">
-												<div id="ldscore-browse-button">
+											    <div id="ldscore-browse-button">
 													<span class="btn btn-default btn-file btn-csv-file">Browse
 														<input type="file" id="ldscore-file">
 													</span>
-												</div>
-												<div id="ldscore-sample">
-													<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
-													<label class="switch" for="example-gwas2">
-														<input id="example-gwas2" type="checkbox" data-toggle="toggle">
-														<span class="slider round"></span>
-													</label>
-													<div id="ldscore-sample-label"> &nbsp;Use example GWAS data</div>
-												</div>
-											</div>
-											<a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
-											 data-placement="bottom" data-content="Please upload a file."></a>
+												    <div id="ldscore-sample">
+														<label class="switch" for="example-gwas2">
+														  <input id="example-gwas2" type="checkbox" data-toggle="toggle">
+														  <span class="slider round"></span>
+													    </label>
+													   <div id="ldscore-sample-label"> &nbsp;Use example GWAS data</div>
+												    </div>
+											    </div>
+											    <a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+											       data-placement="bottom" data-content="Please upload a file."></a>
+										    </div>
 										</div>
-
 										<progress style="display:none;"></progress>
 
 										<div id="header-values2" style="display:none;">
-
-											<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
 											<div class="" style="width:300px;">
-												<!--
-										<div style="clear:both;"></div>
-										  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
-										  </div>
-										  -->
+											
 												<div id="score-chromosome" class="dropdown">
 													<button class="btn btn-default dropdown-toggle" type="button" id="chromosomeColumn2" data-toggle="dropdown"
 													 style="width:250px;">Select Chromosome
@@ -2317,12 +2309,7 @@
 														<li role="presentation" class="divider"></li>
 														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
 													</ul>
-												</div>
-												<!--
-										  <div style="clear:both;"></div>
-										  <div style="width:90px;float:left;"><span style="float:right;">Position:</span>
-										  </div>
-											-->
+												</div>				
 												<div id="score-position" class="dropdown">
 													<button class="btn btn-default dropdown-toggle" type="button" id="score-menu2" data-toggle="dropdown" style="width:250px;">Select
 														Position
@@ -2391,20 +2378,20 @@
 												<a id="score-region-region-start" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div>
-													<label for="score-region-start-coord" style="display:none;">Start Coord (chr1:50000 or 1:50000) in (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</label>
-													<input type="text" id="score-region-start-coord" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000)"
+													<label for="region-region-start-coord2" style="display:none;">Start Coord (chr1:50000 or 1:50000) in (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</label>
+													<input type="text" id="region-region-start-coord2" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000)"
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<a id="ldscore-region-region-end" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
 												<div>
-													<label for="score-region-end-coord" style="display:none;">End Coord (chr1:50000)</label>
-													<input type="text" id="score-region-end-coord" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000)"
+													<label for="region-region-end-coord2" style="display:none;">End Coord (chr1:50000)</label>
+													<input type="text" id="region-region-end-coord2" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000)"
 													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
 												</div>
 												<div>
-													<label for="score-region-index" style="display:none;">Index RSID (optional)</label>
-													<input type="text" id="score-region-index" class="form-control" style="width:300px;" placeholder="Index RSID (optional)"
+													<label for="region-region-index2" style="display:none;">Index RSID (optional)</label>
+													<input type="text" id="region-region-index2" class="form-control" style="width:300px;" placeholder="Index RSID (optional)"
 													 pattern="(^rs\d+$)">
 												</div>
 											</div>
