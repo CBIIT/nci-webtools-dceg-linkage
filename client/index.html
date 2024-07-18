@@ -2274,30 +2274,38 @@
 										</div>
 										<div class="input-group" id="ldscore-file-container">
 											<label for="ldscore-file-label" style="display:none;">Upload Data File</label>
-											<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
+											<input type="text" id="ldscore-file-label" readonly placeholder="Upload association data file" class="readonly-input-text">
 											<label for="ldscore-file" style="display:none;">Browse for RS File</label>
 											<div id="ldscore-files">
-											    <div id="ldscore-browse-button">
+												<div id="ldscore-browse-button">
 													<span class="btn btn-default btn-file btn-csv-file">Browse
 														<input type="file" id="ldscore-file">
 													</span>
-												    <div id="ldscore-sample">
-														<label class="switch" for="example-gwas2">
-														  <input id="example-gwas2" type="checkbox" data-toggle="toggle">
-														  <span class="slider round"></span>
-													    </label>
-													   <div id="ldscore-sample-label"> &nbsp;Use example GWAS data</div>
-												    </div>
-											    </div>
-											    <a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
-											       data-placement="bottom" data-content="Please upload a file."></a>
-										    </div>
+												</div>
+												<div id="ldscore-sample">
+													<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+													<label class="switch" for="example-gwas2">
+														<input id="example-gwas2" type="checkbox" data-toggle="toggle">
+														<span class="slider round"></span>
+													</label>
+													<div id="ldscore-sample-label"> &nbsp;Use example GWAS data</div>
+												</div>
+											</div>
+											<a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+											 data-placement="bottom" data-content="Please upload a file."></a>
 										</div>
+
 										<progress style="display:none;"></progress>
 
 										<div id="header-values2" style="display:none;">
+
+											<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
 											<div class="" style="width:300px;">
-											
+												<!--
+										 <div style="clear:both;"></div>
+										  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
+										  </div>
+										  -->
 												<div id="score-chromosome" class="dropdown">
 													<button class="btn btn-default dropdown-toggle" type="button" id="chromosomeColumn2" data-toggle="dropdown"
 													 style="width:250px;">Select Chromosome
@@ -2309,12 +2317,17 @@
 														<li role="presentation" class="divider"></li>
 														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
 													</ul>
-												</div>				
+												</div>
+												<!--
+										  <div style="clear:both;"></div>
+										  <div style="width:90px;float:left;"><span style="float:right;">Position:</span>
+										  </div>
+											-->
 												<div id="score-position" class="dropdown">
-													<button class="btn btn-default dropdown-toggle" type="button" id="score-menu2" data-toggle="dropdown" style="width:250px;">Select
+													<button class="btn btn-default dropdown-toggle" type="button" id="ldscore-menu2" data-toggle="dropdown" style="width:250px;">Select
 														Position
 														<span class="caret"></span></button>
-													<ul class="dropdown-menu" role="menu" aria-labelledby="score-menu2">
+													<ul class="dropdown-menu" role="menu" aria-labelledby="ldscore-menu2">
 														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
 														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
 														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
@@ -2323,10 +2336,10 @@
 													</ul>
 												</div>
 												<div id="score-p-value" class="dropdown">
-													<button class="btn btn-default dropdown-toggle" type="button" id="score-menu3" data-toggle="dropdown" style="width:250px;">Select
+													<button class="btn btn-default dropdown-toggle" type="button" id="ldscore-menu3" data-toggle="dropdown" style="width:250px;">Select
 														P-value
 														<span class="caret"></span></button>
-													<ul class="dropdown-menu" role="menu" aria-labelledby="score-menu3">
+													<ul class="dropdown-menu" role="menu" aria-labelledby="ldscore-menu3">
 														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
 														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
 														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
@@ -2338,6 +2351,8 @@
 										</div> <!-- End header-values -->
 									</div>
 								</div>
+								
+
 								<div class="ldassoc-flex-item2">
 									<div class="form-group">
 										<div class="col-sm-3" style="width:275px;">
