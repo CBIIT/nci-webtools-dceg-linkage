@@ -803,6 +803,52 @@ $(document).ready(function () {
     }
   });
 
+  $("#score-region > .dropdown-menu li a").click(function (e) {
+    $("#score-region > .btn:first-child").html(
+      $(this).text() + '&nbsp;<span class="caret"></span>'
+    );
+    $("#score-region > .btn:first-child").val($(this).text().toLowerCase());
+    $("#region-gene-container2").hide();
+    $("#region-region-container2").hide();
+    $("#region-variant-container2").hide();
+    //console.log(e.target.id);
+    switch ($(this).text()) {
+      case "Gene":
+        $("#region-gene-name2").val("");
+        // $("#region-gene-base-pair-window").val('');
+        $("#region-gene-index2").val("");
+        $("#region-region-start-coord2").val("");
+        $("#region-region-end-coord2").val("");
+        $("#region-region-index2").val("");
+        $("#region-variant-index2").val("");
+        // $("#region-variant-base-pair-window").val('');
+        $("#region-gene-container2").show();
+        break;
+      case "Region":
+        $("#region-gene-name2").val("");
+        // $("#region-gene-base-pair-window").val('');
+        $("#region-gene-index2").val("");
+        $("#region-region-start-coord2").val("");
+        $("#region-region-end-coord2").val("");
+        $("#region-region-index2").val("");
+        $("#region-variant-index2").val("");
+        // $("#region-variant-base-pair-window").val('');
+        $("#region-region-container2").show();
+        break;
+      case "Variant":
+        $("#region-gene-name2").val("");
+        // $("#region-gene-base-pair-window").val('');
+        $("#region-gene-index2").val("");
+        $("#region-region-start-coord2").val("");
+        $("#region-region-end-coord2").val("");
+        $("#region-region-index2").val("");
+        $("#region-variant-index2").val("");
+        // $("#region-variant-base-pair-window").val('');
+        $("#region-variant-container2").show();
+        break;
+    }
+  });
+
   // init genome build selection
   switch (genomeBuild) {
     case "grch37":
@@ -850,6 +896,7 @@ $(document).ready(function () {
   });
 
   $("#ldassoc").prop("disabled", true);
+  $("#ldscore").prop("disabled", true);
 
   // reset apiaccess form
   $(".apiaccess-done").click(function (e) {
@@ -1468,6 +1515,59 @@ function uploadFile2() {
   });
 }
 
+function uploadFile3() {
+  restService.route = "LDlinkRestWeb";
+  restServerUrl =
+    restService.protocol +
+    "//" +
+    restService.hostname +
+    restService.pathname +
+    restService.route;
+
+  var filename = $("#ldscoreFile").val();
+  // console.log(filename);
+
+  var fileInput = document.getElementById("ldassoc-file");
+  var file = fileInput.files[0];
+  var formData = new FormData();
+  //console.log("formData before");
+  //console.dir(formData);
+  formData.append("ldscoreFile", file);
+  //console.log("formData after");
+  //console.dir(formData);
+  // Display the keys
+  //  for (var key of formData.keys()) {
+  //     console.log(key);
+  //  }
+  $.ajax({
+    url: restServerUrl + "/upload", //Server script to process data
+    type: "POST",
+    xhr: function () {
+      // Custom XMLHttpRequest
+      var myXhr = $.ajaxSettings.xhr();
+      if (myXhr.upload) {
+        // Check if upload property exists
+        myXhr.upload.addEventListener(
+          "progress",
+          progressHandlingFunction,
+          false
+        ); // For handling the progress of the upload
+      }
+      return myXhr;
+    },
+    //Ajax events
+    beforeSend: beforeSendHandler,
+    success: completeHandler,
+    error: errorHandler,
+    // Form data
+    data: formData,
+    //Options to tell jQuery not to process data or worry about content-type.
+    cache: false,
+    contentType: false,
+    processData: false,
+  });
+}
+
 function progressHandlingFunction(e) {
   if (e.lengthComputable) {
     //$('progress').attr({value:e.loaded,max:e.total});
@@ -1500,6 +1600,7 @@ function completeHandler() {
   $("#ldscore-file-container").fadeIn(1000);
   // enable calculate button only when file is successfully uploaded
   $("#ldassoc").removeAttr("disabled");
+  $("#ldscore").removeAttr("disabled");
 }
 function errorHandler(e) {
   showCommError(e);
@@ -2852,10 +2953,16 @@ function updateData(id) {
       }
       break;
     case "ldscore":
+      console.log(
+        isBrowseSetLdscore(id),
+        isRegionSetLdscore(id),
+        areRegionDetailsSetLdscore(id),
+        isPopulationSet(id)
+      );
       if (
-        isBrowseSet(id) &&
-        isRegionSet(id) &&
-        areRegionDetailsSet(id) &&
+        isBrowseSetLdscore(id) &&
+        isRegionSetLdscore(id) &&
+        areRegionDetailsSetLdscore(id) &&
         isPopulationSet(id)
       ) {
         $("#" + id + "-loading").show();
@@ -2946,8 +3053,39 @@ function isBrowseSet(elementId) {
   }
 }
 
+function isBrowseSetLdscore(elementId) {
+  var query = $("#header-values2");
+  var isVisible = query.is(":visible");
+  if (isVisible === true) {
+    $("#" + elementId + "-browse-set-none").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-browse-set-none").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-browse-set-none").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
 function isRegionSet(elementId) {
   var region = $("#region-codes-menu1")
+    .html()
+    .replace(/&nbsp;<span class="caret"><\/span>/, "");
+  if (region == "Gene" || region == "Region" || region == "Variant") {
+    $("#" + elementId + "-region-codes-zero").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-region-codes-zero").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-region-codes-zero").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
+function isRegionSetLdscore(elementId) {
+  var region = $("#region-codes-menu2")
     .html()
     .replace(/&nbsp;<span class="caret"><\/span>/, "");
   if (region == "Gene" || region == "Region" || region == "Variant") {
@@ -2988,6 +3126,32 @@ function isGeneBPSet(elementId) {
   }
 }
 
+function isGeneNameSetLdscore(elementId) {
+  if ($("#region-gene-name2").val().toString().length > 0) {
+    $("#" + elementId + "-region-gene-name").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-region-gene-name").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-region-gene-name").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
+function isGeneBPSetLdscore(elementId) {
+  if ($("#region-gene-base-pair-window2").val().toString().length > 0) {
+    $("#" + elementId + "-region-gene-bp").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-region-gene-bp").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-region-gene-bp").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
 function isRegionStartSet(elementId) {
   if ($("#region-region-start-coord").val().toString().length > 0) {
     $("#" + elementId + "-region-region-start").popover("hide");
@@ -3003,6 +3167,32 @@ function isRegionStartSet(elementId) {
 
 function isRegionEndSet(elementId) {
   if ($("#region-region-end-coord").val().toString().length > 0) {
+    $("#" + elementId + "-region-region-end").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-region-region-end").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-region-region-end").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
+function isRegionStartSetLdscore(elementId) {
+  if ($("#region-region-start-coord2").val().toString().length > 0) {
+    $("#" + elementId + "-region-region-start").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-region-region-start").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-region-region-start").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
+function isRegionEndSetLdscore(elementId) {
+  if ($("#region-region-end-coord2").val().toString().length > 0) {
     $("#" + elementId + "-region-region-end").popover("hide");
     return true;
   } else {
@@ -3040,6 +3230,32 @@ function isVariantBPSet(elementId) {
   }
 }
 
+function isVariantIndexSetLdscore(elementId) {
+  if ($("#region-variant-index2").val().toString().length > 0) {
+    $("#" + elementId + "-variant-index-pop").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-variant-index-pop").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-variant-index-pop").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
+function isVariantBPSetLdscore(elementId) {
+  if ($("#region-variant-base-pair-window2").val().toString().length > 0) {
+    $("#" + elementId + "-variant-bp-pop").popover("hide");
+    return true;
+  } else {
+    $("#" + elementId + "-variant-bp-pop").popover("show");
+    setTimeout(function () {
+      $("#" + elementId + "-variant-bp-pop").popover("hide");
+    }, 4000);
+    return false;
+  }
+}
+
 function areRegionDetailsSet(elementId) {
   var region = $("#region-codes-menu1")
     .html()
@@ -3066,6 +3282,45 @@ function areRegionDetailsSet(elementId) {
     // index variant
     // bp window
     if (isVariantIndexSet(elementId) && isVariantBPSet(elementId)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
+function areRegionDetailsSetLdscore(elementId) {
+  var region = $("#region-codes-menu2")
+    .html()
+    .replace(/&nbsp;<span class="caret"><\/span>/, "");
+  if (region == "Gene") {
+    // gene name
+    // bp window
+    if (isGeneNameSetLdscore(elementId) && isGeneBPSetLdscore(elementId)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  if (region == "Region") {
+    // region start
+    // region end
+    if (
+      isRegionStartSetLdscore(elementId) &&
+      isRegionEndSetLdscore(elementId)
+    ) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  if (region == "Variant") {
+    // index variant
+    // bp window
+    if (
+      isVariantIndexSetLdscore(elementId) &&
+      isVariantBPSetLdscore(elementId)
+    ) {
       return true;
     } else {
       return false;

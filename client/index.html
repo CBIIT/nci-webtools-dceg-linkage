@@ -523,11 +523,11 @@
 											<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
 											<div id="ldassoc-files">
 												<div id="ldassoc-browse-button">
-													<span class="btn btn-default btn-file btn-csv-file">Browse
-														<input type="file" id="ldassoc-file">
-													</span>
-												</div>
-												<div id="ldassoc-sample">
+					<span class="btn btn-default btn-file btn-csv-file">Browse
+						<input type="file" id="ldassoc-file">
+					</span>
+					</div>
+							<div id="ldassoc-sample">
 													<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
 													<label class="switch" for="example-gwas">
 														<input id="example-gwas" type="checkbox" data-toggle="toggle">
@@ -536,9 +536,9 @@
 													<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
 												</div>
 											</div>
-											<a id="ldassoc-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
-											 data-placement="bottom" data-content="Please upload a file."></a>
-										</div>
+							<a id="ldassoc-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+								data-placement="bottom" data-content="Please upload a file."></a>
+							</div>
 
 										<progress style="display:none;"></progress>
 
@@ -2256,10 +2256,10 @@
 <!--- ADD new LDScore module -->
 			<!-- LDscore -->
 			<div class="tab-pane fade not-home" id="ldscore-tab">
-				<!-- ldassoc INPUTS-->
+				<!-- ldscore INPUTS-->
 				<div class="container-fluid">
 					<div class="row" style="padding-top: 10px;">
-						<!-- ldassoc FORM -->
+						<!-- ldscore FORM -->
 						<form id="ldscoreForm" class="ldlinkForm">
 							<!-- Population -->
 							<!-- Broswe RS numbers -->
@@ -2359,16 +2359,16 @@
 											<a id="ldscore-region-codes-zero" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 											 trigger="manual" data-placement="right" data-content="Please select a region."></a>
 											<div id="score-region" class="dropdown">
-												<button class="btn btn-default dropdown-toggle" type="button" id="score-codes-menu1" data-toggle="dropdown"
+												<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu2" data-toggle="dropdown"
 												 style="width:155px;">Select Region<span class="caret"></span></button>
-												<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-menu1">
+												<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-menu2">
 													<li role="presentation"><a role="menuitem" tabindex="-1" >Gene</a></li>
 													<li role="presentation"><a role="menuitem" tabindex="-1" >Region</a></li>
 													<li role="presentation"><a role="menuitem" tabindex="-1" >Variant</a></li>
 												</ul>
 											</div>
 											<!-- region = Gene -->
-											<div id="region-gene-container" class="form-inline" style="display:none;">
+											<div id="region-gene-container2" class="form-inline" style="display:none;">
 												<a id="ldscore-region-gene-name" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div class="form-group">
@@ -2390,7 +2390,7 @@
 											</div>
 											<!-- region = Region -->
 											<div id="region-region-container2" class="form-inline" style="display:none;">
-												<a id="score-region-region-start" style="position:relative;left:155px;top:17px"  data-toggle="popover"
+												<a id="ldscore-region-region-start" style="position:relative;left:155px;top:17px"  data-toggle="popover"
 												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
 												<div>
 													<label for="region-region-start-coord2" style="display:none;">Start Coord (chr1:50000 or 1:50000) in (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</label>
@@ -2530,7 +2530,7 @@
 						</div>
 					</div>
 				</div>
-				<!-- ldassoc CONTAINER -->
+				<!-- ldscore CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="ldscore-results-container">
 						<!-- <div id="row-button" class="row overflowy">

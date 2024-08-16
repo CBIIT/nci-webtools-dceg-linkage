@@ -530,10 +530,12 @@ def upload():
         # check if the post request has the file part
         print(" We got a POST")
         # print dir(request.files)
-        if 'ldassocFile' not in request.files:
+        if 'ldassocFile' or 'ldscoreFile' not in request.files:
             print('No file part')
             return 'No file part...'
-        file = request.files['ldassocFile']
+        file = request.files['ldassocFile'] if 'ldassocFile' in request.files else request.files['ldscoreFile'] if 'ldscoreFile' in request.files else None
+
+
         # if user does not select file, browser also
         # submit a empty part without filename
         print(type(file))
