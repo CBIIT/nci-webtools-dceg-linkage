@@ -21,11 +21,13 @@ from LDexpress import calculate_express, get_ldexpress_tissues
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
+from LDscore import calculate_ldscore
 from LDutilites import get_config, unlock_stale_tokens
 from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
+import requests
 
 # retrieve config
 param_list = get_config()
@@ -733,6 +735,41 @@ def ldassoc():
     end_time = time.time()
     app.logger.info("Executed LDassoc (%ss)" % (round(end_time - start_time, 2)))
     return sendJSON(out_json)
+
+# Web and API route for LDassoc
+@app.route('/LDlinkRest/ldscore', methods=['GET'])
+#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldscore', methods=['GET'])
+def ldscore():
+    print("LDscore###############:")
+    start_time = time.time()
+
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+
+    web = False
+
+    try:
+        # Make an API call to the ldsc39_container
+        ldsc39_url = "http://ldsc_container:5000/ldscore" 
+        params = {
+            "pop": pop,
+            "genome_build": genome_build
+        }
+        response = requests.get(ldsc39_url)
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        out_json = response.json()
+        print(out_json)
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    return out_json
+
+
 
 # Web and API route for LDexpress
 @app.route('/LDlinkRest/ldexpress', methods=['POST'])

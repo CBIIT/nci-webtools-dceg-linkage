@@ -2955,14 +2955,14 @@ function updateData(id) {
     case "ldscore":
       console.log(
         isBrowseSetLdscore(id),
-        isRegionSetLdscore(id),
-        areRegionDetailsSetLdscore(id),
+        //isRegionSetLdscore(id),
+        //areRegionDetailsSetLdscore(id),
         isPopulationSet(id)
       );
       if (
         isBrowseSetLdscore(id) &&
-        isRegionSetLdscore(id) &&
-        areRegionDetailsSetLdscore(id) &&
+        //isRegionSetLdscore(id) &&
+        //areRegionDetailsSetLdscore(id) &&
         isPopulationSet(id)
       ) {
         $("#" + id + "-loading").show();
@@ -3572,32 +3572,32 @@ function updateLDscore() {
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
     calculateRegion: $("#score-region > button").val(),
-    gene: new Object(),
-    region: new Object(),
-    variant: new Object(),
-    genome_build: genomeBuild,
-    dprime: $("#score-matrix-color-r2").hasClass("active") ? "False" : "True",
-    transcript: $("#score-transcript").hasClass("active") ? "False" : "True",
+    //  gene: new Object(),
+    //  region: new Object(),
+    //  variant: new Object(),
+    //  genome_build: genomeBuild,
+    //  dprime: $("#score-matrix-color-r2").hasClass("active") ? "False" : "True",
+    //  transcript: $("#score-transcript").hasClass("active") ? "False" : "True",
 
-    annotate: document.querySelector('input[name="ldscore_options"]:checked')
-      .value,
-    useEx: $("#example-gwas2").is(":checked") ? "True" : "False",
+    //  annotate: document.querySelector('input[name="ldscore_options"]:checked')
+    //    .value,
+    //  useEx: $("#example-gwas2").is(":checked") ? "True" : "False",
   };
 
-  ldInputs.columns.chromosome = $("#score-chromosome > button").val();
-  ldInputs.columns.position = $("#score-position > button").val();
-  ldInputs.columns.pvalue = $("#score-p-value > button").val();
-  //gene
-  ldInputs.gene.name = $("#region-gene-name2").val();
-  ldInputs.gene.basepair = $("#region-gene-base-pair-window2").val();
-  ldInputs.gene.index = $("#region-gene-index2").val();
-  //region
-  ldInputs.region.start = $("#region-region-start-coord2").val();
-  ldInputs.region.end = $("#region-region-end-coord2").val();
-  ldInputs.region.index = $("#region-region-index2").val();
-  //variant
-  ldInputs.variant.index = $("#region-variant-index2").val();
-  ldInputs.variant.basepair = $("#region-variant-base-pair-window2").val();
+  // ldInputs.columns.chromosome = $("#score-chromosome > button").val();
+  // ldInputs.columns.position = $("#score-position > button").val();
+  // ldInputs.columns.pvalue = $("#score-p-value > button").val();
+  // //gene
+  // ldInputs.gene.name = $("#region-gene-name2").val();
+  // ldInputs.gene.basepair = $("#region-gene-base-pair-window2").val();
+  // ldInputs.gene.index = $("#region-gene-index2").val();
+  // //region
+  // ldInputs.region.start = $("#region-region-start-coord2").val();
+  // ldInputs.region.end = $("#region-region-end-coord2").val();
+  // ldInputs.region.index = $("#region-region-index2").val();
+  // //variant
+  // ldInputs.variant.index = $("#region-variant-index2").val();
+  // ldInputs.variant.basepair = $("#region-variant-base-pair-window2").val();
 
   var tempbuild = genomeBuild == "grch37" ? "hg19" : "hg38";
   var r2url =
@@ -3625,7 +3625,7 @@ function updateLDscore() {
     data: ldInputs,
     contentType: "application/json", // JSON
   });
-
+  //console.log(ajaxRequest);
   ajaxRequest.success(function (data) {
     //data is returned as a string representation of JSON instead of JSON obj
     //JSON.parse() cleans up this json string.
@@ -3640,7 +3640,28 @@ function updateLDscore() {
     } else {
       jsonObjCanvas = dataCanvas;
     }
-
+    //console.log(data.output);
+    if (displayError(id, jsonObjCanvas) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container").show();
+      $("#" + id + "-links-container").show();
+      //console.log(dataCanvas);
+      var formattedOutput = data.output.replace(/\n/g, "<br>");
+      $("#ldscore-bokeh-graph").html(formattedOutput);
+      //$("#ldscore-bokeh-graph").empty().append(data);
+    }
     // display graph if no errors
     // if (displayError(id, jsonObjCanvas) == false) {
     //   switch (genomeBuild) {
