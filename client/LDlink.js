@@ -884,9 +884,9 @@ $(document).ready(function () {
       setupLDassocExample();
     }
 
-    if (document.getElementById("example-gwas2").checked) {
-      setupLDscoreExample();
-    }
+    //if (document.getElementById("example-gwas2").checked) {
+    //setupLDscoreExample();
+    //}
   });
 
   // Hide Genome Build dropdown on LD Tools dropdown-nav hover
@@ -918,7 +918,7 @@ $(document).ready(function () {
   });
 
   $("#example-gwas2").click(function (e) {
-    setupLDscoreExample();
+    //setupLDscoreExample();
   });
 
   updateVersion(ldlink_version);
@@ -1515,7 +1515,7 @@ function uploadFile2() {
   });
 }
 
-function uploadFile3() {
+function uploadFileScore() {
   restService.route = "LDlinkRestWeb";
   restServerUrl =
     restService.protocol +
@@ -1524,21 +1524,19 @@ function uploadFile3() {
     restService.pathname +
     restService.route;
 
-  var filename = $("#ldscoreFile").val();
+  var fileList = document.getElementById("ldscoreFile");
   // console.log(filename);
 
-  var fileInput = document.getElementById("ldassoc-file");
-  var file = fileInput.files[0];
+  var fileInput = document.getElementById("ldscore-file");
+  var file = fileInput.files;
   var formData = new FormData();
-  //console.log("formData before");
-  //console.dir(formData);
-  formData.append("ldscoreFile", file);
-  //console.log("formData after");
-  //console.dir(formData);
-  // Display the keys
-  //  for (var key of formData.keys()) {
-  //     console.log(key);
-  //  }
+  for (let i = 0; i < file.length; i++) {
+    const fileItem = document.createElement("div");
+    fileItem.textContent = file[i].name;
+    fileList.appendChild(fileItem);
+    formData.append("ldscoreFile" + i, file[i]);
+  }
+  console.log(formData);
   $.ajax({
     url: restServerUrl + "/upload", //Server script to process data
     type: "POST",
@@ -1636,6 +1634,7 @@ function createFileSelectEvent() {
     // console.log("Event");
     populateHeaderValues(event, numFiles, label);
     uploadFile2();
+    uploadFileScore();
     $("#header-values").show();
     $("#header-values2").show();
     //Changing loadCSVFile because the file size is 722Meg
@@ -3662,65 +3661,7 @@ function updateLDscore() {
       $("#ldscore-bokeh-graph").html(formattedOutput);
       //$("#ldscore-bokeh-graph").empty().append(data);
     }
-    // display graph if no errors
-    // if (displayError(id, jsonObjCanvas) == false) {
-    //   switch (genomeBuild) {
-    //     case "grch37":
-    //       $("." + id + "-position-genome-build-header").text("GRCh37");
-    //       break;
-    //     case "grch38":
-    //       $("." + id + "-position-genome-build-header").text("GRCh38");
-    //       break;
-    //     case "grch38_high_coverage":
-    //       $("." + id + "-position-genome-build-header").text(
-    //         "GRCh38 High Coverage"
-    //       );
-    //       break;
-    //   }
 
-    //   $("#ldassoc-bokeh-graph").empty().append(dataCanvas);
-
-    //   // place Download PDF button
-    //   $("#" + id + "-export-dropdown")
-    //     .empty()
-    //     .prepend(
-    //       '<div class="dropdown pull-right"><button class="btn btn-default dropdown-toggle" type="button" id="ldassoc-menu1" data-toggle="dropdown" disabled>Exporting Plot <i class="fa fa-spinner fa-pulse"></i><span class="sr-only">Loading</span></button><ul class="dropdown-menu " role="menu" aria-labelledby="ldassoc-menu1" style="overflow: hidden;"><li role="presentation"><a role="menuitem" id="ldassoc-downloadSVG" class="text-center" tabindex="-1" >SVG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPDF" class="text-center" tabindex="-1" >PDF</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadPNG" class="text-center" tabindex="-1" >PNG</a></li><li role="presentation" class="divider"></li><li role="presentation"><a role="menuitem" id="ldassoc-downloadJPEG" class="text-center" tabindex="-1" >JPEG</a></li></ul></div>'
-    //     );
-    //   $("#ldassoc-downloadSVG").click(function (e) {
-    //     e.preventDefault();
-    //     var assoc_plot =
-    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".svg";
-    //     window.open(assoc_plot, "_blank");
-    //   });
-    //   $("#ldassoc-downloadPDF").click(function (e) {
-    //     e.preventDefault();
-    //     var assoc_plot =
-    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".pdf";
-    //     window.open(assoc_plot, "_blank");
-    //   });
-    //   $("#ldassoc-downloadPNG").click(function (e) {
-    //     e.preventDefault();
-    //     var assoc_plot =
-    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".png";
-    //     window.open(assoc_plot, "_blank");
-    //   });
-    //   $("#ldassoc-downloadJPEG").click(function (e) {
-    //     e.preventDefault();
-    //     var assoc_plot =
-    //       "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
-    //     window.open(assoc_plot, "_blank");
-    //   });
-
-    // enable button once .svg file is generated from subprocess
-    //   var fileURL =
-    //     "/LDlinkRestWeb/tmp/assoc_plot_" + ldInputs.reference + ".jpeg";
-    //   checkFile(id, fileURL, 180);
-
-    //   $("#" + id + "-results-container").show();
-    //   getLDAssocResults("assoc" + ldInputs.reference + ".json");
-    // } else {
-    //   displayError(id, dataCanvas);
-    // }
     $("#" + id + "-loading").hide();
   });
   ajaxRequest.fail(function (jqXHR, textstatus) {

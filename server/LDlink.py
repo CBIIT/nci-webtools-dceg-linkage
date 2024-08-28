@@ -528,31 +528,43 @@ def upload():
     for arg in request.args:
         print(arg)
     print("request.method = %s" % (request.method))
+    print("request.files = %s" % (request.files))
     if request.method == 'POST':
         # check if the post request has the file part
         print(" We got a POST")
         # print dir(request.files)
-        if 'ldassocFile' or 'ldscoreFile' not in request.files:
+        if len(request.files) == 0:
             print('No file part')
             return 'No file part...'
+        # if 'ldassocFile' not in request.files:
+        #     print('No file part')
+        #     return 'No file part...'
+        # if 'ldscoreFile' not in request.files:
+        #     print('No file part')
+        #     return 'No file part...'
         file = request.files['ldassocFile'] if 'ldassocFile' in request.files else request.files['ldscoreFile'] if 'ldscoreFile' in request.files else None
 
 
         # if user does not select file, browser also
         # submit a empty part without filename
-        print(type(file))
-        if file.filename == '':
-            print('No selected file')
-            return 'No selected file'
-        if file:
-            print('file.filename ' + file.filename)
-            print('file and allowed_file')
-            filename = secure_filename(file.filename)
-            print("About to SAVE file")
-            print("filename = " + filename)
-            os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
-            file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-            return 'File was saved'
+        print(len(request.files))
+        for file_key in request.files:
+            file = request.files[file_key]
+            print(type(file))
+            if file.filename == '':
+                print('No selected file')
+                return 'No selected file'
+            if file:
+                print('file.filename ' + file.filename)
+                print('file and allowed_file')
+                filename = secure_filename(file.filename)
+                print("About to SAVE file")
+                print("filename = " + filename)
+                os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
+                file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+                print(f'File {filename} was saved')
+        
+        return 'All files were saved'
 
 # Route for LDassoc example GWAS data
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
@@ -751,7 +763,7 @@ def ldscore():
 
     try:
         # Make an API call to the ldsc39_container
-        ldsc39_url = "http://ldsc_container:5000/ldscore" 
+        ldsc39_url = "http://ldsc_container:5000/ldscore?pop=%s&genome_build=%s" % (pop, genome_build)
         params = {
             "pop": pop,
             "genome_build": genome_build
