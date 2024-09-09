@@ -758,15 +758,19 @@ def ldscore():
 
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
 
     web = False
-
     try:
         # Make an API call to the ldsc39_container
-        ldsc39_url = "http://ldsc_container:5000/ldscore?pop=%s&genome_build=%s" % (pop, genome_build)
+        ldsc39_url = "http://ldsc_container:5000/ldscore?pop=%s&genome_build=%s&filename=%s" % (pop, genome_build,fileroot)
         params = {
             "pop": pop,
             "genome_build": genome_build
+
         }
         response = requests.get(ldsc39_url)
         response.raise_for_status()  # Raise an exception for HTTP errors

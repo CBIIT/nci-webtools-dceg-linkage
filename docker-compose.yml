@@ -40,6 +40,9 @@ services:
       - my_network
     ports:
       - "5000:5000"
+    volumes:
+      - ./data:/data
+      
 
 networks:
   my_network:

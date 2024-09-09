@@ -3560,6 +3560,7 @@ function updateLDassoc() {
   hideLoadingIcon(ajaxRequest, id);
 }
 
+//click Calculate button
 function updateLDscore() {
   var id = "ldscore";
 
@@ -3570,11 +3571,11 @@ function updateLDscore() {
     filename: $("#ldscore-file-label").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
-    calculateRegion: $("#score-region > button").val(),
+    //  calculateRegion: $("#score-region > button").val(),
     //  gene: new Object(),
     //  region: new Object(),
     //  variant: new Object(),
-    //  genome_build: genomeBuild,
+    genome_build: genomeBuild,
     //  dprime: $("#score-matrix-color-r2").hasClass("active") ? "False" : "True",
     //  transcript: $("#score-transcript").hasClass("active") ? "False" : "True",
 
