@@ -27,7 +27,7 @@ from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
-import requests
+import requests,glob
 from ldscore.ldsc_utils import run_ldsc_command
 
 # retrieve config
@@ -763,6 +763,28 @@ def ldscore():
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
+
+    fileDir = f"/data/tmp/uploads"
+    print(filename)
+    if filename:
+        file_parts = filename.split('.')
+        file_chromo = None
+        for part in file_parts:
+            if part.isdigit() and 1 <= int(part) <= 22:
+                file_chromo = part
+                break
+    print(file_chromo)
+    if file_chromo:
+        # Find the file in the directory
+        pattern = os.path.join(fileDir, f"{fileroot}.*")
+        for file_path in glob.glob(pattern):
+            extension = file_path.split('.')[-1]
+            new_filename = f"{file_chromo}.{extension}"
+            new_file_path = os.path.join(fileDir, new_filename)
+            os.rename(file_path, new_file_path)
+            print(f"Renamed {file_path} to {new_file_path}")
+            #shutil.copy(file_path, new_file_path)  # Copy the file instead of renaming it
+
 
     web = False
     try:
