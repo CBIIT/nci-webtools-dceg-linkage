@@ -7,6 +7,8 @@ RUN dnf -y update \
     bzip2-devel \
     fontconfig \
     gcc \
+    g++ \
+    git \
     glibc-langpack-en \
     httpd \
     httpd-devel \
@@ -62,7 +64,10 @@ WORKDIR ${LDLINK_HOME}
 
 COPY server/requirements.txt .
 
-RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
+
+# Install ldsc package from GitHub
+#RUN pip install git+https://github.com/CBIIT/ldsc.git@master
 
 COPY server/ .
 

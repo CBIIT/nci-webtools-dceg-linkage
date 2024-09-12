@@ -10,7 +10,7 @@ from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app, send_from_directory
+from flask import Flask, request, jsonify, current_app, send_from_directory,Response
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 from LDpair import calculate_pair
@@ -28,6 +28,7 @@ from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 import requests
+from ldscore.ldsc_utils import run_ldsc_command
 
 # retrieve config
 param_list = get_config()
@@ -766,15 +767,12 @@ def ldscore():
     web = False
     try:
         # Make an API call to the ldsc39_container
-        ldsc39_url = "http://ldsc_container:5000/ldscore?pop=%s&genome_build=%s&filename=%s" % (pop, genome_build,fileroot)
-        params = {
-            "pop": pop,
-            "genome_build": genome_build
-
-        }
-        response = requests.get(ldsc39_url)
-        response.raise_for_status()  # Raise an exception for HTTP errors
-        out_json = response.json()
+       
+        #response = requests.get(ldsc39_url)
+        #response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        result = run_ldsc_command(pop, genome_build, filename)
+        out_json = {"result": result}
         print(out_json)
     except requests.RequestException as e:
         # Print the error message
@@ -783,7 +781,7 @@ def ldscore():
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
-    return out_json
+    return jsonify(out_json)
 
 
 

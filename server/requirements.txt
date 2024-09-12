@@ -5,10 +5,12 @@ Flask==1.1.4
 jinja2==2.11.3
 MarkupSafe==1.1.1
 mod_wsgi
-numpy==1.23.1
+numpy==1.23.3
 pymongo
 python-dateutil
 python-dotenv
 requests
 selenium==3.3.0
 svgutils==0.3.0
+pybedtools==0.9.1  # Specify a known working version
+ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39

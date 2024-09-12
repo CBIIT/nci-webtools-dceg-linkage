@@ -3631,16 +3631,17 @@ function updateLDscore() {
     //JSON.parse() cleans up this json string.
 
     // create bokeh object with output_backend=canvas from svg
+
     var dataString = data[0];
-    var dataCanvas = new Object([dataString, data[1]]);
+    var dataCanvas = [dataString, data[1]];
 
     var jsonObjCanvas;
-    if (typeof dataCanvas == "string") {
-      jsonObjCanvas = JSON.parse(dataCanvas);
+    if (typeof dataString === "string") {
+      jsonObjCanvas = JSON.parse(dataString);
     } else {
       jsonObjCanvas = dataCanvas;
     }
-    //console.log(data.output);
+    console.log(data.result);
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {
         case "grch37":
@@ -3658,7 +3659,7 @@ function updateLDscore() {
       $("#" + id + "-results-container").show();
       $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
-      var formattedOutput = data.output.replace(/\n/g, "<br>");
+      var formattedOutput = data.result.replace(/\n/g, "<br>");
       $("#ldscore-bokeh-graph").html(formattedOutput);
       //$("#ldscore-bokeh-graph").empty().append(data);
     }
