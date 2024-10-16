@@ -1202,6 +1202,8 @@ $(document).on("change", ".btn-snp :file", createFileSelectTrigger);
 // ldAssoc File Change
 $(document).on("change", ".btn-csv-file :file", createFileSelectTrigger);
 
+$(document).on("change", ".btn-ldscore-file :file", createFileSelectTrigger);
+
 function setupLDassocExample() {
   //   console.log("Use example GWAS data.");
   var useEx = document.getElementById("example-gwas");
@@ -1458,7 +1460,7 @@ function resetBootstrapSelector(id) {
 }
 
 function createFileSelectTrigger() {
-  // console.log("createFileSelectTrigger");
+  console.log("createFileSelectTrigger");
   var input = $(this),
     numFiles = input.get(0).files ? input.get(0).files.length : 1,
     label = input.val().replace(/\\/g, "/").replace(/.*\//, "");
@@ -1669,6 +1671,22 @@ function createFileSelectEvent() {
     //Changing loadCSVFile because the file size is 722Meg
     //loadCSVFile(event);
   });
+
+  $(".btn-ldscore-file :file").on(
+    "fileselect",
+    function (event, numFiles, label) {
+      // console.log(label);
+      $(this).parents(".input-group").find(":text").val(label.split(".")[0]);
+      //$(this).parents(".input-group").find("input[type='hidden']").val(label);
+      populateHeaderValues(event, numFiles, label);
+      uploadFile2();
+      uploadFileScore();
+      $("#header-values").show();
+      $("#header-values2").show();
+      //Changing loadCSVFile because the file size is 722Meg
+      //loadCSVFile(event);
+    }
+  );
 }
 
 function fileUpload(fieldName, buttonName) {

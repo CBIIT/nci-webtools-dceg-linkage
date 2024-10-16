@@ -759,7 +759,7 @@ def ldscore():
 
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)
+    filename = request.args.get('filename', False)+".bim"
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
