@@ -17,6 +17,35 @@ var restServerUrl =
 
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
 var dropdowns2 = ["score-chromosome", "score-position", "score-p-value"];
+var populationsLdscore = {
+  AFR: {
+    subPopulations: { AFR: "African American" },
+  },
+  ASJ: {
+    subPopulations: { ASJ: "Ashkenazi Jewish" },
+  },
+  EAS: {
+    subPopulations: { EAS: "East Asian" },
+  },
+  EST: {
+    subPopulations: { EST: "Estonian" },
+  },
+  FIN: {
+    subPopulations: { FIN: "Finnish European" },
+  },
+  AMR: {
+    subPopulations: { AMR: "Latino / Admixed American" },
+  },
+  NFE: {
+    subPopulations: { NFE: "Non-Finnish European" },
+  },
+  NWE: {
+    subPopulations: { NWE: "North-Western European" },
+  },
+  SEU: {
+    subPopulations: { SEI: "Southern European" },
+  },
+};
 
 var populations = {
   AFR: {
@@ -6686,18 +6715,34 @@ function buildPopulationDropdown(elementId) {
   var htmlText = "";
   var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
   var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
-  for (var popAbbrev in populations) {
-    var population = populations[popAbbrev];
-    htmlText += htmlText1
-      .replace(/ABBREV/g, popAbbrev)
-      .replace("FULLNAME", population.fullName);
-    for (var subPopAbbrev in population.subPopulations) {
-      var subDetail = population.subPopulations[subPopAbbrev];
-      htmlText += htmlText2
-        .replace(/ABBREV/g, subPopAbbrev)
-        .replace("DETAIL", subDetail);
+  if (elementId.includes("ldscore")) {
+    for (var popAbbrev in populationsLdscore) {
+      var population = populationsLdscore[popAbbrev];
+      // htmlText += htmlText1
+      //   .replace(/ABBREV/g, popAbbrev)
+      //   .replace("FULLNAME", population.fullName);
+      for (var subPopAbbrev in population.subPopulations) {
+        var subDetail = population.subPopulations[subPopAbbrev];
+        htmlText += htmlText2
+          .replace(/ABBREV/g, subPopAbbrev)
+          .replace("DETAIL", subDetail);
+      }
+      htmlText += "</optgroup>\n";
     }
-    htmlText += "</optgroup>\n";
+  } else {
+    for (var popAbbrev in populations) {
+      var population = populations[popAbbrev];
+      htmlText += htmlText1
+        .replace(/ABBREV/g, popAbbrev)
+        .replace("FULLNAME", population.fullName);
+      for (var subPopAbbrev in population.subPopulations) {
+        var subDetail = population.subPopulations[subPopAbbrev];
+        htmlText += htmlText2
+          .replace(/ABBREV/g, subPopAbbrev)
+          .replace("DETAIL", subDetail);
+      }
+      htmlText += "</optgroup>\n";
+    }
   }
 
   $("#" + elementId).html(htmlText);
