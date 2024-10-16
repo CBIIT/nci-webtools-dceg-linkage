@@ -1561,13 +1561,24 @@ function uploadFileScore() {
   var fileInput = document.getElementById("ldscore-file");
   var file = fileInput.files;
   var formData = new FormData();
+  var fileinput = document.getElementById("ldscore-file-label").value;
+  var fileExistInput = document.getElementById("ldscoreFile");
+  fileExistInput.innerHTML = ""; // Clear the file input value
   for (let i = 0; i < file.length; i++) {
     const fileItem = document.createElement("div");
     fileItem.textContent = file[i].name;
-    fileList.appendChild(fileItem);
-    formData.append("ldscoreFile" + i, file[i]);
+
+    if (fileItem.textContent.includes(fileinput)) {
+      fileList.appendChild(fileItem);
+      console.log(fileItem);
+      formData.append("ldscoreFile" + i, file[i]);
+    } else {
+      fileList.removeChild(fileItem);
+      formData.delete("ldscoreFile" + i);
+      console.log(fileItem);
+    }
   }
-  console.log(formData);
+
   $.ajax({
     url: restServerUrl + "/upload", //Server script to process data
     type: "POST",
@@ -1653,6 +1664,7 @@ function showCommError(e) {
 
 function createFileSelectEvent() {
   // Add file select file listener
+
   $(".btn-snp :file").on("fileselect", function (event, numFiles, label) {
     // console.log(label);
     $(this).parents(".input-group").find(":text").val(label);
@@ -1675,16 +1687,17 @@ function createFileSelectEvent() {
   $(".btn-ldscore-file :file").on(
     "fileselect",
     function (event, numFiles, label) {
-      // console.log(label);
-      $(this).parents(".input-group").find(":text").val(label.split(".")[0]);
+      $(this)
+        .parents(".input-group")
+        .find(":text")
+        .val(label.split(".").slice(0, -1).join("."));
       //$(this).parents(".input-group").find("input[type='hidden']").val(label);
+      console.log(numFiles);
       populateHeaderValues(event, numFiles, label);
       uploadFile2();
       uploadFileScore();
       $("#header-values").show();
       $("#header-values2").show();
-      //Changing loadCSVFile because the file size is 722Meg
-      //loadCSVFile(event);
     }
   );
 }
