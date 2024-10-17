@@ -2262,11 +2262,25 @@
 						<!-- ldscore FORM -->
 						<form id="ldscoreForm" class="ldlinkForm">
 							   <!-- Tabs Navigation -->
-							   <ul class="nav nav-tabs">
+							<ul class="nav nav-tabs">
                                 <li class="active"><a data-toggle="tab" href="#ldscore-file-container-tab">LDScore Calculation</a></li>
                                 <li><a data-toggle="tab" href="#ldscore-test1-tab">Heritability Analysis</a></li>
                                 <li><a data-toggle="tab" href="#ldscore-test2-tab">Genetic Correlation</a></li>
                             </ul>
+							<!-- <div class="tab-content">
+								<div id="ldscore-file-container-tab" class="tab-pane fade in active">
+									<h3>LDScore Calculation</h3>
+									<p>Content for LDScore Calculation.</p>
+								</div>
+								<div id="ldscore-test1-tab" class="tab-pane fade">
+									<h3>Heritability Analysis</h3>
+									<p>Content for Heritability Analysis.</p>
+								</div>
+								<div id="ldscore-test2-tab" class="tab-pane fade">
+									<h3>Genetic Correlation</h3>
+									<p>Content for Genetic Correlation.</p>
+								</div>
+							</div> -->
         
 
 							<!-- Population -->
@@ -2540,98 +2554,113 @@
 					</div>
 				</div>
 				<!-- ldscore CONTAINER -->
-				<div class="jumbotron">
-					<div class="container-fluid" id="ldscore-results-container">
-						<div id="row-button" class="row overflowy">
-							<div id="ldscore-export-dropdown"></div>
-							<div class="col-sm-10 col-sm-offset-1">
-								<div id="ldscore-bokeh-graph"></div>
+
+				<div class="tab-content">
+					<div id="ldscore-file-container-tab" class="tab-pane fade in active">
+						<h3>LDScore Calculation Results</h3>
+						<div class="jumbotron">
+							<div class="container-fluid" id="ldscore-results-container">
+								<div id="row-button" class="row overflowy">
+									<div id="ldscore-export-dropdown"></div>
+									<div class="col-sm-10 col-sm-offset-1">
+										<div id="ldscore-bokeh-graph"></div>
+										<br />
+										<!-- <div>
+											<img id="ldassoc-legend" src="LDassoc_legend.png" title="LDscore Legend" class="graph-legend" alt="LDscore legend">
+										</div> -->
+									</div>
+								</div> 
+		
+								<!-- <br />
+								<a id="ldascore-genome" class="ldproxy-link" href="https://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://ldlink.nih.gov/LDLinkRestWeb/tmp/track78816.txt"
+								 target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
+								<a class="ldproxy-link" href="https://forgedb.cancer.gov/about/" target="LDassoc-forgedb-browser_FOREGEdb"
+									title="FORGEdb scoring scheme">View scoring scheme for FORGEdb scores</a>
+								<a class="ldproxy-link" href="https://www.regulomedb.org/regulome-help/" target="LDassoc-genome-browser_RegulomeDB"
+								 title="RegulomeDB scoring scheme">View scoring scheme for RegulomeDB scores</a> <br> -->
+		
+		
+		
 								<br />
+		
+								<!-- <div class="row" style="padding:10px;">
+									<div class="col-sm-7 col-sm-offset-1">
+										<ul id="ldassoc-stats" style="list-style-type: none;">
+											<li>Number of Individuals: <b>2504</b></li>
+											<li>SNPs in Region: <b>2451</b></li>
+											<li>Run time: <b>6.39</b> seconds</li>
+										</ul>
+									</div>
+								</div> -->
+		
+		
 								<!-- <div>
-									<img id="ldassoc-legend" src="LDassoc_legend.png" title="LDscore Legend" class="graph-legend" alt="LDscore legend">
+									<h3>Association Results</h3>
+								</div>
+		
+								<table id="new-ldassoc" class="table display compact">
+									<thead title="Shift-click column headers to sort by multiple levels">
+										<tr>
+											<th>RS Number</th>
+											<th class="dt-body-center">Chr</th>
+											<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
+											<th>Alleles</th>
+											<th>MAF</th>
+											<th>Distance</th>
+											<th>D'</th>
+											<th>R<sup>2</sup></th>
+											<th>Correlated Alleles</th>
+											<th>Association P-value</th>
+											<th>FORGEdb</th>
+											<th>RegulomeDB</th>
+											<th>HaploReg</th>
+											<th>Functional Class</th>
+										</tr>
+									</thead>
+									<tfoot>
+										<tr>
+											<th>RS Number</th>
+											<th>Chr</th>
+											<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
+											<th>Alleles</th>
+											<th>MAF</th>
+											<th>Distance</th>
+											<th>D'</th>
+											<th>R<sup>2</sup></th>
+											<th>Correlated Alleles</th>
+											<th>Association P-value</th>
+											<th>FORGEdb</th>
+											<th>RegulomeDB</th>
+											<th>HaploReg</th>
+											<th>Functional Class</th>
+										</tr>
+									</tfoot>
+								</table> -->
+		
+								<!-- <div class="row">
+									<a id="ldassoc-results-link" target="LDProxy-SNP-File"> <span>Download association data for all variants</span></a>
+								</div>
+		
+								<div class="row" style="padding:10px;">
+									<div class="col-sm-7">
+										<ul style="list-style-type: none;">
+											<li><i></i></li>
+										</ul>
+									</div>
 								</div> -->
 							</div>
-						</div> 
-
-						<!-- <br />
-						<a id="ldascore-genome" class="ldproxy-link" href="https://genome.ucsc.edu/cgi-bin/hgTracks?org=human&hgt.customText=http://ldlink.nih.gov/LDLinkRestWeb/tmp/track78816.txt"
-						 target="LDProxy-genome-browser_UCSC" title="Genome Browser">View R<sup>2</sup> data in UCSC Genome Browser</a>
-						<a class="ldproxy-link" href="https://forgedb.cancer.gov/about/" target="LDassoc-forgedb-browser_FOREGEdb"
-							title="FORGEdb scoring scheme">View scoring scheme for FORGEdb scores</a>
-						<a class="ldproxy-link" href="https://www.regulomedb.org/regulome-help/" target="LDassoc-genome-browser_RegulomeDB"
-						 title="RegulomeDB scoring scheme">View scoring scheme for RegulomeDB scores</a> <br> -->
-
-
-
-						<br />
-
-						<!-- <div class="row" style="padding:10px;">
-							<div class="col-sm-7 col-sm-offset-1">
-								<ul id="ldassoc-stats" style="list-style-type: none;">
-									<li>Number of Individuals: <b>2504</b></li>
-									<li>SNPs in Region: <b>2451</b></li>
-									<li>Run time: <b>6.39</b> seconds</li>
-								</ul>
-							</div>
-						</div> -->
-
-
-						<!-- <div>
-							<h3>Association Results</h3>
 						</div>
-
-						<table id="new-ldassoc" class="table display compact">
-							<thead title="Shift-click column headers to sort by multiple levels">
-								<tr>
-									<th>RS Number</th>
-									<th class="dt-body-center">Chr</th>
-									<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
-									<th>Alleles</th>
-									<th>MAF</th>
-									<th>Distance</th>
-									<th>D'</th>
-									<th>R<sup>2</sup></th>
-									<th>Correlated Alleles</th>
-									<th>Association P-value</th>
-									<th>FORGEdb</th>
-									<th>RegulomeDB</th>
-									<th>HaploReg</th>
-									<th>Functional Class</th>
-								</tr>
-							</thead>
-							<tfoot>
-								<tr>
-									<th>RS Number</th>
-									<th>Chr</th>
-									<th>Position (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</th>
-									<th>Alleles</th>
-									<th>MAF</th>
-									<th>Distance</th>
-									<th>D'</th>
-									<th>R<sup>2</sup></th>
-									<th>Correlated Alleles</th>
-									<th>Association P-value</th>
-									<th>FORGEdb</th>
-									<th>RegulomeDB</th>
-									<th>HaploReg</th>
-									<th>Functional Class</th>
-								</tr>
-							</tfoot>
-						</table> -->
-
-						<!-- <div class="row">
-							<a id="ldassoc-results-link" target="LDProxy-SNP-File"> <span>Download association data for all variants</span></a>
-						</div>
-
-						<div class="row" style="padding:10px;">
-							<div class="col-sm-7">
-								<ul style="list-style-type: none;">
-									<li><i></i></li>
-								</ul>
-							</div>
-						</div> -->
+					</div>
+					<div id="ldscore-test1-tab" class="tab-pane fade">
+						<h3>Heritability Analysis</h3>
+						<p>Content for Heritability Analysis.</p>
+					</div>
+					<div id="ldscore-test2-tab" class="tab-pane fade">
+						<h3>Genetic Correlation</h3>
+						<p>Content for Genetic Correlation.</p>
 					</div>
 				</div>
+
 			</div>
 
 
