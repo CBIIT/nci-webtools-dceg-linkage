@@ -1144,6 +1144,52 @@ textarea:invalid,
 	color: #800000;
 }
 
+#ldscore-file-label {
+    margin-top: 10px; /* Adjust the value as needed */
+}
+
+#ldscore-browse-button {
+    margin-left: 10px; /* Adjust the value as needed */
+	margin-top: -25px;
+	float: left;
+}
+
+.ldscore-flex-item1{
+	-webkit-box-ordinal-group: 2;
+    -ms-flex-order: 1;
+    order: 1;
+    -webkit-box-flex: 2;
+    -ms-flex-positive: 2;
+    flex-grow: 2;
+	display: flex; /* Add flex display */
+    justify-content: left; /* Center horizontally */
+    align-items: left; /* Center vertically */
+}
+
+.ldscore-flex-item2 {
+	margin-left: 30px;
+	display: flex; /* Add flex display */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+.ldscore-flex-item{
+	
+	display: flex; /* Add flex display */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.ldscore-population-col {
+    /* Add your styles here */
+   margin-top: 10px;
+}
+
+.ldscore {
+    /* Add your styles here */
+   margin-top: 10px;
+}
+
+
 #region-gene-container > div *,
 #region-region-container > div *,
 #region-variant-container > div * {
@@ -1176,7 +1222,7 @@ textarea:invalid,
 	float: right;
 	margin-top: -4px;
 }
-#ldassoc-browse-button, #ldscore-browse-button {
+#ldassoc-browse-button {
 	float: left;
 }
 #ldassoc-sample, #ldscore-sample {
@@ -1292,6 +1338,37 @@ input:checked + .slider:before {
 }*/
 .ldassoc-calculate-col {
 	float: left;
+}
+
+.ldscore-calculate-col{
+	float: center;
+	margin-top: 10px;
+}
+.tab-content{
+	min-height: 0px;
+	margin-bottom: 0px;
+}
+#ldscore-file-container-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+	padding-bottom: 50px;
+}
+#ldscore-test1-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+}
+#ldscore-test2-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+}
+#ldscore-inflation-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+}
+
+.ldassoc-flex {
+    display: flex;
+    flex-wrap: wrap;
 }
 /*
 .dropdown-menu {

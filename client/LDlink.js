@@ -18,14 +18,17 @@ var restServerUrl =
 var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
 var dropdowns2 = ["score-chromosome", "score-position", "score-p-value"];
 var populationsLdscore = {
+  EUR: {
+    subPopulations: { EUR: "European" },
+  },
+  EAS: {
+    subPopulations: { EAS: "East Asian" },
+  },
   AFR: {
     subPopulations: { AFR: "African American" },
   },
   ASJ: {
     subPopulations: { ASJ: "Ashkenazi Jewish" },
-  },
-  EAS: {
-    subPopulations: { EAS: "East Asian" },
   },
   EST: {
     subPopulations: { EST: "Estonian" },
@@ -1367,8 +1370,10 @@ function setupLDscoreExample() {
     // console.log($("#region-region-index").val());
 
     $("#ldscore-population-codes").val("");
+    $("#ldscore-population-codes2").val("");
     refreshPopulation([], "ldscore");
     $("#ldscore-population-codes").val(["CEU"]);
+    $("#ldscore-population-codes2").val(["CEU"]);
     refreshPopulation(["CEU"], "ldscore");
     // console.log($("#ldassoc-population-codes").val());
   } else {
@@ -1403,6 +1408,7 @@ function setupLDscoreExample() {
     $("#region-region-end-coord2").val("");
     $("#region-region-index2").val("");
     $("#ldscore-population-codes").val("");
+    $("#ldscore-population-codes2").val("");
     refreshPopulation([], "ldscore");
   }
 }
@@ -3019,10 +3025,10 @@ function updateData(id) {
         isPopulationSet(id)
       );
       if (
-        isBrowseSetLdscore(id) &&
+        isBrowseSetLdscore(id) //&&
         //isRegionSetLdscore(id) &&
         //areRegionDetailsSetLdscore(id) &&
-        isPopulationSet(id)
+        //isPopulationSet(id)
       ) {
         $("#" + id + "-loading").show();
         updateLDscore();
@@ -3625,9 +3631,9 @@ function updateLDscore() {
   var id = "ldscore";
 
   var $btn = $("#" + id).button("loading");
-  var population = getPopulationCodes(id + "-population-codes");
+  //var population = getPopulationCodes(id + "-population-codes");
   var ldInputs = {
-    pop: population.join("+"),
+    //pop: population.join("+"),
     filename: $("#ldscore-file-label").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
@@ -3702,6 +3708,17 @@ function updateLDscore() {
       jsonObjCanvas = dataCanvas;
     }
     console.log(data.result);
+
+    // Create a download link
+    var downloadLink = document.createElement("a");
+    downloadLink.id = "download-url"; // Add an ID to the download link
+    downloadLink.href = "";
+    downloadLink.download = "data_result.txt"; // You can set the desired filename here
+    downloadLink.textContent = "Download Result";
+
+    // Append the download link to the document body or a specific container
+    document.body.appendChild(downloadLink);
+
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {
         case "grch37":

@@ -2265,268 +2265,203 @@
 							<ul class="nav nav-tabs">
                                 <li class="active"><a data-toggle="tab" href="#ldscore-file-container-tab">LDScore Calculation</a></li>
                                 <li><a data-toggle="tab" href="#ldscore-test1-tab">Heritability Analysis</a></li>
-                                <li><a data-toggle="tab" href="#ldscore-test2-tab">Genetic Correlation</a></li>
-                            </ul>
-							<!-- <div class="tab-content">
+                                <li><a data-toggle="tab" href="#ldscore-inflation-tab">Inflation Calculation</a></li>
+								<li><a data-toggle="tab" href="#ldscore-test2-tab">Genetic Correlation</a></li>
+							</ul>
+							<div class="tab-content">
 								<div id="ldscore-file-container-tab" class="tab-pane fade in active">
-									<h3>LDScore Calculation</h3>
-									<p>Content for LDScore Calculation.</p>
+									<!-- Population -->
+									<!-- Broswe RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldscore-flex-item">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+													aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container">
+													<label for="ldscore-file-label" style="display:none;">Upload Data File</label>
+													<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
+													<label for="ldscore-file" style="display:none;">Browse for RS File</label>
+													<div id="ldscore-files">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file">Browse
+																<input type="file" id="ldscore-file" multiple>
+															</span>
+														</div>
+														<div id="ldscoreFile"></div>
+													
+													</div>
+													<a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+													data-placement="bottom" data-content="Please upload a file."></a>
+												</div>
+
+												<progress style="display:none;"></progress>
+
+												<div id="header-values2" style="display:none;">
+
+													<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
+													<div class="" style="width:300px;">
+														
+													</div>
+												</div> 
+											</div>
+										</div>
+
+										<div class="ldscore-flex-item2">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
 								<div id="ldscore-test1-tab" class="tab-pane fade">
-									<h3>Heritability Analysis</h3>
-									<p>Content for Heritability Analysis.</p>
+									<!-- Broswe RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldassoc-flex-item1">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+													aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container">
+													<label for="ldscore-file-label" style="display:none;">Upload Data File</label>
+													<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
+													<label for="ldscore-file" style="display:none;">Browse for RS File</label>
+													<div id="ldscore-files">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file">Browse
+																<input type="file" id="ldscore-file" multiple>
+															</span>
+														</div>
+														<div id="ldscoreFile"></div>
+													
+													</div>
+													<a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+													data-placement="bottom" data-content="Please upload a file."></a>
+												</div>
+
+												<progress style="display:none;"></progress>
+
+												<div id="header-values2" style="display:none;">
+
+													<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
+													<div class="" style="width:300px;">
+														
+													</div>
+												</div> 
+											</div>
+										</div>
+										
+
+										<div class="ldassoc-flex-item2">
+											<div class="form-group">
+												
+											</div>
+										</div>
+										<div class="ldassoc-flex-item3">
+											<div class="form-group">
+												<div class="ldscore-population-col" style="width:190px;">
+													<a id="ldscore-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
+													trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
+													<label for="ldscore-population-codes" style="display: none;">Populations</label>
+													<select id="ldscore-population-codes" multiple="multiple" name="populations">
+													</select>
+												</div>
+											</div>  
+											
+										</div>
+										<!-- Calculate -->
+										<div class="ldassoc-flex-item4">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
 								<div id="ldscore-test2-tab" class="tab-pane fade">
-									<h3>Genetic Correlation</h3>
-									<p>Content for Genetic Correlation.</p>
+									<!-- Broswe RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldassoc-flex-item1">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+													aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container">
+													<label for="ldscore-file-label" style="display:none;">Upload Data File</label>
+													<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
+													<label for="ldscore-file" style="display:none;">Browse for RS File</label>
+													<div id="ldscore-files">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file">Browse
+																<input type="file" id="ldscore-file" multiple>
+															</span>
+														</div>
+														<div id="ldscoreFile"></div>
+													
+													</div>
+													<a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+													data-placement="bottom" data-content="Please upload a file."></a>
+												</div>
+
+												<progress style="display:none;"></progress>
+
+												<div id="header-values2" style="display:none;">
+
+													<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
+													<div class="" style="width:300px;">
+														
+													</div>
+												</div> 
+											</div>
+										</div>
+										
+
+										<div class="ldassoc-flex-item2">
+											<div class="form-group">
+												
+											</div>
+										</div>
+										<div class="ldassoc-flex-item3">
+											<!-- <div class="form-group">
+												<div class="ldassoc-population-col" style="width:190px;">
+													<a id="ldscore-population-codes-zero2" style="position:relative;left:180px;"  data-toggle="popover"
+													trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
+													<label for="ldscore-population-codes2" style="display: none;">Populations</label>
+													<select id="ldscore-population-codes2" multiple="multiple" name="populations2">
+													</select>
+												</div>
+											</div>  -->
+											
+										</div>
+										<!-- Calculate -->
+										<div class="ldassoc-flex-item4">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+									</div>
 								</div>
-							</div> -->
+							</div> 
         
 
-							<!-- Population -->
-							<!-- Broswe RS numbers -->
-							<div class="ldassoc-flex">
-								<div class="ldassoc-flex-item1">
-									<div class="col-sm-3" style="width:280px;">
-										<div class="progress" style="display:none;">
-											<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
-											 aria-valuemin="0" aria-valuemax="100">
-												50% Complete (info)
-											</div>
-										</div>
-										<div class="input-group" id="ldscore-file-container">
-											<label for="ldscore-file-label" style="display:none;">Upload Data File</label>
-											<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
-											<label for="ldscore-file" style="display:none;">Browse for RS File</label>
-											<div id="ldscore-files">
-												<div id="ldscore-browse-button">
-													<span class="btn btn-default btn-file btn-ldscore-file">Browse
-														<input type="file" id="ldscore-file" multiple>
-													</span>
-												</div>
-												<div id="ldscoreFile"></div>
-												<!-- <div id="ldscore-sample">
-													 <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> 
-													<label class="switch" for="example-gwas2">
-														<input id="example-gwas2" type="checkbox" data-toggle="toggle">
-														<span class="slider round"></span>
-													</label>
-													<div id="ldscore-sample-label"> &nbsp;Use example GWAS data</div>
-												</div> -->
-											</div>
-											<a id="ldscore-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
-											 data-placement="bottom" data-content="Please upload a file."></a>
-										</div>
-
-										<progress style="display:none;"></progress>
-
-										<div id="header-values2" style="display:none;">
-
-											<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
-											<div class="" style="width:300px;">
-												<!--
-										 <div style="clear:both;"></div>
-										  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
-										  </div>
-										  -->
-												<!-- <div id="score-chromosome" class="dropdown">
-													<button class="btn btn-default dropdown-toggle" type="button" id="chromosomeColumn2" data-toggle="dropdown"
-													 style="width:250px;">Select Chromosome
-														<span class="caret"></span></button>
-													<ul class="dropdown-menu" role="menu" aria-labelledby="chromosomeColumn2">
-														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
-														<li role="presentation" class="divider"></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
-													</ul>
-												</div> -->
-												<!--
-										  <div style="clear:both;"></div>
-										  <div style="width:90px;float:left;"><span style="float:right;">Position:</span>
-										  </div>
-											-->
-												<!-- <div id="score-position" class="dropdown">
-													<button class="btn btn-default dropdown-toggle" type="button" id="ldscore-menu2" data-toggle="dropdown" style="width:250px;">Select
-														Position
-														<span class="caret"></span></button>
-													<ul class="dropdown-menu" role="menu" aria-labelledby="ldscore-menu2">
-														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
-														<li role="presentation" class="divider"></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
-													</ul>
-												</div>
-												<div id="score-p-value" class="dropdown">
-													<button class="btn btn-default dropdown-toggle" type="button" id="ldscore-menu3" data-toggle="dropdown" style="width:250px;">Select
-														P-value
-														<span class="caret"></span></button>
-													<ul class="dropdown-menu" role="menu" aria-labelledby="ldscore-menu3">
-														<li role="presentation"><a role="menuitem" tabindex="-1" >BP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >SNP</a></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >A1</a></li>
-														<li role="presentation" class="divider"></li>
-														<li role="presentation"><a role="menuitem" tabindex="-1" >A2</a></li>
-													</ul>
-												</div> -->
-											</div>
-										</div> <!-- End header-values -->
-									</div>
-								</div>
-								
-
-								<div class="ldassoc-flex-item2">
-									<div class="form-group">
-										<!-- <div class="col-sm-3" style="width:275px;">
-											<a id="ldscore-region-codes-zero" style="position:relative;left:155px;top:17px"  data-toggle="popover"
-											 trigger="manual" data-placement="right" data-content="Please select a region."></a>
-											<div id="score-region" class="dropdown">
-												<button class="btn btn-default dropdown-toggle" type="button" id="region-codes-menu2" data-toggle="dropdown"
-												 style="width:155px;">Select Region<span class="caret"></span></button>
-												<ul class="dropdown-menu pull-left" role="menu" aria-labelledby="region-codes-menu2">
-													<li role="presentation"><a role="menuitem" tabindex="-1" >Gene</a></li>
-													<li role="presentation"><a role="menuitem" tabindex="-1" >Region</a></li>
-													<li role="presentation"><a role="menuitem" tabindex="-1" >Variant</a></li>
-												</ul>
-											</div>
-											-- region = Gene --
-											<div id="region-gene-container2" class="form-inline" style="display:none;">
-												<a id="ldscore-region-gene-name" style="position:relative;left:155px;top:17px"  data-toggle="popover"
-												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
-												<div class="form-group">
-													<label for="region-gene-name2" style="display:none;">Gene Name</label>
-													<input type="text" id="region-gene-name2" class="form-control" placeholder="Gene Name" pattern="(^[A-Za-z0-9\-]+$)">
-												</div>
-												<div class="form-group">
-													<a id="score-region-gene-bp" style="position:relative;left:95px;top:5px"  data-toggle="popover"
-													 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
-													<label for="region-gene-base-pair-window2">&plusmn;</label>
-													<input id="region-gene-base-pair-window2" class="form-control" value="100000" type="text" pattern="^\d+$"
-													 style="width:90px;"><span style="margin-left:10px;">base pair window</span>
-												</div>
-												<div class="form-group">
-													<label for="region-gene-index2" style="display:none;">Index RSID (optional)</label>
-													<input type="text" id="region-gene-index2" class="form-control" placeholder="Index RSID (optional)"
-													 pattern="(^rs\d+$)">
-												</div>
-											</div>
-											-- region = Region --
-											<div id="region-region-container2" class="form-inline" style="display:none;">
-												<a id="ldscore-region-region-start" style="position:relative;left:155px;top:17px"  data-toggle="popover"
-												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
-												<div>
-													<label for="region-region-start-coord2" style="display:none;">Start Coord (chr1:50000 or 1:50000) in (<span class="ldassoc-position-genome-build-header">GRCh37</span>)</label>
-													<input type="text" id="region-region-start-coord2" class="form-control" style="width:300px;" placeholder="Start Coord (chr1:50000 or 1:50000)"
-													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
-												</div>
-												<a id="ldscore-region-region-end" style="position:relative;left:155px;top:17px"  data-toggle="popover"
-												 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
-												<div>
-													<label for="region-region-end-coord2" style="display:none;">End Coord (chr1:50000)</label>
-													<input type="text" id="region-region-end-coord2" class="form-control" style="width:300px;" placeholder="End Coord (chr1:50000 or 1:50000)"
-													 pattern="(^(chr)?(\d{1,2}|(x|y|X|Y)):\d+$)">
-												</div>
-												<div>
-													<label for="region-region-index2" style="display:none;">Index RSID (optional)</label>
-													<input type="text" id="region-region-index2" class="form-control" style="width:300px;" placeholder="Index RSID (optional)"
-													 pattern="(^rs\d+$)">
-												</div>
-											</div>
-											-- region = Variant --
-											<div id="region-variant-container2" class="form-inline" style="display:none;">
-												<a id="ldscore-variant-index-pop" style="position:relative;left:155px;top:17px"  data-toggle="popover"
-												 trigger="manual" data-placement="top" data-content="Please fill out this field."></a>
-												<div class="form-group">
-													<label for="region-variant-index2" style="display:none;">Index RSID</label>
-													<input type="text" id="region-variant-index2" class="form-control" style="width:225px" placeholder="Variant RSID" pattern="(^rs\d+$)">
-												</div>
-												<div class="form-group">
-													<a id="ldscore-variant-bp-pop" style="position:relative;left:95px;top:5px"  data-toggle="popover"
-													 trigger="manual" data-placement="bottom" data-content="Please fill out this field."></a>
-													<label for="region-variant-base-pair-window2">&plusmn;</label>
-													<input id="region-variant-base-pair-window2" class="form-control" value="500000" type="text" pattern="^\d+$"
-													 style="width:90px;"><span style="margin-left:10px;">base pair window</span>
-												</div>
-											</div>
-										</div> -->
-									</div>
-								</div>
-								<div class="ldassoc-flex-item3">
-									<div class="form-group">
-										<div class="ldassoc-population-col" style="width:190px;">
-											<a id="ldscore-population-codes-zero" style="position:relative;left:180px;"  data-toggle="popover"
-											 trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
-											<label for="ldscore-population-codes" style="display: none;">Populations</label>
-											<select id="ldscore-population-codes" multiple="multiple" name="populations">
-											</select>
-										</div>
-									</div>
-									<!-- <div class="toggle-labels">
-										<div id="toggle-label">
-											<a class="help-anchor-link" href="#LDscore">LD measure: </a>
-										</div>
-										<div id="toggle-label">
-											<a class="help-anchor-link" href="#LDscore">Collapse transcripts: </a>
-										</div>
-										<div id="toggle-label">
-											<a class="help-anchor-link" href="#LDscore">Annotation: </a>
-										</div>
-									</div>
-									<div class="col-sm-2">
-										<div id="ldscore-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Select R-squared attribute" class="btn btn-default active" id="score-matrix-color-r2">
-													<input type="radio" checked="" autocomplete="off" name="options">R<sup>2</sup>
-												</label>
-											</div>
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Select D-prime attribute" class="btn btn-default">
-													<input type="radio" autocomplete="off" name="options">D'
-												</label>
-											</div>
-										</div>
-										<div id="ldscore-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Collapse transcripts" class="btn btn-default active" id="score-transcript">
-													<input type="radio" checked="" autocomplete="off" name="options">Yes
-												</label>
-											</div>
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Show transcripts" class="btn btn-default">
-													<input type="radio" autocomplete="off" name="options">No
-												</label>
-											</div>
-										</div>
-										<div id="ldscore-flag-switches" data-toggle="buttons" class="btn-group flag-switches">
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Show ForgeDB annotation" class="btn btn-default active" >
-													<input id="score-annotate-forage" type="radio" value="forge" checked="" autocomplete="off" name="ldscore_options">FORGEdb
-												</label>
-											</div>
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Show RegulomeDB annotation" class="btn btn-default">
-													<input id="score-annotate-regulome" type="radio" value="regulome" autocomplete="off" name="ldscore_options">RegulomeDB
-												</label>
-											</div>
-											<div class="ldassoc-flag-switch" id="ldscore-flag-switch">
-												<label title="Hide RegulomeDB annotation" class="btn btn-default">
-													<input id="score-annotate" type="radio" value="no" autocomplete="off" name="ldscore_options">None
-												</label>
-											</div>
-										</div>
-									</div> -->
-								</div>
-								<!-- Calculate -->
-								<div class="ldassoc-flex-item4">
-									<div class="form-group">
-										<div class="ldassoc-calculate-col">
-											<label for="ldscore" class="sr-only">Submit</label>
-											<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
-										</div>
-									</div>
-								</div>
-							</div>
+							
 						</form>
 					</div>
 					<hr>

@@ -796,7 +796,6 @@ def ldscore():
         result = run_ldsc_command(pop, genome_build, filename)
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
-
         print(out_json)
     except requests.RequestException as e:
         # Print the error message
