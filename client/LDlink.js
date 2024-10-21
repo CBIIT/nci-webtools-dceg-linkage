@@ -3709,6 +3709,31 @@ function updateLDscore() {
     }
     console.log(data.result);
 
+    // Parse the result data
+    var summaryData = parseResultData(data.result);
+
+    // Create and append the summary table
+    var summaryHeaders = ["", "MAF", "L2"];
+    var summaryTable = createTable(
+      summaryHeaders,
+      summaryData.ldScoreSummary,
+      true
+    );
+    document
+      .getElementById("summary-table-container")
+      .appendChild(summaryTable);
+
+    // Create and append the correlation matrix table
+    var correlationHeaders = ["", "MAF", "L2"];
+    var correlationTable = createTable(
+      correlationHeaders,
+      summaryData.correlationMatrix,
+      false
+    );
+    document
+      .getElementById("correlation-table-container")
+      .appendChild(correlationTable);
+
     // Create a download link
     var downloadLink = document.createElement("a");
     downloadLink.id = "download-url"; // Add an ID to the download link
@@ -3758,6 +3783,94 @@ function updateLDscore() {
   });
 
   hideLoadingIcon(ajaxRequest, id);
+}
+// Function to parse the result data
+function parseResultData(resultDataText) {
+  var lines = resultDataText.trim().split("\n");
+  var summaryData = {
+    ldScoreSummary: {},
+    correlationMatrix: {},
+  };
+  var isSummary = false;
+  var isCorrelation = false;
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+
+    if (line === "Summary of LD Scores in 22.l2.ldscore.gz") {
+      isSummary = true;
+      isCorrelation = false;
+      continue;
+    }
+
+    if (line === "MAF/LD Score Correlation Matrix") {
+      isSummary = false;
+      isCorrelation = true;
+      continue;
+    }
+
+    if (isSummary) {
+      var parts = line.split(/\s+/);
+      if (parts.length === 3) {
+        var key = parts[0];
+        summaryData.ldScoreSummary[key] = {
+          MAF: parseFloat(parts[1]),
+          L2: parseFloat(parts[2]),
+        };
+      }
+    }
+
+    if (isCorrelation) {
+      var parts = line.split(/\s+/);
+      if (parts.length === 3) {
+        var key = parts[0];
+        summaryData.correlationMatrix[key] = {
+          MAF: parseFloat(parts[1]),
+          L2: parseFloat(parts[2]),
+        };
+      }
+    }
+  }
+
+  return summaryData;
+}
+// Function to create a table
+function createTable(headers, data, isSummary) {
+  var table = document.createElement("table");
+  table.className = "table table-bordered";
+
+  // Create table header
+  var thead = document.createElement("thead");
+  var headerRow = document.createElement("tr");
+  headers.forEach(function (header) {
+    var th = document.createElement("th");
+    th.textContent = header;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create table body
+  var tbody = document.createElement("tbody");
+  if (isSummary) var keys = ["mean", "std", "min", "25%", "50%", "75%", "max"];
+  else keys = ["MAF", "L2"];
+  keys.forEach(function (key) {
+    if (data[key]) {
+      var row = document.createElement("tr");
+      var cell = document.createElement("td");
+      cell.textContent = key;
+      row.appendChild(cell);
+      headers.slice(1).forEach(function (header) {
+        var cell = document.createElement("td");
+        cell.textContent = data[key][header];
+        row.appendChild(cell);
+      });
+      tbody.appendChild(row);
+    }
+  });
+  table.appendChild(tbody);
+
+  return table;
 }
 
 function updateLDhap() {
