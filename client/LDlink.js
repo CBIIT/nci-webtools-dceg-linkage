@@ -3725,7 +3725,8 @@ function updateLDscore() {
     var summaryTable = createTable(
       summaryHeaders,
       summaryData.ldScoreSummary,
-      true
+      true,
+      "summary-table-container"
     );
     document
       .getElementById("summary-table-container")
@@ -3736,16 +3737,20 @@ function updateLDscore() {
     var correlationTable = createTable(
       correlationHeaders,
       summaryData.correlationMatrix,
-      false
+      false,
+      "correlation-table-container"
     );
     document
       .getElementById("correlation-table-container")
       .appendChild(correlationTable);
 
+    var chromeFilematch = ldInputs.filename.match(/\b([1-9]|1[0-9]|2[0-2])\b/);
+
+    var chromeFile = chromeFilematch ? chromeFilematch[0] : null;
     // Create a download link
     var downloadLink = document.getElementById("ldscore-download-url");
     downloadLink.href =
-      "/LDlinkRestWeb/tmp/uploads/" + ldInputs.filename + ".l2.ldscore.gz"; // Set the href to the backend path
+      "/LDlinkRestWeb/tmp/uploads/" + chromeFile + ".l2.ldscore.gz"; // Set the href to the backend path
 
     // Create a download link for the input files
     var downloadLinkInput = document.getElementById(
@@ -3753,9 +3758,9 @@ function updateLDscore() {
     );
     downloadLinkInput.addEventListener("click", function () {
       var filenames = [
-        ldInputs.filename + ".bim",
-        ldInputs.filename + ".bed",
-        ldInputs.filename + ".fam",
+        chromeFile + ".bim",
+        chromeFile + ".bed",
+        chromeFile + ".fam",
       ];
 
       fetch("/LDlinkRestWeb/zip", {
@@ -3833,13 +3838,13 @@ function parseResultData(resultDataText) {
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i].trim();
 
-    if (line === "Summary of LD Scores in 22.l2.ldscore.gz") {
+    if (line.startsWith("Summary of LD Scores")) {
       isSummary = true;
       isCorrelation = false;
       continue;
     }
 
-    if (line === "MAF/LD Score Correlation Matrix") {
+    if (line.startsWith("MAF/LD Score Correlation Matrix")) {
       isSummary = false;
       isCorrelation = true;
       continue;
@@ -3871,7 +3876,15 @@ function parseResultData(resultDataText) {
   return summaryData;
 }
 // Function to create a table
-function createTable(headers, data, isSummary) {
+function createTable(headers, data, isSummary, containerId) {
+  var container = document.getElementById(containerId);
+
+  // Check if a table already exists in the container and remove it
+  var existingTable = container.querySelector("table");
+  if (existingTable) {
+    container.removeChild(existingTable);
+  }
+
   var table = document.createElement("table");
   table.className = "table table-bordered";
 
