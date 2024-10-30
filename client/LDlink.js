@@ -3649,6 +3649,7 @@ function updateLDscore() {
     //    .value,
     //  useEx: $("#example-gwas2").is(":checked") ? "True" : "False",
   };
+  console.log(ldInputs);
 
   // ldInputs.columns.chromosome = $("#score-chromosome > button").val();
   // ldInputs.columns.position = $("#score-position > button").val();
@@ -3742,14 +3743,42 @@ function updateLDscore() {
       .appendChild(correlationTable);
 
     // Create a download link
-    var downloadLink = document.createElement("a");
-    downloadLink.id = "download-url"; // Add an ID to the download link
-    downloadLink.href = "";
-    downloadLink.download = "data_result.txt"; // You can set the desired filename here
-    downloadLink.textContent = "Download Result";
+    var downloadLink = document.getElementById("ldscore-download-url");
+    downloadLink.href =
+      "/LDlinkRestWeb/tmp/uploads/" + ldInputs.filename + ".l2.ldscore.gz"; // Set the href to the backend path
 
-    // Append the download link to the document body or a specific container
-    document.body.appendChild(downloadLink);
+    // Create a download link for the input files
+    var downloadLinkInput = document.getElementById(
+      "ldscore-input-download-url"
+    );
+    downloadLinkInput.addEventListener("click", function () {
+      var filenames = [
+        ldInputs.filename + ".bim",
+        ldInputs.filename + ".bed",
+        ldInputs.filename + ".fam",
+      ];
+
+      fetch("/LDlinkRestWeb/zip", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ filenames: filenames }),
+      })
+        .then((response) => response.blob())
+        .then((blob) => {
+          var url = window.URL.createObjectURL(blob);
+          var a = document.createElement("a");
+          a.href = url;
+          a.download = "input_files.zip";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+        })
+        .catch((error) => console.error("Error:", error));
+    });
+
+    // downloadLink.textContent = "Download Result";
 
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {

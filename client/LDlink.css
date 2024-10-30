@@ -1388,7 +1388,25 @@ input:checked + .slider:before {
 #correlation-table-container .table-bordered tr:last-child {
     border-bottom: none; /* Remove the border from the last row */
 }
+.ldscore-download-button {
+	display: inline-block;
+	position: relative;
+	z-index: 10;
+	background-color: white;
+	padding: 5px;
+	border: 1px solid black;
+	text-decoration: none;
+	color: black;
+	margin-right: 10px; 
 
+	/* position:absolute;
+	z-index:10; 
+	background-color:white; 
+	padding:20px; 
+	border:1px solid black; 
+	text-decoration:none; 
+	color:black; */
+  }
 .ldassoc-flex {
     display: flex;
     flex-wrap: wrap;

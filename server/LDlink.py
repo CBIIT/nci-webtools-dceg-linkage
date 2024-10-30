@@ -10,7 +10,7 @@ from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app, send_from_directory,Response
+from flask import Flask, request, jsonify, current_app, send_from_directory,send_file,Response
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 from LDpair import calculate_pair
@@ -29,6 +29,7 @@ from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 import requests,glob
 from ldscore.ldsc_utils import run_ldsc_command
+import zipfile
 
 # retrieve config
 param_list = get_config()
@@ -513,10 +514,40 @@ def status(filename):
 
 
 # Route to serve temporary files
+#@app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
+#@app.route('/tmp/<filename>', strict_slashes=False)
+#def send_temp_file(filename):
+#    return send_from_directory(tmp_dir, filename)
+
+# Route to serve temporary files
 @app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
 @app.route('/tmp/<filename>', strict_slashes=False)
+@app.route('/LDlinkRestWeb/tmp/uploads/<filename>', strict_slashes=False)
+@app.route('/tmp/uploads/<filename>', strict_slashes=False)
 def send_temp_file(filename):
-    return send_from_directory(tmp_dir, filename)
+    if 'uploads' in request.path:
+        return send_from_directory(os.path.join(tmp_dir, 'uploads'), filename)
+    else:
+        return send_from_directory(tmp_dir, filename)
+
+@app.route('/LDlinkRestWeb/zip', methods=['POST'])
+def zip_files():
+    try:
+        filenames = request.json.get('filenames')
+        zip_filename = 'files.zip'
+        zip_filepath = os.path.join(tmp_dir, zip_filename)
+        
+        with zipfile.ZipFile(zip_filepath, 'w') as zipf:
+            for filename in filenames:
+                file_path = safe_join(tmp_dir, 'uploads', filename)
+                zipf.write(file_path, os.path.basename(file_path))
+        
+        return send_file(zip_filepath, as_attachment=True, attachment_filename=zip_filename)
+    except Exception as e:
+        exc_obj = e
+        app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        return jsonify({'error': str(e)}), 500
+        
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])
