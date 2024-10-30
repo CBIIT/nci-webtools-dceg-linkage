@@ -3701,11 +3701,18 @@ function updateLDscore() {
     var dataString = data[0];
     var dataCanvas = [dataString, data[1]];
 
+    // Find the index of the substring "Summary of LD Scores"
+    var index = data.result.indexOf("Summary of LD Scores");
+    if (index !== -1) {
+      // Remove the substring and everything that follows
+      resultStringCanvas = data.result.substring(0, index);
+    }
+    console.log(resultStringCanvas);
     var jsonObjCanvas;
     if (typeof dataString === "string") {
-      jsonObjCanvas = JSON.parse(dataString);
+      jsonObjCanvas = JSON.parse(resultStringCanvas);
     } else {
-      jsonObjCanvas = dataCanvas;
+      jsonObjCanvas = resultStringCanvas;
     }
     console.log(data.result);
 
@@ -3761,7 +3768,7 @@ function updateLDscore() {
       $("#" + id + "-results-container").show();
       $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
-      var formattedOutput = data.result.replace(/\n/g, "<br>");
+      var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
       $("#ldscore-bokeh-graph").html(formattedOutput);
       //$("#ldscore-bokeh-graph").empty().append(data);
     }

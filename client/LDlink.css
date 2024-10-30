@@ -1366,6 +1366,29 @@ input:checked + .slider:before {
     height: auto; /* Ensure the height adjusts to the content */
 }
 
+#summary-table-container .table-bordered,
+#correlation-table-container .table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+#summary-table-container .table-bordered th,
+#summary-table-container .table-bordered td,
+#correlation-table-container .table-bordered th,
+#correlation-table-container .table-bordered td {
+    border: 1px solid #dee2e6;
+    padding: 8px; /* Add padding to the table cells */
+}
+
+#summary-table-container .table-bordered tr,
+#correlation-table-container .table-bordered tr {
+    border-bottom: 1px solid #dee2e6; /* Add a border between rows */
+}
+
+#summary-table-container .table-bordered tr:last-child,
+#correlation-table-container .table-bordered tr:last-child {
+    border-bottom: none; /* Remove the border from the last row */
+}
+
 .ldassoc-flex {
     display: flex;
     flex-wrap: wrap;
