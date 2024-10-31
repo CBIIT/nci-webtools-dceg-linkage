@@ -3752,6 +3752,9 @@ function updateLDscore() {
     downloadLink.href =
       "/LDlinkRestWeb/tmp/uploads/" + chromeFile + ".l2.ldscore.gz"; // Set the href to the backend path
 
+    var downloadLogLink = document.getElementById("ldscore-download-log-url");
+    downloadLogLink.href = "/LDlinkRestWeb/tmp/uploads/" + chromeFile + ".log"; // Set the href to the backend path
+
     // Create a download link for the input files
     var downloadLinkInput = document.getElementById(
       "ldscore-input-download-url"
