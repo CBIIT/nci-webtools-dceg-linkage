@@ -1189,6 +1189,15 @@ textarea:invalid,
    margin-top: 10px;
 }
 
+.ldscore-file-name-container {
+	width: 172px;
+	word-wrap: break-word;
+	margin-top: 10px;
+	white-space: break-spaces;
+	overflow: hidden;
+	text-overflow: ellipsis;
+  }
+
 
 #region-gene-container > div *,
 #region-region-container > div *,
