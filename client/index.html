@@ -2305,8 +2305,19 @@
 												</div>
 											</div>
 										</div>
-						
 										<div class="ldscore-flex-item2">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore-wind">Window:</label>
+													<input type="text" id="ldscore-wind" name="wind" value="1" class="ldscore-form-control">
+													<select id="unit-select" class="ldscore-form-control">
+														<option value="cm">cm</option>
+														<option value="kb">kb</option>
+													  </select>
+												</div>
+											</div>
+										</div>
+										<div class="ldscore-flex-item3">
 											<div class="form-group">
 												<div class="ldscore-calculate-col">
 													<label for="ldscore" class="sr-only">Submit</label>
@@ -2330,7 +2341,8 @@
 													<div class="panel panel-default">
 														<div class="panel-heading">Download Options</div>
 														<div class="panel-body">
-														  <a id="ldscore-download-log-url" class="ldscore-download-button">Download Result</a>
+														  <a id="ldscore-download-log-url" download="result.txt"  
+														  class="ldscore-download-button">Download Result</a>
 														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
 														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Input</a>
 														</div>

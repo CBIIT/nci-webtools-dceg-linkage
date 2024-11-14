@@ -1172,6 +1172,18 @@ textarea:invalid,
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
 }
+
+
+.ldscore-form-control {
+	width: 50px;
+  }
+
+.ldscore-flex-item3 {
+	margin-left: 30px;
+	display: flex; /* Add flex display */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
 .ldscore-flex-item{
 	
 	display: flex; /* Add flex display */

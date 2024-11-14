@@ -791,6 +791,8 @@ def ldscore():
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
     filename = request.args.get('filename', False)+".bim"
+    ldwindow = request.args.get('ldwindow', '1')
+    windUnit = request.args.get('windUnit', 'cm')
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
@@ -824,7 +826,70 @@ def ldscore():
         #response = requests.get(ldsc39_url)
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
-        result = run_ldsc_command(pop, genome_build, filename)
+        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit)
+        filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+        out_json = {"result": filtered_result}
+        print(out_json)
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    return jsonify(out_json)
+
+
+###########
+#####
+###########
+# Web and API route for LDscore
+@app.route('/LDlinkRest/ldherit', methods=['GET'])
+#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
+def ldherit():
+    print("LDherit###############:")
+    start_time = time.time()
+
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)
+
+    print(pop,genome_build,filename)
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
+
+    fileDir = f"/data/tmp/uploads"
+    print(filename)
+    if filename:
+        file_parts = filename.split('.')
+        file_chromo = None
+        for part in file_parts:
+            if part.isdigit() and 1 <= int(part) <= 22:
+                file_chromo = part
+                break
+    print(file_chromo)
+    if file_chromo:
+        # Find the file in the directory
+        pattern = os.path.join(fileDir, f"{fileroot}.*")
+        for file_path in glob.glob(pattern):
+            extension = file_path.split('.')[-1]
+            new_filename = f"{file_chromo}.{extension}"
+            new_file_path = os.path.join(fileDir, new_filename)
+            os.rename(file_path, new_file_path)
+            print(f"Renamed {file_path} to {new_file_path}")
+            #shutil.copy(file_path, new_file_path)  # Copy the file instead of renaming it
+
+
+    web = False
+    try:
+        # Make an API call to the ldsc39_container
+       
+        #response = requests.get(ldsc39_url)
+        #response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        result = run_ldsc_command(pop, genome_build, filename,1,"cm")
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
         print(out_json)

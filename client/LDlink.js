@@ -3019,19 +3019,27 @@ function updateData(id) {
       break;
     case "ldscore":
       console.log(
-        isBrowseSetLdscore(id),
+        isBrowseSetLdscore(id)
         //isRegionSetLdscore(id),
         //areRegionDetailsSetLdscore(id),
-        isPopulationSet(id)
       );
       if (
-        isBrowseSetLdscore(id) //&&
+        true
+        //isBrowseSetLdscore(id) //&&
         //isRegionSetLdscore(id) &&
         //areRegionDetailsSetLdscore(id) &&
         //isPopulationSet(id)
       ) {
         $("#" + id + "-loading").show();
-        updateLDscore();
+        var heritTab = document.getElementById("ldscore-heritability-tab");
+        var ldscoreTab = document.getElementById("ldscore-file-container-tab");
+        var isHerit = heritTab.classList.contains("active");
+        var isLdscore = ldscoreTab.classList.contains("active");
+        if (isHerit) {
+          updateLDherit();
+        } else if (isLdscore) {
+          updateLDscore();
+        }
       }
       break;
     case "ldexpress":
@@ -3102,7 +3110,7 @@ function updateData(id) {
       }
   }
 }
-
+function isHerit(id) {}
 function isBrowseSet(elementId) {
   var query = $("#header-values");
   var isVisible = query.is(":visible");
@@ -3635,6 +3643,8 @@ function updateLDscore() {
   var ldInputs = {
     //pop: population.join("+"),
     filename: $("#ldscore-file-label").val(),
+    ldwindow: $("#ldscore-wind").val(),
+    windUnit: $("#unit-select").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
     //  calculateRegion: $("#score-region > button").val(),
@@ -3828,6 +3838,113 @@ function updateLDscore() {
 
   hideLoadingIcon(ajaxRequest, id);
 }
+
+//click Calculate button
+function updateLDherit() {
+  var id = "ldscore";
+  var $btn = $("#" + id).button("loading");
+  var population = getPopulationCodes(id + "-population-codes");
+  var ldInputs = {
+    //pop: population.join("+"),
+    filename: $("#ldscore-file-label").val(),
+    reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
+    columns: new Object(),
+    genome_build: genomeBuild,
+  };
+  console.log(ldInputs);
+
+  var tempbuild = genomeBuild == "grch37" ? "hg19" : "hg38";
+  var r2url =
+    "https://genome.ucsc.edu/cgi-bin/hgTracks?db=" +
+    tempbuild +
+    "&hgt.customText=http://" +
+    location.hostname +
+    "/LDlinkRestWeb/tmp/track" +
+    ldInputs.reference +
+    ".txt";
+  //console.log(r2url)
+  $("#ldscore-genome").prop("href", r2url);
+
+  //console.dir(ldproxyInputs);
+  $("#ldscore-results-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
+  );
+  //console.log( $('#ldassoc-genome'))
+  //console.log(ldInputs);
+  var url = restServerUrl + "/ldherit";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+    data: ldInputs,
+    contentType: "application/json", // JSON
+  });
+  //console.log(ajaxRequest);
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    //JSON.parse() cleans up this json string.
+
+    // create bokeh object with output_backend=canvas from svg
+
+    var dataString = data[0];
+    var dataCanvas = [dataString, data[1]];
+
+    // Find the index of the substring "Summary of LD Scores"
+    var index = data.result.indexOf("Summary of LD Scores");
+    if (index !== -1) {
+      // Remove the substring and everything that follows
+      resultStringCanvas = data.result.substring(0, index);
+    }
+    console.log(resultStringCanvas);
+    var jsonObjCanvas;
+    if (typeof dataString === "string") {
+      jsonObjCanvas = JSON.parse(resultStringCanvas);
+    } else {
+      jsonObjCanvas = resultStringCanvas;
+    }
+    console.log(data.result);
+
+    if (displayError(id, jsonObjCanvas) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container").show();
+      $("#" + id + "-links-container").show();
+      //console.log(dataCanvas);
+      var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
+      $("#ldscore-bokeh-graph").html(formattedOutput);
+      //$("#ldscore-bokeh-graph").empty().append(data);
+    }
+
+    $("#" + id + "-loading").hide();
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+    setTimeout(function () {
+      var checkbox = $(".bk-toolbar-inspector").children().first();
+      $(checkbox).attr("id", "hover");
+      $(checkbox).append(
+        '<label for="hover" class="sr-only">Hover Tool</label>'
+      );
+    }, 100);
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
+}
+
 // Function to parse the result data
 function parseResultData(resultDataText) {
   var lines = resultDataText.trim().split("\n");
