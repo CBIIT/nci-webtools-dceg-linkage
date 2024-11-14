@@ -3695,6 +3695,7 @@ function updateLDscore() {
   );
   //console.log( $('#ldassoc-genome'))
   //console.log(ldInputs);
+  document.getElementById("ldmessage").style.display = "block";
   var url = restServerUrl + "/ldscore";
   var ajaxRequest = $.ajax({
     type: "GET",
@@ -3719,6 +3720,7 @@ function updateLDscore() {
       resultStringCanvas = data.result.substring(0, index);
     }
     console.log(resultStringCanvas);
+    document.getElementById("ldmessage").style.display = "none";
     var jsonObjCanvas;
     if (typeof dataString === "string") {
       jsonObjCanvas = JSON.parse(resultStringCanvas);

@@ -2325,8 +2325,12 @@
 												</div>
 											</div>
 										</div>
+										
 									</div>
 									<h3>LDScore Calculation Results</h3>
+									<div class="col-sm-4 col-sm-offset-1 ">
+										<div id="ldmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
+									</div>
 									<div class="jumbotron">
 										<div class="container-fluid" id="ldscore-results-container">
 											<div id="row-button" class="row overflowy">
@@ -2348,9 +2352,7 @@
 														</div>
 													  </div>
 												</div>
-												<div class="col-sm-4 col-sm-offset-1 ">
-													
-												</div>
+											
 											</div>
 											
 											<br />
@@ -2541,10 +2543,12 @@
 								</div>
 							</div>
 						</form>
-						
+					
 					</div>
 					<hr>
+					
 					<div id="ldscore-loading">
+						
 						<img src="calculating_LD.gif" alt="loading icon" class="loading">
 					</div>
 					<!-- Message ERROR -->
