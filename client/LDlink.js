@@ -7721,6 +7721,41 @@ function testResize() {
     }
   }
 }
+document.addEventListener("DOMContentLoaded", function () {
+  console.log("DOM fully loaded and parsed"); // Debugging statement
+
+  // Function to validate the input value
+  function validateInput() {
+    var input = document.getElementById("ldscore-wind");
+    if (!input.checkValidity()) {
+      console.log("Invalid input. Showing alert."); // Debugging statement
+      input.reportValidity();
+      return false;
+    }
+    return true;
+  }
+
+  // Add event listener to the calculate button
+  document
+    .getElementById("calculate-button")
+    .addEventListener("click", function () {
+      if (validateInput()) {
+        // Proceed with the calculation
+        console.log("Input is valid. Proceeding with calculation...");
+        // Call your calculation function here
+        updateLDscore();
+      }
+    });
+
+  // Add event listener to validate on input event
+  var inputElement = document.getElementById("ldscore-wind");
+  if (inputElement) {
+    console.log("Adding input event listener to ldscore-wind"); // Debugging statement
+    inputElement.addEventListener("input", validateInput);
+  } else {
+    console.log("Element ldscore-wind not found"); // Debugging statement
+  }
+});
 
 var timeout = false, // holder for timeout id
   delay = 250; // delay after event is "complete" to run callback

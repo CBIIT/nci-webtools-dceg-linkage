@@ -2309,7 +2309,7 @@
 											<div class="form-group">
 												<div class="ldscore-calculate-col">
 													<label for="ldscore-wind">Window:</label>
-													<input type="text" id="ldscore-wind" name="wind" value="1" class="ldscore-form-control">
+													<input type="text" id="ldscore-wind" name="wind" value="1" class="ldscore-form-control" pattern="^[1-9]\d*$" title="Please enter an integer greater than 0." required>
 													<select id="unit-select" class="ldscore-form-control">
 														<option value="cm">cm</option>
 														<option value="kb">kb</option>
