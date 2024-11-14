@@ -1563,6 +1563,8 @@ function uploadFileScore() {
 
   var fileList = document.getElementById("ldscoreFile");
   // console.log(filename);
+  document.getElementById("ldscore-file-message").style.display = "none";
+  document.getElementById("ldscore-loading").style.display = "none";
 
   var fileInput = document.getElementById("ldscore-file");
   var file = fileInput.files;
@@ -3018,11 +3020,12 @@ function updateData(id) {
       }
       break;
     case "ldscore":
-      console.log(
-        isBrowseSetLdscore(id)
+      console
+        .log
+        // isBrowseSetLdscore(id)
         //isRegionSetLdscore(id),
         //areRegionDetailsSetLdscore(id),
-      );
+        ();
       if (
         true
         //isBrowseSetLdscore(id) //&&
@@ -3038,7 +3041,14 @@ function updateData(id) {
         if (isHerit) {
           updateLDherit();
         } else if (isLdscore) {
-          updateLDscore();
+          var isFilevalid = validateFiles();
+          console.log(isFilevalid);
+          if (isFilevalid) {
+            // Proceed with the calculation
+            console.log("Input is valid. Proceeding with calculation...");
+            // Call your calculation function here
+            updateLDscore();
+          }
         }
       }
       break;
@@ -7738,16 +7748,14 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Add event listener to the calculate button
-  document
-    .getElementById("calculate-button")
-    .addEventListener("click", function () {
-      if (validateInput()) {
-        // Proceed with the calculation
-        console.log("Input is valid. Proceeding with calculation...");
-        // Call your calculation function here
-        updateLDscore();
-      }
-    });
+  document.getElementById("ldscore").addEventListener("click", function () {
+    // if (validateFiles()) {
+    //   // Proceed with the calculation
+    //   console.log("Input is valid. Proceeding with calculation...");
+    //   // Call your calculation function here
+    //   updateLDscore();
+    // }
+  });
 
   // Add event listener to validate on input event
   var inputElement = document.getElementById("ldscore-wind");
@@ -7758,6 +7766,39 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Element ldscore-wind not found"); // Debugging statement
   }
 });
+
+// Function to validate the uploaded files
+function validateFiles() {
+  var fileInput = document.getElementById("ldscore-file");
+  var files = fileInput.files;
+  var requiredExtensions = ["bed", "bim", "fam"];
+  var valid = true;
+  var message = "";
+  var messageElement = document.getElementById("ldscore-file-message");
+  messageElement.style.display = "none";
+  if (files.length !== 3) {
+    valid = false;
+    message = "Three files in the format *.bed, *.bim, *.fam are required";
+  } else {
+    var extensions = Array.from(files).map((file) =>
+      file.name.split(".").pop()
+    );
+    console.log(extensions);
+    requiredExtensions.forEach((ext) => {
+      if (!extensions.includes(ext)) {
+        valid = false;
+        message = "Files must include .bed, .bim, and .fam extensions.";
+      }
+    });
+  }
+
+  if (!valid) {
+    messageElement.textContent = message;
+    messageElement.style.display = "block";
+  }
+
+  return valid;
+}
 
 var timeout = false, // holder for timeout id
   delay = 250; // delay after event is "complete" to run callback

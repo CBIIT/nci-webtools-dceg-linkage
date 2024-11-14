@@ -2282,8 +2282,8 @@
 													</div>
 												</div>
 												<div class="input-group" id="ldscore-file-container">
-													<!-- <label for="ldscore-file-label" style="display:none;">Upload Data File</label> -->
-													<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
+													 <!-- <label for="ldscore-file-label" style="display:block;">Three files in the format *.bed, *.bim, *.fam are required</label>  -->
+													<input type="text" id="ldscore-file-label" readonly placeholder="*.bed *.bim *.fam are required" class="readonly-input-text">
 													<!-- <label for="ldscore-file" style="display:none;">Browse for RS File</label> -->
 													<div id="ldscore-files">
 														<div id="ldscore-browse-button">
@@ -2294,6 +2294,8 @@
 													
 													</div>
 													<div id="ldscoreFile" class="ldscore-file-name-container"></div>
+													
+
 													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
 													   data-placement="bottom" data-content="Please upload a file."></a>
 												</div>
@@ -2327,7 +2329,8 @@
 										</div>
 										
 									</div>
-									<h3>LDScore Calculation Results</h3>
+									<h3></h3>
+									<div id="ldscore-file-message" style="display:none; margin-top: 50px; width: 800px;" class="alert alert-info">file error</div>
 									<div class="col-sm-4 col-sm-offset-1 ">
 										<div id="ldmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
 									</div>
