@@ -28,7 +28,7 @@ from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 import requests,glob
-from ldscore.ldsc_utils import run_ldsc_command
+from ldscore.ldsc_utils import run_ldsc_command,run_herit_command
 import zipfile
 
 # retrieve config
@@ -853,7 +853,7 @@ def ldherit():
 
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)
+    filename = request.args.get('filename', False)+".txt"
 
     print(pop,genome_build,filename)
     if filename:
@@ -862,26 +862,6 @@ def ldherit():
 
     fileDir = f"/data/tmp/uploads"
     print(filename)
-    if filename:
-        file_parts = filename.split('.')
-        file_chromo = None
-        for part in file_parts:
-            if part.isdigit() and 1 <= int(part) <= 22:
-                file_chromo = part
-                break
-    print(file_chromo)
-    if file_chromo:
-        # Find the file in the directory
-        pattern = os.path.join(fileDir, f"{fileroot}.*")
-        for file_path in glob.glob(pattern):
-            extension = file_path.split('.')[-1]
-            new_filename = f"{file_chromo}.{extension}"
-            new_file_path = os.path.join(fileDir, new_filename)
-            os.rename(file_path, new_file_path)
-            print(f"Renamed {file_path} to {new_file_path}")
-            #shutil.copy(file_path, new_file_path)  # Copy the file instead of renaming it
-
-
     web = False
     try:
         # Make an API call to the ldsc39_container
@@ -889,7 +869,7 @@ def ldherit():
         #response = requests.get(ldsc39_url)
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
-        result = run_ldsc_command(pop, genome_build, filename,1,"cm")
+        result = run_herit_command(filename,pop)
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
         print(out_json)

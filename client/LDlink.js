@@ -1637,6 +1637,7 @@ function beforeSendHandler() {
   $("#progressbar2").html(percent + "% Completed");
   $("#ldassoc-file-container").hide();
   $("#ldscore-file-container").hide();
+  $("#ldscore-file-container2").hide();
   $("#progressbar").parent().show();
   $("#progressbar2").parent().show();
 }
@@ -1646,6 +1647,7 @@ function completeHandler() {
   $("#progressbar2").parent().hide();
   $("#ldassoc-file-container").fadeIn(1000);
   $("#ldscore-file-container").fadeIn(1000);
+  $("#ldscore-file-container2").fadeIn(1000);
   // enable calculate button only when file is successfully uploaded
   $("#ldassoc").removeAttr("disabled");
   $("#ldscore").removeAttr("disabled");
@@ -1657,6 +1659,7 @@ function errorHandler(e) {
   $("#progressbar2").parent().hide();
   $("#ldassoc-file-container").fadeIn(1000);
   $("#ldscore-file-container").fadeIn(1000);
+  $("#ldscore-file-container2").fadeIn(1000);
   console.error("Comm Error");
   console.dir(e);
 }
@@ -1692,7 +1695,7 @@ function createFileSelectEvent() {
     //loadCSVFile(event);
   });
 
-  $(".btn-ldscore-file :file").on(
+  $(".btn-ldscore-file :file, .btn-ldscore-file-herit :file").on(
     "fileselect",
     function (event, numFiles, label) {
       $(this)
@@ -3857,8 +3860,8 @@ function updateLDherit() {
   var $btn = $("#" + id).button("loading");
   var population = getPopulationCodes(id + "-population-codes");
   var ldInputs = {
-    //pop: population.join("+"),
-    filename: $("#ldscore-file-label").val(),
+    pop: population.join("+"),
+    filename: $("#ldscore-file-label-herit").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
     genome_build: genomeBuild,
@@ -3900,13 +3903,14 @@ function updateLDherit() {
 
     var dataString = data[0];
     var dataCanvas = [dataString, data[1]];
-
-    // Find the index of the substring "Summary of LD Scores"
-    var index = data.result.indexOf("Summary of LD Scores");
-    if (index !== -1) {
-      // Remove the substring and everything that follows
-      resultStringCanvas = data.result.substring(0, index);
-    }
+    var resultStringCanvas = data.result;
+    // // Find the index of the substring "Summary of LD Scores"
+    // var index = data.result.indexOf("Summary of LD Scores");
+    // if (index !== -1) {
+    //   // Remove the substring and everything that follows
+    //   resultStringCanvas = data.result.substring(0, index);
+    // }
+    console.log(data);
     console.log(resultStringCanvas);
     var jsonObjCanvas;
     if (typeof dataString === "string") {
@@ -3934,7 +3938,7 @@ function updateLDherit() {
       $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
-      $("#ldscore-bokeh-graph").html(formattedOutput);
+      $("#ldscore-bokeh-graph-herit").html(formattedOutput);
       //$("#ldscore-bokeh-graph").empty().append(data);
     }
 

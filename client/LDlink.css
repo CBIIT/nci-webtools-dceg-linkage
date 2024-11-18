@@ -1144,7 +1144,7 @@ textarea:invalid,
 	color: #800000;
 }
 
-#ldscore-file-label {
+#ldscore-file-label,#ldscore-file-label-herit {
     margin-top: 10px; /* Adjust the value as needed */
 }
 
@@ -1239,7 +1239,7 @@ textarea:invalid,
 #assoc-region, #score-region {
 	margin-bottom: 20px;
 }
-#ldassoc-files, #ldscore-files {
+#ldassoc-files, #ldscore-files, #ldscore-files-herit{
 	float: right;
 	margin-top: -4px;
 }
@@ -1263,7 +1263,7 @@ textarea:invalid,
 	clear: left;
 }
 
-#ldassoc-file-container, #ldscore-file-container {
+#ldassoc-file-container, #ldscore-file-container, #ldscore-file-container2 {
 	margin-top: 4px;
 }
 
