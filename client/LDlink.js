@@ -648,7 +648,7 @@ var moduleTitleDescription = {
     "#LDtrait",
     "Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.",
   ],
-  ldscore: ["LDScore Tool", "#LDscore", "Calcuates the LD Score"],
+  ldscore: ["LDScore Tool", "#LDscore", "Calculates the LD Score"],
   snpclip: [
     "SNPclip Tool",
     "#SNPclip",
@@ -1343,8 +1343,7 @@ function setupLDscoreExample() {
       var fileInput = document.getElementById("ldscore-file");
       fileInput.files = dataTransfer.files;
 
-      initCalculate("ldscore");
-      updateData("ldscore");
+      document.getElementById("ldscore").disabled = false;
     });
 
     // switch (genomeBuild) {
@@ -1376,7 +1375,7 @@ function setupLDscoreExample() {
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-
+    document.getElementById("ldscore-results-container").innerHTML = "";
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");

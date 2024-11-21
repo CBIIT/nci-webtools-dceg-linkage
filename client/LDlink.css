@@ -1204,7 +1204,7 @@ textarea:invalid,
 .ldscore-file-name-container {
 	width: 172px;
 	word-wrap: break-word;
-	margin-top: 10px;
+	margin-top: 0px;
 	white-space: break-spaces;
 	overflow: hidden;
 	text-overflow: ellipsis;
@@ -1250,7 +1250,7 @@ textarea:invalid,
 	position: absolute;
 	float: left;
 	clear: left;
-	margin-top: 40px;
+	margin-top: 5px;
 	margin-left: -172px;
 }
 #ldassoc-sample-label, #ldscore-sample-label {
@@ -1391,6 +1391,15 @@ input:checked + .slider:before {
     padding-bottom: 20px; /* Adjust the value as needed */
     box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
 }
+#ldscore-sample, #example-ldscore {
+	position: relative;
+	top: 0;
+	left: 0px !important;
+	
+	display: block; 
+  }
+  
+
 
 #summary-table-container .table-bordered,
 #herit-table-container .table-bordered,
