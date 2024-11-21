@@ -149,7 +149,7 @@ html {
 html body .footer {
 	bottom: 0;
 	width: 100%;
-	position: absolute;
+	position: relative;
 	background-color: #535353;
 }
 
