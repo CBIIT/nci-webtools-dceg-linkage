@@ -949,8 +949,8 @@ $(document).ready(function () {
     setupLDassocExample();
   });
 
-  $("#example-gwas2").click(function (e) {
-    //setupLDscoreExample();
+  $("#example-ldscore").click(function (e) {
+    setupLDscoreExample();
   });
 
   updateVersion(ldlink_version);
@@ -1310,8 +1310,7 @@ function setupLDassocExample() {
 
 function setupLDscoreExample() {
   //   console.log("Use example GWAS data.");
-  var useEx = document.getElementById("example-gwas2");
-  // var exampleHeaders = ['A', 'B', 'C'];
+  var useEx = document.getElementById("example-ldscore");
   if (useEx.checked) {
     var url = restServerUrl + "/ldscore_example";
     var ajaxRequest = $.ajax({
@@ -1322,93 +1321,64 @@ function setupLDscoreExample() {
         genome_build: genomeBuild,
       },
     }).success(function (response) {
+      console.log(response);
+      document.getElementById("ldscore-file-label").value = 22;
       var data = JSON.parse(response);
-      $("#ldscore-file-label").val(data.filename);
-      populateScoreDropDown(data.headers);
-      console.log("ldscore_example url call success", data.header);
-      $("#header-values2").show();
-      $("#score-chromosome > button").val("chr");
-      $("#score-chromosome > button").text("Chromosome: chr column");
-      $("#score-position > button").val("pos");
-      $("#score-position > button").text("Position: pos column");
-      $("#score-p-value > button").val("p");
-      $("#score-p-value > button").text("P-Value: p column");
-      $("#ldscore-file").prop("disabled", true);
-      $("#ldscore").removeAttr("disabled");
+      var fileContainer = document.getElementById("ldscoreFile");
+      fileContainer.innerHTML = ""; // Clear any existing content
+      // Create a DataTransfer object to simulate file input
+      var dataTransfer = new DataTransfer();
+
+      data.filenames.forEach(function (fileName) {
+        var fileDiv = document.createElement("div");
+        fileDiv.textContent = fileName;
+        fileContainer.appendChild(fileDiv);
+
+        // Create a new File object and add it to the DataTransfer object
+        var file = new File([""], fileName);
+        dataTransfer.items.add(file);
+      });
+
+      // Assign the files to the file input element
+      var fileInput = document.getElementById("ldscore-file");
+      fileInput.files = dataTransfer.files;
+
+      initCalculate("ldscore");
+      updateData("ldscore");
     });
 
-    $("#region-gene-name2").val("");
-    $("#region-gene-index2").val("");
-    $("#region-variant-index2").val("");
-
-    $("#score-region > .btn:first-child").val("Region".toLowerCase());
-    $("#score-region > .btn:first-child").html(
-      "Region" + '&nbsp;<span class="caret"></span>'
-    );
-
-    $("#region-gene-container2").hide();
-    $("#region-region-container2").hide();
-    $("#region-variant-container2").hide();
-    $("#region-region-container2").show();
-    switch (genomeBuild) {
-      case "grch37":
-        $("#region-region-start-coord2").val("chr8:128289591");
-        $("#region-region-end-coord2").val("chr8:128784397");
-        break;
-      case "grch38":
-        $("#region-region-start-coord2").val("chr8:127277115");
-        $("#region-region-end-coord2").val("chr8:127777115");
-        break;
-      case "grch38_high_coverage":
-        $("#region-region-start-coord2").val("chr8:127277115");
-        $("#region-region-end-coord2").val("chr8:127777115");
-        break;
-    }
-    $("#region-region-index2").val("rs7837688");
+    // switch (genomeBuild) {
+    //   case "grch37":
+    //     $("#region-region-start-coord2").val("chr8:128289591");
+    //     $("#region-region-end-coord2").val("chr8:128784397");
+    //     break;
+    //   case "grch38":
+    //     $("#region-region-start-coord2").val("chr8:127277115");
+    //     $("#region-region-end-coord2").val("chr8:127777115");
+    //     break;
+    //   case "grch38_high_coverage":
+    //     $("#region-region-start-coord2").val("chr8:127277115");
+    //     $("#region-region-end-coord2").val("chr8:127777115");
+    //     break;
+    // }
+    //$("#region-region-index2").val("rs7837688");
     // console.log($("#region-region-start-coord").val());
     // console.log($("#region-region-end-coord").val());
     // console.log($("#region-region-index").val());
 
-    $("#ldscore-population-codes").val("");
-    $("#ldscore-population-codes2").val("");
-    refreshPopulation([], "ldscore");
-    $("#ldscore-population-codes").val(["CEU"]);
-    $("#ldscore-population-codes2").val(["CEU"]);
-    refreshPopulation(["CEU"], "ldscore");
+    // $("#ldscore-population-codes").val("");
+    // $("#ldscore-population-codes2").val("");
+    // refreshPopulation([], "ldscore");
+    // $("#ldscore-population-codes").val(["CEU"]);
+    // $("#ldscore-population-codes2").val(["CEU"]);
+    // refreshPopulation(["CEU"], "ldscore");
     // console.log($("#ldassoc-population-codes").val());
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-    $("#score-chromosome > button").val("");
-    $("#score-chromosome > button").html(
-      'Select Chromosome&nbsp;<span class="caret"></span>'
-    );
-    $("#score-position > button").val("");
-    $("#score-position > button").html(
-      'Select Position&nbsp;<span class="caret"></span>'
-    );
-    $("#score-p-value > button").val("");
-    $("#score-p-value > button").html(
-      'Select P-Value&nbsp;<span class="caret"></span>'
-    );
 
-    $("#ldscore-file-label").val("");
     populateScoreDropDown([]);
-    $("#header-values2").hide();
-    $("#ldscore-file").val("");
-    // console.log("Don't use example GWAS data.");
-    $("#region-gene-container2").hide();
-    $("#region-region-container2").hide();
-    $("#region-variant-container2").hide();
-    $("#score-region > .btn:first-child").val("");
-    $("#score-region > .btn:first-child").html(
-      'Select Region<span class="caret"></span>'
-    );
-    $("#region-region-start-coord2").val("");
-    $("#region-region-end-coord2").val("");
-    $("#region-region-index2").val("");
-    $("#ldscore-population-codes").val("");
-    $("#ldscore-population-codes2").val("");
+
     refreshPopulation([], "ldscore");
   }
 }
@@ -1636,8 +1606,8 @@ function beforeSendHandler() {
   $("#progressbar2").css("width", percent + "%");
   $("#progressbar2").html(percent + "% Completed");
   $("#ldassoc-file-container").hide();
-  $("#ldscore-file-container").hide();
-  $("#ldscore-file-container2").hide();
+  //$("#ldscore-file-container").hide();
+  //$("#ldscore-file-container2").hide();
   $("#progressbar").parent().show();
   $("#progressbar2").parent().show();
 }
@@ -1646,8 +1616,8 @@ function completeHandler() {
   $("#progressbar").parent().hide();
   $("#progressbar2").parent().hide();
   $("#ldassoc-file-container").fadeIn(1000);
-  $("#ldscore-file-container").fadeIn(1000);
-  $("#ldscore-file-container2").fadeIn(1000);
+  //$("#ldscore-file-container").fadeIn(1000);
+  //$("#ldscore-file-container2").fadeIn(1000);
   // enable calculate button only when file is successfully uploaded
   $("#ldassoc").removeAttr("disabled");
   $("#ldscore").removeAttr("disabled");
@@ -2995,7 +2965,7 @@ function loadHelp() {
 function calculate(e) {
   var formId = e.target.id;
   e.preventDefault();
-
+  console.log("Calculating for form: " + formId);
   // strip out "Form" from id
   var id = formId.slice(0, formId.length - 4);
 
@@ -3904,12 +3874,12 @@ function updateLDherit() {
     var dataString = data[0];
     var dataCanvas = [dataString, data[1]];
     var resultStringCanvas = data.result;
-    // // Find the index of the substring "Summary of LD Scores"
-    // var index = data.result.indexOf("Summary of LD Scores");
-    // if (index !== -1) {
-    //   // Remove the substring and everything that follows
-    //   resultStringCanvas = data.result.substring(0, index);
-    // }
+    // // Find the index of the substring "Total Observed scale"
+    var index = data.result.indexOf("Total Observed scale");
+    if (index !== -1) {
+      // Remove the substring and everything that follows
+      resultStringCanvas = data.result.substring(0, index);
+    }
     console.log(data);
     console.log(resultStringCanvas);
     var jsonObjCanvas;
@@ -3919,7 +3889,22 @@ function updateLDherit() {
       jsonObjCanvas = resultStringCanvas;
     }
     console.log(data.result);
-
+    // Parse the result data
+    var summaryData = parseResultHerit(
+      data.result,
+      "Using two-step estimator with cutoff",
+      ""
+    );
+    console.log(summaryData);
+    // Create and append the summary table
+    var summaryHeaders = ["", "Value"];
+    var summaryTable = createHeritTable(
+      summaryHeaders,
+      summaryData.res1,
+      true,
+      "herit-table-container"
+    );
+    document.getElementById("herit-table-container").appendChild(summaryTable);
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {
         case "grch37":
@@ -3934,8 +3919,8 @@ function updateLDherit() {
           );
           break;
       }
-      $("#" + id + "-results-container").show();
-      $("#" + id + "-links-container").show();
+      // $("#" + id + "-results-container").show();
+      // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
       $("#ldscore-bokeh-graph-herit").html(formattedOutput);
@@ -4011,6 +3996,56 @@ function parseResultData(resultDataText) {
 
   return summaryData;
 }
+
+// Function to parse the result data
+function parseResultHerit(resultDataText, title, title2) {
+  var lines = resultDataText.trim().split("\n");
+  var summaryData = {
+    res1: {},
+    res2: {},
+  };
+  var summary1 = false;
+  var summary2 = false;
+
+  for (var i = 0; i < lines.length; i++) {
+    var line = lines[i].trim();
+
+    if (line.startsWith(title)) {
+      summary1 = true;
+      summary2 = false;
+      continue;
+    }
+
+    // if (line.startsWith(title2)) {
+    //   summary1 = false;
+    //   summary2 = true;
+    //   continue;
+    // }
+
+    if (summary1) {
+      var parts = line.split(":");
+      console.log(parts);
+      if (parts.length === 2) {
+        var key = parts[0];
+        summaryData.res1[key] = parseFloat(parts[1]);
+        console.log(summaryData);
+      }
+    }
+
+    // if (summary2) {
+    //   var parts = line.split(/\s+/);
+    //   if (parts.length === 2) {
+    //     var key = parts[0];
+    //     summaryData.res2[key] = {
+    //       MAF: parseFloat(parts[1]),
+    //       L2: parseFloat(parts[2]),
+    //     };
+    //   }
+    // }
+  }
+
+  return summaryData;
+}
 // Function to create a table
 function createTable(headers, data, isSummary, containerId) {
   var container = document.getElementById(containerId);
@@ -4055,6 +4090,57 @@ function createTable(headers, data, isSummary, containerId) {
   });
   table.appendChild(tbody);
 
+  return table;
+}
+function createHeritTable(headers, data, isSummary, containerId) {
+  var container = document.getElementById(containerId);
+
+  // Check if a table already exists in the container and remove it
+  var existingTable = container.querySelector("table");
+  if (existingTable) {
+    container.removeChild(existingTable);
+  }
+
+  var table = document.createElement("table");
+  table.className = "table table-bordered";
+
+  // Create table header
+  var thead = document.createElement("thead");
+  var headerRow = document.createElement("tr");
+  headers.forEach(function (header) {
+    var th = document.createElement("th");
+    th.textContent = header;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create table body
+  var tbody = document.createElement("tbody");
+  if (isSummary)
+    var keys = [
+      "Total Observed scale h2",
+      "Lambda GC",
+      "Mean Chi^2",
+      "Intercept",
+      "Ratio",
+    ];
+  keys.forEach(function (key) {
+    if (data[key]) {
+      var row = document.createElement("tr");
+      var cell = document.createElement("td");
+      cell.textContent = key;
+      row.appendChild(cell);
+      headers.slice(1).forEach(function (header) {
+        var cell = document.createElement("td");
+        cell.textContent = data[key];
+        row.appendChild(cell);
+      });
+      tbody.appendChild(row);
+    }
+  });
+  table.appendChild(tbody);
+  console.log(table);
   return table;
 }
 
@@ -7775,6 +7861,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function validateFiles() {
   var fileInput = document.getElementById("ldscore-file");
   var files = fileInput.files;
+  console.log(files);
   var requiredExtensions = ["bed", "bim", "fam"];
   var valid = true;
   var message = "";

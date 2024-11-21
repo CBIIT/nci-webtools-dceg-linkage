@@ -527,15 +527,15 @@
 						<input type="file" id="ldassoc-file">
 					</span>
 					</div>
-							<div id="ldassoc-sample">
-													<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
-													<label class="switch" for="example-gwas">
-														<input id="example-gwas" type="checkbox" data-toggle="toggle">
-														<span class="slider round"></span>
-													</label>
-													<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
-												</div>
-											</div>
+						<div id="ldassoc-sample">
+									<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+										<label class="switch" for="example-gwas">
+												<input id="example-gwas" type="checkbox" data-toggle="toggle">
+													<span class="slider round"></span>
+										</label>
+										<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
+						</div>
+					</div>
 							<a id="ldassoc-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
 								data-placement="bottom" data-content="Please upload a file."></a>
 							</div>
@@ -2291,6 +2291,14 @@
 																<input type="file" id="ldscore-file" multiple>
 															</span>
 														</div>
+														<div id="ldscore-sample">
+															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+																<label class="switch" for="example-ldscore">
+																		<input id="example-ldscore" type="checkbox" data-toggle="toggle">
+																			<span class="slider round"></span>
+																</label>
+																<div id="ldscore-sample-label"> &nbsp;Use example data</div>
+														</div>
 													
 													</div>
 													<div id="ldscoreFile" class="ldscore-file-name-container"></div>
@@ -2353,7 +2361,7 @@
 														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
 														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Input</a>
 														</div>
-													  </div>
+													</div>
 												</div>
 											
 											</div>
@@ -2422,16 +2430,18 @@
 											</div>
 										</div>
 									</div>
-									<h3>Heritability Analysis</h3>
-									<p>Content for Heritability Analysis.</p>
-
+									
 									<div class="jumbotron">
-										<div class="container-fluid" id="ldscore-results-container">
+										<div class="container-fluid" id="ldscore-results-container-herit">
 											<div id="row-button" class="row overflowy">
 												<div id="ldscore-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
 													<div id="ldscore-bokeh-graph-herit"></div>
 													<br />
+													<br />
+													<!-- <h4>Heritability Analysis:</h4> -->
+													<div id="herit-table-container"></div>
+													
 												</div>
 											
 											</div>
