@@ -1376,6 +1376,8 @@ function setupLDscoreExample() {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
     document.getElementById("ldscore-results-container").innerHTML = "";
+    document.getElementById("ldscoreFile").innerHTML = "";
+    document.getElementById("ldscore-file-label").value = "";
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");
