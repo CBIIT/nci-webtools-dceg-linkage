@@ -630,6 +630,24 @@ def ldscore_example():
     print(example)
     return json.dumps(example)
 
+# Route for LDherit example 
+@app.route('/LDlinkRest/ldherit_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldherit_example', methods=['GET'])
+def ldherit_example():
+    genome_build = request.args.get('genome_build', 'grch37')
+    data_dir = param_list['data_dir']
+    ldscore_example_dir = data_dir + 'ldscore/'
+    #ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = 'BBJ_HDLC22.txt'
+    example_filepaths = ldscore_example_dir+ example_files #+ genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {
+            'filenames': example_files,
+            'filepaths': example_filepaths
+        }
+    print(example)
+    return json.dumps(example)
+
+
 # Route to retrieve LDexpress tissue info
 @app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
 #@app.route('/LDlinkRest2/ldexpress_tissues', methods=['GET'])
@@ -796,6 +814,7 @@ def ldscore():
     filename = request.args.get('filename', False)+".bim"
     ldwindow = request.args.get('ldwindow', '1')
     windUnit = request.args.get('windUnit', 'cm')
+    isExample = request.args.get('isExample', False)
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
@@ -829,7 +848,7 @@ def ldscore():
         #response = requests.get(ldsc39_url)
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
-        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit)
+        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
         print(out_json)
@@ -851,14 +870,14 @@ def ldscore():
 #@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
 def ldherit():
-    print("LDherit###############:")
+    print("LDherit###############:",request.args.get('isExample'))
     start_time = time.time()
-
+    
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
     filename = request.args.get('filename', False)+".txt"
-
-    print(pop,genome_build,filename)
+    isexample = request.args.get('isExample', False)
+    print(pop,genome_build,filename,isexample)
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
@@ -872,7 +891,7 @@ def ldherit():
         #response = requests.get(ldsc39_url)
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
-        result = run_herit_command(filename,pop)
+        result = run_herit_command(filename,pop,isexample)
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
         print(out_json)

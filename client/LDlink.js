@@ -952,7 +952,9 @@ $(document).ready(function () {
   $("#example-ldscore").click(function (e) {
     setupLDscoreExample();
   });
-
+  $("#example-ldherit").click(function (e) {
+    setupLDheritExample();
+  });
   updateVersion(ldlink_version);
   //addValidators();
   $("#ldlink-tabs").on("click", "a", function (e) {
@@ -1321,7 +1323,7 @@ function setupLDscoreExample() {
         genome_build: genomeBuild,
       },
     }).success(function (response) {
-      console.log(response);
+      //console.log(response);
       document.getElementById("ldscore-file-label").value = 22;
       var data = JSON.parse(response);
       var fileContainer = document.getElementById("ldscoreFile");
@@ -1338,6 +1340,81 @@ function setupLDscoreExample() {
         var file = new File([""], fileName);
         dataTransfer.items.add(file);
       });
+
+      // Assign the files to the file input element
+      var fileInput = document.getElementById("ldscore-file");
+      fileInput.files = dataTransfer.files;
+
+      document.getElementById("ldscore").disabled = false;
+    });
+
+    // switch (genomeBuild) {
+    //   case "grch37":
+    //     $("#region-region-start-coord2").val("chr8:128289591");
+    //     $("#region-region-end-coord2").val("chr8:128784397");
+    //     break;
+    //   case "grch38":
+    //     $("#region-region-start-coord2").val("chr8:127277115");
+    //     $("#region-region-end-coord2").val("chr8:127777115");
+    //     break;
+    //   case "grch38_high_coverage":
+    //     $("#region-region-start-coord2").val("chr8:127277115");
+    //     $("#region-region-end-coord2").val("chr8:127777115");
+    //     break;
+    // }
+    //$("#region-region-index2").val("rs7837688");
+    // console.log($("#region-region-start-coord").val());
+    // console.log($("#region-region-end-coord").val());
+    // console.log($("#region-region-index").val());
+
+    // $("#ldscore-population-codes").val("");
+    // $("#ldscore-population-codes2").val("");
+    // refreshPopulation([], "ldscore");
+    // $("#ldscore-population-codes").val(["CEU"]);
+    // $("#ldscore-population-codes2").val(["CEU"]);
+    // refreshPopulation(["CEU"], "ldscore");
+    // console.log($("#ldassoc-population-codes").val());
+  } else {
+    $("#ldscore-file").prop("disabled", false);
+    $("#ldscore").prop("disabled", true);
+    document.getElementById("ldscore-results-container").innerHTML = "";
+    document.getElementById("ldscoreFile").innerHTML = "";
+    document.getElementById("ldscore-file-label").value = "";
+    populateScoreDropDown([]);
+
+    refreshPopulation([], "ldscore");
+  }
+}
+
+function setupLDheritExample() {
+  //   console.log("Use example GWAS data.");
+  var useEx = document.getElementById("example-ldherit");
+  if (useEx.checked) {
+    var url = restServerUrl + "/ldherit_example";
+    var ajaxRequest = $.ajax({
+      type: "GET",
+      url: url,
+      contentType: "application/json", // JSON
+      data: {
+        genome_build: genomeBuild,
+      },
+    }).success(function (response) {
+      //console.log(response);
+      document.getElementById("ldscore-file-label-herit").value = "BBJ_HDLC22";
+      var data = JSON.parse(response);
+      // var fileContainer = document.getElementById("ldscoreFile");
+      //  fileContainer.innerHTML = ""; // Clear any existing content
+      // Create a DataTransfer object to simulate file input
+      var dataTransfer = new DataTransfer();
+      console.log(data);
+
+      //var fileDiv = document.createElement("div");
+      //fileDiv.textContent = data.filenames;
+      //fileContainer.appendChild(fileDiv);
+
+      // Create a new File object and add it to the DataTransfer object
+      var file = new File([""], data.filenames);
+      dataTransfer.items.add(file);
 
       // Assign the files to the file input element
       var fileInput = document.getElementById("ldscore-file");
@@ -1558,6 +1635,11 @@ function uploadFileScore() {
     }
   }
 
+  // if (document.getElementById("ldscore-bokeh-graph") !== null)
+  //   document.getElementById("ldscore-bokeh-graph").innerHTML = "";
+  //if (document.getElementById("ldscore-results-container") !== null)
+  //  document.getElementById("ldscore-results-container").textContent = "";
+
   $.ajax({
     url: restServerUrl + "/upload", //Server script to process data
     type: "POST",
@@ -1622,6 +1704,13 @@ function completeHandler() {
   // enable calculate button only when file is successfully uploaded
   $("#ldassoc").removeAttr("disabled");
   $("#ldscore").removeAttr("disabled");
+  $("#ldscore-herit").removeAttr("disabled");
+
+  $("#example-ldscore").prop("checked", false).trigger("change");
+  //if (document.getElementById("ldscore-bokeh-graph") !== null)
+  //  document.getElementById("ldscore-bokeh-graph").innerHTML = "";
+  //if (document.getElementById("ldscore-results-container") !== null)
+  //  document.getElementById("ldscore-results-container").innerHTML = "";
 }
 function errorHandler(e) {
   showCommError(e);
@@ -3631,6 +3720,7 @@ function updateLDscore() {
     windUnit: $("#unit-select").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
+    isExampe: $("#example-ldscore").is(":checked") ? "True" : "False",
     //  calculateRegion: $("#score-region > button").val(),
     //  gene: new Object(),
     //  region: new Object(),
@@ -3836,6 +3926,7 @@ function updateLDherit() {
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
     genome_build: genomeBuild,
+    isExample: $("#example-ldherit").is(":checked") ? "True" : "False",
   };
   console.log(ldInputs);
 
