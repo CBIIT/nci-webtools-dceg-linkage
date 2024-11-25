@@ -3102,7 +3102,10 @@ function updateData(id) {
         var isHerit = heritTab.classList.contains("active");
         var isLdscore = ldscoreTab.classList.contains("active");
         if (isHerit) {
-          updateLDherit();
+          if (isPopulationSet(id)) updateLDherit();
+          else {
+            document.getElementById("ldscore-loading").style.display = "none";
+          }
         } else if (isLdscore) {
           var isFilevalid = validateFiles();
           console.log(isFilevalid);
