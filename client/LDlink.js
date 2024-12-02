@@ -3789,7 +3789,7 @@ function updateLDscore() {
 
     var dataString = data[0];
     var dataCanvas = [dataString, data[1]];
-
+    resultStringCanvas = "";
     // Find the index of the substring "Summary of LD Scores"
     var index = data.result.indexOf("Summary of LD Scores");
     if (index !== -1) {
