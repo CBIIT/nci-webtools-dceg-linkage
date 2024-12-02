@@ -3796,7 +3796,7 @@ function updateLDscore() {
       // Remove the substring and everything that follows
       resultStringCanvas = data.result.substring(0, index);
     }
-    console.log(resultStringCanvas);
+    //console.log(resultStringCanvas);
     document.getElementById("ldmessage").style.display = "none";
     var jsonObjCanvas;
     if (typeof dataString === "string") {

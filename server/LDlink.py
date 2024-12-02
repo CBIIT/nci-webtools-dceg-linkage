@@ -867,7 +867,6 @@ def ldscore():
 ###########
 # Web and API route for LDscore
 @app.route('/LDlinkRest/ldherit', methods=['GET'])
-#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
 def ldherit():
     print("LDherit###############:",request.args.get('isExample'))
