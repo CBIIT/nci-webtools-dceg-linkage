@@ -1208,7 +1208,11 @@ $(document).on("change", ".btn-snp :file", createFileSelectTrigger);
 $(document).on("change", ".btn-csv-file :file", createFileSelectTrigger);
 
 $(document).on("change", ".btn-ldscore-file :file", createFileSelectTrigger);
-
+$(document).on(
+  "change",
+  ".btn-ldscore-file-herit :file",
+  createFileSelectTrigger
+);
 function setupLDassocExample() {
   //   console.log("Use example GWAS data.");
   var useEx = document.getElementById("example-gwas");
@@ -1452,9 +1456,9 @@ function setupLDheritExample() {
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-    document.getElementById("ldscore-results-container").innerHTML = "";
-    document.getElementById("ldscoreFile").innerHTML = "";
-    document.getElementById("ldscore-file-label").value = "";
+    document.getElementById("ldscore-results-container-herit").innerHTML = "";
+    document.getElementById("ldheritFile").innerHTML = "";
+    document.getElementById("ldherit-sample-label").value = "";
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");
@@ -1669,6 +1673,75 @@ function uploadFileScore() {
   });
 }
 
+function uploadFileldherit() {
+  restService.route = "LDlinkRestWeb";
+  restServerUrl =
+    restService.protocol +
+    "//" +
+    restService.hostname +
+    restService.pathname +
+    restService.route;
+  console.log("uploadFileldherit");
+  var fileList = document.getElementById("ldheritFile");
+  // console.log(filename);
+  document.getElementById("ldscore-file-message").style.display = "none";
+  document.getElementById("ldscore-loading").style.display = "none";
+
+  var fileInput = document.getElementById("ldscore-file-ldherit");
+  var file = fileInput.files;
+  var formData = new FormData();
+  var fileinput = document.getElementById("ldscore-file-label-herit").value;
+  //var fileExistInput = document.getElementById("ldscoreFile");
+  //fileExistInput.innerHTML = ""; // Clear the file input value
+  for (let i = 0; i < file.length; i++) {
+    const fileItem = document.createElement("div");
+    fileItem.textContent = file[i].name;
+
+    if (fileItem.textContent.includes(fileinput)) {
+      fileList.appendChild(fileItem);
+      console.log(fileItem);
+      formData.append("ldscoreFile" + i, file[i]);
+    } else {
+      fileList.removeChild(fileItem);
+      formData.delete("ldscoreFile" + i);
+      console.log(fileItem);
+    }
+  }
+
+  // if (document.getElementById("ldscore-bokeh-graph") !== null)
+  //   document.getElementById("ldscore-bokeh-graph").innerHTML = "";
+  //if (document.getElementById("ldscore-results-container") !== null)
+  //  document.getElementById("ldscore-results-container").textContent = "";
+
+  $.ajax({
+    url: restServerUrl + "/upload", //Server script to process data
+    type: "POST",
+    xhr: function () {
+      // Custom XMLHttpRequest
+      var myXhr = $.ajaxSettings.xhr();
+      if (myXhr.upload) {
+        // Check if upload property exists
+        myXhr.upload.addEventListener(
+          "progress",
+          progressHandlingFunction,
+          false
+        ); // For handling the progress of the upload
+      }
+      return myXhr;
+    },
+    //Ajax events
+    beforeSend: beforeSendHandler,
+    success: completeHandler,
+    error: errorHandler,
+    // Form data
+    data: formData,
+    //Options to tell jQuery not to process data or worry about content-type.
+    cache: false,
+    contentType: false,
+    processData: false,
+  });
+}
+
 function progressHandlingFunction(e) {
   if (e.lengthComputable) {
     //$('progress').attr({value:e.loaded,max:e.total});
@@ -1749,6 +1822,7 @@ function createFileSelectEvent() {
     populateHeaderValues(event, numFiles, label);
     uploadFile2();
     uploadFileScore();
+    uploadFileldherit();
     $("#header-values").show();
     $("#header-values2").show();
     //Changing loadCSVFile because the file size is 722Meg
@@ -1767,6 +1841,7 @@ function createFileSelectEvent() {
       populateHeaderValues(event, numFiles, label);
       uploadFile2();
       uploadFileScore();
+      uploadFileldherit();
       $("#header-values").show();
       $("#header-values2").show();
     }
