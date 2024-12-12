@@ -806,7 +806,7 @@ def ldassoc():
 #@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldscore', methods=['GET'])
 def ldscore():
-    print("LDscore###############:")
+    print("LDscore###############:",request.args.get('isExample'))
     start_time = time.time()
 
     pop = request.args.get('pop', False)
@@ -815,6 +815,7 @@ def ldscore():
     ldwindow = request.args.get('ldwindow', '1')
     windUnit = request.args.get('windUnit', 'cm')
     isExample = request.args.get('isExample', False)
+    print(pop,genome_build,filename,ldwindow,windUnit,isExample)
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)

@@ -3798,7 +3798,7 @@ function updateLDscore() {
     windUnit: $("#unit-select").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
-    isExampe: $("#example-ldscore").is(":checked") ? "True" : "False",
+    isExample: $("#example-ldscore").is(":checked") ? "True" : "False",
     //  calculateRegion: $("#score-region > button").val(),
     //  gene: new Object(),
     //  region: new Object(),
