@@ -867,9 +867,9 @@ def ldscore():
             else:
                 filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
-            #out_json = {"result": filtered_result}
-            #pretty_out_json = json.dumps(out_json, indent=4)
-            out_json = filtered_result
+            out_json = {"result": filtered_result}
+            pretty_out_json = json.dumps(out_json, indent=4)
+            out_json = pretty_out_json
 
     except requests.RequestException as e:
         # Print the error message
