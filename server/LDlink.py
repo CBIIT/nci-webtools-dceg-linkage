@@ -858,6 +858,13 @@ def ldscore():
         print(out_json)
         if not web:
                 # Pretty-print the JSON output
+            summary_index = result.find("Summary of LD Scores")
+            if summary_index != -1:
+                filtered_result = result[summary_index:]
+            else:
+                filtered_result = result
+            filtered_result = filtered_result.replace("\\n", "\n")
+            out_json = {"result": filtered_result}
             pretty_out_json = json.dumps(out_json, indent=4)
             out_json = pretty_out_json
     except requests.RequestException as e:
@@ -910,6 +917,13 @@ def ldherit():
         print(out_json)
         if not web:
                 # Pretty-print the JSON output
+            summary_index = result.find("Total Observed scale")
+            if summary_index != -1:
+                filtered_result = result[summary_index:]
+            else:
+                filtered_result = result
+            filtered_result = filtered_result.replace("\\n", "\n")
+            out_json = {"result": filtered_result}
             pretty_out_json = json.dumps(out_json, indent=4)
             out_json = pretty_out_json
     except requests.RequestException as e:
