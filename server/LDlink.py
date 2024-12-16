@@ -853,10 +853,12 @@ def ldscore():
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
         result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
+        print("######################### Result:")
+        print(result)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            print(out_json)
+            #print(out_json)
         else:
                 # Pretty-print the JSON output
             summary_index = result.find("Summary of LD Scores")
@@ -864,10 +866,10 @@ def ldscore():
                 filtered_result = result[summary_index:]
             else:
                 filtered_result = result
-            filtered_result = filtered_result.replace("\\n", "\n")
-            out_json = {"result": filtered_result}
-            pretty_out_json = json.dumps(out_json, indent=4)
-            out_json = pretty_out_json
+            #filtered_result = filtered_result.replace("\\n", "\n")
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            out_json = filtered_result
 
     except requests.RequestException as e:
         # Print the error message
