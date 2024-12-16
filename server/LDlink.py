@@ -904,7 +904,6 @@ def ldherit():
 
     fileDir = f"/data/tmp/uploads"
     print(filename)
-    web = False
     try:
         # Make an API call to the ldsc39_container
        
