@@ -805,7 +805,6 @@ def ldassoc():
 @app.route('/LDlinkRest/ldscore', methods=['GET'])
 #@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldscore', methods=['GET'])
-@requires_token
 def ldscore():
     if 'LDlinkRestWeb' in request.path:
         web = True
@@ -854,7 +853,7 @@ def ldscore():
         
         result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
         print("######################### Result:")
-        print(result)
+        #print(result)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
@@ -867,8 +866,10 @@ def ldscore():
             else:
                 filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
-            out_json = {"result": filtered_result}
-            pretty_out_json = json.dumps(out_json, indent=4)
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            #print(pretty_out_json)
+            return filtered_result
             out_json = pretty_out_json
 
     except requests.RequestException as e:
@@ -915,20 +916,19 @@ def ldherit():
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
         result = run_herit_command(filename,pop,isexample)
-        filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
-        out_json = {"result": filtered_result}
-        print(out_json)
-        if not web:
+        if web:
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            out_json = {"result": filtered_result}
+            #print(out_json)
+        else:
                 # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
             else:
                 filtered_result = result
-            filtered_result = filtered_result.replace("\\n", "\n")
-            out_json = {"result": filtered_result}
-            pretty_out_json = json.dumps(out_json, indent=4)
-            out_json = pretty_out_json
+            #filtered_result = filtered_result.replace("\\n", "\n")
+            return filtered_result
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
