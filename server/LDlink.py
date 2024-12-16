@@ -859,7 +859,7 @@ def ldscore():
         if not web:
                 # Pretty-print the JSON output
             pretty_out_json = json.dumps(out_json, indent=4)
-            out_json = jsonify(pretty_out_json)
+            out_json = pretty_out_json
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
@@ -911,7 +911,7 @@ def ldherit():
         if not web:
                 # Pretty-print the JSON output
             pretty_out_json = json.dumps(out_json, indent=4)
-            out_json = jsonify(pretty_out_json)
+            out_json = pretty_out_json
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
