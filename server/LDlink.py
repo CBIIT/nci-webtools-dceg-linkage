@@ -805,7 +805,12 @@ def ldassoc():
 @app.route('/LDlinkRest/ldscore', methods=['GET'])
 #@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldscore', methods=['GET'])
+@requires_token
 def ldscore():
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
     print("LDscore###############:",request.args.get('isExample'))
     start_time = time.time()
 
@@ -841,8 +846,6 @@ def ldscore():
             print(f"Renamed {file_path} to {new_file_path}")
             #shutil.copy(file_path, new_file_path)  # Copy the file instead of renaming it
 
-
-    web = False
     try:
         # Make an API call to the ldsc39_container
        
@@ -853,6 +856,10 @@ def ldscore():
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
         print(out_json)
+        if not web:
+                # Pretty-print the JSON output
+            pretty_out_json = json.dumps(out_json, indent=4)
+            out_json = jsonify(pretty_out_json)
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
@@ -870,7 +877,12 @@ def ldscore():
 @app.route('/LDlinkRest/ldherit', methods=['GET'])
 #@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
+@requires_token
 def ldherit():
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
     print("LDherit###############:",request.args.get('isExample'))
     start_time = time.time()
     
@@ -896,6 +908,10 @@ def ldherit():
         filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
         out_json = {"result": filtered_result}
         print(out_json)
+        if not web:
+                # Pretty-print the JSON output
+            pretty_out_json = json.dumps(out_json, indent=4)
+            out_json = jsonify(pretty_out_json)
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
