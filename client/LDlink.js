@@ -7358,7 +7358,7 @@ function buildPopulationDropdown(elementId) {
     buttonWidth: "180px",
     maxHeight: 400,
     buttonClass: "btn btn-default btn-ldlink-multiselect",
-    includeSelectAllOption: true,
+    includeSelectAllOption: false,
     dropRight: false,
     allSelectedText: "All Populations",
     nonSelectedText: "Select Population",
@@ -7368,7 +7368,7 @@ function buildPopulationDropdown(elementId) {
     maxPopulationWarn: 2,
     maxPopulationWarnTimeout: 5000,
     maxPopulationWarnVisible: false,
-
+    maxSelection: 1, // Allow only one selection
     // buttonClass: 'btn btn-link',
     buttonText: function (options, select) {
       //console.log("elementId: "+elementId);
@@ -7429,16 +7429,16 @@ function buildPopulationDropdown(elementId) {
         return selected;
       }
     },
-    onChange: function (option, checked) {
-      /*
-            var active_tab = $("#ldlink-tabs li:[class]='active']");
-            console.dir(active_tab);
-            */
-      //alert("You changed the population selection.");
-      //console.log("Option: ")
-      //console.dir(option[0]);
-      //console.log("checked: ")
-      //console.dir(checked);
+    onChange: function (option, checked, select) {
+      if (checked) {
+        var selectedOptions = $("#" + elementId + " option:selected");
+        if (selectedOptions.length >= 1) {
+          // Deselect all other options
+          var nonSelectedOptions = $("#" + elementId + " option").not(option);
+          nonSelectedOptions.prop("selected", false);
+          $("#" + elementId).multiselect("refresh");
+        }
+      }
     },
   });
 
