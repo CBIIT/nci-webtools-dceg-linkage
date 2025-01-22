@@ -195,36 +195,36 @@ def requires_admin_token(f):
     return decorated_function
 
 # Web route to send API token unblock request from front-end
-@app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
-def apiblocked_web():
-    start_time = time.time()
-    firstname = request.args.get('firstname', False)
-    lastname = request.args.get('lastname', False)
-    email = request.args.get('email', False)
-    institution = request.args.get('institution', False)
-    registered = request.args.get('registered', False)
-    blocked = request.args.get('blocked', False)
-    justification = request.args.get('justification', False) 
-    app.logger.debug('apiblocked_web params ' + json.dumps({
-        'firstname': firstname,
-        'lastname': lastname,
-        'email': email,
-        'institution': institution,
-        'registered': registered,
-        'blocked': blocked,
-        'justification': justification
-    }, indent=4, sort_keys=True))
-    url_path = request.headers.get('X-Forwarded-Host')
-    if url_path== None:
-        url_path= request.url_root
-    try:
-        out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_path)
-    except Exception as e:
-        exc_obj = e
-        app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
-    end_time = time.time()
-    app.logger.info("Executed unblocked API user justification submission (%ss)" % (round(end_time - start_time, 2)))
-    return sendJSON(out_json)
+# @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
+# def apiblocked_web():
+#     start_time = time.time()
+#     firstname = request.args.get('firstname', False)
+#     lastname = request.args.get('lastname', False)
+#     email = request.args.get('email', False)
+#     institution = request.args.get('institution', False)
+#     registered = request.args.get('registered', False)
+#     blocked = request.args.get('blocked', False)
+#     justification = request.args.get('justification', False) 
+#     app.logger.debug('apiblocked_web params ' + json.dumps({
+#         'firstname': firstname,
+#         'lastname': lastname,
+#         'email': email,
+#         'institution': institution,
+#         'registered': registered,
+#         'blocked': blocked,
+#         'justification': justification
+#     }, indent=4, sort_keys=True))
+#     url_path = request.headers.get('X-Forwarded-Host')
+#     if url_path== None:
+#         url_path= request.url_root
+#     try:
+#         out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_path)
+#     except Exception as e:
+#         exc_obj = e
+#         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+#     end_time = time.time()
+#     app.logger.info("Executed unblocked API user justification submission (%ss)" % (round(end_time - start_time, 2)))
+#     return sendJSON(out_json)
 
 # Web route to register user's email for API token
 @app.route('/LDlinkRestWeb/apiaccess/register_web', methods=['GET'])
@@ -887,9 +887,7 @@ def ldscore():
 ###########
 # Web and API route for LDscore
 @app.route('/LDlinkRest/ldherit', methods=['GET'])
-#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
 @app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
-@requires_token
 def ldherit():
     if 'LDlinkRestWeb' in request.path:
         web = True
