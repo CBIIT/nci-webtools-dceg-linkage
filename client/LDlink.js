@@ -46,7 +46,7 @@ var populationsLdscore = {
     subPopulations: { NWE: "North-Western European" },
   },
   SEU: {
-    subPopulations: { SEI: "Southern European" },
+    subPopulations: { SEU: "Southern European" },
   },
 };
 

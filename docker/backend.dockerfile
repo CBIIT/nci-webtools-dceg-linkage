@@ -43,10 +43,15 @@ ENV PHANTOMJS_VERSION=2.1.1
 # workaround for phantomjs, use --ignore-ssl-errors=true/yes --web-security=false/no to ignore ssl errors
 ENV OPENSSL_CONF=/dev/null
 
+#RUN cd /tmp \
+#    && curl -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -xj \
+#    && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
+#    && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64
 RUN cd /tmp \
-    && curl -L https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 | tar -xj \
+    && curl -L https://github.com/Medium/phantomjs/releases/download/v${PHANTOMJS_VERSION}/phantomjs-${PHANTOMJS_VERSION}-linux-x86_64.tar.bz2 -o phantomjs.tar.bz2 \
+    && tar -xjf phantomjs.tar.bz2 \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
-    && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64
+    && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 phantomjs.tar.bz2
 
 ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
 
