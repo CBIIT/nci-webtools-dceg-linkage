@@ -1246,8 +1246,14 @@ textarea:invalid,
 #ldassoc-browse-button {
 	float: left;
 }
-#ldassoc-sample, #ldscore-sample, #ldherit-sample {
+#ldscore-sample {
 	position: absolute;
+	float: left;
+	clear: left;
+	margin-top: 5px;
+	margin-left: -172px;
+}
+#ldassoc-sample {
 	float: left;
 	clear: left;
 	margin-top: 5px;
