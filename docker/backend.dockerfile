@@ -26,7 +26,7 @@ RUN dnf -y update \
     && dnf clean all
 
 # install htslib
-ENV HTSLIB_VERSION=1.16
+ENV HTSLIB_VERSION=1.21
 
 RUN cd /tmp \
     && curl -L https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2 | tar -xj \

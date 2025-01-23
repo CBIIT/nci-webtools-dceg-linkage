@@ -4270,51 +4270,53 @@ function createHeritTable(headers, data, isSummary, containerId) {
   var container = document.getElementById(containerId);
 
   // Check if a table already exists in the container and remove it
-  var existingTable = container.querySelector("table");
-  if (existingTable) {
-    container.removeChild(existingTable);
-  }
-
-  var table = document.createElement("table");
-  table.className = "table table-bordered";
-
-  // Create table header
-  var thead = document.createElement("thead");
-  var headerRow = document.createElement("tr");
-  headers.forEach(function (header) {
-    var th = document.createElement("th");
-    th.textContent = header;
-    headerRow.appendChild(th);
-  });
-  thead.appendChild(headerRow);
-  table.appendChild(thead);
-
-  // Create table body
-  var tbody = document.createElement("tbody");
-  if (isSummary)
-    var keys = [
-      "Total Observed scale h2",
-      "Lambda GC",
-      "Mean Chi^2",
-      "Intercept",
-      "Ratio",
-    ];
-  keys.forEach(function (key) {
-    if (data[key]) {
-      var row = document.createElement("tr");
-      var cell = document.createElement("td");
-      cell.textContent = key;
-      row.appendChild(cell);
-      headers.slice(1).forEach(function (header) {
-        var cell = document.createElement("td");
-        cell.textContent = data[key];
-        row.appendChild(cell);
-      });
-      tbody.appendChild(row);
+  if (container !== null) {
+    var existingTable = container.querySelector("table");
+    if (existingTable) {
+      container.removeChild(existingTable);
     }
-  });
-  table.appendChild(tbody);
-  console.log(table);
+
+    var table = document.createElement("table");
+    table.className = "table table-bordered";
+
+    // Create table header
+    var thead = document.createElement("thead");
+    var headerRow = document.createElement("tr");
+    headers.forEach(function (header) {
+      var th = document.createElement("th");
+      th.textContent = header;
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Create table body
+    var tbody = document.createElement("tbody");
+    if (isSummary)
+      var keys = [
+        "Total Observed scale h2",
+        "Lambda GC",
+        "Mean Chi^2",
+        "Intercept",
+        "Ratio",
+      ];
+    keys.forEach(function (key) {
+      if (data[key]) {
+        var row = document.createElement("tr");
+        var cell = document.createElement("td");
+        cell.textContent = key;
+        row.appendChild(cell);
+        headers.slice(1).forEach(function (header) {
+          var cell = document.createElement("td");
+          cell.textContent = data[key];
+          row.appendChild(cell);
+        });
+        tbody.appendChild(row);
+      }
+    });
+    table.appendChild(tbody);
+    console.log(table);
+  }
   return table;
 }
 
