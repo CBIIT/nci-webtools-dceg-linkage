@@ -3140,9 +3140,29 @@ function calculate(e) {
 }
 
 function initCalculate(id) {
-  $("#" + id + "-results-container").hide();
-  $("#" + id + "-message").hide();
-  $("#" + id + "-message-warning").hide();
+  //if form is ldscore, check the activate tab
+  if (id == "ldscore") {
+    var activeTab = $("#ldscoreForm .nav-tabs li.active a");
+    if (activeTab.length) {
+      var activateTab = activeTab.attr("href");
+      if (activateTab.includes("ldscore-file-container-tab")) {
+        console.log("ldscore");
+        $("#" + id + "-results-container").hide();
+        $("#" + id + "-message").hide();
+        $("#" + id + "-message-warning").hide();
+      } else if (activateTab.includes("ldscore-heritability-tab")) {
+        console.log("ldscore-herit");
+        $("#" + id + "-results-container-herit").hide();
+        //  $("#" + id + "-message").hide();
+        //  $("#" + id + "-message-warning").hide();
+      } else if (activateTab.includes("ldscore-correlation-tab")) {
+      }
+    }
+  } else {
+    $("#" + id + "-results-container").hide();
+    $("#" + id + "-message").hide();
+    $("#" + id + "-message-warning").hide();
+  }
 }
 
 function updateData(id) {
@@ -4097,7 +4117,7 @@ function updateLDherit() {
           );
           break;
       }
-      // $("#" + id + "-results-container").show();
+      $("#" + id + "-results-container-herit").show();
       // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
