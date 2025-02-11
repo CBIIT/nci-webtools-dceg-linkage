@@ -1114,6 +1114,7 @@ $(document).ready(function () {
     $("#" + id + "-message").hide();
     $("#" + id + "-message-warning").hide();
     $("#" + id + "-loading").hide();
+    $("#" + id + "-loading-herit").hide();
   });
 
   $("#apiblocked-loading").hide();
@@ -1334,7 +1335,7 @@ function setupLDscoreExample() {
       fileContainer.innerHTML = ""; // Clear any existing content
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
-
+      console.log(data);
       data.filenames.forEach(function (fileName) {
         var fileDiv = document.createElement("div");
         fileDiv.textContent = fileName;
@@ -1421,7 +1422,7 @@ function setupLDheritExample() {
       dataTransfer.items.add(file);
 
       // Assign the files to the file input element
-      var fileInput = document.getElementById("ldscore-file");
+      var fileInput = document.getElementById("ldscore-file-ldherit");
       fileInput.files = dataTransfer.files;
 
       document.getElementById("ldscore").disabled = false;
@@ -1685,7 +1686,7 @@ function uploadFileldherit() {
   var fileList = document.getElementById("ldheritFile");
   // console.log(filename);
   document.getElementById("ldscore-file-message").style.display = "none";
-  document.getElementById("ldscore-loading").style.display = "none";
+  // document.getElementById("ldscore-loading-herit").style.display = "none";
 
   var fileInput = document.getElementById("ldscore-file-ldherit");
   var file = fileInput.files;
@@ -3171,17 +3172,20 @@ function updateData(id) {
         //areRegionDetailsSetLdscore(id) &&
         //isPopulationSet(id)
       ) {
-        $("#" + id + "-loading").show();
         var heritTab = document.getElementById("ldscore-heritability-tab");
         var ldscoreTab = document.getElementById("ldscore-file-container-tab");
         var isHerit = heritTab.classList.contains("active");
         var isLdscore = ldscoreTab.classList.contains("active");
         if (isHerit) {
+          console.log(isHerit);
+          // Check if the element exists
+          $("#ldscore-loading-herit").show();
           if (isPopulationSet(id)) updateLDherit();
-          else {
-            document.getElementById("ldscore-loading").style.display = "none";
-          }
+          // else {
+          //   document.getElementById("ldscore-loading").style.display = "none";
+          // }
         } else if (isLdscore) {
+          $("#" + id + "-loading").show();
           var isFilevalid = validateFiles();
           console.log(isFilevalid);
           if (isFilevalid) {
@@ -4000,7 +4004,7 @@ function updateLDscore() {
 //click Calculate button
 function updateLDherit() {
   var id = "ldscore";
-  var $btn = $("#" + id).button("loading");
+  var $btn = $("#ldscore-herit").button("loading");
   var population = getPopulationCodes(id + "-population-codes");
   var ldInputs = {
     pop: population.join("+"),
@@ -4101,7 +4105,8 @@ function updateLDherit() {
       //$("#ldscore-bokeh-graph").empty().append(data);
     }
 
-    $("#" + id + "-loading").hide();
+    //$("#" + id + "-loading").hide();
+    $("#ldscore-loading-herit").hide();
   });
   ajaxRequest.fail(function (jqXHR, textstatus) {
     displayCommFail(id, jqXHR, textstatus);
