@@ -1763,8 +1763,8 @@ function beforeSendHandler() {
   $("#progressbar2").css("width", percent + "%");
   $("#progressbar2").html(percent + "% Completed");
   $("#ldassoc-file-container").hide();
-  //$("#ldscore-file-container").hide();
-  //$("#ldscore-file-container2").hide();
+  $("#ldscore-file-container").hide();
+  $("#ldscore-file-container2").hide();
   $("#progressbar").parent().show();
   $("#progressbar2").parent().show();
 }
@@ -1773,8 +1773,8 @@ function completeHandler() {
   $("#progressbar").parent().hide();
   $("#progressbar2").parent().hide();
   $("#ldassoc-file-container").fadeIn(1000);
-  //$("#ldscore-file-container").fadeIn(1000);
-  //$("#ldscore-file-container2").fadeIn(1000);
+  $("#ldscore-file-container").fadeIn(1000);
+  $("#ldscore-file-container2").fadeIn(1000);
   // enable calculate button only when file is successfully uploaded
   $("#ldassoc").removeAttr("disabled");
   $("#ldscore").removeAttr("disabled");
