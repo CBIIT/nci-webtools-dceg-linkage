@@ -3199,7 +3199,6 @@ function updateData(id) {
         if (isHerit) {
           console.log(isHerit);
           // Check if the element exists
-          $("#ldscore-loading-herit").show();
           if (isPopulationSet(id)) updateLDherit();
           // else {
           //   document.getElementById("ldscore-loading").style.display = "none";
@@ -4023,6 +4022,7 @@ function updateLDscore() {
 
 //click Calculate button
 function updateLDherit() {
+  $("#ldscore-loading-herit").show();
   var id = "ldscore";
   var $btn = $("#ldscore-herit").button("loading");
   var population = getPopulationCodes(id + "-population-codes");
@@ -4053,6 +4053,7 @@ function updateLDherit() {
     "href",
     "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
   );
+  document.getElementById("ldheritmessage").style.display = "block";
   //console.log( $('#ldassoc-genome'))
   //console.log(ldInputs);
   var url = restServerUrl + "/ldherit";
@@ -4080,6 +4081,7 @@ function updateLDherit() {
     }
     console.log(data);
     console.log(resultStringCanvas);
+    document.getElementById("ldheritmessage").style.display = "none";
     var jsonObjCanvas;
     if (typeof dataString === "string") {
       jsonObjCanvas = JSON.parse(resultStringCanvas);
