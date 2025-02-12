@@ -762,6 +762,8 @@ $(document).ready(function () {
   });
 
   $("#progressbar2").progressbar();
+  $("#progressbar3").progressbar();
+  $("#progressbar4").progressbar();
   //$('#progressbar').progressbar('setPosition', 85);
   //$('#ldassoc-progressbar').progressbar('reset');
   $("#ldscore-progressbar").on("positionChanged", function (e) {
@@ -1581,7 +1583,7 @@ function uploadFile2() {
     type: "POST",
     xhr: function () {
       // Custom XMLHttpRequest
-      var myXhr = $.ajaxSettings.xhr();
+      var myXhr = new XMLHttpRequest();
       if (myXhr.upload) {
         // Check if upload property exists
         myXhr.upload.addEventListener(
@@ -1613,7 +1615,7 @@ function uploadFileScore() {
     restService.hostname +
     restService.pathname +
     restService.route;
-
+  console.log("uploadFileldscore");
   var fileList = document.getElementById("ldscoreFile");
   // console.log(filename);
   document.getElementById("ldscore-file-message").style.display = "none";
@@ -1650,7 +1652,7 @@ function uploadFileScore() {
     type: "POST",
     xhr: function () {
       // Custom XMLHttpRequest
-      var myXhr = $.ajaxSettings.xhr();
+      var myXhr = new XMLHttpRequest();
       if (myXhr.upload) {
         // Check if upload property exists
         myXhr.upload.addEventListener(
@@ -1719,7 +1721,7 @@ function uploadFileldherit() {
     type: "POST",
     xhr: function () {
       // Custom XMLHttpRequest
-      var myXhr = $.ajaxSettings.xhr();
+      var myXhr = new XMLHttpRequest();
       if (myXhr.upload) {
         // Check if upload property exists
         myXhr.upload.addEventListener(
@@ -1745,7 +1747,8 @@ function uploadFileldherit() {
 
 function progressHandlingFunction(e) {
   if (e.lengthComputable) {
-    //$('progress').attr({value:e.loaded,max:e.total});
+    // console.log(e);
+    //$("progress").attr({ value: e.loaded, max: e.total });
     var percent = Math.floor((e.loaded / e.total) * 100);
     $("#progressbar").progressbar({ value: percent });
     $("#progressbar").css("width", percent + "%");
@@ -1753,6 +1756,9 @@ function progressHandlingFunction(e) {
     $("#progressbar2").progressbar({ value: percent });
     $("#progressbar2").css("width", percent + "%");
     $("#progressbar2").html(percent + "% Completed");
+    $("#progressbar3").progressbar({ value: percent });
+    $("#progressbar3").css("width", percent + "%");
+    $("#progressbar3").html(percent + "% Completed");
   }
 }
 function beforeSendHandler() {
@@ -1762,16 +1768,24 @@ function beforeSendHandler() {
   $("#progressbar").html(percent + "% Completed");
   $("#progressbar2").css("width", percent + "%");
   $("#progressbar2").html(percent + "% Completed");
-  $("#ldassoc-file-container").hide();
-  $("#ldscore-file-container").hide();
-  $("#ldscore-file-container2").hide();
+  $("#progressbar3").css("width", percent + "%");
+  $("#progressbar3").html(percent + "% Completed");
+  $("#progressbar4").css("width", percent + "%");
+  $("#progressbar4").html(percent + "% Completed");
+  //$("#ldassoc-file-container").hide();
+  //$("#ldscore-file-container").hide();
+  //  $("#ldscore-file-container2").hide();
   $("#progressbar").parent().show();
   $("#progressbar2").parent().show();
+  $("#progressbar3").parent().show();
+  $("#progressbar4").parent().show();
 }
 function completeHandler() {
   console.warn("completeHandler");
   $("#progressbar").parent().hide();
   $("#progressbar2").parent().hide();
+  $("#progressbar3").parent().hide();
+  $("#progressbar4").parent().hide();
   $("#ldassoc-file-container").fadeIn(1000);
   $("#ldscore-file-container").fadeIn(1000);
   $("#ldscore-file-container2").fadeIn(1000);
@@ -1791,6 +1805,8 @@ function errorHandler(e) {
   console.warn("errorHandler");
   $("#progressbar").parent().hide();
   $("#progressbar2").parent().hide();
+  $("#progressbar3").parent().hide();
+  $("#progressbar4").parent().hide();
   $("#ldassoc-file-container").fadeIn(1000);
   $("#ldscore-file-container").fadeIn(1000);
   $("#ldscore-file-container2").fadeIn(1000);
@@ -1822,15 +1838,15 @@ function createFileSelectEvent() {
     // console.log("Event");
     populateHeaderValues(event, numFiles, label);
     uploadFile2();
-    uploadFileScore();
-    uploadFileldherit();
+    // uploadFileScore();
+    // uploadFileldherit();
     $("#header-values").show();
     $("#header-values2").show();
     //Changing loadCSVFile because the file size is 722Meg
     //loadCSVFile(event);
   });
 
-  $(".btn-ldscore-file :file, .btn-ldscore-file-herit :file").on(
+  $(".btn-ldscore-file :file").on(
     "fileselect",
     function (event, numFiles, label) {
       $(this)
@@ -1840,8 +1856,26 @@ function createFileSelectEvent() {
       //$(this).parents(".input-group").find("input[type='hidden']").val(label);
       console.log(numFiles);
       populateHeaderValues(event, numFiles, label);
-      uploadFile2();
+      //uploadFile2();
       uploadFileScore();
+      //uploadFileldherit();
+      $("#header-values").show();
+      $("#header-values2").show();
+    }
+  );
+
+  $(".btn-ldscore-file-herit :file").on(
+    "fileselect",
+    function (event, numFiles, label) {
+      $(this)
+        .parents(".input-group")
+        .find(":text")
+        .val(label.split(".").slice(0, -1).join("."));
+      //$(this).parents(".input-group").find("input[type='hidden']").val(label);
+      console.log(numFiles);
+      populateHeaderValues(event, numFiles, label);
+      //uploadFile2();
+      // uploadFileScore();
       uploadFileldherit();
       $("#header-values").show();
       $("#header-values2").show();
