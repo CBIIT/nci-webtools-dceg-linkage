@@ -952,6 +952,15 @@ def ldscoreapi():
         else:
                 filtered_result = result
 
+         # Delete the uploaded files
+        for file_path in saved_files.values():
+            try:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+
         return filtered_result
 
     except requests.RequestException as e:
@@ -1058,13 +1067,20 @@ def ldheritAPI():
         
         result = run_herit_command(filename,pop,isexample)
        
-                # Pretty-print the JSON output
+        # Pretty-print the JSON output
         summary_index = result.find("Total Observed scale")
         if summary_index != -1:
             filtered_result = result[summary_index:]
         else:
             filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
+
+        # Delete the uploaded files
+        try:
+            os.remove(file)
+            print(f"Deleted file: {file}")
+        except Exception as e:
+            print(f"Error deleting file {file}: {e}")
         return filtered_result
     except requests.RequestException as e:
         # Print the error message

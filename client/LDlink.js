@@ -4139,6 +4139,7 @@ function updateLDherit() {
       "herit-table-container"
     );
     document.getElementById("herit-table-container").appendChild(summaryTable);
+
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {
         case "grch37":
@@ -4242,7 +4243,7 @@ function parseResultHerit(resultDataText, title, title2) {
   var summary1 = false;
   var summary2 = false;
 
-  for (var i = 0; i < lines.length; i++) {
+  for (var i = 0, j = 0; i < lines.length; i++) {
     var line = lines[i].trim();
 
     if (line.startsWith(title)) {
@@ -4262,8 +4263,15 @@ function parseResultHerit(resultDataText, title, title2) {
       console.log(parts);
       if (parts.length === 2) {
         var key = parts[0];
-        summaryData.res1[key] = parseFloat(parts[1]);
-        console.log(summaryData);
+        summaryData.res1[key] = parts[1]; //parseFloat(parts[1]);
+        //console.log(summaryData);
+      } else {
+        j++;
+        //console.log(line);
+        if (line.includes("Ratio")) {
+          summaryData.res1["Ratio"] = line.replace("Ratio", "");
+        }
+        summaryData.res2[j] = line;
       }
     }
 

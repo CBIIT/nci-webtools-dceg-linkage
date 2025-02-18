@@ -2488,21 +2488,29 @@
 														50% Complete (info)
 													</div>
 												</div>
-												<!-- <div class="input-group" id="ldscore-file-container3">
-													<label for="ldscore-file-label" style="display:none;">Upload Data File</label>
-													<input type="text" id="ldscore-file-label" readonly placeholder="Upload data file" class="readonly-input-text">
-													<label for="ldscore-file" style="display:none;">Browse for RS File</label>
+												<div class="input-group" id="ldscore-file-container3">
+													
+													<input type="text" id="ldscore-file-label-correlation" readonly placeholder="Upload data file" class="readonly-input-text">
+													
 													<div id="ldscore-files-correlation">
 														<div id="ldscore-browse-button">
-															<span class="btn btn-default btn-file btn-ldscore-file">Browse
-																<input type="file" id="ldscore-file" multiple>
+															<span class="btn btn-default btn-file btn-ldscore-file-correlation">Browse
+																<input type="file" id="ldscore-file-correlation" >
 															</span>
 														</div>
-														<div id="ldscoreFile"></div>
+														<div id="correlation-sample">
+															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+																<label class="switch" for="example-correlation">
+																		<input id="example-correlation" type="checkbox" data-toggle="toggle">
+																			<span class="slider round"></span>
+																</label>
+																<div id="correlation-sample-label"> &nbsp;Use example data</div>
+														</div>
+														<div id="correlationFile"></div>
 													</div>
 													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
 													   data-placement="bottom" data-content="Please upload a file."></a>
-												</div> -->
+												</div>
 						
 												<progress style="display:none;"></progress>
 						
@@ -2513,27 +2521,53 @@
 										</div>
 						
 										<div class="ldassoc-flex-item3">
-											<!-- <div class="form-group">
-												<div class="ldassoc-population-col" style="width:190px;">
-													<a id="ldscore-population-codes-zero2" style="position:relative;left:180px;" data-toggle="popover"
+											<div class="form-group">
+												<div class="ldscore-population-col" style="width:190px;">
+													<a id="correlation-population-codes-zero" style="position:relative;left:180px;" data-toggle="popover"
 													   trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
-													<label for="ldscore-population-codes2" style="display: none;">Populations</label>
-													<select id="ldscore-population-codes2" multiple="multiple" name="populations2">
+													<label for="correlation-population-codes" style="display: none;">Populations</label>
+													<select id="correlation-population-codes" multiple="multiple" name="populations">
 													</select>
 												</div>
-											</div> -->
+											</div>
 										</div>
 										<!-- Calculate -->
 										<div class="ldassoc-flex-item4">
 											<div class="form-group">
 												<div class="ldscore-calculate-col">
 													<label for="ldscore" class="sr-only">Submit</label>
-													<input type="submit" id="ldscore-genetic" value="Calculate" class="btn btn-default calculate"></input>
+													<input type="submit" id="ldscore-herit" value="Calculate" class="btn btn-default calculate"></input>
 												</div>
 											</div>
 										</div>
-										<h3>Correlation Analysis</h3>
+									</div>
+									<h3></h3>
+									<br/>
+									<div class="col-sm-4 col-sm-offset-1 ">
+										<div id="ldheritmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
 										
+										<div id="ldscore-loading-herit">
+											<img src="calculating_LD.gif"  alt="loading icon" class="loading">
+										</div>
+									</div>
+									
+									<div class="jumbotron">
+										<div class="container-fluid" id="ldscore-results-container-herit">
+											<div id="row-button" class="row overflowy">
+												<div id="ldscore-export-dropdown"></div>
+												<div class="col-sm-8 col-sm-offset-1">
+													<div id="ldscore-bokeh-graph-herit"></div>
+													<br />
+													<br />
+													<!-- <h4>Heritability Analysis:</h4> -->
+													<div id="herit-table-container"></div>
+													
+												</div>
+											
+											</div>
+											
+											<br />
+										</div>
 									</div>
 								</div>				
 							
