@@ -2491,11 +2491,20 @@
 												<div class="input-group" id="ldscore-file-container3">
 													
 													<input type="text" id="ldscore-file-label-correlation" readonly placeholder="Upload data file" class="readonly-input-text">
-													
 													<div id="ldscore-files-correlation">
 														<div id="ldscore-browse-button">
 															<span class="btn btn-default btn-file btn-ldscore-file-correlation">Browse
 																<input type="file" id="ldscore-file-correlation" >
+															</span>
+														</div>
+														<div id="correlationFile"></div>
+													</div>
+
+													<input type="text" id="ldscore-file-label-correlation2" readonly placeholder="Upload data file" class="readonly-input-text">
+													<div id="ldscore-files-correlation2">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file-correlation2">Browse
+																<input type="file" id="ldscore-file-correlation2" >
 															</span>
 														</div>
 														<div id="correlation-sample">
@@ -2506,7 +2515,7 @@
 																</label>
 																<div id="correlation-sample-label"> &nbsp;Use example data</div>
 														</div>
-														<div id="correlationFile"></div>
+														<div id="correlationFile2"></div>
 													</div>
 													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
 													   data-placement="bottom" data-content="Please upload a file."></a>
@@ -2523,10 +2532,10 @@
 										<div class="ldassoc-flex-item3">
 											<div class="form-group">
 												<div class="ldscore-population-col" style="width:190px;">
-													<a id="correlation-population-codes-zero" style="position:relative;left:180px;" data-toggle="popover"
+													<a id="ldscore2-population-codes-zero" style="position:relative;left:180px;" data-toggle="popover"
 													   trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
-													<label for="correlation-population-codes" style="display: none;">Populations</label>
-													<select id="correlation-population-codes" multiple="multiple" name="populations">
+													<label for="ldscore2-population-codes" style="display: none;">Populations</label>
+													<select id="ldscore2-population-codes" multiple="multiple" name="populations2">
 													</select>
 												</div>
 											</div>
@@ -2536,7 +2545,7 @@
 											<div class="form-group">
 												<div class="ldscore-calculate-col">
 													<label for="ldscore" class="sr-only">Submit</label>
-													<input type="submit" id="ldscore-herit" value="Calculate" class="btn btn-default calculate"></input>
+													<input type="submit" id="ldscore-correlation" value="Calculate" class="btn btn-default calculate"></input>
 												</div>
 											</div>
 										</div>
@@ -2544,23 +2553,23 @@
 									<h3></h3>
 									<br/>
 									<div class="col-sm-4 col-sm-offset-1 ">
-										<div id="ldheritmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
+										<div id="correlationmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
 										
-										<div id="ldscore-loading-herit">
+										<div id="ldscore-loading-correlation">
 											<img src="calculating_LD.gif"  alt="loading icon" class="loading">
 										</div>
 									</div>
 									
 									<div class="jumbotron">
-										<div class="container-fluid" id="ldscore-results-container-herit">
+										<div class="container-fluid" id="ldscore-results-container-correlation">
 											<div id="row-button" class="row overflowy">
-												<div id="ldscore-export-dropdown"></div>
+												<div id="correlation-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
-													<div id="ldscore-bokeh-graph-herit"></div>
+													<div id="ldscore-bokeh-graph-correlation"></div>
 													<br />
 													<br />
 													<!-- <h4>Heritability Analysis:</h4> -->
-													<div id="herit-table-container"></div>
+													<div id="correlation-table-container"></div>
 													
 												</div>
 											

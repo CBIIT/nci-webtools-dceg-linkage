@@ -1144,7 +1144,7 @@ textarea:invalid,
 	color: #800000;
 }
 
-#ldscore-file-label,#ldscore-file-label-herit {
+#ldscore-file-label,#ldscore-file-label-herit,#ldscore-file-label-correlation,#ldscore-file-label-correlation2 {
     margin-top: 10px; /* Adjust the value as needed */
 }
 
@@ -1239,7 +1239,7 @@ textarea:invalid,
 #assoc-region, #score-region {
 	margin-bottom: 20px;
 }
-#ldassoc-files, #ldscore-files, #ldscore-files-herit{
+#ldassoc-files, #ldscore-files, #ldscore-files-herit,#ldscore-files-correlation,#ldscore-files-correlation2{
 	float: right;
 	margin-top: -4px;
 }
@@ -1260,7 +1260,7 @@ textarea:invalid,
 	margin-left: -172px;
 }
 
-#ldherit-sample {
+#ldherit-sample,#correlation-sample{
 	position: absolute;
 	float: left;
 	clear: left;
@@ -1268,7 +1268,7 @@ textarea:invalid,
 	margin-left: -172px;
 }
 
-#ldassoc-sample-label, #ldscore-sample-label, #ldherit-sample-label {
+#ldassoc-sample-label, #ldscore-sample-label, #ldherit-sample-label,#correlation-sample-label {
 	float: right;
 }
 
@@ -1278,7 +1278,7 @@ textarea:invalid,
 	clear: left;
 }
 
-#ldassoc-file-container, #ldscore-file-container, #ldscore-file-container2 {
+#ldassoc-file-container, #ldscore-file-container, #ldscore-file-container2,#ldscore-file-container3 {
 	margin-top: 4px;
 }
 
@@ -1406,7 +1406,7 @@ input:checked + .slider:before {
     padding-bottom: 20px; /* Adjust the value as needed */
     box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
 }
-#ldscore-sample, #example-ldscore,#example-ldherit {
+#ldscore-sample, #example-ldscore,#example-ldherit,#example-correlation {
 	position: relative;
 	top: 0;
 	left: 10px !important;

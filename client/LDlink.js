@@ -588,6 +588,7 @@ var modules = [
   "ldproxy",
   "ldtrait",
   "ldscore",
+  "ldscore2",
   "snpclip",
   "snpchip",
   "apiaccess",
@@ -957,6 +958,9 @@ $(document).ready(function () {
   $("#example-ldherit").click(function (e) {
     setupLDheritExample();
   });
+  $("#example-correlation").click(function (e) {
+    setupLDcorrelationExample();
+  });
   updateVersion(ldlink_version);
   //addValidators();
   $("#ldlink-tabs").on("click", "a", function (e) {
@@ -1117,6 +1121,7 @@ $(document).ready(function () {
     $("#" + id + "-message-warning").hide();
     $("#" + id + "-loading").hide();
     $("#" + id + "-loading-herit").hide();
+    $("#" + id + "-loading-correlation").hide();
   });
 
   $("#apiblocked-loading").hide();
@@ -1468,6 +1473,82 @@ function setupLDheritExample() {
   }
 }
 
+function setupLDcorrelationExample() {
+  //   console.log("Use example GWAS data.");
+  var useEx = document.getElementById("example-correlation");
+  if (useEx.checked) {
+    var url = restServerUrl + "/correlation_example";
+    var ajaxRequest = $.ajax({
+      type: "GET",
+      url: url,
+      contentType: "application/json", // JSON
+      data: {
+        genome_build: genomeBuild,
+      },
+    }).success(function (response) {
+      //console.log(response);
+      document.getElementById("ldscore-file-label-correlation").value =
+        "BBJ_HDLC22";
+      var data = JSON.parse(response);
+      // var fileContainer = document.getElementById("ldscoreFile");
+      //  fileContainer.innerHTML = ""; // Clear any existing content
+      // Create a DataTransfer object to simulate file input
+      var dataTransfer = new DataTransfer();
+      console.log(data);
+
+      //var fileDiv = document.createElement("div");
+      //fileDiv.textContent = data.filenames;
+      //fileContainer.appendChild(fileDiv);
+
+      // Create a new File object and add it to the DataTransfer object
+      var file = new File([""], data.filenames);
+      dataTransfer.items.add(file);
+
+      // Assign the files to the file input element
+      var fileInput = document.getElementById("ldscore-file-ldherit");
+      fileInput.files = dataTransfer.files;
+
+      document.getElementById("ldscore").disabled = false;
+    });
+
+    // switch (genomeBuild) {
+    //   case "grch37":
+    //     $("#region-region-start-coord2").val("chr8:128289591");
+    //     $("#region-region-end-coord2").val("chr8:128784397");
+    //     break;
+    //   case "grch38":
+    //     $("#region-region-start-coord2").val("chr8:127277115");
+    //     $("#region-region-end-coord2").val("chr8:127777115");
+    //     break;
+    //   case "grch38_high_coverage":
+    //     $("#region-region-start-coord2").val("chr8:127277115");
+    //     $("#region-region-end-coord2").val("chr8:127777115");
+    //     break;
+    // }
+    //$("#region-region-index2").val("rs7837688");
+    // console.log($("#region-region-start-coord").val());
+    // console.log($("#region-region-end-coord").val());
+    // console.log($("#region-region-index").val());
+
+    // $("#ldscore-population-codes").val("");
+    // $("#ldscore-population-codes2").val("");
+    // refreshPopulation([], "ldscore");
+    // $("#ldscore-population-codes").val(["CEU"]);
+    // $("#ldscore-population-codes2").val(["CEU"]);
+    // refreshPopulation(["CEU"], "ldscore");
+    // console.log($("#ldassoc-population-codes").val());
+  } else {
+    $("#ldscore-file").prop("disabled", false);
+    $("#ldscore").prop("disabled", true);
+    document.getElementById("ldscore-results-container-herit").innerHTML = "";
+    document.getElementById("ldheritFile").innerHTML = "";
+    document.getElementById("ldherit-sample-label").value = "";
+    populateScoreDropDown([]);
+
+    refreshPopulation([], "ldscore");
+  }
+}
+
 // wait for svg genreation subprocess complete before enabling plot export menu button
 function checkFile(id, fileURL, retries) {
   // add countdown retries here to prevent hang up of infinite loop
@@ -1744,6 +1825,76 @@ function uploadFileldherit() {
     processData: false,
   });
 }
+function uploadFileldcorrelation() {
+  restService.route = "LDlinkRestWeb";
+  restServerUrl =
+    restService.protocol +
+    "//" +
+    restService.hostname +
+    restService.pathname +
+    restService.route;
+  console.log("uploadFileldherit");
+  var fileList = document.getElementById("ldheritFile");
+  // console.log(filename);
+  document.getElementById("ldscore-file-message").style.display = "none";
+  // document.getElementById("ldscore-loading-herit").style.display = "none";
+
+  var fileInput = document.getElementById("ldscore-file-ldherit");
+  var file = fileInput.files;
+  var formData = new FormData();
+  var fileinput = document.getElementById(
+    "ldscore-file-label-correlation"
+  ).value;
+  //var fileExistInput = document.getElementById("ldscoreFile");
+  //fileExistInput.innerHTML = ""; // Clear the file input value
+  for (let i = 0; i < file.length; i++) {
+    const fileItem = document.createElement("div");
+    fileItem.textContent = file[i].name;
+
+    if (fileItem.textContent.includes(fileinput)) {
+      fileList.appendChild(fileItem);
+      console.log(fileItem);
+      formData.append("ldscoreFile" + i, file[i]);
+    } else {
+      fileList.removeChild(fileItem);
+      formData.delete("ldscoreFile" + i);
+      console.log(fileItem);
+    }
+  }
+
+  // if (document.getElementById("ldscore-bokeh-graph") !== null)
+  //   document.getElementById("ldscore-bokeh-graph").innerHTML = "";
+  //if (document.getElementById("ldscore-results-container") !== null)
+  //  document.getElementById("ldscore-results-container").textContent = "";
+
+  $.ajax({
+    url: restServerUrl + "/upload", //Server script to process data
+    type: "POST",
+    xhr: function () {
+      // Custom XMLHttpRequest
+      var myXhr = new XMLHttpRequest();
+      if (myXhr.upload) {
+        // Check if upload property exists
+        myXhr.upload.addEventListener(
+          "progress",
+          progressHandlingFunction,
+          false
+        ); // For handling the progress of the upload
+      }
+      return myXhr;
+    },
+    //Ajax events
+    beforeSend: beforeSendHandler,
+    success: completeHandler,
+    error: errorHandler,
+    // Form data
+    data: formData,
+    //Options to tell jQuery not to process data or worry about content-type.
+    cache: false,
+    contentType: false,
+    processData: false,
+  });
+}
 
 function progressHandlingFunction(e) {
   if (e.lengthComputable) {
@@ -1759,6 +1910,9 @@ function progressHandlingFunction(e) {
     $("#progressbar3").progressbar({ value: percent });
     $("#progressbar3").css("width", percent + "%");
     $("#progressbar3").html(percent + "% Completed");
+    $("#progressbar4").progressbar({ value: percent });
+    $("#progressbar4").css("width", percent + "%");
+    $("#progressbar4").html(percent + "% Completed");
   }
 }
 function beforeSendHandler() {
@@ -1789,10 +1943,12 @@ function completeHandler() {
   $("#ldassoc-file-container").fadeIn(1000);
   $("#ldscore-file-container").fadeIn(1000);
   $("#ldscore-file-container2").fadeIn(1000);
+  $("#ldscore-file-container3").fadeIn(1000);
   // enable calculate button only when file is successfully uploaded
   $("#ldassoc").removeAttr("disabled");
   $("#ldscore").removeAttr("disabled");
   $("#ldscore-herit").removeAttr("disabled");
+  $("#dscore-correlation").removeAttr("disabled");
 
   $("#example-ldscore").prop("checked", false).trigger("change");
   //if (document.getElementById("ldscore-bokeh-graph") !== null)
@@ -1810,6 +1966,7 @@ function errorHandler(e) {
   $("#ldassoc-file-container").fadeIn(1000);
   $("#ldscore-file-container").fadeIn(1000);
   $("#ldscore-file-container2").fadeIn(1000);
+  $("#ldscore-file-container3").fadeIn(1000);
   console.error("Comm Error");
   console.dir(e);
 }
@@ -3185,11 +3342,12 @@ function initCalculate(id) {
         $("#" + id + "-message").hide();
         $("#" + id + "-message-warning").hide();
       } else if (activateTab.includes("ldscore-heritability-tab")) {
-        console.log("ldscore-herit");
+        //console.log("ldscore-herit");
         $("#" + id + "-results-container-herit").hide();
         //  $("#" + id + "-message").hide();
         //  $("#" + id + "-message-warning").hide();
       } else if (activateTab.includes("ldscore-correlation-tab")) {
+        $("#" + id + "-results-container-correlation").hide();
       }
     }
   } else {
@@ -4387,6 +4545,131 @@ function createHeritTable(headers, data, isSummary, containerId) {
     console.log(table);
   }
   return table;
+}
+//click Calculate button
+function updateLDcorrelation() {
+  $("#ldscore-loading-correlation").show();
+  var id = "ldscore";
+  var $btn = $("#ldscore-correlation").button("loading");
+  var population = getPopulationCodes(id + "-population-codes");
+  var ldInputs = {
+    pop: population.join("+"),
+    filename: $("#ldscore-file-label-correlation").val(),
+    reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
+    columns: new Object(),
+    genome_build: genomeBuild,
+    isExample: $("#example-correlation").is(":checked") ? "True" : "False",
+  };
+  console.log(ldInputs);
+
+  var tempbuild = genomeBuild == "grch37" ? "hg19" : "hg38";
+  var r2url =
+    "https://genome.ucsc.edu/cgi-bin/hgTracks?db=" +
+    tempbuild +
+    "&hgt.customText=http://" +
+    location.hostname +
+    "/LDlinkRestWeb/tmp/track" +
+    ldInputs.reference +
+    ".txt";
+  //console.log(r2url)
+  $("#ldscore-genome").prop("href", r2url);
+
+  //console.dir(ldproxyInputs);
+  $("#ldscore-results-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
+  );
+  document.getElementById("ldheritmessage").style.display = "block";
+  //console.log( $('#ldassoc-genome'))
+  //console.log(ldInputs);
+  var url = restServerUrl + "/ldherit";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+    data: ldInputs,
+    contentType: "application/json", // JSON
+  });
+  //console.log(ajaxRequest);
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    //JSON.parse() cleans up this json string.
+
+    // create bokeh object with output_backend=canvas from svg
+
+    var dataString = data[0];
+    var dataCanvas = [dataString, data[1]];
+    var resultStringCanvas = data.result;
+    // // Find the index of the substring "Total Observed scale"
+    var index = data.result.indexOf("Total Observed scale");
+    if (index !== -1) {
+      // Remove the substring and everything that follows
+      resultStringCanvas = data.result.substring(0, index);
+    }
+    console.log(data);
+    console.log(resultStringCanvas);
+    document.getElementById("ldheritmessage").style.display = "none";
+    var jsonObjCanvas;
+    if (typeof dataString === "string") {
+      jsonObjCanvas = JSON.parse(resultStringCanvas);
+    } else {
+      jsonObjCanvas = resultStringCanvas;
+    }
+    console.log(data.result);
+    // Parse the result data
+    var summaryData = parseResultHerit(
+      data.result,
+      "Using two-step estimator with cutoff",
+      ""
+    );
+    console.log(summaryData);
+    // Create and append the summary table
+    var summaryHeaders = ["", "Value"];
+    var summaryTable = createHeritTable(
+      summaryHeaders,
+      summaryData.res1,
+      true,
+      "herit-table-container"
+    );
+    document.getElementById("herit-table-container").appendChild(summaryTable);
+
+    if (displayError(id, jsonObjCanvas) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container-herit").show();
+      // $("#" + id + "-links-container").show();
+      //console.log(dataCanvas);
+      var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
+      $("#ldscore-bokeh-graph-herit").html(formattedOutput);
+      //$("#ldscore-bokeh-graph").empty().append(data);
+    }
+    $("#ldscore-loading-correlation").hide();
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+    setTimeout(function () {
+      var checkbox = $(".bk-toolbar-inspector").children().first();
+      $(checkbox).attr("id", "hover");
+      $(checkbox).append(
+        '<label for="hover" class="sr-only">Hover Tool</label>'
+      );
+    }, 100);
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
 }
 
 function updateLDhap() {
@@ -7389,6 +7672,8 @@ function buildTissueDropdown(elementId, tissueData) {
 }
 
 function buildPopulationDropdown(elementId) {
+  //console.log(elementId);
+  console.trace();
   var htmlText = "";
   var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
   var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
@@ -7423,7 +7708,7 @@ function buildPopulationDropdown(elementId) {
   }
 
   $("#" + elementId).html(htmlText);
-  //alert(elemtnId);
+  //alert(elementId);
   $("#" + elementId).multiselect({
     enableClickableOptGroups: true,
     buttonWidth: "180px",
