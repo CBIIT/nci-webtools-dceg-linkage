@@ -4682,6 +4682,10 @@ function updateLDcorrelation() {
     var dataCanvas = [dataString, data[1]];
     var resultStringCanvas = data.result;
     var resultforTable = "";
+    var heritforTable = "";
+    var heritforTable2 = "";
+    var geneticTable = "";
+
     // // Find the index of the substring "Total Observed scale"
     var index0 = data.result.indexOf("Summary of Genetic Correlation Results");
     if (index0 !== -1) {
