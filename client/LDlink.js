@@ -4803,15 +4803,10 @@ function updateLDcorrelation() {
   hideLoadingIcon(ajaxRequest, id);
 }
 function parseAndCreateTables(resultDataText, title1, title2) {
-  var existingTable = container.querySelector("table");
-  if (existingTable) {
-    container.removeChild(existingTable);
-  }
-
   var sections = resultDataText
     .split("\n\n")
     .filter((section) => section.trim() !== "");
-  console.log(sections);
+
   sections.forEach((section, index) => {
     var lines = section.trim().split("\n");
     if (lines.length < 1) return;
