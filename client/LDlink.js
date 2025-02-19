@@ -4513,7 +4513,6 @@ function parseResultHerit(resultDataText, title, title2) {
     //   }
     // }
   }
-
   return summaryData;
 }
 // Function to create a table
@@ -4562,7 +4561,7 @@ function createTable(headers, data, isSummary, containerId) {
 
   return table;
 }
-function createHeritTable(headers, data, isSummary, containerId) {
+function createHeritTable(headers, data, isSummary, containerId, tableTitle) {
   var container = document.getElementById(containerId);
 
   // Check if a table already exists in the container and remove it
@@ -4574,6 +4573,9 @@ function createHeritTable(headers, data, isSummary, containerId) {
 
     var table = document.createElement("table");
     table.className = "table table-bordered";
+    var caption = document.createElement("caption");
+    caption.textContent = tableTitle;
+    table.appendChild(caption);
 
     // Create table header
     var thead = document.createElement("thead");
@@ -4581,6 +4583,10 @@ function createHeritTable(headers, data, isSummary, containerId) {
     headers.forEach(function (header) {
       var th = document.createElement("th");
       th.textContent = header;
+      th.style.border = "1px solid black";
+      th.style.padding = "8px";
+      th.style.textAlign = "left";
+      th.style.backgroundColor = "#f2f2f2";
       headerRow.appendChild(th);
     });
     thead.appendChild(headerRow);
@@ -4601,10 +4607,16 @@ function createHeritTable(headers, data, isSummary, containerId) {
         var row = document.createElement("tr");
         var cell = document.createElement("td");
         cell.textContent = key;
+        cell.style.border = "1px solid black";
+        cell.style.padding = "8px";
+        cell.style.textAlign = "left";
         row.appendChild(cell);
         headers.slice(1).forEach(function (header) {
           var cell = document.createElement("td");
           cell.textContent = data[key];
+          cell.style.border = "1px solid black";
+          cell.style.padding = "8px";
+          cell.style.textAlign = "left";
           row.appendChild(cell);
         });
         tbody.appendChild(row);
@@ -4624,6 +4636,7 @@ function updateLDcorrelation() {
   var ldInputs = {
     pop: population.join("+"),
     filename: $("#ldscore-file-label-correlation").val(),
+    filename2: $("#ldscore-file-label-correlation2").val(),
     reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
     columns: new Object(),
     genome_build: genomeBuild,
@@ -4670,11 +4683,64 @@ function updateLDcorrelation() {
     var resultStringCanvas = data.result;
     var resultforTable = "";
     // // Find the index of the substring "Total Observed scale"
-    var index = data.result.indexOf("Summary of Genetic Correlation Results");
+    var index0 = data.result.indexOf("Summary of Genetic Correlation Results");
+    if (index0 !== -1) {
+      resultforTable = data.result.substring(index0);
+    }
+
+    var index = data.result.indexOf("Heritability of phenotype 1");
+    var index2 = data.result.indexOf("Heritability of phenotype 2/2");
+    var index3 = data.result.indexOf("Genetic Covariance");
+    var index4 = data.result.indexOf("Genetic Correlation");
     if (index !== -1) {
       resultStringCanvas = data.result.substring(0, index);
-      resultforTable = data.result.substring(index);
+      heritforTable = data.result.substring(index, index2);
     }
+
+    if (index2 !== -1) {
+      heritforTable2 = data.result.substring(index2, index3);
+    }
+    if (index3 != -1 && index0 > 1) {
+      geneticTable = data.result.substring(index3, index0 - 1);
+    }
+    var summaryHerit = parseResultHerit(
+      heritforTable,
+      "Heritability of phenotype 1",
+      "correlation-table-container-1"
+    );
+    var summaryHeaders = ["", "Value"];
+    var summaryTable = createHeritTable(
+      summaryHeaders,
+      summaryHerit.res1,
+      true,
+      "correlation-table-container-1",
+      "Heritability of phenotype 1"
+    );
+    document
+      .getElementById("correlation-table-container-1")
+      .appendChild(summaryTable);
+
+    var summaryHerit2 = parseResultHerit(
+      heritforTable2,
+      "Heritability of phenotype 2",
+      "correlation-table-container-2"
+    );
+    var summaryTable2 = createHeritTable(
+      summaryHeaders,
+      summaryHerit2.res1,
+      true,
+      "correlation-table-container-2",
+      "Heritability of phenotype 2"
+    );
+    document
+      .getElementById("correlation-table-container-2")
+      .appendChild(summaryTable2);
+
+    parseAndCreateTables(
+      geneticTable,
+      "Genetic Covariance",
+      "Genetic Correlation"
+    );
 
     document.getElementById("correlationmessage").style.display = "none";
     var jsonObjCanvas;
@@ -4732,7 +4798,75 @@ function updateLDcorrelation() {
 
   hideLoadingIcon(ajaxRequest, id);
 }
+function parseAndCreateTables(resultDataText, title1, title2) {
+  var sections = resultDataText
+    .split("\n\n")
+    .filter((section) => section.trim() !== "");
+  console.log(sections);
+  sections.forEach((section, index) => {
+    var lines = section.trim().split("\n");
+    if (lines.length < 1) return;
+    var dataLines = lines.slice(2);
 
+    // Create the table element
+    var table = document.createElement("table");
+    //table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.style.tableLayout = "auto"; // Make the table layout auto
+
+    // Add a caption for the table name
+    var caption = document.createElement("caption");
+    caption.textContent = index === 0 ? title1 : title2;
+    caption.style.captionSide = "top";
+    caption.style.fontWeight = "bold";
+    //caption.style.marginBottom = "10px";
+    table.appendChild(caption);
+
+    var thead = document.createElement("thead");
+    var tbody = document.createElement("tbody");
+
+    // Create the header row
+    var summaryHeaders = ["", "Value"];
+    var headerRow = document.createElement("tr");
+    summaryHeaders.forEach((header) => {
+      var th = document.createElement("th");
+      th.textContent = header;
+      th.style.border = "1px solid black";
+      th.style.padding = "8px";
+      th.style.textAlign = "left";
+      th.style.backgroundColor = "#f2f2f2";
+      th.style.whiteSpace = "nowrap"; // Prevent text wrapping
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+
+    // Create the data rows
+    dataLines.forEach((line) => {
+      var row = document.createElement("tr");
+      var cells = line.split(": ");
+      cells.forEach((cellText) => {
+        var cell = document.createElement("td");
+        cell.textContent = cellText;
+        cell.style.border = "1px solid black";
+        cell.style.padding = "8px";
+        cell.style.textAlign = "left";
+        row.appendChild(cell);
+      });
+      tbody.appendChild(row);
+    });
+
+    // Append the thead and tbody to the table
+    table.appendChild(thead);
+    table.appendChild(tbody);
+
+    // Append the table to the desired container
+    var containerId =
+      index === 0
+        ? "correlation-table-container-3"
+        : "correlation-table-container-4";
+    document.getElementById(containerId).appendChild(table);
+  });
+}
 function updateLDhap() {
   var id = "ldhap";
 
