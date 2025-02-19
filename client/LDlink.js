@@ -4803,6 +4803,11 @@ function updateLDcorrelation() {
   hideLoadingIcon(ajaxRequest, id);
 }
 function parseAndCreateTables(resultDataText, title1, title2) {
+  var existingTable = container.querySelector("table");
+  if (existingTable) {
+    container.removeChild(existingTable);
+  }
+
   var sections = resultDataText
     .split("\n\n")
     .filter((section) => section.trim() !== "");
@@ -4868,6 +4873,12 @@ function parseAndCreateTables(resultDataText, title1, title2) {
       index === 0
         ? "correlation-table-container-3"
         : "correlation-table-container-4";
+
+    var container = document.getElementById(containerId);
+    var existingTable = container.querySelector("table");
+    if (existingTable) {
+      container.removeChild(existingTable);
+    }
     document.getElementById(containerId).appendChild(table);
   });
 }
