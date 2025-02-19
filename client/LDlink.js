@@ -1474,10 +1474,10 @@ function setupLDheritExample() {
 }
 
 function setupLDcorrelationExample() {
-  //   console.log("Use example GWAS data.");
+  console.log("Use example correlation data.");
   var useEx = document.getElementById("example-correlation");
   if (useEx.checked) {
-    var url = restServerUrl + "/correlation_example";
+    var url = restServerUrl + "/ldcorrelation_example";
     var ajaxRequest = $.ajax({
       type: "GET",
       url: url,
@@ -1489,25 +1489,26 @@ function setupLDcorrelationExample() {
       //console.log(response);
       document.getElementById("ldscore-file-label-correlation").value =
         "BBJ_HDLC22";
+      document.getElementById("ldscore-file-label-correlation2").value =
+        "BBJ_LDLC22";
       var data = JSON.parse(response);
       // var fileContainer = document.getElementById("ldscoreFile");
       //  fileContainer.innerHTML = ""; // Clear any existing content
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
+      var dataTransfer2 = new DataTransfer();
+
       console.log(data);
-
-      //var fileDiv = document.createElement("div");
-      //fileDiv.textContent = data.filenames;
-      //fileContainer.appendChild(fileDiv);
-
       // Create a new File object and add it to the DataTransfer object
       var file = new File([""], data.filenames);
+      var file2 = new File([""], data.filenames2);
       dataTransfer.items.add(file);
-
+      dataTransfer2.items.add(file2);
       // Assign the files to the file input element
-      var fileInput = document.getElementById("ldscore-file-ldherit");
+      var fileInput = document.getElementById("ldscore-file-correlation");
       fileInput.files = dataTransfer.files;
-
+      var fileInput2 = document.getElementById("ldscore-file-correlation2");
+      fileInput2.files2 = dataTransfer2.files;
       document.getElementById("ldscore").disabled = false;
     });
 
@@ -1540,9 +1541,11 @@ function setupLDcorrelationExample() {
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-    document.getElementById("ldscore-results-container-herit").innerHTML = "";
-    document.getElementById("ldheritFile").innerHTML = "";
-    document.getElementById("ldherit-sample-label").value = "";
+    document.getElementById("ldscore-results-container-correlation").innerHTML =
+      "";
+    document.getElementById("correlationFile").innerHTML = "";
+    document.getElementById("correlationFile2").innerHTML = "";
+    document.getElementById("correlation-sample-label").value = "";
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");
@@ -3386,8 +3389,10 @@ function updateData(id) {
       ) {
         var heritTab = document.getElementById("ldscore-heritability-tab");
         var ldscoreTab = document.getElementById("ldscore-file-container-tab");
+        var correlationTab = document.getElementById("ldscore-correlation-tab");
         var isHerit = heritTab.classList.contains("active");
         var isLdscore = ldscoreTab.classList.contains("active");
+        var isCorrelation = correlationTab.classList.contains("active");
         if (isHerit) {
           console.log(isHerit);
           // Check if the element exists
@@ -3405,6 +3410,9 @@ function updateData(id) {
             // Call your calculation function here
             updateLDscore();
           }
+        } else if (isCorrelation) {
+          console.log("click correlation", id + "2");
+          if (isPopulationSet(id + "2")) updateLDcorrelation();
         }
       }
       break;
@@ -4116,16 +4124,16 @@ function updateLDscore() {
       .appendChild(summaryTable);
 
     // Create and append the correlation matrix table
-    var correlationHeaders = ["", "MAF", "L2"];
-    var correlationTable = createTable(
-      correlationHeaders,
+    var ldscoreHeaders = ["", "MAF", "L2"];
+    var ldscoreTable = createTable(
+      ldscoreHeaders,
       summaryData.correlationMatrix,
       false,
-      "correlation-table-container"
+      "ldscore-table-container"
     );
     document
-      .getElementById("correlation-table-container")
-      .appendChild(correlationTable);
+      .getElementById("ldscore-table-container")
+      .appendChild(ldscoreTable);
 
     var chromeFilematch = ldInputs.filename.match(/\b([1-9]|1[0-9]|2[0-2])\b/);
 
@@ -4390,7 +4398,68 @@ function parseResultData(resultDataText) {
 
   return summaryData;
 }
+function parseResultCorrelation(resultDataText, title, tablename) {
+  console.log(resultDataText);
+  var lines = resultDataText.trim().split("\n");
+  var summaryData = {
+    res1: {},
+    res2: {},
+  };
+  // Create the table element
+  var table = document.createElement("table");
+  table.className = "bordered";
+  var caption = document.createElement("caption");
+  caption.textContent = title;
+  table.appendChild(caption);
 
+  var thead = document.createElement("thead");
+  var tbody = document.createElement("tbody");
+
+  var headers = lines[1].trim().split(/\s+/);
+  console.log(headers);
+  // Create the header row
+  var headerRow = document.createElement("tr");
+  headers.forEach((header) => {
+    var th = document.createElement("th");
+    th.textContent = header;
+    th.style.border = "1px solid black";
+    th.style.padding = "8px";
+    th.style.textAlign = "left";
+    th.style.backgroundColor = "#f2f2f2";
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+
+  for (var i = 2, j = 0; i < 3; i++) {
+    var line = lines[i].trim();
+    console.log(line);
+    var row = line.split(/\s+/);
+    console.log(row);
+    //if (line.startsWith(title))
+    {
+      summary1 = true;
+      // Create the data rows
+
+      var tr = document.createElement("tr");
+      row.forEach((cell) => {
+        var td = document.createElement("td");
+        td.textContent = cell;
+        td.style.border = "1px solid black";
+        td.style.padding = "8px";
+        td.style.textAlign = "left";
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+  }
+  // Extract the headers and rows
+
+  // Append the thead and tbody to the table
+  table.appendChild(thead);
+  table.appendChild(tbody);
+  document.getElementById(tablename).appendChild(table);
+  return table;
+}
 // Function to parse the result data
 function parseResultHerit(resultDataText, title, title2) {
   var lines = resultDataText.trim().split("\n");
@@ -4551,7 +4620,7 @@ function updateLDcorrelation() {
   $("#ldscore-loading-correlation").show();
   var id = "ldscore";
   var $btn = $("#ldscore-correlation").button("loading");
-  var population = getPopulationCodes(id + "-population-codes");
+  var population = getPopulationCodes(id + "2-population-codes");
   var ldInputs = {
     pop: population.join("+"),
     filename: $("#ldscore-file-label-correlation").val(),
@@ -4579,10 +4648,10 @@ function updateLDcorrelation() {
     "href",
     "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
   );
-  document.getElementById("ldheritmessage").style.display = "block";
+  document.getElementById("correlationmessage").style.display = "block";
   //console.log( $('#ldassoc-genome'))
   //console.log(ldInputs);
-  var url = restServerUrl + "/ldherit";
+  var url = restServerUrl + "/ldcorrelation";
   var ajaxRequest = $.ajax({
     type: "GET",
     url: url,
@@ -4599,15 +4668,15 @@ function updateLDcorrelation() {
     var dataString = data[0];
     var dataCanvas = [dataString, data[1]];
     var resultStringCanvas = data.result;
+    var resultforTable = "";
     // // Find the index of the substring "Total Observed scale"
-    var index = data.result.indexOf("Total Observed scale");
+    var index = data.result.indexOf("Summary of Genetic Correlation Results");
     if (index !== -1) {
-      // Remove the substring and everything that follows
       resultStringCanvas = data.result.substring(0, index);
+      resultforTable = data.result.substring(index);
     }
-    console.log(data);
-    console.log(resultStringCanvas);
-    document.getElementById("ldheritmessage").style.display = "none";
+
+    document.getElementById("correlationmessage").style.display = "none";
     var jsonObjCanvas;
     if (typeof dataString === "string") {
       jsonObjCanvas = JSON.parse(resultStringCanvas);
@@ -4616,21 +4685,13 @@ function updateLDcorrelation() {
     }
     console.log(data.result);
     // Parse the result data
-    var summaryData = parseResultHerit(
-      data.result,
-      "Using two-step estimator with cutoff",
-      ""
+    var summaryData = parseResultCorrelation(
+      resultforTable,
+      "Summary of Genetic Correlation Results",
+      "correlation-table-container"
     );
     console.log(summaryData);
     // Create and append the summary table
-    var summaryHeaders = ["", "Value"];
-    var summaryTable = createHeritTable(
-      summaryHeaders,
-      summaryData.res1,
-      true,
-      "herit-table-container"
-    );
-    document.getElementById("herit-table-container").appendChild(summaryTable);
 
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {
@@ -4646,11 +4707,11 @@ function updateLDcorrelation() {
           );
           break;
       }
-      $("#" + id + "-results-container-herit").show();
+      $("#" + id + "-results-container-correlation").show();
       // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
-      $("#ldscore-bokeh-graph-herit").html(formattedOutput);
+      $("#ldscore-bokeh-graph-correlation").html(formattedOutput);
       //$("#ldscore-bokeh-graph").empty().append(data);
     }
     $("#ldscore-loading-correlation").hide();

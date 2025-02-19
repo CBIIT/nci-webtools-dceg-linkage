@@ -28,7 +28,7 @@ from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
 import requests,glob
-from ldscore.ldsc_utils import run_ldsc_command,run_herit_command
+from ldscore.ldsc_utils import run_ldsc_command,run_herit_command,run_correlation_command
 import zipfile
 
 # retrieve config
@@ -647,6 +647,25 @@ def ldherit_example():
     print(example)
     return json.dumps(example)
 
+# Route for LDherit example 
+@app.route('/LDlinkRest/ldcorrelation_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldcorrelation_example', methods=['GET'])
+def ldcorrelation_example():
+    genome_build = request.args.get('genome_build', 'grch37')
+    data_dir = param_list['data_dir']
+    ldscore_example_dir = data_dir + 'ldscore/'
+    #ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = 'BBJ_HDLC22.txt'
+    example_files2 = 'BBJ_LDLC22.txt'
+    example_filepaths = ldscore_example_dir+ example_files #+ genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {
+            'filenames': example_files,
+            'filenames2': example_files2,
+            'filepaths': example_filepaths
+        }
+    print(example)
+    return json.dumps(example)
+
 
 # Route to retrieve LDexpress tissue info
 @app.route('/LDlinkRest/ldexpress_tissues', methods=['GET'])
@@ -1082,6 +1101,53 @@ def ldheritAPI():
         except Exception as e:
             print(f"Error deleting file {file}: {e}")
         return filtered_result
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    return jsonify(out_json)
+
+@app.route('/LDlinkRest/ldcorrelation', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldcorrelation', methods=['GET'])
+def ldcorrelation():
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    print("LDcorrelation###############:",request.args.get('isExample'))
+    start_time = time.time()
+    
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)+".txt"
+    filename2 = request.args.get('filename', False)+".txt"
+    isexample = request.args.get('isExample', False)
+    print(pop,genome_build,filename,isexample)
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
+
+    fileDir = f"/data/tmp/uploads"
+    print(filename)
+    try:
+        # Make an API call to the ldsc39_container    
+        result = run_correlation_command(filename,filename2,pop,isexample)
+        if web:
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            out_json = {"result": filtered_result}
+            #print(out_json)
+        else:
+                # Pretty-print the JSON output
+            summary_index = result.find("Total Observed scale")
+            if summary_index != -1:
+                filtered_result = result[summary_index:]
+            else:
+                filtered_result = result
+            #filtered_result = filtered_result.replace("\\n", "\n")
+            return filtered_result
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
