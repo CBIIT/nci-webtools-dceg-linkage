@@ -4399,7 +4399,7 @@ function parseResultData(resultDataText) {
   return summaryData;
 }
 function parseResultCorrelation(resultDataText, title, tablename) {
-  console.log(resultDataText);
+  //console.log(resultDataText);
   var lines = resultDataText.trim().split("\n");
   var summaryData = {
     res1: {},
@@ -4457,6 +4457,11 @@ function parseResultCorrelation(resultDataText, title, tablename) {
   // Append the thead and tbody to the table
   table.appendChild(thead);
   table.appendChild(tbody);
+  var container = document.getElementById(tablename);
+  var existingTable = container.querySelector("table");
+  if (existingTable) {
+    container.removeChild(existingTable);
+  }
   document.getElementById(tablename).appendChild(table);
   return table;
 }
