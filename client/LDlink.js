@@ -1221,6 +1221,21 @@ $(document).on(
   ".btn-ldscore-file-herit :file",
   createFileSelectTrigger
 );
+$(document).on(
+  "change",
+  ".btn-ldscore-file-correlation :file",
+  createFileSelectTriggerCorrelation
+);
+$(document).on(
+  "change",
+  ".btn-ldscore-file-correlation2 :file",
+  createFileSelectTriggerCorrelation
+);
+$(document).on(
+  "change",
+  ".btn-ldscore-file-correlation2 :file",
+  createFileSelectTriggerCorrelation
+);
 function setupLDassocExample() {
   //   console.log("Use example GWAS data.");
   var useEx = document.getElementById("example-gwas");
@@ -1612,6 +1627,16 @@ function createFileSelectTrigger() {
   input.trigger("fileselect", [numFiles, label]);
 }
 
+function createFileSelectTriggerCorrelation(event) {
+  console.log("createFileSelectTrigger", event.target);
+  var input = $(event.target).closest(":file"),
+    numFiles = input.get(0).files ? input.get(0).files.length : 1,
+    label = input.val().replace(/\\/g, "/").replace(/.*\//, "");
+
+  console.log(input, label);
+  input.trigger("fileselect", [numFiles, label]);
+}
+
 function createEnterEvent() {
   $("body").keypress(function (e) {
     // Look for a return value
@@ -1828,7 +1853,7 @@ function uploadFileldherit() {
     processData: false,
   });
 }
-function uploadFileldcorrelation() {
+function uploadFileldcorrelation(fileid) {
   restService.route = "LDlinkRestWeb";
   restServerUrl =
     restService.protocol +
@@ -1836,20 +1861,27 @@ function uploadFileldcorrelation() {
     restService.hostname +
     restService.pathname +
     restService.route;
-  console.log("uploadFileldherit");
-  var fileList = document.getElementById("ldheritFile");
+  console.log("uploadFileCorrelation");
+  var fileList = document.getElementById(
+    fileid.includes("2") ? "correlationFile2" : "correlationFile"
+  );
   // console.log(filename);
   document.getElementById("ldscore-file-message").style.display = "none";
   // document.getElementById("ldscore-loading-herit").style.display = "none";
 
-  var fileInput = document.getElementById("ldscore-file-ldherit");
+  var fileInput = document.getElementById(fileid);
+
   var file = fileInput.files;
   var formData = new FormData();
   var fileinput = document.getElementById(
-    "ldscore-file-label-correlation"
+    fileid.includes("2")
+      ? "ldscore-file-label-correlation2"
+      : "ldscore-file-label-correlation"
   ).value;
+
   //var fileExistInput = document.getElementById("ldscoreFile");
   //fileExistInput.innerHTML = ""; // Clear the file input value
+  console.log(file, fileinput);
   for (let i = 0; i < file.length; i++) {
     const fileItem = document.createElement("div");
     fileItem.textContent = file[i].name;
@@ -2037,6 +2069,42 @@ function createFileSelectEvent() {
       //uploadFile2();
       // uploadFileScore();
       uploadFileldherit();
+      $("#header-values").show();
+      $("#header-values2").show();
+    }
+  );
+
+  $(".btn-ldscore-file-correlation :file").on(
+    "fileselect",
+    function (event, numFiles, label) {
+      var input = $(this);
+      if (input.attr("id") === "ldscore-file-correlation") {
+        $("#ldscore-file-label-correlation").val(
+          label.split(".").slice(0, -1).join(".")
+        );
+      }
+      console.log(numFiles);
+      populateHeaderValues(event, numFiles, label);
+      //uploadFile2();
+      // uploadFileScore();
+      uploadFileldcorrelation("ldscore-file-correlation");
+      $("#header-values").show();
+      $("#header-values2").show();
+    }
+  );
+  $(".btn-ldscore-file-correlation2 :file").on(
+    "fileselect",
+    function (event, numFiles, label) {
+      $("#ldscore-file-label-correlation2").val(
+        label.split(".").slice(0, -1).join(".")
+      );
+
+      //$(this).parents(".input-group").find("input[type='hidden']").val(label);
+      console.log(numFiles);
+      populateHeaderValues(event, numFiles, label);
+      //uploadFile2();
+      // uploadFileScore();
+      uploadFileldcorrelation("ldscore-file-correlation2");
       $("#header-values").show();
       $("#header-values2").show();
     }
