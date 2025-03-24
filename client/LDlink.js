@@ -773,11 +773,21 @@ $(document).ready(function () {
   });
 
   $(":file").change(function () {
+    var exampleLdherit = document.getElementById("example-ldherit");
+    document.getElementById("ldheritFile").innerHTML="";
+    exampleLdherit.checked = false;
+    console.log(this.files)
     var file = this.files[0];
-    var name = file.name;
-    var size = file.size;
-    var type = file.type;
+    if(file==undefined){
+    }
+    else{
+      var name = file.name;
+      var size = file.size;
+      var type = file.type;
+    }
+   
     //Your validation
+   
     console.dir(file);
   });
   $.each(dropdowns, function (i, id) {
@@ -1414,7 +1424,10 @@ function setupLDscoreExample() {
 }
 
 function setupLDheritExample() {
-  //   console.log("Use example GWAS data.");
+   console.log("Use example hertitability data.");
+   document.getElementById("ldscore-bokeh-graph-herit").innerHTML = "";
+   document.getElementById("herit-table-container").innerHTML = "";
+    document.getElementById("ldheritFile").innerHTML = "";
   var useEx = document.getElementById("example-ldherit");
   if (useEx.checked) {
     var url = restServerUrl + "/ldherit_example";
@@ -1479,9 +1492,11 @@ function setupLDheritExample() {
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-    document.getElementById("ldscore-results-container-herit").innerHTML = "";
+    //document.getElementById("ldscore-bokeh-graph-herit").innerHTML = "";
+    //document.getElementById("herit-table-container").innerHTML = "";
     document.getElementById("ldheritFile").innerHTML = "";
     document.getElementById("ldherit-sample-label").value = "";
+    document.getElementById("ldscore-file-label-herit").value = ""
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");
@@ -3366,7 +3381,9 @@ function getHeaderLine(header) {
 function populateHeaderValues(event, numFiles, label) {
   console.warn("populateHeaderValues");
   //findColumnLength(event.target.files[0], printLength);
-  parseFile(event.target.files[0], getHeaderLine);
+  if (event.target.files[0]!=undefined){
+    parseFile(event.target.files[0], getHeaderLine);
+  }
   /*
     id = event.target.id;
     if (window.FileReader) {
@@ -8633,7 +8650,6 @@ function testResize() {
 }
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded and parsed"); // Debugging statement
-
   // Function to validate the input value
   function validateInput() {
     var input = document.getElementById("ldscore-wind");
