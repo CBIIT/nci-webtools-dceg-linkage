@@ -1148,7 +1148,7 @@ textarea:invalid,
     margin-top: 10px; /* Adjust the value as needed */
 }
 
-#ldscore-browse-button {
+#ldscore-browse-button, #ldscore-browse-button2 {
     margin-left: 10px; /* Adjust the value as needed */
 	margin-top: -25px;
 	float: left;

@@ -774,8 +774,10 @@ $(document).ready(function () {
 
   $(":file").change(function () {
     var exampleLdherit = document.getElementById("example-ldherit");
+    var exampleLdcorrelation = document.getElementById("example-correlation");
     document.getElementById("ldheritFile").innerHTML="";
-    exampleLdherit.checked = false;
+    if (exampleLdherit !== undefined)exampleLdherit.checked = false;
+    if (exampleLdcorrelation !== undefined)exampleLdcorrelation.checked= false;
     console.log(this.files)
     var file = this.files[0];
     if(file==undefined){
@@ -1241,11 +1243,12 @@ $(document).on(
   ".btn-ldscore-file-correlation2 :file",
   createFileSelectTriggerCorrelation
 );
-$(document).on(
-  "change",
-  ".btn-ldscore-file-correlation2 :file",
-  createFileSelectTriggerCorrelation
-);
+$(document).on("click", ".btn-ldscore-file-correlation :file", function () {
+  console.log("Current files:", this.files);
+  //$(this).val("");
+  
+  //document.getElementById("ldscore-file-label-correlation2").value ="";
+});
 function setupLDassocExample() {
   //   console.log("Use example GWAS data.");
   var useEx = document.getElementById("example-gwas");
@@ -1424,10 +1427,10 @@ function setupLDscoreExample() {
 }
 
 function setupLDheritExample() {
-   console.log("Use example hertitability data.");
-   document.getElementById("ldscore-bokeh-graph-herit").innerHTML = "";
-   document.getElementById("herit-table-container").innerHTML = "";
-    document.getElementById("ldheritFile").innerHTML = "";
+  console.log("Use example hertitability data.");
+  document.getElementById("ldscore-bokeh-graph-herit").innerHTML = "";
+  document.getElementById("herit-table-container").innerHTML = "";
+  document.getElementById("ldheritFile").innerHTML = "";
   var useEx = document.getElementById("example-ldherit");
   if (useEx.checked) {
     var url = restServerUrl + "/ldherit_example";
@@ -1505,6 +1508,15 @@ function setupLDheritExample() {
 
 function setupLDcorrelationExample() {
   console.log("Use example correlation data.");
+  document.getElementById("ldscore-bokeh-graph-correlation").innerHTML = "";
+  document.getElementById("correlation-table-container-1").innerHTML = "";
+  document.getElementById("correlation-table-container-2").innerHTML = "";
+  document.getElementById("correlation-table-container-3").innerHTML = "";
+  document.getElementById("correlation-table-container-4").innerHTML = "";
+  document.getElementById("correlation-table-container").innerHTML = "";
+  document.getElementById("correlationFile").innerHTML = "";
+  document.getElementById("correlationFile2").innerHTML = "";
+  
   var useEx = document.getElementById("example-correlation");
   if (useEx.checked) {
     var url = restServerUrl + "/ldcorrelation_example";
@@ -1538,7 +1550,7 @@ function setupLDcorrelationExample() {
       var fileInput = document.getElementById("ldscore-file-correlation");
       fileInput.files = dataTransfer.files;
       var fileInput2 = document.getElementById("ldscore-file-correlation2");
-      fileInput2.files2 = dataTransfer2.files;
+      fileInput2.files = dataTransfer2.files;
       document.getElementById("ldscore").disabled = false;
     });
 
