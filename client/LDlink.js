@@ -776,8 +776,16 @@ $(document).ready(function () {
     var exampleLdherit = document.getElementById("example-ldherit");
     var exampleLdcorrelation = document.getElementById("example-correlation");
     document.getElementById("ldheritFile").innerHTML="";
-    if (exampleLdherit !== undefined)exampleLdherit.checked = false;
-    if (exampleLdcorrelation !== undefined)exampleLdcorrelation.checked= false;
+    if (exampleLdherit !== undefined) {
+      // document.getElementById("ldscore-herit").disabled = true;
+      // document.getElementById("ldscore-herit").classList.add("disabled");
+      exampleLdherit.checked = false;
+    }
+    if (exampleLdcorrelation !== undefined){
+      // document.getElementById("ldscore-correlation").disabled = true;
+      // document.getElementById("ldscore-correlation").classList.add("disabled");
+      exampleLdcorrelation.checked= false;
+    }
     console.log(this.files)
     var file = this.files[0];
     if(file==undefined){
@@ -1230,8 +1238,12 @@ $(document).on("change", ".btn-csv-file :file", createFileSelectTrigger);
 $(document).on("change", ".btn-ldscore-file :file", createFileSelectTrigger);
 $(document).on(
   "change",
-  ".btn-ldscore-file-herit :file",
-  createFileSelectTrigger
+  ".btn-ldscore-file-herit :file",function (event) {
+    createFileSelectTrigger.call(this, event);
+    var btn = document.getElementById("ldscore-herit");
+    btn.disabled = false;
+    btn.classList.remove("disabled");
+  }
 );
 $(document).on(
   "change",
@@ -1423,6 +1435,7 @@ function setupLDscoreExample() {
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");
+
   }
 }
 
@@ -1432,6 +1445,8 @@ function setupLDheritExample() {
   document.getElementById("herit-table-container").innerHTML = "";
   document.getElementById("ldheritFile").innerHTML = "";
   var useEx = document.getElementById("example-ldherit");
+  var btn = document.getElementById("ldscore-herit");
+
   if (useEx.checked) {
     var url = restServerUrl + "/ldherit_example";
     var ajaxRequest = $.ajax({
@@ -1463,7 +1478,8 @@ function setupLDheritExample() {
       var fileInput = document.getElementById("ldscore-file-ldherit");
       fileInput.files = dataTransfer.files;
 
-      document.getElementById("ldscore").disabled = false;
+      btn.disabled = false;
+      btn.classList.remove("disabled");
     });
 
     // switch (genomeBuild) {
@@ -1502,6 +1518,8 @@ function setupLDheritExample() {
     document.getElementById("ldscore-file-label-herit").value = ""
     populateScoreDropDown([]);
 
+    btn.disabled = true;
+    btn.classList.add("disabled");
     refreshPopulation([], "ldscore");
   }
 }
@@ -1516,7 +1534,8 @@ function setupLDcorrelationExample() {
   document.getElementById("correlation-table-container").innerHTML = "";
   document.getElementById("correlationFile").innerHTML = "";
   document.getElementById("correlationFile2").innerHTML = "";
-  
+  var btn = document.getElementById("ldscore-correlation");
+
   var useEx = document.getElementById("example-correlation");
   if (useEx.checked) {
     var url = restServerUrl + "/ldcorrelation_example";
@@ -1551,7 +1570,9 @@ function setupLDcorrelationExample() {
       fileInput.files = dataTransfer.files;
       var fileInput2 = document.getElementById("ldscore-file-correlation2");
       fileInput2.files = dataTransfer2.files;
-      document.getElementById("ldscore").disabled = false;
+
+     // btn.disabled = false;
+     // btn.classList.remove("disabled");
     });
 
     // switch (genomeBuild) {
@@ -1583,14 +1604,19 @@ function setupLDcorrelationExample() {
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-    document.getElementById("ldscore-results-container-correlation").innerHTML =
-      "";
-    document.getElementById("correlationFile").innerHTML = "";
-    document.getElementById("correlationFile2").innerHTML = "";
+    //document.getElementById("ldscore-results-container-correlation").innerHTML ="";
+   // document.getElementById("correlationFile").innerHTML = "";
+   // document.getElementById("correlationFile2").innerHTML = "";
     document.getElementById("correlation-sample-label").value = "";
+    document.getElementById("ldscore-file-label-correlation").value = "";
+    document.getElementById("ldscore-file-label-correlation2").value = "";
+    document.getElementById("ldscore-file-correlation").value = "";
+    document.getElementById("ldscore-file-correlation2").value = "";
     populateScoreDropDown([]);
 
     refreshPopulation([], "ldscore");
+    //btn.disabled = true;
+   // btn.classList.add("disabled");
   }
 }
 
@@ -3491,9 +3517,10 @@ function updateData(id) {
         var isLdscore = ldscoreTab.classList.contains("active");
         var isCorrelation = correlationTab.classList.contains("active");
         if (isHerit) {
-          console.log(isHerit);
           // Check if the element exists
-          if (isPopulationSet(id)) updateLDherit();
+          var ifFile = document.getElementById("ldscore-file-label-herit").value === ''
+          console.log(ifFile);
+          if (!ifFile && isPopulationSet(id)) updateLDherit();
           // else {
           //   document.getElementById("ldscore-loading").style.display = "none";
           // }
@@ -3509,7 +3536,21 @@ function updateData(id) {
           }
         } else if (isCorrelation) {
           console.log("click correlation", id + "2");
-          if (isPopulationSet(id + "2")) updateLDcorrelation();
+          var input = document.getElementById("ldscore-file-correlation");
+          var fileinput1 = input && input.files && input.files.length > 0;
+          input = document.getElementById("ldscore-file-correlation2");
+          var fileinput2 = input && input.files && input.files.length > 0;
+          
+          if(isPopulationSet(id + "2")){
+            if (!fileinput1 || !fileinput2) {
+              // Popup message if one or both files are missing
+              // You can use any popup method (e.g. alert or a Bootstrap modal)
+              alert("Please upload both required files for correlation analysis.");
+            } else{
+              updateLDcorrelation();
+            }
+          }
+          
         }
       }
       break;
