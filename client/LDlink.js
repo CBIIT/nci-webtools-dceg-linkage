@@ -3520,7 +3520,12 @@ function updateData(id) {
           // Check if the element exists
           var ifFile = document.getElementById("ldscore-file-label-herit").value === ''
           console.log(ifFile);
-          if (!ifFile && isPopulationSet(id)) updateLDherit();
+          if (isPopulationSet(id)) {
+            if (ifFile) {
+              alert("Please upload a file for heritability analysis.");
+              updateLDherit();
+            }
+          }
           // else {
           //   document.getElementById("ldscore-loading").style.display = "none";
           // }
