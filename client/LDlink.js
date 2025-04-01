@@ -4340,6 +4340,7 @@ function updateLDscore() {
       }
       $("#" + id + "-results-container").show();
       $("#" + id + "-links-container").show();
+      $("#ldscoreCollapseGroup").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
       $("#ldscore-bokeh-graph").html(formattedOutput);
@@ -4929,6 +4930,7 @@ function updateLDcorrelation() {
           break;
       }
       $("#" + id + "-results-container-correlation").show();
+      $("#correlationCollapseGroup").show();
       // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");

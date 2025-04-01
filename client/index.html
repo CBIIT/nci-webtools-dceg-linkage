@@ -2357,12 +2357,30 @@
 											<div id="row-button" class="row overflowy">
 												<div id="ldscore-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
-													<div id="ldscore-bokeh-graph"></div>
-													<br />
+													
 													<h4>Summary of LD Scores</h4>
 													<div id="summary-table-container"></div>
 													<h4>MAF/LD Score Correlation Matrix</h4>
 													<div id="ldscore-table-container"></div>
+													<br />
+													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="ldscoreCollapseGroup" style="display: none;">
+															<div class="panel panel-default">
+																<div class="panel-heading">
+																	<h4 class="panel-title">
+																	<a data-toggle="collapse" data-parent="#ldscoreCollapseGroup" href="#collapseLDscoreGraph">
+																		LDscore Analysis Process Outputs <span class="indicator">+</span>
+																	</a>
+																	</h4>
+																</div>
+																<div id="collapseLDscoreGraph" class="panel-collapse collapse">
+																	<div class="panel-body">
+																		<div id="ldscore-bokeh-graph"></div>
+																		</div>
+																	</div>
+																</div>
+													</div>
+
 													<div class="panel panel-default">
 														<div class="panel-heading">Download Options</div>
 														<div class="panel-body">
@@ -2372,6 +2390,8 @@
 														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Input</a>
 														</div>
 													</div>
+													
+													
 												</div>
 											
 											</div>
@@ -2582,9 +2602,7 @@
 											<div id="row-button" class="row overflowy">
 												<div id="correlation-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
-													<div id="ldscore-bokeh-graph-correlation"></div>
-													<br />
-													<br />
+												
 													<!-- <h4>Heritability Analysis:</h4> -->
 													<div id="correlation-table-container-1"></div>
 													<div id="correlation-table-container-2"></div>
@@ -2592,6 +2610,23 @@
 													<div id="correlation-table-container-4"></div>
 													<div id="correlation-table-container"></div>
 													
+												<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="correlationCollapseGroup" style="display: none;">
+														<div class="panel panel-default">
+															<div class="panel-heading">
+																<h4 class="panel-title">
+																	<a data-toggle="collapse" data-parent="#correlationCollapseGroup" href="#collapseCorrelationGraph">
+																		Correlation Analysis Process Outputs <span class="indicator">+</span>
+																	</a>
+																</h4>
+															</div>
+														<div id="collapseCorrelationGraph" class="panel-collapse collapse">
+															<div class="panel-body">
+															<div id="ldscore-bokeh-graph-correlation"></div>
+															</div>
+														</div>
+													</div>
+												</div>
 												</div>
 											
 											</div>
