@@ -2463,11 +2463,28 @@
 											<div id="row-button" class="row overflowy">
 												<div id="ldscore-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
-													<div id="ldscore-bokeh-graph-herit"></div>
-													<br />
-													<br />
-													<!-- <h4>Heritability Analysis:</h4> -->
+														<!-- <h4>Heritability Analysis:</h4> -->
 													<div id="herit-table-container"></div>
+													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="heritCollapseGroup" style="display: none;">
+														<div class="panel panel-default">
+														<div class="panel-heading">
+															<h4 class="panel-title">
+															<a data-toggle="collapse" data-parent="#heritCollapseGroup" href="#collapseHeritGraph">
+																Heritability Analysis Process Outputs <span class="indicator">+</span>
+															</a>
+															</h4>
+														</div>
+														<div id="collapseHeritGraph" class="panel-collapse collapse">
+															<div class="panel-body">
+															<div id="ldscore-bokeh-graph-herit"></div>
+															</div>
+														</div>
+														</div>
+													</div>
+													<br />
+													<br />
+												
 													
 												</div>
 											

@@ -3523,6 +3523,8 @@ function updateData(id) {
           if (isPopulationSet(id)) {
             if (ifFile) {
               alert("Please upload a file for heritability analysis.");
+            }
+            else{
               updateLDherit();
             }
           }
@@ -4464,6 +4466,7 @@ function updateLDherit() {
           break;
       }
       $("#" + id + "-results-container-herit").show();
+      $("#heritCollapseGroup").show();
       // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
@@ -8841,3 +8844,11 @@ setTimeout(() => {
     flashBanner.style.display = "none";
   }
 }, 20000);
+
+// Toggle the plus/minus indicator on collapse show/hide
+$('#collapseHeritGraph').on('show.bs.collapse', function () {
+  $("#heritCollapseGroup .panel-heading a .indicator").text("-");
+});
+$('#collapseHeritGraph').on('hide.bs.collapse', function () {
+  $("#heritCollapseGroup .panel-heading a .indicator").text("+");
+});
