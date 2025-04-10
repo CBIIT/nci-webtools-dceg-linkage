@@ -1235,7 +1235,13 @@ $(document).on("change", ".btn-snp :file", createFileSelectTrigger);
 // ldAssoc File Change
 $(document).on("change", ".btn-csv-file :file", createFileSelectTrigger);
 
-$(document).on("change", ".btn-ldscore-file :file", createFileSelectTrigger);
+$(document).on("change", ".btn-ldscore-file :file", function (event) {
+  createFileSelectTrigger.call(this, event);
+//  var btn = document.getElementById("ldscore-herit");
+ // btn.disabled = false;
+ // btn.classList.remove("disabled");
+ document.getElementById("ldscore-results-container").style.display="none";
+});
 $(document).on(
   "change",
   ".btn-ldscore-file-herit :file",function (event) {
@@ -1244,24 +1250,37 @@ $(document).on(
     btn.disabled = false;
     btn.classList.remove("disabled");
     //document.getElementById("ldscore-results-container-herit").innerHTML='';
+    //document.getElementById("heritCollapseGroup").style.display="none";
+   // document.getElementById("herit-table-container").style.display="none";
+       document.getElementById("ldscore-results-container-herit").style.display="none";
   }
 );
 $(document).on(
   "change",
-  ".btn-ldscore-file-correlation :file",
-  createFileSelectTriggerCorrelation
+  ".btn-ldscore-file-correlation :file",function (event) {
+    createFileSelectTrigger.call(this, event);
+  //  var btn = document.getElementById("ldscore-herit");
+   // btn.disabled = false;
+   // btn.classList.remove("disabled");
+   document.getElementById("ldscore-results-container-correlation").style.display="none";
+  }
 );
 $(document).on(
   "change",
-  ".btn-ldscore-file-correlation2 :file",
-  createFileSelectTriggerCorrelation
+  ".btn-ldscore-file-correlation2 :file",function (event) {
+    createFileSelectTrigger.call(this, event);
+  //  var btn = document.getElementById("ldscore-herit");
+   // btn.disabled = false;
+   // btn.classList.remove("disabled");
+   document.getElementById("ldscore-results-container-correlation").style.display="none";
+  }
 );
-$(document).on("click", ".btn-ldscore-file-correlation :file", function () {
-  console.log("Current files:", this.files);
-  //$(this).val("");
+// $(document).on("click", ".btn-ldscore-file-correlation :file", function () {
+//   console.log("Current files:", this.files);
+//   //$(this).val("");
   
-  //document.getElementById("ldscore-file-label-correlation2").value ="";
-});
+//   //document.getElementById("ldscore-file-label-correlation2").value ="";
+// });
 function setupLDassocExample() {
   //   console.log("Use example GWAS data.");
   var useEx = document.getElementById("example-gwas");
@@ -1430,7 +1449,7 @@ function setupLDscoreExample() {
   } else {
     $("#ldscore-file").prop("disabled", false);
     $("#ldscore").prop("disabled", true);
-    document.getElementById("ldscore-results-container").innerHTML = "";
+    document.getElementById("ldscore-results-container").style.display="none";
     document.getElementById("ldscoreFile").innerHTML = "";
     document.getElementById("ldscore-file-label").value = "";
     populateScoreDropDown([]);
@@ -1443,7 +1462,8 @@ function setupLDscoreExample() {
 function setupLDheritExample() {
   console.log("Use example hertitability data.");
   document.getElementById("ldscore-bokeh-graph-herit").innerHTML = "";
-  document.getElementById("herit-table-container").innerHTML = "";
+  //document.getElementById("herit-table-container").innerHTML = "";
+  document.getElementById("ldscore-results-container-herit").style.display="none";
   document.getElementById("ldheritFile").innerHTML = "";
   var useEx = document.getElementById("example-ldherit");
   var btn = document.getElementById("ldscore-herit");
@@ -1528,11 +1548,12 @@ function setupLDheritExample() {
 function setupLDcorrelationExample() {
   console.log("Use example correlation data.");
   document.getElementById("ldscore-bokeh-graph-correlation").innerHTML = "";
-  document.getElementById("correlation-table-container-1").innerHTML = "";
-  document.getElementById("correlation-table-container-2").innerHTML = "";
-  document.getElementById("correlation-table-container-3").innerHTML = "";
-  document.getElementById("correlation-table-container-4").innerHTML = "";
-  document.getElementById("correlation-table-container").innerHTML = "";
+  // document.getElementById("correlation-table-container-1").innerHTML = "";
+  // document.getElementById("correlation-table-container-2").innerHTML = "";
+  // document.getElementById("correlation-table-container-3").innerHTML = "";
+  // document.getElementById("correlation-table-container-4").innerHTML = "";
+  // document.getElementById("correlation-table-container").innerHTML = "";
+  document.getElementById("ldscore-results-container-correlation").style.display="none";
   document.getElementById("correlationFile").innerHTML = "";
   document.getElementById("correlationFile2").innerHTML = "";
   var btn = document.getElementById("ldscore-correlation");
