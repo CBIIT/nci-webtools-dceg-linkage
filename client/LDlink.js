@@ -1008,7 +1008,7 @@ $(document).ready(function () {
   if (currentTab === "ldscore") {
     // Hide module header and genome build parts
     $("#genome-build").hide();
-    $("#genome-build-label").hide();
+    $("#genome-build-label").replaceWith("<br id='genome-build-label'>");
   } else {
     // Show them for other tabs
     $("#genome-build").show();
@@ -2716,7 +2716,7 @@ function setupTabs() {
   }
   if (currentTab === "ldscore") {
     $("#genome-build").hide();
-    $("#genome-build-label").hide();
+    $("#genome-build-label").replaceWith("<br id='genome-build-label'>");
   } else {
     $("#genome-build").show();
     $("#genome-build-label").show();
@@ -8781,12 +8781,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Add event listener to the calculate button
   document.getElementById("ldscore").addEventListener("click", function () {
-    // if (validateFiles()) {
-    //   // Proceed with the calculation
-    //   console.log("Input is valid. Proceeding with calculation...");
-    //   // Call your calculation function here
-    //   updateLDscore();
-    // }
+    //document.getElementById("example-ldscore").disabled = true;
   });
 
   // Add event listener to validate on input event
