@@ -1001,6 +1001,19 @@ $(document).ready(function () {
     } else {
       window.history.pushState({}, "", "?" + last_url_params);
     }
+
+     // (your existing tab click logic)
+
+  // Now, update the visibility based on which tab is selected:
+  if (currentTab === "ldscore") {
+    // Hide module header and genome build parts
+    $("#genome-build").hide();
+    $("#genome-build-label").hide();
+  } else {
+    // Show them for other tabs
+    $("#genome-build").show();
+    $("#genome-build-label").show();
+  }
   });
 
   setupLDexpressControls();
@@ -2700,6 +2713,13 @@ function setupTabs() {
       moduleTitleDescription[currentTab][2];
   } else {
     $("#module-header").hide();
+  }
+  if (currentTab === "ldscore") {
+    $("#genome-build").hide();
+    $("#genome-build-label").hide();
+  } else {
+    $("#genome-build").show();
+    $("#genome-build-label").show();
   }
 }
 
