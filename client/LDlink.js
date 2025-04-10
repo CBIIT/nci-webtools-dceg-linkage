@@ -649,7 +649,7 @@ var moduleTitleDescription = {
     "#LDtrait",
     "Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.",
   ],
-  ldscore: ["LDScore Tool", "#LDscore", "Calculates the LD Score"],
+  ldscore: ["LDscore Tool", "#LDscore", "Calculates the LD Score"],
   snpclip: [
     "SNPclip Tool",
     "#SNPclip",
@@ -1243,6 +1243,7 @@ $(document).on(
     var btn = document.getElementById("ldscore-herit");
     btn.disabled = false;
     btn.classList.remove("disabled");
+    //document.getElementById("ldscore-results-container-herit").innerHTML='';
   }
 );
 $(document).on(
@@ -1518,8 +1519,8 @@ function setupLDheritExample() {
     document.getElementById("ldscore-file-label-herit").value = ""
     populateScoreDropDown([]);
 
-    btn.disabled = true;
-    btn.classList.add("disabled");
+    btn.disabled = false;
+    //btn.classList.add("disabled");
     refreshPopulation([], "ldscore");
   }
 }
@@ -3522,7 +3523,13 @@ function updateData(id) {
           console.log(ifFile);
           if (isPopulationSet(id)) {
             if (ifFile) {
-              alert("Please upload a file for heritability analysis.");
+              $("#herit-error-message").show();
+              $("#herit-error-message").show().css("display", "inline-block");
+              $(document).one("click", function (e) {
+                if (!$(e.target).is("#ldscore-herit")) {
+                  $("#herit-error-message").fadeOut();
+                }
+              });
             }
             else{
               updateLDherit();
@@ -3552,7 +3559,14 @@ function updateData(id) {
             if (!fileinput1 || !fileinput2) {
               // Popup message if one or both files are missing
               // You can use any popup method (e.g. alert or a Bootstrap modal)
-              alert("Please upload both required files for correlation analysis.");
+             // alert("Please upload both required files for correlation analysis.");
+             $("#correlation-error-message").show();
+             $("#correlation-error-message").show().css("display", "inline-block");
+             $(document).one("click", function (e) {
+               if (!$(e.target).is("#ldscore-correlation")) {
+                 $("#correlation-error-message").fadeOut();
+               }
+             });
             } else{
               updateLDcorrelation();
             }

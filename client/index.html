@@ -2266,7 +2266,7 @@
 						<form id="ldscoreForm" class="ldlinkForm">
 							<!-- Tabs Navigation -->
 							<ul class="nav nav-tabs">
-								<li class="active"><a data-toggle="tab" href="#ldscore-file-container-tab">LDScore Calculation</a></li>
+								<li class="active"><a data-toggle="tab" href="#ldscore-file-container-tab">LDscore Calculation</a></li>
 								<li><a data-toggle="tab" href="#ldscore-heritability-tab">Heritability Analysis</a></li>
 								<li><a data-toggle="tab" href="#ldscore-correlation-tab">Genetic Correlation</a></li>
 								<!-- <li><a data-toggle="tab" href="#ldscore-inflation-tab">Inflation Calculation</a></li> -->
@@ -2302,7 +2302,7 @@
 																</label>
 																<div id="ldscore-sample-label"> &nbsp;Use example data</div>
 														</div>
-													
+																			
 													</div>
 													<div id="ldscoreFile" class="ldscore-file-name-container"></div>
 													
@@ -2434,17 +2434,23 @@
 																<div id="ldherit-sample-label"> &nbsp;Use example data</div>
 														</div>
 														<div id="ldheritFile"></div>
+
 													</div>
+													
 													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
 													   data-placement="bottom" data-content="Please upload a file."></a>
+													 
 												</div>
+												
 						
 												<progress style="display:none;"></progress>
 						
 												<div id="header-values2" style="display:none;">
 													<div class="" style="width:300px;"></div>
 												</div>
+												
 											</div>
+											
 										</div>
 						
 										<div class="ldassoc-flex-item3">
@@ -2469,6 +2475,9 @@
 										</div>
 									</div>
 									<h3></h3>
+									<div id="herit-error-message" class="alert alert-info" style="display:none; margin-top:10px;width:auto;">
+										Please upload a file for heritability analysis.
+									</div>
 									<br/>
 									<div class="col-sm-4 col-sm-offset-1 ">
 										<div id="ldheritmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
@@ -2588,6 +2597,10 @@
 										</div>
 									</div>
 									<h3></h3>
+									<br/>
+									<div id="correlation-error-message" class="alert alert-info" style="display:none; margin-top:10px;width:auto;">
+										Please upload both required files for correlation analysis.
+									</div>
 									<br/>
 									<div class="col-sm-4 col-sm-offset-1 ">
 										<div id="correlationmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
