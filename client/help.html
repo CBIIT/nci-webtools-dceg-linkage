@@ -53,6 +53,7 @@
 	<p style="margin-left: 80px;"> <a href="#LDpop"><strong>LDpop</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDproxy"><strong>LDproxy</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#LDtrait"><strong>LDtrait</strong></a></p>
+	<p style="margin-left: 80px;"> <a href="#LDscore"><strong>LDscore</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#SNPchip"><strong>SNPchip</strong></a></p>
 	<p style="margin-left: 80px;"> <a href="#SNPclip"><strong>SNPclip</strong></a></p>
 	<p style="margin-left: 40px;"> <a href="#FAQ"><strong>Frequently
@@ -596,6 +597,54 @@
 	</p>
 	<p style="margin-left: 120px;"><u>Download GWAS Catalog annotated variant list</u>
 		- clickable link to download a text file in tab-delimited format that lists all query variant RS numbers and their respective GWAS Catalog results.
+	</p>
+	<br>
+
+	<p style="margin-left: 40px;"> <strong><a name="LDscore"></a><span style="text-decoration: underline;">LDscore</span></strong>
+		- Perform LD score regression analysis.
+	</p>
+	<p style="margin-left: 80px;"> <strong>Input:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>For LD score calculation</u>
+		-  genotype information as .bim/.bed/.fam files, 
+		as well as window in centiMorgan (cM) or kilobasepairs (kb) selected from the drop-down menu.
+	</p>
+	<p style="margin-left: 120px;"><u>For heritability analysis</u>
+		- GWAS summary statistics (format: tab-separated files with columns accepted by <a href="https://github.com/bulik/ldsc/blob/master/munge_sumstats.py" target="_blank">
+			https://github.com/bulik/ldsc/blob/master/munge_sumstats.py</a>, 
+		e.g. with effect size, p-value, SNP identifiers, and allelic information, 
+		note header naming format is important). 
+		For example: SNP (Variant ID e.g., rs number), A1 (Allele 1, interpreted as reference allele for signed sumstat),
+		 A2 (Allele 2, interpreted as non-reference allele for signed sumstat), Frq (Allele frequency), 
+		 BETA or [linear/logistic] regression coefficient
+		  (0 --> no effect; above 0 --> A1 is trait/risk increasing), P (p-Value), N (Sample size). 
+		  In addition, a reference population needs to be selected from the drop down menu.
+	</p>
+	<p style="margin-left: 120px;"><u>For genetic correlation</u>
+		- GWAS summary statistics (format: tab-separated files with columns accepted by <a href="https://github.com/bulik/ldsc/blob/master/munge_sumstats.py" target="_blank">
+			https://github.com/bulik/ldsc/blob/master/munge_sumstats.py</a>, 
+		e.g. with effect size, p-value, SNP identifiers, and allelic information, note header naming format is important). 
+		For example: SNP (Variant ID e.g., rs number), A1 (Allele 1, interpreted as reference allele for signed sumstat), 
+		A2 (Allele 2, interpreted as non-reference allele for signed sumstat), Frq (Allele frequency), 
+		BETA or [linear/logistic] regression coefficient (0 --> no effect; above 0 --> A1 is trait/risk increasing), P (p-Value), N (Sample size). 
+		In addition, a reference population needs to be selected from the drop down menu.
+	</p>
+	<p style="margin-left: 120px;"><u>Reference population</u>
+		- One 1000 Genomes Project/Genome Aggregation Database (gnomAD) sub-population is required for heritability analysis or genetic correlation.
+
+	</p>
+	<p style="margin-left: 80px;"> <strong>Output:</strong>
+	</p>
+	<p style="margin-left: 120px;"><u>For LD Score calculation</u>
+		- A summary of LD Scores, the MAF/LD Score Correlation Matrix, full LD Scores file, 
+		as well as the option to download input data, in addition to a code prompt output summary.
+	</p>
+	<p style="margin-left: 120px;"><u>For heritability analysis</u>
+		- Total Observed scale heritability, Lambda GC, Mean Chi^2, Intercept and LDSC Ratio, as well as a code prompt output summary.
+	</p>
+	<p style="margin-left: 120px;"><u>For genetic correlation</u>
+		- tables with heritability of phenotype 1, heritability of phenotype 2, Genetic Covariance, 
+		Genetic Correlation and a Summary of Genetic Correlation Results, as well as a code prompt output summary.
 	</p>
 	<br>
 

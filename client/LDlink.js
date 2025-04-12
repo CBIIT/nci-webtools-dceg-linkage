@@ -649,7 +649,7 @@ var moduleTitleDescription = {
     "#LDtrait",
     "Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease.",
   ],
-  ldscore: ["LDscore Tool", "#LDscore", "Calculates the LD Score"],
+  ldscore: ["LDscore Tool", "#LDscore", "Calculate LD scores and perform LD score regression"],
   snpclip: [
     "SNPclip Tool",
     "#SNPclip",
@@ -8899,8 +8899,22 @@ setTimeout(() => {
 
 // Toggle the plus/minus indicator on collapse show/hide
 $('#collapseHeritGraph').on('show.bs.collapse', function () {
-  $("#heritCollapseGroup .panel-heading a .indicator").text("-");
+  $("#heritCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-down").addClass("fa-chevron-up");
 });
 $('#collapseHeritGraph').on('hide.bs.collapse', function () {
-  $("#heritCollapseGroup .panel-heading a .indicator").text("+");
+  $("#heritCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+});
+
+$('#collapseLDscoreGraph').on('show.bs.collapse', function () {
+  $("#ldscoreCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+});
+$('#collapseLDscoreGraph').on('hide.bs.collapse', function () {
+  $("#ldscoreCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+});
+
+$('#collapseCorrelationGraph').on('show.bs.collapse', function () {
+  $("#correlationCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-down").addClass("fa-chevron-up");
+});
+$('#collapseCorrelationGraph').on('hide.bs.collapse', function () {
+  $("#correlationCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-up").addClass("fa-chevron-down");
 });
