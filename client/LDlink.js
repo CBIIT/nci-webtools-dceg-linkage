@@ -2078,6 +2078,8 @@ function completeHandler() {
   //  document.getElementById("ldscore-bokeh-graph").innerHTML = "";
   //if (document.getElementById("ldscore-results-container") !== null)
   //  document.getElementById("ldscore-results-container").innerHTML = "";
+
+
 }
 function errorHandler(e) {
   showCommError(e);
@@ -3536,6 +3538,7 @@ function updateData(id) {
       ) {
         $("#" + id + "-loading").show();
         updateLDassoc();
+      
       }
       break;
     case "ldscore":
@@ -3574,6 +3577,7 @@ function updateData(id) {
             }
             else{
               updateLDherit();
+              $("#example-ldherit").prop("disabled", true);
             }
           }
           // else {
@@ -3588,6 +3592,7 @@ function updateData(id) {
             console.log("Input is valid. Proceeding with calculation...");
             // Call your calculation function here
             updateLDscore();
+            $("#example-ldscore").prop("disabled", true);
           }
         } else if (isCorrelation) {
           console.log("click correlation", id + "2");
@@ -3610,6 +3615,7 @@ function updateData(id) {
              });
             } else{
               updateLDcorrelation();
+              $("#example-correlation").prop("disabled", true);
             }
           }
           
@@ -4300,6 +4306,7 @@ function updateLDscore() {
     }
     //console.log(resultStringCanvas);
     document.getElementById("ldmessage").style.display = "none";
+    $("#example-ldscore").prop("disabled", false);
     var jsonObjCanvas;
     if (typeof dataString === "string") {
       jsonObjCanvas = JSON.parse(resultStringCanvas);
@@ -4455,6 +4462,8 @@ function updateLDherit() {
     "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
   );
   document.getElementById("ldheritmessage").style.display = "block";
+
+
   //console.log( $('#ldassoc-genome'))
   //console.log(ldInputs);
   var url = restServerUrl + "/ldherit";
@@ -4483,6 +4492,7 @@ function updateLDherit() {
     console.log(data);
     console.log(resultStringCanvas);
     document.getElementById("ldheritmessage").style.display = "none";
+    $("#example-ldherit").prop("disabled", false);
     var jsonObjCanvas;
     if (typeof dataString === "string") {
       jsonObjCanvas = JSON.parse(resultStringCanvas);
@@ -4954,6 +4964,7 @@ function updateLDcorrelation() {
     );
 
     document.getElementById("correlationmessage").style.display = "none";
+    $("#example-correlation").prop("disabled", false);
     var jsonObjCanvas;
     if (typeof dataString === "string") {
       jsonObjCanvas = JSON.parse(resultStringCanvas);
@@ -8917,4 +8928,40 @@ $('#collapseCorrelationGraph').on('show.bs.collapse', function () {
 });
 $('#collapseCorrelationGraph').on('hide.bs.collapse', function () {
   $("#correlationCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-up").addClass("fa-chevron-down");
+});
+
+// List of container IDs that hold your tables
+var containerIds = [
+  "correlation-table-container-1",
+  "correlation-table-container-2",
+  "correlation-table-container-3",
+  "correlation-table-container-4",
+  "correlation-table-container"
+];
+
+document.getElementById("download-all-tables-btn").addEventListener("click", function(e) {
+  // Prevent any default action (e.g., form submit)
+  e.preventDefault();
+  
+  var combinedText = "";
+  
+  containerIds.forEach(function(id) {
+    var container = document.getElementById(id);
+    if (container) {
+      // Extract the text content (adjust if you want HTML, then use innerHTML)
+      combinedText += container.innerText + "\n\n";
+    }
+  });
+  
+  // Create a Blob with MIME type text/plain
+  var blob = new Blob([combinedText], { type: "text/plain" });
+  
+  // Create a temporary link to trigger the download
+  var link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "all_tables.txt";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(link.href);
 });

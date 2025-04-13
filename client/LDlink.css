@@ -1948,3 +1948,12 @@ input:checked + .slider:before {
 	margin: -2rem 0rem -1rem 0rem;
 	
 }
+/* When the toggle is enabled and checked, use the blue background */
+input:not(:disabled):checked + .slider {
+	background-color: #2196f3;
+  }
+  
+  /* When the toggle is disabled and checked, force a grey background */
+  input:disabled:checked + .slider {
+	background-color: #ccc !important;
+  }
