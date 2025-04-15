@@ -4533,6 +4533,7 @@ function updateLDherit() {
       }
       $("#" + id + "-results-container-herit").show();
       $("#heritCollapseGroup").show();
+      $("#download-herit-tables-btn").show();
       // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
@@ -8931,38 +8932,59 @@ $('#collapseCorrelationGraph').on('hide.bs.collapse', function () {
   $("#correlationCollapseGroup .panel-heading a .indicator").removeClass("fa-chevron-up").addClass("fa-chevron-down");
 });
 
-// List of container IDs that hold your tables
-var containerIds = [
-  "correlation-table-container-1",
-  "correlation-table-container-2",
-  "correlation-table-container-3",
-  "correlation-table-container-4",
-  "correlation-table-container"
+// Define the configuration for each download button
+var downloadButtonConfigs = [
+  {
+    // For the correlation tables download button
+    buttonId: "download-all-tables-btn",
+    containerIds: [
+      "correlation-table-container-1",
+      "correlation-table-container-2",
+      "correlation-table-container-3",
+      "correlation-table-container-4",
+      "correlation-table-container"
+    ],
+    fileName: "correlation_tables.txt"
+  },
+  {
+    // For the heritability tables download button
+    buttonId: "download-herit-tables-btn",
+    containerIds: ["herit-table-container"],
+    fileName: "herit_tables.txt"
+  }
 ];
 
-document.getElementById("download-all-tables-btn").addEventListener("click", function(e) {
-  // Prevent any default action (e.g., form submit)
-  e.preventDefault();
-  
+// Utility function that collects text from container IDs,
+// creates a text file blob and triggers the download
+function downloadTables(containerIds, fileName) {
   var combinedText = "";
-  
   containerIds.forEach(function(id) {
     var container = document.getElementById(id);
     if (container) {
-      // Extract the text content (adjust if you want HTML, then use innerHTML)
+      // Retrieve text content (you may use innerHTML if needed)
       combinedText += container.innerText + "\n\n";
     }
   });
-  
-  // Create a Blob with MIME type text/plain
+  // Create a blob with MIME type text/plain
   var blob = new Blob([combinedText], { type: "text/plain" });
-  
   // Create a temporary link to trigger the download
   var link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "all_tables.txt";
+  link.download = fileName;
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
   URL.revokeObjectURL(link.href);
+}
+
+// Loop through each configuration, then add a click event listener
+// to its associated button.
+downloadButtonConfigs.forEach(function(config) {
+  var btn = document.getElementById(config.buttonId);
+  if (btn) {
+    btn.addEventListener("click", function(e) {
+      e.preventDefault();
+      downloadTables(config.containerIds, config.fileName);
+    });
+  }
 });
