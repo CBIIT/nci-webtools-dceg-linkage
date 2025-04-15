@@ -4997,6 +4997,7 @@ function updateLDcorrelation() {
       }
       $("#" + id + "-results-container-correlation").show();
       $("#correlationCollapseGroup").show();
+      $("#download-all-tables-btn").show();
       // $("#" + id + "-links-container").show();
       //console.log(dataCanvas);
       var formattedOutput = resultStringCanvas.replace(/\n/g, "<br>");
