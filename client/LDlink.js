@@ -2167,6 +2167,7 @@ function createFileSelectEvent() {
   $(".btn-ldscore-file-correlation :file").on(
     "fileselect",
     function (event, numFiles, label) {
+      document.getElementById("correlationFile").innerHTML = "";
       var input = $(this);
       if (input.attr("id") === "ldscore-file-correlation") {
         $("#ldscore-file-label-correlation").val(
@@ -2180,11 +2181,13 @@ function createFileSelectEvent() {
       uploadFileldcorrelation("ldscore-file-correlation");
       $("#header-values").show();
       $("#header-values2").show();
+     
     }
   );
   $(".btn-ldscore-file-correlation2 :file").on(
     "fileselect",
     function (event, numFiles, label) {
+      document.getElementById("correlationFile2").innerHTML = "";
       $("#ldscore-file-label-correlation2").val(
         label.split(".").slice(0, -1).join(".")
       );
