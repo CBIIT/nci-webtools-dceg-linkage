@@ -1153,6 +1153,11 @@ textarea:invalid,
 	margin-top: -25px;
 	float: left;
 }
+#ldscore-browse-button, #ldscore-browse-button2 {
+    margin-left: 10px; /* Adjust the value as needed */
+	margin-top: -25px;
+	float: left;
+}
 
 .ldscore-flex-item1{
 	-webkit-box-ordinal-group: 2;
@@ -1239,10 +1244,20 @@ textarea:invalid,
 #assoc-region, #score-region {
 	margin-bottom: 20px;
 }
-#ldassoc-files, #ldscore-files, #ldscore-files-herit,#ldscore-files-correlation,#ldscore-files-correlation2{
+#ldassoc-files, #ldscore-files, #ldscore-files-herit{
 	float: right;
 	margin-top: -4px;
 }
+#ldscore-files-correlation{
+	float: right;
+	margin-top: -4px;
+}
+#ldscore-files-correlation2{
+	float: right;
+	margin-top: -4px;
+}
+
+
 #ldassoc-browse-button {
 	float: left;
 }
@@ -1957,3 +1972,30 @@ input:not(:disabled):checked + .slider {
   input:disabled:checked + .slider {
 	background-color: #ccc !important;
   }
+
+
+  .ldheritFile-file-name{
+		width: 172px;
+		word-wrap: break-word;
+		margin-top: 30px;
+		white-space: break-spaces;
+		overflow: hidden;
+		text-overflow: ellipsis;
+  }
+
+  .ldcorrelation-file-name{
+	width: 172px;
+	word-wrap: break-word;
+	margin-top: 30px;
+	white-space: break-spaces;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.ldcorrelation-file-name2{
+	width: 172px;
+	word-wrap: break-word;
+	margin-top: 5px;
+	white-space: break-spaces;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}

@@ -2418,7 +2418,7 @@
 												</div>
 												<div class="input-group" id="ldscore-file-container2">
 													
-													<input type="text" id="ldscore-file-label-herit" readonly placeholder="Upload data file" class="readonly-input-text">
+													<input type="text" id="ldscore-file-label-herit" readonly placeholder=" pre-munged GWAS sumstats txt file" class="readonly-input-text">
 													
 													<div id="ldscore-files-herit">
 														<div id="ldscore-browse-button">
@@ -2433,10 +2433,9 @@
 																			<span class="slider round"></span>
 																</label>
 																<div id="ldherit-sample-label"> &nbsp;Use example data</div>
-														</div>
-														<div id="ldheritFile"></div>
-
+														</div>							
 													</div>
+													<div id="ldheritFile" class="ldheritFile-file-name"></div>
 													
 													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
 													   data-placement="bottom" data-content="Please upload a file."></a>
@@ -2540,17 +2539,19 @@
 												</div>
 												<div class="input-group" id="ldscore-file-container3">
 													
-													<input type="text" id="ldscore-file-label-correlation" readonly placeholder="Upload data file" class="readonly-input-text">
+													<input type="text" id="ldscore-file-label-correlation" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
+													
 													<div id="ldscore-files-correlation">
 														<div id="ldscore-browse-button">
 															<span class="btn btn-default btn-file btn-ldscore-file-correlation">Browse
 																<input type="file" id="ldscore-file-correlation" >
 															</span>
 														</div>
-														<div id="correlationFile"></div>
+														
 													</div>
 
-													<input type="text" id="ldscore-file-label-correlation2" readonly placeholder="Upload data file" class="readonly-input-text">
+													<input type="text" id="ldscore-file-label-correlation2" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
+													
 													<div id="ldscore-files-correlation2">
 														<div id="ldscore-browse-button2">
 															<span class="btn btn-default btn-file btn-ldscore-file-correlation2">Browse
@@ -2565,8 +2566,11 @@
 																</label>
 																<div id="correlation-sample-label"> &nbsp;Use example data</div>
 														</div>
-														<div id="correlationFile2"></div>
+														
 													</div>
+													
+													<div id="correlationFile" class="ldcorrelation-file-name"></div>
+													<div id="correlationFile2" class="ldcorrelation-file-name2"></div>
 													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
 													   data-placement="bottom" data-content="Please upload a file."></a>
 												</div>
