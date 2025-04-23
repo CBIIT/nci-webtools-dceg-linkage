@@ -785,8 +785,12 @@ $(document).ready(function () {
       // document.getElementById("ldscore-correlation").disabled = true;
       // document.getElementById("ldscore-correlation").classList.add("disabled");
       exampleLdcorrelation.checked= false;
+      var filelabel1 = document.getElementById("ldscore-file-label-correlation1");
+      var filelabel2 = document.getElementById("ldscore-file-label-correlation2");
+      if(filelabel1!==null) $('input#ldscore-file-label-correlation1.readonly-input-text').val('');
+      if(filelabel2!==null) $('input#ldscore-file-label-correlation2.readonly-input-text').val('');
     }
-    console.log(this.files)
+   // console.log(this.files)
     var file = this.files[0];
     if(file==undefined){
     }
@@ -8102,7 +8106,7 @@ function buildTissueDropdown(elementId, tissueData) {
 
 function buildPopulationDropdown(elementId) {
   //console.log(elementId);
-  console.trace();
+ // console.trace();
   var htmlText = "";
   var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
   var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";

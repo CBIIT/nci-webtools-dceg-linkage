@@ -1432,6 +1432,7 @@ input:checked + .slider:before {
 
 
 #summary-table-container .table-bordered,
+#ldscore-table-container .table-bordered,
 #herit-table-container .table-bordered,
 #correlation-table-container .table-bordered {
     border: 1px solid #dee2e6;
@@ -1439,6 +1440,8 @@ input:checked + .slider:before {
 
 #summary-table-container .table-bordered th,
 #summary-table-container .table-bordered td,
+#ldscore-table-container .table-bordered th,
+#ldscore-table-container .table-bordered td,
 #herit-table-container .table-bordered th,
 #herit-table-container .table-bordered td,
 #correlation-table-container .table-bordered th,
