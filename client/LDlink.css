@@ -1146,16 +1146,19 @@ textarea:invalid,
 
 #ldscore-file-label,#ldscore-file-label-herit,#ldscore-file-label-correlation,#ldscore-file-label-correlation2 {
     margin-top: 10px; /* Adjust the value as needed */
+	margin-bottom: 5px;
 }
+
 
 #ldscore-browse-button, #ldscore-browse-button2 {
     margin-left: 10px; /* Adjust the value as needed */
-	margin-top: -25px;
+	margin-top: -50px;
 	float: left;
 }
-#ldscore-browse-button, #ldscore-browse-button2 {
-    margin-left: 10px; /* Adjust the value as needed */
-	margin-top: -25px;
+
+.ldcorrelation{
+	margin-left: 10px; /* Adjust the value as needed */
+	margin-top: -35px !important;
 	float: left;
 }
 
@@ -1423,7 +1426,7 @@ input:checked + .slider:before {
 }
 #ldscore-sample, #example-ldscore,#example-ldherit,#example-correlation {
 	position: relative;
-	top: 0;
+	top: 15;
 	left: 10px !important;
 	
 	display: block; 

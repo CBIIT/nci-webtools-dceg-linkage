@@ -30,6 +30,7 @@ from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlock
 import requests,glob
 from ldscore.ldsc_utils import run_ldsc_command,run_herit_command,run_correlation_command
 import zipfile
+import shutil
 
 # retrieve config
 param_list = get_config()
@@ -598,6 +599,36 @@ def upload():
         
         return 'All files were saved'
 
+@app.route('/LDlinkRestWeb/copy_and_download/<filename>', methods=['GET'])
+def copy_and_download(filename):
+    """
+    Copies a file from the `data/ldscore/` directory to the `tmp/` directory
+    and serves it for download.
+    """
+    try:
+        # Define source and destination paths
+        source_dir = os.path.join(param_list['data_dir'], 'ldscore')
+        destination_dir = os.path.join(tmp_dir, 'uploads')
+        source_file = os.path.join(source_dir, filename)
+        destination_file = os.path.join(destination_dir, filename)
+
+        # Ensure the destination directory exists
+        os.makedirs(destination_dir, exist_ok=True)
+
+        # Copy the file to the destination directory
+        shutil.copy(source_file, destination_file)
+        print(f"Copied {source_file} to {destination_file}")
+
+        # Serve the file for download
+        return send_from_directory(destination_dir, filename, as_attachment=True)
+
+    except FileNotFoundError:
+        return f"File {filename} not found in {source_dir}", 404
+    except Exception as e:
+        print(f"Error: {e}")
+        return f"An error occurred: {e}", 500
+    
+
 # Route for LDassoc example GWAS data
 @app.route('/LDlinkRest/ldassoc_example', methods=['GET'])
 #@app.route('/LDlinkRest2/ldassoc_example', methods=['GET'])
@@ -661,7 +692,8 @@ def ldcorrelation_example():
     example = {
             'filenames': example_files,
             'filenames2': example_files2,
-            'filepaths': example_filepaths
+            'filepath': example_filepaths,
+            'filepath2':ldscore_example_dir+ example_files2
         }
     print(example)
     return json.dumps(example)

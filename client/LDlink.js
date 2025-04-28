@@ -1422,7 +1422,14 @@ function setupLDscoreExample() {
       console.log(data);
       data.filenames.forEach(function (fileName) {
         var fileDiv = document.createElement("div");
-        fileDiv.textContent = fileName;
+        //fileDiv.textContent = fileName;
+        var downloadLink = document.createElement("a");
+        downloadLink.href = '/LDlinkRestWeb/copy_and_download/'+fileName; // Set the file URL
+        downloadLink.download = fileName; // Set the file name for download
+        downloadLink.textContent = fileName; // Set the link text to the file name
+        fileDiv.appendChild(downloadLink);
+        fileDiv.appendChild(document.createElement("br"));
+        
         fileContainer.appendChild(fileDiv);
 
         // Create a new File object and add it to the DataTransfer object
@@ -1498,15 +1505,26 @@ function setupLDheritExample() {
       //console.log(response);
       document.getElementById("ldscore-file-label-herit").value = "BBJ_HDLC22";
       var data = JSON.parse(response);
-      // var fileContainer = document.getElementById("ldscoreFile");
-      //  fileContainer.innerHTML = ""; // Clear any existing content
+     
+    
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
       console.log(data);
 
-      //var fileDiv = document.createElement("div");
-      //fileDiv.textContent = data.filenames;
-      //fileContainer.appendChild(fileDiv);
+       
+      var fileContainer = document.getElementById("ldheritFile");
+      fileContainer.innerHTML = ""; // Clear any existing content
+      var fileDiv = document.createElement("div");
+     // fileDiv.textContent = data.filenames;
+
+      var downloadLink = document.createElement("a");
+      downloadLink.href = '/LDlinkRestWeb/copy_and_download/BBJ_HDLC22.txt'; // Set the file URL
+      downloadLink.download = data.filenames; // Set the file name for download
+      downloadLink.textContent = data.filenames; // Set the link text to the file name
+      fileDiv.appendChild(downloadLink);
+      fileDiv.appendChild(document.createElement("br"));
+
+      fileContainer.appendChild(fileDiv);
 
       // Create a new File object and add it to the DataTransfer object
       var file = new File([""], data.filenames);
@@ -1547,8 +1565,8 @@ function setupLDheritExample() {
     // refreshPopulation(["CEU"], "ldscore");
     // console.log($("#ldassoc-population-codes").val());
   } else {
-    $("#ldscore-file").prop("disabled", false);
-    $("#ldscore").prop("disabled", true);
+   // $("#ldscore-file").prop("disabled", false);
+   // $("#ldscore").prop("disabled", true);
     //document.getElementById("ldscore-bokeh-graph-herit").innerHTML = "";
     //document.getElementById("herit-table-container").innerHTML = "";
     document.getElementById("ldheritFile").innerHTML = "";
@@ -1598,6 +1616,35 @@ function setupLDcorrelationExample() {
       var dataTransfer = new DataTransfer();
       var dataTransfer2 = new DataTransfer();
 
+      var fileContainer = document.getElementById("correlationFile");
+      fileContainer.innerHTML = ""; // Clear any existing content
+      var fileDiv = document.createElement("div");
+
+      var fileContainer2 = document.getElementById("correlationFile2");
+      fileContainer2.innerHTML = ""; // Clear any existing content
+      // Create a div to hold the file link
+      var fileDiv2 = document.createElement("div");
+
+      var downloadLink = document.createElement("a");
+      downloadLink.href = '/LDlinkRestWeb/copy_and_download/BBJ_HDLC22.txt'; // Set the file URL
+      downloadLink.download = data.filenames; // Set the file name for download
+      downloadLink.textContent = data.filenames; // Set the link text to the file name
+      fileDiv.appendChild(downloadLink);
+      fileDiv.appendChild(document.createElement("br"));
+
+      // Create the download link
+      var downloadLink2 = document.createElement("a");
+      downloadLink2.href = '/LDlinkRestWeb/copy_and_download/BBJ_LDLC22.txt'; // Set the file URL
+      downloadLink2.download = data.filenames2; // Set the file name for download
+      downloadLink2.textContent = data.filenames2; // Set the link text to the file name
+      fileDiv2.appendChild(downloadLink2);
+      fileDiv2.appendChild(document.createElement("br"));
+
+
+      // Append the div to the container
+      fileContainer2.appendChild(fileDiv);
+      fileContainer2.appendChild(fileDiv2);
+      
       console.log(data);
       // Create a new File object and add it to the DataTransfer object
       var file = new File([""], data.filenames);
@@ -1641,8 +1688,8 @@ function setupLDcorrelationExample() {
     // refreshPopulation(["CEU"], "ldscore");
     // console.log($("#ldassoc-population-codes").val());
   } else {
-    $("#ldscore-file").prop("disabled", false);
-    $("#ldscore").prop("disabled", true);
+   // $("#ldscore-file").prop("disabled", false);
+    //$("#ldscore").prop("disabled", true);
     //document.getElementById("ldscore-results-container-correlation").innerHTML ="";
    // document.getElementById("correlationFile").innerHTML = "";
    // document.getElementById("correlationFile2").innerHTML = "";
