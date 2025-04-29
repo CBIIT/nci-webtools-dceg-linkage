@@ -944,13 +944,13 @@
 									<div class="row">Thresholds</div>
 									<div class="input-group row" title="R2 or D' threshold for LD with query SNP">
 										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup> &ge;</label>
-										<input id="ldexpress_r2_d_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e\-[1-9]+)" value="0.1"
+										<input id="ldexpress_r2_d_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)" value="0.1"
 											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" title="P-value threshold for the QTL association">
 										<label id="ldexpress_p_threshold_label" for="ldexpress_p_threshold" style="width: 30px">P &nbsp;&lt;</label>
-										<input id="ldexpress_p_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e\-[1-9]+)" value="0.1"
+										<input id="ldexpress_p_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)" value="0.1"
 											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
@@ -2290,7 +2290,7 @@
 													<input type="text" id="ldscore-file-label" readonly placeholder="*.bed *.bim *.fam are required" class="readonly-input-text">
 													<!-- <label for="ldscore-file" style="display:none;">Browse for RS File</label> -->
 													<div>
-														<a id="ldscoreSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Sample Data Format</a>
+														<a id="ldscoreSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for Sample Format</a>
 													</div>
 
 													<div id="ldscore-files">
@@ -2374,7 +2374,7 @@
 														  <a id="ldscore-download-log-url" download="result.txt"  
 														  class="ldscore-download-button">Download Tables</a>
 														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
-														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Input</a>
+														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Inputs</a>
 														</div>
 													</div>
 
@@ -2425,7 +2425,7 @@
 													
 													<input type="text" id="ldscore-file-label-herit" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
 													<div>
-														<a id="ldheritSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Sample Data Format</a>
+														<a id="ldheritSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for Sample Format</a>
 													</div>
 													<div id="ldscore-files-herit">
 														<div id="ldscore-browse-button">
@@ -2565,7 +2565,7 @@
 
 													<input type="text" id="ldscore-file-label-correlation2" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
 													<div>
-														<a id="ldcorrSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Sample Data Format</a>
+														<a id="ldcorrSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for Sample Format</a>
 													</div>
 													<div id="ldscore-files-correlation2">
 														<div id="ldscore-browse-button2">
@@ -2650,8 +2650,8 @@
 													<div class="panel panel-default">
 														<div class="panel-heading">Download Options</div>
 														<div class="panel-body">
-															<button id="download-all-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download All Tables</button>
-															<button id="download-all-input-btn"  type="button" class="btn btn-default" >Download Input</button>
+															<button id="download-all-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download Tables</button>
+															<button id="download-all-input-btn"  type="button" class="btn btn-default" >Download Inputs</button>
 														</div>
 													</div>
 									

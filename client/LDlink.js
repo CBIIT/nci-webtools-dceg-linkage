@@ -9159,3 +9159,25 @@ downloadButtonConfigs.forEach(function(config) {
     });
   }
 });
+
+window.addEventListener("load", function () {
+  const params = new URLSearchParams(window.location.search);
+  const tab = params.get("tab");
+  const hash = window.location.hash.substring(1); // removes the "#"
+
+  if (tab === "help") {
+    // 1. Show the help tab
+    const helpTabTrigger = document.querySelector('[data-tab="help"]'); // adjust this selector
+    if (helpTabTrigger) {
+      helpTabTrigger.click(); // simulates clicking the help tab button
+    }
+
+    // 2. Wait briefly for content to appear, then scroll to the section
+    setTimeout(() => {
+      const targetElement = document.getElementById(hash);
+      if (targetElement) {
+        targetElement.scrollIntoView();
+      }
+    }, 300); // You can adjust the delay depending on how long your tab content takes to render
+  }
+});
