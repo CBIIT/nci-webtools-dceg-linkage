@@ -5132,7 +5132,7 @@ downloadLinkInput.addEventListener("click", function () {
     // Exit early since we handled the example case
     return;
   }
- console.log(filenames);
+
   fetch(zipurl, {
     method: "POST",
     headers: {
