@@ -1258,6 +1258,7 @@ $(document).on("change", ".btn-ldscore-file :file", function (event) {
  // btn.disabled = false;
  // btn.classList.remove("disabled");
  document.getElementById("ldscore-results-container").style.display="none";
+
 });
 $(document).on(
   "change",
@@ -1269,7 +1270,8 @@ $(document).on(
     //document.getElementById("ldscore-results-container-herit").innerHTML='';
     //document.getElementById("heritCollapseGroup").style.display="none";
    // document.getElementById("herit-table-container").style.display="none";
-       document.getElementById("ldscore-results-container-herit").style.display="none";
+    document.getElementById("ldscore-results-container-herit").style.display="none";
+    document.getElementById("ldheritFile").innerHTML = "";
   }
 );
 $(document).on(
@@ -1280,6 +1282,8 @@ $(document).on(
    // btn.disabled = false;
    // btn.classList.remove("disabled");
    document.getElementById("ldscore-results-container-correlation").style.display="none";
+   document.getElementById("correlationFile").innerHTML = "";
+   document.getElementById("correlationFile2").innerHTML = "";
   }
 );
 $(document).on(
@@ -1290,6 +1294,8 @@ $(document).on(
    // btn.disabled = false;
    // btn.classList.remove("disabled");
    document.getElementById("ldscore-results-container-correlation").style.display="none";
+   document.getElementById("correlationFile").innerHTML = "";
+   document.getElementById("correlationFile2").innerHTML = "";
   }
 );
 // $(document).on("click", ".btn-ldscore-file-correlation :file", function () {
