@@ -4543,8 +4543,8 @@ function updateLDherit() {
       // Remove the substring and everything that follows
       resultStringCanvas = data.result.substring(0, index);
     }
-    console.log(data);
-    console.log(resultStringCanvas);
+    //console.log(data);
+   // console.log(resultStringCanvas);
     document.getElementById("ldheritmessage").style.display = "none";
     $("#example-ldherit").prop("disabled", false);
     var jsonObjCanvas;
@@ -4570,6 +4570,43 @@ function updateLDherit() {
       "herit-table-container"
     );
     document.getElementById("herit-table-container").appendChild(summaryTable);
+
+    //
+    // Create a download link for the input files
+    var downloadLinkInput = document.getElementById(
+      "download-herit-input-btn"
+    );
+    downloadLinkInput.addEventListener("click", function () {
+      // Get the filename from the input field
+    var filename = document.getElementById("ldscore-file-label-herit").value;
+  // Check if the filename is not empty
+    if (filename) {
+      var filePath=""
+      // Construct the file path (assuming the file is in tmp/upload)
+      if(!ldInputs.isExample){
+        filePath= "/LDlinkRestWeb/tmp/uploads/" + filename;
+      }
+      else {
+        filePath = "/LDlinkRestWeb/copy_and_download/BBJ_HDLC22.txt"
+      }
+      // Create a temporary anchor element to trigger the download
+      var tempLink = document.createElement("a");
+      tempLink.href = filePath;
+      tempLink.download = filename; // Set the download attribute with the filename
+
+      // Append the link to the document body (required for some browsers)
+      document.body.appendChild(tempLink);
+
+      // Programmatically click the link to trigger the download
+      tempLink.click();
+
+      // Remove the temporary link from the document
+      document.body.removeChild(tempLink);
+    } else {
+      // Handle the case where the filename is empty
+      alert("Please enter a valid filename.");
+    }
+    })
 
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {
@@ -5035,6 +5072,86 @@ function updateLDcorrelation() {
     );
     console.log(summaryData);
     // Create and append the summary table
+
+//
+ // Create a download link for the input files
+ var downloadLinkInput = document.getElementById(
+  "download-all-input-btn"
+);
+downloadLinkInput.addEventListener("click", function () {
+  var filenames = [
+    ldInputs.filename+".txt",
+    ldInputs.filename2+".txt",
+  ];
+
+  var zipurl = "";
+  if (!(ldInputs.isExample==='True')) {
+    zipurl = "/LDlinkRestWeb/zip";
+  } else {
+    // If it's an example, handle the specific files
+    const filesToZip = [
+      { href: "/LDlinkRestWeb/copy_and_download/BBJ_HDLC22.txt", name: "BBJ_HDLC22.txt" },
+      { href: "/LDlinkRestWeb/copy_and_download/BBJ_LDLC22.txt", name: "BBJ_LDLC22.txt" },
+    ];
+  
+    // Create a zip file containing the two files
+    const JSZip = window.JSZip; // Ensure JSZip library is included in your project
+    const zip = new JSZip();
+  
+    const filePromises = filesToZip.map((file) =>
+      fetch(file.href)
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error(`Failed to fetch ${file.name}`);
+          }
+          return response.blob();
+        })
+        .then((blob) => {
+          return blob.arrayBuffer();
+        })
+        .then((arrayBuffer) => {
+          zip.file(file.name, arrayBuffer);
+        })
+    );
+  
+    Promise.all(filePromises)
+      .then(() => {
+        return zip.generateAsync({ type: "blob" });
+      })
+      .then((zipBlob) => {
+        const url = window.URL.createObjectURL(zipBlob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "example_files.zip";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      })
+      .catch((error) => console.error("Error zipping example files:", error));
+  
+    // Exit early since we handled the example case
+    return;
+  }
+ console.log(filenames);
+  fetch(zipurl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ filenames: filenames }),
+  })
+    .then((response) => response.blob())
+    .then((blob) => {
+      var url = window.URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = "input_files.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    })
+    .catch((error) => console.error("Error:", error));
+});
 
     if (displayError(id, jsonObjCanvas) == false) {
       switch (genomeBuild) {

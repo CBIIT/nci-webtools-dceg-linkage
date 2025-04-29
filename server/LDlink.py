@@ -548,7 +548,7 @@ def zip_files():
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
         return jsonify({'error': str(e)}), 500
-        
+ 
 
 # File upload route
 @app.route('/LDlinkRest/upload', methods=['POST'])

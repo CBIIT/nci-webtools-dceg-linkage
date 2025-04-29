@@ -25,6 +25,7 @@
 	</script>
 	<!-- Import web component -->
 	<script src="https://cbiit.github.io/nci-softwaresolutions-elements/components/include-html.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="lib/bootstrap@3.3.5/bootstrap.min.css">	
 	<link rel="stylesheet" href="lib/bootstrap@3.3.5/bootstrap-theme.min.css">	
@@ -2367,6 +2368,16 @@
 													<h4>MAF/LD Score Correlation Matrix</h4>
 													<div id="ldscore-table-container"></div>
 													<br />
+													<div class="panel panel-default">
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+														  <a id="ldscore-download-log-url" download="result.txt"  
+														  class="ldscore-download-button">Download Tables</a>
+														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
+														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Input</a>
+														</div>
+													</div>
+
 													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
 													<div class="panel-group" id="ldscoreCollapseGroup" style="display: none;">
 															<div class="panel panel-default">
@@ -2384,16 +2395,6 @@
 																		</div>
 																	</div>
 																</div>
-													</div>
-
-													<div class="panel panel-default">
-														<div class="panel-heading">Download Options</div>
-														<div class="panel-body">
-														  <a id="ldscore-download-log-url" download="result.txt"  
-														  class="ldscore-download-button">Download Result</a>
-														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
-														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Input</a>
-														</div>
 													</div>
 													
 													
@@ -2494,15 +2495,21 @@
 									</div>
 									
 									<div class="jumbotron">
-										<div class="container-fluid" id="ldscore-results-container-herit">
+										<div class="container-fluid" id="ldscore-results-container-herit" style="display:none">
 											<div id="row-button" class="row overflowy">
 												<div id="ldscore-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
 														<!-- <h4>Heritability Analysis:</h4> -->
 													<div id="herit-table-container"></div>
-
-													<button id="download-herit-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download Table</button>
-													<br> <br>
+													
+													<div class="panel panel-default" >
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+														  <button id="download-herit-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download Table</button>
+														  <button id="download-herit-input-btn"  type="button" class="btn btn-default">Download Input</button>
+														</div>
+													</div>
+											
 													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
 													<div class="panel-group" id="heritCollapseGroup" style="display: none;">
 														<div class="panel panel-default">
@@ -2627,7 +2634,7 @@
 									</div>
 									
 									<div class="jumbotron">
-										<div class="container-fluid" id="ldscore-results-container-correlation">
+										<div class="container-fluid" id="ldscore-results-container-correlation"  style="display:none">
 											<div id="row-button" class="row overflowy">
 												<div id="correlation-export-dropdown"></div>
 												<div class="col-sm-8 col-sm-offset-1">
@@ -2640,8 +2647,14 @@
 													<div id="correlation-table-container" class="table-responsive" style="padding-top: 20px;"></div>
 													<br>
 													<!-- Download button that downloads all tables in one file -->
-													<button id="download-all-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download All Tables</button>
-													<br> <br>
+													<div class="panel panel-default">
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+															<button id="download-all-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download All Tables</button>
+															<button id="download-all-input-btn"  type="button" class="btn btn-default" >Download Input</button>
+														</div>
+													</div>
+									
 												<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
 													<div class="panel-group" id="correlationCollapseGroup" style="display: none;">
 														<div class="panel panel-default">
