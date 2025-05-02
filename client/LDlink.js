@@ -1419,7 +1419,7 @@ function setupLDscoreExample() {
       },
     }).success(function (response) {
       //console.log(response);
-      document.getElementById("ldscore-file-label").value = 22;
+      document.getElementById("ldscore-file-label").value = "22.bed;22.bim;22.fam";
       var data = JSON.parse(response);
       var fileContainer = document.getElementById("ldscoreFile");
       fileContainer.innerHTML = ""; // Clear any existing content
@@ -1515,7 +1515,7 @@ function setupLDheritExample() {
     
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
-      console.log(data);
+     // console.log(data);
 
        
       var fileContainer = document.getElementById("ldheritFile");
@@ -3566,7 +3566,7 @@ function initCalculate(id) {
     var activeTab = $("#ldscoreForm .nav-tabs li.active a");
     if (activeTab.length) {
       var activateTab = activeTab.attr("href");
-      if (activateTab.includes("ldscore-file-container-tab")) {
+      if (activateTab.includes("ldscore-heritability-tab")) {
         console.log("ldscore");
         $("#" + id + "-results-container").hide();
         $("#" + id + "-message").hide();
@@ -4117,7 +4117,6 @@ function checkTextAreaLength(elementId) {
 
 function updateLDassoc() {
   var id = "ldassoc";
-
   var $btn = $("#" + id).button("loading");
   var population = getPopulationCodes(id + "-population-codes");
   var ldInputs = {

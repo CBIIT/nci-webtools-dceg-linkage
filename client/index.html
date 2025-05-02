@@ -2267,150 +2267,14 @@
 						<form id="ldscoreForm" class="ldlinkForm">
 							<!-- Tabs Navigation -->
 							<ul class="nav nav-tabs">
-								<li class="active"><a data-toggle="tab" href="#ldscore-file-container-tab">LDscore Calculation</a></li>
-								<li><a data-toggle="tab" href="#ldscore-heritability-tab">Heritability Analysis</a></li>
+								<li class="active"><a data-toggle="tab" href="#ldscore-heritability-tab">Heritability Analysis</a></li>
 								<li><a data-toggle="tab" href="#ldscore-correlation-tab">Genetic Correlation</a></li>
+								<li ><a data-toggle="tab" href="#ldscore-file-container-tab">LDscore Calculation</a></li>
 								<!-- <li><a data-toggle="tab" href="#ldscore-inflation-tab">Inflation Calculation</a></li> -->
 							</ul>
 							<div class="tab-content">
-								<div id="ldscore-file-container-tab" class="tab-pane fade in active">
-									<!-- Population -->
-									<!-- Browse RS numbers -->
-									<div class="ldassoc-flex">
-										<div class="ldscore-flex-item">
-											<div class="col-sm-3" style="width:280px;">
-												<div class="progress" style="display:none;">
-													<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
-														 aria-valuemin="0" aria-valuemax="100">
-														50% Complete (info)
-													</div>
-												</div>
-												<div class="input-group" id="ldscore-file-container">
-													 <!-- <label for="ldscore-file-label" style="display:block;">Three files in the format *.bed, *.bim, *.fam are required</label>  -->
-													<input type="text" id="ldscore-file-label" readonly placeholder="*.bed *.bim *.fam are required" class="readonly-input-text">
-													<!-- <label for="ldscore-file" style="display:none;">Browse for RS File</label> -->
-													<div>
-														<a id="ldscoreSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for Sample Format</a>
-													</div>
 
-													<div id="ldscore-files">
-														<div id="ldscore-browse-button">
-															<span class="btn btn-default btn-file btn-ldscore-file">Browse
-																<input type="file" id="ldscore-file" multiple>
-															</span>
-														</div>
-														<div id="ldscore-sample">
-															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
-																<label class="switch" for="example-ldscore">
-																		<input id="example-ldscore" type="checkbox" data-toggle="toggle">
-																			<span class="slider round"></span>
-																</label>
-																<div id="ldscore-sample-label"> &nbsp;Use example data</div>
-														</div>
-																			
-													</div>
-													<div id="ldscoreFile" class="ldscore-file-name-container"></div>
-													
-
-													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
-													   data-placement="bottom" data-content="Please upload a file."></a>
-												</div>
-						
-												<progress style="display:none;"></progress>
-						
-												<div id="header-values2" style="display:none;">
-													<div class="" style="width:300px;"></div>
-												</div>
-											</div>
-										</div>
-										<div class="ldscore-flex-item2">
-											<div class="form-group">
-												<div class="ldscore-calculate-col">
-													<label for="ldscore-wind">Window:</label>
-													<input type="text" id="ldscore-wind" name="wind" value="1" class="ldscore-form-control" pattern="^[1-9]\d*$" title="Please enter an integer greater than 0." required>
-													<select id="unit-select" class="ldscore-form-control">
-														<option value="cm">cM</option>
-														<option value="kb">kb</option>
-													  </select>
-												</div>
-											</div>
-										</div>
-										<div class="ldscore-flex-item3">
-											<div class="form-group">
-												<div class="ldscore-calculate-col">
-													<label for="ldscore" class="sr-only">Submit</label>
-													<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
-												</div>
-											</div>
-										</div>
-										
-									</div>
-									<h3></h3>
-									<div id="ldscore-file-message" style="display:none; margin-top: 50px; width: 800px;" class="alert alert-info">file error</div>
-									<div class="col-sm-4 col-sm-offset-1 ">
-										<div id="ldmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
-										
-										<div id="ldscore-loading">
-											<img src="calculating_LD.gif" alt="loading icon" class="loading">
-										</div>
-									</div>
-									
-					
-									
-									<div class="jumbotron">
-										<div class="container-fluid" id="ldscore-results-container">
-											<div id="row-button" class="row overflowy">
-												<div id="ldscore-export-dropdown"></div>
-												<div class="col-sm-8 col-sm-offset-1">
-													
-													<h4>Summary of LD Scores</h4>
-													<div id="summary-table-container"></div>
-													<h4>MAF/LD Score Correlation Matrix</h4>
-													<div id="ldscore-table-container"></div>
-													<br />
-													<div class="panel panel-default">
-														<div class="panel-heading">Download Options</div>
-														<div class="panel-body">
-														  <a id="ldscore-download-log-url" download="result.txt"  
-														  class="ldscore-download-button">Download Tables</a>
-														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
-														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Inputs</a>
-														</div>
-													</div>
-
-													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
-													<div class="panel-group" id="ldscoreCollapseGroup" style="display: none;">
-															<div class="panel panel-default">
-																<div class="panel-heading">
-																	<h4 class="panel-title">
-																	<a data-toggle="collapse" data-parent="#ldscoreCollapseGroup" href="#collapseLDscoreGraph" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
-																		LDscore Analysis Process Outputs <i class="fa fa-chevron-down indicator"></i>
-																	</a>
-																	
-																	</h4>
-																</div>
-																<div id="collapseLDscoreGraph" class="panel-collapse collapse">
-																	<div class="panel-body">
-																		<div id="ldscore-bokeh-graph"></div>
-																		</div>
-																	</div>
-																</div>
-													</div>
-													
-													
-												</div>
-											
-											</div>
-											
-											<br />
-										</div>
-									</div>
-									<!-- <div id="canvas-container">
-										<canvas id="yourCanvasId" width="500" height="500" style="border:1px solid #000000;"></canvas>
-										<a id="download-url" href="" download="data_result.txt" style="position:absolute; z-index:10; background-color:white; padding:5px; border:1px solid black; text-decoration:none; color:black;">Download Result</a>
-									</div> -->
-								</div>
-								<div id="ldscore-heritability-tab" class="tab-pane fade">
+								<div id="ldscore-heritability-tab" class="tab-pane fade in active">
 									<!-- Browse RS numbers -->
 									<div class="ldassoc-flex">
 										<div class="ldassoc-flex-item1">
@@ -2679,7 +2543,145 @@
 											<br />
 										</div>
 									</div>
-								</div>				
+								</div>	
+								
+								<div id="ldscore-file-container-tab" class="tab-pane fade in ">
+									<!-- Population -->
+									<!-- Browse RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldscore-flex-item">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+														 aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container">
+													 <!-- <label for="ldscore-file-label" style="display:block;">Three files in the format *.bed, *.bim, *.fam are required</label>  -->
+													<input type="text" id="ldscore-file-label" readonly placeholder="*.bed *.bim *.fam are required" class="readonly-input-text">
+													<!-- <label for="ldscore-file" style="display:none;">Browse for RS File</label> -->
+													<div>
+														<a id="ldscoreSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for Sample Format</a>
+													</div>
+
+													<div id="ldscore-files">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file">Browse
+																<input type="file" id="ldscore-file" multiple>
+															</span>
+														</div>
+														<div id="ldscore-sample">
+															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+																<label class="switch" for="example-ldscore">
+																		<input id="example-ldscore" type="checkbox" data-toggle="toggle">
+																			<span class="slider round"></span>
+																</label>
+																<div id="ldscore-sample-label"> &nbsp;Use example data</div>
+														</div>
+																			
+													</div>
+													<div id="ldscoreFile" class="ldscore-file-name-container"></div>
+													
+
+													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
+													   data-placement="bottom" data-content="Please upload a file."></a>
+												</div>
+						
+												<progress style="display:none;"></progress>
+						
+												<div id="header-values2" style="display:none;">
+													<div class="" style="width:300px;"></div>
+												</div>
+											</div>
+										</div>
+										<div class="ldscore-flex-item2">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore-wind">Window:</label>
+													<input type="text" id="ldscore-wind" name="wind" value="1" class="ldscore-form-control" pattern="^[1-9]\d*$" title="Please enter an integer greater than 0." required>
+													<select id="unit-select" class="ldscore-form-control">
+														<option value="cm">cM</option>
+														<option value="kb">kb</option>
+													  </select>
+												</div>
+											</div>
+										</div>
+										<div class="ldscore-flex-item3">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+									<h3></h3>
+									<div id="ldscore-file-message" style="display:none; margin-top: 50px; width: 800px;" class="alert alert-info">file error</div>
+									<div class="col-sm-4 col-sm-offset-1 ">
+										<div id="ldmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
+										
+										<div id="ldscore-loading">
+											<img src="calculating_LD.gif" alt="loading icon" class="loading">
+										</div>
+									</div>
+									
+					
+									
+									<div class="jumbotron">
+										<div class="container-fluid" id="ldscore-results-container">
+											<div id="row-button" class="row overflowy">
+												<div id="ldscore-export-dropdown"></div>
+												<div class="col-sm-8 col-sm-offset-1">
+													
+													<h4>Summary of LD Scores</h4>
+													<div id="summary-table-container"></div>
+													<h4>MAF/LD Score Correlation Matrix</h4>
+													<div id="ldscore-table-container"></div>
+													<br />
+													<div class="panel panel-default">
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+														  <a id="ldscore-download-log-url" download="result.txt"  
+														  class="ldscore-download-button">Download Tables</a>
+														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
+														  <a id="ldscore-input-download-url" class="ldscore-download-button">Download Inputs</a>
+														</div>
+													</div>
+
+													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="ldscoreCollapseGroup" style="display: none;">
+															<div class="panel panel-default">
+																<div class="panel-heading">
+																	<h4 class="panel-title">
+																	<a data-toggle="collapse" data-parent="#ldscoreCollapseGroup" href="#collapseLDscoreGraph" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																		LDscore Analysis Process Outputs <i class="fa fa-chevron-down indicator"></i>
+																	</a>
+																	
+																	</h4>
+																</div>
+																<div id="collapseLDscoreGraph" class="panel-collapse collapse">
+																	<div class="panel-body">
+																		<div id="ldscore-bokeh-graph"></div>
+																		</div>
+																	</div>
+																</div>
+													</div>
+													
+													
+												</div>
+											
+											</div>
+											
+											<br />
+										</div>
+									</div>
+									<!-- <div id="canvas-container">
+										<canvas id="yourCanvasId" width="500" height="500" style="border:1px solid #000000;"></canvas>
+										<a id="download-url" href="" download="data_result.txt" style="position:absolute; z-index:10; background-color:white; padding:5px; border:1px solid black; text-decoration:none; color:black;">Download Result</a>
+									</div> -->
+								</div>
 							
 							</div>
 						</form>
