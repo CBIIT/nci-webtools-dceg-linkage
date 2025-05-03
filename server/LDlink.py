@@ -1040,7 +1040,7 @@ def ldherit():
     
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)+".txt"
+    filename = request.args.get('filename', False)
     isexample = request.args.get('isExample', False)
     print(pop,genome_build,filename,isexample)
     if filename:
@@ -1154,8 +1154,8 @@ def ldcorrelation():
     
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)+".txt"
-    filename2 = request.args.get('filename2', False)+".txt"
+    filename = request.args.get('filename', False)
+    filename2 = request.args.get('filename2', False)
     isexample = request.args.get('isExample', False)
     print(pop,genome_build,filename,isexample)
     if filename:
