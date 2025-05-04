@@ -773,23 +773,7 @@ $(document).ready(function () {
   });
 
   $(":file").change(function () {
-    var exampleLdherit = document.getElementById("example-ldherit");
-    var exampleLdcorrelation = document.getElementById("example-correlation");
-    document.getElementById("ldheritFile").innerHTML="";
-    if (exampleLdherit !== undefined) {
-      // document.getElementById("ldscore-herit").disabled = true;
-      // document.getElementById("ldscore-herit").classList.add("disabled");
-      exampleLdherit.checked = false;
-    }
-    if (exampleLdcorrelation !== undefined){
-      // document.getElementById("ldscore-correlation").disabled = true;
-      // document.getElementById("ldscore-correlation").classList.add("disabled");
-      exampleLdcorrelation.checked= false;
-      var filelabel1 = document.getElementById("ldscore-file-label-correlation1");
-      var filelabel2 = document.getElementById("ldscore-file-label-correlation2");
-      if(filelabel1!==null) $('input#ldscore-file-label-correlation1.readonly-input-text').val('');
-      if(filelabel2!==null) $('input#ldscore-file-label-correlation2.readonly-input-text').val('');
-    }
+
    // console.log(this.files)
     var file = this.files[0];
     if(file==undefined){
@@ -1271,33 +1255,63 @@ $(document).on(
     //document.getElementById("heritCollapseGroup").style.display="none";
    // document.getElementById("herit-table-container").style.display="none";
     document.getElementById("ldscore-results-container-herit").style.display="none";
-    document.getElementById("ldheritFile").innerHTML = "";
+
+  
   }
 );
+// Clear the file input when the "Browse" button is clicked
+$(document).on("click", ".btn-ldscore-file-herit :file", function () {
+  this.value = ""; // Clear the file input value
+  document.getElementById("ldheritFile").innerHTML = ""; // Clear the displayed file name
+  document.getElementById("ldscore-file-label-herit").value = "";
+  var exampleLdherit = document.getElementById("example-ldherit"); 
+  if (exampleLdherit !== undefined) {
+    exampleLdherit.checked = false;
+  }
+});
+
 $(document).on(
   "change",
   ".btn-ldscore-file-correlation :file",function (event) {
     createFileSelectTrigger.call(this, event);
-  //  var btn = document.getElementById("ldscore-herit");
-   // btn.disabled = false;
-   // btn.classList.remove("disabled");
    document.getElementById("ldscore-results-container-correlation").style.display="none";
-   document.getElementById("correlationFile").innerHTML = "";
-   document.getElementById("correlationFile2").innerHTML = "";
+
   }
 );
 $(document).on(
   "change",
   ".btn-ldscore-file-correlation2 :file",function (event) {
     createFileSelectTrigger.call(this, event);
-  //  var btn = document.getElementById("ldscore-herit");
-   // btn.disabled = false;
-   // btn.classList.remove("disabled");
    document.getElementById("ldscore-results-container-correlation").style.display="none";
-   document.getElementById("correlationFile").innerHTML = "";
-   document.getElementById("correlationFile2").innerHTML = "";
   }
 );
+$(document).on("click", ".btn-ldscore-file-correlation :file", function () {
+  this.value = ""; // Clear the file input value
+  document.getElementById("correlationFile2").innerHTML = ""; // Clear the displayed file name
+  document.getElementById("ldscore-file-label-correlation").value = "";
+ 
+  var exampleCorrelation = document.getElementById("example-correlation"); 
+  console.log(exampleCorrelation.checked)
+  if (exampleCorrelation !== undefined) {
+    if( exampleCorrelation.checked) {
+      document.getElementById("ldscore-file-label-correlation2").value = "";
+    }
+    exampleCorrelation.checked = false;
+    }
+});
+$(document).on("click", ".btn-ldscore-file-correlation2 :file", function () {
+  this.value = ""; // Clear the file input value
+  document.getElementById("correlationFile2").innerHTML = ""; // Clear the displayed file name
+  document.getElementById("ldscore-file-label-correlation2").value = "";
+  var exampleCorrelation = document.getElementById("example-correlation"); 
+  if (exampleCorrelation !== undefined) {
+    console.log(exampleCorrelation.checked)
+    if( exampleCorrelation.checked){
+      document.getElementById("ldscore-file-label-correlation").value = "";
+    } 
+     exampleCorrelation.checked = false;
+  }
+});
 // $(document).on("click", ".btn-ldscore-file-correlation :file", function () {
 //   console.log("Current files:", this.files);
 //   //$(this).val("");
@@ -1426,6 +1440,9 @@ function setupLDscoreExample() {
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
       console.log(data);
+      const newDiv = document.createElement("div");
+      newDiv.textContent = "Input files uploaded";
+      fileContainer.appendChild(newDiv);
       data.filenames.forEach(function (fileName) {
         var fileDiv = document.createElement("div");
         //fileDiv.textContent = fileName;
@@ -1442,6 +1459,7 @@ function setupLDscoreExample() {
         var file = new File([""], fileName);
         dataTransfer.items.add(file);
       });
+    
 
       // Assign the files to the file input element
       var fileInput = document.getElementById("ldscore-file");
@@ -1516,7 +1534,8 @@ function setupLDheritExample() {
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
      // console.log(data);
-
+     const newDiv = document.createElement("div");
+     newDiv.textContent = "Input file uploaded";
        
       var fileContainer = document.getElementById("ldheritFile");
       fileContainer.innerHTML = ""; // Clear any existing content
@@ -1529,7 +1548,7 @@ function setupLDheritExample() {
       downloadLink.textContent = data.filenames; // Set the link text to the file name
       fileDiv.appendChild(downloadLink);
       fileDiv.appendChild(document.createElement("br"));
-
+      fileContainer.appendChild(newDiv);
       fileContainer.appendChild(fileDiv);
 
       // Create a new File object and add it to the DataTransfer object
@@ -1621,6 +1640,8 @@ function setupLDcorrelationExample() {
       // Create a DataTransfer object to simulate file input
       var dataTransfer = new DataTransfer();
       var dataTransfer2 = new DataTransfer();
+      const newDiv = document.createElement("div");
+      newDiv.textContent = "Input files uploaded";
 
       var fileContainer = document.getElementById("correlationFile");
       fileContainer.innerHTML = ""; // Clear any existing content
@@ -1648,6 +1669,7 @@ function setupLDcorrelationExample() {
 
 
       // Append the div to the container
+      fileContainer.appendChild(newDiv);
       fileContainer2.appendChild(fileDiv);
       fileContainer2.appendChild(fileDiv2);
       
@@ -1882,22 +1904,12 @@ function uploadFileScore() {
   var fileExistInput = document.getElementById("ldscoreFile");
   fileExistInput.innerHTML = ""; // Clear the file input value
   var filelist = ""
+  
+
+  createFileList(fileList, file, formData);
+
   for (let i = 0; i < file.length; i++) {
-    const fileItem = document.createElement("div");
-    fileItem.textContent = file[i].name;
-    fileList.appendChild(fileItem);
-    console.log(fileItem);
-    formData.append("ldscoreFile" + i, file[i]);
     filelist += file[i].name+";";
-    // if (fileItem.textContent.includes(fileinput)) {
-    //   fileList.appendChild(fileItem);
-    //   console.log(fileItem);
-    //   formData.append("ldscoreFile" + i, file[i]);
-    // } else {
-    //   fileList.removeChild(fileItem);
-    //   formData.delete("ldscoreFile" + i);
-    //   console.log(fileItem);
-    // }
   }
   document.getElementById("ldscore-file-label").value=filelist;
   // if (document.getElementById("ldscore-bokeh-graph") !== null)
@@ -1954,25 +1966,23 @@ function uploadFileldherit() {
   var fileinput = document.getElementById("ldscore-file-label-herit").value;
   //var fileExistInput = document.getElementById("ldscoreFile");
   //fileExistInput.innerHTML = ""; // Clear the file input value
-  var fileinputlist= "";
-  for (let i = 0; i < file.length; i++) {
-    const fileItem = document.createElement("div");
-    fileItem.textContent = file[i].name;
-    fileList.appendChild(fileItem);
-    console.log(fileItem);
-    fileinputlist += file[i].name;
-    formData.append("ldscoreFile" + i, file[i]);
-    // if (fileItem.textContent.includes(fileinput)) {
-    //   fileList.appendChild(fileItem);
-    //   console.log(fileItem);
-    //   formData.append("ldscoreFile" + i, file[i]);
-    // } else {
-    //   fileList.removeChild(fileItem);
-    //   formData.delete("ldscoreFile" + i);
-    //   console.log(fileItem);
-    // }
-  }
-  document.getElementById("ldscore-file-label-herit").value = fileinputlist;
+  createFileList(fileList, file, formData);
+
+  // for (let i = 0; i < file.length; i++) {
+  //   const fileItem = document.createElement("div");
+  //  // fileItem.innerHTML =file[i].name;
+  //   var downloadLink = document.createElement("a");
+  //   downloadLink.textContent =  file[i].name;
+  //   downloadLink.href = '/LDlinkRestWeb//tmp/uploads/'+file[i].name; // Set the file URL
+  //   downloadLink.target = '_blank';
+  //   //downloadLink.download = data.filenames; // Set the file n
+  
+  //   fileItem.appendChild(downloadLink);
+  //   fileItem.appendChild(document.createElement("br"));
+  //   console.log(fileList.appendChild(fileItem));
+  //   console.log(fileItem);
+  //   formData.append("ldscoreFile" + i, file[i]);
+  // }
 
 
   // if (document.getElementById("ldscore-bokeh-graph") !== null)
@@ -2037,26 +2047,29 @@ function uploadFileldcorrelation(fileid) {
   //var fileExistInput = document.getElementById("ldscoreFile");
   //fileExistInput.innerHTML = ""; // Clear the file input value
   var fileinputlist= "";
-  console.log(file, fileinput);
-  for (let i = 0; i < file.length; i++) {
-    const fileItem = document.createElement("div");
-    fileItem.textContent = file[i].name;
-    fileinputlist += file[i].name;
-    fileList.appendChild(fileItem);
-    console.log(fileItem);
-    formData.append("ldscoreFile" + i, file[i]);
-    // if (fileItem.textContent.includes(fileinput)) {
-    //   fileList.appendChild(fileItem);
-    //   console.log(fileItem);
-    //   formData.append("ldscoreFile" + i, file[i]);
-    // } else {
-    //   fileList.removeChild(fileItem);
-    //   formData.delete("ldscoreFile" + i);
-    //   console.log(fileItem);
-    // }
-  }
-  console.log(fileinputlist);
-  fileInput = "test.txt";
+
+  
+  fileid.includes("2")? createFileList(fileList, file, formData, false):createFileList(fileList, file, formData);
+
+  // const newDiv = document.createElement("div");
+  // fileList.appendChild(newDiv);
+  // // Add text content to the div
+  // newDiv.textContent = "files input";
+  // for (let i = 0; i < file.length; i++) {
+  //   const fileItem = document.createElement("div");
+  //  // fileItem.innerHTML =file[i].name;
+  //   var downloadLink = document.createElement("a");
+  //   downloadLink.textContent =  file[i].name;
+  //   downloadLink.href = '/LDlinkRestWeb//tmp/uploads/'+file[i].name; // Set the file URL
+  // //downloadLink.download = data.filenames; // Set the file n
+  //   downloadLink.target = '_blank';
+  //   fileItem.appendChild(downloadLink);
+  //   fileItem.appendChild(document.createElement("br"));
+  //   console.log(fileList.appendChild(fileItem));
+  //   console.log(fileItem);
+  //   formData.append("ldscoreFile" + i, file[i]);
+  // }
+
   // if (document.getElementById("ldscore-bokeh-graph") !== null)
   //   document.getElementById("ldscore-bokeh-graph").innerHTML = "";
   //if (document.getElementById("ldscore-results-container") !== null)
@@ -2089,6 +2102,39 @@ function uploadFileldcorrelation(fileid) {
     contentType: false,
     processData: false,
   });
+}
+
+function createFileList(fileList, file, formData, hasText=true) {
+  // Create a new div and append it to the fileList
+  const newDiv = document.createElement("div");
+ if(fileList.id==='ldheritFile')
+    newDiv.textContent = "Input file uploaded";
+  else{
+    newDiv.textContent = "Input files uploaded";
+  }
+  if(hasText) fileList.appendChild(newDiv);
+
+
+  // Loop through the files and create file items
+  for (let i = 0; i < file.length; i++) {
+    const fileItem = document.createElement("div");
+
+    // Create a download link for the file
+    const downloadLink = document.createElement("a");
+    downloadLink.textContent = file[i].name;
+    downloadLink.href = '/LDlinkRestWeb/tmp/uploads/' + file[i].name; // Set the file URL
+    downloadLink.target = '_blank';
+
+    // Append the download link and a line break to the file item
+    fileItem.appendChild(downloadLink);
+    fileItem.appendChild(document.createElement("br"));
+
+    // Append the file item to the fileList
+    fileList.appendChild(fileItem);
+
+    // Add the file to the FormData object
+    formData.append("ldscoreFile" + i, file[i]);
+  }
 }
 
 function progressHandlingFunction(e) {
