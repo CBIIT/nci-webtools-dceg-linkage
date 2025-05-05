@@ -9020,7 +9020,6 @@ function testResize() {
 }
 document.addEventListener("DOMContentLoaded", function () {
   console.log("DOM fully loaded and parsed"); // Debugging statement
-  // Function to validate the input value
   function validateInput() {
     var input = document.getElementById("ldscore-wind");
     if (!input.checkValidity()) {
@@ -9247,5 +9246,17 @@ window.addEventListener("load", function () {
         targetElement.scrollIntoView();
       }
     }, 300); // You can adjust the delay depending on how long your tab content takes to render
+  }
+});
+
+window.addEventListener('load', () => {
+  if( $("#example-ldherit").is(":checked")){
+    $("#example-ldherit").trigger("click");
+  }
+  if( $("#example-correlation").is(":checked")){
+    $("#example-correlation").trigger("click");
+  }
+  if( $("#example-ldscore").is(":checked")){
+    $("#example-ldscore").trigger("click");
   }
 });
