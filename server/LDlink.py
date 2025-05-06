@@ -866,7 +866,7 @@ def ldscore():
 
     pop = request.args.get('pop', False)
     genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)+".bim"
+    filename = request.args.get('filename', False)
     ldwindow = request.args.get('ldwindow', '1')
     windUnit = request.args.get('windUnit', 'cm')
     isExample = request.args.get('isExample', False)
@@ -884,16 +884,16 @@ def ldscore():
             if part.isdigit() and 1 <= int(part) <= 22:
                 file_chromo = part
                 break
-    print(file_chromo)
+    print(887,file_chromo)
     if file_chromo:
-        # Find the file in the directory
-        pattern = os.path.join(fileDir, f"{fileroot}.*")
-        for file_path in glob.glob(pattern):
-            extension = file_path.split('.')[-1]
-            new_filename = f"{file_chromo}.{extension}"
-            new_file_path = os.path.join(fileDir, new_filename)
-            os.rename(file_path, new_file_path)
-            print(f"Renamed {file_path} to {new_file_path}")
+         # Find the file in the directory
+         pattern = os.path.join(fileDir, f"{fileroot}.*")
+         for file_path in glob.glob(pattern):
+             extension = file_path.split('.')[-1]
+             new_filename = f"{file_chromo}.{extension}"
+             new_file_path = os.path.join(fileDir, new_filename)
+             os.rename(file_path, new_file_path)
+             print(f"Renamed {file_path} to {new_file_path}")
             #shutil.copy(file_path, new_file_path)  # Copy the file instead of renaming it
 
     try:
