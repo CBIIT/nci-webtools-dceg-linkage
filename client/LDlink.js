@@ -1631,9 +1631,9 @@ function setupLDcorrelationExample() {
     }).success(function (response) {
       //console.log(response);
       document.getElementById("ldscore-file-label-correlation").value =
-        "BBJ_HDLC22";
+        "BBJ_HDLC22.txt";
       document.getElementById("ldscore-file-label-correlation2").value =
-        "BBJ_LDLC22";
+        "BBJ_LDLC22.txt";
       var data = JSON.parse(response);
       // var fileContainer = document.getElementById("ldscoreFile");
       //  fileContainer.innerHTML = ""; // Clear any existing content
