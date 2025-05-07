@@ -1433,7 +1433,7 @@ function setupLDscoreExample() {
       },
     }).success(function (response) {
       //console.log(response);
-      document.getElementById("ldscore-file-label").value = "22.bed;22.bim;22.fam";
+      document.getElementById("ldscore-file-label").value = "22.bed, 22.bim, 22.fam";
       var data = JSON.parse(response);
       var fileContainer = document.getElementById("ldscoreFile");
       fileContainer.innerHTML = ""; // Clear any existing content
@@ -1441,7 +1441,8 @@ function setupLDscoreExample() {
       var dataTransfer = new DataTransfer();
       console.log(data);
       const newDiv = document.createElement("div");
-      newDiv.textContent = "Input files uploaded";
+      newDiv.textContent = "Input files uploaded:";
+      newDiv.style.fontWeight = "bold";
       fileContainer.appendChild(newDiv);
       data.filenames.forEach(function (fileName) {
         var fileDiv = document.createElement("div");
@@ -1535,7 +1536,8 @@ function setupLDheritExample() {
       var dataTransfer = new DataTransfer();
      // console.log(data);
      const newDiv = document.createElement("div");
-     newDiv.textContent = "Input file uploaded";
+     newDiv.textContent = "Input file uploaded:";
+     newDiv.style.fontWeight = "bold";
        
       var fileContainer = document.getElementById("ldheritFile");
       fileContainer.innerHTML = ""; // Clear any existing content
@@ -1641,7 +1643,8 @@ function setupLDcorrelationExample() {
       var dataTransfer = new DataTransfer();
       var dataTransfer2 = new DataTransfer();
       const newDiv = document.createElement("div");
-      newDiv.textContent = "Input files uploaded";
+      newDiv.textContent = "Input files uploaded:";
+      newDiv.style.fontWeight = "bold";
 
       var fileContainer = document.getElementById("correlationFile");
       fileContainer.innerHTML = ""; // Clear any existing content
@@ -1909,7 +1912,7 @@ function uploadFileScore() {
   createFileList(fileList, file, formData);
 
   for (let i = 0; i < file.length; i++) {
-    filelist += file[i].name+";";
+    filelist += file[i].name+", ";
   }
   document.getElementById("ldscore-file-label").value=filelist;
   // if (document.getElementById("ldscore-bokeh-graph") !== null)
@@ -2112,6 +2115,7 @@ function createFileList(fileList, file, formData, hasText=true) {
   else{
     newDiv.textContent = "Input files uploaded";
   }
+  newDiv.style.fontWeight = "bold";
   if(hasText) fileList.appendChild(newDiv);
 
 

@@ -1424,11 +1424,17 @@ input:checked + .slider:before {
     padding-bottom: 20px; /* Adjust the value as needed */
     box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
 }
-#ldscore-sample, #example-ldscore,#example-ldherit,#example-correlation {
+#example-ldherit,#example-correlation {
 	position: relative;
 	top: 15;
-	left: 10px !important;
-	
+	left: 5px !important;
+	display: block; 
+  }
+
+  #ldscore-sample, #example-ldscore {
+	position: relative;
+	top: 15 !important;
+	left: 5px !important;
 	display: block; 
   }
   
