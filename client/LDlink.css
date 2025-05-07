@@ -1284,6 +1284,7 @@ textarea:invalid,
 	clear: left;
 	margin-top: 10px;
 	margin-left: -172px;
+	left: 172px;
 }
 
 #ldassoc-sample-label, #ldscore-sample-label, #ldherit-sample-label,#correlation-sample-label {
@@ -1427,13 +1428,13 @@ input:checked + .slider:before {
 #example-ldherit,#example-correlation {
 	position: relative;
 	top: 15;
-	left: 5px !important;
+	left: 8px !important;
 	display: block; 
   }
 
   #ldscore-sample, #example-ldscore {
 	position: relative;
-	top: 15 !important;
+	top: 18 !important;
 	left: 5px !important;
 	display: block; 
   }
