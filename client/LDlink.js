@@ -4450,7 +4450,8 @@ function updateLDscore() {
       summaryHeaders,
       summaryData.ldScoreSummary,
       true,
-      "summary-table-container"
+      "summary-table-container",
+      "Summary of LD Scores"
     );
     document
       .getElementById("summary-table-container")
@@ -4462,7 +4463,8 @@ function updateLDscore() {
       ldscoreHeaders,
       summaryData.correlationMatrix,
       false,
-      "ldscore-table-container"
+      "ldscore-table-container",
+      "MAF/LD Score Correlation Matrix"
     );
     document
       .getElementById("ldscore-table-container")
@@ -4476,10 +4478,9 @@ function updateLDscore() {
     downloadLink.href =
       "/LDlinkRestWeb/tmp/uploads/" + chromeFile + ".l2.ldscore.gz"; // Set the href to the backend path
 
-    var downloadLogLink = document.getElementById("ldscore-download-log-url");
-    downloadLogLink.href = "/LDlinkRestWeb/tmp/uploads/" + chromeFile + ".log"; // Set the href to the backend path
-
-    // Create a download link for the input files
+ //   var downloadLogLink = document.getElementById("ldscore-download-log-url");
+   // downloadLogLink.href = "/LDlinkRestWeb/tmp/uploads/" + chromeFile + ".log"; // Set the href to the backend path
+     // Create a download link for the input files
     var downloadLinkInput = document.getElementById(
       "ldscore-input-download-url"
     );
@@ -4783,7 +4784,7 @@ function parseResultCorrelation(resultDataText, title, tablename) {
   };
   // Create the table element
   var table = document.createElement("table");
-  table.className = "bordered";
+  //table.className = "bordered";
   var caption = document.createElement("caption");
   caption.textContent = title;
   table.appendChild(caption);
@@ -4897,7 +4898,7 @@ function parseResultHerit(resultDataText, title, title2) {
   return summaryData;
 }
 // Function to create a table
-function createTable(headers, data, isSummary, containerId) {
+function createTable(headers, data, isSummary, containerId, tableTitle) {
   var container = document.getElementById(containerId);
 
   // Check if a table already exists in the container and remove it
@@ -4908,6 +4909,10 @@ function createTable(headers, data, isSummary, containerId) {
 
   var table = document.createElement("table");
   table.className = "table table-bordered";
+  var caption = document.createElement("caption");
+  caption.textContent = tableTitle;
+  caption.style.whiteSpace = "nowrap"; // Prevent wrapping
+  table.appendChild(caption);
 
   // Create table header
   var thead = document.createElement("thead");
@@ -9193,6 +9198,14 @@ var downloadButtonConfigs = [
     buttonId: "download-herit-tables-btn",
     containerIds: ["herit-table-container"],
     fileName: "herit_tables.txt"
+  },
+  {
+    // For the ldscore tables download button
+    buttonId: "ldscore-download-log-url",
+    containerIds: ["summary-table-container",
+                  "ldscore-table-container"
+                   ],
+    fileName: "ldscore_tables.txt"
   }
 ];
 
