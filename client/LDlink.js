@@ -4992,7 +4992,7 @@ function createHeritTable(headers, data, isSummary, containerId, tableTitle) {
       if (data[key]) {
         var row = document.createElement("tr");
         var cell = document.createElement("td");
-        cell.textContent = key;
+        cell.innerHTML = key.includes("Chi")?"Mean Chi&sup2":key.includes("h2")?"Total Observed scale h&sup2":key;
         cell.style.border = "1px solid black";
         cell.style.padding = "8px";
         cell.style.textAlign = "left";
@@ -5104,7 +5104,7 @@ function updateLDcorrelation() {
       summaryHerit.res1,
       true,
       "correlation-table-container-1",
-      "Heritability of phenotype 1"
+      "Heritability of Phenotype 1"
     );
     document
       .getElementById("correlation-table-container-1")
@@ -5120,7 +5120,7 @@ function updateLDcorrelation() {
       summaryHerit2.res1,
       true,
       "correlation-table-container-2",
-      "Heritability of phenotype 2"
+      "Heritability of Phenotype 2"
     );
     document
       .getElementById("correlation-table-container-2")

@@ -339,7 +339,7 @@
 									<h2 style="color:white; margin:0px;  font-size: 24px;">LDscore</h2>
 								</div>
 								<div class="card-body">
-									<p>Calculate LDscore.</p>
+									<p>Calculate LD scores and perform LD score regression</p>
 								</div>
 							</a>
 						</div>
@@ -2269,7 +2269,7 @@
 							<ul class="nav nav-tabs">
 								<li class="active"><a data-toggle="tab" href="#ldscore-heritability-tab">Heritability Analysis</a></li>
 								<li><a data-toggle="tab" href="#ldscore-correlation-tab">Genetic Correlation</a></li>
-								<li ><a data-toggle="tab" href="#ldscore-file-container-tab">LDscore Calculation</a></li>
+								<li ><a data-toggle="tab" href="#ldscore-file-container-tab">LD Score Calculation</a></li>
 								<!-- <li><a data-toggle="tab" href="#ldscore-inflation-tab">Inflation Calculation</a></li> -->
 							</ul>
 							<div class="tab-content">
@@ -2379,11 +2379,9 @@
 													<div class="panel-group" id="heritCollapseGroup" style="display: none;">
 														<div class="panel panel-default">
 														<div class="panel-heading">
-															<h4 class="panel-title">
-																<a data-toggle="collapse" data-parent="#heritCollapseGroup" href="#collapseHeritGraph" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
-																	Heritability Analysis Process Outputs <i class="fa fa-chevron-down indicator"></i>
+																<a data-toggle="collapse" data-parent="#heritCollapseGroup" href="#collapseHeritGraph" style="color: #333;text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																	Heritability Analysis Output <i class="fa fa-chevron-down indicator"></i>
 																  </a>
-															</h4>
 														</div>
 														<div id="collapseHeritGraph" class="panel-collapse collapse">
 															<div class="panel-body">
@@ -2525,11 +2523,9 @@
 													<div class="panel-group" id="correlationCollapseGroup" style="display: none;">
 														<div class="panel panel-default">
 															<div class="panel-heading">
-																<h4 class="panel-title">
-																	<a data-toggle="collapse" data-parent="#correlationCollapseGroup" href="#collapseCorrelationGraph" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
-																		Correlation Analysis Process Outputs <i class="fa fa-chevron-down indicator"></i>
+																	<a data-toggle="collapse" data-parent="#correlationCollapseGroup" href="#collapseCorrelationGraph" style="color: #333;text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																		Correlation Analysis Output <i class="fa fa-chevron-down indicator"></i>
 																	  </a>
-																</h4>
 															</div>
 														<div id="collapseCorrelationGraph" class="panel-collapse collapse">
 															<div class="panel-body">
@@ -2648,7 +2644,7 @@
 															<a id="ldscore-input-download-url" class="ldscore-download-button">Download Inputs</a>
 														  <a id="ldscore-download-log-url" download="result.txt"  
 														  class="ldscore-download-button">Download Tables</a>
-														  <a id="ldscore-download-url" class="ldscore-download-button">Download LDscore</a>
+														  <a id="ldscore-download-url" class="ldscore-download-button">Download LD Scores</a>
 
 														</div>
 													</div>
@@ -2657,12 +2653,9 @@
 													<div class="panel-group" id="ldscoreCollapseGroup" style="display: none;">
 															<div class="panel panel-default">
 																<div class="panel-heading">
-																	<h4 class="panel-title">
-																	<a data-toggle="collapse" data-parent="#ldscoreCollapseGroup" href="#collapseLDscoreGraph" style="text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
-																		LDscore Analysis Process Outputs <i class="fa fa-chevron-down indicator"></i>
+																	<a data-toggle="collapse" data-parent="#ldscoreCollapseGroup" href="#collapseLDscoreGraph" style="color: #333; text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																		LD Score Analysis Output <i class="fa fa-chevron-down indicator"></i>
 																	</a>
-																	
-																	</h4>
 																</div>
 																<div id="collapseLDscoreGraph" class="panel-collapse collapse">
 																	<div class="panel-body">
