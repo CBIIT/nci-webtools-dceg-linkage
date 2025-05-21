@@ -4798,7 +4798,7 @@ function parseResultCorrelation(resultDataText, title, tablename) {
   var headerRow = document.createElement("tr");
   headers.forEach((header) => {
     var th = document.createElement("th");
-    th.textContent = header;
+    th.textContent = header.includes("h2")?header.replace("h2", "h\u00B2"):header;;
     th.style.border = "1px solid black";
     th.style.padding = "8px";
     th.style.textAlign = "left";
@@ -5303,7 +5303,7 @@ function parseAndCreateTables(resultDataText, title1, title2) {
     var headerRow = document.createElement("tr");
     summaryHeaders.forEach((header) => {
       var th = document.createElement("th");
-      th.textContent = header;
+      th.textContent = header
       th.style.border = "1px solid black";
       th.style.padding = "8px";
       th.style.textAlign = "left";
