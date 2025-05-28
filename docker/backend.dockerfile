@@ -64,6 +64,9 @@ COPY server/requirements.txt .
 
 RUN python3 -m pip install -r requirements.txt
 
+RUN mkdir -p /var/cache/fontconfig \
+    && chown -R apache:apache /var/cache/fontconfig
+
 COPY server/ .
 
 COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf

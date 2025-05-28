@@ -6,6 +6,8 @@ import argparse
 import json
 import time
 import random
+import logging
+import sys
 from threading import Thread
 from pathlib import Path
 from functools import wraps
@@ -26,12 +28,13 @@ from LDcommon import genome_build_vars,connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
 from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
+from Cleanup import schedule_tmp_cleanup
 
 # retrieve config
 param_list = get_config()
 # Ensure tmp directory exists
 tmp_dir = param_list['tmp_dir']
-log_level = param_list['log_level']
+
 
 Path(tmp_dir).mkdir(parents=True, exist_ok=True) 
 
@@ -42,7 +45,17 @@ app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024 * 1024
 app.config['UPLOAD_DIR'] = os.path.join(tmp_dir, 'uploads')
 app.debug = False
+
+# Log settings
+log_level = getattr(logging, param_list['log_level'].upper(), logging.DEBUG)
+formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s", "%Y-%m-%d %H:%M:%S")
+handler = logging.StreamHandler(stream=sys.stderr)
+handler.setLevel(log_level)
+handler.setFormatter(formatter)
+
+app.logger = logging.getLogger("root")
 app.logger.setLevel(log_level)
+app.logger.addHandler(handler)
 
 os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
 
@@ -494,7 +507,8 @@ def root():
 #@app.route('/LDlinkRest2/ping/', strict_slashes=False)
 @app.route('/ping/', strict_slashes=False)
 def ping():
-    print("pong")
+    app.logger.debug("pong")
+    print('pong')
     try:
         return "true"
     except Exception as e:
@@ -716,6 +730,7 @@ def ldassoc():
         # PROGRAMMATIC ACCESS NOT AVAILABLE
     end_time = time.time()
     app.logger.info("Executed LDassoc (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return sendJSON(out_json)
 
 # Web and API route for LDexpress
@@ -736,12 +751,13 @@ def ldexpress():
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
+    reference = str(data['reference']) if 'reference' in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = str(data['reference'])
+            # reference = str(data['reference'])
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
             app.logger.debug('ldexpress params ' + json.dumps({
                 'snps': snps,
@@ -786,7 +802,7 @@ def ldexpress():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
         app.logger.debug('ldexpress params ' + json.dumps({
                 'snps': snps,
@@ -842,6 +858,7 @@ def ldexpress():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDexpress (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDhap
@@ -856,12 +873,12 @@ def ldhap():
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
     web = False
+    reference = request.args.get('reference', str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = request.args.get('reference', False)
             # print('request: ' + str(reference))
             app.logger.debug('LDhap params ' + json.dumps({
                 'snps': snps,
@@ -885,7 +902,6 @@ def ldhap():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('LDhap params ' + json.dumps({
                 'snps': snps,
                 'pop': pop,
@@ -932,6 +948,7 @@ def ldhap():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDhap (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return sendJSON(out_json)
 
 # Web and API route for LDmatrix
@@ -961,12 +978,13 @@ def ldmatrix():
         collapseTranscript = request.args.get('collapseTranscript', True)
     token = request.args.get('token', False)
     web = False
+    if reference is False:
+        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = request.args.get('reference', False)
             annotate = request.args.get('annotate',True)
             # print('request: ' + str(reference))
             app.logger.debug('ldmatrix params ' + json.dumps({
@@ -994,7 +1012,6 @@ def ldmatrix():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('ldmatrix params ' + json.dumps({
             'snps': snps,
             'pop': pop,
@@ -1048,6 +1065,7 @@ def ldmatrix():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDmatrix (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return out_script + "\n " + out_div
 
 # Web and API route for LDpair
@@ -1161,7 +1179,7 @@ def ldpair():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDpair (%ss)" % (round(end_time - start_time, 2)))
- 
+    schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDpop
@@ -1178,12 +1196,13 @@ def ldpop():
     token = request.args.get('token', False)
     genome_build = request.args.get('genome_build', 'grch37')
     web = False
+    reference = request.args.get('reference', str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = request.args.get('reference', False)
+            # reference = request.args.get('reference', False)
             app.logger.debug('ldpop params ' + json.dumps({
                 'var1': var1,
                 'var2': var2,
@@ -1205,7 +1224,7 @@ def ldpop():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('ldpop params ' + json.dumps({
             'var1': var1,
             'var2': var2,
@@ -1248,6 +1267,7 @@ def ldpop():
     end_time = time.time()
     app.logger.info("Executed LDpop (%ss)" % (round(end_time - start_time, 2)))
     print("ERRR",out_json)
+    schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for LDproxy
@@ -1266,12 +1286,13 @@ def ldproxy():
     collapseTranscript = request.args.get('collapseTranscript', True)
     #annotateText = request.args.get('annotate', False)
     web = False
+    reference = request.args.get('reference', str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = request.args.get('reference', False)
+            # reference = request.args.get('reference', False)
             annotate = request.args.get('annotate', False)
             # print('request: ' + str(reference))
             app.logger.debug('ldproxy params ' + json.dumps({
@@ -1297,7 +1318,7 @@ def ldproxy():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         # print('request: ' + str(reference))
         app.logger.debug('ldproxy params ' + json.dumps({
             'var': var,
@@ -1345,6 +1366,7 @@ def ldproxy():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDproxy (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return out_script + "\n " + out_div
 
 # Web and API route for LDtrait
@@ -1363,7 +1385,8 @@ def ldtrait():
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
-   
+    reference = str(data['reference']) if 'reference' in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+    
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
@@ -1372,7 +1395,7 @@ def ldtrait():
             if data['ifContinue']:
                 ifContinue = data['ifContinue'] 
                 ifContinue = bool(ifContinue!="False")
-            reference = str(data['reference'])
+            # reference = str(data['reference'])
             app.logger.debug('ldtrait params ' + json.dumps({
                 'snps': snps,
                 'pop': pop,
@@ -1425,7 +1448,7 @@ def ldtrait():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('ldtrait params ' + json.dumps({
             'snps': snps,
             'pop': pop,
@@ -1502,6 +1525,7 @@ def ldtrait():
             print("time out")
     end_time = time.time()
     app.logger.info("Executed LDtrait (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype='application/json')
 
 
@@ -1518,12 +1542,14 @@ def snpchip():
     platforms = data['platforms']
     token = request.args.get('token', False)
     web = False
+    reference = str(data['reference']) if 'reference' in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+    
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = str(data['reference'])
+            # reference = str(data['reference'])
             app.logger.debug('snpchip params ' + json.dumps({
                 'snps': snps,
                 'token': token,
@@ -1547,7 +1573,7 @@ def snpchip():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         # print('request: ' + reference)
         app.logger.debug('snpchip params ' + json.dumps({
             'snps': snps,
@@ -1593,6 +1619,7 @@ def snpchip():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed SNPchip (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype='application/json')
 
 # Web and API route for SNPclip
@@ -1610,12 +1637,14 @@ def snpclip():
     token = request.args.get('token', False)
     genome_build = data['genome_build'] if 'genome_build' in data else 'grch37'
     web = False
+    reference = str(data['reference']) if 'reference' in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+
     # differentiate web or api request
     if 'LDlinkRestWeb' in request.path:
         # WEB REQUEST
         if request.user_agent.browser is not None:
             web = True
-            reference = str(data['reference'])
+            # reference = str(data['reference'])
             app.logger.debug('snpclip params ' + json.dumps({
                 'snps': snps,
                 'pop': pop,
@@ -1668,7 +1697,7 @@ def snpclip():
     else:
         # API REQUEST
         web = False
-        reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
         app.logger.debug('snpclip params ' + json.dumps({
             'snps': snps,
             'pop': pop,
@@ -1730,6 +1759,7 @@ def snpclip():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed SNPclip (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype='application/json')
 
 ### Add Request Headers & Initialize Flags ###
@@ -1764,6 +1794,7 @@ if is_main:
     port_num = int(args.port_number)
     # debugger = args.debug == 'True'
     hostname = gethostname()
+    app.logger.info(f"LDlink server starting on {hostname} at port {port_num} with debug={args.debug}")
     app.run(host='0.0.0.0', port=port_num, use_evalex=False)
     # app.logger.disabled = True
     # application = DebuggedApplication(app, True)
