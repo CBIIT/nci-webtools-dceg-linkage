@@ -6846,14 +6846,14 @@ $('#news-link').on('click', function () {
 	window.scrollTo(0, 40000);
 });
 
-const closeBtn = document.querySelector('.close-button');
-const flashBanner = document.querySelector('.popup-flash');
+// const closeBtn = document.querySelector('.close-button');
+// const flashBanner = document.querySelector('.popup-flash');
 
-closeBtn.addEventListener('click', () => {
-	//flashBanner.style.transform = "translateY(-70vh)";
-	flashBanner.style.display = 'none';
-});
-setTimeout(() => {
-	//flashBanner.style.transform = "translateY(-70vh)";
-	flashBanner.style.display = 'none';
-}, 20000);
+// closeBtn.addEventListener('click', () => {
+// 	//flashBanner.style.transform = "translateY(-70vh)";
+// 	flashBanner.style.display = 'none';
+// });
+// setTimeout(() => {
+// 	//flashBanner.style.transform = "translateY(-70vh)";
+// 	flashBanner.style.display = 'none';
+// }, 20000);
