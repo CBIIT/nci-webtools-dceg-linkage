@@ -1,14 +1,14 @@
 
-bokeh==0.13.0
+bokeh==3.4.3
 boto3
-Flask==1.1.4
-jinja2==2.11.3
-MarkupSafe==1.1.1
+Flask==3.1.1
+jinja2
+MarkupSafe
 mod_wsgi
 numpy==1.23.1
 pymongo
 python-dateutil
 python-dotenv
 requests
-selenium==3.3.0
-svgutils==0.3.0
+selenium
+svgutils

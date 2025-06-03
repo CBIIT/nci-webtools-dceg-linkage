@@ -419,11 +419,11 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     assoc_plot=figure(
                 title="P-values and Regional LD for "+snp+" in "+pop,
-                min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-                plot_width=900,
-                plot_height=600,
+                min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+                width=900,
+                height=600,
                 x_range=xr, y_range=yr,
-                tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,previewsave", logo=None,
+                tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,save", 
                 toolbar_location="above")
 
     assoc_plot.title.align="center"
@@ -447,8 +447,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     b = [-log10(0.00000005),-log10(0.00000005)]
     assoc_plot.line(a, b, color="blue", alpha=0.5)
 
-    assoc_points_not1000G=assoc_plot.circle(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
-    assoc_points=assoc_plot.circle(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
+    assoc_points_not1000G=assoc_plot.scatter(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
+    assoc_points=assoc_plot.scatter(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
     assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
 
     hover=HoverTool(renderers=[assoc_points])
@@ -489,8 +489,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     rug=figure(
             x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
-            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-            plot_width=900, plot_height=50, tools="xpan,tap,wheel_zoom", logo=None)
+            title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+            width=900, height=50, tools="xpan,tap,wheel_zoom")
 
     rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
     rug.toolbar_location=None
@@ -594,8 +594,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2, border_fill_color='white',
-                            title="", h_symmetry=False, v_symmetry=False, logo=None,
-                            plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                            title="",  
+                            width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -745,8 +745,8 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2_c, border_fill_color='white',
-                            title="", h_symmetry=False, v_symmetry=False, logo=None,
-                            plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                            title="",  
+                            width=900, height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -782,7 +782,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         gene_c_plot.output_backend = "svg"
         export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
         export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
-        
+
         # 1 pixel = 0.0264583333 cm
         svg_height = str(20.00 + (0.0264583333 * plot_c_h_pix)) + "cm"
         svg_height_scaled = str(100.00 + (0.1322916665 * plot_c_h_pix)) + "cm"
