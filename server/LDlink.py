@@ -871,31 +871,32 @@ def ldscore():
     windUnit = request.args.get('windUnit', 'cm')
     isExample = request.args.get('isExample', False)
     print(pop,genome_build,filename,ldwindow,windUnit,isExample)
-    if filename:
-        filename = secure_filename(filename)
-        fileroot, ext = os.path.splitext(filename)
 
     fileDir = f"/data/tmp/uploads"
-    print(filename)
+    #print(filename)
     if filename:
-        file_parts = filename.split('.')
-        file_chromo = None
-        for part in file_parts:
-            if part.isdigit() and 1 <= int(part) <= 22:
-                file_chromo = part
-                break
-    print(887,file_chromo)
-    if file_chromo:
-         # Find the file in the directory
-         pattern = os.path.join(fileDir, f"{fileroot}.*")
-         for file_path in glob.glob(pattern):
-             extension = file_path.split('.')[-1]
-             new_filename = f"{file_chromo}.{extension}"
-             new_file_path = os.path.join(fileDir, new_filename)
-             os.rename(file_path, new_file_path)
-             print(f"Renamed {file_path} to {new_file_path}")
-            #shutil.copy(file_path, new_file_path)  # Copy the file instead of renaming it
-
+        # Split by comma or semicolon (adjust as needed)
+        filenames = [secure_filename(f.strip()) for f in filename.replace(';', ',').split(',')]
+        for fname in filenames:
+            fileroot, ext = os.path.splitext(fname)
+            # Find the chromosome number in the filename
+            file_parts = fname.split('.')
+            file_chromo = None
+            for part in file_parts:
+                if part.isdigit() and 1 <= int(part) <= 22:
+                    file_chromo = part         
+                    break
+            if file_chromo:
+                # Find the file in the directory
+                pattern = os.path.join(fileDir, fname)
+                #print(891, pattern)
+                for file_path in glob.glob(pattern):
+                    extension = file_path.split('.')[-1]
+                    new_filename = f"{file_chromo}.{extension}"
+                    new_file_path = os.path.join(fileDir, new_filename)
+                    shutil.copyfile(file_path, new_file_path)  
+                    #os.rename(file_path, new_file_path)
+                    print(f"Copied {file_path} to {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
        
