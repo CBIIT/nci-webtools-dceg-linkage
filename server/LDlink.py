@@ -874,7 +874,7 @@ def ldscore():
 
     fileDir = f"/data/tmp/uploads"
     #print(filename)
-    if filename:
+    if filename and str(isExample).lower() != "true":
         # Split by comma or semicolon (adjust as needed)
         filenames = [secure_filename(f.strip()) for f in filename.replace(';', ',').split(',')]
         for fname in filenames:
@@ -894,7 +894,7 @@ def ldscore():
                     extension = file_path.split('.')[-1]
                     new_filename = f"{file_chromo}.{extension}"
                     new_file_path = os.path.join(fileDir, new_filename)
-                    shutil.copyfile(file_path, new_file_path)  
+                    #shutil.copyfile(file_path, new_file_path)  
                     #os.rename(file_path, new_file_path)
                     print(f"Copied {file_path} to {new_file_path}")
     try:
