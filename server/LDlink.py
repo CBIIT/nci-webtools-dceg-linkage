@@ -576,7 +576,7 @@ def upload():
         #     print('No file part')
         #     return 'No file part...'
         file = request.files['ldassocFile'] if 'ldassocFile' in request.files else request.files['ldscoreFile'] if 'ldscoreFile' in request.files else None
-
+        reference = request.form.get('reference', None)
 
         # if user does not select file, browser also
         # submit a empty part without filename
@@ -587,6 +587,7 @@ def upload():
             if file.filename == '':
                 print('No selected file')
                 return 'No selected file'
+     
             if file:
                 print('file.filename ' + file.filename)
                 print('file and allowed_file')
@@ -594,7 +595,12 @@ def upload():
                 print("About to SAVE file")
                 print("filename = " + filename)
                 os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
-                file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+                if reference:
+                    ref_dir = os.path.join(app.config['UPLOAD_DIR'], reference)
+                    os.makedirs(ref_dir, exist_ok=True)
+                    file.save(os.path.join(ref_dir, filename))
+                else:
+                    file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
                 print(f'File {filename} was saved')
         
         return 'All files were saved'
@@ -870,9 +876,10 @@ def ldscore():
     ldwindow = request.args.get('ldwindow', '1')
     windUnit = request.args.get('windUnit', 'cm')
     isExample = request.args.get('isExample', False)
+    reference = request.args.get('reference',False)
     print(pop,genome_build,filename,ldwindow,windUnit,isExample)
 
-    fileDir = f"/data/tmp/uploads"
+    fileDir = f"/data/tmp/uploads/{reference}/"
     #print(filename)
     if filename and str(isExample).lower() != "true":
         # Split by comma or semicolon (adjust as needed)
@@ -894,16 +901,24 @@ def ldscore():
                     extension = file_path.split('.')[-1]
                     new_filename = f"{file_chromo}.{extension}"
                     new_file_path = os.path.join(fileDir, new_filename)
-                    shutil.copyfile(file_path, new_file_path)  
+                   # Create the reference subfolder if it doesn't exist
+                    #reference_folder = os.path.join(fileDir, str(reference))
+                    #os.makedirs(reference_folder, exist_ok=True)
+                    new_file_path = os.path.join(fileDir, new_filename)
+                    if os.path.abspath(file_path) != os.path.abspath(new_file_path):
+                        shutil.copyfile(file_path, new_file_path)
+                        print(f"Copied {file_path} to {new_file_path}")
+                    else:
+                        print(f"Skipped copying {file_path} to itself.")
                     #os.rename(file_path, new_file_path)
-                    print(f"Copied {file_path} to {new_file_path}")
+                    #print(f"Copied {file_path} to {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
        
         #response = requests.get(ldsc39_url)
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
-        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
+        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample,reference)
         print("######################### Result:")
         #print(result)
         if web:
@@ -1043,6 +1058,7 @@ def ldherit():
     genome_build = request.args.get('genome_build', 'grch37')
     filename = request.args.get('filename', False)
     isexample = request.args.get('isExample', False)
+    reference = request.args.get('reference',False)
     print(pop,genome_build,filename,isexample)
     if filename:
         filename = secure_filename(filename)

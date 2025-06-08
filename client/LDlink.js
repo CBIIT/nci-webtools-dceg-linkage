@@ -1907,6 +1907,8 @@ function uploadFileScore() {
   var fileExistInput = document.getElementById("ldscoreFile");
   fileExistInput.innerHTML = ""; // Clear the file input value
   var filelist = ""
+  let reference = document.getElementById('ldscore-reference').value;
+  formData.append("reference", reference);
   
 
   createFileList(fileList, file, formData);
@@ -4351,7 +4353,7 @@ function updateLDscore() {
     filename: $("#ldscore-file-label").val(),
     ldwindow: $("#ldscore-wind").val(),
     windUnit: $("#unit-select").val(),
-    reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
+    reference: document.getElementById('ldscore-reference').value,
     columns: new Object(),
     isExample: $("#example-ldscore").is(":checked") ? "True" : "False",
     //  calculateRegion: $("#score-region > button").val(),
@@ -9276,4 +9278,12 @@ window.addEventListener('load', () => {
   if( $("#example-ldscore").is(":checked")){
     $("#example-ldscore").trigger("click");
   }
+});
+
+document.getElementById('ldscore-file').addEventListener('change', function() {
+    let refInput = document.getElementById('ldscore-reference');
+    if (!refInput.value) {
+        let reference =  Math.floor(Math.random() * (99999 - 10000 + 1));
+        refInput.value = reference;
+    }
 });
