@@ -4369,7 +4369,7 @@ function updateLDscore() {
     //  useEx: $("#example-gwas2").is(":checked") ? "True" : "False",
   };
   console.log(ldInputs);
-
+  document.getElementById("ldscore-results-container").style.display="none";
   // ldInputs.columns.chromosome = $("#score-chromosome > button").val();
   // ldInputs.columns.position = $("#score-position > button").val();
   // ldInputs.columns.pvalue = $("#score-p-value > button").val();
@@ -4572,6 +4572,7 @@ function updateLDherit() {
     isExample: $("#example-ldherit").is(":checked") ? "True" : "False",
   };
   console.log(ldInputs);
+  document.getElementById("ldscore-results-container-herit").style.display="none";
 
   var tempbuild = genomeBuild == "grch37" ? "hg19" : "hg38";
   var r2url =
@@ -4591,8 +4592,7 @@ function updateLDherit() {
     "/LDlinkRestWeb/tmp/score" + ldInputs.reference + ".txt"
   );
   document.getElementById("ldheritmessage").style.display = "block";
-
-
+  
   //console.log( $('#ldassoc-genome'))
   //console.log(ldInputs);
   var url = restServerUrl + "/ldherit";
