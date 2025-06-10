@@ -8347,13 +8347,143 @@ function buildTissueDropdown(elementId, tissueData) {
   }
 }
 
+// function buildPopulationDropdown(elementId) {
+//   //console.log(elementId);
+//  // console.trace();
+//   var htmlText = "";
+//   var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
+//   var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
+//   if (elementId.includes("ldscore")) {
+//     for (var popAbbrev in populationsLdscore) {
+//       var population = populationsLdscore[popAbbrev];
+//       // htmlText += htmlText1
+//       //   .replace(/ABBREV/g, popAbbrev)
+//       //   .replace("FULLNAME", population.fullName);
+//       for (var subPopAbbrev in population.subPopulations) {
+//         var subDetail = population.subPopulations[subPopAbbrev];
+//         htmlText += htmlText2
+//           .replace(/ABBREV/g, subPopAbbrev)
+//           .replace("DETAIL", subDetail);
+//       }
+//       htmlText += "</optgroup>\n";
+//     }
+//   } else {
+//     for (var popAbbrev in populations) {
+//       var population = populations[popAbbrev];
+//       htmlText += htmlText1
+//         .replace(/ABBREV/g, popAbbrev)
+//         .replace("FULLNAME", population.fullName);
+//       for (var subPopAbbrev in population.subPopulations) {
+//         var subDetail = population.subPopulations[subPopAbbrev];
+//         htmlText += htmlText2
+//           .replace(/ABBREV/g, subPopAbbrev)
+//           .replace("DETAIL", subDetail);
+//       }
+//       htmlText += "</optgroup>\n";
+//     }
+//   }
+// alert(elementId)
+//   $("#" + elementId).html(htmlText);
+//   //alert(elementId);
+//   $("#" + elementId).multiselect({
+//     enableClickableOptGroups: true,
+//     buttonWidth: "180px",
+//     maxHeight: 400,
+//     buttonClass: "btn btn-default btn-ldlink-multiselect",
+//     includeSelectAllOption: true,
+//     dropRight: false,
+//     nonSelectedText: "Select Population",
+//     numberDisplayed: 4,
+//     selectAllText: " (ALL) All Populations",
+//     previousOptionLength: 0,
+//     maxPopulationWarn: 2,
+//     maxPopulationWarnTimeout: 5000,
+//     maxPopulationWarnVisible: false,
+//     //maxSelection: 1, // Allow only one selection
+//     // buttonClass: 'btn btn-link',
+//     buttonText: function (options, select) {
+//       //console.log("elementId: "+elementId);
+//       if (
+//         this.previousOptionLength < this.maxPopulationWarn &&
+//         options.length >= this.maxPopulationWarn
+//       ) {
+//         $("#" + elementId + "-popover").popover("show");
+//         this.maxPopulatinWarnVisible = true;
+//         setTimeout(function () {
+//           $("#" + elementId + "-popover").popover("destroy");
+//           this.maxPopulatinWarnVisible = false;
+//         }, this.maxPopulationWarnTimeout);
+//       } else {
+//         //Destory popover if it is currently being displayed.
+//         if (this.maxPopulatinWarnVisible) {
+//           $("#" + elementId + "-popover").popover("destroy");
+//         }
+//       }
+
+//       if (options.length > 0) {
+//         $("#" + elementId + "-zero").popover("hide");
+//       }
+//       this.previousOptionLength = options.length;
+//       if (options.length === 0) {
+//         return this.nonSelectedText + '<span class="caret"></span>';
+//       } else if (options.length == $("option", $(select)).length) {
+//         return this.allSelectedText + '<span class="caret"></span>';
+//       } else if (options.length > this.numberDisplayed) {
+//         return (
+//           '<span class="badge">' +
+//           options.length +
+//           "</span> " +
+//           this.nSelectedText +
+//           '<span class="caret"></span>'
+//         );
+//       } else {
+//         var selected = "";
+//         options.each(function () {
+//           // var label = $(this).attr('label') :
+//           // $(this).html();
+//           selected += $(this).val() + "+";
+//         });
+
+//         return (
+//           selected.substr(0, selected.length - 1) + ' <b class="caret"></b>'
+//         );
+//       }
+//     },
+//     buttonTitle: function (options, select) {
+//       if (options.length === 0) {
+//         return this.nonSelectedText;
+//       } else {
+//         var selected = "";
+//         options.each(function () {
+//           selected += $(this).text() + "\n";
+//         });
+//         return selected;
+//       }
+//     },
+//     onChange: function (option, checked, select) {
+//       if (checked) {
+//         var selectedOptions = $("#" + elementId + " option:selected");
+//         if (selectedOptions.length >= 1) {
+//           // Deselect all other options
+//           var nonSelectedOptions = $("#" + elementId + " option").not(option);
+//           nonSelectedOptions.prop("selected", false);
+//           $("#" + elementId).multiselect("refresh");
+//         }
+//       }
+//     },
+//   });
+
+//   //console.log(elementId);
+//   //console.dir($('#' + elementId));
+// }
+
+
 function buildPopulationDropdown(elementId) {
-  //console.log(elementId);
- // console.trace();
-  var htmlText = "";
-  var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
-  var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
-  if (elementId.includes("ldscore")) {
+	var htmlText = '';
+	var htmlText1 = "<optgroup value='ABBREV' label='(ABBREV) FULLNAME'>\n";
+	var htmlText2 = "<option value='ABBREV'>(ABBREV) DETAIL </option>\n";
+   var isLdscore = elementId.includes("ldscore");
+	 if (isLdscore) {
     for (var popAbbrev in populationsLdscore) {
       var population = populationsLdscore[popAbbrev];
       // htmlText += htmlText1
@@ -8368,114 +8498,111 @@ function buildPopulationDropdown(elementId) {
       htmlText += "</optgroup>\n";
     }
   } else {
-    for (var popAbbrev in populations) {
-      var population = populations[popAbbrev];
-      htmlText += htmlText1
-        .replace(/ABBREV/g, popAbbrev)
-        .replace("FULLNAME", population.fullName);
-      for (var subPopAbbrev in population.subPopulations) {
-        var subDetail = population.subPopulations[subPopAbbrev];
-        htmlText += htmlText2
-          .replace(/ABBREV/g, subPopAbbrev)
-          .replace("DETAIL", subDetail);
-      }
-      htmlText += "</optgroup>\n";
-    }
-  }
+  for (var popAbbrev in populations) {
+		var population = populations[popAbbrev];
+		htmlText += htmlText1
+			.replace(/ABBREV/g, popAbbrev)
+			.replace('FULLNAME', population.fullName);
+		for (var subPopAbbrev in population.subPopulations) {
+			var subDetail = population.subPopulations[subPopAbbrev];
+			htmlText += htmlText2
+				.replace(/ABBREV/g, subPopAbbrev)
+				.replace('DETAIL', subDetail);
+		}
+		htmlText += '</optgroup>\n';
+	}
+}
 
-  $("#" + elementId).html(htmlText);
-  //alert(elementId);
-  $("#" + elementId).multiselect({
-    enableClickableOptGroups: true,
-    buttonWidth: "180px",
-    maxHeight: 400,
-    buttonClass: "btn btn-default btn-ldlink-multiselect",
-    includeSelectAllOption: false,
-    dropRight: false,
-    allSelectedText: "All Populations",
-    nonSelectedText: "Select Population",
-    numberDisplayed: 4,
-    selectAllText: " (ALL) All Populations",
-    previousOptionLength: 0,
-    maxPopulationWarn: 2,
-    maxPopulationWarnTimeout: 5000,
-    maxPopulationWarnVisible: false,
-    maxSelection: 1, // Allow only one selection
-    // buttonClass: 'btn btn-link',
-    buttonText: function (options, select) {
-      //console.log("elementId: "+elementId);
-      if (
-        this.previousOptionLength < this.maxPopulationWarn &&
-        options.length >= this.maxPopulationWarn
-      ) {
-        $("#" + elementId + "-popover").popover("show");
-        this.maxPopulatinWarnVisible = true;
-        setTimeout(function () {
-          $("#" + elementId + "-popover").popover("destroy");
-          this.maxPopulatinWarnVisible = false;
-        }, this.maxPopulationWarnTimeout);
-      } else {
-        //Destory popover if it is currently being displayed.
-        if (this.maxPopulatinWarnVisible) {
-          $("#" + elementId + "-popover").popover("destroy");
+	$('#' + elementId).html(htmlText);
+	//alert(elemtnId);
+	$('#' + elementId).multiselect({
+		enableClickableOptGroups: true,
+		buttonWidth: '180px',
+		maxHeight: 400,
+		buttonClass: 'btn btn-default btn-ldlink-multiselect',
+		includeSelectAllOption: !isLdscore,
+		dropRight: false,
+		allSelectedText: 'All Populations',
+		nonSelectedText: 'Select Population',
+		numberDisplayed: 4,
+		selectAllText: ' (ALL) All Populations',
+		previousOptionLength: 0,
+		maxPopulationWarn: 2,
+		maxPopulationWarnTimeout: 5000,
+		maxPopulationWarnVisible: false,
+		// buttonClass: 'btn btn-link',
+		buttonText: function (options, select) {
+			//console.log("elementId: "+elementId);
+			if (
+				this.previousOptionLength < this.maxPopulationWarn &&
+				options.length >= this.maxPopulationWarn
+			) {
+				$('#' + elementId + '-popover').popover('show');
+				this.maxPopulatinWarnVisible = true;
+				setTimeout(function () {
+					$('#' + elementId + '-popover').popover('destroy');
+					this.maxPopulatinWarnVisible = false;
+				}, this.maxPopulationWarnTimeout);
+			} else {
+				//Destory popover if it is currently being displayed.
+				if (this.maxPopulatinWarnVisible) {
+					$('#' + elementId + '-popover').popover('destroy');
+				}
+			}
+
+			if (options.length > 0) {
+				$('#' + elementId + '-zero').popover('hide');
+			}
+			this.previousOptionLength = options.length;
+			if (options.length === 0) {
+				return this.nonSelectedText + '<span class="caret"></span>';
+			} else if (options.length == $('option', $(select)).length) {
+				return this.allSelectedText + '<span class="caret"></span>';
+			} else if (options.length > this.numberDisplayed) {
+				return (
+					'<span class="badge">' +
+					options.length +
+					'</span> ' +
+					this.nSelectedText +
+					'<span class="caret"></span>'
+				);
+			} else {
+				var selected = '';
+				options.each(function () {
+					// var label = $(this).attr('label') :
+					// $(this).html();
+					selected += $(this).val() + '+';
+				});
+
+				return (
+					selected.substr(0, selected.length - 1) + ' <b class="caret"></b>'
+				);
+			}
+		},
+		buttonTitle: function (options, select) {
+			if (options.length === 0) {
+				return this.nonSelectedText;
+			} else {
+				var selected = '';
+				options.each(function () {
+					selected += $(this).text() + '\n';
+				});
+				return selected;
+			}
+		},
+		onChange: function (option, checked) {
+	 if (isLdscore && checked) {
+            // Deselect all other options
+            var nonSelectedOptions = $("#" + elementId + " option").not(option);
+            nonSelectedOptions.prop("selected", false);
+            $("#" + elementId).multiselect("refresh");
         }
-      }
+		},
+	});
+ 
 
-      if (options.length > 0) {
-        $("#" + elementId + "-zero").popover("hide");
-      }
-      this.previousOptionLength = options.length;
-      if (options.length === 0) {
-        return this.nonSelectedText + '<span class="caret"></span>';
-      } else if (options.length == $("option", $(select)).length) {
-        return this.allSelectedText + '<span class="caret"></span>';
-      } else if (options.length > this.numberDisplayed) {
-        return (
-          '<span class="badge">' +
-          options.length +
-          "</span> " +
-          this.nSelectedText +
-          '<span class="caret"></span>'
-        );
-      } else {
-        var selected = "";
-        options.each(function () {
-          // var label = $(this).attr('label') :
-          // $(this).html();
-          selected += $(this).val() + "+";
-        });
-
-        return (
-          selected.substr(0, selected.length - 1) + ' <b class="caret"></b>'
-        );
-      }
-    },
-    buttonTitle: function (options, select) {
-      if (options.length === 0) {
-        return this.nonSelectedText;
-      } else {
-        var selected = "";
-        options.each(function () {
-          selected += $(this).text() + "\n";
-        });
-        return selected;
-      }
-    },
-    onChange: function (option, checked, select) {
-      if (checked) {
-        var selectedOptions = $("#" + elementId + " option:selected");
-        if (selectedOptions.length >= 1) {
-          // Deselect all other options
-          var nonSelectedOptions = $("#" + elementId + " option").not(option);
-          nonSelectedOptions.prop("selected", false);
-          $("#" + elementId).multiselect("refresh");
-        }
-      }
-    },
-  });
-
-  //console.log(elementId);
-  //console.dir($('#' + elementId));
+	//console.log(elementId);
+	//console.dir($('#' + elementId));
 }
 
 function getPopulationCodes(id) {
