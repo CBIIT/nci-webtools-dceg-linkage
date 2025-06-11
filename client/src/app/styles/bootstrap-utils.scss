@@ -1,0 +1,37 @@
+// @import "./bootstrap-variables.scss";
+@import "bootstrap/scss/functions";
+@import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
+@import "bootstrap/scss/mixins";
+@import "bootstrap/scss/utilities";
+
+$utilities: map-merge(
+  $utilities, (
+    "background-color": map-merge(
+      map-get($utilities, "background-color"),
+      ( responsive: true ),
+    ),
+  )
+);
+
+$utilities: map-merge(
+  $utilities, (
+    "border": map-merge(
+      map-get($utilities, "border"),
+      ( responsive: true ),
+    ),
+  )
+);
+
+$utilities: map-merge(
+  $utilities, (
+    "position": map-merge(
+      map-get($utilities, "position"),
+      ( responsive: true ),
+    ),
+  )
+);
+
+
+@import "bootstrap/scss/utilities/api";

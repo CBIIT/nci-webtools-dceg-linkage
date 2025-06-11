@@ -818,7 +818,7 @@
 							<h3>Association Results</h3>
 						</div>
 
-						<table id="new-ldassoc" class="table display compact">
+						<table id="new-ldassoc" class="table2">
 							<thead title="Shift-click column headers to sort by multiple levels">
 								<tr>
 									<th>RS Number</th>
@@ -1051,7 +1051,7 @@
 							<div class="col-md-10 ldexpress-table-scroller" id="ldexpress-detail">
 
 								<!-- SNP and Trait Details -->
-								<table id="new-ldexpress" class="table display compact">
+								<table id="new-ldexpress"  class="table2">
 									<!-- <caption id="ldexpress-detail-title">Details for rs1234</caption> -->
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
@@ -1074,7 +1074,7 @@
 								</table>
 
 								<!-- Query variants with warnings -->
-								<table id="new-ldexpress-query-warnings" class="table display compact">
+								<table id="new-ldexpress-query-warnings"  class="table2">
 									<caption id="ldexpress-query-warnings-title">Query Variants with Warnings</caption>
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
@@ -1844,7 +1844,7 @@
 							</div>
 						</div>
 						<br>
-						<table id="new-ldpop" class="table display compact">
+						<table id="new-ldpop"  class="table2">
 							<thead title="Shift-click column headers to sort by multiple levels">
 								<tr>
 									<th class="dt-head-center dt-body-center">Population</th>
@@ -2016,7 +2016,7 @@
 								<div>
 									<h3>Proxy Variants</h3>
 								</div>
-								<table id="new-ldproxy" class="table display compact">
+								<table id="new-ldproxy"  class="table2">
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
 											<th>RS Number</th>
@@ -2201,7 +2201,7 @@
 							<div class="col-md-10 ldtrait-table-scroller" id="ldtrait-detail">
 
 								<!-- SNP and Trait Details -->
-								<table id="new-ldtrait" class="table display compact">
+								<table id="new-ldtrait"  class="table2" style="width: 100%;">
 									<caption id="ldtrait-detail-title">Details for rs1234</caption>
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
@@ -2225,7 +2225,7 @@
 								</table>
 
 								<!-- Query variants with warnings -->
-								<table id="new-ldtrait-query-warnings" class="table display compact">
+								<table id="new-ldtrait-query-warnings"  class="table2">
 									<caption id="ldtrait-query-warnings-title">Query Variants with Warnings</caption>
 									<thead title="Shift-click column headers to sort by multiple levels">
 										<tr>
@@ -3001,8 +3001,8 @@
 											<th colspan="3">SNP Chip List</th>
 										</tr>
 										<tr>
-											<th nowrap>RS Number</th>
-											<th nowrap>Position (<span class="snpchip-position-genome-build-header">GRCh37</span>)</th>
+											<th style="text-align:center; padding: 0 5px;" nowrap>RS Number</th>
+											<th style="text-align:center; padding: 0 5px;" nowrap>Position (<span class="snpchip-position-genome-build-header">GRCh37</span>)</th>
 										</tr>
 									</thead>
 									<tbody>
@@ -3045,7 +3045,7 @@
 										<!-- ko foreach: snpchip -->
 										<tr>
 											<!-- ko foreach: map -->
-											<td style="text-align:center" data-bind="html: $data"></td>
+											<td style="text-align:center; padding: 0 5px;" data-bind="html: $data"></td>
 											<!-- /ko -->
 										</tr>
 										<!-- /ko -->

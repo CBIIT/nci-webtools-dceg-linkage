@@ -248,6 +248,51 @@ html body .footer {
 	border-bottom: 0px;
 }
 
+.table2 {
+  width: 100%;          /* Make table take full width */
+  table-layout: auto; 
+  border-collapse: collapse;
+  border-spacing: 0px !important;
+}
+
+.table2, th, td {
+  border: none;
+  border-collapse: collapse;
+  padding: 5px 0px;   /* Increase vertical and horizontal space */
+  font-size: 14px; 
+}
+
+
+/* Add a bottom border to each row */
+.table2 tr {
+  border-bottom: 1px solid #e6e4e4;
+}
+
+/* Optional: Remove border from the last row if you don't want it */
+.table2 tr:last-child {
+  border-bottom: none;
+}
+
+.table2 td, .table2 th {
+  border-bottom: 1px solid #ccc;
+}
+
+.table2 tfoot tr,
+.table2 tfoot td,
+.table2 tfoot th {
+  border-bottom: none !important;
+}
+/* Zebra striping for odd/even rows */
+.table2 tbody tr:nth-child(odd) td,
+.table2 tbody tr:nth-child(odd) th {
+  background-color: #f5f4f4 !important;
+}
+.table2 tbody tr:nth-child(even) td,
+.table2 tbody tr:nth-child(even) th {
+  background-color: #fff !important;
+}
+
+
 #ldpairTable > thead > tr > th,
 #ldpairTable > tbody > tr > td,
 #ldpairTable > tfoot > tr > th {
@@ -2011,4 +2056,51 @@ input:not(:disabled):checked + .slider {
 	white-space: break-spaces;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+
+.paginate_button {
+  box-sizing: border-box;
+  display: inline-block;
+  min-width: 1.5em;
+  padding: 0.5em 1em;
+  margin-left: 2px;
+  text-align: center;
+  text-decoration: none !important;
+  cursor: pointer;
+  color: #333 !important;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  border-radius: 4px;
+  transition: background 0.2s, border 0.2s, border-radius 0.2s;
+}
+
+/* Square box on hover */
+.paginate_button:hover,
+.paginate_button:focus {
+  background-color: #444;
+  color: #fff !important;
+  border-color:  #444;
+  border-radius: 0;
+}
+
+/* Square box and highlighted for current/active page */
+.paginate_button.current,
+.paginate_button.active {
+ background-color: #e0e0e0;
+  color: #444 !important;
+  border-color: #bbb;
+  border-radius: 0;
+  font-weight: bold;
+}
+
+.paginate_button.disabled,
+.paginate_button.disabled:hover,
+.paginate_button.disabled:focus {
+  background-color: #f5f5f5;
+  color: #bbb !important;
+  border-color: #eee;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-radius: 4px;
 }

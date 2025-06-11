@@ -32,14 +32,23 @@ legend {
 }
 
 .cover-image {
-  background-attachment: fixed;
-  background-position: 25%;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: auto 400px;
+  background-position-x: right;
+}
+
+@media screen and (max-width: 1400px) {
+  .cover-image {
+    background-position-x: 480px;
+  }
 }
 
 .cursor-pointer {
   cursor: pointer;
+}
+
+.shadow-0 {
+  box-shadow: none !important;
 }
 
 .required::after {
@@ -48,64 +57,48 @@ legend {
   margin-left: 0.1rem;
 }
 
-.navbar {
+.navbar-dark {
   .nav-link {
     border-top: $navbar-dark-nav-link-border-top;
     border-bottom: $navbar-dark-nav-link-border-bottom;
     padding-left: $navbar-nav-link-padding-x !important;
     padding-right: $navbar-nav-link-padding-x !important;
     text-decoration: none;
+    background-color: black;
 
     &:hover,
     &.active {
-      color: white;
+      background-color: $navbar-dark-nav-link-active-background-color;
       border-bottom: $navbar-dark-nav-link-border-bottom-active;
     }
 
     &:hover {
-      border-bottom: 3px rgba(255, 255, 255, 0.3) solid;
-    }
-  }
-
-  .search-control,
-  .search-control-button {
-    padding: $nav-link-padding-y $nav-link-padding-x;
-    background-color: #636363;
-    border: none;
-    border-radius: 0;
-    color: white;
-    outline: none;
-    box-shadow: none;
-
-    &::placeholder {
-      color: white;
+      background-color: $navbar-dark-nav-link-active-background-color;
     }
   }
 }
 
-.form-control-list-group {
-  .form-control {
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
-  }
-
-  .list-group {
-    .list-group-item:first-child {
-      border-top-left-radius: 0;
-      border-top-right-radius: 0;
-      border-top-width: 0;
-    }
-  }
+.placeholder-light::placeholder {
+  color: $gray-100;
 }
 
-.alert {
-  border-top: none;
-  border-bottom: none;
-  border-right: none;
-}
-
-:root {
-  font-size: 1.2rem;
+.no-clear-control {
+  &::-ms-clear {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  &::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+  &::-webkit-search-decoration,
+  &::-webkit-search-cancel-button,
+  &::-webkit-search-results-button,
+  &::-webkit-search-results-decoration {
+    display: none;
+  }
 }
 
 .table {
@@ -117,19 +110,4 @@ legend {
   .table {
     margin-bottom: 0;
   }
-}
-
-.active-row {
-  background-color: lightgreen;
-}
-
-.card:hover {
-  box-shadow: 8px 8px 5px blue;
-  transform: scale(1.05);
-  transition: 0.3s;
-}
-
-.link-custom {
-  cursor: pointer;
-  color: #6e3acf;
 }

@@ -1,95 +1,57 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Link from "next/link";
+import { Container, Row, Col } from "react-bootstrap";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <>
+      <div className="bg-primary flex-grow-1">
+        <Container>
+          <Row>
+            <Col md={6}>
+              <div className="d-flex h-100 align-items-center" style={{ minHeight: "300px" }}>
+                <div>
+                  <h1 className="fs-1 text-light fw-light mb-3">LDlink</h1>
+                  <hr className="border-white" />
+                  <p className="lead text-light">DCEG Linkage</p>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+                  <Link className="link-secondary" href="/citations">
+                    Citations
+                  </Link>
+                </div>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+      <div className="bg-light py-5 flex-grow-1">
+        <Container>
+          <Row>
+            <Col>
+              <p>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam id dictum sapien. Nam suscipit erat vel
+                facilisis sagittis. Fusce a ante sed magna malesuada tincidunt. Ut pretium, ante eget suscipit egestas,
+                augue ligula vestibulum justo, id interdum nunc odio et odio. Sed sed egestas nisl, aliquam imperdiet
+                quam. Duis pellentesque purus cursus, molestie felis eget, facilisis nisl. Phasellus convallis lectus
+                vitae nibh imperdiet commodo. Integer rhoncus imperdiet mauris. Suspendisse at dolor felis. Vestibulum
+                ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nam imperdiet elit orci,
+                nec condimentum lectus sollicitudin eu. Aenean felis nunc, accumsan a arcu ut, sagittis ornare lorem.
+                Sed ac lorem et dui faucibus pharetra vel sed ipsum. Quisque varius erat euismod dolor lacinia commodo.
+                Phasellus sed ultrices neque, sit amet consectetur nisl.
+              </p>
+              <div>
+                <p className="h6">Reference</p>
+                <ol>
+                  <li>
+                    Sed fringilla elementum convallis. Morbi vehicula sapien sit amet quam facilisis, id gravida massa
+                    volutpat. Nulla venenatis aliquam mi eu finibus. Proin at congue magna, in tempor dui. Suspendisse
+                    potenti. Quisque pharetra sagittis volutpat. Suspendisse laoreet risus et tempor sollicitudin.
+                  </li>
+                </ol>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      </div>
+    </>
   );
 }

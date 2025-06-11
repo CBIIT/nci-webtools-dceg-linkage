@@ -4922,6 +4922,7 @@ function createTable(headers, data, isSummary, containerId, tableTitle) {
   headers.forEach(function (header) {
     var th = document.createElement("th");
     th.textContent = header;
+    th.style.backgroundColor = "#f2f2f2";
     headerRow.appendChild(th);
   });
   thead.appendChild(headerRow);

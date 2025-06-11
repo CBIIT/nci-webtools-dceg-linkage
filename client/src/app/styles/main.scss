@@ -1,7 +1,8 @@
 @import "./bootstrap-variables.scss";
+@import "./bootstrap-utils.scss";
 @import "bootstrap/scss/bootstrap";
 @import "./bootstrap-theme.scss";
-@import "~bootstrap-icons/font/bootstrap-icons.scss";
+@import "bootstrap-icons/font/bootstrap-icons.css";
 
 body {
   font-family: "Inter", sans-serif;
