@@ -149,7 +149,7 @@ html {
 html body .footer {
 	bottom: 0;
 	width: 100%;
-	position: absolute;
+	position: relative;
 	background-color: #535353;
 }
 
@@ -415,7 +415,7 @@ img.graph-legend {
 	margin-left: auto;
 	margin-right: auto;
 }
-#ldassoc-legend {
+#ldassoc-legend, #ldscore-legend {
 	width: 700px;
 }
 #ldproxy-legend {
@@ -1140,49 +1140,167 @@ textarea:invalid,
 	color: #800000;
 }
 
+#ldscoreForm button.dropdown-toggle {
+	color: #800000;
+}
+
+#ldscore-file-label,#ldscore-file-label-herit,#ldscore-file-label-correlation,#ldscore-file-label-correlation2 {
+    margin-top: 10px; /* Adjust the value as needed */
+	margin-bottom: 5px;
+}
+
+
+#ldscore-browse-button, #ldscore-browse-button2 {
+    margin-left: 10px; /* Adjust the value as needed */
+	margin-top: -50px;
+	float: left;
+}
+
+.ldcorrelation{
+	margin-left: 10px; /* Adjust the value as needed */
+	margin-top: -35px !important;
+	float: left;
+}
+
+.ldscore-flex-item1{
+	-webkit-box-ordinal-group: 2;
+    -ms-flex-order: 1;
+    order: 1;
+    -webkit-box-flex: 2;
+    -ms-flex-positive: 2;
+    flex-grow: 2;
+	display: flex; /* Add flex display */
+    justify-content: left; /* Center horizontally */
+    align-items: left; /* Center vertically */
+}
+
+.ldscore-flex-item2 {
+	margin-left: 30px;
+	display: flex; /* Add flex display */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+
+.ldscore-form-control {
+	width: 50px;
+  }
+
+.ldscore-flex-item3 {
+	margin-left: 30px;
+	display: flex; /* Add flex display */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+.ldscore-flex-item{
+	
+	display: flex; /* Add flex display */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+.ldscore-population-col {
+    /* Add your styles here */
+   margin-top: 10px;
+}
+
+.ldscore {
+    /* Add your styles here */
+   margin-top: 10px;
+}
+
+.ldscore-file-name-container {
+	width: 172px;
+	word-wrap: break-word;
+	margin-top: 0px;
+	white-space: break-spaces;
+	overflow: hidden;
+	text-overflow: ellipsis;
+  }
+
+
 #region-gene-container > div *,
 #region-region-container > div *,
 #region-variant-container > div * {
 	margin-top: 5px;
 	white-space: nowrap;
 }
-#header-values {
+
+#region-gene-container2 > div *,
+#region-region-container2 > div *,
+#region-variant-container2 > div * {
+	margin-top: 5px;
+	white-space: nowrap;
+}
+
+#header-values, #header-values2 {
 	margin-top: 30px;
 }
 #header-values > div > div * {
 	margin-top: 5px;
 	white-space: nowrap;
 }
-#assoc-region {
+#header-values2 > div > div * {
+	margin-top: 5px;
+	white-space: nowrap;
+}
+#assoc-region, #score-region {
 	margin-bottom: 20px;
 }
-#ldassoc-files {
+#ldassoc-files, #ldscore-files, #ldscore-files-herit{
 	float: right;
 	margin-top: -4px;
 }
+#ldscore-files-correlation{
+	float: right;
+	margin-top: -4px;
+}
+#ldscore-files-correlation2{
+	float: right;
+	margin-top: -4px;
+}
+
+
 #ldassoc-browse-button {
 	float: left;
 }
-#ldassoc-sample {
+#ldscore-sample {
 	position: absolute;
 	float: left;
 	clear: left;
-	margin-top: 40px;
+	margin-top: 5px;
 	margin-left: -172px;
 }
-#ldassoc-sample-label {
+#ldassoc-sample {
+	float: left;
+	clear: left;
+	margin-top: 5px;
+	margin-left: -172px;
+}
+
+#ldherit-sample,#correlation-sample{
+	position: absolute;
+	float: left;
+	clear: left;
+	margin-top: 10px;
+	margin-left: -172px;
+	left: 172px;
+}
+
+#ldassoc-sample-label, #ldscore-sample-label, #ldherit-sample-label,#correlation-sample-label {
 	float: right;
 }
 
-#ldassoc-gr-toggle {
+#ldassoc-gr-toggle, #ldscore-gr-toggle {
 	position: absolute;
 	float: left;
 	clear: left;
 }
 
-#ldassoc-file-container {
+#ldassoc-file-container, #ldscore-file-container, #ldscore-file-container2,#ldscore-file-container3 {
 	margin-top: 4px;
 }
+
 .toggle-labels {
 	position: relative;
 	float: left;
@@ -1191,7 +1309,7 @@ textarea:invalid,
 	line-height: 37px;
 	text-align: right;
 }
-#ldassoc-flag-switch {
+#ldassoc-flag-switch, #ldscore-flag-switch {
 	text-align: left;
 }
 .flag-switches {
@@ -1207,6 +1325,7 @@ textarea:invalid,
 .ldassoc-flag-switch input {
 	display: none;
 }
+
 .switch {
 	position: relative;
 	display: inline-block;
@@ -1274,6 +1393,106 @@ input:checked + .slider:before {
 }*/
 .ldassoc-calculate-col {
 	float: left;
+}
+
+.ldscore-calculate-col{
+	float: center;
+	margin-top: 10px;
+}
+.tab-content{
+	min-height: 0px;
+	margin-bottom: 0px;
+}
+#ldscore-file-container-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+	padding-bottom: 50px;
+}
+#ldscore-test1-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+}
+#ldscore-test2-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+}
+#ldscore-inflation-tab {
+    padding: 10px; /* Adjust the padding as needed */
+    height: auto; /* Ensure the height adjusts to the content */
+}
+#ldscore-results-container-herit {
+    margin-bottom: 20px; /* Adjust the value as needed */
+    padding-bottom: 20px; /* Adjust the value as needed */
+    box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
+}
+#example-ldherit,#example-correlation {
+	position: relative;
+	top: 15;
+	left: 8px !important;
+	display: block; 
+  }
+
+  #ldscore-sample, #example-ldscore {
+	position: relative;
+	top: 18 !important;
+	left: 5px !important;
+	display: block; 
+  }
+  
+
+
+#summary-table-container .table-bordered,
+#ldscore-table-container .table-bordered,
+#herit-table-container .table-bordered,
+#correlation-table-container .table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+#summary-table-container .table-bordered th,
+#summary-table-container .table-bordered td,
+#ldscore-table-container .table-bordered th,
+#ldscore-table-container .table-bordered td,
+#herit-table-container .table-bordered th,
+#herit-table-container .table-bordered td,
+#correlation-table-container .table-bordered th,
+#correlation-table-container .table-bordered td {
+    border: 1px solid #dee2e6;
+    padding: 8px; /* Add padding to the table cells */
+}
+
+#summary-table-container .table-bordered tr,
+#herit-table-container .table-bordered tr,
+#correlation-table-container .table-bordered tr {
+    border-bottom: 1px solid #dee2e6; /* Add a border between rows */
+}
+
+#summary-table-container .table-bordered tr:last-child,
+#herit-table-container .table-bordered tr:last-child,
+#correlation-table-container .table-bordered tr:last-child {
+    border-bottom: none; /* Remove the border from the last row */
+}
+.ldscore-download-button {
+	display: inline-block;
+	position: relative;
+	z-index: 10;
+	background-color: white;
+	padding: 5px;
+	border: 1px solid black;
+	text-decoration: none;
+	color: black;
+	margin-right: 10px; 
+
+	/* position:absolute;
+	z-index:10; 
+	background-color:white; 
+	padding:20px; 
+	border:1px solid black; 
+	text-decoration:none; 
+	color:black; */
+  }
+.ldassoc-flex {
+    display: flex;
+    flex-wrap: wrap;
 }
 /*
 .dropdown-menu {
@@ -1700,6 +1919,7 @@ input:checked + .slider:before {
 	}
 }
 
+
 .navbar-nav .dropdown-menu > .active > a,
 .navbar-nav .dropdown-menu > .active > a:focus,
 .navbar-nav .dropdown-menu > .active > a:hover {
@@ -1755,4 +1975,40 @@ input:checked + .slider:before {
 	border: 0px solid #ccc;
 	margin: -2rem 0rem -1rem 0rem;
 	
+}
+/* When the toggle is enabled and checked, use the blue background */
+input:not(:disabled):checked + .slider {
+	background-color: #2196f3;
+  }
+  
+  /* When the toggle is disabled and checked, force a grey background */
+  input:disabled:checked + .slider {
+	background-color: #ccc !important;
+  }
+
+
+  .ldheritFile-file-name{
+		width: 172px;
+		word-wrap: break-word;
+		margin-top: 30px;
+		white-space: break-spaces;
+		overflow: hidden;
+		text-overflow: ellipsis;
+  }
+
+  .ldcorrelation-file-name{
+	width: 172px;
+	word-wrap: break-word;
+	margin-top: 30px;
+	white-space: break-spaces;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.ldcorrelation-file-name2{
+	width: 172px;
+	word-wrap: break-word;
+	margin-top: 5px;
+	white-space: break-spaces;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }

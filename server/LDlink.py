@@ -12,7 +12,7 @@ from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app, send_from_directory
+from flask import Flask, request, jsonify, current_app, send_from_directory,send_file,Response
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 from LDpair import calculate_pair
@@ -23,29 +23,16 @@ from LDexpress import calculate_express, get_ldexpress_tissues
 from LDmatrix import calculate_matrix
 from LDhap import calculate_hap
 from LDassoc import calculate_assoc
+from LDscore import calculate_ldscore
 from LDutilites import get_config, unlock_stale_tokens
 from LDcommon import genome_build_vars, connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from ApiAccess import (
-    register_user,
-    checkToken,
-    checkApiServer2Auth,
-    checkBlocked,
-    checkLocked,
-    toggleLocked,
-    logAccess,
-    emailJustification,
-    blockUser,
-    unblockUser,
-    getStats,
-    setUserLock,
-    setUserApi2Auth,
-    unlockAllUsers,
-    getLockedUsers,
-    getBlockedUsers,
-    lookupUser,
-)
+from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
+import requests,glob
+from ldscore.ldsc_utils import run_ldsc_command,run_herit_command,run_correlation_command
+import zipfile
+import shutil
 from Cleanup import schedule_tmp_cleanup
 
 # retrieve config
@@ -242,45 +229,36 @@ def requires_admin_token(f):
 
 
 # Web route to send API token unblock request from front-end
-@app.route("/LDlinkRestWeb/apiaccess/apiblocked_web", methods=["GET"])
-def apiblocked_web():
-    start_time = time.time()
-    firstname = request.args.get("firstname", False)
-    lastname = request.args.get("lastname", False)
-    email = request.args.get("email", False)
-    institution = request.args.get("institution", False)
-    registered = request.args.get("registered", False)
-    blocked = request.args.get("blocked", False)
-    justification = request.args.get("justification", False)
-    app.logger.debug(
-        "apiblocked_web params "
-        + json.dumps(
-            {
-                "firstname": firstname,
-                "lastname": lastname,
-                "email": email,
-                "institution": institution,
-                "registered": registered,
-                "blocked": blocked,
-                "justification": justification,
-            },
-            indent=4,
-            sort_keys=True,
-        )
-    )
-    url_path = request.headers.get("X-Forwarded-Host")
-    if url_path == None:
-        url_path = request.url_root
-    try:
-        out_json = emailJustification(
-            firstname, lastname, email, institution, registered, blocked, justification, url_path
-        )
-    except Exception as e:
-        exc_obj = e
-        app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
-    end_time = time.time()
-    app.logger.info("Executed unblocked API user justification submission (%ss)" % (round(end_time - start_time, 2)))
-    return sendJSON(out_json)
+# @app.route('/LDlinkRestWeb/apiaccess/apiblocked_web', methods=['GET'])
+# def apiblocked_web():
+#     start_time = time.time()
+#     firstname = request.args.get('firstname', False)
+#     lastname = request.args.get('lastname', False)
+#     email = request.args.get('email', False)
+#     institution = request.args.get('institution', False)
+#     registered = request.args.get('registered', False)
+#     blocked = request.args.get('blocked', False)
+#     justification = request.args.get('justification', False) 
+#     app.logger.debug('apiblocked_web params ' + json.dumps({
+#         'firstname': firstname,
+#         'lastname': lastname,
+#         'email': email,
+#         'institution': institution,
+#         'registered': registered,
+#         'blocked': blocked,
+#         'justification': justification
+#     }, indent=4, sort_keys=True))
+#     url_path = request.headers.get('X-Forwarded-Host')
+#     if url_path== None:
+#         url_path= request.url_root
+#     try:
+#         out_json = emailJustification(firstname, lastname, email, institution, registered, blocked, justification, url_path)
+#     except Exception as e:
+#         exc_obj = e
+#         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+#     end_time = time.time()
+#     app.logger.info("Executed unblocked API user justification submission (%ss)" % (round(end_time - start_time, 2)))
+#     return sendJSON(out_json)
 
 
 # Web route to register user's email for API token
@@ -567,10 +545,40 @@ def status(filename):
 
 
 # Route to serve temporary files
-@app.route("/LDlinkRestWeb/tmp/<filename>", strict_slashes=False)
-@app.route("/tmp/<filename>", strict_slashes=False)
+#@app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
+#@app.route('/tmp/<filename>', strict_slashes=False)
+#def send_temp_file(filename):
+#    return send_from_directory(tmp_dir, filename)
+
+# Route to serve temporary files
+@app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
+@app.route('/tmp/<filename>', strict_slashes=False)
+@app.route('/LDlinkRestWeb/tmp/uploads/<filename>', strict_slashes=False)
+@app.route('/tmp/uploads/<filename>', strict_slashes=False)
 def send_temp_file(filename):
-    return send_from_directory(tmp_dir, filename)
+    if 'uploads' in request.path:
+        return send_from_directory(os.path.join(tmp_dir, 'uploads'), filename)
+    else:
+        return send_from_directory(tmp_dir, filename)
+
+@app.route('/LDlinkRestWeb/zip', methods=['POST'])
+def zip_files():
+    try:
+        filenames = request.json.get('filenames')
+        zip_filename = 'files.zip'
+        zip_filepath = os.path.join(tmp_dir, zip_filename)
+        
+        with zipfile.ZipFile(zip_filepath, 'w') as zipf:
+            for filename in filenames:
+                file_path = safe_join(tmp_dir, 'uploads', filename)
+                zipf.write(file_path, os.path.basename(file_path))
+        
+        return send_file(zip_filepath, as_attachment=True, attachment_filename=zip_filename)
+    except Exception as e:
+        exc_obj = e
+        app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        return jsonify({'error': str(e)}), 500
+ 
 
 
 # File upload route
@@ -584,30 +592,79 @@ def upload():
     for arg in request.args:
         print(arg)
     print("request.method = %s" % (request.method))
-    if request.method == "POST":
+    print("request.files = %s" % (request.files))
+    if request.method == 'POST':
         # check if the post request has the file part
         print(" We got a POST")
         # print dir(request.files)
-        if "ldassocFile" not in request.files:
-            print("No file part")
-            return "No file part..."
-        file = request.files["ldassocFile"]
+        if len(request.files) == 0:
+            print('No file part')
+            return 'No file part...'
+        # if 'ldassocFile' not in request.files:
+        #     print('No file part')
+        #     return 'No file part...'
+        # if 'ldscoreFile' not in request.files:
+        #     print('No file part')
+        #     return 'No file part...'
+        file = request.files['ldassocFile'] if 'ldassocFile' in request.files else request.files['ldscoreFile'] if 'ldscoreFile' in request.files else None
+        reference = request.form.get('reference', None)
+
         # if user does not select file, browser also
         # submit a empty part without filename
-        print(type(file))
-        if file.filename == "":
-            print("No selected file")
-            return "No selected file"
-        if file:
-            print("file.filename " + file.filename)
-            print("file and allowed_file")
-            filename = secure_filename(file.filename)
-            print("About to SAVE file")
-            print("filename = " + filename)
-            os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
-            file.save(os.path.join(app.config["UPLOAD_DIR"], filename))
-            return "File was saved"
+        print(len(request.files))
+        for file_key in request.files:
+            file = request.files[file_key]
+            print(type(file))
+            if file.filename == '':
+                print('No selected file')
+                return 'No selected file'
+     
+            if file:
+                print('file.filename ' + file.filename)
+                print('file and allowed_file')
+                filename = secure_filename(file.filename)
+                print("About to SAVE file")
+                print("filename = " + filename)
+                os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
+                if reference:
+                    ref_dir = os.path.join(app.config['UPLOAD_DIR'], reference)
+                    os.makedirs(ref_dir, exist_ok=True)
+                    file.save(os.path.join(ref_dir, filename))
+                else:
+                    file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
+                print(f'File {filename} was saved')
+        
+        return 'All files were saved'
 
+@app.route('/LDlinkRestWeb/copy_and_download/<filename>', methods=['GET'])
+def copy_and_download(filename):
+    """
+    Copies a file from the `data/ldscore/` directory to the `tmp/` directory
+    and serves it for download.
+    """
+    try:
+        # Define source and destination paths
+        source_dir = os.path.join(param_list['data_dir'], 'ldscore')
+        destination_dir = os.path.join(tmp_dir, 'uploads')
+        source_file = os.path.join(source_dir, filename)
+        destination_file = os.path.join(destination_dir, filename)
+
+        # Ensure the destination directory exists
+        os.makedirs(destination_dir, exist_ok=True)
+
+        # Copy the file to the destination directory
+        shutil.copy(source_file, destination_file)
+        print(f"Copied {source_file} to {destination_file}")
+
+        # Serve the file for download
+        return send_from_directory(destination_dir, filename, as_attachment=True)
+
+    except FileNotFoundError:
+        return f"File {filename} not found in {source_dir}", 404
+    except Exception as e:
+        print(f"Error: {e}")
+        return f"An error occurred: {e}", 500
+    
 
 # Route for LDassoc example GWAS data
 @app.route("/LDlinkRest/ldassoc_example", methods=["GET"])
@@ -619,6 +676,60 @@ def ldassoc_example():
     data_dir = param_list["data_dir"]
     example_filepath = data_dir + ldassoc_example_dir + genome_build_vars[genome_build]["ldassoc_example_file"]
     example = {"filename": os.path.basename(example_filepath), "headers": read_csv_headers(example_filepath)}
+    return json.dumps(example)
+
+# Route for LDscore example 22
+@app.route('/LDlinkRest/ldscore_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldscore_example', methods=['GET'])
+def ldscore_example():
+    genome_build = request.args.get('genome_build', 'grch37')
+    data_dir = param_list['data_dir']
+    ldscore_example_dir = data_dir + 'ldscore/'
+    #ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = ['22.bed', '22.bim', '22.fam']
+    example_filepaths = [ldscore_example_dir+ file for file in example_files] #+ genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {
+            'filenames': example_files,
+            'filepaths': example_filepaths
+        }
+    print(example)
+    return json.dumps(example)
+
+# Route for LDherit example 
+@app.route('/LDlinkRest/ldherit_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldherit_example', methods=['GET'])
+def ldherit_example():
+    genome_build = request.args.get('genome_build', 'grch37')
+    data_dir = param_list['data_dir']
+    ldscore_example_dir = data_dir + 'ldscore/'
+    #ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = 'BBJ_HDLC22.txt'
+    example_filepaths = ldscore_example_dir+ example_files #+ genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {
+            'filenames': example_files,
+            'filepaths': example_filepaths
+        }
+    print(example)
+    return json.dumps(example)
+
+# Route for LDherit example 
+@app.route('/LDlinkRest/ldcorrelation_example', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldcorrelation_example', methods=['GET'])
+def ldcorrelation_example():
+    genome_build = request.args.get('genome_build', 'grch37')
+    data_dir = param_list['data_dir']
+    ldscore_example_dir = data_dir + 'ldscore/'
+    #ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = 'BBJ_HDLC22.txt'
+    example_files2 = 'BBJ_LDLC22.txt'
+    example_filepaths = ldscore_example_dir+ example_files #+ genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {
+            'filenames': example_files,
+            'filenames2': example_files2,
+            'filepath': example_filepaths,
+            'filepath2':ldscore_example_dir+ example_files2
+        }
+    print(example)
     return json.dumps(example)
 
 
@@ -786,6 +897,357 @@ def ldassoc():
     app.logger.info("Executed LDassoc (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
     return sendJSON(out_json)
+
+# Web and API route for LDassoc
+@app.route('/LDlinkRest/ldscore', methods=['GET'])
+#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldscore', methods=['GET'])
+def ldscore():
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    print("LDscore###############:",request.args.get('isExample'))
+    start_time = time.time()
+
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)
+    ldwindow = request.args.get('ldwindow', '1')
+    windUnit = request.args.get('windUnit', 'cm')
+    isExample = request.args.get('isExample', False)
+    reference = request.args.get('reference',False)
+    print(pop,genome_build,filename,ldwindow,windUnit,isExample)
+
+    fileDir = f"/data/tmp/uploads/{reference}/"
+    #print(filename)
+    if filename and str(isExample).lower() != "true":
+        # Split by comma or semicolon (adjust as needed)
+        filenames = [secure_filename(f.strip()) for f in filename.replace(';', ',').split(',')]
+        for fname in filenames:
+            fileroot, ext = os.path.splitext(fname)
+            # Find the chromosome number in the filename
+            file_parts = fname.split('.')
+            file_chromo = None
+            for part in file_parts:
+                if part.isdigit() and 1 <= int(part) <= 22:
+                    file_chromo = part         
+                    break
+            if file_chromo:
+                # Find the file in the directory
+                pattern = os.path.join(fileDir, fname)
+                #print(891, pattern)
+                for file_path in glob.glob(pattern):
+                    extension = file_path.split('.')[-1]
+                    new_filename = f"{file_chromo}.{extension}"
+                    new_file_path = os.path.join(fileDir, new_filename)
+                   # Create the reference subfolder if it doesn't exist
+                    #reference_folder = os.path.join(fileDir, str(reference))
+                    #os.makedirs(reference_folder, exist_ok=True)
+                    new_file_path = os.path.join(fileDir, new_filename)
+                    if os.path.abspath(file_path) != os.path.abspath(new_file_path):
+                        shutil.copyfile(file_path, new_file_path)
+                        print(f"Copied {file_path} to {new_file_path}")
+                    else:
+                        print(f"Skipped copying {file_path} to itself.")
+                    #os.rename(file_path, new_file_path)
+                    #print(f"Copied {file_path} to {new_file_path}")
+    try:
+        # Make an API call to the ldsc39_container
+       
+        #response = requests.get(ldsc39_url)
+        #response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample,reference)
+        print("######################### Result:")
+        #print(result)
+        if web:
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            out_json = {"result": filtered_result}
+            #print(out_json)
+        else:
+                # Pretty-print the JSON output
+            summary_index = result.find("Summary of LD Scores")
+            if summary_index != -1:
+                filtered_result = result[summary_index:]
+            else:
+                filtered_result = result
+            #filtered_result = filtered_result.replace("\\n", "\n")
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            #print(pretty_out_json)
+            return filtered_result
+            out_json = pretty_out_json
+
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
+    return jsonify(out_json)
+
+@app.route('/LDlinkRest/ldscoreapi', methods=['POST'])
+@requires_token
+def ldscoreapi():
+    required_files = ['file1', 'file2', 'file3']
+    fileDir = "/data/tmp/uploads"
+
+    start_time = time.time()
+
+    pop = request.args.get('pop', 'eur')
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)+".bim"
+    ldwindow = request.args.get('ldwindow', '1')
+    windUnit = request.args.get('windUnit', 'cm')
+    isExample = request.args.get('isExample', False)
+    
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
+    # Check if all required files are present
+    for file_key in required_files:
+        if file_key not in request.files:
+            return jsonify({"error": f"No {file_key} part"}), 400
+    
+    # Save the files
+    saved_files = {}
+    for file_key in required_files:
+        file = request.files[file_key]
+        if file.filename == '':
+            return jsonify({"error": f"No selected file for {file_key}"}), 400
+        
+        if file:
+            filename = secure_filename(file.filename)
+            file_path = os.path.join(fileDir, filename)
+            file.save(file_path)
+            saved_files[file_key] = file_path
+    
+    if filename:
+        file_parts = filename.split('.')
+        file_chromo = None
+        for part in file_parts:
+            if part.isdigit() and 1 <= int(part) <= 22:
+                file_chromo = part
+                break
+    print(file_chromo)
+    if file_chromo:
+        # Find the file in the directory
+        pattern = os.path.join(fileDir, f"{fileroot}.*")
+        for file_path in glob.glob(pattern):
+            extension = file_path.split('.')[-1]
+            new_filename = f"{file_chromo}.{extension}"
+            new_file_path = os.path.join(fileDir, new_filename)
+            os.rename(file_path, new_file_path)
+            print(f"Renamed {file_path} to {new_file_path}")
+
+    try:
+        # Make an API call to the ldsc39_container
+       
+        #response = requests.get(ldsc39_url)
+        #response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
+        print("######################### Result:")
+        #print(result)
+       
+                # Pretty-print the JSON output
+        summary_index = result.find("Summary of LD Scores")
+        if summary_index != -1:
+                filtered_result = result[summary_index:]
+        else:
+                filtered_result = result
+
+         # Delete the uploaded files
+        for file_path in saved_files.values():
+            try:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+
+        return filtered_result
+
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    return jsonify(out_json)
+
+
+###########
+#####
+###########
+# Web for LDscore
+@app.route('/LDlinkRest/ldherit', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
+def ldherit():
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    print("LDherit###############:",request.args.get('isExample'))
+    start_time = time.time()
+    
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)
+    isexample = request.args.get('isExample', False)
+    reference = request.args.get('reference',False)
+    print(pop,genome_build,filename,isexample)
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
+
+    fileDir = f"/data/tmp/uploads"
+    print(filename)
+    try:
+        # Make an API call to the ldsc39_container
+       
+        #response = requests.get(ldsc39_url)
+        #response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        result = run_herit_command(filename,pop,isexample)
+        if web:
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            out_json = {"result": filtered_result}
+            #print(out_json)
+        else:
+                # Pretty-print the JSON output
+            summary_index = result.find("Total Observed scale")
+            if summary_index != -1:
+                filtered_result = result[summary_index:]
+            else:
+                filtered_result = result
+            #filtered_result = filtered_result.replace("\\n", "\n")
+            return filtered_result
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
+    return jsonify(out_json)
+
+###########
+#####
+###########
+# Web and API route for LDscore
+@app.route('/LDlinkRest/ldheritapi', methods=['POST'])
+@requires_token
+def ldheritAPI():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+    
+    file = request.files['file']
+    fileDir = f"/data/tmp/uploads"
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+    
+    if file:
+        # Save the file to a desired location
+        file.save(f"{fileDir}/{file.filename}")
+    
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)
+    isexample = request.args.get('isExample', False)
+
+    start_time = time.time()
+       
+    print(pop,genome_build,filename,isexample)
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
+   
+    print(filename)
+    try:
+        # Make an API call to the ldsc39_container
+       
+        #response = requests.get(ldsc39_url)
+        #response.raise_for_status()  # Raise an exception for HTTP errors
+        
+        result = run_herit_command(filename,pop,isexample)
+       
+        # Pretty-print the JSON output
+        summary_index = result.find("Total Observed scale")
+        if summary_index != -1:
+            filtered_result = result[summary_index:]
+        else:
+            filtered_result = result
+            #filtered_result = filtered_result.replace("\\n", "\n")
+
+        # Delete the uploaded files
+        try:
+            os.remove(file)
+            print(f"Deleted file: {file}")
+        except Exception as e:
+            print(f"Error deleting file {file}: {e}")
+        return filtered_result
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    return jsonify(out_json)
+
+@app.route('/LDlinkRest/ldcorrelation', methods=['GET'])
+@app.route('/LDlinkRestWeb/ldcorrelation', methods=['GET'])
+def ldcorrelation():
+    if 'LDlinkRestWeb' in request.path:
+        web = True
+    else:
+        web = False
+    print("LDcorrelation###############:",request.args.get('isExample'))
+    start_time = time.time()
+    
+    pop = request.args.get('pop', False)
+    genome_build = request.args.get('genome_build', 'grch37')
+    filename = request.args.get('filename', False)
+    filename2 = request.args.get('filename2', False)
+    isexample = request.args.get('isExample', False)
+    print(pop,genome_build,filename,isexample)
+    if filename:
+        filename = secure_filename(filename)
+        fileroot, ext = os.path.splitext(filename)
+
+    fileDir = f"/data/tmp/uploads"
+    print(filename)
+    try:
+        # Make an API call to the ldsc39_container    
+        result = run_correlation_command(filename,filename2,pop,isexample)
+        if web:
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            out_json = {"result": filtered_result}
+            #print(out_json)
+        else:
+                # Pretty-print the JSON output
+            summary_index = result.find("Total Observed scale")
+            if summary_index != -1:
+                filtered_result = result[summary_index:]
+            else:
+                filtered_result = result
+            #filtered_result = filtered_result.replace("\\n", "\n")
+            return filtered_result
+    except requests.RequestException as e:
+        # Print the error message
+        print(f"An error occurred: {e}")
+        out_json = {"error": str(e)}
+
+    end_time = time.time()
+    app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    return jsonify(out_json)
+
 
 
 # Web and API route for LDexpress

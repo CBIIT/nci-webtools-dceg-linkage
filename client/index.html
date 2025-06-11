@@ -7,7 +7,7 @@
 	<meta name="generator" content="HTML Tidy for Windows (vers 18 June 2008), see www.w3.org">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="description" content="LDlink is a suite of web-based applications designed to easily and efficiently interrogate linkage disequilibrium in population groups." />
-	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDassoc, LDexpress, LDhap, LDmatrix, LDpair, LDpop, LDproxy, LDtrait, SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
+	<meta name="keywords" content="linkage, disequilibrium, LD, visualization, tool, calculate, 1000 Genomes Project, population, correlated SNPs, equilibrium, haplotype, genotype, SNP, variant, indel, insertion, deletion, LDassoc, LDexpress, LDhap, LDmatrix, LDpair, LDpop, LDproxy, LDtrait, LDscore SNPchip, SNPclip, Machiela, dbSNP, SNAP, Haploview, BROAD" />
 	<meta name="author" content="NCI, CBIIT, DCEG, Machiela" />
 	<link rel="shortcut icon" href="LD.ico" type="image/x-icon">
 	<link rel="apple-touch-icon-precomposed.png" href="LD.ico">
@@ -25,6 +25,7 @@
 	</script>
 	<!-- Import web component -->
 	<script src="https://cbiit.github.io/nci-softwaresolutions-elements/components/include-html.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 	<!-- Bootstrap CSS -->
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous">	
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap-theme.min.css" integrity="sha384-6pzBo3FDv/PJ8r2KRkGHifhEocL+1X2rVCTTkUfGk7/0pbek5mMa1upzvWbrUbOZ" crossorigin="anonymous">
@@ -35,7 +36,7 @@
 	<link rel="stylesheet" href="css/style.css">
 	<link rel="stylesheet" href="css/social.css">
 	<link rel="stylesheet" href="css/ncids.css">
-	<link rel="stylesheet" href="LDlink.css?v=5.6.6">
+	<link rel="stylesheet" href="LDlink.css?v=5.7.0">
 </head>
 
 <!-- <body class="d-flex flex-column vh-100" role="document"> -->
@@ -195,8 +196,10 @@
 								<li><a id="ldpop-tab-anchor" class="dropdown-text" href="#ldpop-tab" data-toggle="tab" title="Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations"  style="color:black !important;">LDpop</a></li>
 								<li><a id="ldproxy-tab-anchor" class="dropdown-text" href="#ldproxy-tab" data-toggle="tab" title="Interactively explore proxy and putatively functional variants" style="color:black !important;">LDproxy</a></li>
 								<li><a id="ldtrait-tab-anchor" class="dropdown-text" href="#ldtrait-tab" data-toggle="tab" title="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease." style="color:black !important;">LDtrait</a></li>
+								<li><a id="ldscore-tab-anchor" class="dropdown-text" href="#ldscore-tab"  data-toggle="tab" title="Calculate LDSC" style="color:black !important;">LDscore</a></li>
 								<li><a id="snpchip-tab-anchor" class="dropdown-text" href="#snpchip-tab" data-toggle="tab" title="Find commercial genotyping platforms for variants" style="color:black !important;">SNPchip</a></li>
 								<li><a id="snpclip-tab-anchor" class="dropdown-text" href="#snpclip-tab" data-toggle="tab" title="Prune a list of variants by linkage disequilibrium" style="color:black !important;">SNPclip</a></li>
+								
 							</ul>
 						
 					</li>
@@ -331,6 +334,16 @@
 							</a>
 						</div>
 						<div class = "card-outside">
+							<a class="card anchor-link"  dest="ldscore">
+								<div class="text-center card-title">
+									<h2 style="color:white; margin:0px;  font-size: 24px;">LDscore</h2>
+								</div>
+								<div class="card-body">
+									<p>Calculate LD scores and perform LD score regression</p>
+								</div>
+							</a>
+						</div>
+						<div class = "card-outside">
 							<a class="card anchor-link"  dest="snpchip">
 								<div class="text-center card-title">
 									<h2 style="color:white; margin:0px; font-size: 24px;">SNPchip</h2>
@@ -340,6 +353,9 @@
 								</div>
 							</a>
 						</div>
+						
+					</div>
+					<div class="card-row">
 						<div class = "card-outside">
 							<a class="card anchor-link"  dest="snpclip">
 								<div class="text-center card-title" >
@@ -350,7 +366,48 @@
 								</div>
 							</a>
 						</div>
+						<div class = "card-outside" style="visibility: hidden">
+							<a class="card anchor-link"  dest="">
+								<div class="text-center card-title" >
+									<h2 style="color:white; margin:0px; font-size: 24px;"></h2>
+								</div>
+								<div class="card-body">
+									<p></p>
+								</div>
+							</a>
+						</div>
+						<div class = "card-outside" style="visibility: hidden">
+							<a class="card anchor-link"  dest="">
+								<div class="text-center card-title" >
+									<h2 style="color:white; margin:0px; font-size: 24px;"></h2>
+								</div>
+								<div class="card-body">
+									<p></p>
+								</div>
+							</a>
+						</div>
+						<div class = "card-outside" style="visibility: hidden">
+							<a class="card anchor-link"  dest="">
+								<div class="text-center card-title" >
+									<h2 style="color:white; margin:0px; font-size: 24px;"></h2>
+								</div>
+								<div class="card-body">
+									<p></p>
+								</div>
+							</a>
+						</div>
+						<div class = "card-outside" style="visibility: hidden">
+							<a class="card anchor-link"  dest="">
+								<div class="text-center card-title" >
+									<h2 style="color:white; margin:0px; font-size: 24px;"></h2>
+								</div>
+								<div class="card-body">
+									<p></p>
+								</div>
+							</a>
+						</div>
 					</div>
+					
 				</div>
 				
 				<!-- News and Updates content text can be updated from separate news.html file -->
@@ -413,9 +470,11 @@
 						Epidemiology and Genetics Informatics Tool Challenge.</p>
 
 					<p> 
+					<p>
+						This work utilized the computational resources of the NIH STRIDES Initiative  (<a href="https://cloud.nih.gov" target="_blank">https://cloud.nih.gov</a>) through the Other Transaction agreement [AWS{*}:{*} OT2OD027852]
+					<p>
 						LDlink's <a href="https://github.com/CBIIT/nci-webtools-dceg-linkage" target="_blank" alt="Link to open GitHub">source code</a> is available under the <a href="license.txt" target="_blank" alt="Link to MIT license">MIT license</a>, an <a href="https://opensource.org" target="_blank" alt="Link to open source initiative">Open Source Initiative</a> approved license.
 					</p>
-
 					<p> Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top"
 						title="Support">email</a>.
 					</p>
@@ -427,7 +486,7 @@
 			<!-- Module Header-->
 			<div class="module-header" id="module-header">
 				<div class="container-fluid" style="margin-top: -10px; padding-bottom: 10px;">
-					<label style="padding-left: 4px; color: gray">
+					<label id="genome-build-label" style="padding-left: 4px; color: gray">
 						Genome Build (<a class="help-anchor-link" href="#1000_Genomes_Project" style="color: gray">1000G</a>)
 					</label>
 					<div id="genome-build" class="dropdown" style="margin-bottom: -20px;">
@@ -467,22 +526,22 @@
 											<label for="ldassoc-file" style="display:none;">Browse for RS File</label>
 											<div id="ldassoc-files">
 												<div id="ldassoc-browse-button">
-													<span class="btn btn-default btn-file btn-csv-file">Browse
-														<input type="file" id="ldassoc-file">
-													</span>
-												</div>
-												<div id="ldassoc-sample">
-													<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
-													<label class="switch" for="example-gwas">
-														<input id="example-gwas" type="checkbox" data-toggle="toggle">
-														<span class="slider round"></span>
-													</label>
-													<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
-												</div>
-											</div>
-											<a id="ldassoc-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
-											 data-placement="bottom" data-content="Please upload a file."></a>
-										</div>
+					<span class="btn btn-default btn-file btn-csv-file">Browse
+						<input type="file" id="ldassoc-file">
+					</span>
+					</div>
+						<div id="ldassoc-sample">
+									<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+										<label class="switch" for="example-gwas">
+												<input id="example-gwas" type="checkbox" data-toggle="toggle">
+													<span class="slider round"></span>
+										</label>
+										<div id="ldassoc-sample-label"> &nbsp;Use example GWAS data</div>
+						</div>
+					</div>
+							<a id="ldassoc-browse-set-none" style="position:relative"  data-toggle="popover" trigger="manual"
+								data-placement="bottom" data-content="Please upload a file."></a>
+							</div>
 
 										<progress style="display:none;"></progress>
 
@@ -491,7 +550,7 @@
 											<!-- <div style="color:#800000;margin-top:5%">Data Details:</div> -->
 											<div class="" style="width:300px;">
 												<!--
-										<div style="clear:both;"></div>
+										 <div style="clear:both;"></div>
 										  <div style="width:90px;float:left;"><span style="float:right;">Chromo:</span>
 										  </div>
 										  -->
@@ -884,13 +943,13 @@
 									<div class="row">Thresholds</div>
 									<div class="input-group row" title="R2 or D' threshold for LD with query SNP">
 										<label id="ldexpress_r2_d_threshold_label" for="ldexpress_r2_d_threshold" style="width: 30px">R<sup>2</sup> &ge;</label>
-										<input id="ldexpress_r2_d_threshold" type="text" pattern="^(0(\.\d+)?|1(\.0+)?|0?\.?\d+([eE]-?\d+)?)$" value="0.1"
+										<input id="ldexpress_r2_d_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)" value="0.1"
 											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
 									<div class="input-group row" title="P-value threshold for the QTL association">
 										<label id="ldexpress_p_threshold_label" for="ldexpress_p_threshold" style="width: 30px">P &nbsp;&lt;</label>
-										<input id="ldexpress_p_threshold" type="text" pattern="^(0(\.\d+)?|1(\.0+)?|0?\.?\d+([eE]-?\d+)?)$" value="0.1"
+										<input id="ldexpress_p_threshold" type="text" pattern="(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)" value="0.1"
 											title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)." required>
 									</div>
 									<div style="clear:both;"></div>
@@ -2197,6 +2256,462 @@
 			</div>
 			<!--  END OF ldtrait -->
 
+<!--- ADD new LDScore module -->
+			<!-- LDscore -->
+			<div class="tab-pane fade not-home" id="ldscore-tab">
+				<!-- ldscore INPUTS-->
+				<div class="container-fluid">
+					<div class="row" style="padding-top: 10px;">
+						<!-- ldscore FORM -->
+						<form id="ldscoreForm" class="ldlinkForm">
+							<!-- Tabs Navigation -->
+							<ul class="nav nav-tabs">
+								<li class="active"><a data-toggle="tab" href="#ldscore-heritability-tab">Heritability Analysis</a></li>
+								<li><a data-toggle="tab" href="#ldscore-correlation-tab">Genetic Correlation</a></li>
+								<li ><a data-toggle="tab" href="#ldscore-file-container-tab">LD Score Calculation</a></li>
+								<!-- <li><a data-toggle="tab" href="#ldscore-inflation-tab">Inflation Calculation</a></li> -->
+							</ul>
+							<input type="hidden" id="ldscore-reference" value="">
+							<div class="tab-content">
+
+								<div id="ldscore-heritability-tab" class="tab-pane fade in active">
+									<!-- Browse RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldassoc-flex-item1">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar3" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+														 aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container2">
+													
+													<input type="text" id="ldscore-file-label-herit" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
+													<div>
+														<a id="ldheritSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for sample format</a>
+													</div>
+													<div id="ldscore-files-herit">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file-herit">Browse
+																<input type="file" id="ldscore-file-ldherit" >
+															</span>
+														</div>
+														<div id="ldherit-sample">
+															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+																<label class="switch" for="example-ldherit">
+																		<input id="example-ldherit" type="checkbox" data-toggle="toggle">
+																			<span class="slider round"></span>
+																</label>
+																<div id="ldherit-sample-label"> &nbsp;Use example data</div>
+														</div>							
+													</div>
+													<div id="ldheritFile" class="ldheritFile-file-name"></div>
+													
+													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
+													   data-placement="bottom" data-content="Please upload a file."></a>
+													 
+												</div>
+												
+						
+												<progress style="display:none;"></progress>
+						
+												<div id="header-values2" style="display:none;">
+													<div class="" style="width:300px;"></div>
+												</div>
+												
+											</div>
+											
+										</div>
+						
+										<div class="ldassoc-flex-item3">
+											<div class="form-group">
+												<div class="ldscore-population-col" style="width:190px;">
+													<a id="ldscore-population-codes-zero" style="position:relative;left:180px;" data-toggle="popover"
+													   trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
+													<label for="ldscore-population-codes" style="display: none;">Populations</label>
+													<select id="ldscore-population-codes" multiple="multiple" name="populations">
+													</select>
+												</div>
+											</div>
+										</div>
+										<!-- Calculate -->
+										<div class="ldassoc-flex-item4">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore-herit" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+									</div>
+									<h3></h3>
+									<div id="herit-error-message" class="alert alert-info" style="display:none; margin-top:10px;width:auto;">
+										Please upload a file for heritability analysis.
+									</div>
+									<br/>
+									<div class="col-sm-4 col-sm-offset-1 ">
+										<div id="ldheritmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
+										
+										<div id="ldscore-loading-herit">
+											<img src="calculating_LD.gif"  alt="loading icon" class="loading">
+										</div>
+									</div>
+									
+									<div class="jumbotron">
+										<div class="container-fluid" id="ldscore-results-container-herit" style="display:none">
+											<div id="row-button" class="row overflowy">
+												<div id="ldscore-export-dropdown"></div>
+												<div class="col-sm-8 col-sm-offset-1">
+														<!-- <h4>Heritability Analysis:</h4> -->
+													<div id="herit-table-container"></div>
+													
+													<div class="panel panel-default" >
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+															<button id="download-herit-input-btn"  type="button" class="btn btn-default">Download Input</button>
+														  <button id="download-herit-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download Table</button>
+														 
+														</div>
+													</div>
+											
+													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="heritCollapseGroup" style="display: none;">
+														<div class="panel panel-default">
+														<div class="panel-heading">
+																<a data-toggle="collapse" data-parent="#heritCollapseGroup" href="#collapseHeritGraph" style="color: #333;text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																	Heritability Analysis Output <i class="fa fa-chevron-down indicator"></i>
+																  </a>
+														</div>
+														<div id="collapseHeritGraph" class="panel-collapse collapse">
+															<div class="panel-body">
+															<div id="ldscore-bokeh-graph-herit"></div>
+															</div>
+														</div>
+														</div>
+													</div>
+													<br />
+													<br />
+												
+													
+												</div>
+											
+											</div>
+											
+											<br />
+										</div>
+									</div>
+								</div>
+								<div id="ldscore-correlation-tab" class="tab-pane fade">
+									<!-- Browse RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldassoc-flex-item1">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar4" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+														 aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container3">
+													
+													<input type="text" id="ldscore-file-label-correlation" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
+													
+													<div id="ldscore-files-correlation">
+														<div id="ldscore-browse-button" class="ldcorrelation">
+															<span class="btn btn-default btn-file btn-ldscore-file-correlation">Browse
+																<input type="file" id="ldscore-file-correlation" >
+															</span>
+														</div>
+														
+													</div>
+
+													<input type="text" id="ldscore-file-label-correlation2" readonly placeholder="pre-munged GWAS sumstats txt file" class="readonly-input-text">
+													<div>
+														<a id="ldcorrSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for sample format</a>
+													</div>
+													<div id="ldscore-files-correlation2">
+														<div id="ldscore-browse-button2">
+															<span class="btn btn-default btn-file btn-ldscore-file-correlation2">Browse
+																<input type="file" id="ldscore-file-correlation2" >
+															</span>
+														</div>
+														<div id="correlation-sample">
+															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+																<label class="switch" for="example-correlation">
+																		<input id="example-correlation" type="checkbox" data-toggle="toggle">
+																			<span class="slider round"></span>
+																</label>
+																<div id="correlation-sample-label"> &nbsp;Use example data</div>
+														</div>
+														
+													</div>
+													
+													<div id="correlationFile" class="ldcorrelation-file-name"></div>
+													<div id="correlationFile2" class="ldcorrelation-file-name2"></div>
+													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
+													   data-placement="bottom" data-content="Please upload a file."></a>
+												</div>
+						
+												<progress style="display:none;"></progress>
+						
+												<div id="header-values2" style="display:none;">
+													<div class="" style="width:300px;"></div>
+												</div>
+											</div>
+										</div>
+						
+										<div class="ldassoc-flex-item3">
+											<div class="form-group">
+												<div class="ldscore-population-col" style="width:190px;">
+													<a id="ldscore2-population-codes-zero" style="position:relative;left:180px;" data-toggle="popover"
+													   trigger="manual" data-placement="right" data-content="Please select a population."><span class="sr-only">ldscore population codes</span></a>
+													<label for="ldscore2-population-codes" style="display: none;">Populations</label>
+													<select id="ldscore2-population-codes" multiple="multiple" name="populations2">
+													</select>
+												</div>
+											</div>
+										</div>
+										<!-- Calculate -->
+										<div class="ldassoc-flex-item4">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore-correlation" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+									</div>
+									<h3></h3>
+									<br/>
+									<div id="correlation-error-message" class="alert alert-info" style="display:none; margin-top:10px;width:auto;">
+										Please upload both required files for correlation analysis.
+									</div>
+									<br/>
+									<div class="col-sm-4 col-sm-offset-1 ">
+										<div id="correlationmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
+										
+										<div id="ldscore-loading-correlation">
+											<img src="calculating_LD.gif"  alt="loading icon" class="loading">
+										</div>
+									</div>
+									
+									<div class="jumbotron">
+										<div class="container-fluid" id="ldscore-results-container-correlation"  style="display:none">
+											<div id="row-button" class="row overflowy">
+												<div id="correlation-export-dropdown"></div>
+												<div class="col-sm-8 col-sm-offset-1">
+												
+													<!-- <h4>Heritability Analysis:</h4> -->
+													<div id="correlation-table-container-1" class="table-responsive"></div>
+													<div id="correlation-table-container-2" class="table-responsive"></div>
+													<div id="correlation-table-container-3" class="table-responsive" ></div>
+													<div id="correlation-table-container-4" class="table-responsive" style="padding-top: 20px;"></div>
+													<div id="correlation-table-container" class="table-responsive" style="padding-top: 20px;"></div>
+													<br>
+													<!-- Download button that downloads all tables in one file -->
+													<div class="panel panel-default">
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+															<button id="download-all-input-btn"  type="button" class="btn btn-default" >Download Inputs</button>
+															<button id="download-all-tables-btn"  type="button" class="btn btn-default" style="display: none;">Download Tables</button>
+															
+														</div>
+													</div>
+									
+												<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="correlationCollapseGroup" style="display: none;">
+														<div class="panel panel-default">
+															<div class="panel-heading">
+																	<a data-toggle="collapse" data-parent="#correlationCollapseGroup" href="#collapseCorrelationGraph" style="color: #333;text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																		Correlation Analysis Output <i class="fa fa-chevron-down indicator"></i>
+																	  </a>
+															</div>
+														<div id="collapseCorrelationGraph" class="panel-collapse collapse">
+															<div class="panel-body">
+															<div id="ldscore-bokeh-graph-correlation"></div>
+															</div>
+														</div>
+													</div>
+												</div>
+												</div>
+											
+											</div>
+											
+											<br />
+										</div>
+									</div>
+								</div>	
+								
+								<div id="ldscore-file-container-tab" class="tab-pane fade in ">
+									<!-- Population -->
+									<!-- Browse RS numbers -->
+									<div class="ldassoc-flex">
+										<div class="ldscore-flex-item">
+											<div class="col-sm-3" style="width:280px;">
+												<div class="progress" style="display:none;">
+													<div id="progressbar2" class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="50"
+														 aria-valuemin="0" aria-valuemax="100">
+														50% Complete (info)
+													</div>
+												</div>
+												<div class="input-group" id="ldscore-file-container">
+													 <!-- <label for="ldscore-file-label" style="display:block;">Three files in the format *.bed, *.bim, *.fam are required</label>  -->
+													<input type="text" id="ldscore-file-label" readonly placeholder="*.bed *.bim *.fam are required" class="readonly-input-text">
+													<!-- <label for="ldscore-file" style="display:none;">Browse for RS File</label> -->
+													<div>
+														<a id="ldscoreSampleFormat" href="?tab=help#LDscore" style="padding-top: 5px;">Click here for sample format</a>
+													</div>
+
+													<div id="ldscore-files">
+														<div id="ldscore-browse-button">
+															<span class="btn btn-default btn-file btn-ldscore-file">Browse
+																<input type="file" id="ldscore-file" multiple>
+															</span>
+														</div>
+														<div id="ldscore-sample">
+															<!-- <a href="https://raw.githubusercontent.com/CBIIT/nci-webtools-dceg-linkage/LDlink_3.0.5/LDlink/files/assoc1.csv" download>Sample file</a> -->
+																<label class="switch" for="example-ldscore">
+																		<input id="example-ldscore" type="checkbox" data-toggle="toggle">
+																			<span class="slider round"></span>
+																</label>
+																<div id="ldscore-sample-label"> &nbsp;Use example data</div>
+														</div>
+																			
+													</div>
+													<div id="ldscoreFile" class="ldscore-file-name-container"></div>
+													
+
+													<a id="ldscore-browse-set-none" style="position:relative" data-toggle="popover" trigger="manual"
+													   data-placement="bottom" data-content="Please upload a file."></a>
+												</div>
+						
+												<progress style="display:none;"></progress>
+						
+												<div id="header-values2" style="display:none;">
+													<div class="" style="width:300px;"></div>
+												</div>
+											</div>
+										</div>
+										<div class="ldscore-flex-item2">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore-wind">Window:</label>
+													<input type="text" id="ldscore-wind" name="wind" value="1" class="ldscore-form-control" pattern="^[1-9]\d*$" title="Please enter an integer greater than 0." required>
+													<select id="unit-select" class="ldscore-form-control">
+														<option value="cm">cM</option>
+														<option value="kb">kb</option>
+													  </select>
+												</div>
+											</div>
+										</div>
+										<div class="ldscore-flex-item3">
+											<div class="form-group">
+												<div class="ldscore-calculate-col">
+													<label for="ldscore" class="sr-only">Submit</label>
+													<input type="submit" id="ldscore" value="Calculate" class="btn btn-default calculate"></input>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+									<h3></h3>
+									<div id="ldscore-file-message" style="display:none; margin-top: 50px; width: 800px;" class="alert alert-info">file error</div>
+									<div class="col-sm-4 col-sm-offset-1 ">
+										<div id="ldmessage" style="display:none; margin-top: 0px; width: 600px;" class="alert alert-info">Computational time may vary based on the number of samples and genetic markers provided in the data</div>
+										
+										<div id="ldscore-loading">
+											<img src="calculating_LD.gif" alt="loading icon" class="loading">
+										</div>
+									</div>
+									
+					
+									
+									<div class="jumbotron">
+										<div class="container-fluid" id="ldscore-results-container">
+											<div id="row-button" class="row overflowy">
+												<div id="ldscore-export-dropdown"></div>
+												<div class="col-sm-8 col-sm-offset-1">
+													
+													<!-- <h4>Summary of LD Scores</h4> -->
+													<div id="summary-table-container"></div>
+													<!-- <h4>MAF/LD Score Correlation Matrix</h4> -->
+													<div id="ldscore-table-container"></div>
+													<br />
+													<div class="panel panel-default">
+														<div class="panel-heading">Download Options</div>
+														<div class="panel-body">
+															<a id="ldscore-input-download-url" class="ldscore-download-button">Download Inputs</a>
+														  <a id="ldscore-download-log-url" download="result.txt"  
+														  class="ldscore-download-button">Download Tables</a>
+														  <a id="ldscore-download-url" class="ldscore-download-button">Download LD Scores</a>
+
+														</div>
+													</div>
+
+													<!-- Collapse panel for ldscore-bokeh-graph-herit - hidden on page load, with plus sign at end of title -->
+													<div class="panel-group" id="ldscoreCollapseGroup" style="display: none;">
+															<div class="panel panel-default">
+																<div class="panel-heading">
+																	<a data-toggle="collapse" data-parent="#ldscoreCollapseGroup" href="#collapseLDscoreGraph" style="color: #333; text-decoration: none; display: flex; justify-content: space-between; align-items: center;">
+																		LD Score Analysis Output <i class="fa fa-chevron-down indicator"></i>
+																	</a>
+																</div>
+																<div id="collapseLDscoreGraph" class="panel-collapse collapse">
+																	<div class="panel-body">
+																		<div id="ldscore-bokeh-graph"></div>
+																		</div>
+																	</div>
+																</div>
+													</div>
+													
+													
+												</div>
+											
+											</div>
+											
+											<br />
+										</div>
+									</div>
+									<!-- <div id="canvas-container">
+										<canvas id="yourCanvasId" width="500" height="500" style="border:1px solid #000000;"></canvas>
+										<a id="download-url" href="" download="data_result.txt" style="position:absolute; z-index:10; background-color:white; padding:5px; border:1px solid black; text-decoration:none; color:black;">Download Result</a>
+									</div> -->
+								</div>
+							
+							</div>
+						</form>
+					
+					</div>
+					
+					<!-- Message ERROR -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldscore-message">
+							<div class="panel panel-danger">
+								<div class="panel-heading">Error</div>
+								<div class="panel-body" id="ldassoc-message-content"></div>
+							</div>
+						</div>
+					</div>
+					<!-- Message WARNING -->
+					<div class="row">
+						<div class="col-sm-7 col-sm-offset-2" id="ldscore-message-warning">
+							<div class="panel panel-warning">
+								<div class="panel-heading">Warning</div>
+								<div class="panel-body" id="ldscore-message-warning-content">
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!-- ldscore CONTAINER -->
+
+				<!-- <div class="tab-content"> -->
+					
+				<!-- </div> -->
+
+			</div>
+
 			<!-- SNPclip -->
 			<div class="tab-pane fade not-home" id="snpclip-tab">
 				<!-- SNPclip INPUTS-->
@@ -2277,6 +2792,7 @@
 						</div>
 					</div>
 				</div>
+				
 				<!-- snpclip CONTAINER -->
 				<div class="jumbotron">
 					<div class="container-fluid" id="snpclip-results-container">
@@ -2946,7 +3462,7 @@
 	<script src="https://cdn.datatables.net/1.13.11/js/jquery.dataTables.min.js"></script>
 	<script src="lib/html2canvas@1.0.0-alpha.12/html2canvas.min.js"></script>
 	<script src="https://maps.googleapis.com/maps/api/js?key=@gmap_key@"></script>
-	<script src="LDlink.js?v=5.6.5"></script>
+	<script src="LDlink.js?v=5.7.0"></script>
 	<script>_satellite.pageBottom();</script>
 </body>
 

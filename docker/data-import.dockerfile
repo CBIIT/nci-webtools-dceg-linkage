@@ -7,6 +7,8 @@ RUN dnf -y update \
     bzip2-devel \
     fontconfig \
     gcc \
+    g++ \
+    git \
     glibc-langpack-en \
     httpd \
     httpd-devel \

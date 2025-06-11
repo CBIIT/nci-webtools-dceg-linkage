@@ -27,5 +27,6 @@ scripts/SNPchip_update/test
 scripts/SNPchip_update/updatenull
 database/
 config.yml
+docker-compose.yml
 
 .env

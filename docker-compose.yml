@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: docker/backend.dockerfile
+    platform: linux/amd64
     ports:
       - "8000:80"
       - "8080:8080"
@@ -10,6 +11,8 @@ services:
       - ./data:/data
     env_file:
       - server/.env
+    networks:
+      - my_network
 
   frontend:
     build:
@@ -19,6 +22,8 @@ services:
       - "9000:80"
     environment:
       API_HOST: "http://backend:80"
+    networks:
+      - my_network
     
   database:
     image: mongo:latest
@@ -26,3 +31,20 @@ services:
       - "27017:27017"
     volumes:
       - ./database:/data/db
+    networks:
+      - my_network
+
+#  ldsc:
+#    image: ldsc39
+#    container_name: ldsc_container
+#    networks:
+#      - my_network
+#    ports:
+#      - "5000:5000"
+#    volumes:
+#      - ./data:/data
+      
+
+networks:
+  my_network:
+    driver: bridge
