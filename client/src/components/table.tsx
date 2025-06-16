@@ -10,7 +10,13 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-export default function Table({ title = "", data, columns, ...props }) {
+type TableProps = {
+  title?: string;
+  data: any[];
+  columns: any[];
+};
+
+export default function Table({ title = "", data, columns, ...props }: TableProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const table = useReactTable({
     data,
