@@ -1,7 +1,7 @@
 // components/Header.tsx
 export default function Header() {
   return (
-    <div className="header" style={{ backgroundColor: '#F8F9FA' }}>
+    <div className="header">
       <div className="container">
         <header className="usa-banner__header">
           <div className="usa-banner__inner">
@@ -19,7 +19,7 @@ export default function Header() {
             src="/images/NIH-LDlink-Logo.png"
             alt="NIH National Institutes of Health"
           />
-          <span className="sr-only">NIH National Institutes of Health</span>
+          <span className="visually-hidden">NIH National Institutes of Health</span>
         </a>
       </div>
     </div>
