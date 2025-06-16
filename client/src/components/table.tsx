@@ -6,10 +6,11 @@ import {
   getCoreRowModel,
   getPaginationRowModel,
   getSortedRowModel,
+  getFilteredRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 
-export default function Table({ data, columns, ...props }) {
+export default function Table({ title = "", data, columns, ...props }) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const table = useReactTable({
     data,
@@ -18,6 +19,7 @@ export default function Table({ data, columns, ...props }) {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     onPaginationChange: setPagination,
+    getFilteredRowModel: getFilteredRowModel(),
     state: {
       pagination,
     },
@@ -25,43 +27,58 @@ export default function Table({ data, columns, ...props }) {
 
   return (
     <Container className="mb-3" tabIndex={0} style={{ maxHeight: "650px" }}>
+      <Row className="justify-content-between mb-2">
+        <Col sm="auto">
+          <h4 className="text-primary-emphasis">{title}</h4>
+        </Col>
+        <Col />
+        <Col sm="auto">
+          <input
+            value={table.getState().globalFilter ?? ""}
+            onChange={(e) => table.setGlobalFilter(String(e.target.value))}
+            placeholder="Search..."
+          />
+        </Col>
+      </Row>
       <Row>
-        <BsTable striped bordered {...props}>
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id} colSpan={header.colSpan}>
-                    {header.isPlaceholder ? null : (
-                      <>
-                        <div
-                          {...{
-                            className: header.column.getCanSort() ? "cursor-pointer select-none" : "",
-                            onClick: header.column.getToggleSortingHandler(),
-                          }}>
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <i className="bi bi-chevron-down" />,
-                            desc: <i className="bi bi-chevron-down" />,
-                          }[header.column.getIsSorted() as string] ?? <i className="bi bi-chevron-expand" />}
-                        </div>
-                      </>
-                    )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </BsTable>
+        <Col>
+          <BsTable striped bordered {...props}>
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th key={header.id} colSpan={header.colSpan}>
+                      {header.isPlaceholder ? null : (
+                        <>
+                          <div
+                            {...{
+                              className: header.column.getCanSort() ? "cursor-pointer select-none" : "",
+                              onClick: header.column.getToggleSortingHandler(),
+                            }}>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                            {{
+                              asc: <i className="bi bi-chevron-down" />,
+                              desc: <i className="bi bi-chevron-down" />,
+                            }[header.column.getIsSorted() as string] ?? <i className="bi bi-chevron-expand" />}
+                          </div>
+                        </>
+                      )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              {table.getRowModel().rows.map((row) => (
+                <tr key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </BsTable>
+        </Col>
       </Row>
       <Row className="align-items-center">
         <Col sm="auto">
