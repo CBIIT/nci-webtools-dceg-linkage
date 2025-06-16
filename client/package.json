@@ -9,17 +9,22 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-table": "^8.21.3",
+    "bootstrap": "^5.3.6",
+    "bootstrap-icons": "^1.13.1",
+    "next": "15.3.3",
     "react": "^19.0.0",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^19.0.0",
-    "next": "15.3.3"
+    "sass": "^1.89.2"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "@eslint/eslintrc": "^3"
+    "typescript": "^5"
   }
 }

@@ -1,0 +1,135 @@
+a {
+  text-decoration: none;
+  font-weight: 500;
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+body {
+  min-width: 320px;
+}
+
+fieldset {
+  position: relative;
+}
+
+legend {
+  position: absolute;
+  width: inherit;
+  font-size: 1rem;
+  top: -15px;
+  white-space: nowrap;
+}
+
+[disabled],
+:disabled {
+  cursor: not-allowed;
+}
+
+.bg-primary-dark {
+  background-color: $blue-dark;
+}
+
+.cover-image {
+  background-attachment: fixed;
+  background-position: 25%;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.required::after {
+  content: "*";
+  color: $red;
+  margin-left: 0.1rem;
+}
+
+.navbar {
+  .nav-link {
+    border-top: $navbar-dark-nav-link-border-top;
+    border-bottom: $navbar-dark-nav-link-border-bottom;
+    padding-left: $navbar-nav-link-padding-x !important;
+    padding-right: $navbar-nav-link-padding-x !important;
+    text-decoration: none;
+
+    &:hover,
+    &.active {
+      color: white;
+      border-bottom: $navbar-dark-nav-link-border-bottom-active;
+    }
+
+    &:hover {
+      border-bottom: 3px rgba(255, 255, 255, 0.3) solid;
+    }
+  }
+
+  .search-control,
+  .search-control-button {
+    padding: $nav-link-padding-y $nav-link-padding-x;
+    background-color: #636363;
+    border: none;
+    border-radius: 0;
+    color: white;
+    outline: none;
+    box-shadow: none;
+
+    &::placeholder {
+      color: white;
+    }
+  }
+}
+
+.form-control-list-group {
+  .form-control {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .list-group {
+    .list-group-item:first-child {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+      border-top-width: 0;
+    }
+  }
+}
+
+.alert {
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+}
+
+:root {
+  font-size: 1.2rem;
+}
+
+.table {
+  font-variant: tabular-nums;
+}
+
+.table-responsive {
+  margin-bottom: $spacer;
+  .table {
+    margin-bottom: 0;
+  }
+}
+
+.active-row {
+  background-color: lightgreen;
+}
+
+.card:hover {
+  box-shadow: 8px 8px 5px blue;
+  transform: scale(1.05);
+  transition: 0.3s;
+}
+
+.link-custom {
+  cursor: pointer;
+  color: #6e3acf;
+}
