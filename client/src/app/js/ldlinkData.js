@@ -1,23 +1,23 @@
-var ldlink_version = "Version 5.7.0";
+export const ldlink_version = "Version 5.7.0";
 
 // var restService = {protocol:'http',hostname:document.location.hostname,fqn:"nih.gov",port:9090,route : "LDlinkRestWeb"}
 // var restServerUrl = restService.protocol + "://" + restService.hostname + "/"+ restService.route;
-var restService = {
+export const restService = {
   protocol: window.location.protocol,
   hostname: window.location.host,
   pathname: window.location.pathname,
   route: "LDlinkRestWeb",
 };
-var restServerUrl =
+export const restServerUrl =
   restService.protocol +
   "//" +
   restService.hostname +
   restService.pathname +
   restService.route;
 
-var dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
-var dropdowns2 = ["score-chromosome", "score-position", "score-p-value"];
-var populationsLdscore = {
+export const dropdowns = ["assoc-chromosome", "assoc-position", "assoc-p-value"];
+export const dropdowns2 = ["score-chromosome", "score-position", "score-p-value"];
+export const populationsLdscore = {
   EUR: {
     subPopulations: { EUR: "European" },
   },
@@ -228,7 +228,7 @@ var ldhapData = {
     },
   ],
 };
-var ldassocData = [
+export const ldassocData = [
   {
     RS_Number: "rs75563749",
     Coord: "chr3:171031233",
@@ -571,7 +571,7 @@ var snpchipData = {
     },
   ],
 };
-var snpchipReverseLookup = [];
+export const snpchipReverseLookup = [];
 var ldExpressRaw;
 var ldExpressSort;
 var ldTraitRaw;
@@ -606,9 +606,9 @@ var headerModules = [
   "snpclip",
   "snpchip",
 ];
-var homeStartBox = 0;
-var newsList = [];
-var moduleTitleDescription = {
+export const homeStartBox = 0;
+export const newsList = [];
+export const moduleTitleDescription = {
   ldassoc: [
     "LDassoc Tool",
     "#LDassoc",

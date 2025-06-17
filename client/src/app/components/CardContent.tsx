@@ -1,6 +1,6 @@
 "use client";
 
-export default function MainContent() {
+export default function CardContent() {
   const tools = [
     {
       id: "ldassoc",
