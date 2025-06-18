@@ -1,7 +1,7 @@
 // components/Header.tsx
 export default function Header() {
   return (
-    <div className="header">
+    <div className="header" >
       <div className="container">
         <header className="usa-banner__header">
           <div className="usa-banner__inner">

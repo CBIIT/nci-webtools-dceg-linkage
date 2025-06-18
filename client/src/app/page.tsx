@@ -10,15 +10,14 @@ import Credits from "./components/Credits";
 export default function Home() {
   return (
     <div >      
-        <Header />
-        <Navbar />
+       
         <div className="container">
           <CardContent />
           <NewsSection />
           <Credits />
         </div>
         
-        <Footer />
+       
     </div>
   );
 }

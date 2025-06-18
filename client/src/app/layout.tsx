@@ -4,6 +4,9 @@ import "./globals.css";
 import Script from "next/script";
 import "./css/ncids.css";
 import "./css/LDlink.css";
+import Header from "./components/Header";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,8 +44,16 @@ export default function RootLayout({
         
         {/* Add other stylesheets here if needed */}
       </head>
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
-        {children}
+      
+        <body className={`${geistSans.variable} ${geistMono.variable}`} >
+          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <Header />
+            <Navbar />
+            {children}
+            <Footer />
+          </div>
+
+          {/* Load custom scripts */}
 
         {/* External scripts */}
         <Script

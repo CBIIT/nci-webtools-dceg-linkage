@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 export default function Navbar() {
   const tools = [
@@ -37,9 +38,9 @@ export default function Navbar() {
 
             {/* Home */}
             <li className="nav-item mr-4">
-              <a id="home-tab-anchor" className="nav-link" href="#home-tab" data-bs-toggle="tab">
+              <Link id="home-tab-anchor" className="nav-link" href="/" >
                 Home
-              </a>
+              </Link>
             </li>
 
             {/* LD Tools Dropdown */}
@@ -79,15 +80,15 @@ export default function Navbar() {
               </a>
             </li>
             <li className="nav-item">
-              <a id="citations-tab-anchor" className="nav-link" href="#citations-tab" data-bs-toggle="tab">
+              <Link id="citations-tab-anchor" className="nav-link" href="/citations">
                 Citations
-              </a>
+              </Link>
             </li>
             <li className="nav-item">
-              <a id="version-tab-anchor" className="nav-link" href="#version-tab" data-bs-toggle="tab">
-                Version History
-              </a>
+                <Link href="/version-history" className="nav-link">Version History</Link>
+
             </li>
+
             <li className="nav-item">
               <a id="help-tab-anchor" className="nav-link" href="#help-tab" data-bs-toggle="tab">
                 Documentation
