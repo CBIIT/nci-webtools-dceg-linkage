@@ -248,14 +248,14 @@ html body .footer {
 	border-bottom: 0px;
 }
 
-table {
+.table2 {
   width: 100%;          /* Make table take full width */
   table-layout: auto; 
   border-collapse: collapse;
   border-spacing: 0px !important;
 }
 
-table, th, td {
+.table2, th, td {
   border: none;
   border-collapse: collapse;
   padding: 5px 0px;   /* Increase vertical and horizontal space */
@@ -264,31 +264,31 @@ table, th, td {
 
 
 /* Add a bottom border to each row */
-table tr {
+.table2 tr {
   border-bottom: 1px solid #e6e4e4;
 }
 
 /* Optional: Remove border from the last row if you don't want it */
-table tr:last-child {
+.table2 tr:last-child {
   border-bottom: none;
 }
 
-table td, table th {
+.table2 td, .table2 th {
   border-bottom: 1px solid #ccc;
 }
 
-table tfoot tr,
-table tfoot td,
-table tfoot th {
+.table2 tfoot tr,
+.table2 tfoot td,
+.table2 tfoot th {
   border-bottom: none !important;
 }
 /* Zebra striping for odd/even rows */
-table tbody tr:nth-child(odd) td,
-table tbody tr:nth-child(odd) th {
+.table2 tbody tr:nth-child(odd) td,
+.table2 tbody tr:nth-child(odd) th {
   background-color: #f5f4f4 !important;
 }
-table tbody tr:nth-child(even) td,
-table tbody tr:nth-child(even) th {
+.table2 tbody tr:nth-child(even) td,
+.table2 tbody tr:nth-child(even) th {
   background-color: #fff !important;
 }
 
