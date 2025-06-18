@@ -2093,3 +2093,14 @@ input:not(:disabled):checked + .slider {
   border-radius: 0;
   font-weight: bold;
 }
+
+.paginate_button.disabled,
+.paginate_button.disabled:hover,
+.paginate_button.disabled:focus {
+  background-color: #f5f5f5;
+  color: #bbb !important;
+  border-color: #eee;
+  cursor: not-allowed;
+  pointer-events: none;
+  border-radius: 4px;
+}
