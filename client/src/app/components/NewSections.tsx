@@ -17,13 +17,19 @@ export default function NewsSection() {
                 {[1, 2, 3].map((id) => (
                     <div key={id} id={`news-card-outside-${id}`} className="news-card-outside">
                     <div className="card">
-                        <div className="news-card-left" style={{ fontSize: id === 1 ? "32px" : undefined }}>
-                        {/* Optional title or icon space */}
+                        <div className="d-flex align-items-start">
+                            <div
+                            className="news-card-left"
+                            style={{ fontSize: id === 1 ? "32px" : undefined }}
+                            >
+                            {/* Optional title or icon space */}
+                            </div>
+                            <div id={`news-card-${id}`} className="news-card-body">
+                            Testing
+                            </div>
                         </div>
-                        <div id={`news-card-${id}`} className="news-card-body">
-                        
                         </div>
-                    </div>
+
                     </div>
                 ))}
 
