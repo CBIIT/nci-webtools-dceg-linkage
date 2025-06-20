@@ -2192,28 +2192,30 @@ if(activeTabId ==="ldassoc-tab"){
 }
 function completeHandler() {
   console.warn("completeHandler");
-  $("#progressbar").parent().hide();
-  $("#progressbar2").parent().hide();
+
+  var activeTabId = $(".tab-pane.active").attr("id") || "";
+if(activeTabId ==="ldassoc-tab"){
+   $("#progressbar").parent().hide();
+     $("#ldassoc-file-container").fadeIn(1000);
+     $("#ldassoc").removeAttr("disabled");
+}
+else{
+ var activeTab = $("#ldscoreForm").closest(".tab-pane").find(".tab-pane.active").attr("id");
+ if (activeTab === "ldscore-heritability-tab") {
   $("#progressbar3").parent().hide();
-  $("#progressbar4").parent().hide();
-  $("#ldassoc-file-container").fadeIn(1000);
-  $("#ldscore-file-container").fadeIn(1000);
-  $("#ldscore-file-container2").fadeIn(1000);
-  $("#ldscore-file-container3").fadeIn(1000);
-  // enable calculate button only when file is successfully uploaded
-  $("#ldassoc").removeAttr("disabled");
-  $("#ldscore").removeAttr("disabled");
   $("#ldscore-herit").removeAttr("disabled");
-  
-  $("#ldscore-correlation").removeAttr("disabled").removeClass("disabled");
-
-  $("#example-ldscore").prop("checked", false).trigger("change");
-  //if (document.getElementById("ldscore-bokeh-graph") !== null)
-  //  document.getElementById("ldscore-bokeh-graph").innerHTML = "";
-  //if (document.getElementById("ldscore-results-container") !== null)
-  //  document.getElementById("ldscore-results-container").innerHTML = "";
-
-
+  $("#ldscore-file-container2").fadeIn(1000);
+ }else if(activeTab === "ldscore-correlation-tab"){
+    $("#progressbar4").parent().hide();
+     $("#ldscore-correlation").removeAttr("disabled").removeClass("disabled");
+  $("#ldscore-file-container3").fadeIn(1000);
+ }else{
+    $("#ldscore-file-container").fadeIn(1000);
+    $("#progressbar2").parent().hide();
+   $("#ldscore").removeAttr("disabled");
+   $("#example-ldscore").prop("checked", false).trigger("change");
+ }
+}
 }
 function errorHandler(e) {
   showCommError(e);
