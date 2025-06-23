@@ -90,9 +90,7 @@ export default function Navbar() {
             </li>
 
             <li className="nav-item">
-              <a id="help-tab-anchor" className="nav-link" href="#help-tab" data-bs-toggle="tab">
-                Documentation
-              </a>
+              <Link href="/documentation" className="nav-link">Documentation</Link>
             </li>
           </ul>
         </div>
