@@ -18,13 +18,24 @@ services:
     build:
       context: .
       dockerfile: docker/frontend.dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: http://backend:8080
     ports:
-      - "9000:80"
-    environment:
-      API_HOST: "http://backend:80"
+      - "3000:80"
     networks:
       - my_network
-    
+
+  # frontend_old:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/frontend_old.dockerfile
+  #   ports:
+  #     - "9000:80"
+  #   environment:
+  #     API_HOST: "http://backend:80"
+  #   networks:
+  #     - my_network
+
   database:
     image: mongo:latest
     ports:
@@ -43,7 +54,6 @@ services:
 #      - "5000:5000"
 #    volumes:
 #      - ./data:/data
-      
 
 networks:
   my_network:

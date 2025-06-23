@@ -940,6 +940,8 @@ $(document).ready(function () {
 
   $("#ldassoc").prop("disabled", true);
   $("#ldscore").prop("disabled", true);
+  $("#ldscore-herit").prop("disabled", true);
+  $("#ldscore-correlation").prop("disabled", true);
 
   // reset apiaccess form
   $(".apiaccess-done").click(function (e) {
@@ -1516,7 +1518,7 @@ function setupLDheritExample() {
   document.getElementById("ldheritFile").innerHTML = "";
   var useEx = document.getElementById("example-ldherit");
   var btn = document.getElementById("ldscore-herit");
-
+  btn.classList.add("disabled");
   if (useEx.checked) {
     var url = restServerUrl + "/ldherit_example";
     var ajaxRequest = $.ajax({
@@ -1619,7 +1621,8 @@ function setupLDcorrelationExample() {
   document.getElementById("correlationFile").innerHTML = "";
   document.getElementById("correlationFile2").innerHTML = "";
   var btn = document.getElementById("ldscore-correlation");
-
+  //btn.disabled = true;
+  btn.classList.add("disabled");
   var useEx = document.getElementById("example-correlation");
   if (useEx.checked) {
     var url = restServerUrl + "/ldcorrelation_example";
@@ -1688,8 +1691,8 @@ function setupLDcorrelationExample() {
       var fileInput2 = document.getElementById("ldscore-file-correlation2");
       fileInput2.files = dataTransfer2.files;
 
-     // btn.disabled = false;
-     // btn.classList.remove("disabled");
+      btn.disabled = false;
+      btn.classList.remove("disabled");
     });
 
     // switch (genomeBuild) {
@@ -2038,6 +2041,7 @@ function uploadFileldcorrelation(fileid) {
   // console.log(filename);
   document.getElementById("ldscore-file-message").style.display = "none";
   // document.getElementById("ldscore-loading-herit").style.display = "none";
+  //document.getElementById("ldscore-correlation").classList.add("disabled");
 
   var fileInput = document.getElementById(fileid);
 
@@ -2163,47 +2167,55 @@ function progressHandlingFunction(e) {
   }
 }
 function beforeSendHandler() {
-  console.warn("beforeSendHandler");
+     var activeTabId = $(".tab-pane.active").attr("id") || "";
+  console.warn("beforeSendHandler",activeTabId);
   var percent = 0;
-  $("#progressbar").css("width", percent + "%");
+  $("#progressbar2, #progressbar3, #progressbar4").parent().hide();
+if(activeTabId ==="ldassoc-tab"){
+    $("#progressbar").css("width", percent + "%");
   $("#progressbar").html(percent + "% Completed");
-  $("#progressbar2").css("width", percent + "%");
-  $("#progressbar2").html(percent + "% Completed");
-  $("#progressbar3").css("width", percent + "%");
-  $("#progressbar3").html(percent + "% Completed");
-  $("#progressbar4").css("width", percent + "%");
-  $("#progressbar4").html(percent + "% Completed");
-  //$("#ldassoc-file-container").hide();
-  //$("#ldscore-file-container").hide();
-  //  $("#ldscore-file-container2").hide();
-  $("#progressbar").parent().show();
-  $("#progressbar2").parent().show();
-  $("#progressbar3").parent().show();
-  $("#progressbar4").parent().show();
+    $("#progressbar").parent().show();
+}  else {
+    // Find the active tab under ldscore
+    var activeTab = $("#ldscoreForm").closest(".tab-pane").find(".tab-pane.active").attr("id");
+      // Check for Heritability Analysis tab
+    if (activeTab === "ldscore-heritability-tab") {
+      $("#progressbar3").css("width", percent + "%").html(percent + "% Completed").parent().show();
+    } else if(activeTab === "ldscore-correlation-tab"){
+      // Assume correlation or other tab
+      $("#progressbar4").css("width", percent + "%").html(percent + "% Completed").parent().show();
+    } else{
+    $("#progressbar2").css("width", percent + "%").html(percent + "% Completed").parent().show();
+    }
+  }
+
 }
 function completeHandler() {
   console.warn("completeHandler");
-  $("#progressbar").parent().hide();
-  $("#progressbar2").parent().hide();
+
+  var activeTabId = $(".tab-pane.active").attr("id") || "";
+if(activeTabId ==="ldassoc-tab"){
+   $("#progressbar").parent().hide();
+     $("#ldassoc-file-container").fadeIn(1000);
+     $("#ldassoc").removeAttr("disabled");
+}
+else{
+ var activeTab = $("#ldscoreForm").closest(".tab-pane").find(".tab-pane.active").attr("id");
+ if (activeTab === "ldscore-heritability-tab") {
   $("#progressbar3").parent().hide();
-  $("#progressbar4").parent().hide();
-  $("#ldassoc-file-container").fadeIn(1000);
-  $("#ldscore-file-container").fadeIn(1000);
-  $("#ldscore-file-container2").fadeIn(1000);
-  $("#ldscore-file-container3").fadeIn(1000);
-  // enable calculate button only when file is successfully uploaded
-  $("#ldassoc").removeAttr("disabled");
-  $("#ldscore").removeAttr("disabled");
   $("#ldscore-herit").removeAttr("disabled");
-  $("#dscore-correlation").removeAttr("disabled");
-
-  $("#example-ldscore").prop("checked", false).trigger("change");
-  //if (document.getElementById("ldscore-bokeh-graph") !== null)
-  //  document.getElementById("ldscore-bokeh-graph").innerHTML = "";
-  //if (document.getElementById("ldscore-results-container") !== null)
-  //  document.getElementById("ldscore-results-container").innerHTML = "";
-
-
+  $("#ldscore-file-container2").fadeIn(1000);
+ }else if(activeTab === "ldscore-correlation-tab"){
+    $("#progressbar4").parent().hide();
+     $("#ldscore-correlation").removeAttr("disabled").removeClass("disabled");
+  $("#ldscore-file-container3").fadeIn(1000);
+ }else{
+    $("#ldscore-file-container").fadeIn(1000);
+    $("#progressbar2").parent().hide();
+   $("#ldscore").removeAttr("disabled");
+   $("#example-ldscore").prop("checked", false).trigger("change");
+ }
+}
 }
 function errorHandler(e) {
   showCommError(e);
@@ -3615,7 +3627,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-  $("#help-tab").load("help.html?v=5.6.0");
+  $("#help-tab").load("help.html?v=5.7.0");
 }
 
 function calculate(e) {
@@ -3635,7 +3647,7 @@ function initCalculate(id) {
     var activeTab = $("#ldscoreForm .nav-tabs li.active a");
     if (activeTab.length) {
       var activateTab = activeTab.attr("href");
-      if (activateTab.includes("ldscore-heritability-tab")) {
+      if (activateTab.includes("ldscore-file-container-tab")) {
         console.log("ldscore");
         $("#" + id + "-results-container").hide();
         $("#" + id + "-message").hide();
@@ -4922,6 +4934,7 @@ function createTable(headers, data, isSummary, containerId, tableTitle) {
   headers.forEach(function (header) {
     var th = document.createElement("th");
     th.textContent = header;
+    th.style.backgroundColor = "#f2f2f2";
     headerRow.appendChild(th);
   });
   thead.appendChild(headerRow);

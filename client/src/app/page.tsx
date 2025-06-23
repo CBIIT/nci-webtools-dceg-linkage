@@ -8,14 +8,11 @@ export default function Home() {
   
   return (
     <div >      
-       
         <div className="container">
           <CardContent />
           <NewsSection />
           <Credits />
         </div>
-        
-       
     </div>
   );
 }
