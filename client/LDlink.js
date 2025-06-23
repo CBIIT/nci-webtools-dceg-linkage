@@ -2192,7 +2192,6 @@ if(activeTabId ==="ldassoc-tab"){
 }
 function completeHandler() {
   console.warn("completeHandler");
-
   var activeTabId = $(".tab-pane.active").attr("id") || "";
 if(activeTabId ==="ldassoc-tab"){
    $("#progressbar").parent().hide();
