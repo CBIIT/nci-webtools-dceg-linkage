@@ -1,9 +1,20 @@
 import Select, { components } from "react-select";
 import { Controller } from "react-hook-form";
+import "./select.scss";
+
+export interface PopOption {
+  readonly value: string;
+  readonly label: string;
+}
+
+export interface GroupedOption {
+  readonly label: string;
+  readonly options: readonly PopOption[];
+}
 
 export interface Populations {
   [key: string]: {
-    fullName: string;
+    label: string;
     subPopulations: {
       [subKey: string]: string;
     };
@@ -12,7 +23,7 @@ export interface Populations {
 
 export const populations: Populations = {
   AFR: {
-    fullName: "African",
+    label: "African",
     subPopulations: {
       YRI: "Yoruba in Ibadan, Nigera",
       LWK: "Luhya in Webuye, Kenya",
@@ -24,7 +35,7 @@ export const populations: Populations = {
     },
   },
   AMR: {
-    fullName: "Ad Mixed American",
+    label: "Ad Mixed American",
     subPopulations: {
       MXL: "Mexican Ancestry from Los Angeles, USA",
       PUR: "Puerto Ricans from Puerto Rico",
@@ -33,7 +44,7 @@ export const populations: Populations = {
     },
   },
   EAS: {
-    fullName: "East Asian",
+    label: "East Asian",
     subPopulations: {
       CHB: "Han Chinese in Bejing, China",
       JPT: "Japanese in Tokyo, Japan",
@@ -43,7 +54,7 @@ export const populations: Populations = {
     },
   },
   EUR: {
-    fullName: "European",
+    label: "European",
     subPopulations: {
       CEU: "Utah Residents from North and West Europe",
       TSI: "Toscani in Italia",
@@ -53,7 +64,7 @@ export const populations: Populations = {
     },
   },
   SAS: {
-    fullName: "South Asian",
+    label: "South Asian",
     subPopulations: {
       GIH: "Gujarati Indian from Houston, Texas",
       PJL: "Punjabi from Lahore, Pakistan",
@@ -65,44 +76,20 @@ export const populations: Populations = {
 };
 
 export default function PopSelect({ name, control }) {
-  interface PopOption {
-    readonly value: string;
-    readonly label: string;
-  }
-
-  interface GroupedOption {
-    readonly label: string;
-    readonly options: readonly PopOption[];
-  }
-
   const popGroups: readonly GroupedOption[] = Object.entries(populations).map(([key, group]) => ({
-    label: `(${key}) ${group.fullName}`,
+    label: `(${key}) ${group.label}`,
+    value: key,
     options: Object.entries(group.subPopulations).map(([value, label]) => ({
       value,
       label: `(${value}) ${label}`,
     })),
   }));
+  console.log("Pop groups:", popGroups);
   const popOptions: any[] = [{ label: "(ALL) All Populations", value: "ALL" }, ...popGroups];
 
-  const GroupHeading = (props: any) => {
-    const { data, selectProps } = props;
-    const handleClick = (e: React.MouseEvent) => {
-      e.stopPropagation();
-      const groupOptions = data.options;
-      const currentValue = selectProps.value || [];
-      // Add only options not already selected
-      const newValue = [
-        ...currentValue,
-        ...groupOptions.filter((opt: any) => !currentValue.some((v: any) => v.value === opt.value)),
-      ];
-      selectProps.onChange(newValue, { action: "select-option", option: groupOptions });
-    };
-
-    return (
-      <div onClick={handleClick} className="custom-group-heading" style={{ cursor: "pointer" }}>
-        <components.GroupHeading {...props} />
-      </div>
-    );
+  const Group = (props: any) => {
+    const onClick = () => props.selectProps.onChange(props.options);
+    return <components.Group {...props} headingProps={{ ...props.headingProps, onClick }} />;
   };
 
   const customStyles = {
@@ -181,7 +168,7 @@ export default function PopSelect({ name, control }) {
           isMulti
           options={popOptions}
           closeMenuOnSelect={false}
-          components={{ GroupHeading }}
+          components={{ Group }}
           className="basic-multi-select"
           classNamePrefix="select"
           value={field.value || []}

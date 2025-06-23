@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.81.2",
     "@tanstack/react-table": "^8.21.3",
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
