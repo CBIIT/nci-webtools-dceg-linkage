@@ -6,19 +6,20 @@ export default function CitationsPage() {
       <div className="text-center">
         <h2>
           <img
-            src="/LDlink_logo_small_clear.png"
+            src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
             style={{ verticalAlign: "bottom" }}
           />{" "}
           Citations
         </h2>
+        
+      </div>
+
+      <div style={{ paddingLeft: "20px", paddingRight: "20px" }}>
         <p>
           Thank you for using LDlink! If you use LDlink in any publication,
           please cite the LDlink manuscript and any relevant module publications:
         </p>
-      </div>
-
-      <div style={{ paddingLeft: "20px", paddingRight: "20px" }}>
         <p>
           Machiela MJ, Chanock SJ.{" "}
           <a
