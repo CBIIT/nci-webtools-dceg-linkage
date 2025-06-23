@@ -62,6 +62,9 @@ app.logger = logging.getLogger("root")
 app.logger.setLevel(log_level)
 app.logger.addHandler(handler)
 
+# Suppress PyMongo logs below WARNING
+logging.getLogger("pymongo").setLevel(logging.WARNING)
+
 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
 
 # Flask Limiter initialization

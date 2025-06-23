@@ -6,7 +6,6 @@ import "./css/ncids.css";
 import "./css/LDlink.css";
 import Header from "./components/Header";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -23,7 +22,6 @@ export const metadata: Metadata = {
   description:
     "LDlink is a suite of web-based applications designed to easily and efficiently interrogate linkage disequilibrium in population groups.",
 };
-
 
 export default function RootLayout({
   children,
