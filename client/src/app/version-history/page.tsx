@@ -2,7 +2,7 @@
 "use client";
 
 
-import { versionHistory } from "@/data/versionHistory";
+import { versionHistory } from "@/ldLinkdata/versionHistory";
 
 export default function VersionHistoryPage() {
   return (
