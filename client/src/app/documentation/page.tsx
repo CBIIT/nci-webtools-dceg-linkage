@@ -1,13 +1,14 @@
 // src/app/documentation/page.tsx
 "use client";
 import React from "react";
+import Image from "next/image";
 
 export default function DocumentationPage() {
   return (
     <div className="container mt-4">
       <div style={{ textAlign: "center" }}>
         <h2>
-          <img
+          <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
             style={{ verticalAlign: "bottom" }}
@@ -117,7 +118,7 @@ export default function DocumentationPage() {
 		nucleotide polymorphisms (SNPs) and insertions/deletions (indels). Every module of LDlink requires the
 		entry of at least one variant as identified by a RefSNP number (RS
 		number) or genomic position (chr#:position). RS numbers have been assigned by dbSNP
-		and are well-curated identifiers that follow the format "rs" followed by 1 to 8 numbers. The
+		and are well-curated identifiers that follow the format &quot;rs&quot; followed by 1 to 8 numbers. The
 		current implementation of LDlink references dbSNP and only
 		accepts input for bi-allelic variants.
 	</p>
@@ -134,32 +135,32 @@ export default function DocumentationPage() {
 	</p>
     <p>
 		<strong><a id="ucsc_refgene"></a><a href="https://genome.ucsc.edu/cgi-bin/hgTables" target="_blank">UCSC RefSeq</a></strong> (source: <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=Human&db=hg19&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=0&hgta_regionType=genome&position=chrX%3A15%2C578%2C261-15%2C621%2C068&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh37</a> and <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=&db=hg38&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=ncbiRefSeq&hgta_regionType=genome&position=&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh38</a>) - 
-		Publicly available gene transcripts from the UCSC Table Browser are used by LDlink's <a href="#LDassoc">LDassoc</a>, <a href="#LDmatrix">LDmatrix</a>, and <a href="#LDproxy">LDproxy</a> modules to display genes within the genomic window of interest.
+		Publicly available gene transcripts from the UCSC Table Browser are used by LDlink&apos;s <a href="#LDassoc">LDassoc</a>, <a href="#LDmatrix">LDmatrix</a>, and <a href="#LDproxy">LDproxy</a> modules to display genes within the genomic window of interest.
 	</p>
 	<p>
 		<strong><a id="regulomedb"></a><a href="https://regulomedb.org/" target="_blank">RegulomeDB</a></strong> (source: <a href="https://www.encodeproject.org/files/ENCFF297XMQ/@@download/ENCFF297XMQ.tsv" target="_blank">GRCh37</a>) - 
-		Publicly available scores from RegulomeDB are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to rank available datatypes for a single coordinate.
+		Publicly available scores from RegulomeDB are used by LDlink&apos;s <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to rank available datatypes for a single coordinate.
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
     <p>
 		<strong><a id="recomb"></a><a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">Genetic Map</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
-		Publicly available combined recombination rates (cM/Mb) from the 1000 Genomes Project are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
+		Publicly available combined recombination rates (cM/Mb) from the 1000 Genomes Project are used by LDlink&apos;s <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
 	<p>
 		<strong><a id="gtex"></a><a href="https://www.gtexportal.org/home/" target="_blank">GTEx Portal</a></strong> (source: <a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_Analysis_v8_eQTL.tar" target="_blank">GRCh38</a>) - 
-		Publicly available single-tissue cis-QTL data from the GTEx Portal is used by LDlink's <a href="#LDexpress">LDexpress</a> module to show significant variant-gene associations in multiple tissue types.
+		Publicly available single-tissue cis-QTL data from the GTEx Portal is used by LDlink&apos;s <a href="#LDexpress">LDexpress</a> module to show significant variant-gene associations in multiple tissue types.
 		GRCh37 support is added via <a href="https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz" target="_blank">GTEx lookup table</a>.
 	</p>
     <p>
 		<strong><a id="gwas_catalog"></a><a href="https://www.ebi.ac.uk/gwas/home" target="_blank">GWAS Catalog</a></strong> (source: <a href="https://www.ebi.ac.uk/gwas/api/search/downloads/alternative" target="_blank">GRCh38</a>) - 
-		Publicly available NHGRI-EBI Catalog of human genome-wide association studies from GWAS Catalog is used by LDlink's <a href="#LDtrait">LDtrait</a> module to search if variants have previously been associated with a trait or disease.
+		Publicly available NHGRI-EBI Catalog of human genome-wide association studies from GWAS Catalog is used by LDlink&apos;s <a href="#LDtrait">LDtrait</a> module to search if variants have previously been associated with a trait or disease.
 		GRCh37 support is added via <a href="#dbSNP">dbSNP</a>.
     </p>
 	<p>
 		<strong><a id="forgedb"></a><a href="https://forgedb.cancer.gov/" target="_blank">FORGEdb</a></strong> (source: <a href="https://forgedb.cancer.gov/"
 			target="_blank">FORGEdb</a>) -
-		Publicly available scores from FORGEdb are used by LDlink's LDassoc and LDproxy modules to rank putative functionality
+		Publicly available scores from FORGEdb are used by LDlink&apos;s LDassoc and LDproxy modules to rank putative functionality
 		for a single variant by RSID.
 	</p>
       </div>
@@ -172,10 +173,10 @@ export default function DocumentationPage() {
 		statistics. Below is a brief description of each measure.
 	</p>
 	<p> <strong><a id="D_prime"></a>D
-			prime (D')</strong> - an indicator of
-		allelic segregation for two genetic variants. D' values range from 0 to
-		1 with higher values indicating tight linkage of alleles. A D' value of
-		0 indicates no linkage of alleles. A D' value of 1 indicates at least
+			prime (D&apos;)</strong> - an indicator of
+		allelic segregation for two genetic variants. D&apos; values range from 0 to
+		1 with higher values indicating tight linkage of alleles. A D&apos; value of
+		0 indicates no linkage of alleles. A D&apos; value of 1 indicates at least
 		one expected haplotype combination is not observed.
 	</p>
 	<p> <strong><a id="R_squared"></a>R
@@ -243,7 +244,7 @@ export default function DocumentationPage() {
 		sub-population is required, but more than one may be selected.
         </p>
         <p style={{marginLeft: "120px"}}><u>LD measure</u>
-            - select if desired output is based on estimated R<sup>2</sup> or D'.
+            - select if desired output is based on estimated R<sup>2</sup> or D&apos;.
         </p>
         <p style={{marginLeft: "120px"}}><u>Collapse transcripts</u>
             - choose to combine gene transcripts with the same name in the gene plot.

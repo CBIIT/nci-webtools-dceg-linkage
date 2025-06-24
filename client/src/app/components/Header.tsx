@@ -1,4 +1,6 @@
 // components/Header.tsx
+import React from "react";
+import Image from "next/image";
 export default function Header() {
   return (
     <div className="header" >
@@ -13,7 +15,7 @@ export default function Header() {
           </div>
         </header>
         <a href="https://dceg.cancer.gov/" target="_blank" rel="noopener noreferrer">
-          <img
+          <Image
             className="mw-100"
             height="90"
             src="/images/NIH-LDlink-Logo.png"

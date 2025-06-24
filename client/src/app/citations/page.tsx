@@ -1,11 +1,12 @@
 import React from "react";
+import Image from "next/image";
 
 export default function CitationsPage() {
   return (
     <div className="container py-4">
       <div className="text-center">
         <h2>
-          <img
+          <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
             style={{ verticalAlign: "bottom" }}

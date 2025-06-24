@@ -1,4 +1,6 @@
 "use client";
+import React from "react";
+import Image from "next/image";
 
 export default function CardContent() {
   const tools = [
@@ -74,7 +76,7 @@ export default function CardContent() {
           <div className="text-center">
             <h2>
               Welcome to{" "}
-              <img
+              <Image
                 src="/images/LDlink_logo_small_clear.png"
                 alt="LDlink"
                 style={{ verticalAlign: "bottom" }}
