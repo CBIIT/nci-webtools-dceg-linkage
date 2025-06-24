@@ -1,0 +1,73 @@
+@import "./bootstrap-variables.scss";
+@import "./bootstrap-utils.scss";
+@import "bootstrap/scss/bootstrap";
+@import "./bootstrap-theme.scss";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+body {
+  font-family: "Inter", sans-serif;
+}
+
+.accordion-button {
+  color: $blue;
+}
+
+.disabled-contrast {
+  label {
+    opacity: 0.63 !important;
+  }
+}
+
+.legend-wrap {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.navbar-nav .nav-item .nav-link.nav-menu-active,
+.navbar-nav .nav-item .nav-link.nav-menu-active:hover {
+  background-color: #df3041;
+  color: white;
+}
+
+.submenu {
+  color: black;
+  text-decoration: none;
+}
+.submenu:hover {
+  background-color: white;
+}
+
+.submenu-border {
+  box-shadow: 0 20px 20px rgba(180, 22, 22, 0.1); /* Adjust the shadow values */
+  border-bottom: 0.01px solid #d9d9d9;
+  z-index: 10;
+}
+
+.submenu:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.submenu .active {
+  text-decoration: underline;
+  text-decoration-thickness: 2px; /* Set the desired thickness */
+  text-decoration-color: #bf00a4; /* Set the desired underline color */
+  text-underline-offset: 10px; /* Set the desired space between the line and the text */
+  text-decoration-skip-ink: none; /* Ensure the underline is not skipped over descenders */
+  color: black;
+}
+
+.active-submenu {
+  text-decoration: none;
+}
+
+.navbar-toggler {
+  border: none;
+}
+.navbar-toggler:focus,
+.navbar-toggler:focus > *,
+.navbar-toggler:focus > *:before,
+.navbar-toggler:focus > *:after {
+  box-shadow: none !important;
+}
