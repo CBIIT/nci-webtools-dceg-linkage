@@ -3,13 +3,13 @@ import { Controller } from "react-hook-form";
 import "./select.scss";
 
 export interface PopOption {
-  readonly value: string;
-  readonly label: string;
+  value: string;
+  label: string;
 }
 
 export interface GroupedOption {
-  readonly label: string;
-  readonly options: readonly PopOption[];
+  label: string;
+  options: PopOption[];
 }
 
 export interface Populations {
@@ -75,8 +75,8 @@ export const populations: Populations = {
   },
 };
 
-export default function PopSelect({ name, control }) {
-  const popGroups: readonly GroupedOption[] = Object.entries(populations).map(([key, group]) => ({
+export default function PopSelect({ name, control }: { name: string; control: any }) {
+  const popGroups: GroupedOption[] = Object.entries(populations).map(([key, group]) => ({
     label: `(${key}) ${group.label}`,
     value: key,
     options: Object.entries(group.subPopulations).map(([value, label]) => ({
@@ -131,7 +131,7 @@ export default function PopSelect({ name, control }) {
     </div>
   );
 
-  function handleChange(selected: any[], previous: any[], cb: Function) {
+  function handleChange(selected: any[], previous: any[], cb: any) {
     // If "ALL" is selected, deselect all others
     const prevHasAll = Array.isArray(previous) && previous.some((opt) => opt.value === "ALL");
     const currHasAll = Array.isArray(selected) && selected.some((opt) => opt.value === "ALL");
@@ -174,7 +174,7 @@ export default function PopSelect({ name, control }) {
           value={field.value || []}
           styles={customStyles}
           formatGroupLabel={formatGroupLabel}
-          onChange={(selected) => handleChange(selected, field.value, field.onChange)}
+          onChange={(selected) => handleChange(Array.from(selected), field.value, field.onChange)}
         />
       )}
     />
