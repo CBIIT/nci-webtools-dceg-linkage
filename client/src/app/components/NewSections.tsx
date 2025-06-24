@@ -1,27 +1,27 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 export default function NewsSection() {
-  const homeStartBox = useRef(0); // this replaces global var
-  const newsList = useRef<string[]>([]);
+  const [newsList, setNewsList] = useState<string[]>([]);
+  const [startIndex, setStartIndex] = useState(0);
 
   useEffect(() => {
-    const runJQueryLogic = async () => {
-      if (typeof window === "undefined") return;
-      const $ = (await import("jquery")).default;
+    const fetchNews = async () => {
+      try {
+        const res = await fetch("news.html?v=5.7.0");
+        const text = await res.text();
 
-      $.get("news.html?v=5.7.0", function (data) {
         const list: string[] = [];
-        const tmpData = data.split("<p>");
+        const tmpData = text.split("<p>");
         let versionNews = tmpData[1].replace("<br>", "");
         let lastNews = "";
 
-        if (versionNews.indexOf("</li>") !== -1) {
+        if (versionNews.includes("</li>")) {
           lastNews += versionNews.substring(0, versionNews.indexOf("</li>") + 5);
           versionNews = versionNews.substring(versionNews.indexOf("</li>") + 6);
         }
 
-        if (versionNews.indexOf("</li>") !== -1) {
+        if (versionNews.includes("</li>")) {
           lastNews += '</ul> <a class="version-link">Show more...</a>';
         }
 
@@ -41,70 +41,60 @@ export default function NewsSection() {
           '<p><b>GWAS Explorer</b><br></p><div style="height:4px;"/><p>Visit <a href="https://exploregwas.cancer.gov/plco-atlas/" target="_blank">GWAS Explorer</a>.</p>'
         );
 
-        newsList.current = list;
-
-        // Render initial 3
-        $("#news-card-1").html(list[0]);
-        $("#news-card-2").html(list[1]);
-        $("#news-card-3").html(list[2]);
-
-        // Now attach click listeners
-        $("#news-right-arrow").on("click", () => {
-          if ($("#news-right-arrow").hasClass("enabled-news-scroller")) {
-            if (homeStartBox.current + 3 < newsList.current.length) {
-              homeStartBox.current += 1;
-              $("#news-card-1").html(newsList.current[homeStartBox.current]);
-              $("#news-card-2").html(newsList.current[homeStartBox.current + 1]);
-              $("#news-card-3").html(newsList.current[homeStartBox.current + 2]);
-
-              if (homeStartBox.current + 3 >= newsList.current.length) {
-                $("#news-right-arrow").removeClass("enabled-news-scroller").addClass("disabled-news-scroller");
-              }
-              $("#news-left-arrow").removeClass("disabled-news-scroller").addClass("enabled-news-scroller");
-            }
-          }
-        });
-
-        $("#news-left-arrow").on("click", () => {
-          if ($("#news-left-arrow").hasClass("enabled-news-scroller")) {
-            if (homeStartBox.current > 0) {
-              homeStartBox.current -= 1;
-              $("#news-card-1").html(newsList.current[homeStartBox.current]);
-              $("#news-card-2").html(newsList.current[homeStartBox.current + 1]);
-              $("#news-card-3").html(newsList.current[homeStartBox.current + 2]);
-
-              if (homeStartBox.current <= 0) {
-                $("#news-left-arrow").removeClass("enabled-news-scroller").addClass("disabled-news-scroller");
-              }
-              $("#news-right-arrow").removeClass("disabled-news-scroller").addClass("enabled-news-scroller");
-            }
-          }
-        });
-      });
+        setNewsList(list);
+      } catch (err) {
+        console.error("Failed to load news.html:", err);
+      }
     };
 
-    runJQueryLogic();
+    fetchNews();
   }, []);
+
+  const handleLeft = () => {
+    setStartIndex((prev) => Math.max(prev - 1, 0));
+  };
+
+  const handleRight = () => {
+    if (startIndex + 3 < newsList.length) {
+      setStartIndex((prev) => prev + 1);
+    }
+  };
 
   return (
     <div className="news-and-credits-section">
       <h2 className="text-center" style={{ color: "#566473" }}>What&apos;s New</h2>
       <div className="container">
         <div className="news-row d-flex align-items-center">
-          <div id="news-left-arrow" className="news-scroller disabled-news-scroller">
+          <div
+            id="news-left-arrow"
+            className={`news-scroller ${startIndex > 0 ? "enabled-news-scroller" : "disabled-news-scroller"}`}
+            onClick={handleLeft}
+          >
             <div style={{ textAlign: "center", lineHeight: "210px", fontSize: "48px" }}>&lsaquo;</div>
           </div>
 
-          {[1, 2, 3].map((id) => (
-            <div key={id} className="news-card-outside" id={`news-card-outside-${id}`}>
-              <div className="card d-flex flex-row align-items-start">
-                <div className="news-card-left" />
-                <div id={`news-card-${id}`} className="news-card-body"></div>
+          {[0, 1, 2].map((offset) => {
+            const news = newsList[startIndex + offset] ?? "";
+            return (
+              <div key={offset} className="news-card-outside" id={`news-card-outside-${offset}`}>
+                <div className="card d-flex flex-row align-items-start">
+                  <div className="news-card-left" />
+                  <div
+                    className="news-card-body"
+                    dangerouslySetInnerHTML={{ __html: news }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          <div id="news-right-arrow" className="news-scroller enabled-news-scroller">
+          <div
+            id="news-right-arrow"
+            className={`news-scroller ${
+              startIndex + 3 < newsList.length ? "enabled-news-scroller" : "disabled-news-scroller"
+            }`}
+            onClick={handleRight}
+          >
             <div style={{ textAlign: "center", lineHeight: "210px", fontSize: "48px" }}>&rsaquo;</div>
           </div>
         </div>

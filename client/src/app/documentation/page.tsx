@@ -107,11 +107,11 @@ export default function DocumentationPage() {
 
       </div>
       <div>
-        <p> <strong><a name="Data_Sources"></a>Data
+        <p> <strong><a id="Data_Sources"></a>Data
 			Sources</strong>
 	</p>
 	<p>
-		<strong><a name="dbSNP"></a><a href="https://www.ncbi.nlm.nih.gov/snp/" target="_blank">dbSNP</a></strong> (source: <a href="https://ftp.ncbi.nih.gov/snp/" target="_blank">GRCh37 and GRCh38</a>) - 
+		<strong><a id="dbSNP"></a><a href="https://www.ncbi.nlm.nih.gov/snp/" target="_blank">dbSNP</a></strong> (source: <a href="https://ftp.ncbi.nih.gov/snp/" target="_blank">GRCh37 and GRCh38</a>) - 
 		To investigate patterns of linkage disequilibrium, LDlink
 		focuses on two main class of genetic variation: single
 		nucleotide polymorphisms (SNPs) and insertions/deletions (indels). Every module of LDlink requires the
@@ -122,7 +122,7 @@ export default function DocumentationPage() {
 		accepts input for bi-allelic variants.
 	</p>
 	<p>
-		<strong><a name="1000_Genomes_Project"></a><a href="https://www.internationalgenome.org/" target="_blank">1000 Genomes Project</a></strong> (source: <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/" target="_blank">GRCh37</a>, <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/" target="_blank">GRCh38</a>, and <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20201028_3202_phased/" target="_blank">GRCh38 High Coverage</a>) - 
+		<strong><a id="1000_Genomes_Project"></a><a href="https://www.internationalgenome.org/" target="_blank">1000 Genomes Project</a></strong> (source: <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/release/20130502/" target="_blank">GRCh37</a>, <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000_genomes_project/release/20190312_biallelic_SNV_and_INDEL/" target="_blank">GRCh38</a>, and <a href="http://ftp.1000genomes.ebi.ac.uk/vol1/ftp/data_collections/1000G_2504_high_coverage/working/20201028_3202_phased/" target="_blank">GRCh38 High Coverage</a>) - 
 		Publicly available reference haplotypes from the 1000 Genomes Project are used by LDlink to calculate
 		population-specific measures of linkage disequilibrium. Haplotypes are
 		available for continental populations (ex: European, African, and
@@ -133,52 +133,52 @@ export default function DocumentationPage() {
 		based on sample size.
 	</p>
     <p>
-		<strong><a name="ucsc_refgene"></a><a href="https://genome.ucsc.edu/cgi-bin/hgTables" target="_blank">UCSC RefSeq</a></strong> (source: <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=Human&db=hg19&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=0&hgta_regionType=genome&position=chrX%3A15%2C578%2C261-15%2C621%2C068&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh37</a> and <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=&db=hg38&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=ncbiRefSeq&hgta_regionType=genome&position=&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh38</a>) - 
+		<strong><a id="ucsc_refgene"></a><a href="https://genome.ucsc.edu/cgi-bin/hgTables" target="_blank">UCSC RefSeq</a></strong> (source: <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=Human&db=hg19&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=0&hgta_regionType=genome&position=chrX%3A15%2C578%2C261-15%2C621%2C068&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh37</a> and <a href="https://genome.ucsc.edu/cgi-bin/hgTables?hgsid=1196412861_bzHfOz59YBcRs96UaRLkQjHBova0&clade=mammal&org=&db=hg38&hgta_group=genes&hgta_track=refSeqComposite&hgta_table=ncbiRefSeq&hgta_regionType=genome&position=&hgta_outputType=primaryTable&hgta_outFileName=" target="_blank">GRCh38</a>) - 
 		Publicly available gene transcripts from the UCSC Table Browser are used by LDlink's <a href="#LDassoc">LDassoc</a>, <a href="#LDmatrix">LDmatrix</a>, and <a href="#LDproxy">LDproxy</a> modules to display genes within the genomic window of interest.
 	</p>
 	<p>
-		<strong><a name="regulomedb"></a><a href="https://regulomedb.org/" target="_blank">RegulomeDB</a></strong> (source: <a href="https://www.encodeproject.org/files/ENCFF297XMQ/@@download/ENCFF297XMQ.tsv" target="_blank">GRCh37</a>) - 
+		<strong><a id="regulomedb"></a><a href="https://regulomedb.org/" target="_blank">RegulomeDB</a></strong> (source: <a href="https://www.encodeproject.org/files/ENCFF297XMQ/@@download/ENCFF297XMQ.tsv" target="_blank">GRCh37</a>) - 
 		Publicly available scores from RegulomeDB are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to rank available datatypes for a single coordinate.
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
     <p>
-		<strong><a name="recomb"></a><a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">Genetic Map</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
+		<strong><a id="recomb"></a><a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">Genetic Map</a></strong> (source: <a href="https://mathgen.stats.ox.ac.uk/impute/1000GP_Phase3.html" target="_blank">GRCh37</a>) - 
 		Publicly available combined recombination rates (cM/Mb) from the 1000 Genomes Project are used by LDlink's <a href="#LDassoc">LDassoc</a> and <a href="#LDproxy">LDproxy</a> modules to show recombination at specific coordinates.
 		GRCh38 support is added via <a href="https://genome.ucsc.edu/cgi-bin/hgLiftOver" target="_blank">liftOver</a>.
 	</p>
 	<p>
-		<strong><a name="gtex"></a><a href="https://www.gtexportal.org/home/" target="_blank">GTEx Portal</a></strong> (source: <a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_Analysis_v8_eQTL.tar" target="_blank">GRCh38</a>) - 
+		<strong><a id="gtex"></a><a href="https://www.gtexportal.org/home/" target="_blank">GTEx Portal</a></strong> (source: <a href="https://storage.googleapis.com/gtex_analysis_v8/single_tissue_qtl_data/GTEx_Analysis_v8_eQTL.tar" target="_blank">GRCh38</a>) - 
 		Publicly available single-tissue cis-QTL data from the GTEx Portal is used by LDlink's <a href="#LDexpress">LDexpress</a> module to show significant variant-gene associations in multiple tissue types.
 		GRCh37 support is added via <a href="https://storage.googleapis.com/gtex_analysis_v8/reference/GTEx_Analysis_2017-06-05_v8_WholeGenomeSeq_838Indiv_Analysis_Freeze.lookup_table.txt.gz" target="_blank">GTEx lookup table</a>.
 	</p>
     <p>
-		<strong><a name="gwas_catalog"></a><a href="https://www.ebi.ac.uk/gwas/home" target="_blank">GWAS Catalog</a></strong> (source: <a href="https://www.ebi.ac.uk/gwas/api/search/downloads/alternative" target="_blank">GRCh38</a>) - 
+		<strong><a id="gwas_catalog"></a><a href="https://www.ebi.ac.uk/gwas/home" target="_blank">GWAS Catalog</a></strong> (source: <a href="https://www.ebi.ac.uk/gwas/api/search/downloads/alternative" target="_blank">GRCh38</a>) - 
 		Publicly available NHGRI-EBI Catalog of human genome-wide association studies from GWAS Catalog is used by LDlink's <a href="#LDtrait">LDtrait</a> module to search if variants have previously been associated with a trait or disease.
 		GRCh37 support is added via <a href="#dbSNP">dbSNP</a>.
     </p>
 	<p>
-		<strong><a name="forgedb"></a><a href="https://forgedb.cancer.gov/" target="_blank">FORGEdb</a></strong> (source: <a href="https://forgedb.cancer.gov/"
+		<strong><a id="forgedb"></a><a href="https://forgedb.cancer.gov/" target="_blank">FORGEdb</a></strong> (source: <a href="https://forgedb.cancer.gov/"
 			target="_blank">FORGEdb</a>) -
 		Publicly available scores from FORGEdb are used by LDlink's LDassoc and LDproxy modules to rank putative functionality
 		for a single variant by RSID.
 	</p>
       </div>
       <div>
-        <p> <strong><a name="Calculations"></a>Calculations</strong>
+        <p> <strong><a id="Calculations"></a>Calculations</strong>
 	</p>
 	<p>
 		LDlink modules report the following measures of linkage
 		disequilibrium: <a href="#D_prime">D prime</a>, <a href="#R_squared">R squared</a>, and <a href="#Goodness_of_Fit">goodness-of-fit</a>
 		statistics. Below is a brief description of each measure.
 	</p>
-	<p> <strong><a name="D_prime"></a>D
+	<p> <strong><a id="D_prime"></a>D
 			prime (D')</strong> - an indicator of
 		allelic segregation for two genetic variants. D' values range from 0 to
 		1 with higher values indicating tight linkage of alleles. A D' value of
 		0 indicates no linkage of alleles. A D' value of 1 indicates at least
 		one expected haplotype combination is not observed.
 	</p>
-	<p> <strong><a name="R_squared"></a>R
+	<p> <strong><a id="R_squared"></a>R
 			squared (R<sup>2</sup>) </strong>
 		- a measure of correlation of alleles for two genetic variants. R<sup>2</sup>
 		values range from 0 to 1 with higher values indicating a higher degree
@@ -188,7 +188,7 @@ export default function DocumentationPage() {
 		another variant. R<sup>2</sup> is sensitive to allele
 		frequency.
 	</p>
-    <p> <strong><a name="Goodness_of_Fit"></a>Goodness
+    <p> <strong><a id="Goodness_of_Fit"></a>Goodness
 			of Fit (&#935;<sup>2</sup> and
 			p-value) </strong> - statistical test testing whether observed
 		haplotype counts follow frequencies expected from variant allele
@@ -199,7 +199,7 @@ export default function DocumentationPage() {
       </div>
 
       <div>
-        <p> <strong><a name="Modules"></a>Modules</strong>
+        <p> <strong><a id="Modules"></a>Modules</strong>
 	</p>
 	<p>LDlink consists of eleven modules: <a href="#LDassoc">LDassoc</a>, <a href="#LDexpress">LDexpress</a>, <a href="#LDhap">LDhap</a>,
 		<a href="#LDmatrix">LDmatrix</a>, <a href="#LDpair">LDpair</a>, <a href="#LDpop">LDpop</a>, 
@@ -237,7 +237,22 @@ export default function DocumentationPage() {
             allows for an optional base pair window (500,000bp is the default). The index variant will be plotted in blue and is used to calculate all
             pairwise LD statistics. If not required, LDassoc will designate the variant with the lowest p-value as the index variant,
             unless otherwise specified.
-	</p>
+	    </p>
+        <p style={{marginLeft: "120px"}}><u>Reference population(s)</u> - selected
+		from the drop down menu. At least one 1000 Genomes Project
+		sub-population is required, but more than one may be selected.
+        </p>
+        <p style={{marginLeft: "120px"}}><u>LD measure</u>
+            - select if desired output is based on estimated R<sup>2</sup> or D'.
+        </p>
+        <p style={{marginLeft: "120px"}}><u>Collapse transcripts</u>
+            - choose to combine gene transcripts with the same name in the gene plot.
+        </p>
+        <p style={{marginLeft: "120px"}}><u>RegulomeDB annotation</u>
+            - choose to display RegulomeDB scores in the interactive plot.
+        </p>
+        <p style={{marginLeft: "80px;"}}> <strong>Output:</strong>
+        </p>
         </div>
 
 

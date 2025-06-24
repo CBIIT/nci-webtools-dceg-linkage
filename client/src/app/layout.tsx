@@ -6,6 +6,7 @@ import "./css/ncids.css";
 import "./css/LDlink.css";
 import Header from "./components/Header";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

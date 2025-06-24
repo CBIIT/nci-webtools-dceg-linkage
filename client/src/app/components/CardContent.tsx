@@ -55,10 +55,11 @@ export default function CardContent() {
     
   ];
 
-  const toolRows = [];
+  const toolRows: ({ id: string; title: string; desc: string } | null)[][] = [];
+
   const toolsPerRow = 5;
   for (let i = 0; i < tools.length; i += toolsPerRow) {
-    const rowTools = tools.slice(i, i + toolsPerRow);
+    const rowTools: ({ id: string; title: string; desc: string } | null)[] = tools.slice(i, i + toolsPerRow);
     // Pad with empty placeholders if needed
     while (rowTools.length < toolsPerRow) {
       rowTools.push(null);
@@ -95,7 +96,7 @@ export default function CardContent() {
                 {row.map((tool, colIndex) =>
                   tool ? (
                     <div className="card-outside" key={tool.id}>
-                      <a className="card anchor-link" href="#" dest={tool.id}>
+                      <a className="card anchor-link" href="#" data-dest={tool.id}>
                         <div className="text-center card-title">
                           <h2 style={{ color: "white", margin: 0, fontSize: "24px" }}>{tool.title}</h2>
                         </div>
