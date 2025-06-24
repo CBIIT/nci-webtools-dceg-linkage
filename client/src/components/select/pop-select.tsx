@@ -101,6 +101,7 @@ export default function PopSelect({ name, control }: { name: string; control: an
         paddingLeft: isGroupOption ? 32 : provided.paddingLeft,
       };
     },
+    menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
   };
 
   const formatGroupLabel = (data: GroupedOption) => (
@@ -131,31 +132,31 @@ export default function PopSelect({ name, control }: { name: string; control: an
     </div>
   );
 
-  function handleChange(selected: any[], previous: any[], cb: any) {
+  function handleChange(selected: any[], previous: any[], onchange: any) {
     // If "ALL" is selected, deselect all others
     const prevHasAll = Array.isArray(previous) && previous.some((opt) => opt.value === "ALL");
     const currHasAll = Array.isArray(selected) && selected.some((opt) => opt.value === "ALL");
 
     if (currHasAll && !prevHasAll) {
-      cb([{ label: "(ALL) All Populations", value: "ALL" }]);
+      onchange([{ label: "(ALL) All Populations", value: "ALL" }]);
       return;
     }
 
     // If "ALL" was previously selected and now something else is selected, remove "ALL"
     if (!currHasAll && prevHasAll) {
       const filtered = selected.filter((opt) => opt.value !== "ALL");
-      cb(filtered);
+      onchange(filtered);
       return;
     }
 
     // If both present, remove "ALL"
     if (currHasAll && selected.length > 1) {
       const filtered = selected.filter((opt) => opt.value !== "ALL");
-      cb(filtered);
+      onchange(filtered);
       return;
     }
 
-    cb(selected);
+    onchange(selected);
   }
 
   return (
