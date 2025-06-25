@@ -11,6 +11,7 @@ import Footer from "@/components/footer";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import "./styles/main.scss";
+import "./styles/ncids.scss";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const routes: Route[] = [
