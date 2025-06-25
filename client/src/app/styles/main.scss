@@ -24,10 +24,24 @@ body {
   overflow-wrap: break-word;
 }
 
+.navbar {
+  background-color: #4a4a4a; 
+  border-bottom: 0.01px solid #d9d9d9;
+}
 .navbar-nav .nav-item .nav-link.nav-menu-active,
 .navbar-nav .nav-item .nav-link.nav-menu-active:hover {
-  background-color: #df3041;
+  position: relative;
   color: white;
+}
+
+.navbar-nav .nav-item .nav-link.nav-menu-active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;  // stick to the bottom of the link
+  left: 0;
+  width: 100%;
+  height: 4px;  // thickness of the underline
+  background-color: #f5ab35; // yellow color
 }
 
 .submenu {

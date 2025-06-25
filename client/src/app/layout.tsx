@@ -10,13 +10,29 @@ import { Header, Route } from "@/components/header";
 import Footer from "@/components/footer";
 import { QueryClientProvider, QueryClient } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap-icons/font/bootstrap-icons.css";
 import "./styles/main.scss";
 import "./styles/ncids.scss";
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   const routes: Route[] = [
     { title: "Home", path: "/", subRoutes: [] },
-    { title: "LD Tools", path: "/ldtools", subRoutes: [] },
+    { title: "LD Tools", path: "/ldtools", subRoutes: [
+      {title: "LDassoc", path: "/ldtools/ldassic"},
+      {title: "LDexpress", path: "/ldtools/ldexpress"},
+      {title: "LDhap", path: "/ldtools/ldhap"},
+      {title: "LDmatrix", path: "/ldtools/ldmatrix"},
+      {title: "LDpair", path: "/ldtools/ldpair"},
+      {title: "LDpop", path: "/ldtools/ldpop"},
+      {title: "LDproxy", path: "/ldtools/ldproxy"},
+      {title: "LDtrait", path: "/ldtools/ldtrait"},
+      {title: "LDscore", path: "/ldtools/ldscore"},
+      {title: "SNPchip", path: "/ldtools/SNPchip"},
+      {title: "SNPclip", path: "/ldtools/SNPclip"}
+
+      
+    ] },
     { title: "API Access", path: "/apiaccess", subRoutes: [] },
     { title: "Citations", path: "/citations", subRoutes: [] },
     { title: "Version History", path: "/history", subRoutes: [] },
@@ -24,7 +40,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   ];
   const queryClient = new QueryClient({});
   const pathname = usePathname();
-  const currentRoute = routes.find((route) => route.path === pathname);
+  // const currentRoute = routes.find((route) => route.path === pathname);
+  const currentRoute =
+  routes.find((route) => route.path === pathname) ||
+  routes
+    .flatMap((route) => route.subRoutes)
+    .find((subRoute) => subRoute.path === pathname);
   const pageTitle = currentRoute ? `${currentRoute.title} | Survival Stats Tools` : "Survival Stats Tools";
 
   return (

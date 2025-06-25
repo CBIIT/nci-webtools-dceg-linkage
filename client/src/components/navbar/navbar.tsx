@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Route } from "../header";
 import type { MouseEvent } from "react";
+import { NavDropdown } from "react-bootstrap";
 
 type AppNavbarProps = {
   routes: Route[];
@@ -39,9 +40,9 @@ function SubMenu({
   isMainActive: boolean;
 }): React.ReactElement {
   return (
-    <div className={clsx("d-flex flex-row", !isOpen && "d-none", isMainActive && "active-submenu")}>
+    <div className={clsx("d-flex flex-column", !isOpen && "d-none", isMainActive && "active-submenu")}>
       {subRoutes.map((subRoute: { path: string; title: string }) => (
-        <Nav.Item key={subRoute.path}>
+        <Nav.Item key={subRoute.path} className="mb-1">
           <Link
             href={subRoute.path || "#"}
             className={clsx("nav-link", "submenu", pathsMatch(pathName, subRoute.path) && "active")}>
@@ -190,7 +191,7 @@ export default function AppNavbar({ routes = [] }: AppNavbarProps): React.ReactE
   return (
     <div>
       {/* Main Navbar */}
-      <Navbar bg="dark" data-bs-theme="dark" className="text-uppercase font-title" expand="md">
+      <Navbar className="text-uppercase font-title" expand="md">
         <Container>
           {/* Navbar Brand and Toggle */}
           <Navbar.Toggle aria-controls="navbar-nav" className="px-0 py-3 text-uppercase">

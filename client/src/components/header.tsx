@@ -6,8 +6,11 @@ import { Container, Row, Col } from "react-bootstrap";
 
 export type Route = {
   title: string;
-  path: string;
-  subRoutes: never[];
+  path?: string;
+  subRoutes: Array<{
+    title: string;
+    path: string;
+  }>;
 };
 
 type HeaderProps = {
