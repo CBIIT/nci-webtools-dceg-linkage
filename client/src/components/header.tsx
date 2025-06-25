@@ -58,7 +58,7 @@ export function Header({ routes = [] }: HeaderProps) {
                 src="/images/NIH-LDlink-Logo.png"
                 alt="LDlink Logo"
                 className="mw-100 ldlink-logo"
-                width={300}
+                width={359.078}
                 height={90}
                 unoptimized
               />
