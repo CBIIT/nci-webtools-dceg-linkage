@@ -74,6 +74,26 @@ function isRouteActive(route: Route, pathName: string): boolean {
   return false;
 }
 
+const CustomNavDropdownToggle = React.forwardRef<HTMLAnchorElement, any>(
+  ({ children, onClick, className }, ref) => (
+    <a
+      href="#"
+      ref={ref}
+      className={clsx("nav-link", className)}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(e);
+      }}
+    >
+      {children}
+    </a>
+  )
+);
+CustomNavDropdownToggle.displayName = "CustomNavDropdownToggle";
+
+
+
+
 // Function to render routes
 function renderRoutes({
   routes,
@@ -96,8 +116,9 @@ function renderRoutes({
       return (
         <Nav.Item key={route.path || route.title}>
           <Link href={route.path} className={clsx("nav-link", isActive && "nav-menu-active", "pointer-cursor")}>
-            {route.title}
+            {route.title}            
           </Link>
+          
         </Nav.Item>
       );
     }
@@ -111,46 +132,40 @@ function renderRoutes({
     let closeTimer: NodeJS.Timeout;
 
     return (
-      <div
+      <Nav.Item
         key={route.title}
-        onMouseEnter={() => {
-          if (!isMobileView) {
-            clearTimeout(closeTimer);
-            setOpenSubmenu(route.title);
-          }
-        }}
-        onMouseLeave={() => {
-          if (!isMobileView) {
-            closeTimer = setTimeout(() => {
-              setOpenSubmenu(null);
-            }, 200); // 200ms delay
-          }
-        }}
-        style={{ position: "relative" }}
+        className={clsx("dropdown", isActive && "nav-menu-active")}
+        onMouseEnter={() => !isMobileView && setOpenSubmenu(route.title)}
+        onMouseLeave={() => !isMobileView && setOpenSubmenu(null)}
       >
-        <NavDropdown
-          title={route.title}
-          id={`nav-dropdown-${route.title}`}
-          show={openSubmenu === route.title}
+        <span
+          className={clsx("nav-link pointer-cursor", isActive && "nav-menu-active")}
           onClick={() => {
             if (isMobileView) {
               setOpenSubmenu(openSubmenu === route.title ? null : route.title);
             }
           }}
-          className={clsx(isActive && "nav-menu-active")}
         >
-          {route.subRoutes.map((subRoute) => (
-            <NavDropdown.Item
-              key={subRoute.path}
-              href={subRoute.path}
-              active={pathsMatch(pathName, subRoute.path)}
-            >
-              {subRoute.title}
-            </NavDropdown.Item>
-          ))}
-        </NavDropdown>
-      </div>
+          {route.title}
+          <i className="bi bi-caret-down-fill ms-2"></i>
+        </span>
+
+        {openSubmenu === route.title && (
+          <div className="dropdown-menu show">
+            {route.subRoutes.map((subRoute) => (
+              <Link
+                key={subRoute.path}
+                href={subRoute.path}
+                className={clsx("dropdown-item", pathsMatch(pathName, subRoute.path) && "active")}
+              >
+                {subRoute.title}
+              </Link>
+            ))}
+          </div>
+        )}
+      </Nav.Item>
     );
+
 
 
   });

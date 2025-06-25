@@ -19,17 +19,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const routes: Route[] = [
     { title: "Home", path: "/", subRoutes: [] },
     { title: "LD Tools", path: "/ldtools", subRoutes: [
-      {title: "LDassoc", path: "/ldtools/ldassoc"},
-      {title: "LDexpress", path: "/ldtools/ldexpress"},
-      {title: "LDhap", path: "/ldtools/ldhap"},
-      {title: "LDmatrix", path: "/ldtools/ldmatrix"},
-      {title: "LDpair", path: "/ldtools/ldpair"},
-      {title: "LDpop", path: "/ldtools/ldpop"},
-      {title: "LDproxy", path: "/ldtools/ldproxy"},
-      {title: "LDtrait", path: "/ldtools/ldtrait"},
-      {title: "LDscore", path: "/ldtools/ldscore"},
-      {title: "SNPchip", path: "/ldtools/SNPchip"},
-      {title: "SNPclip", path: "/ldtools/SNPclip"}
+      {title: "LDassoc", path: "/ldassoc"},
+      {title: "LDexpress", path: "/ldexpress"},
+      {title: "LDhap", path: "/ldtldhap"},
+      {title: "LDmatrix", path: "/ldmatrix"},
+      {title: "LDpair", path: "/ldpair"},
+      {title: "LDpop", path: "/ldpop"},
+      {title: "LDproxy", path: "/ldproxy"},
+      {title: "LDtrait", path: "/ldtrait"},
+      {title: "LDscore", path: "/ldscore"},
+      {title: "SNPchip", path: "/SNPchip"},
+      {title: "SNPclip", path: "/SNPclip"}
 
       
     ] },
