@@ -92,8 +92,6 @@ const CustomNavDropdownToggle = React.forwardRef<HTMLAnchorElement, any>(
 CustomNavDropdownToggle.displayName = "CustomNavDropdownToggle";
 
 
-
-
 // Function to render routes
 function renderRoutes({
   routes,
@@ -187,7 +185,7 @@ export default function AppNavbar({ routes = [] }: AppNavbarProps): React.ReactE
   }, []);
 
   return (
-    <Navbar expand="md" className="text-uppercase font-title">
+    <Navbar expand="md" className="text-uppercase font-title pt-1 pb-1">
       <Container>
         <Navbar.Toggle aria-controls="navbar-nav" className="px-0 py-3 text-uppercase">
           <i className="bi bi-list me-1"></i> Menu

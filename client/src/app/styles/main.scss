@@ -57,6 +57,7 @@ body {
   position: relative;
   color: white !important;
   text-decoration: none;
+  background-color: gray; 
 }
 .dropdown-item:hover, 
 .dropdown-item:active, 
@@ -71,7 +72,7 @@ body {
 .navbar-nav .nav-item .nav-link.nav-menu-active::after {
   content: "";
   position: absolute;
-  bottom: 0;  // stick to the bottom of the link
+  bottom: -1px;  // stick to the bottom of the link
   left: 0;
   width: 100%;
   height: 4px;  // thickness of the underline
@@ -129,7 +130,7 @@ body {
 .navbar-nav .nav-link.nav-menu-active::after {
   content: "";
   position: absolute;
-  bottom: 0;
+  bottom: -1px;
   left: 0;
   width: 100%;
   height: 4px;
