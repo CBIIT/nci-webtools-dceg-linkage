@@ -1,5 +1,35 @@
 import axios from "axios";
 
-export async function upload(params: any, data: any): Promise<any> {
-  return await axios.post(`/LDlinkRestWeb/upload`, { params, data });
+// Flattens nested objects into bracket notation keys for URLSearchParams
+function flattenForParams(obj: any, prefix = ""): Record<string, any> {
+  return Object.keys(obj).reduce((acc: any, key) => {
+    let value = obj[key];
+    const newKey = prefix ? `${prefix}[${key}]` : key;
+    if (typeof value === "boolean") {
+      value = value ? "True" : "False";
+    }
+    if (value && typeof value === "object" && !Array.isArray(value)) {
+      Object.assign(acc, flattenForParams(value, newKey));
+    } else {
+      acc[newKey] = value;
+    }
+    return acc;
+  }, {});
+}
+
+export async function upload(formData: any): Promise<any> {
+  return await axios.post(`/LDlinkRestWeb/upload`, formData);
+}
+
+export async function ldassoc(params: any): Promise<any> {
+  const searchParams = new URLSearchParams(flattenForParams(params)).toString();
+  return await axios.get(`/LDlinkRestWeb/ldassoc?${searchParams}`);
+}
+
+export async function ldassocExample(genome_build: string): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/ldassoc_example?genome_build=${genome_build}`)).data;
+}
+
+export async function fetchOutput(filename: string): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`)).data;
 }
