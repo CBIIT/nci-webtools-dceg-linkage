@@ -30,15 +30,22 @@ body {
   text-decoration: none;
 }
 
-.nav-link.pointer-cursor:hover {
+.nav-link.pointer-cursor:hover, 
+.dropdown-toggle .nav-link:hover
+{
   color: white;
   text-decoration: none;
   background-color: grey;;
 } 
-.navbar-nav .nav-item .nav-link.nav-menu-active,
-.navbar-nav .nav-item .nav-link.nav-menu-active:hover {
+.navbar-nav .nav-item .nav-link.nav-menu-active
+{
   position: relative;
   color: white !important;
+  text-decoration: none;
+}
+.dropdown-item:hover{
+  background-color: gray; /* yellow color */
+  color: black;
   text-decoration: none;
 }
 

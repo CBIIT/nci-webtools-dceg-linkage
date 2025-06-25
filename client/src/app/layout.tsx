@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const routes: Route[] = [
     { title: "Home", path: "/", subRoutes: [] },
     { title: "LD Tools", path: "/ldtools", subRoutes: [
-      {title: "LDassoc", path: "/ldtools/ldassic"},
+      {title: "LDassoc", path: "/ldtools/ldassoc"},
       {title: "LDexpress", path: "/ldtools/ldexpress"},
       {title: "LDhap", path: "/ldtools/ldhap"},
       {title: "LDmatrix", path: "/ldtools/ldmatrix"},
