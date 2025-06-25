@@ -24,14 +24,22 @@ body {
   overflow-wrap: break-word;
 }
 
-.navbar {
+.navbar, .nav-item, .nav-link, .pointer-cursor {
   background-color: #4a4a4a; 
-  border-bottom: 0.01px solid #d9d9d9;
+  color: white;
+  text-decoration: none;
 }
+
+.nav-link.pointer-cursor:hover {
+  color: white;
+  text-decoration: none;
+  background-color: grey;;
+} 
 .navbar-nav .nav-item .nav-link.nav-menu-active,
 .navbar-nav .nav-item .nav-link.nav-menu-active:hover {
   position: relative;
-  color: white;
+  color: white !important;
+  text-decoration: none;
 }
 
 .navbar-nav .nav-item .nav-link.nav-menu-active::after {
@@ -66,7 +74,7 @@ body {
 .submenu .active {
   text-decoration: underline;
   text-decoration-thickness: 2px; /* Set the desired thickness */
-  text-decoration-color: #bf00a4; /* Set the desired underline color */
+  text-decoration-color: #f5ab35; /* Set the desired underline color */
   text-underline-offset: 10px; /* Set the desired space between the line and the text */
   text-decoration-skip-ink: none; /* Ensure the underline is not skipped over descenders */
   color: black;
@@ -84,4 +92,10 @@ body {
 .navbar-toggler:focus > *:before,
 .navbar-toggler:focus > *:after {
   box-shadow: none !important;
+}
+
+.footer {
+  background-color: #4a4a4a;
+  color: white;
+  padding: 1rem;
 }
