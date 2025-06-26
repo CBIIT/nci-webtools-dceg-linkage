@@ -113,7 +113,7 @@ function renderRoutes({
     if (!hasSubRoutes) {
       return (
         <Nav.Item key={route.path || route.title}>
-          <Link href={route.path} className={clsx("nav-link", isActive && "nav-menu-active", "pointer-cursor")}>
+          <Link href={route.path || "#"} className={clsx("nav-link", isActive && "nav-menu-active", "pointer-cursor")}>
             {route.title}            
           </Link>
           

@@ -1,25 +1,40 @@
 import Link from "next/link";
 import { Container, Row, Col } from "react-bootstrap";
+import Image from "next/image";
+import LdToolCard from "@/components/cards/ldtool-card";
 
 export default function Home() {
+ 
+
   return (
     <>
-      <div className="bg-primary flex-grow-1">
+      <div className="flex-grow-1">
         <Container>
-          <Row>
-            <Col md={6}>
-              <div className="d-flex h-100 align-items-center" style={{ minHeight: "300px" }}>
-                <div>
-                  <h1 className="fs-1 text-light fw-light mb-3">LDlink</h1>
-                  <hr className="border-white" />
-                  <p className="lead text-light">DCEG Linkage</p>
+          <Row className="mt-3">
+            <div className="text-center">
+              <h2>
+                Welcome to{" "}
+                <Image
+                  src="/images/LDlink_logo_small_clear.png"
+                  alt="LDlink"
+                  style={{ verticalAlign: "bottom" }}
+                  width={91}
+                  height={36}
+                />
+              </h2>
+            </div>
 
-                  <Link className="link-secondary" href="/citations">
-                    Citations
-                  </Link>
-                </div>
-              </div>
-            </Col>
+            <div className="text-center" style={{ maxWidth: "1200px", margin: "auto" }}>
+              <p>
+                LDlink is a suite of web-based applications designed to easily and efficiently
+                interrogate linkage disequilibrium in population groups. Each included application is
+                specialized for querying and displaying unique aspects of linkage disequilibrium.
+              </p>
+            </div>
+          </Row>
+          <LdToolCard />
+          <Row>
+            
           </Row>
         </Container>
       </div>
