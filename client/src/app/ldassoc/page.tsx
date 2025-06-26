@@ -9,9 +9,9 @@ import LdAssocResults from "./results";
 export default function LdAssoc() {
   return (
     <Container fluid="md" className="border rounded bg-white my-3 p-3">
-      <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading Form</Alert>}>
+      <LDAssocForm />
+      <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
         <Suspense fallback={<Loading message="Loading..." />}>
-          <LDAssocForm />
           <LdAssocResults />
         </Suspense>
       </ErrorBoundary>

@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
-import { useSuspenseQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
 import PopSelect from "@/components/select/pop-select";
@@ -38,20 +38,16 @@ export default function LDAssocForm() {
     defaultValues: defaultForm,
   });
 
-  const filename = watch("filename");
+  const filename = watch("filename") as string | FileList;
   const genome_build = watch("genome_build");
   const useEx = watch("useEx");
   const calculateRegion = watch("calculateRegion");
-
   const all = watch();
 
-  const submitForm = useMutation({
-    mutationFn: ({ params }: { params: any }) => ldassoc(params),
-  });
-
-  const { data: exampleData } = useSuspenseQuery({
+  const { data: exampleData, isFetching } = useQuery({
     queryKey: ["ldassoc", genome_build, useEx],
-    queryFn: async () => (useEx ? ldassocExample(genome_build) : null),
+    queryFn: () => ldassocExample(genome_build),
+    enabled: useEx,
   });
 
   useEffect(() => {
@@ -94,10 +90,13 @@ export default function LDAssocForm() {
   }
 
   async function onSubmit(data: any) {
-    console.log(data);
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1));
     if (!data.useEx) await handleUpload(data);
-    submitForm.mutate({ params: { ...data, filename: data.filename[0].name, reference } });
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    queryClient.setQueryData(["ldassoc-form", reference], {
+      ...data,
+      reference,
+      filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
+    });
     router.push(`${pathname}?ref=${reference}`);
   }
 
@@ -132,8 +131,8 @@ export default function LDAssocForm() {
               <Form.Control type="file" {...register("filename")} />
             )}
           </Form.Group>
-          <Form.Group controlId="useExample">
-            <Form.Check type="switch" id="useExample" label="Use example GWAS data" {...register("useEx")} />
+          <Form.Group controlId="useEx">
+            <Form.Check type="switch" id="useEx" label="Use example GWAS data" {...register("useEx")} />
           </Form.Group>
 
           {filename && (

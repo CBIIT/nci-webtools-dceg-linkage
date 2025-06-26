@@ -23,7 +23,7 @@ export async function upload(formData: any): Promise<any> {
 
 export async function ldassoc(params: any): Promise<any> {
   const searchParams = new URLSearchParams(flattenForParams(params)).toString();
-  return await axios.get(`/LDlinkRestWeb/ldassoc?${searchParams}`);
+  return (await axios.get(`/LDlinkRestWeb/ldassoc?${searchParams}`)).data;
 }
 
 export async function ldassocExample(genome_build: string): Promise<any> {

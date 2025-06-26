@@ -1,22 +1,46 @@
 "use client";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Row, Col, Container, Form, Button } from "react-bootstrap";
 import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
-import { fetchOutput } from "@/services/queries";
+import { fetchOutput, ldassoc } from "@/services/queries";
+// import { embed } from "@bokeh/bokehjs";
 
 export default function LdAssocResults() {
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
+  const { data: plot } = useSuspenseQuery({
+    queryKey: ["ldassoc-submit", ref],
+    queryFn: async () => {
+      if (!ref) return null;
+      const formData = queryClient.getQueryData(["ldassoc-form", ref]);
+      if (!formData) throw new Error("No form data found for this reference.");
+      return ldassoc(formData);
+    },
+  });
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldassoc", ref],
     queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),
     refetchInterval: (data) => (!data ? 10 * 1000 : false),
     // retry: 6,
   });
+
+  // const plotRef = useRef<HTMLDivElement>(null);
   console.log(results);
+  console.log(plot);
+
+  // useEffect(() => {
+  //   if (plot && plotRef.current) {
+  //     // Clear previous plot if any
+  //     plotRef.current.innerHTML = "";
+  //     // Embed the Bokeh plot
+  //     embed.embed_item(plot, plotRef.current);
+  //   }
+  // }, [plot]);
 
   const columnHelper = createColumnHelper<any>();
 
@@ -91,7 +115,19 @@ export default function LdAssocResults() {
   return (
     <Container fluid="md">
       {/* <pre>{JSON.stringify(results, null, 2)}</pre> */}
-      {results && <Table title="Association Results" data={results.aaData} columns={columns} />}
+
+      {results && (
+        <>
+          {/* <div ref={plotRef} /> */}
+          {plot && (
+            <div
+              // This will render the HTML returned by your backend
+              dangerouslySetInnerHTML={{ __html: plot }}
+            />
+          )}
+          <Table title="Association Results" data={results.aaData} columns={columns} />
+        </>
+      )}
     </Container>
   );
 }
