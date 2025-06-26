@@ -5,7 +5,7 @@ services:
       dockerfile: docker/backend.dockerfile
     platform: linux/amd64
     ports:
-      - "8000:80"
+      - "80:80"
       - "8080:8080"
     volumes:
       - ./data:/data
@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: docker/frontend.dockerfile
       args:
-        NEXT_PUBLIC_API_BASE_URL: http://backend:8080
+        NEXT_PUBLIC_API_BASE_URL: http://backend:80
     ports:
       - "3000:80"
     networks:
