@@ -84,7 +84,7 @@ export default function PopSelect({ name, control }: { name: string; control: an
       label: `(${value}) ${label}`,
     })),
   }));
-  console.log("Pop groups:", popGroups);
+
   const popOptions: any[] = [{ label: "(ALL) All Populations", value: "ALL" }, ...popGroups];
 
   const Group = (props: any) => {
