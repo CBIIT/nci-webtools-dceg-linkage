@@ -787,7 +787,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
-	from bokeh.embed import components,file_html
+	from bokeh.embed import components,file_html, json_item
 	from bokeh.layouts import gridplot
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
@@ -1197,9 +1197,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	###########################
 	# Html output for testing #
 	###########################
-	html=file_html(out_grid, CDN, "ldassoc")
-	with open(tmp_dir + f"ldassoc_plot_{request}.html", "w") as f_html:
-		f_html.write(html)
 	#out_html=open("LDassoc.html","w")
 	#print >> out_html, html
 	#out_html.close()
@@ -1208,6 +1205,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	out_script,out_div=components(out_grid, CDN)
 	reset_output()
 
+	# save json embedding
+	jsonEmbed = f"ldassoc_plot_{request}.json"
+	print('Save JSON embedding: '+ jsonEmbed)
+	with open(tmp_dir + jsonEmbed, "w") as f_json:
+		json.dump(json_item(out_grid), f_json)
 
 
 	# Print run time statistics

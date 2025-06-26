@@ -34,6 +34,10 @@ export async function fetchOutput(filename: string): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`)).data;
 }
 
-export async function fetchHtmlOutput(filename: string): Promise<any> {
+export async function fetchOutputText(filename: string): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`, { responseType: "text" })).data;
+}
+
+export async function fetchOutputStatus(filename: string): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/status/${filename}`)).data;
 }

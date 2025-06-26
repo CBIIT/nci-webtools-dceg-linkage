@@ -7,12 +7,35 @@ import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
 import PopSelect from "@/components/select/pop-select";
 
+export interface FormData {
+  "pop": string;
+  "filename": string;
+  "reference": string;
+  "columns[chromosome]": string;
+  "columns[position]": string;
+  "columns[pvalue]": string;
+  "calculateRegion": "region" | "gene" | "variant";
+  "gene[name]": string;
+  "gene[basepair]": string;
+  "gene[index]": string;
+  "region[start]": string;
+  "region[end]": string;
+  "region[index]": string;
+  "variant[index]": string;
+  "variant[basepair]": string;
+  "genome_build": "grch37" | "grch38" | "grch38_high_coverage";
+  "dprime": boolean;
+  "transcript": boolean;
+  "annotate": "forge" | "regulome" | "no";
+  "useEx": boolean;
+}
+
 export default function LDAssocForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
 
-  const defaultForm = {
+  const defaultForm: FormData = {
     "pop": "",
     "filename": "",
     "reference": "",
@@ -102,12 +125,13 @@ export default function LDAssocForm() {
   async function onSubmit(data: any) {
     if (!data.useEx) await handleUpload(data);
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-    submitForm.mutate({
+    const formData = {
       ...data,
       reference,
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
-    });
-    // router.push is now handled in onSuccess
+    };
+    queryClient.setQueryData(["ldassoc-form-data", reference], formData);
+    submitForm.mutate(formData);
   }
 
   function onReset(event: any): void {
@@ -177,13 +201,13 @@ export default function LDAssocForm() {
               <div>
                 <Form.Group controlId="gene[name]" className="mb-3">
                   <Form.Label>Gene name</Form.Label>
-                  <Form.Control {...register("region[start]")} placeholder="Gene name" />
+                  <Form.Control {...register("gene[name]")} placeholder="Gene name" />
                 </Form.Group>
                 <Form.Group controlId="gene[basepair]" className="mb-3">
                   <Form.Label>Base pair window</Form.Label>
                   <div className="d-flex align-items-center">
                     ±&nbsp;
-                    <Form.Control {...register("gene[basepair]")} placeholder="100000" />
+                    <Form.Control type="number" {...register("gene[basepair]")} placeholder="100000" />
                   </div>
                 </Form.Group>
                 <Form.Group controlId="gene[index]" className="mb-3">
@@ -219,7 +243,7 @@ export default function LDAssocForm() {
                 <Form.Label>Base pair window</Form.Label>
                 <div className="d-flex align-items-center">
                   ±&nbsp;
-                  <Form.Control {...register("variant[basepair]")} />
+                  <Form.Control type="number" {...register("variant[basepair]")} />
                 </div>
               </Form.Group>
             </div>
@@ -267,10 +291,10 @@ export default function LDAssocForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("transcript")}
-                value="false"
-                checked={!watch("transcript")}
+                value="true"
+                checked={!!watch("transcript")}
                 onChange={() => {
-                  setValue("transcript", false);
+                  setValue("transcript", true);
                 }}>
                 Yes
               </ToggleButton>
@@ -279,10 +303,10 @@ export default function LDAssocForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("transcript")}
-                value="true"
-                checked={!!watch("transcript")}
+                value="false"
+                checked={!watch("transcript")}
                 onChange={() => {
-                  setValue("transcript", true);
+                  setValue("transcript", false);
                 }}>
                 No
               </ToggleButton>
@@ -335,7 +359,7 @@ export default function LDAssocForm() {
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
             </Button>
-            <Button type="submit" variant="primary">
+            <Button type="submit" variant="primary" disabled={submitForm.isPending}>
               Submit
             </Button>
           </div>
