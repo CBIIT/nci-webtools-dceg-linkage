@@ -522,24 +522,24 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         if len(snps) < threshold:
             matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                                 x_range=xr, y_range=list(reversed(rsnum_lst)),
-                                h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
-                                tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                                 border_fill_color='white', x_axis_type=None, 
+                                tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
             # CHANGE AXIS LABELS & LINE COLOR:
             # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
             #                     x_range=xr, y_range=list(rsnum_lst),
-            #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
-            #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+            #                      border_fill_color='white', background_fill_color="beige", 
+            #                     tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
 
         else:
             matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                                 x_range=xr, y_range=list(reversed(rsnum_lst)),
-                                h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                                tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                                 border_fill_color='white', x_axis_type=None, y_axis_type=None, 
+                                tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
             # CHANGE AXIS LABELS & LINE COLOR:
             # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
             #                     x_range=xr, y_range=list(rsnum_lst),
-            #                     h_symmetry=False, v_symmetry=False, border_fill_color='white', background_fill_color="beige", logo=None,
-            #                     tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+            #                      border_fill_color='white', background_fill_color="beige", 
+            #                     tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
 
         matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
                         color="box_color", alpha="box_trans", line_color=None)
@@ -598,8 +598,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         if len(snps) < threshold:
             connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
                             x_range=xr, y_range=yr2, border_fill_color='white',
-                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                            plot_width=800, plot_height=90, tools="xpan,tap")
+                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, 
+                            width=800, height=90, tools="xpan,tap")
             connector.segment(x, y0, x, y1, color="black")
             connector.segment(x, y1, x2, y2, color="black")
             connector.segment(x2, y2, x2, y3, color="black")
@@ -608,8 +608,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         else:
             connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
                             x_range=xr, y_range=yr3, border_fill_color='white',
-                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                            plot_width=800, plot_height=30, tools="xpan,tap")
+                            title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, 
+                            width=800, height=30, tools="xpan,tap")
             connector.segment(x, y0, x, y1, color="black")
             connector.segment(x, y1, x2, y2, color="black")
             connector.segment(x2, y2, x2, y3, color="black")
@@ -638,8 +638,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
         # Rug Plot
         rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
-                    title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
-                    plot_width=800, plot_height=50, tools="hover,xpan,tap")
+                    title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, 
+                    width=800, height=50, tools="hover,xpan,tap")
         rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
                 dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
 
@@ -757,8 +757,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
             gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2, border_fill_color='white',
-                            title="", h_symmetry=False, v_symmetry=False, logo=None,
-                            plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                            title="",  
+                            width=800, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
             # if len(genes_raw) <= max_genes:
             gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -790,8 +790,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
             gene_plot.toolbar_location = "below"
 
-            out_grid = gridplot(matrix_plot, connector, rug, gene_plot,
-                                ncols=1, toolbar_options=dict(logo=None))
+            out_grid = gridplot([matrix_plot, connector, rug, gene_plot], ncols=1, toolbar_options=dict(logo=None))
 
         # Gene Plot (Collapsed)
         else:
@@ -874,8 +873,8 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
             gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=yr2_c, border_fill_color='white',
-                            title="", h_symmetry=False, v_symmetry=False, logo=None,
-                            plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                            title="",  
+                            width=900, height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset")
 
             # if len(genes_c_raw) <= max_genes_c:
             gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -905,8 +904,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
 
             gene_c_plot.toolbar_location = "below"
             
-            out_grid = gridplot(matrix_plot, rug, gene_c_plot,
-                        ncols=1, toolbar_options=dict(logo=None))
+            out_grid = gridplot([matrix_plot, rug, gene_c_plot], ncols=1, toolbar_options=dict(logo=None))
 
         # Generate high quality images only if accessed via web instance
         

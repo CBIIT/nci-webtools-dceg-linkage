@@ -23,6 +23,7 @@ RUN dnf -y update \
     tar \
     xz-devel \
     zlib-devel \
+    firefox \
     && dnf clean all
 
 # install htslib
@@ -52,6 +53,25 @@ RUN cd /tmp \
     && tar -xjf phantomjs.tar.bz2 \
     && mv phantomjs-${PHANTOMJS_VERSION}-linux-x86_64/bin/phantomjs /usr/local/bin/phantomjs \
     && rm -rf phantomjs-${PHANTOMJS_VERSION}-linux-x86_64 phantomjs.tar.bz2
+
+# install geckodriver
+ENV GECKODRIVER_VERSION=0.36.0
+ENV MOZ_HEADLESS=1
+
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+        GD_ARCH="linux64"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+        GD_ARCH="linux-aarch64"; \
+    else \
+        echo "Unsupported architecture: $ARCH"; exit 1; \
+    fi && \
+    cd /tmp && \
+    curl -L "https://github.com/mozilla/geckodriver/releases/download/v${GECKODRIVER_VERSION}/geckodriver-v${GECKODRIVER_VERSION}-$GD_ARCH.tar.gz" -o geckodriver.tar.gz && \
+    tar -xzf geckodriver.tar.gz && \
+    mv geckodriver /usr/local/bin/ && \
+    chmod +x /usr/local/bin/geckodriver && \
+    rm geckodriver.tar.gz
 
 ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
 
