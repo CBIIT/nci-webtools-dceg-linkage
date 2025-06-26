@@ -60,6 +60,7 @@ export default function LDAssocForm() {
   const { control, register, handleSubmit, reset, watch, setValue } = useForm({
     defaultValues: defaultForm,
   });
+  const columnOptions = ["chr", "pos", "rsid", "p"];
 
   const filename = watch("filename") as string | FileList;
   const genome_build = watch("genome_build");
@@ -173,15 +174,33 @@ export default function LDAssocForm() {
             <div>
               <Form.Group controlId="columns[chromosome]" className="mb-3">
                 <Form.Label>Chromosome Column</Form.Label>
-                <Form.Control type="text" {...register("columns[chromosome]")} />
+                <Form.Select {...register("columns[chromosome]")}>
+                  {columnOptions.map((e, i) => (
+                    <option key={e + i + "chr"} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </Form.Select>
               </Form.Group>
               <Form.Group controlId="columns[position]" className="mb-3">
                 <Form.Label>Position Column</Form.Label>
-                <Form.Control type="text" {...register("columns[position]")} />
+                <Form.Select {...register("columns[position]")}>
+                  {columnOptions.map((e, i) => (
+                    <option key={e + i + "pos"} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </Form.Select>
               </Form.Group>
               <Form.Group controlId="columns[pvalue]" className="mb-3">
                 <Form.Label>P-Value</Form.Label>
-                <Form.Control type="text" {...register("columns[pvalue]")} />
+                <Form.Select {...register("columns[pvalue]")}>
+                  {columnOptions.map((e, i) => (
+                    <option key={e + i + "pval"} value={e}>
+                      {e}
+                    </option>
+                  ))}
+                </Form.Select>
               </Form.Group>
             </div>
           )}
