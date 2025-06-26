@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
 import PopSelect from "@/components/select/pop-select";
@@ -76,6 +76,16 @@ export default function LDAssocForm() {
     }
   }, [exampleData, genome_build, setValue]);
 
+  const submitForm = useMutation<any, unknown, any>({
+    mutationFn: (params: any) => ldassoc(params),
+    onSuccess: (_data, variables) => {
+      // variables contains the submitted data
+      if (variables && variables.reference) {
+        router.push(`${pathname}?ref=${variables.reference}`);
+      }
+    },
+  });
+
   async function handleUpload(data: any) {
     try {
       const fileData = new FormData();
@@ -92,12 +102,12 @@ export default function LDAssocForm() {
   async function onSubmit(data: any) {
     if (!data.useEx) await handleUpload(data);
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-    queryClient.setQueryData(["ldassoc-form", reference], {
+    submitForm.mutate({
       ...data,
       reference,
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     });
-    router.push(`${pathname}?ref=${reference}`);
+    // router.push is now handled in onSuccess
   }
 
   function onReset(event: any): void {

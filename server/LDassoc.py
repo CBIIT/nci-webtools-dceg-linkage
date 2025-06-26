@@ -1197,7 +1197,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	###########################
 	# Html output for testing #
 	###########################
-	#html=file_html(out_grid, CDN, "Test Plot")
+	html=file_html(out_grid, CDN, "ldassoc")
+	with open(tmp_dir + f"ldassoc_plot_{request}.html", "w") as f_html:
+		f_html.write(html)
 	#out_html=open("LDassoc.html","w")
 	#print >> out_html, html
 	#out_html.close()
