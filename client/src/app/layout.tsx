@@ -24,7 +24,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   const queryClient = new QueryClient({});
   const pathname = usePathname();
   const currentRoute = routes.find((route) => route.path === pathname);
-  const pageTitle = currentRoute ? `${currentRoute.title} | Survival Stats Tools` : "Survival Stats Tools";
+  const pageTitle = currentRoute ? `${currentRoute.title} | LDlink` : "LDlink";
 
   return (
     <html lang="en">
