@@ -1,12 +1,17 @@
 "use client";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Alert from "react-bootstrap/Alert";
-import Loading from "@/components/loading";
 import { Container, Row, Col } from "react-bootstrap";
 import LDAssocForm from "./form";
-import LdAssocResults from "./results";
+import CalculateLoading from "@/components/calculateLoading";
+
+const LdAssocResults = dynamic(() => import("./results"), {
+  ssr: false,
+});
+
 export default function LdAssoc() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
@@ -37,7 +42,7 @@ export default function LdAssoc() {
         <Col>
           <LDAssocForm />
           <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-            <Suspense fallback={<Loading message="Loading..." />}>{ref && <LdAssocResults ref={ref} />}</Suspense>
+            <Suspense fallback={<CalculateLoading />}>{ref && <LdAssocResults ref={ref} />}</Suspense>
           </ErrorBoundary>
         </Col>
       </Row>
