@@ -39,7 +39,7 @@ export default function LdToolSection() {
   const rows = chunkTools(tools, 5);
 
   return (
-    <main id="main-container" role="main">
+    <div id="main-container" role="main">
       <div id="content" className="tab-content">
         <div className="tab-pane fade show active" id="home-tab">
           <div style={{ width: "100%", backgroundColor: "#536e84", padding: "40px 0" }}>
@@ -68,6 +68,6 @@ export default function LdToolSection() {
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
