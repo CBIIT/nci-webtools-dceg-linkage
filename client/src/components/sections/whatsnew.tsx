@@ -56,11 +56,21 @@ export default function WhatsNew() {
             newCardId={startIndex + index + 1}
             title={entry.title}
             body={
-              <ul style={{ marginBottom: "0" }}>
+              <div style={{ marginBottom: "0" }}>
                 {entry.items.map((item, idx) => (
-                  <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
+                <p
+                    key={idx}
+                    style={{ marginBottom: "0.5rem" }}
+                    dangerouslySetInnerHTML={{
+                    __html:
+                        startIndex === 0 && index === 0 && idx === entry.items.length - 1
+                        ? item + ' <span style="display:block;margin-top:5px;">(See <a class="version-link">Version History</a>)</span>'
+                        : item,
+                    }}
+                />
                 ))}
-              </ul>
+
+              </div>
             }
           />
         ))}
