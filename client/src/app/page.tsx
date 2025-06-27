@@ -37,20 +37,29 @@ export default function Home() {
           <Row>
             <LdToolSection />
           </Row>
-          <Row>
+          <Row className="ms-1 me-1">
             <WhatsNew />  
           </Row>
-          <Row>
+          <Row className="ms-1 me-1">
             <div className="container">
 
-            <br/>
+            
             <p style={{ fontSize: "18px" }}><b>Credits</b></p>
             <p> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell"
               title="Mitchell Machiela Biography" target="_blank">Mitchell Machiela</a> in collaboration
               with NCI&apos;s Center for Biomedical Informatics and Information
               Technology (CBIIT). Support comes from the Division of Cancer
               Epidemiology and Genetics Informatics Tool Challenge.</p>
-
+            <p>
+              This work utilized the computational resources of the NIH STRIDES Initiative (<a href="https://cloud.nih.gov" target="_blank">https://cloud.nih.gov</a>) through the Other Transaction agreement [AWS&#123;*&#125;:&#123;*&#125; OT2OD027852]
+            </p>
+            <p>
+              LDlink&apos;s <a href="https://github.com/CBIIT/nci-webtools-dceg-linkage" target="_blank" >source code</a> is available under the <a href="license.txt" target="_blank" >MIT license</a>, an <a href="https://opensource.org" target="_blank">Open Source Initiative</a> approved license.
+            </p>
+            <p>
+              Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
+            </p>
+            <p id="ldlink_version"></p>
             
             
 
@@ -58,35 +67,7 @@ export default function Home() {
           </Row>
         </div>
       </div>
-      <div className="bg-light py-5 flex-grow-1">
-        <div>
-          <Row>
-            <Col>
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam id dictum sapien. Nam suscipit erat vel
-                facilisis sagittis. Fusce a ante sed magna malesuada tincidunt. Ut pretium, ante eget suscipit egestas,
-                augue ligula vestibulum justo, id interdum nunc odio et odio. Sed sed egestas nisl, aliquam imperdiet
-                quam. Duis pellentesque purus cursus, molestie felis eget, facilisis nisl. Phasellus convallis lectus
-                vitae nibh imperdiet commodo. Integer rhoncus imperdiet mauris. Suspendisse at dolor felis. Vestibulum
-                ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nam imperdiet elit orci,
-                nec condimentum lectus sollicitudin eu. Aenean felis nunc, accumsan a arcu ut, sagittis ornare lorem.
-                Sed ac lorem et dui faucibus pharetra vel sed ipsum. Quisque varius erat euismod dolor lacinia commodo.
-                Phasellus sed ultrices neque, sit amet consectetur nisl.
-              </p>
-              <div>
-                <p className="h6">Reference</p>
-                <ol>
-                  <li>
-                    Sed fringilla elementum convallis. Morbi vehicula sapien sit amet quam facilisis, id gravida massa
-                    volutpat. Nulla venenatis aliquam mi eu finibus. Proin at congue magna, in tempor dui. Suspendisse
-                    potenti. Quisque pharetra sagittis volutpat. Suspendisse laoreet risus et tempor sollicitudin.
-                  </li>
-                </ol>
-              </div>
-            </Col>
-          </Row>
-        </div>
-      </div>
+      
     </>
   );
 }
