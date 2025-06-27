@@ -15,7 +15,21 @@ import "./styles/main.scss";
 export default function RootLayout({ children }: { children: ReactNode }) {
   const routes: Route[] = [
     { title: "Home", path: "/", subRoutes: [] },
-    { title: "LD Tools", path: "/ldtools", subRoutes: [] },
+    { title: "LD Tools", path: "/ldtools", subRoutes: [
+      {title: "LDassoc", path: "/ldassoc"},
+      {title: "LDexpress", path: "/ldexpress"},
+      {title: "LDhap", path: "/ldtldhap"},
+      {title: "LDmatrix", path: "/ldmatrix"},
+      {title: "LDpair", path: "/ldpair"},
+      {title: "LDpop", path: "/ldpop"},
+      {title: "LDproxy", path: "/ldproxy"},
+      {title: "LDtrait", path: "/ldtrait"},
+      {title: "LDscore", path: "/ldscore"},
+      {title: "SNPchip", path: "/SNPchip"},
+      {title: "SNPclip", path: "/SNPclip"}
+
+      
+    ] },
     { title: "API Access", path: "/apiaccess", subRoutes: [] },
     { title: "Citations", path: "/citations", subRoutes: [] },
     { title: "Version History", path: "/history", subRoutes: [] },
@@ -23,7 +37,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   ];
   const queryClient = new QueryClient({});
   const pathname = usePathname();
-  const currentRoute = routes.find((route) => route.path === pathname);
+  // const currentRoute = routes.find((route) => route.path === pathname);
+  const currentRoute =
+  routes.find((route) => route.path === pathname) ||
+  routes
+    .flatMap((route) => route.subRoutes)
+    .find((subRoute) => subRoute.path === pathname);
   const pageTitle = currentRoute ? `${currentRoute.title} | LDlink` : "LDlink";
 
   return (
