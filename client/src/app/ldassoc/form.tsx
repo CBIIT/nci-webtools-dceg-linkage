@@ -7,6 +7,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
 import PopSelect, { PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
+import { useStore } from "@/store";
 
 export interface FormData {
   "pop": PopOption[];
@@ -35,6 +36,7 @@ export default function LDAssocForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
+  const { genome_build } = useStore((state) => state);
 
   const defaultForm: FormData = {
     "pop": [],
@@ -64,7 +66,6 @@ export default function LDAssocForm() {
   const columnOptions = ["chr", "pos", "rsid", "p"];
 
   const filename = watch("filename") as string | FileList;
-  const genome_build = watch("genome_build");
   const useEx = watch("useEx");
   const calculateRegion = watch("calculateRegion");
 
@@ -127,6 +128,7 @@ export default function LDAssocForm() {
     const formData = {
       ...data,
       reference,
+      genome_build,
       pop: data.pop.map((e: PopOption) => e.value).join("+"),
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
@@ -143,18 +145,6 @@ export default function LDAssocForm() {
 
   return (
     <Form id="ldassoc-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset}>
-      <Row>
-        <Col sm="auto">
-          <Form.Group controlId="genome_build" className="mb-3">
-            <Form.Label>Genome Build (1000G)</Form.Label>
-            <Form.Select {...register("genome_build")}>
-              <option value="grch37">GRCh37</option>
-              <option value="grch38">GRCh38</option>
-              <option value="grch38_high_coverage">GRCh38 High Coverage</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-      </Row>
       <Row>
         <Col sm={3}>
           <Form.Group controlId="filename" className="mb-3">
