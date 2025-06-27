@@ -2,6 +2,8 @@ import Link from "next/link";
 import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
 import LdToolCard from "@/components/cards/ldtool-card";
+import WhatsNew from "@/components/sections/whatsnew";
+import LdToolSection from "@/components/sections/ldToolCards";
 
 export default function Home() {
  
@@ -9,7 +11,7 @@ export default function Home() {
   return (
     <>
       <div className="flex-grow-1">
-        <Container>
+        <div>
           <Row className="mt-3">
             <div className="text-center">
               <h2>
@@ -31,15 +33,33 @@ export default function Home() {
                 specialized for querying and displaying unique aspects of linkage disequilibrium.
               </p>
             </div>
-          </Row>
-          <LdToolCard />
+          </Row>          
           <Row>
-            
+            <LdToolSection />
           </Row>
-        </Container>
+          <Row>
+            <WhatsNew />  
+          </Row>
+          <Row>
+            <div className="container">
+
+            <br/>
+            <p style={{ fontSize: "18px" }}><b>Credits</b></p>
+            <p> LDlink was developed by <a href="https://dceg.cancer.gov/about/staff-directory/biographies/K-N/machiela-mitchell"
+              title="Mitchell Machiela Biography" target="_blank">Mitchell Machiela</a> in collaboration
+              with NCI&apos;s Center for Biomedical Informatics and Information
+              Technology (CBIIT). Support comes from the Division of Cancer
+              Epidemiology and Genetics Informatics Tool Challenge.</p>
+
+            
+            
+
+          </div>
+          </Row>
+        </div>
       </div>
       <div className="bg-light py-5 flex-grow-1">
-        <Container>
+        <div>
           <Row>
             <Col>
               <p>
@@ -65,7 +85,7 @@ export default function Home() {
               </div>
             </Col>
           </Row>
-        </Container>
+        </div>
       </div>
     </>
   );

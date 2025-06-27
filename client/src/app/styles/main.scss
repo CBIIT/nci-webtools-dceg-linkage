@@ -148,8 +148,8 @@ body {
 	background-color: #133a55;
 	height: 40px;
 	padding: 8px 0;
-	margin-right: 5px;
-	margin-left: 5px;
+	// margin-right: 5px;
+	// margin-left: 5px;
 }
 
 .card-body {
@@ -174,8 +174,9 @@ body {
 	display: inline-block;
 	width: 19%;
 	height: 150px;
-	margin: 10px 0;
-	/* margin-bottom: 10px; */
+	margin: 10px 5px;
+	margin-bottom: 10px; 
+  margin-right: 5px;;
 	text-decoration: none;
 	vertical-align: top;
 	text-align: left;
@@ -207,6 +208,13 @@ body {
 	text-decoration: none;
 	vertical-align: top;
 }
+
+.news-card-outside .card {
+  display: flex;
+  flex-direction: row; /* Align children horizontally */
+  height: 210px;        /* Match vertical alignment with arrows */
+}
+
 
 .news-card-left {
 	background-color: #133a55;
@@ -240,7 +248,7 @@ body {
 	color: white;
 	/* display:none;  */
 	vertical-align: top;
-	margin-top: 10px;
+	// margin-top: 10px;
 }
 .news-row {
 	display: inline-block;
@@ -252,8 +260,52 @@ body {
 }
 
 .news-titles {
-	transform: rotate(-90deg);
-	color: white;
-	font-size: 100px;
-	top: 50px;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  color: white;
+  font-size: 18px;
+  white-space: nowrap;
+  margin: 0;
+}
+
+
+.card-row {
+	max-width: 1300px;
+	min-height: 130px;
+	margin: auto;
+	text-align: center;
+  padding-left:5px;
+  padding-right:5px;
+}
+
+.border-0{
+  border: none !important;
+}
+
+.news-card-body p {
+    font-size: 16px;
+}
+
+@media only screen and (max-width: 930px) {
+	.card-outside {
+		height: 210px;
+	}
+	.card-body {
+		height: 170px;
+	}
+	.card-outside {
+		width: 32.8%;
+	}
+}
+@media only screen and (max-width: 767px) {
+	.card-body {
+		display: none;
+	}
+	.card-outside {
+		height: 40px;
+		width: 32%;
+	}
+	.card-row {
+		min-height: 50px;
+	}
 }
