@@ -8,6 +8,14 @@ from LDcommon import retrieveAWSCredentials, genome_build_vars,connectMongoDBRea
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population,get_1000g_data,parse_vcf
 from LDcommon import set_alleles,get_forgeDB
 from LDutilites import get_config
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+
+# selenium webdriver options
+options = Options()
+options.headless = True
+service = Service("/usr/local/bin/geckodriver")
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
 def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
@@ -20,7 +28,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     tmp_dir = param_list['tmp_dir']
     genotypes_dir = param_list['genotypes_dir']
     aws_info = param_list['aws_info']
- 
+
     export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
@@ -28,10 +36,10 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
         os.makedirs(tmp_dir)
 
     snps = validsnp(snplst,genome_build,None)
-    #if return value is string, then it is error message and need to return the message
+    # if return value is string, then it is error message and need to return the message
     if isinstance(snps, str):
         return snps
-    
+
     # Select desired ancestral populations
     pop_ids = get_population(pop,request,None)
     if isinstance(pop_ids,str):
@@ -39,7 +47,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     # Connect to Mongo snp database
     db = connectMongoDBReadOnly(True)
-  
+
     snps = replace_coords_rsid_list(db, snps,None,None)
 
     # Find RS numbers in snp database
@@ -80,13 +88,12 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     for i in range(len(index) - 1):
         hap2.append([])
 
-       # parse vcf
+    # parse vcf
     snp_dict,missing_snp,output = parse_vcf(vcf,snp_coords,None,None,True)
-    
+
     rsnum_lst = []
     allele_lst = []
     pos_lst = []
-    
 
     for s_key in snp_dict:
         # parse snp_key such as chr7:pos_rs4
@@ -101,8 +108,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
             geno[0] = geno[0].lstrip('chr')
             # if 1000G position does not match dbSNP position for variant, use dbSNP position
             if geno[1] != snp_key:
-               geno[1] = snp_key
-               
+                geno[1] = snp_key
+
             if "," not in geno[3] and "," not in geno[4]:
                 a1, a2 = set_alleles(geno[3], geno[4])
                 for i in range(len(index)):
@@ -354,14 +361,14 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     if len(snps) < threshold:
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                            h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, logo=None,
-                            tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                             border_fill_color='white', x_axis_type=None, 
+                            tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
 
     else:
         matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                             x_range=xr, y_range=list(reversed(rsnum_lst)),
-                            h_symmetry=False, v_symmetry=False, border_fill_color='white', x_axis_type=None, y_axis_type=None, logo=None,
-                            tools="hover,undo,redo,reset,pan,box_zoom,previewsave", title=" ", plot_width=800, plot_height=700)
+                             border_fill_color='white', x_axis_type=None, y_axis_type=None, 
+                            tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
 
     matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
                     color="box_color", alpha="box_trans", line_color=None)
@@ -394,7 +401,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
         font_divider = 0.7*total_y
     else:
         font_divider = 0.5*total_y
-    #print("#####",total_y,num_font)
+    # print("#####",total_y,num_font)
     for y_y in y:
         y_text.append(total_y - y_y-ycount)
         x_text.append(start_x+spacing*ycount)
@@ -418,8 +425,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     if len(snps) < threshold:
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
                         x_range=xr, y_range=yr2, border_fill_color='white',
-                        title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                        plot_width=800, plot_height=90, tools="xpan,tap")
+                        title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, 
+                        width=800, height=90, tools="xpan,tap")
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
@@ -428,8 +435,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     else:
         connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
                         x_range=xr, y_range=yr3, border_fill_color='white',
-                        title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, h_symmetry=False, v_symmetry=False,
-                        plot_width=800, plot_height=30, tools="xpan,tap")
+                        title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, 
+                        width=800, height=30, tools="xpan,tap")
         connector.segment(x, y0, x, y1, color="black")
         connector.segment(x, y1, x2, y2, color="black")
         connector.segment(x2, y2, x2, y3, color="black")
@@ -458,8 +465,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
     # Rug Plot
     rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
-                title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, h_symmetry=False, v_symmetry=False,
-                plot_width=800, plot_height=50, tools="hover,xpan,tap")
+                title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, 
+                width=800, height=50, tools="hover,xpan,tap")
     rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
             dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
 
@@ -579,8 +586,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                         x_range=xr, y_range=yr2, border_fill_color='white',
-                        title="", h_symmetry=False, v_symmetry=False, logo=None,
-                        plot_width=800, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                        title="",  
+                        width=800, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -611,7 +618,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
         gene_plot.yaxis.major_label_text_color = None
 
         gene_plot.toolbar_location = "below"
-    
+
     # Gene Plot (Collapsed)
     else:
         genes_c_file = tmp_dir + "genes_c_" + request + ".json"
@@ -676,7 +683,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
                     exons_c_plot_name.append(name)
                     exons_c_plot_id.append(e_transcripts[i].replace("-",","))
 
-
         n_rows_c=len(lines_c)
         genes_c_plot_yn=[n_rows_c-x+0.5 for x in genes_c_plot_y]
         exons_c_plot_yn=[n_rows_c-x+0.5 for x in exons_c_plot_y]
@@ -693,8 +699,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                         x_range=xr, y_range=yr2_c, border_fill_color='white',
-                        title="", h_symmetry=False, v_symmetry=False, logo=None,
-                        plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+                        title="",  
+                        width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -730,14 +736,13 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     connector.output_backend = "svg"
     rug.output_backend = "svg"
     gene_plot.output_backend = "svg"
-    export_svgs(matrix_plot, filename=tmp_dir +
-                "matrix_plot_1_" + request + ".svg")
-    export_svgs(connector, filename=tmp_dir +
-                "connector_1_" + request + ".svg")
-    export_svgs(rug, filename=tmp_dir +
-                "rug_1_" + request + ".svg")
-    export_svgs(gene_plot, filename=tmp_dir +
-                "gene_plot_1_" + request + ".svg")
+
+    driver = webdriver.Firefox(service=service, options=options)
+    export_svgs(matrix_plot, filename=tmp_dir + "matrix_plot_1_" + request + ".svg", webdriver=driver)
+    export_svgs(connector, filename=tmp_dir + "connector_1_" + request + ".svg", webdriver=driver)
+    export_svgs(rug, filename=tmp_dir + "rug_1_" + request + ".svg", webdriver=driver)
+    export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg", webdriver=driver)
+    driver.quit()
 
     # 1 pixel = 0.0264583333 cm
     svg_height = str(25.00 + (0.0264583333 * plot_h_pix)) + "cm"
@@ -782,7 +787,6 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     # Remove temporary file(s)
     subprocess.call("rm " + tmp_dir + "genes_*" + 
                     request + "*.json", shell=True)
-
 
     reset_output()
 

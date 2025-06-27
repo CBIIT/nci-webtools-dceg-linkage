@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   routes
     .flatMap((route) => route.subRoutes)
     .find((subRoute) => subRoute.path === pathname);
-  const pageTitle = currentRoute ? `${currentRoute.title} | Survival Stats Tools` : "Survival Stats Tools";
+  const pageTitle = currentRoute ? `${currentRoute.title} | LDlink` : "LDlink";
 
   return (
     <html lang="en">
