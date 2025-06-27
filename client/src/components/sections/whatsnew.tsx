@@ -64,7 +64,7 @@ export default function WhatsNew() {
                     dangerouslySetInnerHTML={{
                     __html:
                         startIndex === 0 && index === 0 && idx === entry.items.length - 1
-                        ? item + ' <span style="display:block;margin-top:5px;">(See <a class="version-link">Version History</a>)</span>'
+                        ? item + ' <span style="display:block;margin-top:5px;">(See <a class="version-link" href="/history">Version History</a>)</span>'
                         : item,
                     }}
                 />
