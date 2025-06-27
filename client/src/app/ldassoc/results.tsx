@@ -30,7 +30,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   });
   const { data: enableExport } = useQuery<FormData>({
     queryKey: ["ldassoc-export", ref],
-    queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : null),
+    queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
     enabled: !!ref,
     refetchInterval: 5000, // Check every 5 seconds
     retry: 60,
@@ -147,7 +147,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       <Row className="align-items-center">
         <Col sm={12} className="justify-content-end text-end">
           <Dropdown>
-            <Dropdown.Toggle variant="outline-primary" disabled={!!enableExport}>
+            <Dropdown.Toggle variant="outline-primary" disabled={!enableExport}>
               Export Plot
             </Dropdown.Toggle>
             <Dropdown.Menu>
