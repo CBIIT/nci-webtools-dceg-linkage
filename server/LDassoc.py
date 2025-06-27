@@ -787,7 +787,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# Begin Bokeh Plotting
 	from collections import OrderedDict
-	from bokeh.embed import components,file_html
+	from bokeh.embed import components,file_html, json_item
 	from bokeh.layouts import gridplot
 	from bokeh.models import HoverTool,LinearAxis,Range1d
 	from bokeh.plotting import ColumnDataSource,curdoc,figure,output_file,reset_output,save
@@ -812,11 +812,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	assoc_plot=figure(
 				title="P-values and Regional LD for "+snp+" in "+pop,
-				min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-				plot_width=900,
-				plot_height=600,
+				min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, 
+				width=900,
+				height=600,
 				x_range=xr, y_range=yr,
-				tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,previewsave", logo=None,
+				tools="tap,pan,box_zoom,wheel_zoom,box_select,undo,redo,reset,save", 
 				toolbar_location="above")
 
 	assoc_plot.title.align="center"
@@ -840,8 +840,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	b = [-log10(0.00000005),-log10(0.00000005)]
 	assoc_plot.line(a, b, color="blue", alpha=0.5)
 
-	assoc_points_not1000G=assoc_plot.circle(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
-	assoc_points=assoc_plot.circle(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
+	assoc_points_not1000G=assoc_plot.scatter(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
+	assoc_points=assoc_plot.scatter(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
 	assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
 
 	hover=HoverTool(renderers=[assoc_points])
@@ -881,8 +881,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	rug=figure(
 			x_range=xr, y_range=yr_rug, border_fill_color='white', y_axis_type=None,
-			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60, h_symmetry=False, v_symmetry=False,
-			plot_width=900, plot_height=50, tools="xpan,tap,wheel_zoom", logo=None)
+			title="", min_border_top=2, min_border_bottom=2, min_border_left=60, min_border_right=60,
+			width=900, height=50, tools="xpan,tap,wheel_zoom")
 
 	rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
 	rug.toolbar_location=None
@@ -983,8 +983,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 		gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
 						   x_range=xr, y_range=yr2, border_fill_color='white',
-						   title="", h_symmetry=False, v_symmetry=False, logo=None,
-						   plot_width=900, plot_height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+						   title="", 
+						   width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
 		# if len(genes_raw) <= max_genes:
 		gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -1015,8 +1015,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 		gene_plot.toolbar_location = "below"
 
-		out_grid = gridplot(assoc_plot, rug, gene_plot,
-			ncols=1, toolbar_options=dict(logo=None))
+		out_grid = gridplot([assoc_plot, rug, gene_plot], ncols=1, toolbar_options=dict(logo=None))
 
 		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
 			json.dump(vars(myargs), out_args)
@@ -1132,8 +1131,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 		gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
 						   x_range=xr, y_range=yr2_c, border_fill_color='white',
-						   title="", h_symmetry=False, v_symmetry=False, logo=None,
-						   plot_width=900, plot_height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,previewsave")
+						   title="", 
+						   width=900, height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
 		# if len(genes_c_raw) <= max_genes_c:
 		gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -1163,8 +1162,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 		gene_c_plot.toolbar_location = "below"
 		
-		out_grid = gridplot(assoc_plot, rug, gene_c_plot,
-					ncols=1, toolbar_options=dict(logo=None))
+		out_grid = gridplot([assoc_plot, rug, gene_c_plot], ncols=1, toolbar_options=dict(logo=None))
 
 
 		with open(tmp_dir + 'assoc_args' + request + ".json", "w") as out_args:
@@ -1199,7 +1197,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	###########################
 	# Html output for testing #
 	###########################
-	#html=file_html(out_grid, CDN, "Test Plot")
 	#out_html=open("LDassoc.html","w")
 	#print >> out_html, html
 	#out_html.close()
@@ -1208,6 +1205,11 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	out_script,out_div=components(out_grid, CDN)
 	reset_output()
 
+	# save json embedding
+	jsonEmbed = f"ldassoc_plot_{request}.json"
+	print('Save JSON embedding: '+ jsonEmbed)
+	with open(tmp_dir + jsonEmbed, "w") as f_json:
+		json.dump(json_item(out_grid), f_json)
 
 
 	# Print run time statistics
