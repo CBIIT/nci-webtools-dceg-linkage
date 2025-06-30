@@ -6,7 +6,8 @@
 @import "./ncids.scss";
 
 body {
-  font-family: "Inter", sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #444;
 }
 
 .accordion-button {
@@ -195,6 +196,9 @@ body {
 	background-color: #21628d;
 }
 
+.card-outside:hover .card .card-body p {
+	color: #21628d;
+}
 .news-and-citations {
 	max-width: 1270px;
 	margin: auto;
