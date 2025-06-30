@@ -5,10 +5,12 @@ import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstr
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import PopSelect, { PopOption } from "@/components/select/pop-select";
+import CalculateLoading from "@/components/calculateLoading";
+import { useStore } from "@/store";
 
 export interface FormData {
-  "pop": string;
+  "pop": PopOption[];
   "filename": string;
   "reference": string;
   "columns[chromosome]": string;
@@ -34,9 +36,10 @@ export default function LDAssocForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
+  const { genome_build } = useStore((state) => state);
 
   const defaultForm: FormData = {
-    "pop": "",
+    "pop": [],
     "filename": "",
     "reference": "",
     "columns[chromosome]": "",
@@ -63,10 +66,8 @@ export default function LDAssocForm() {
   const columnOptions = ["chr", "pos", "rsid", "p"];
 
   const filename = watch("filename") as string | FileList;
-  const genome_build = watch("genome_build");
   const useEx = watch("useEx");
   const calculateRegion = watch("calculateRegion");
-  const all = watch();
 
   const { data: exampleData, isFetching } = useQuery({
     queryKey: ["ldassoc", genome_build, useEx],
@@ -76,14 +77,13 @@ export default function LDAssocForm() {
 
   useEffect(() => {
     if (exampleData) {
-      console.log("Example data:", exampleData);
       setValue("filename", exampleData.filename);
       setValue("columns[chromosome]", exampleData.headers[0]);
       setValue("columns[position]", exampleData.headers[1]);
       setValue("columns[pvalue]", exampleData.headers[3]);
       setValue("calculateRegion", "region");
       setValue("region[index]", "rs7837688");
-      setValue("pop", "CEU");
+      setValue("pop", [{ value: "CEU", label: "(CEU) Utah Residents from North and West Europe" }]);
       switch (genome_build) {
         case "grch37":
           setValue("region[start]", "chr8:128289591");
@@ -116,7 +116,6 @@ export default function LDAssocForm() {
       fileData.append("ldassocFile", data.filename[0]);
 
       await upload(fileData);
-      console.log("File uploaded successfully");
     } catch (error) {
       console.error("Error uploading file:", error);
       return;
@@ -129,6 +128,8 @@ export default function LDAssocForm() {
     const formData = {
       ...data,
       reference,
+      genome_build,
+      pop: data.pop.map((e: PopOption) => e.value).join("+"),
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
     queryClient.setQueryData(["ldassoc-form-data", reference], formData);
@@ -144,18 +145,6 @@ export default function LDAssocForm() {
 
   return (
     <Form id="ldassoc-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset}>
-      <Row>
-        <Col sm="auto">
-          <Form.Group controlId="genome_build" className="mb-3">
-            <Form.Label>Genome Build (1000G)</Form.Label>
-            <Form.Select {...register("genome_build")}>
-              <option value="grch37">GRCh37</option>
-              <option value="grch38">GRCh38</option>
-              <option value="grch38_high_coverage">GRCh38 High Coverage</option>
-            </Form.Select>
-          </Form.Group>
-        </Col>
-      </Row>
       <Row>
         <Col sm={3}>
           <Form.Group controlId="filename" className="mb-3">
@@ -174,7 +163,7 @@ export default function LDAssocForm() {
             <div>
               <Form.Group controlId="columns[chromosome]" className="mb-3">
                 <Form.Label>Chromosome Column</Form.Label>
-                <Form.Select {...register("columns[chromosome]")}>
+                <Form.Select {...register("columns[chromosome]", { required: true })}>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "chr"} value={e}>
                       {e}
@@ -184,7 +173,7 @@ export default function LDAssocForm() {
               </Form.Group>
               <Form.Group controlId="columns[position]" className="mb-3">
                 <Form.Label>Position Column</Form.Label>
-                <Form.Select {...register("columns[position]")}>
+                <Form.Select {...register("columns[position]", { required: true })}>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "pos"} value={e}>
                       {e}
@@ -194,7 +183,7 @@ export default function LDAssocForm() {
               </Form.Group>
               <Form.Group controlId="columns[pvalue]" className="mb-3">
                 <Form.Label>P-Value</Form.Label>
-                <Form.Select {...register("columns[pvalue]")}>
+                <Form.Select {...register("columns[pvalue]", { required: true })}>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "pval"} value={e}>
                       {e}
@@ -384,10 +373,7 @@ export default function LDAssocForm() {
           </div>
         </Col>
       </Row>
-      <div>
-        <h5 className="mt-3">Form Data</h5>
-        <pre>{JSON.stringify(all, null, 2)}</pre>
-      </div>
+      {submitForm.isPending && <CalculateLoading />}
     </Form>
   );
 }

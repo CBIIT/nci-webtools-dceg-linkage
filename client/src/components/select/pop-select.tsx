@@ -88,7 +88,23 @@ export default function PopSelect({ name, control }: { name: string; control: an
   const popOptions: any[] = [{ label: "(ALL) All Populations", value: "ALL" }, ...popGroups];
 
   const Group = (props: any) => {
-    const onClick = () => props.selectProps.onChange(props.options);
+    const onClick = () => {
+      // Find all options within this group
+      const groupOptions = props.options;
+      const currentValues = props.selectProps.value || [];
+
+      // Check if all options in this group are already selected
+      const allSelected = groupOptions.every((opt: any) =>
+        currentValues.some((sel: any) => sel.value === opt.value)
+      );
+
+      // If all selected, deselect the group, otherwise select all in group
+      const newSelection = allSelected
+        ? currentValues.filter((sel: any) => !groupOptions.some((opt: any) => opt.value === sel.value))
+        : [...currentValues, ...groupOptions.filter((opt: any) => !currentValues.some((sel: any) => sel.value === opt.value))];
+
+      props.selectProps.onChange(newSelection);
+    };
     return <components.Group {...props} headingProps={{ ...props.headingProps, onClick }} />;
   };
 
@@ -112,6 +128,7 @@ export default function PopSelect({ name, control }: { name: string; control: an
         alignItems: "center",
         justifyContent: "space-between",
         fontSize: ".9rem",
+        cursor: "pointer",
       }}>
       <span>{data.label}</span>
       <span

@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     { title: "API Access", path: "/apiaccess", subRoutes: [] },
     { title: "Citations", path: "/citations", subRoutes: [] },
     { title: "Version History", path: "/history", subRoutes: [] },
-    { title: "Documentations", path: "/docs", subRoutes: [] },
+    { title: "Documentation", path: "/docs", subRoutes: [] },
   ];
   const queryClient = new QueryClient({});
   const pathname = usePathname();
