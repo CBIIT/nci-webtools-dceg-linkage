@@ -22,8 +22,8 @@ function pathsMatch(path1: string, path2: string) {
   }
 
   // remove trailing slash
-  path1 = path1.replace(/\/$/, "");
-  path2 = path2.replace(/\/$/, "");
+  path1 = path1.replace(/\/$/, "").toLowerCase();
+  path2 = path2.replace(/\/$/, "").toLowerCase();
 
   return path1 === path2;
 }

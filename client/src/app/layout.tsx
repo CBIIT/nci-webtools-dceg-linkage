@@ -18,15 +18,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     { title: "LD Tools", path: "/ldtools", subRoutes: [
       {title: "LDassoc", path: "/ldassoc"},
       {title: "LDexpress", path: "/ldexpress"},
-      {title: "LDhap", path: "/ldtldhap"},
+      {title: "LDhap", path: "/ldhap"},
       {title: "LDmatrix", path: "/ldmatrix"},
       {title: "LDpair", path: "/ldpair"},
       {title: "LDpop", path: "/ldpop"},
       {title: "LDproxy", path: "/ldproxy"},
       {title: "LDtrait", path: "/ldtrait"},
       {title: "LDscore", path: "/ldscore"},
-      {title: "SNPchip", path: "/SNPchip"},
-      {title: "SNPclip", path: "/SNPclip"}
+      {title: "SNPchip", path: "/snpchip"},
+      {title: "SNPclip", path: "/snpclip"}
 
       
     ] },
