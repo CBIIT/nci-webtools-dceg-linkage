@@ -12,7 +12,7 @@ export default function ApiAccessPage() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [modalShow, setModalShow] = useState(false);
-  const [modalType, setModalType] = useState<"new" | "existing">("new");
+  const [modalType, setModalType] = useState<"new" | "existing" | "error">("new");
   const [modalEmail, setModalEmail] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [error, setError] = useState("");
@@ -45,16 +45,17 @@ export default function ApiAccessPage() {
       }
 
       const data = await res.json();
-      setSubmitted(true);
-      setModalEmail(data.email || form.email);
-      setModalTitle(data.message || "Registration Successful");
-      // Determine modal type based on backend response
-      if (data.registered === true && data.blocked === false) {
-        setModalType("new");
-      } else {
-        setModalType("existing");
-      }
-      setModalShow(true);
+        setSubmitted(true);
+        setModalEmail(data.email || form.email);
+        setModalTitle(data.message || "Registration Successful");
+        if (data.registered === true && data.blocked === false) {
+          setModalType("new");
+        } else if (data.registered === false) {
+          setModalType("error");
+        } else {
+          setModalType("existing");
+        }
+        setModalShow(true);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     }
@@ -306,7 +307,18 @@ export default function ApiAccessPage() {
               </h3>
             </div>
             <div className="modal-body" style={{ textAlign: "center" }}>
-              Your API token has been sent to the email: <span className="apiaccess-user-email" style={{ fontWeight: "bold" }}>{modalEmail}</span>
+              {modalTitle && (modalTitle.startsWith("Error") || modalType === "error" || !submitted) ? (
+                <span style={{ color: "#a94442", fontWeight: "bold" }}>
+                  An error occurred during registration. Try again later. Contact us if you continue to experience issues.
+                </span>
+              ) : (
+                <>
+                  Your API token has been sent to the email:{" "}
+                  <span className="apiaccess-user-email" style={{ fontWeight: "bold" }}>
+                    {modalEmail}
+                  </span>
+                </>
+              )}
             </div>
             <div className="modal-footer">
               <input
