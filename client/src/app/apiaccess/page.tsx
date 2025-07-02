@@ -193,13 +193,7 @@ export default function ApiAccessPage() {
             &#123;&quot;snps&quot;: &quot;rs3\nrs4&quot;, &quot;pop&quot;: &quot;YRI+CEU&quot;, &quot;tissues&quot;: &quot;Adipose_Subcutaneous+Adipose_Visceral_Omentum&quot;, &quot;r2_d&quot;: &quot;r2&quot;, &quot;r2_d_threshold&quot;: &quot;0.1&quot;, &quot;p_threshold&quot;: &quot;0.1&quot;, &quot;window&quot;: &quot;500000&quot;, &quot;genome_build&quot;: &quot;grch37&quot;&#125; &apos;https://ldlink.nih.gov/LDlinkRest/ldexpress?token=faketoken123&apos;
           </pre>
         </p>
-        <p>
-            <a className="help-anchor-link" href="#LDexpress">LDexpress</a>
-            <br />
-            <pre className="apiaccess-examples">
-                {`curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' 'https://ldlink.nih.gov/LDlinkRest/ldexpress?token=faketoken123'`}
-            </pre>
-            </p>
+        
             <p>
             <a className="help-anchor-link" href="#LDhap">LDhap</a>
             <br />
