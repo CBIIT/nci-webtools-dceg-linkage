@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -83,15 +83,45 @@ export default function LDAssocForm() {
     reset,
     watch,
     setValue,
+    setError,
     formState: { errors },
   } = useForm({
     defaultValues: defaultForm,
   });
-  const columnOptions = ["chr", "pos", "rsid", "p"];
+  const [columnOptions, setColumnOptions] = useState<string[]>([]);
 
   const filename = watch("filename") as string | FileList;
   const useEx = watch("useEx");
   const calculateRegion = watch("calculateRegion");
+
+  // get headers from association file
+  useEffect(() => {
+    if (filename && typeof filename !== "string" && filename.length > 0) {
+      const file = filename[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        if (text) {
+          const [header] = text.split("\n");
+          const columns = header.trim().split(/\s+/);
+          if (columns.length > 0 && columns[0]) {
+            setColumnOptions(columns);
+            setValue("columns.chromosome", "");
+            setValue("columns.position", "");
+            setValue("columns.pvalue", "");
+            setError("filename", {});
+          } else {
+            setColumnOptions([]);
+            setError("filename", {
+              type: "manual",
+              message: "Header not found. Please ensure the file is not empty and contains a header row.",
+            });
+          }
+        }
+      };
+      reader.readAsText(file);
+    }
+  }, [filename, setValue, setError]);
 
   const { data: exampleData, isFetching } = useQuery({
     queryKey: ["ldassoc", genome_build, useEx],
@@ -101,6 +131,7 @@ export default function LDAssocForm() {
 
   useEffect(() => {
     if (exampleData) {
+      setColumnOptions(exampleData.headers);
       setValue("filename", exampleData.filename);
       setValue("columns.chromosome", exampleData.headers[0]);
       setValue("columns.position", exampleData.headers[1]);
@@ -193,6 +224,9 @@ export default function LDAssocForm() {
               <Form.Group controlId="columns.chromosome" className="mb-3">
                 <Form.Label>Chromosome Column</Form.Label>
                 <Form.Select {...register("columns.chromosome", { required: "Chromosome column is required" })}>
+                  <option value="" disabled>
+                    Select...
+                  </option>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "chr"} value={e}>
                       {e}
@@ -204,6 +238,9 @@ export default function LDAssocForm() {
               <Form.Group controlId="columns.position" className="mb-3">
                 <Form.Label>Position Column</Form.Label>
                 <Form.Select {...register("columns.position", { required: "Position column is required" })}>
+                  <option value="" disabled>
+                    Select...
+                  </option>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "pos"} value={e}>
                       {e}
@@ -215,6 +252,9 @@ export default function LDAssocForm() {
               <Form.Group controlId="columns.pvalue" className="mb-3">
                 <Form.Label>P-Value</Form.Label>
                 <Form.Select {...register("columns.pvalue", { required: "P-value column is required" })}>
+                  <option value="" disabled>
+                    Select...
+                  </option>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "pval"} value={e}>
                       {e}
