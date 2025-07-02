@@ -15,6 +15,7 @@ export default function ApiAccessPage() {
   const [modalType, setModalType] = useState<"new" | "existing">("new");
   const [modalEmail, setModalEmail] = useState("");
   const [modalTitle, setModalTitle] = useState("");
+  const [error, setError] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.id.replace("apiaccess-", "")]: e.target.value });
@@ -22,6 +23,7 @@ export default function ApiAccessPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
 
     const query = new URLSearchParams({
       firstname: form.firstname,
@@ -37,7 +39,9 @@ export default function ApiAccessPage() {
       );
 
       if (!res.ok) {
-        throw new Error("Registration failed.");
+        const errText = await res.text();
+        setError(errText || "Registration failed.");
+        return;
       }
 
       const data = await res.json();
@@ -52,7 +56,7 @@ export default function ApiAccessPage() {
       }
       setModalShow(true);
     } catch (err: any) {
-      alert("Error: " + err.message);
+      setError(err.message || "An unexpected error occurred.");
     }
   };
 
@@ -159,6 +163,11 @@ export default function ApiAccessPage() {
               </Button>
             </div>
           </Form>
+          {error && (
+            <Alert variant="danger" className="mt-3">
+              {error}
+            </Alert>
+          )}
           {submitted && (
             <Alert variant="success">
               Thank you for registering! Your API token will be sent to your email.

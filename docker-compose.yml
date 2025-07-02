@@ -14,16 +14,16 @@ services:
     networks:
       - my_network
 
-  frontend:
-    build:
-      context: .
-      dockerfile: docker/frontend.dockerfile
-      args:
-        NEXT_PUBLIC_API_BASE_URL: http://backend:80
-    ports:
-      - "3000:80"
-    networks:
-      - my_network
+  # frontend:
+  #   build:
+  #     context: .
+  #     dockerfile: docker/frontend.dockerfile
+  #     args:
+  #       NEXT_PUBLIC_API_BASE_URL: http://backend:80
+  #   ports:
+  #     - "3000:80"
+  #   networks:
+  #     - my_network
 
   # frontend_old:
   #   build:
