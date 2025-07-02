@@ -33,7 +33,7 @@ export default function ApiAccessPage() {
 
     try {
       const res = await fetch(
-        `/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
       );
 
       if (!res.ok) {

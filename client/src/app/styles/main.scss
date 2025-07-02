@@ -299,7 +299,7 @@ body {
 	border-radius: 4px;
 	display: block;
     padding: 9.5px;
-    margin: 0 0 10px
+    margin: 0 0 10px;
 }
 /* API Access warning banner */
 .alert-api {
@@ -325,14 +325,6 @@ body {
 
 .close {
 	padding: 5px 0px 0px 0px;
-}
-
-.alert-api {
-    color: black;
-    font-weight: bold;
-    background-color: #ffd351;
-    border-radius: 0 !important;
-    margin-bottom: 0%;
 }
 
 /*disable bk logo */
