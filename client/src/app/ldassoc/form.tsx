@@ -10,26 +10,34 @@ import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 
 export interface FormData {
-  "pop": PopOption[];
-  "filename": string;
-  "reference": string;
-  "columns[chromosome]": string;
-  "columns[position]": string;
-  "columns[pvalue]": string;
-  "calculateRegion": "region" | "gene" | "variant";
-  "gene[name]": string;
-  "gene[basepair]": string;
-  "gene[index]": string;
-  "region[start]": string;
-  "region[end]": string;
-  "region[index]": string;
-  "variant[index]": string;
-  "variant[basepair]": string;
-  "genome_build": "grch37" | "grch38" | "grch38_high_coverage";
-  "dprime": boolean;
-  "transcript": boolean;
-  "annotate": "forge" | "regulome" | "no";
-  "useEx": boolean;
+  pop: PopOption[];
+  filename: string;
+  reference: string;
+  columns: {
+    chromosome: string;
+    position: string;
+    pvalue: string;
+  };
+  calculateRegion: "" | "region" | "gene" | "variant";
+  gene: {
+    name: string;
+    basepair: string;
+    index: string;
+  };
+  region: {
+    start: string;
+    end: string;
+    index: string;
+  };
+  variant: {
+    index: string;
+    basepair: string;
+  };
+  genome_build: "grch37" | "grch38" | "grch38_high_coverage";
+  dprime: boolean;
+  transcript: boolean;
+  annotate: "forge" | "regulome" | "no";
+  useEx: boolean;
 }
 
 export default function LDAssocForm() {
@@ -39,28 +47,44 @@ export default function LDAssocForm() {
   const { genome_build } = useStore((state) => state);
 
   const defaultForm: FormData = {
-    "pop": [],
-    "filename": "",
-    "reference": "",
-    "columns[chromosome]": "",
-    "columns[position]": "",
-    "columns[pvalue]": "",
-    "calculateRegion": "region",
-    "gene[name]": "",
-    "gene[basepair]": "100000",
-    "gene[index]": "",
-    "region[start]": "",
-    "region[end]": "",
-    "region[index]": "",
-    "variant[index]": "",
-    "variant[basepair]": "500000",
-    "genome_build": "grch37",
-    "dprime": false,
-    "transcript": false,
-    "annotate": "forge",
-    "useEx": false,
+    pop: [],
+    filename: "",
+    reference: "",
+    columns: {
+      chromosome: "",
+      position: "",
+      pvalue: "",
+    },
+    calculateRegion: "",
+    gene: {
+      name: "",
+      basepair: "100000",
+      index: "",
+    },
+    region: {
+      start: "",
+      end: "",
+      index: "",
+    },
+    variant: {
+      index: "",
+      basepair: "500000",
+    },
+    genome_build: "grch37",
+    dprime: false,
+    transcript: false,
+    annotate: "forge",
+    useEx: false,
   };
-  const { control, register, handleSubmit, reset, watch, setValue } = useForm({
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: defaultForm,
   });
   const columnOptions = ["chr", "pos", "rsid", "p"];
@@ -78,21 +102,21 @@ export default function LDAssocForm() {
   useEffect(() => {
     if (exampleData) {
       setValue("filename", exampleData.filename);
-      setValue("columns[chromosome]", exampleData.headers[0]);
-      setValue("columns[position]", exampleData.headers[1]);
-      setValue("columns[pvalue]", exampleData.headers[3]);
+      setValue("columns.chromosome", exampleData.headers[0]);
+      setValue("columns.position", exampleData.headers[1]);
+      setValue("columns.pvalue", exampleData.headers[3]);
       setValue("calculateRegion", "region");
-      setValue("region[index]", "rs7837688");
+      setValue("region.index", "rs7837688");
       setValue("pop", [{ value: "CEU", label: "(CEU) Utah Residents from North and West Europe" }]);
       switch (genome_build) {
         case "grch37":
-          setValue("region[start]", "chr8:128289591");
-          setValue("region[end]", "chr8:128784397");
+          setValue("region.start", "chr8:128289591");
+          setValue("region.end", "chr8:128784397");
           break;
         case "grch38":
         case "grch38_high_coverage":
-          setValue("region[start]", "chr8:127277115");
-          setValue("region[end]", "chr8:127777115");
+          setValue("region.start", "chr8:127277115");
+          setValue("region.end", "chr8:127777115");
           break;
       }
     } else {
@@ -144,115 +168,179 @@ export default function LDAssocForm() {
   }
 
   return (
-    <Form id="ldassoc-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset}>
+    <Form id="ldassoc-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm={3}>
           <Form.Group controlId="filename" className="mb-3">
-            <Form.Label>File</Form.Label>
+            <Form.Label>Association Data File</Form.Label>
             {typeof filename === "string" && filename !== "" ? (
               <div className="form-control bg-light">{filename}</div>
             ) : (
-              <Form.Control type="file" {...register("filename")} />
+              <Form.Control
+                placeholder="Upload"
+                type="file"
+                {...register("filename", { required: "Association data file is required" })}
+              />
             )}
+            <Form.Text className="text-danger">{errors?.filename?.message}</Form.Text>
           </Form.Group>
           <Form.Group controlId="useEx">
             <Form.Check type="switch" id="useEx" label="Use example GWAS data" {...register("useEx")} />
           </Form.Group>
 
-          {filename && (
+          {filename.length > 0 && (
             <div>
-              <Form.Group controlId="columns[chromosome]" className="mb-3">
+              <Form.Group controlId="columns.chromosome" className="mb-3">
                 <Form.Label>Chromosome Column</Form.Label>
-                <Form.Select {...register("columns[chromosome]", { required: true })}>
+                <Form.Select {...register("columns.chromosome", { required: "Chromosome column is required" })}>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "chr"} value={e}>
                       {e}
                     </option>
                   ))}
                 </Form.Select>
+                <Form.Text className="text-danger">{errors?.columns?.chromosome?.message}</Form.Text>
               </Form.Group>
-              <Form.Group controlId="columns[position]" className="mb-3">
+              <Form.Group controlId="columns.position" className="mb-3">
                 <Form.Label>Position Column</Form.Label>
-                <Form.Select {...register("columns[position]", { required: true })}>
+                <Form.Select {...register("columns.position", { required: "Position column is required" })}>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "pos"} value={e}>
                       {e}
                     </option>
                   ))}
                 </Form.Select>
+                <Form.Text className="text-danger">{errors?.columns?.position?.message}</Form.Text>
               </Form.Group>
-              <Form.Group controlId="columns[pvalue]" className="mb-3">
+              <Form.Group controlId="columns.pvalue" className="mb-3">
                 <Form.Label>P-Value</Form.Label>
-                <Form.Select {...register("columns[pvalue]", { required: true })}>
+                <Form.Select {...register("columns.pvalue", { required: "P-value column is required" })}>
                   {columnOptions.map((e, i) => (
                     <option key={e + i + "pval"} value={e}>
                       {e}
                     </option>
                   ))}
                 </Form.Select>
+                <Form.Text className="text-danger">{errors?.columns?.pvalue?.message}</Form.Text>
               </Form.Group>
             </div>
           )}
         </Col>
         <Col sm={3}>
           <Form.Group controlId="calculateRegion" className="mb-3">
-            <Form.Label>Region Type</Form.Label>
-            <Form.Select {...register("calculateRegion")}>
+            <Form.Label>Allele</Form.Label>
+            <Form.Select {...register("calculateRegion", { required: "Allele is required" })}>
+              <option value="" disabled>
+                Select...
+              </option>
               <option value="gene">Gene</option>
               <option value="region">Region</option>
               <option value="variant">Variant</option>
             </Form.Select>
+            <Form.Text className="text-danger">{errors?.calculateRegion?.message}</Form.Text>
           </Form.Group>
           {calculateRegion === "gene" && (
             <div>
-              {" "}
               <div>
-                <Form.Group controlId="gene[name]" className="mb-3">
+                <Form.Group controlId="gene.name" className="mb-3">
                   <Form.Label>Gene name</Form.Label>
-                  <Form.Control {...register("gene[name]")} placeholder="Gene name" />
+                  <Form.Control
+                    {...register("gene.name", {
+                      required: "Gene name is required",
+                      pattern: { value: /^[A-Za-z0-9-]+$/, message: "Invalid gene name" },
+                    })}
+                    placeholder="Gene name"
+                  />
+                  <Form.Text className="text-danger">{errors?.gene?.name?.message}</Form.Text>
                 </Form.Group>
-                <Form.Group controlId="gene[basepair]" className="mb-3">
+                <Form.Group controlId="gene.basepair" className="mb-3">
                   <Form.Label>Base pair window</Form.Label>
                   <div className="d-flex align-items-center">
                     ±&nbsp;
-                    <Form.Control type="number" {...register("gene[basepair]")} placeholder="100000" />
+                    <Form.Control
+                      type="number"
+                      {...register("gene.basepair", {
+                        required: "Base pair window is required",
+                        pattern: { value: /^\d+$/, message: "Invalid base pair window" },
+                      })}
+                      placeholder="100000"
+                    />
                   </div>
+                  <Form.Text className="text-danger">{errors?.gene?.basepair?.message}</Form.Text>
                 </Form.Group>
-                <Form.Group controlId="gene[index]" className="mb-3">
+                <Form.Group controlId="gene.index" className="mb-3">
                   <Form.Label>Index RSID</Form.Label>
-                  <Form.Control {...register("gene[index]")} placeholder="(optional)" />
+                  <Form.Control
+                    {...register("gene.index", {
+                      pattern: { value: /^rs\d+$/, message: "Invalid RSID" },
+                    })}
+                    placeholder="(optional)"
+                  />
+                  <Form.Text className="text-danger">{errors?.gene?.index?.message}</Form.Text>
                 </Form.Group>
               </div>
             </div>
           )}
           {calculateRegion === "region" && (
             <div>
-              <Form.Group controlId="region[start]" className="mb-3">
+              <Form.Group controlId="region.start" className="mb-3">
                 <Form.Label>Region Start</Form.Label>
-                <Form.Control {...register("region[start]")} placeholder="Start Coord (chr1:50000 or 1:50000)" />
+                <Form.Control
+                  {...register("region.start", {
+                    required: "Region start is required",
+                    pattern: { value: /^(chr)?(\d{1,2}|[xyXY]):\d+$/, message: "Invalid region start" },
+                  })}
+                  placeholder="Start Coord (chr1:50000 or 1:50000)"
+                />
+                <Form.Text className="text-danger">{errors?.region?.start?.message}</Form.Text>
               </Form.Group>
-              <Form.Group controlId="region[end]" className="mb-3">
+              <Form.Group controlId="region.end" className="mb-3">
                 <Form.Label>Region End</Form.Label>
-                <Form.Control {...register("region[end]")} placeholder="End Coord (chr1:50000 or 1:50000)" />
+                <Form.Control
+                  {...register("region.end", {
+                    required: "Region end is required",
+                    pattern: { value: /^(chr)?(\d{1,2}|[xyXY]):\d+$/, message: "Invalid region end" },
+                  })}
+                  placeholder="End Coord (chr1:50000 or 1:50000)"
+                />
+                <Form.Text className="text-danger">{errors?.region?.end?.message}</Form.Text>
               </Form.Group>
-              <Form.Group controlId="region[index]" className="mb-3">
+              <Form.Group controlId="region.index" className="mb-3">
                 <Form.Label>Index RSID</Form.Label>
-                <Form.Control {...register("region[index]")} placeholder="(optional)" />
+                <Form.Control
+                  {...register("region.index", { pattern: { value: /^rs\d+$/, message: "Invalid RSID" } })}
+                  placeholder="(optional)"
+                />
+                <Form.Text className="text-danger">{errors?.region?.index?.message}</Form.Text>
               </Form.Group>
             </div>
           )}
           {calculateRegion === "variant" && (
             <div>
-              <Form.Group controlId="variant[end]" className="mb-3">
+              <Form.Group controlId="variant.index" className="mb-3">
                 <Form.Label>Variant RSID</Form.Label>
-                <Form.Control {...register("variant[index]")} placeholder="Variant RSID" />
+                <Form.Control
+                  {...register("variant.index", {
+                    required: "Variant RSID is required",
+                    pattern: { value: /^rs\d+$/, message: "Invalid RSID" },
+                  })}
+                  placeholder="Variant RSID"
+                />
+                <Form.Text className="text-danger">{errors?.variant?.index?.message}</Form.Text>
               </Form.Group>
-              <Form.Group controlId="variant[basepair]" className="mb-3">
+              <Form.Group controlId="variant.basepair" className="mb-3">
                 <Form.Label>Base pair window</Form.Label>
                 <div className="d-flex align-items-center">
                   ±&nbsp;
-                  <Form.Control type="number" {...register("variant[basepair]")} />
+                  <Form.Control
+                    type="number"
+                    {...register("variant.basepair", {
+                      required: "Base pair window is required",
+                      pattern: { value: /^\d+$/, message: "Invalid base pair window" },
+                    })}
+                  />
                 </div>
+                <Form.Text className="text-danger">{errors?.variant?.basepair?.message}</Form.Text>
               </Form.Group>
             </div>
           )}
@@ -260,7 +348,8 @@ export default function LDAssocForm() {
         <Col sm={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
-            <PopSelect name="pop" control={control} />
+            <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+            <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
           <Form.Group controlId="dprime" className="mb-3">
             <Form.Label>LD measure:</Form.Label>
@@ -270,6 +359,7 @@ export default function LDAssocForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("dprime")}
+                title="Select R-squared attribute"
                 value="false"
                 checked={!watch("dprime")}
                 onChange={() => {
@@ -282,6 +372,7 @@ export default function LDAssocForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("dprime")}
+                title="Select D-prime attribute"
                 value="true"
                 checked={!!watch("dprime")}
                 onChange={() => {
@@ -299,6 +390,7 @@ export default function LDAssocForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("transcript")}
+                title="Collapse transcripts"
                 value="true"
                 checked={!!watch("transcript")}
                 onChange={() => {
@@ -311,6 +403,7 @@ export default function LDAssocForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("transcript")}
+                title="Show transcripts"
                 value="false"
                 checked={!watch("transcript")}
                 onChange={() => {
@@ -325,6 +418,7 @@ export default function LDAssocForm() {
             <ButtonGroup className="ms-3">
               <ToggleButton
                 id="radio-annotate-forgedb"
+                title="Show ForgeDB annotation"
                 type="radio"
                 variant="outline-primary"
                 {...register("annotate")}
@@ -337,6 +431,7 @@ export default function LDAssocForm() {
               </ToggleButton>
               <ToggleButton
                 id="radio-annotate-regulome"
+                title="Show RegulomeDB annotation"
                 type="radio"
                 variant="outline-primary"
                 {...register("annotate")}
@@ -349,6 +444,7 @@ export default function LDAssocForm() {
               </ToggleButton>
               <ToggleButton
                 id="radio-annotate-no"
+                title="Hide annotation"
                 type="radio"
                 variant="outline-primary"
                 {...register("annotate")}
@@ -368,7 +464,7 @@ export default function LDAssocForm() {
               Reset
             </Button>
             <Button type="submit" variant="primary" disabled={submitForm.isPending}>
-              Submit
+              Calculate
             </Button>
           </div>
         </Col>

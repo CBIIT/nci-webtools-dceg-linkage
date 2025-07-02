@@ -37,8 +37,8 @@ export default function LdAssoc() {
             LDassoc Tool
             <sup>
               <a
-                id="module-help"
                 href="/docs/#LDassoc"
+                target="_blank"
                 style={{ fontSize: 20, textDecoration: "none", marginLeft: 5 }}
                 title="Click here for documentation">
                 <i className="bi bi-info-circle-fill text-primary"></i>

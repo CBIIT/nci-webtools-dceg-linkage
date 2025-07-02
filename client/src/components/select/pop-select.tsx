@@ -75,17 +75,30 @@ export const populations: Populations = {
   },
 };
 
-export default function PopSelect({ name, control }: { name: string; control: any }) {
-  const popGroups: GroupedOption[] = Object.entries(populations).map(([key, group]) => ({
-    label: `(${key}) ${group.label}`,
-    value: key,
-    options: Object.entries(group.subPopulations).map(([value, label]) => ({
-      value,
-      label: `(${value}) ${label}`,
-    })),
-  }));
+export default function PopSelect({
+  name,
+  control,
+  rules,
+}: {
+  name: string;
+  control: any;
+  rules?: any;
+}) {
+  const popGroups: GroupedOption[] = Object.entries(populations).map(
+    ([key, group]) => ({
+      label: `(${key}) ${group.label}`,
+      value: key,
+      options: Object.entries(group.subPopulations).map(([value, label]) => ({
+        value,
+        label: `(${value}) ${label}`,
+      })),
+    })
+  );
 
-  const popOptions: any[] = [{ label: "(ALL) All Populations", value: "ALL" }, ...popGroups];
+  const popOptions: any[] = [
+    { label: "(ALL) All Populations", value: "ALL" },
+    ...popGroups,
+  ];
 
   const Group = (props: any) => {
     const onClick = () => {
@@ -180,6 +193,7 @@ export default function PopSelect({ name, control }: { name: string; control: an
     <Controller
       name={name}
       control={control}
+      rules={rules}
       render={({ field }) => (
         <Select
           {...field}
