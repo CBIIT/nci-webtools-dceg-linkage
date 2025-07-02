@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Alert } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Modal } from "react-bootstrap";
 import Image from "next/image";
 
 export default function ApiAccessPage() {
@@ -11,40 +11,50 @@ export default function ApiAccessPage() {
     institution: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [modalShow, setModalShow] = useState(false);
+  const [modalType, setModalType] = useState<"new" | "existing">("new");
+  const [modalEmail, setModalEmail] = useState("");
+  const [modalTitle, setModalTitle] = useState("");
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.id.replace("apiaccess-", "")]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const query = new URLSearchParams({
-    firstname: form.firstname,
-    lastname: form.lastname,
-    email: form.email,
-    institution: form.institution,
-    reference: "", // optional
-  });
+    const query = new URLSearchParams({
+      firstname: form.firstname,
+      lastname: form.lastname,
+      email: form.email,
+      institution: form.institution,
+      reference: "", // optional
+    });
 
-  try {
-    const res = await fetch(
-  `/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
-);
+    try {
+      const res = await fetch(
+        `/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
+      );
 
-    if (!res.ok) {
-      throw new Error("Registration failed.");
+      if (!res.ok) {
+        throw new Error("Registration failed.");
+      }
+
+      const data = await res.json();
+      setSubmitted(true);
+      setModalEmail(data.email || form.email);
+      setModalTitle(data.message || "Registration Successful");
+      // Determine modal type based on backend response
+      if (data.registered === true && data.blocked === false) {
+        setModalType("new");
+      } else {
+        setModalType("existing");
+      }
+      setModalShow(true);
+    } catch (err: any) {
+      alert("Error: " + err.message);
     }
-
-    const data = await res.json();
-    console.log(data);
-    setSubmitted(true);
-    // Optional: setRegistrationData(data);
-  } catch (err: any) {
-    alert("Error: " + err.message);
-  }
-};
-
+  };
 
   const handleReset = () => {
     setForm({ firstname: "", lastname: "", email: "", institution: "" });
@@ -141,7 +151,7 @@ export default function ApiAccessPage() {
               />
             </Form.Group>
             <div className="mb-3">
-              <Button type="submit" className="btn btn-default calculate me-2">
+              <Button type="submit" className="btn btn-primary calculate me-2">
                 Register
               </Button>
               <Button type="reset" className="btn btn-secondary">
@@ -258,6 +268,51 @@ export default function ApiAccessPage() {
             <strong>Note</strong>: <a className="help-anchor-link" href="#LDassoc">LDassoc</a> is not currently accessible via programmatic access.
             </p>
         </div>
+
+        {/* Modals for API Access */}
+        <Modal
+          show={modalShow}
+          onHide={() => setModalShow(false)}
+          centered
+          backdrop="static"
+          aria-labelledby="apiaccess-modal-title"
+        >
+          <div
+            className="modal-content"
+            style={{
+              borderStyle: "solid",
+              borderWidth: 3,
+              borderColor: modalType === "new" ? "#D6E9C6" : "#FFEEBA",
+            }}
+          >
+            <div
+              className="modal-header"
+              style={{
+                color: modalType === "new" ? "#3C763D" : "#856404",
+                backgroundColor: modalType === "new" ? "#DFF0D8" : "#FFF3CD",
+              }}
+            >
+              <h3 className="modal-title apiaccess" id="apiaccess-modal-title">
+                {modalTitle}
+              </h3>
+            </div>
+            <div className="modal-body" style={{ textAlign: "center" }}>
+              Your API token has been sent to the email: <span className="apiaccess-user-email" style={{ fontWeight: "bold" }}>{modalEmail}</span>
+            </div>
+            <div className="modal-footer">
+              <input
+                type="button"
+                id="apiaccess-done"
+                value="Done"
+                className="btn btn-primary apiaccess-done"
+                onClick={() => {
+                  setModalShow(false);
+                  handleReset();
+                }}
+              />
+            </div>
+          </div>
+        </Modal>
     </Container>
   );
 }
