@@ -29,8 +29,8 @@ export default function ApiAccessPage() {
 
   try {
     const res = await fetch(
-      `https://ldlink.nih.gov/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
-    );
+  `/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
+);
 
     if (!res.ok) {
       throw new Error("Registration failed.");
