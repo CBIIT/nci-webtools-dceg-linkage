@@ -16,11 +16,35 @@ export default function ApiAccessPage() {
     setForm({ ...form, [e.target.id.replace("apiaccess-", "")]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: handle API registration logic here
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  const query = new URLSearchParams({
+    firstname: form.firstname,
+    lastname: form.lastname,
+    email: form.email,
+    institution: form.institution,
+    reference: "", // optional
+  });
+
+  try {
+    const res = await fetch(
+      `https://ldlink.nih.gov/LDlinkRestWeb/apiaccess/register_web?${query.toString()}`
+    );
+
+    if (!res.ok) {
+      throw new Error("Registration failed.");
+    }
+
+    const data = await res.json();
+    console.log(data);
     setSubmitted(true);
-  };
+    // Optional: setRegistrationData(data);
+  } catch (err: any) {
+    alert("Error: " + err.message);
+  }
+};
+
 
   const handleReset = () => {
     setForm({ firstname: "", lastname: "", email: "", institution: "" });
@@ -130,7 +154,7 @@ export default function ApiAccessPage() {
               Thank you for registering! Your API token will be sent to your email.
             </Alert>
           )}
-          <Alert variant="info" className="mt-3">
+          <Alert variant="alert" className="mt-3 alert-api">
             <b>Important:</b> API access is limited to sequential requests only. Please wait until calculation results are returned before making another request.
             Contact <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">support</a> if you plan to make large volumes of API requests.
           </Alert>
