@@ -173,7 +173,7 @@ export default function ApiAccessPage() {
               Thank you for registering! Your API token will be sent to your email.
             </Alert>
           )}
-          <Alert variant="alert" className="mt-3 alert-api">
+          <Alert className="mt-3 alert-api">
             <b>Important:</b> API access is limited to sequential requests only. Please wait until calculation results are returned before making another request.
             Contact <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">support</a> if you plan to make large volumes of API requests.
           </Alert>
