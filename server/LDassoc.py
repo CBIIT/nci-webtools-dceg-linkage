@@ -115,7 +115,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# Check header
 	for item in header_list:
 		if item not in header:
-			output["error"]="Variables mapping is not listed in the in the association file header."
+			output["error"]="Variables mapping is not listed in the association file header."
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
