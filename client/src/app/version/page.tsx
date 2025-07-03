@@ -10,22 +10,22 @@ export default function VersionHistoryPage() {
       <div className="text-center">
         <h2>
           <Image
-            src="/LDlink_logo_small_clear.png"
+            src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
             style={{ verticalAlign: "bottom" }}
-            width={48}
-            height={48}
+            width={91}
+            height={36}
           />{" "}
           Version History
         </h2>
       </div>
-      <div style={{ paddingLeft: 20, paddingRight: 20 }}>
+      <div id="news-container" style={{ paddingLeft: 20, paddingRight: 20 }}>
         {versionHistory.map((entry, idx) => (
-          <div key={entry.title} style={{ marginBottom: "2rem" }}>
-            <h4>{entry.title}</h4>
+          <div className="" key={entry.title} style={{ marginBottom: "2rem" }}>
+            <p><b>{entry.title}</b></p>
             <ul>
               {entry.items.map((item, i) => (
-                <li key={i}>{item}</li>
+                <li key={i} dangerouslySetInnerHTML={{ __html: item }} />
               ))}
             </ul>
           </div>

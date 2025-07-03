@@ -145,7 +145,7 @@ export const versionHistory: NewsEntry[] = [
   {
     title: "LDlink 5.0 Release (11/06/2020)",
     items: [
-      "LDexpress released for searching variants that are associated with gene expression in multiple tissue types."
+      "<b>LDexpress</b> released for searching variants that are associated with gene expression in multiple tissue types."
     ]
   },
   {
@@ -242,7 +242,7 @@ export const versionHistory: NewsEntry[] = [
   {
     title: "LDlink 3.3 Release (12/24/2018)",
     items: [
-      "LDlink API access now requires registration. Please register using the API Access tab",
+      "LDlink API access now requires registration. Please register using the <u>API Access</u> tab.",
       "dbSNP build updated from version 142 to 151.",
       "Genomic coordinates can now be used to query variants for each module.",
       "Improvements have been made to error messages from programmatic access.",
@@ -261,8 +261,8 @@ export const versionHistory: NewsEntry[] = [
   {
     title: "LDlink 3.0 Release (04/01/2017)",
     items: [
-      "LDassoc released for visualizing association results.",
-      "Programmatic Access of LDlink via terminal commands.",
+      "<b>LDassoc</b> released for visualizing association results.",
+      "<b>Programmatic Access</b> of LDlink via terminal commands.",
       "Update Bokeh interactive plotting library to release 0.12.2.",
       "Improve performance of allele matching algorithm.",
       "Better table sorting on absolute value of distance.",
@@ -272,20 +272,20 @@ export const versionHistory: NewsEntry[] = [
   {
     title: "LDlink 2.0 Release (03/10/2016)",
     items: [
-      "SNPclip released for LD pruning a list of variants.",
-      "SNPchip released for finding variants on commercial genotyping arrays.",
+      "<b>SNPclip</b> released for LD pruning a list of variants.",
+      "<b>SNPchip</b> released for finding variants on commercial genotyping arrays.",
       "Minor tweaks to improve visualization of indel output.",
-      "Correct p-value rounding to zero in LDpair.",
+      "Correct p-value rounding to zero in <b>LDpair</b>.",
       "Fix errors when variants map to the same position in 1000G VCF file"
     ]
   },
   {
     title: "LDlink 1.1 Release (09/30/2015)",
     items: [
-      "Indels are now accepted as input in all LDlink modules.",
-      "LDproxy output table now returns all data with options to sort by columns and search output.",
-      "LDhap haplotypes are now color coded by alleles for easier viewing.",
-      "LDmatrix now includes a R2/D' toggle for plotting R2 or D' matrices.",
+      "Indels are now accepted as input in all <b>LDlink</b> modules.",
+      "<b>LDproxy</b> output table now returns all data with options to sort by columns and search output.",
+      "<b>LDhap</b> haplotypes are now color coded by alleles for easier viewing.",
+      "<b>LDmatrix</b> now includes a R2/D' toggle for plotting R2 or D' matrices.",
       "Minor tweaks to improve visualization on a variety of device screen sizes."
     ]
   }
