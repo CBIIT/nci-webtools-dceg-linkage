@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { Container, Row, Col, Form, Button, Alert, Modal } from "react-bootstrap";
+import { Container, Row, Col, Form, Button, Alert, Modal, Spinner } from "react-bootstrap";
 import Image from "next/image";
 
 export default function ApiAccessPage() {
@@ -16,6 +16,7 @@ export default function ApiAccessPage() {
   const [modalEmail, setModalEmail] = useState("");
   const [modalTitle, setModalTitle] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.id.replace("apiaccess-", "")]: e.target.value });
@@ -24,6 +25,7 @@ export default function ApiAccessPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setLoading(true);
 
     const query = new URLSearchParams({
       firstname: form.firstname,
@@ -58,6 +60,8 @@ export default function ApiAccessPage() {
         setModalShow(true);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -156,14 +160,20 @@ export default function ApiAccessPage() {
               />
             </Form.Group>
             <div className="mb-3">
-              <Button type="submit" className="btn btn-primary calculate me-2">
+              <Button type="submit" className="btn btn-primary calculate me-2" disabled={loading}>
                 Register
               </Button>
-              <Button type="reset" className="btn btn-secondary">
+              <Button type="reset" className="btn btn-secondary" disabled={loading}>
                 Reset
               </Button>
             </div>
           </Form>
+          {loading && (
+            <div className="text-center my-3">
+              <Spinner animation="border" role="status" />
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          )}
           {error && (
             <Alert variant="danger" className="mt-3">
               {error}
