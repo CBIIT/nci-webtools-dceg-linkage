@@ -277,6 +277,7 @@ def register_web():
     if url_path == None:
         url_path == request.url_root
 
+    out_json = {}
     # print(request.headers)
     # will return http://nciws-d971-c.nih.gov:8090/
     # print(request.url_root)
@@ -300,6 +301,15 @@ def register_web():
     except Exception as e:
         exc_obj = e
         app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        out_json = {
+            "message": "Error during user registration.",
+            "email": email,
+            "firstname": firstname,
+            "lastname": lastname,
+            "registered": False,
+            "blocked": False,
+            "institution": institution,
+        }
     out_json2 = {
         "message": out_json["message"],
         "email": out_json["email"],
