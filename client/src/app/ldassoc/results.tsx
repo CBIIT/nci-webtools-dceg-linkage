@@ -140,7 +140,6 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue(),
     }),
   ];
-  console.log(formData);
 
   return (
     <Container fluid="md" className="justify-content-center">
