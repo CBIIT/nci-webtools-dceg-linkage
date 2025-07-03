@@ -228,6 +228,13 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       <Row>
         <Col>{tableData && <Table title="Association Results" data={tableData.aaData} columns={columns} />}</Col>
       </Row>
+      <Row>
+        <Col>
+          <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
+            Download association data for all variants
+          </a>
+        </Col>
+      </Row>
     </Container>
   );
 }
