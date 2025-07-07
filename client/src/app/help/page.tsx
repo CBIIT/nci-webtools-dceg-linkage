@@ -19,7 +19,6 @@ export default function HelpPage() {
         </h2>
       </div>
       <div className="pt-2">
-        {/* The following content is a direct JSX translation of the help.html body. For brevity, only the structure and a few sections are shown. Expand as needed. */}
         <p>
           LDlink is designed to be an intuitive and simple tool for investigating patterns of linkage disequilibrium across a variety of ancestral population groups. This help documentation page gives detailed description of the metrics calculated by LDlink modules and aids users in understanding all aspects of the required input and returned output. This application&apos;s source code can be viewed on{' '}
           <a href="https://github.com/CBIIT/nci-webtools-dceg-linkage" target="_blank" rel="noopener noreferrer">GitHub</a>.

@@ -51,7 +51,7 @@ export default function Footer() {
 			</li>
 			</ul>
 			<ul className="list-inline">
-				NIH ... Turning Discovery Into Health<sup>&reg;</sup>
+				<li>NIH ... Turning Discovery Into Health<sup>&reg;</sup></li>
 			</ul>
 			
 		</div>
