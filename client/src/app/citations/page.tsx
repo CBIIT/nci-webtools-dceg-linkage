@@ -8,7 +8,7 @@ export default function CitationPage() {
     <Container className="py-4">
       <div className="text-center">
         {/* If you want to use next/image, place the image in /public and use src="/LDlink_logo_small_clear.png" */}
-        <h1>
+        <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"

@@ -8,7 +8,7 @@ export default function VersionHistoryPage() {
   return (
     <Container className="py-4">
       <div className="text-center">
-        <h2>
+        <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
@@ -17,7 +17,7 @@ export default function VersionHistoryPage() {
             height={36}
           />{" "}
           Version History
-        </h2>
+        </h1>
       </div>
       <div id="news-container" style={{ paddingLeft: 20, paddingRight: 20 }}>
         {versionHistory.map((entry, idx) => (

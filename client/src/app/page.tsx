@@ -14,7 +14,7 @@ export default function Home() {
         <div>
           <Row className="mt-3">
             <div className="text-center">
-              <h1>
+              <h1 className="h2">
                 Welcome to{" "}
                 <Image
                   src="/images/LDlink_logo_small_clear.png"

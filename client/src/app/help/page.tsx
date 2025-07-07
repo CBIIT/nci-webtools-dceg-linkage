@@ -7,7 +7,7 @@ export default function HelpPage() {
   return (
     <Container className="py-4 help-page">
       <div className="text-center">
-        <h2>
+        <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
@@ -16,7 +16,7 @@ export default function HelpPage() {
             height={36}
           />{' '}
           Documentation
-        </h2>
+        </h1>
       </div>
       <div className="pt-2">
         <p>
@@ -57,7 +57,7 @@ export default function HelpPage() {
         <p style={{ marginLeft: 40 }}><a href="#FAQ"><strong>Frequently Asked Questions</strong></a></p>
         <hr />
         <section id="Understanding_Linkage_Disequilibrium">
-          <h3>Understanding Linkage Disequilibrium</h3>
+          <h2 className="h3">Understanding Linkage Disequilibrium</h2>
           <p><a id="linkage_equilibrium"></a><strong>Linkage Equilibrium</strong> exists when alleles from two different genetic variants occur independently of each other. The inheritance of such variants follows probabilistic patterns governed by population allele frequencies. The vast majority of genetic variants on a chromosome are in linkage equilibrium. Variants in linkage equilibrium are not considered linked.</p>
           <p><a id="linkage_disequilibrium"></a><strong>Linkage Disequilibrium</strong> is present when alleles from two nearby genetic variants commonly occur together in a non-random, linked fashion. This linked mode of inheritance results from genetic variants in close proximity being less likely to be separated by a recombination event and thus alleles of the variants are more commonly inherited together than expected. Alleles of variants in linkage disequilibrium are correlated; with the degree of correlation generally greater in magnitude the closer the variants are in physical distance. Measures of linkage disequilibrium include <a href="#D_prime">D prime (D&apos;)</a> and <a href="#R_squared">R squared (R<sup>2</sup>)</a>.</p>
           <p><a id="haplotype"></a><strong>Haplotype</strong> is a cluster of genetic variants that are inherited together. Humans are diploid; having maternal and paternal copies of each autosomal chromosome. Each chromosomal copy is organized into segments of high linkage disequilibrium, called haplotype &quot;blocks&quot;. Due to unique population histories and differences in variant allele frequencies, haplotype structure tends to be population specific. Although haplotypes are essential for calculating measures of linkage disequilibrium, haplotypes are seldom directly observed. Statistical chromosome phasing techniques are often necessary to infer individual haplotypes.</p>
