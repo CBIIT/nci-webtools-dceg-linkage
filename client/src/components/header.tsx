@@ -34,17 +34,16 @@ export function Header({ routes = [] }: HeaderProps) {
 
   return (
     <>
-      <header className="usa-banner__header">
-        <div className="usa-banner__inner">
-          <div className="container">
-            <div className="usa-banner__header-text">
-              An official website of the United States government
+      <header>
+        <div className="usa-banner__header">
+          <div className="usa-banner__inner">
+            <div className="container">
+              <div className="usa-banner__header-text">
+                An official website of the United States government
+              </div>
             </div>
           </div>
         </div>
-      </header>
-
-      <header>
         <Container className="my-2">
           <Row>
             <Col xl="9" md="8" sm="12">

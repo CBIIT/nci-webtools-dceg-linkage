@@ -14,7 +14,7 @@ export default function Home() {
         <div>
           <Row className="mt-3">
             <div className="text-center">
-              <h2>
+              <h1>
                 Welcome to{" "}
                 <Image
                   src="/images/LDlink_logo_small_clear.png"
@@ -23,7 +23,7 @@ export default function Home() {
                   width={91}
                   height={36}
                 />
-              </h2>
+              </h1>
             </div>
 
             <div className="text-center" style={{ maxWidth: "1200px", margin: "auto" }}>
