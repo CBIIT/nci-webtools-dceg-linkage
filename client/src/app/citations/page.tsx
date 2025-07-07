@@ -8,7 +8,7 @@ export default function CitationPage() {
     <Container className="py-4">
       <div className="text-center">
         {/* If you want to use next/image, place the image in /public and use src="/LDlink_logo_small_clear.png" */}
-        <h2>
+        <h1>
           <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
@@ -17,7 +17,7 @@ export default function CitationPage() {
             height={36}
           />{" "}
           Citations
-        </h2>
+        </h1>
         <p>
           Thank you for using LDlink! If you use LDlink in any publication please cite the LDlink manuscript and any relevant module publications:
         </p>
