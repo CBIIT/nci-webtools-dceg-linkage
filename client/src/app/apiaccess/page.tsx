@@ -71,8 +71,9 @@ export default function ApiAccessPage() {
   };
 
   return (
-    <Container className="py-4">
-      <div className="text-center">
+    <Container className="py-4 tab-content mb-0">
+      <div className="not-home">
+        <div className="text-center">
         <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
@@ -338,6 +339,8 @@ export default function ApiAccessPage() {
             </div>
           </div>
         </Modal>
+      </div>
+      
     </Container>
   );
 }
