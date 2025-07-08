@@ -71,9 +71,10 @@ export default function ApiAccessPage() {
   };
 
   return (
-    <Container className="py-4">
-      <div className="text-center">
-        <h2>
+    <Container className="py-4 tab-content mb-0">
+      <div className="not-home">
+        <div className="text-center">
+        <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
@@ -82,7 +83,7 @@ export default function ApiAccessPage() {
             height={36}
           />{" "}
           API Access
-        </h2>
+        </h1>
       </div>
       <p>
         LDlink modules are also accessible via command line from a terminal. This programmatic access facilitates researchers
@@ -338,6 +339,8 @@ export default function ApiAccessPage() {
             </div>
           </div>
         </Modal>
+      </div>
+      
     </Container>
   );
 }
