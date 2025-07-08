@@ -5,9 +5,9 @@ import Image from "next/image";
 
 export default function CitationPage() {
   return (
-    <Container className="py-4">
-      <div className="text-center">
-        {/* If you want to use next/image, place the image in /public and use src="/LDlink_logo_small_clear.png" */}
+    <Container className="py-4 tab-content mb-0">
+        <div className="not-home">
+            <div className="text-center">
         <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
@@ -102,6 +102,8 @@ export default function CitationPage() {
           <i>BMC Bioinformatics</i>. 2021 Dec 20.
         </p>
       </div>
+    </div>
+      
     </Container>
   );
 }
