@@ -502,7 +502,7 @@ export default function LDAssocForm() {
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
             </Button>
-            <Button type="submit" variant="primary" disabled={submitForm.isPending}>
+            <Button type="submit" variant="primary" disabled={submitForm.isPending} data-testid="calculate-button">
               Calculate
             </Button>
           </div>
