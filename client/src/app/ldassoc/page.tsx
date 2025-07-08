@@ -37,7 +37,7 @@ export default function LdAssoc() {
             LDassoc Tool
             <sup>
               <a
-                href="/docs/#LDassoc"
+                href="/help/#LDassoc"
                 target="_blank"
                 style={{ fontSize: 20, textDecoration: "none", marginLeft: 5 }}
                 title="Click here for documentation">

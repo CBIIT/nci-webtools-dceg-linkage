@@ -59,7 +59,7 @@ body {
   position: relative;
   color: white !important;
   text-decoration: none;
-  background-color: gray; 
+  background-color: #595959; 
 }
 .dropdown-item:hover, 
 .dropdown-item:active, 
@@ -347,6 +347,83 @@ body {
     --bs-btn-disabled-color: #fff;
     --bs-btn-disabled-bg: #6c757d;
     --bs-btn-disabled-border-color: #6c757d;
+}
+
+.tab-content {
+	margin-bottom: 200px;
+	padding-left: 0px;
+	padding-right: 0px;
+	width: 100%;
+	min-height: 600px;
+	-webkit-overflow-scrolling: touch;
+}
+
+.tab-content p {
+	font-size: 16px;
+}
+
+.tab-content .tab-pane {
+	color: #566473;
+}
+
+.tab-content .not-home {
+	margin-top: 200px;
+	margin-bottom: 200px;
+	padding-top: 20px;
+	padding-bottom: 20px;
+	padding-left: 25px;
+	padding-right: 25px;
+	width: 100%;
+	min-height: 600px;
+	background: white;
+	border-width: 0 1px 1px 1px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	max-width: 1270px;
+	border-width: 0 0px 0px 0px;
+	border-style: solid;
+	border-color: #d9d9d9;
+	border-radius: 6px;
+	overflow: hidden;
+
+	margin: auto;
+}
+
+.tab-content .module-header {
+	margin-bottom: 10px;
+	padding-top: 20px;
+	padding-bottom: 25px;
+	padding-left: 25px;
+	padding-right: 25px;
+	width: 100%;
+	background: white;
+	border-width: 0 1px 1px 1px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	max-width: 1270px;
+	border-width: 0 0px 0px 0px;
+	border-style: solid;
+	border-color: #d9d9d9;
+	border-radius: 6px;
+	overflow: hidden;
+
+	margin-top: auto;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+#news-container {
+	font-size: 16px;
+}
+
+.help-page {
+	font-size: 16px	;
+}
+
+a{
+	color:#284E6C
+}
+
+code {
+	color: #A22061;
 }
 
 @media only screen and (max-width: 930px) {
