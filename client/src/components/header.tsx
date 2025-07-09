@@ -53,7 +53,7 @@ export function Header({ routes = [] }: HeaderProps) {
 
         <Row>
           <Col xl="9" md="8" sm="12">
-            <a rel="noopener noreferrer" href="https://cancercontrol.cancer.gov/">
+            <a rel="noopener noreferrer" href="https://dceg.cancer.gov/">
               <Image
                 src="/images/NIH-LDlink-Logo.png"
                 alt="LDlink Logo"
