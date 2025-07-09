@@ -21,7 +21,7 @@ export default function LdAssoc() {
     <>
       <ToolBanner
         name="LDexpress Tool"
-        href="/docs/#LDexpress"
+        href="/help/#LDexpress"
         description="Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types."
       />
       <Container fluid="md">
