@@ -33,7 +33,7 @@ export default function SNPchip() {
     formData.append("affymetrix", selectAllAffymetrix.toString());
 
     try {
-      const res = await fetch("/api/snpchip", {
+      const res = await fetch("/snpchip", {
         method: "POST",
         body: formData,
       });
