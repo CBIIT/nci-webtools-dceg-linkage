@@ -24,6 +24,7 @@ RUN dnf -y update \
     xz-devel \
     zlib-devel \
     firefox \
+    xorg-x11-server-Xvfb \
     && dnf clean all
 
 # install htslib
@@ -57,6 +58,7 @@ RUN cd /tmp \
 # install geckodriver
 ENV GECKODRIVER_VERSION=0.36.0
 ENV MOZ_HEADLESS=1
+ENV DISPLAY=:99
 
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
@@ -71,6 +73,7 @@ RUN ARCH=$(uname -m) && \
     tar -xzf geckodriver.tar.gz && \
     mv geckodriver /usr/local/bin/ && \
     chmod +x /usr/local/bin/geckodriver && \
+    ln -s /usr/local/bin/geckodriver /usr/bin/geckodriver && \
     rm geckodriver.tar.gz
 
 ENV CPATH=$CPATH:/usr/include/httpd/:/usr/include/apr-1/
@@ -103,11 +106,15 @@ COPY --chown=apache:apache docker/wsgi.conf /etc/httpd/conf.d/wsgi.conf
 
 RUN chown -R apache:apache ${LDLINK_HOME}
 
+# RUN mkdir -p /usr/share/httpd/.cache/selenium \
+#     && chown -R apache:apache /usr/share/httpd/.cache
+
 EXPOSE 80
 
 EXPOSE 8080
 
-CMD mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
+CMD flask --app bokehExport run & \
+    mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
     --modules-directory /etc/httpd/modules/ \
     --include-file /etc/httpd/conf.d/wsgi.conf \

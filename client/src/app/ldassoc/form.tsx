@@ -158,7 +158,6 @@ export default function LDAssocForm() {
   const submitForm = useMutation<any, unknown, any>({
     mutationFn: (params: any) => ldassoc(params),
     onSuccess: (_data, variables) => {
-      // variables contains the submitted data
       if (variables && variables.reference) {
         router.push(`${pathname}?ref=${variables.reference}`);
       }
