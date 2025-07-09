@@ -1,7 +1,7 @@
 
-bokeh==3.4.3
+bokeh
 boto3
-Flask==3.1.1
+Flask
 jinja2
 MarkupSafe
 mod_wsgi
@@ -11,6 +11,9 @@ python-dateutil
 python-dotenv
 requests
 selenium
-svgutils
+httpx
+svgutils==0.3.1
+cairosvg
+Pillow
 pybedtools==0.9.1  # Specify a known working version
 ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
