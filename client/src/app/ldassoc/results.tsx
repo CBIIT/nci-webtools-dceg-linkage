@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Row, Col, Container, Dropdown } from "react-bootstrap";
+import Spinner from "react-bootstrap/Spinner";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
@@ -147,7 +148,13 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         <Col sm={12} className="justify-content-end text-end">
           <Dropdown>
             <Dropdown.Toggle variant="outline-primary" disabled={!enableExport}>
-              Export Plot
+              {enableExport ? (
+                "Export Plot"
+              ) : (
+                <>
+                  <Spinner size="sm" animation="border" /> Export Plot
+                </>
+              )}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={() => handleDownload("svg")}>SVG</Dropdown.Item>
