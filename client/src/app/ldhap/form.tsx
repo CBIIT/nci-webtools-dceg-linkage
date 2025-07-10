@@ -81,7 +81,7 @@ export default function LdHapForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e: { value: string; label: string }) => e.value).join("+"),
+      pop: data.pop.map((e) => e.value).join("+"),
     };
 
     queryClient.setQueryData(["ldhap-form-data", reference], formData);

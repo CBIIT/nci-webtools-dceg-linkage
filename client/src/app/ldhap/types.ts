@@ -32,7 +32,6 @@ export interface FormData {
 }
 
 export interface Ldhap {
-  // Define the expected response shape here, for now using any
-  [key: string]: any;
+  reference: string;
 }
 
