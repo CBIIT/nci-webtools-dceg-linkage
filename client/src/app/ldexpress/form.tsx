@@ -27,7 +27,7 @@ function parseSnps(text: string): string {
   return snps;
 }
 
-export default function LDAssocForm() {
+export default function LDExpressForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();

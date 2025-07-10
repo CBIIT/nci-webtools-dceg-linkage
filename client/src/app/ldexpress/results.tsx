@@ -3,17 +3,26 @@ import { useMemo, useEffect } from "react";
 import { Row, Col, Container, Accordion, Form } from "react-bootstrap";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
 import { FormData, LocusData } from "./types";
 
+type FormValues = {
+  snps: { value: string; checked: boolean }[];
+  genes: { value: string; checked: boolean }[];
+  tissues: { value: string; checked: boolean }[];
+};
+
 export default function LdExpressResults({ ref }: { ref: string }) {
-  const { register, reset, watch, control } = useForm();
+  const { register, reset, control } = useForm<FormValues>();
 
   const { data: formData } = useQuery<FormData>({
     queryKey: ["ldexpress-form-data", ref],
     enabled: !!ref,
+    queryFn: async () => {
+      return {} as FormData;
+    },
   });
 
   const { data: results } = useSuspenseQuery<LocusData | null>({
@@ -21,25 +30,56 @@ export default function LdExpressResults({ ref }: { ref: string }) {
     queryFn: async () => (ref ? fetchOutput(`ldexpress${ref}.json`) : null),
   });
 
-  const { fields } = useFieldArray({
+  const { fields: snpsFields, append: appendSnp } = useFieldArray({
     control,
     name: "snps",
   });
+  const { fields: genesFields, append: appendGene } = useFieldArray({
+    control,
+    name: "genes",
+  });
+  const { fields: tissuesFields, append: appendTissue } = useFieldArray({
+    control,
+    name: "tissues",
+  });
+  const snps = useWatch({ control, name: "snps" });
+  const genes = useWatch({ control, name: "genes" });
+  const tissues = useWatch({ control, name: "tissues" });
 
   useEffect(() => {
-    if (results?.query_snps) {
-      reset({
-        snps: results.query_snps.map((snp) => ({
-          value: snp[0],
-          checked: false,
-        })),
+    if (results) {
+      reset();
+      results.thinned_snps.forEach((snp) => {
+        appendSnp({ value: snp, checked: false });
+      });
+      results.thinned_genes.forEach((gene) => {
+        appendGene({ value: gene.split("__")[0], checked: false });
+      });
+      results.thinned_tissues.forEach((tissue) => {
+        appendTissue({ value: tissue.split("__")[0], checked: false });
       });
     }
-  }, [results, reset]);
+  }, [results, appendSnp, appendGene, appendTissue]);
 
-  const tableData = useMemo(() => (results ? results.details.results.aaData : []), [results]);
+  const tableData = useMemo(() => {
+    if (!results) return [];
+    const selectedSnps = snps?.filter((snp) => snp.checked).map((snp) => snp.value) || [];
+    const selectedGenes = genes?.filter((gene) => gene.checked).map((gene) => gene.value) || [];
+    const selectedTissues = tissues?.filter((tissue) => tissue.checked).map((tissue) => tissue.value) || [];
 
-  const genomeBuildMap: any = {
+    return results.details.results.aaData.filter((row: any) => {
+      const snp = row[0];
+      const gene = row[5].split("__")[0];
+      const tissue = row[7].split("__")[0];
+      const snpMatch = selectedSnps.length > 0 ? selectedSnps.includes(snp) : true;
+      const geneMatch = selectedGenes.length > 0 ? selectedGenes.includes(gene) : true;
+      const tissueMatch = selectedTissues.length > 0 ? selectedTissues.includes(tissue) : true;
+
+      return snpMatch && geneMatch && tissueMatch;
+    });
+  }, [results, snps, genes, tissues]);
+
+  const genomeBuildMap: Record<string, string> = {
     grch37: "GRCh37",
     grch38: "GRCh38",
     grch38_high_coverage: "GRCh38 High Coverage",
@@ -214,7 +254,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
             <Accordion.Item eventKey="0">
               <Accordion.Header>Variants in LD with GTEx QTL</Accordion.Header>
               <Accordion.Body>
-                {fields.map((field: any, index) => (
+                {snpsFields.map((field: any, index) => (
                   <Form.Check
                     key={field.id}
                     type="checkbox"
@@ -227,15 +267,35 @@ export default function LdExpressResults({ ref }: { ref: string }) {
             </Accordion.Item>
             <Accordion.Item eventKey="1">
               <Accordion.Header>Genes with GTEx QTL</Accordion.Header>
-              <Accordion.Body></Accordion.Body>
+              <Accordion.Body>
+                {genesFields.map((field: any, index) => (
+                  <Form.Check
+                    key={field.id}
+                    type="checkbox"
+                    id={`gene-${index}`}
+                    label={field.value}
+                    {...register(`genes.${index}.checked`)}
+                  />
+                ))}
+              </Accordion.Body>
             </Accordion.Item>
             <Accordion.Item eventKey="2">
               <Accordion.Header>Tissues with GTEx QTL</Accordion.Header>
-              <Accordion.Body></Accordion.Body>
+              <Accordion.Body className="overflow-auto">
+                {tissuesFields.map((field: any, index) => (
+                  <Form.Check
+                    key={field.id}
+                    type="checkbox"
+                    id={`tissue-${index}`}
+                    label={field.value}
+                    {...register(`tissues.${index}.checked`)}
+                  />
+                ))}
+              </Accordion.Body>
             </Accordion.Item>
           </Accordion>
         </Col>
-        <Col>{tableData && <Table title="Express Results" data={tableData} columns={columns} />}</Col>
+        <Col>{tableData && <Table title="" data={tableData} columns={columns} />}</Col>
       </Row>
       <Row>
         <Col>

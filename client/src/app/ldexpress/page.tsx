@@ -13,7 +13,7 @@ const LdExpressResults = dynamic(() => import("./results"), {
   ssr: false,
 });
 
-export default function LdAssoc() {
+export default function LdExpress() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
