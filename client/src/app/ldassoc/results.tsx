@@ -2,6 +2,7 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Row, Col, Container, Dropdown } from "react-bootstrap";
+import Spinner from "react-bootstrap/Spinner";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
@@ -27,6 +28,9 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   const { data: formData } = useQuery<FormData>({
     queryKey: ["ldassoc-form-data", ref],
     enabled: !!ref,
+    queryFn: async () => {
+      return {} as FormData;
+    },
   });
   const { data: enableExport } = useQuery<FormData>({
     queryKey: ["ldassoc-export", ref],
@@ -140,7 +144,6 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue(),
     }),
   ];
-  console.log(formData);
 
   return (
     <Container fluid="md" className="justify-content-center">
@@ -148,7 +151,13 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         <Col sm={12} className="justify-content-end text-end">
           <Dropdown>
             <Dropdown.Toggle variant="outline-primary" disabled={!enableExport}>
-              Export Plot
+              {enableExport ? (
+                "Export Plot"
+              ) : (
+                <>
+                  <Spinner size="sm" animation="border" /> Export Plot
+                </>
+              )}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={() => handleDownload("svg")}>SVG</Dropdown.Item>
@@ -228,6 +237,13 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       </Row>
       <Row>
         <Col>{tableData && <Table title="Association Results" data={tableData.aaData} columns={columns} />}</Col>
+      </Row>
+      <Row>
+        <Col>
+          <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
+            Download association data for all variants
+          </a>
+        </Col>
       </Row>
     </Container>
   );

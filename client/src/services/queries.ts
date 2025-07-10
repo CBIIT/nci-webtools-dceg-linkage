@@ -30,6 +30,14 @@ export async function ldassocExample(genome_build: string): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/ldassoc_example?genome_build=${genome_build}`)).data;
 }
 
+export async function ldexpress(params: any): Promise<any> {
+  return (await axios.post(`/LDlinkRestWeb/ldexpress`, params)).data;
+}
+
+export async function ldexpressTissues(): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/ldexpress_tissues`)).data;
+}
+
 export async function fetchOutput(filename: string): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`)).data;
 }

@@ -1287,7 +1287,7 @@ def ldexpress():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             # reference = str(data['reference'])
             snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
@@ -1347,6 +1347,8 @@ def ldexpress():
                             f.write("Warning(s):\n")
                             f.write(express["warning"])
                 out_json = json.dumps(express, sort_keys=False)
+                with open(tmp_dir + "ldexpress" + reference + ".json", "w") as f:
+                    f.write(out_json)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -1454,7 +1456,7 @@ def ldhap():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             # print('request: ' + str(reference))
             app.logger.debug(
@@ -1583,7 +1585,7 @@ def ldmatrix():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             annotate = request.args.get("annotate", True)
             # print('request: ' + str(reference))
@@ -1725,7 +1727,7 @@ def ldpair():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
             app.logger.debug(
@@ -1838,7 +1840,7 @@ def ldpop():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             # reference = request.args.get('reference', False)
             app.logger.debug(
@@ -1945,7 +1947,7 @@ def ldproxy():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             # reference = request.args.get('reference', False)
             annotate = request.args.get("annotate", False)
@@ -2068,7 +2070,7 @@ def ldtrait():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             if data["ifContinue"]:
                 ifContinue = data["ifContinue"]
@@ -2263,7 +2265,7 @@ def snpchip():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             # reference = str(data['reference'])
             app.logger.debug(
@@ -2377,7 +2379,7 @@ def snpclip():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.user_agent.browser is not None:
+        if request.headers.get("User-Agent"):
             web = True
             # reference = str(data['reference'])
             app.logger.debug(

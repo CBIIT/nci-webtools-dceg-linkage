@@ -4,33 +4,32 @@ import dynamic from "next/dynamic";
 import { Suspense } from "react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Alert from "react-bootstrap/Alert";
-import { Container, Row, Col, Form } from "react-bootstrap";
-import LDAssocForm from "./form";
+import { Container, Row, Col } from "react-bootstrap";
+import LDExpressForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
 
-const LdAssocResults = dynamic(() => import("./results"), {
+const LdExpressResults = dynamic(() => import("./results"), {
   ssr: false,
 });
 
-export default function LdAssoc() {
+export default function LdExpress() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
   return (
     <>
       <ToolBanner
-        name="LDassoc Tool"
-        href="/help/#LDassoc"
-        description="Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic
-              region of interest."
+        name="LDexpress Tool"
+        href="/help/#LDexpress"
+        description="Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types."
       />
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
-            <LDAssocForm />
+            <LDExpressForm />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-              <Suspense fallback={<CalculateLoading />}>{ref && <LdAssocResults ref={ref} />}</Suspense>
+              <Suspense fallback={<CalculateLoading />}>{ref && <LdExpressResults ref={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
         </Row>
