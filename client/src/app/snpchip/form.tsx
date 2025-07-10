@@ -158,7 +158,17 @@ export default function SnpChipForm({
 
       <Accordion className="mb-4">
         <Accordion.Item eventKey="0">
-          <Accordion.Header>Filter by array</Accordion.Header>
+          <Accordion.Header>
+            <div className="d-flex justify-content-between w-100 align-items-center">
+              <span>Filter by array</span>
+              {!platformsLoading && (
+                <small className="text-muted me-2">
+                  {illuminaChips?.length || 0} Illumina array(s), and{" "}
+                  {affymetrixChips?.length || 0} Affymetrix array(s) selected
+                </small>
+              )}
+            </div>
+          </Accordion.Header>
           <Accordion.Body>
             {platformsLoading ? (
               <div className="text-center">
@@ -166,10 +176,6 @@ export default function SnpChipForm({
               </div>
             ) : (
               <>
-                <p>
-                  {illuminaChips?.length || 0} Illumina array(s) and{" "}
-                  {affymetrixChips?.length || 0} Affymetrix array(s) selected
-                </p>
                 <Button
                   variant="link"
                   className="p-0 mb-3"
