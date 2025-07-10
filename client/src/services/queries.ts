@@ -45,3 +45,11 @@ export async function fetchOutputStatus(filename: string): Promise<any> {
 export async function snpchipPlatforms(): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/snpchip_platforms`)).data;
 }
+
+export async function snpchip(params: any): Promise<any> {
+  return (
+    await axios.post(`/LDlinkRestWeb/snpchip`, params, {
+      headers: { "Content-Type": "application/json" },
+    })
+  ).data;
+}

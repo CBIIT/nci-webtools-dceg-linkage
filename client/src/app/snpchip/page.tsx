@@ -6,6 +6,7 @@ import SnpChipForm, { Platform } from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import SNPChipResults from "./results"; // New component for results
 import { useStore } from "@/store";
+import { snpchip } from "@/services/queries";
 
 export default function SNPchip() {
   const searchParams = useSearchParams();
@@ -32,6 +33,10 @@ export default function SNPchip() {
 
     const formData = new FormData();
 
+    if (ref) {
+      formData.append("reference", ref);
+    }
+
     if (file) {
       formData.append("file", file);
     } else {
@@ -45,15 +50,10 @@ export default function SNPchip() {
     formData.append("genome_build", genome_build);
 
     try {
-      const response = await fetch("/api/snpchip", {
-        method: "POST",
-        body: formData,
-      });
+      const data = await snpchip(formData);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.error || "An unknown error occurred.");
+      if (data.error) {
+        setError(data.error);
         return;
       }
 
