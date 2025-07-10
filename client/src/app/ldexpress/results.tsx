@@ -295,13 +295,13 @@ export default function LdExpressResults({ ref }: { ref: string }) {
             </Accordion.Item>
           </Accordion>
         </Col>
-        <Col>{tableData && <Table title="" data={tableData} columns={columns} />}</Col>
-      </Row>
-      <Row>
         <Col>
-          <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
-            Download GTEx QTL annotated variant list
-          </a>
+          <div>
+            {tableData && <Table title="" data={tableData} columns={columns} />}
+            <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
+              Download GTEx QTL annotated variant list
+            </a>
+          </div>
         </Col>
       </Row>
     </Container>
