@@ -1,6 +1,12 @@
 "use client";
 import { Form, Button, Accordion, Row, Col, Spinner } from "react-bootstrap";
 import { useState, useEffect } from "react";
+import { snpchipPlatforms } from "../../services/queries";
+
+export interface Platform {
+  id: string;
+  name: string;
+}
 
 interface SnpChipFormProps {
   handleSubmit: (e: React.FormEvent) => void;
@@ -9,39 +15,11 @@ interface SnpChipFormProps {
   setInput: (value: string) => void;
   file: File | null;
   setFile: (file: File | null) => void;
-  selectAllIllumina: boolean;
-  setSelectAllIllumina: (value: boolean) => void;
-  selectAllAffymetrix: boolean;
-  setSelectAllAffymetrix: (value: boolean) => void;
+  illuminaChips: Platform[];
+  setIlluminaChips: (chips: Platform[]) => void;
+  affymetrixChips: Platform[];
+  setAffymetrixChips: (chips: Platform[]) => void;
 }
-
-const availableIllumina = [
-  "Illumina Cardio-MetaboChip",
-  "Illumina Human1M-Duov3",
-  "Illumina Human1Mv1",
-  "Illumina HumanExon510Sv1",
-  "Illumina HumanOmni1S-8v1",
-  "Illumina HumanOmni2.5-4v1",
-  "Illumina HumanOmni2.5-8v1.2",
-  "Illumina HumanOmni2.5Exome-8v1",
-  "Illumina HumanOmni2.5Exome-8v1.1",
-  "Illumina HumanOmni2.5Exome-8v1.2",
-  "Illumina HumanOmni5-4v1",
-  "Illumina HumanOmni5Exome-4v1",
-  "Illumina Infinium Multi-Ethnic Global-8",
-];
-const availableAffymetrix = [
-  "Affymetrix Axiom GW AFR",
-  "Affymetrix Axiom GW ASI",
-  "Affymetrix Axiom GW EAS",
-  "Affymetrix Axiom GW EUR",
-  "Affymetrix Axiom GW Hu",
-  "Affymetrix Axiom GW Hu-CHB",
-  "Affymetrix Axiom GW LAT",
-  "Affymetrix OncoScan",
-  "Affymetrix OncoScan CNV",
-  "Affymetrix SNP 6.0",
-];
 
 function CheckboxList({
   options,
@@ -49,14 +27,14 @@ function CheckboxList({
   setSelected,
   type,
 }: {
-  options: string[];
-  selected: string[];
-  setSelected: (val: string[]) => void;
+  options: Platform[];
+  selected: Platform[];
+  setSelected: (val: Platform[]) => void;
   type: "illumina" | "affymetrix";
 }) {
-  const toggle = (option: string) => {
-    if (selected.includes(option)) {
-      setSelected(selected.filter((item) => item !== option));
+  const toggle = (option: Platform) => {
+    if (selected.some((item) => item.id === option.id)) {
+      setSelected(selected.filter((item) => item.id !== option.id));
     } else {
       setSelected([...selected, option]);
     }
@@ -66,12 +44,12 @@ function CheckboxList({
     <>
       {options.map((option) => (
         <Form.Check
-          key={option}
-          id={`${type}-${option}`}
+          key={option.id}
+          id={`${type}-${option.id}`}
           type="checkbox"
           className={type}
-          label={option}
-          checked={selected.includes(option)}
+          label={`${option.name} (${option.id})`}
+          checked={selected.some((item) => item.id === option.id)}
           onChange={() => toggle(option)}
         />
       ))}
@@ -86,18 +64,58 @@ export default function SnpChipForm({
   setInput,
   file,
   setFile,
-  selectAllIllumina,
-  setSelectAllIllumina,
-  selectAllAffymetrix,
-  setSelectAllAffymetrix,
+  illuminaChips,
+  setIlluminaChips,
+  affymetrixChips,
+  setAffymetrixChips,
 }: SnpChipFormProps) {
-  const [illuminaChips, setIlluminaChips] = useState<string[]>(availableIllumina);
-  const [affymetrixChips, setAffymetrixChips] = useState<string[]>(availableAffymetrix);
+  const [availableIllumina, setAvailableIllumina] = useState<Platform[]>([]);
+  const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>(
+    [],
+  );
+  const [platformsLoading, setPlatformsLoading] = useState(true);
+  const [selectAllIllumina, setSelectAllIllumina] = useState(true);
+  const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
 
   useEffect(() => {
-    setSelectAllIllumina(illuminaChips.length === availableIllumina.length);
-    setSelectAllAffymetrix(affymetrixChips.length === availableAffymetrix.length);
-  }, [illuminaChips, affymetrixChips]);
+    async function fetchPlatforms() {
+      try {
+        setPlatformsLoading(true);
+        const data = await snpchipPlatforms();
+        const illumina: Platform[] = [];
+        const affymetrix: Platform[] = [];
+
+        for (const key in data) {
+          if (key.startsWith("I_")) {
+            illumina.push({ id: key, name: data[key] });
+          } else if (key.startsWith("A_")) {
+            affymetrix.push({ id: key, name: data[key] });
+          }
+        }
+
+        setAvailableIllumina(illumina);
+        setAvailableAffymetrix(affymetrix);
+        setIlluminaChips(illumina);
+        setAffymetrixChips(affymetrix);
+      } catch (error) {
+        console.error("Failed to fetch SNPchip platforms", error);
+      } finally {
+        setPlatformsLoading(false);
+      }
+    }
+    fetchPlatforms();
+  }, [setIlluminaChips, setAffymetrixChips]);
+
+  useEffect(() => {
+    setSelectAllIllumina(
+      availableIllumina.length > 0 &&
+        illuminaChips.length === availableIllumina.length,
+    );
+    setSelectAllAffymetrix(
+      availableAffymetrix.length > 0 &&
+        affymetrixChips.length === availableAffymetrix.length,
+    );
+  }, [illuminaChips, affymetrixChips, availableIllumina, availableAffymetrix]);
 
   return (
     <>
@@ -142,70 +160,79 @@ export default function SnpChipForm({
         <Accordion.Item eventKey="0">
           <Accordion.Header>Filter by array</Accordion.Header>
           <Accordion.Body>
-            <p>
-              {illuminaChips.length} Illumina array(s) and {affymetrixChips.length} Affymetrix array(s) selected (<span
-                style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}
-                onClick={() => {
-                  const allSelected =
-                    illuminaChips.length === availableIllumina.length &&
-                    affymetrixChips.length === availableAffymetrix.length;
-                  if (allSelected) {
-                    setIlluminaChips([]);
-                    setAffymetrixChips([]);
-                    setSelectAllIllumina(false);
-                    setSelectAllAffymetrix(false);
-                  } else {
-                    setIlluminaChips(availableIllumina);
-                    setAffymetrixChips(availableAffymetrix);
-                    setSelectAllIllumina(true);
-                    setSelectAllAffymetrix(true);
-                  }
-                }}
-              >
-                unselect all
-              </span>)
-            </p>
-
-            <Row>
-              <Col md={6}>
-                <Form.Check
-                  type="checkbox"
-                  id="selectAllIllumina"
-                  label="Select All Illumina"
-                  checked={selectAllIllumina}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setSelectAllIllumina(checked);
-                    setIlluminaChips(checked ? availableIllumina : []);
+            {platformsLoading ? (
+              <div className="text-center">
+                <Spinner animation="border" size="sm" /> Loading platforms...
+              </div>
+            ) : (
+              <>
+                <p>
+                  {illuminaChips?.length || 0} Illumina array(s) and{" "}
+                  {affymetrixChips?.length || 0} Affymetrix array(s) selected
+                </p>
+                <Button
+                  variant="link"
+                  className="p-0 mb-3"
+                  onClick={() => {
+                    const allSelected =
+                      illuminaChips.length === availableIllumina.length &&
+                      affymetrixChips.length === availableAffymetrix.length;
+                    if (allSelected) {
+                      setIlluminaChips([]);
+                      setAffymetrixChips([]);
+                    } else {
+                      setIlluminaChips(availableIllumina);
+                      setAffymetrixChips(availableAffymetrix);
+                    }
                   }}
-                />
-                <CheckboxList
-                  options={availableIllumina}
-                  selected={illuminaChips}
-                  setSelected={setIlluminaChips}
-                  type="illumina"
-                />
-              </Col>
-              <Col md={6}>
-                <Form.Check
-                  type="checkbox"
-                  id="selectAllAffymetrix"
-                  label="Select All Affymetrix"
-                  checked={selectAllAffymetrix}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setSelectAllAffymetrix(checked);
-                    setAffymetrixChips(checked ? availableAffymetrix : []);
-                  }}
-                />
-                <CheckboxList
-                  options={availableAffymetrix}
-                  selected={affymetrixChips}
-                  setSelected={setAffymetrixChips}
-                  type="affymetrix"
-                />
-              </Col>
-            </Row>
+                >
+                  {illuminaChips.length === availableIllumina.length &&
+                  affymetrixChips.length === availableAffymetrix.length
+                    ? "Deselect All"
+                    : "Select All"}
+                </Button>
+                <Row>
+                  <Col>
+                    <Form.Check
+                      type="checkbox"
+                      id="selectAllIllumina"
+                      label="Select All Illumina"
+                      checked={selectAllIllumina}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setSelectAllIllumina(checked);
+                        setIlluminaChips(checked ? availableIllumina : []);
+                      }}
+                    />
+                    <CheckboxList
+                      options={availableIllumina}
+                      selected={illuminaChips}
+                      setSelected={setIlluminaChips}
+                      type="illumina"
+                    />
+                  </Col>
+                  <Col>
+                    <Form.Check
+                      type="checkbox"
+                      id="selectAllAffymetrix"
+                      label="Select All Affymetrix"
+                      checked={selectAllAffymetrix}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setSelectAllAffymetrix(checked);
+                        setAffymetrixChips(checked ? availableAffymetrix : []);
+                      }}
+                    />
+                    <CheckboxList
+                      options={availableAffymetrix}
+                      selected={affymetrixChips}
+                      setSelected={setAffymetrixChips}
+                      type="affymetrix"
+                    />
+                  </Col>
+                </Row>
+              </>
+            )}
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
