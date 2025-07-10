@@ -53,3 +53,5 @@ export async function snpchip(params: any): Promise<any> {
     })
   ).data;
 }
+
+

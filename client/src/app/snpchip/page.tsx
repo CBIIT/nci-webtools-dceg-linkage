@@ -8,6 +8,13 @@ import SNPChipResults from "./results"; // New component for results
 import { useStore } from "@/store";
 import { snpchip } from "@/services/queries";
 
+interface SnpChipPayload {
+  snps: string;
+  platforms: string;
+  genome_build: string;
+  reference: number;
+}
+
 export default function SNPchip() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
@@ -31,26 +38,44 @@ export default function SNPchip() {
     setError(null);
     setWarning(null);
 
-    const formData = new FormData();
-
-    if (ref) {
-      formData.append("reference", ref);
-    }
-
+    let snpsData = input;
     if (file) {
-      formData.append("file", file);
-    } else {
-      formData.append("snps", input);
+      try {
+        snpsData = await file.text();
+      } catch (err) {
+        setError("Error reading file.");
+        setLoading(false);
+        return;
+      }
     }
 
-    const platforms = [...illuminaChips, ...affymetrixChips]
+    if (!snpsData) {
+      setError("Please provide a list of SNPs or upload a file.");
+      setLoading(false);
+      return;
+    }
+
+    const selectedPlatforms = [...illuminaChips, ...affymetrixChips]
       .map((p) => p.id)
-      .join(",");
-    formData.append("platforms", platforms);
-    formData.append("genome_build", genome_build);
+      .join("+");
+
+    if (!selectedPlatforms) {
+      setError("Please select at least one platform.");
+      setLoading(false);
+      return;
+    }
+
+    const payload: SnpChipPayload = {
+      snps: snpsData,
+      platforms: selectedPlatforms,
+      genome_build: genome_build,
+      reference: ref
+        ? parseInt(ref, 10)
+        : Math.floor(Math.random() * (99999 - 10000 + 1) + 10000),
+    };
 
     try {
-      const data = await snpchip(formData);
+      const data = await snpchip(payload);
 
       if (data.error) {
         setError(data.error);
