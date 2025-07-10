@@ -59,7 +59,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
         appendTissue({ value: tissue.split("__")[0], checked: false });
       });
     }
-  }, [results, appendSnp, appendGene, appendTissue]);
+  }, [results, reset, appendSnp, appendGene, appendTissue]);
 
   const tableData = useMemo(() => {
     if (!results) return [];
