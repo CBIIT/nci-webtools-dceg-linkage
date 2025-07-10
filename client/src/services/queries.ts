@@ -55,11 +55,6 @@ export async function snpchipPlatforms(): Promise<any> {
 }
 
 export async function snpchip(params: any): Promise<any> {
-  return (
-    await axios.post(`/LDlinkRestWeb/snpchip`, params, {
-      headers: { "Content-Type": "application/json" },
-    })
-  ).data;
+  return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
 }
-
 
