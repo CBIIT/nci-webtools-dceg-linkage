@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect, { PopOption } from "@/components/select/pop-select";
+import PopSelect from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
@@ -124,7 +124,7 @@ export default function LDExpressForm() {
   return (
     <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm={2}>
+        <Col sm="auto">
           <Form.Group controlId="snps" className="mb-3">
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
@@ -282,7 +282,7 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

@@ -49,13 +49,13 @@ export default function LdExpressResults({ ref }: { ref: string }) {
   useEffect(() => {
     if (results) {
       reset();
-      results.thinned_snps.forEach((snp) => {
+      results.thinned_snps.forEach((snp: string) => {
         appendSnp({ value: snp, checked: false });
       });
-      results.thinned_genes.forEach((gene) => {
+      results.thinned_genes.forEach((gene: string) => {
         appendGene({ value: gene.split("__")[0], checked: false });
       });
-      results.thinned_tissues.forEach((tissue) => {
+      results.thinned_tissues.forEach((tissue: string) => {
         appendTissue({ value: tissue.split("__")[0], checked: false });
       });
     }
