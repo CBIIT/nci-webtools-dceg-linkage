@@ -28,6 +28,9 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   const { data: formData } = useQuery<FormData>({
     queryKey: ["ldassoc-form-data", ref],
     enabled: !!ref,
+    queryFn: async () => {
+      return {} as FormData;
+    },
   });
   const { data: enableExport } = useQuery<FormData>({
     queryKey: ["ldassoc-export", ref],

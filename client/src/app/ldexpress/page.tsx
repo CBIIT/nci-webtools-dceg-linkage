@@ -13,7 +13,7 @@ const LdExpressResults = dynamic(() => import("./results"), {
   ssr: false,
 });
 
-export default function LdAssoc() {
+export default function LdExpress() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
@@ -21,7 +21,7 @@ export default function LdAssoc() {
     <>
       <ToolBanner
         name="LDexpress Tool"
-        href="/docs/#LDexpress"
+        href="/help/#LDexpress"
         description="Search if a list of variants (or variants in LD with those variants) is associated with gene expression in multiple tissue types."
       />
       <Container fluid="md">
