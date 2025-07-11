@@ -2,7 +2,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
-import { Container, Row, Col, Form, Alert } from "react-bootstrap";
+import { Container, Row, Col, Form, Alert, Card } from "react-bootstrap";
 import SnpChipForm, { Platform } from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import SNPChipResults, { SnpchipResult } from "./results";
@@ -170,7 +170,6 @@ export default function SNPchip() {
         })
         .filter((row): row is { rs_number: string; position: string; map: string[]; rs_number_raw: string; position_raw: string; } => row !== null);
 
-      console.log("SNPchip parsed rows:", snpchipRows);
 
       if (snpchipRows.length > 0) {
         const uniquePlatformNames = new Set<string>();
@@ -238,7 +237,7 @@ export default function SNPchip() {
           </Form.Group>
         </Col>
         <Col>
-          <h2 className="text-center">
+          <h1 className="text-center h2">
             SNPchip Tool
             <sup>
               <a
@@ -254,7 +253,7 @@ export default function SNPchip() {
                 <i className="bi bi-info-circle-fill text-primary"></i>
               </a>
             </sup>
-          </h2>
+          </h1>
           <p className="text-center">
             Find commercial genotyping platforms for variants.
           </p>
@@ -279,7 +278,18 @@ export default function SNPchip() {
           </Suspense>
           {loading && <CalculateLoading />}
           {error && <Alert variant="danger">{error}</Alert>}
-          {warning && <Alert variant="warning">{warning}</Alert>}
+          {warning && (
+            <Row className="justify-content-center my-3">
+              <Col sm={8} md={7}>
+                <Card border="warning">
+                  <Card.Header className="bg-warning">Warning</Card.Header>
+                  <Card.Body>
+                    <Card.Text>{warning}</Card.Text>
+                  </Card.Body>
+                </Card>
+              </Col>
+            </Row>
+          )}
           <Suspense fallback={<CalculateLoading />}>
             {results && <SNPChipResults results={results} genome_build={genome_build} />}
           </Suspense>
