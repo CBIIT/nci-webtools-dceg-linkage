@@ -16,6 +16,52 @@ interface SnpChipPayload {
   reference: number;
 }
 
+export const PLATFORM_LOOKUP: Record<string, string> = {
+  "Affymetrix Axiom Exome 1A": "A_Exome1A",
+  "Affymetrix Axiom Exome 319": "A_Exome319",
+  "Affymetrix Axiom GW CHB2": "A_CHB2",
+  "Affymetrix Axiom UK Biobank Array": "A_UKBA",
+  "Affymetrix SNP 6.0": "A_SNP6.0",
+  "Illumina Cardio-MetaboChip": "I_CardioMetab",
+  "Illumina Global Diversity Array_Confluence": "I_GDA-C",
+  "Illumina Human1M-Duov3": "I_1M-D",
+  "Illumina Human1Mv1": "I_1M",
+  "Illumina Human610-Quadv1": "I_610-Q",
+  "Illumina Human660W-Quadv1": "I_660W-Q",
+  "Illumina HumanCNV370-Duov1": "I_CNV370-D",
+  "Illumina HumanCNV370-Quadv3": "I_CNV370-Q",
+  "Illumina HumanCoreExome-12v1": "I_CoreE-12v1",
+  "Illumina HumanCoreExome-12v1.1": "I_CoreE-12v1.1",
+  "Illumina HumanCoreExome-24v1": "I_CoreE-24v1",
+  "Illumina HumanCoreExome-24v1.1": "I_CoreE-24v1.1",
+  "Illumina HumanExome-12v1.1": "I_Exome-12",
+  "Illumina HumanHap300-Duov2": "I_300-D",
+  "Illumina HumanHap300v1": "I_300",
+  "Illumina HumanHap550v1": "I_550v1",
+  "Illumina HumanHap550v3": "I_550v3",
+  "Illumina HumanOmni1S-8v1": "I_O1S-8",
+  "Illumina HumanOmni2.5-4v1": "I_O2.5-4",
+  "Illumina HumanOmni2.5-8v1.2": "I_O2.5-8",
+  "Illumina HumanOmni2.5Exome-8v1": "I_O2.5E-8v1",
+  "Illumina HumanOmni2.5Exome-8v1.1": "I_O2.5E-8v1.1",
+  "Illumina HumanOmni2.5Exome-8v1.2": "I_O2.5E-8v1.2",
+  "Illumina HumanOmni5-4v1": "I_O5-4",
+  "Illumina HumanOmni5Exome-4v1": "I_O5E-4",
+  "Illumina HumanOmniExpressExome-8v1": "I_OEE-8v1",
+  "Illumina HumanOmniExpressExome-8v1.1": "I_OEE-8v1.1",
+  "Illumina HumanOmniExpressExome-8v1.2": "I_OEE-8v1.2",
+  "Illumina HumanOmniExpressExome-8v1.3": "I_OEE-8v1.3",
+  "Illumina HumanOmniZhongHua-8v1": "I_OZH-8v1",
+  "Illumina HumanOmniZhongHua-8v1.1": "I_OZH-8v1.1",
+  "Illumina HumanOmniZhongHua-8v1.2": "I_OZH-8v1.2",
+  "Illumina Infinium PsychArray-24v1": "I_Psyc-24v1",
+  "Illumina Infinium PsychArray-24v1.1": "I_Psyc-24v1.1"
+};
+
+export const CODE_TO_PLATFORM: Record<string, string> = Object.fromEntries(
+  Object.entries(PLATFORM_LOOKUP).map(([full, short]) => [short, full])
+);
+
 export default function SNPchip() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
@@ -99,45 +145,62 @@ export default function SNPchip() {
         setWarning(data.warning);
       }
 
+      const db = genome_build === 'grch37' ? 'hg19' : 'hg38';
+
       const snpchipRows = Object.entries(data)
         .filter(([key]) => !isNaN(Number(key)))
-        .map(([_, row]: [string, any[]]) => {
-          const rs_number = row[0];
-          const position = row[1];
+        .map(([_, row]) => {
+          if (!Array.isArray(row)) return null;
+          const rs_number_raw = String(row[0]);
+          const position_raw = String(row[1]);
+          
+          const rs_number = `<a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs_number_raw}" target="_blank">${rs_number_raw}</a>`;
+
+          const [chr, pos_str] = position_raw.split(':');
+          const pos = parseInt(pos_str, 10);
+          const start = pos - 250;
+          const end = pos + 250;
+          const position = `<a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=chr${chr}%3A${start}-${end}&hgFind.matches=${rs_number_raw}" target="_blank">${position_raw}</a>`;
+
           const platformsStr = row[2] || "";
           const map = platformsStr
-            ? platformsStr.split(",").map((v) => v.trim()).filter(Boolean)
+            ? platformsStr.split(",").map((v: string) => v.trim()).filter(Boolean)
             : [];
-          return { rs_number, position, map };
-        });
+          return { rs_number, position, map, rs_number_raw, position_raw };
+        })
+        .filter((row): row is { rs_number: string; position: string; map: string[]; rs_number_raw: string; position_raw: string; } => row !== null);
 
       console.log("SNPchip parsed rows:", snpchipRows);
 
       if (snpchipRows.length > 0) {
         const uniquePlatformNames = new Set<string>();
-        snpchipRows.forEach((row) =>
+        snpchipRows.forEach((row) => {
           row.map.forEach((p: string) => p && uniquePlatformNames.add(p))
-        );
+        });
 
         const headers = Array.from(uniquePlatformNames).map((name) => ({
-          code: name,
+          code: PLATFORM_LOOKUP[name] || name,
           platform: name,
         }));
 
-        const mappedSnpchip = snpchipRows.map((row) => ({
-          ...row,
-          map: headers.map((h) => (row.map.includes(h.code) ? "X" : "")),
-        }));
+        headers.sort((a, b) => a.code.localeCompare(b.code));
+
+        const mappedSnpchip = snpchipRows.map((row) => {
+          return {
+            ...row,
+            map: headers.map((h) => (row.map.includes(h.platform) ? "X" : "")),
+          };
+        });
 
         const detailsText = [
           ["RS Number", "Position", ...headers.map((h) => h.platform)].join("\t"),
-          ...mappedSnpchip.map((row) =>
-            [
-              row.rs_number,
-              row.position,
+          ...mappedSnpchip.map((row) => {
+            return [
+              row.rs_number_raw,
+              row.position_raw,
               ...row.map.map((v) => (v === "X" ? "X" : "")),
-            ].join("\t")
-          ),
+            ].join("\t");
+          }),
         ].join("\n");
 
         const transformedResults: SnpchipResult = {
@@ -145,6 +208,7 @@ export default function SNPchip() {
           headers,
           details: detailsText,
         };
+
         setResults(transformedResults);
       } else if (!data.warning) {
         setWarning("No results found for the given SNPs.");
@@ -217,7 +281,7 @@ export default function SNPchip() {
           {error && <Alert variant="danger">{error}</Alert>}
           {warning && <Alert variant="warning">{warning}</Alert>}
           <Suspense fallback={<CalculateLoading />}>
-            {results && <SNPChipResults results={results} />}
+            {results && <SNPChipResults results={results} genome_build={genome_build} />}
           </Suspense>
         </Col>
       </Row>

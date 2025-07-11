@@ -6,6 +6,8 @@ export interface SnpchipResult {
     rs_number: string;
     position: string;
     map: string[];
+    rs_number_raw: string;
+    position_raw: string;
   }[];
   headers: {
     platform: string;
@@ -16,25 +18,22 @@ export interface SnpchipResult {
 
 export interface ResultsProps {
   results: SnpchipResult;
+  genome_build: string;
 }
 
 const rotateStyle: React.CSSProperties = {
   height: "140px",
   whiteSpace: "nowrap",
-  textAlign: "center",
+  textAlign: "right",
 };
 
 const rotateDivStyle: React.CSSProperties = {
-  transform: "translate(0, 50px) rotate(315deg)",
-  width: "30px",
+  transform: "rotate(270deg)",
 };
 
-const rotateSpanStyle: React.CSSProperties = {
-  borderBottom: "1px solid #ccc",
-  padding: "5px 10px",
-};
 
-export default function Results({ results }: ResultsProps) {
+
+export default function Results({ results, genome_build }: ResultsProps) {
   function downloadResults() {
     const blob = new Blob([results.details], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -45,38 +44,51 @@ export default function Results({ results }: ResultsProps) {
     URL.revokeObjectURL(url);
   }
 
+  const genomeBuildTitle = {
+    grch37: "GRCh37",
+    grch38: "GRCh38",
+    grch38_high_coverage: "GRCh38 High Coverage",
+  }[genome_build];
+
   return (
     <div className="jumbotron">
       <div className="container-fluid" id="snpchip-results-container">
         <Row>
-          <Col md={3} style={{ paddingRight: "5px" }}>
+          
+          <Col md={12} style={{ overflowX: "scroll" }}>
             <Table striped bordered hover size="sm">
               <thead>
                 <tr>
                   <th colSpan={2}>SNP Chip List</th>
+                  {results.headers.map((header, i) => (
+                    <th rowSpan={2} style={rotateStyle} key={i} title={header.platform}>
+                      <div style={rotateDivStyle}>
+                        {header.code}
+                      </div>
+                    </th>
+                  ))}
                 </tr>
                 <tr>
                   <th>RS Number</th>
-                  <th>Position (GRCh37)</th>
+                  <th>Position ({genomeBuildTitle})</th>
+                  <th></th>
                 </tr>
               </thead>
               <tbody>
-                {results.snpchip.map((snp, i) => {
-                  if (!snp) return null;
-                  return (
-                    <tr key={i}>
-                      <td
-                        dangerouslySetInnerHTML={{ __html: snp.rs_number }}
-                      ></td>
-                      <td
-                        dangerouslySetInnerHTML={{ __html: snp.position }}
-                      ></td>
-                    </tr>
-                  );
-                })}
+                {results.snpchip.map((snp, i) => (
+                  <tr key={i}>
+                    <td dangerouslySetInnerHTML={{ __html: snp.rs_number }}></td>
+                    <td dangerouslySetInnerHTML={{ __html: snp.position }}></td>
+                    {snp.map.map((map, j) => (
+                      <td key={j} dangerouslySetInnerHTML={{ __html: map }}></td>
+                    ))}
+                  </tr>
+                ))}
               </tbody>
             </Table>
-            <div>
+          </Col>
+        </Row>
+        <div>
               <a
                 id="snp_chip_list"
                 target="snp_chip_list"
@@ -86,39 +98,6 @@ export default function Results({ results }: ResultsProps) {
                 Download Chip Details
               </a>
             </div>
-          </Col>
-          <Col md={9} style={{ overflowX: "scroll" }}>
-            <Table striped bordered hover size="sm">
-              <thead>
-                <tr>
-                  {results.headers.map((header, i) => (
-                    <th style={rotateStyle} key={i}>
-                      <div style={rotateDivStyle} title={header.platform}>
-                        <span style={rotateSpanStyle}>{header.code}</span>
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {results.snpchip.map((snp, i) => {
-                  if (!snp) return null;
-                  return (
-                    <tr key={i}>
-                      {snp.map &&
-                        snp.map.map((map, j) => (
-                          <td
-                            key={j}
-                            dangerouslySetInnerHTML={{ __html: map }}
-                          ></td>
-                        ))}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </Table>
-          </Col>
-        </Row>
       </div>
     </div>
   );
