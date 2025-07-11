@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { Container, Row, Col, Form, Alert } from "react-bootstrap";
 import SnpChipForm, { Platform } from "./form";
 import CalculateLoading from "@/components/calculateLoading";
-import SNPChipResults from "./results"; // New component for results
+import SNPChipResults, { SnpchipResult } from "./results"; // New component for results
 import { useStore } from "@/store";
 import { snpchip } from "@/services/queries";
 
@@ -77,19 +77,56 @@ export default function SNPchip() {
     try {
       const data = await snpchip(payload);
 
+      console.log("SNPchip results:", data);
       if (data.error) {
         setError(data.error);
         return;
       }
 
-      if (data.output) {
-        setResults(data.output);
-      }
       if (data.warning) {
         setWarning(data.warning);
+        
+        return;
       }
-    } catch (err: any) {
-      setError(err.message || "An error occurred while fetching results.");
+
+      if (typeof data === "object" && Object.keys(data).some((k) => !isNaN(Number(k)))) {
+        const snpchipRows = Object.entries(data)
+            .filter(([key]) => !isNaN(Number(key)))
+            .map(([_, row]: [string, any]) => ({
+            rs_number: row[0],
+            position: row[1],
+            map: row[2] ? row[2].split(",").map((v: string) => v.trim()) : [],
+            }));
+
+        const uniquePlatformNames = new Set<string>();
+        snpchipRows.forEach((row) => row.map.forEach((p) => p && uniquePlatformNames.add(p)));
+
+        const headers = Array.from(uniquePlatformNames).map((name) => ({
+            code: name,
+            platform: name,
+        }));
+
+        const mappedSnpchip = snpchipRows.map((row) => ({
+            ...row,
+            map: headers.map((h) => (row.map.includes(h.code) ? "X" : "&nbsp;")),
+        }));
+
+        const transformedResults: SnpchipResult = {
+            snpchip: mappedSnpchip,
+            headers,
+            details: "", // you can optionally stringify and attach original content here
+        };
+
+        setResults(transformedResults);
+        if (data.warning) setWarning(data.warning);
+        } else {
+        setWarning("No results found for the given SNPs.");
+        setResults(null);
+        }
+
+    } catch (err) {
+      console.error(err);
+      setError("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
