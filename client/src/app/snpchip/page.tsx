@@ -1,10 +1,11 @@
+// app/snpchip/page.tsx
 "use client";
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Container, Row, Col, Form, Alert } from "react-bootstrap";
 import SnpChipForm, { Platform } from "./form";
 import CalculateLoading from "@/components/calculateLoading";
-import SNPChipResults, { SnpchipResult } from "./results"; // New component for results
+import SNPChipResults, { SnpchipResult } from "./results";
 import { useStore } from "@/store";
 import { snpchip } from "@/services/queries";
 
@@ -75,7 +76,18 @@ export default function SNPchip() {
     };
 
     try {
-      const data = await snpchip(payload);
+      const raw = await snpchip(payload);
+
+      let data = raw;
+      if (typeof raw === "string") {
+        try {
+          data = JSON.parse(raw);
+        } catch (err) {
+          setError("Failed to parse SNPchip response.");
+          setLoading(false);
+          return;
+        }
+      }
 
       console.log("SNPchip results:", data);
       if (data.error) {
@@ -85,45 +97,58 @@ export default function SNPchip() {
 
       if (data.warning) {
         setWarning(data.warning);
-        
-        return;
       }
 
-      if (typeof data === "object" && Object.keys(data).some((k) => !isNaN(Number(k)))) {
-        const snpchipRows = Object.entries(data)
-            .filter(([key]) => !isNaN(Number(key)))
-            .map(([_, row]: [string, any]) => ({
-            rs_number: row[0],
-            position: row[1],
-            map: row[2] ? row[2].split(",").map((v: string) => v.trim()) : [],
-            }));
+      const snpchipRows = Object.entries(data)
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([_, row]: [string, any[]]) => {
+          const rs_number = row[0];
+          const position = row[1];
+          const platformsStr = row[2] || "";
+          const map = platformsStr
+            ? platformsStr.split(",").map((v) => v.trim()).filter(Boolean)
+            : [];
+          return { rs_number, position, map };
+        });
 
+      console.log("SNPchip parsed rows:", snpchipRows);
+
+      if (snpchipRows.length > 0) {
         const uniquePlatformNames = new Set<string>();
-        snpchipRows.forEach((row) => row.map.forEach((p) => p && uniquePlatformNames.add(p)));
+        snpchipRows.forEach((row) =>
+          row.map.forEach((p: string) => p && uniquePlatformNames.add(p))
+        );
 
         const headers = Array.from(uniquePlatformNames).map((name) => ({
-            code: name,
-            platform: name,
+          code: name,
+          platform: name,
         }));
 
         const mappedSnpchip = snpchipRows.map((row) => ({
-            ...row,
-            map: headers.map((h) => (row.map.includes(h.code) ? "X" : "&nbsp;")),
+          ...row,
+          map: headers.map((h) => (row.map.includes(h.code) ? "X" : "")),
         }));
 
+        const detailsText = [
+          ["RS Number", "Position", ...headers.map((h) => h.platform)].join("\t"),
+          ...mappedSnpchip.map((row) =>
+            [
+              row.rs_number,
+              row.position,
+              ...row.map.map((v) => (v === "X" ? "X" : "")),
+            ].join("\t")
+          ),
+        ].join("\n");
+
         const transformedResults: SnpchipResult = {
-            snpchip: mappedSnpchip,
-            headers,
-            details: "", // you can optionally stringify and attach original content here
+          snpchip: mappedSnpchip,
+          headers,
+          details: detailsText,
         };
-
         setResults(transformedResults);
-        if (data.warning) setWarning(data.warning);
-        } else {
+      } else if (!data.warning) {
         setWarning("No results found for the given SNPs.");
-        setResults(null);
-        }
-
+      }
     } catch (err) {
       console.error(err);
       setError("An unexpected error occurred.");
