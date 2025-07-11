@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@bokeh/bokehjs": "^3.7.3",
+    "@bokeh/bokehjs": "^3.4.3",
     "@tanstack/react-query": "^5.81.2",
     "@tanstack/react-table": "^8.21.3",
     "axios": "^1.10.0",
