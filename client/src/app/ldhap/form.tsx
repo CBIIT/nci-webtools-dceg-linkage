@@ -113,7 +113,7 @@ export default function LdHapForm() {
             )}
           </Form.Group>
         </Col>
-        <Col sm="4">
+        <Col sm="3">
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
