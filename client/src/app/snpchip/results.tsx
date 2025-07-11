@@ -22,14 +22,20 @@ export interface ResultsProps {
 }
 
 const rotateStyle: React.CSSProperties = {
-  height: "140px",
+  height: "140px",  
+  verticalAlign: "bottom",
+  textAlign: "center", // aligns the cell itself
   whiteSpace: "nowrap",
-  textAlign: "right",
 };
 
 const rotateDivStyle: React.CSSProperties = {
   transform: "rotate(270deg)",
+  transformOrigin: "left",
+  textAlign: "left", // aligns the rotated text
+  width: "5px", // control line break
+  marginLeft: "5px", // optional tweak for alignment
 };
+
 
 
 
@@ -71,7 +77,6 @@ export default function Results({ results, genome_build }: ResultsProps) {
                 <tr>
                   <th>RS Number</th>
                   <th>Position ({genomeBuildTitle})</th>
-                  <th></th>
                 </tr>
               </thead>
               <tbody>
