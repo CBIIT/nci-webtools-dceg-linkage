@@ -1,27 +1,30 @@
 "use client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { ldhap } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import { ldmatrix } from "@/services/queries";
+import PopSelect, { PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
-import { FormData, LdhapFormData, Ldhap } from "./types";
+import { FormData, LdmatrixFormData } from "./types";
 
-
-export default function LdHapForm() {
+export default function LDMatrixForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state: { genome_build: string }) => state);
+  const { genome_build } = useStore((state) => state);
 
   const defaultForm: FormData = {
     snps: "",
     pop: [],
+    reference: "",
     genome_build: "grch37",
+    r2_d: "d",
+    collapseTranscript: false,
+    annotate: "forge",
   };
   const {
     control,
@@ -31,7 +34,7 @@ export default function LdHapForm() {
     watch,
     setValue,
     formState: { errors },
-  } = useForm<FormData>({
+  } = useForm({
     defaultValues: defaultForm,
   });
 
@@ -51,8 +54,8 @@ export default function LdHapForm() {
     }
   }, [varFile, setValue]);
 
-  const submitForm = useMutation<Ldhap, Error, LdhapFormData>({
-    mutationFn: (params: LdhapFormData) => ldhap(params),
+  const submitForm = useMutation<any, unknown, LdmatrixFormData>({
+    mutationFn: (params: any) => ldmatrix(params),
     onSuccess: (_data, variables) => {
       if (variables && variables.reference) {
         router.push(`${pathname}?ref=${variables.reference}`);
@@ -60,29 +63,27 @@ export default function LdHapForm() {
     },
   });
 
-  async function onSubmit(form: FormData) {
+  async function onSubmit(data: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-    const { varFile, ...data } = form;
-    const formData: LdhapFormData = {
+    const formData: LdmatrixFormData = {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e) => e.value).join("+"),
+      pop: data.pop.map((e: PopOption) => e.value).join("+"),
     };
-
-    queryClient.setQueryData(["ldhap-form-data", reference], formData);
+    queryClient.setQueryData(["ldmatrix-form-data", reference], formData);
     submitForm.mutate(formData);
   }
 
-  function onReset(event: React.FormEvent<HTMLFormElement>): void {
+  function onReset(event: any): void {
     event.preventDefault();
-    router.push("/ldhap");
+    router.push("/ldmatrix");
     reset(defaultForm);
-    queryClient.invalidateQueries({ queryKey: ["ldhap-form-data"] });
+    queryClient.invalidateQueries();
   }
 
   return (
-    <Form id="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
+    <Form id="ldmatrix-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
           <Form.Group controlId="snps" className="mb-3">
@@ -118,6 +119,70 @@ export default function LdHapForm() {
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
+          </Form.Group>
+        </Col>
+        <Col sm="auto">
+          <Form.Group controlId="collapseTranscript" className="mb-3">
+            <Form.Label>Collapse transcripts:</Form.Label>
+            <ButtonGroup className="ms-3">
+              <ToggleButton
+                id="radio-transcript-yes"
+                type="radio"
+                variant="outline-primary"
+                {...register("collapseTranscript")}
+                title="Collapse transcripts"
+                value="true"
+                checked={!!watch("collapseTranscript")}
+                onChange={() => {
+                  setValue("collapseTranscript", true);
+                }}>
+                Yes
+              </ToggleButton>
+              <ToggleButton
+                id="radio-transcript-no"
+                type="radio"
+                variant="outline-primary"
+                {...register("collapseTranscript")}
+                title="Show transcripts"
+                value="false"
+                checked={!watch("collapseTranscript")}
+                onChange={() => {
+                  setValue("collapseTranscript", false);
+                }}>
+                No
+              </ToggleButton>
+            </ButtonGroup>
+          </Form.Group>
+          <Form.Group controlId="annotate" className="mb-3">
+            <Form.Label>Annotation:</Form.Label>
+            <ButtonGroup className="ms-3">
+              <ToggleButton
+                id="radio-annotate-forgedb"
+                title="Show ForgeDB annotation"
+                type="radio"
+                variant="outline-primary"
+                {...register("annotate")}
+                value="forge"
+                checked={watch("annotate") === "forge"}
+                onChange={() => {
+                  setValue("annotate", "forge");
+                }}>
+                FORGEdb
+              </ToggleButton>
+              <ToggleButton
+                id="radio-annotate-no"
+                title="Hide annotation"
+                type="radio"
+                variant="outline-primary"
+                {...register("annotate")}
+                value="no"
+                checked={watch("annotate") === "no"}
+                onChange={() => {
+                  setValue("annotate", "no");
+                }}>
+                None
+              </ToggleButton>
+            </ButtonGroup>
           </Form.Group>
         </Col>
         <Col />

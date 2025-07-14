@@ -9,23 +9,9 @@ import { ldexpress, ldexpressTissues } from "@/services/queries";
 import PopSelect from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
+import { parseSnps } from "@/services/utils";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 
-function parseSnps(text: string): string {
-  const lines = text.split("\n");
-  const snps = lines
-    .map((line) => {
-      const snp = line.trim();
-      const variantRegex = /^(([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))$/;
-      if (variantRegex.test(snp)) {
-        return snp;
-      }
-      return null;
-    })
-    .filter(Boolean)
-    .join("\n");
-  return snps;
-}
 
 export default function LDExpressForm() {
   const queryClient = useQueryClient();
