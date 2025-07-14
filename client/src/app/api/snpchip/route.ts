@@ -12,7 +12,7 @@ export async function POST(request: Request) {
   // Platforms are not used yet, but could be in the future
   // const platforms = JSON.parse(formData.get('platforms') as string);
 
-  const uniqueId = `snpchip_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const uniqueId = `snpchip_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   const tmpDir = path.join(os.tmpdir(), 'nci-webtools-dceg-linkage');
   await fs.promises.mkdir(tmpDir, { recursive: true });
   const inputFile = path.join(tmpDir, `${uniqueId}.txt`);

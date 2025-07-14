@@ -3,8 +3,6 @@ import { Row, Col, Table } from "react-bootstrap";
 
 export interface SnpchipResult {
   snpchip: {
-    rs_number: string;
-    position: string;
     map: string[];
     rs_number_raw: string;
     position_raw: string;
@@ -36,9 +34,6 @@ const rotateDivStyle: React.CSSProperties = {
   marginLeft: "5px", // optional tweak for alignment
 };
 
-
-
-
 export default function Results({ results, genome_build }: ResultsProps) {
   function downloadResults() {
     const blob = new Blob([results.details], { type: "text/plain" });
@@ -60,7 +55,6 @@ export default function Results({ results, genome_build }: ResultsProps) {
     <div className="jumbotron">
       <div className="container-fluid" id="snpchip-results-container">
         <Row>
-          
           <Col md={12} style={{ overflowX: "scroll" }}>
             <Table striped bordered hover size="sm">
               <thead>
@@ -80,15 +74,25 @@ export default function Results({ results, genome_build }: ResultsProps) {
                 </tr>
               </thead>
               <tbody>
-                {results.snpchip.map((snp, i) => (
-                  <tr key={i}>
-                    <td dangerouslySetInnerHTML={{ __html: snp.rs_number }}></td>
-                    <td dangerouslySetInnerHTML={{ __html: snp.position }}></td>
-                    {snp.map.map((map, j) => (
-                      <td key={j} dangerouslySetInnerHTML={{ __html: map }}></td>
-                    ))}
-                  </tr>
-                ))}
+                {results.snpchip.map((snp, i) => {
+                  const [chr, pos_str] = snp.position_raw.split(':');
+                  const pos = parseInt(pos_str, 10);
+                  const start = pos - 250;
+                  const end = pos + 250;
+                  const db = genome_build === 'grch37' ? 'hg19' : 'hg38';
+                  const ucscLink = `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=chr${chr}%3A${start}-${end}&hgFind.matches=${snp.rs_number_raw}`;
+                  const ncbiLink = `http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${snp.rs_number_raw}`;
+
+                  return (
+                    <tr key={i}>
+                      <td><a href={ncbiLink} target="_blank" rel="noopener noreferrer">{snp.rs_number_raw}</a></td>
+                      <td><a href={ucscLink} target="_blank" rel="noopener noreferrer">chr{snp.position_raw}</a></td>
+                      {snp.map.map((map, j) => (
+                        <td key={j}>{map}</td>
+                      ))}
+                    </tr>
+                  );
+                })}
               </tbody>
             </Table>
           </Col>

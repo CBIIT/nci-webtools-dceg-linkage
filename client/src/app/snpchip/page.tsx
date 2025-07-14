@@ -158,22 +158,14 @@ export default function SNPchip() {
           if (!Array.isArray(row)) return null;
           const rs_number_raw = String(row[0]);
           const position_raw = String(row[1]);
-          
-          const rs_number = `<a href="http://www.ncbi.nlm.nih.gov/projects/SNP/snp_ref.cgi?rs=${rs_number_raw}" target="_blank">${rs_number_raw}</a>`;
-
-          const [chr, pos_str] = position_raw.split(':');
-          const pos = parseInt(pos_str, 10);
-          const start = pos - 250;
-          const end = pos + 250;
-          const position = `<a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=chr${chr}%3A${start}-${end}&hgFind.matches=${rs_number_raw}" target="_blank">chr${position_raw}</a>`;
 
           const platformsStr = row[2] || "";
           const map = platformsStr
             ? platformsStr.split(",").map((v: string) => v.trim()).filter(Boolean)
             : [];
-          return { rs_number, position, map, rs_number_raw, position_raw };
+          return { map, rs_number_raw, position_raw };
         })
-        .filter((row): row is { rs_number: string; position: string; map: string[]; rs_number_raw: string; position_raw: string; } => row !== null);
+        .filter((row): row is { map: string[]; rs_number_raw: string; position_raw: string; } => row !== null);
 
       // Sort by chromosome and position
       snpchipRows.sort((a, b) => {
@@ -274,7 +266,7 @@ export default function SNPchip() {
             SNPchip Tool
             <sup>
               <a
-                href="/docs/#LDassoc"
+                href="/docs/#SNPchip"
                 target="_blank"
                 style={{
                   fontSize: 20,
