@@ -1479,6 +1479,8 @@ def ldhap():
                 f.write(snps.lower())
             try:
                 out_json = calculate_hap(snplst, pop, reference, web, genome_build)
+                with open(tmp_dir + "ldhap" + reference + ".json", "w") as f:
+                    json.dump(json.loads(out_json), f)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
