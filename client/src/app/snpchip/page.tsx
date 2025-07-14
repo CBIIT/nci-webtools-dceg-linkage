@@ -55,7 +55,12 @@ export const PLATFORM_LOOKUP: Record<string, string> = {
   "Illumina HumanOmniZhongHua-8v1.1": "I_OZH-8v1.1",
   "Illumina HumanOmniZhongHua-8v1.2": "I_OZH-8v1.2",
   "Illumina Infinium PsychArray-24v1": "I_Psyc-24v1",
-  "Illumina Infinium PsychArray-24v1.1": "I_Psyc-24v1.1"
+  "Illumina Infinium PsychArray-24v1.1": "I_Psyc-24v1.1",
+  "Illumina HumanExon510Sv1": "I_Exon510S",
+  "Illumina HumanOmni2.5S-8v1": "I_O2.5S-8v1",
+  "Affymetrix Axiom GW EAS": "A_EAS",
+  "Affymetrix Axiom GW EUR": "A_EUR"
+
 };
 
 export const CODE_TO_PLATFORM: Record<string, string> = Object.fromEntries(
@@ -135,7 +140,7 @@ export default function SNPchip() {
         }
       }
 
-      console.log("SNPchip results:", data);
+      // console.log("SNPchip results:", data);
       if (data.error) {
         setError(data.error);
         return;
@@ -160,7 +165,7 @@ export default function SNPchip() {
           const pos = parseInt(pos_str, 10);
           const start = pos - 250;
           const end = pos + 250;
-          const position = `<a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=chr${chr}%3A${start}-${end}&hgFind.matches=${rs_number_raw}" target="_blank">${position_raw}</a>`;
+          const position = `<a href="https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=chr${chr}%3A${start}-${end}&hgFind.matches=${rs_number_raw}" target="_blank">chr${position_raw}</a>`;
 
           const platformsStr = row[2] || "";
           const map = platformsStr
@@ -170,6 +175,36 @@ export default function SNPchip() {
         })
         .filter((row): row is { rs_number: string; position: string; map: string[]; rs_number_raw: string; position_raw: string; } => row !== null);
 
+      // Sort by chromosome and position
+      snpchipRows.sort((a, b) => {
+        const [chrA_str, posA_str] = a.position_raw.split(':');
+        const [chrB_str, posB_str] = b.position_raw.split(':');
+
+        const chrA = chrA_str.replace('chr', '');
+        const chrB = chrB_str.replace('chr', '');
+
+        const posA = parseInt(posA_str, 10);
+        const posB = parseInt(posB_str, 10);
+
+        const chrA_isNum = !isNaN(parseInt(chrA, 10));
+        const chrB_isNum = !isNaN(parseInt(chrB, 10));
+
+        if (chrA_isNum && chrB_isNum) {
+          const chrNumA = parseInt(chrA, 10);
+          const chrNumB = parseInt(chrB, 10);
+          if (chrNumA !== chrNumB) {
+            return chrNumA - chrNumB;
+          }
+        } else if (chrA_isNum !== chrB_isNum) {
+          return chrA_isNum ? -1 : 1;
+        } else {
+          if (chrA !== chrB) {
+            return chrA.localeCompare(chrB);
+          }
+        }
+
+        return posA - posB;
+      });
 
       if (snpchipRows.length > 0) {
         const uniquePlatformNames = new Set<string>();
@@ -196,7 +231,7 @@ export default function SNPchip() {
           ...mappedSnpchip.map((row) => {
             return [
               row.rs_number_raw,
-              row.position_raw,
+              "chr" + row.position_raw,
               ...row.map.map((v) => (v === "\u2714" ? "\u2714" : "")),
             ].join("\t");
           }),
