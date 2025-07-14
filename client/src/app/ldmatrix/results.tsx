@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import Image from "next/image";
 import { Row, Col, Container, Dropdown } from "react-bootstrap";
@@ -9,6 +9,8 @@ import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { FormData } from "./types";
 
 export default function LdAMatrixResults({ ref }: { ref: string }) {
+  const [bokehLoaded, setBokehLoaded] = useState(false);
+
   const handleDownload = async (format: string) => {
     const url = `/LDlinkRestWeb/tmp/matrix_plot_${ref}.${format}`;
     const response = await fetch(url);
@@ -46,7 +48,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
   const plotRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (plotJson && plotRef.current && (window as any).Bokeh) {
+    if (plotJson && plotRef.current && bokehLoaded && (window as any).Bokeh) {
       // Remove any existing Bokeh plots
       const docs = (window as any).Bokeh?.documents || [];
       docs.forEach((doc: any) => doc.clear());
@@ -63,7 +65,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
       const docs = (window as any).Bokeh?.documents || [];
       docs.forEach((doc: any) => doc.clear());
     };
-  }, [plotJson]);
+  }, [plotJson, bokehLoaded]);
 
   const genomeBuildMap: any = {
     grch37: "GRCh37",
@@ -77,6 +79,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
         src="https://cdn.bokeh.org/bokeh/release/bokeh-3.4.3.min.js"
         strategy="afterInteractive"
         crossOrigin="anonymous"
+        onLoad={() => setBokehLoaded(true)}
       />
       <Container fluid="md" className="justify-content-center">
         <Row className="align-items-center">
@@ -104,13 +107,11 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
           </Col>
           <Col sm={12} className="d-flex justify-content-center">
             <Image
-              id="ldmatrix-legend"
               src="/images/LDmatrix_legend.png"
               title="LDmatrix Legend"
               alt="LDmatrix legend"
               width={700}
               height={0}
-              priority
               style={{
                 height: "auto",
                 width: "100%",
