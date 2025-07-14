@@ -120,7 +120,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
             />
           </Col>
           <Col sm={12} className="justify-content-center text-center">
-            <a href="https://forgedb.cancer.gov/about/" target="_blank" title="FORGEdb scoring scheme">
+            <a href="https://forgedb.cancer.gov/about/" target="_blank" rel="noopener noreferrer" title="FORGEdb scoring scheme">
               View scoring scheme for FORGEdb scores
             </a>
           </Col>
