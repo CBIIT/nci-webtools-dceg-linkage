@@ -187,7 +187,7 @@ export default function SNPchip() {
         const mappedSnpchip = snpchipRows.map((row) => {
           return {
             ...row,
-            map: headers.map((h) => (row.map.includes(h.platform) ? "X" : "")),
+            map: headers.map((h) => (row.map.includes(h.platform) ? "\u2714" : "")),
           };
         });
 
@@ -197,7 +197,7 @@ export default function SNPchip() {
             return [
               row.rs_number_raw,
               row.position_raw,
-              ...row.map.map((v) => (v === "X" ? "X" : "")),
+              ...row.map.map((v) => (v === "\u2714" ? "\u2714" : "")),
             ].join("\t");
           }),
         ].join("\n");
