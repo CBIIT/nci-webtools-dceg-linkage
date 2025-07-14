@@ -167,34 +167,7 @@ export default function SNPchip() {
         })
         .filter((row): row is { map: string[]; rs_number_raw: string; position_raw: string; } => row !== null);
 
-      // Sort by chromosome and position
-      snpchipRows.sort((a, b) => {
-        const [chrA_str, posA_str] = a.position_raw.split(':');
-        const [chrB_str, posB_str] = b.position_raw.split(':');
-
-        const chrA_raw = chrA_str.replace('chr', '');
-        const chrB_raw = chrB_str.replace('chr', '');
-
-        const posA = parseInt(posA_str, 10);
-        const posB = parseInt(posB_str, 10);
-
-        const getChrNum = (chr: string): number => {
-          if (chr === "X") return 23;
-          if (chr === "Y") return 24;
-          if (chr === "M") return 25;
-          const num = parseInt(chr, 10);
-          return isNaN(num) ? 26 : num; // Place non-standard chromosomes at the end
-        };
-
-        const chrA_num = getChrNum(chrA_raw);
-        const chrB_num = getChrNum(chrB_raw);
-
-        if (chrA_num !== chrB_num) {
-          return chrA_num - chrB_num;
-        }
-
-        return posA - posB;
-      });
+      
 
       if (snpchipRows.length > 0) {
         const uniquePlatformNames = new Set<string>();
