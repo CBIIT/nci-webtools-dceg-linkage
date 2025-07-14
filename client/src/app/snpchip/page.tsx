@@ -207,7 +207,8 @@ export default function SNPchip() {
           platform: name,
         }));
 
-        headers.sort((a, b) => a.code.localeCompare(b.code));
+        // Sort headers alphabetically by full platform name
+        headers.sort((a, b) => a.platform.localeCompare(b.platform));
 
         const mappedSnpchip = snpchipRows.map((row) => {
           return {
