@@ -185,9 +185,9 @@ export default function AppNavbar({ routes = [] }: AppNavbarProps): React.ReactE
   }, []);
 
   return (
-    <Navbar expand="md" className="text-uppercase font-title pt-1 pb-1">
+    <Navbar expand="md" className=" font-title pt-1 pb-1">
       <Container>
-        <Navbar.Toggle aria-controls="navbar-nav" className="px-0 py-3 text-uppercase">
+        <Navbar.Toggle aria-controls="navbar-nav" className="px-0 py-3">
           <i className="bi bi-list me-1"></i> Menu
         </Navbar.Toggle>
         <Navbar.Collapse id="navbar-nav" className="align-items-stretch">

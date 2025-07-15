@@ -2248,16 +2248,15 @@ def ldtrait():
 
 
 # Web and API route for SNPchip
-@app.route("/LDlinkRest/snpchip", methods=["GET", "POST"])
-# @app.route('/LDlinkRest2/snpchip', methods=['GET', 'POST'])
-@app.route("/LDlinkRestWeb/snpchip", methods=["GET", "POST"])
+@app.route("/LDlinkRest/snpchip", methods=["POST"])
+@app.route("/LDlinkRestWeb/snpchip", methods=["POST"])
 @requires_token
 def snpchip():
     start_time = time.time()
     data = json.loads(request.stream.read())
-    snps = data["snps"]
-    genome_build = data["genome_build"] if "genome_build" in data else "grch37"
-    platforms = data["platforms"]
+    snps = data.get("snps")
+    genome_build = data.get("genome_build", "grch37")
+    platforms = data.get("platforms")
     token = request.args.get("token", False)
     web = False
     reference = (
@@ -2267,43 +2266,35 @@ def snpchip():
     # differentiate web or api request
     if "LDlinkRestWeb" in request.path:
         # WEB REQUEST
-        if request.headers.get("User-Agent"):
-            web = True
-            # reference = str(data['reference'])
-            app.logger.debug(
-                "snpchip params "
-                + json.dumps(
-                    {
-                        "snps": snps,
-                        "token": token,
-                        "platforms": platforms,
-                        "genome_build": genome_build,
-                        "web": web,
-                        "reference": reference,
-                    },
-                    indent=4,
-                    sort_keys=True,
-                )
+        web = True
+        app.logger.debug(
+            "snpchip params "
+            + json.dumps(
+                {
+                    "snps": snps,
+                    "token": token,
+                    "platforms": platforms,
+                    "genome_build": genome_build,
+                    "web": web,
+                    "reference": reference,
+                },
+                indent=4,
+                sort_keys=True,
             )
-            snplst = tmp_dir + "snps" + reference + ".txt"
-            with open(snplst, "w") as f:
-                f.write(snps.lower())
-            try:
-                snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
-                out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
-            except Exception as e:
-                exc_obj = e
-                app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
-                return sendTraceback(None)
-        else:
-            return sendJSON(
-                "This web API route does not support programmatic access. Please use the API routes specified on the API Access web page."
-            )
+        )
+        snplst = tmp_dir + "snps" + reference + ".txt"
+        with open(snplst, "w") as f:
+            f.write(snps.lower())
+        try:
+            snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
+            out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+        except Exception as e:
+            exc_obj = e
+            app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+            return sendTraceback(None)
     else:
         # API REQUEST
         web = False
-        # reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
-        # print('request: ' + reference)
         app.logger.debug(
             "snpchip params "
             + json.dumps(
@@ -2361,7 +2352,6 @@ def snpchip():
 
 # Web and API route for SNPclip
 @app.route("/LDlinkRest/snpclip", methods=["POST"])
-# @app.route('/LDlinkRest2/snpclip', methods=['POST'])
 @app.route("/LDlinkRestWeb/snpclip", methods=["POST"])
 @requires_token
 def snpclip():
@@ -2426,6 +2416,8 @@ def snpclip():
                         clip["filtered"][snp[0]] = details[snp[0]]
                     if "warning" in json_dict:
                         clip["warning"] = json_dict["warning"]
+                        f.write("Warning(s):\n")
+                        f.write(clip["warning"])
                 with open(tmp_dir + "snp_list" + reference + ".txt", "w") as f:
                     for rs_number in snp_list:
                         f.write(rs_number + "\n")
