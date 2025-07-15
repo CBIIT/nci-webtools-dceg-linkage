@@ -123,8 +123,8 @@ export default function LDMatrixForm() {
         </Col>
         <Col sm="auto">
           <Form.Group controlId="collapseTranscript" className="mb-3">
-            <Form.Label>Collapse transcripts:</Form.Label>
-            <ButtonGroup className="ms-3">
+            <Form.Label className="d-block">Collapse transcripts:</Form.Label>
+            <ButtonGroup>
               <ToggleButton
                 id="radio-transcript-yes"
                 type="radio"
@@ -154,8 +154,8 @@ export default function LDMatrixForm() {
             </ButtonGroup>
           </Form.Group>
           <Form.Group controlId="annotate" className="mb-3">
-            <Form.Label>Annotation:</Form.Label>
-            <ButtonGroup className="ms-3">
+            <Form.Label className="d-block">Annotation:</Form.Label>
+            <ButtonGroup>
               <ToggleButton
                 id="radio-annotate-forgedb"
                 title="Show ForgeDB annotation"
