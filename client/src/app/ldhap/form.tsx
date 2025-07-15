@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button } from "react-bootstrap";
+import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldhap } from "@/services/queries";
@@ -10,7 +10,6 @@ import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
 import { FormData, LdhapFormData, Ldhap } from "./types";
-
 
 export default function LdHapForm() {
   const queryClient = useQueryClient();
@@ -133,6 +132,11 @@ export default function LdHapForm() {
         </Col>
       </Row>
       {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isError && (
+        <Alert variant="danger" className="mt-3">
+          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+        </Alert>
+      )}
     </Form>
   );
 }

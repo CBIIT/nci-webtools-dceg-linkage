@@ -15,6 +15,7 @@ export interface Haplotype {
 export interface ResultsData {
   snps: Record<string, SNP>;
   haplotypes: Record<string, Haplotype>;
+  error?: string;
 }
 
 export interface LdhapFormData {
@@ -34,4 +35,3 @@ export interface FormData {
 export interface Ldhap {
   reference: string;
 }
-

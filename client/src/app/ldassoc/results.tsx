@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import Image from "next/image";
-import { Row, Col, Container, Dropdown } from "react-bootstrap";
+import { Row, Col, Container, Dropdown, Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
@@ -32,20 +32,20 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       return {} as FormData;
     },
   });
-  const { data: enableExport } = useQuery<FormData>({
-    queryKey: ["ldassoc-export", ref],
-    queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
-    enabled: !!ref,
-    refetchInterval: 5000, // Check every 5 seconds
-    retry: 60,
-  });
-  const { data: tableData } = useSuspenseQuery({
-    queryKey: ["ldassoc_table", ref],
+  const { data: results } = useSuspenseQuery({
+    queryKey: ["ldassoc_results", ref],
     queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),
   });
   const { data: plotJson } = useSuspenseQuery({
     queryKey: ["ldassoc_plot", ref],
-    queryFn: async () => (ref ? fetchOutput(`ldassoc_plot_${ref}.json`) : null),
+    queryFn: async () => (ref && !results?.error ? fetchOutput(`ldassoc_plot_${ref}.json`) : null),
+  });
+  const { data: enableExport } = useQuery<FormData>({
+    queryKey: ["ldassoc-export", ref],
+    queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
+    enabled: !!ref && !results?.error,
+    refetchInterval: 5000, // Check every 5 seconds
+    retry: 60,
   });
 
   const plotRef = useRef<HTMLDivElement>(null);
@@ -146,103 +146,109 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   ];
 
   return (
-    <Container fluid="md" className="justify-content-center">
-      <Row className="align-items-center">
-        <Col sm={12} className="justify-content-end text-end">
-          <Dropdown>
-            <Dropdown.Toggle variant="outline-primary" disabled={!enableExport}>
-              {enableExport ? (
-                "Export Plot"
-              ) : (
-                <>
-                  <Spinner size="sm" animation="border" /> Export Plot
-                </>
-              )}
-            </Dropdown.Toggle>
-            <Dropdown.Menu>
-              <Dropdown.Item onClick={() => handleDownload("svg")}>SVG</Dropdown.Item>
-              <Dropdown.Item onClick={() => handleDownload("pdf")}>PDF</Dropdown.Item>
-              <Dropdown.Item onClick={() => handleDownload("png")}>PNG</Dropdown.Item>
-              <Dropdown.Item onClick={() => handleDownload("jpeg")}>JPEG</Dropdown.Item>
-            </Dropdown.Menu>
-          </Dropdown>
-        </Col>
-        <Col sm={12} className="d-flex justify-content-center">
-          {plotJson && <div ref={plotRef} className="mt-4" />}
-        </Col>
-        <Col sm={12} className="d-flex justify-content-center">
-          <Image
-            src="/images/LDassoc_legend.png"
-            title="LDassoc Legend"
-            alt="LDassoc legend"
-            width={700}
-            height={0}
-            style={{
-              height: "auto",
-              width: "100%",
-              maxWidth: "700px",
-            }}
-          />
-        </Col>
-        <Col sm={12} className="justify-content-center text-center">
-          <a
-            id="ldassoc-genome"
-            href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
-              formData?.genome_build === "grch37" ? "hg19" : "hg38"
-            }&hgt.customText=http://${location.hostname}/LDlinkRestWeb/tmp/track${ref}.txt`}
-            target="LDProxy-genome-browser_UCSC"
-            title="Genome Browser">
-            View{" "}
-            {(formData as any)?.dprime ? (
-              "D'"
-            ) : (
-              <span>
-                R<sup>2</sup>
-              </span>
-            )}{" "}
-            data in UCSC Genome Browser
-          </a>
-        </Col>
-        <Col sm={12} className="justify-content-center text-center">
-          <a
-            href="https://forgedb.cancer.gov/about/"
-            target="LDassoc-forgedb-browser_FOREGEdb"
-            title="FORGEdb scoring scheme">
-            View scoring scheme for FORGEdb scores
-          </a>
-        </Col>
-        <Col sm={12} className="justify-content-center text-center">
-          <a
-            href="https://www.regulomedb.org/regulome-help/"
-            target="LDassoc-genome-browser_RegulomeDB"
-            title="RegulomeDB scoring scheme">
-            View scoring scheme for RegulomeDB scores
-          </a>
-        </Col>
-        <Col sm={12} className="justify-content-center">
-          <ul style={{ listStyleType: "none" }}>
-            <li>
-              Number of Individuals: <b>{tableData.report.statistics.individuals}</b>
-            </li>
-            <li>
-              SNPs in Region: <b>{tableData.report.statistics.in_region}</b>
-            </li>
-            <li>
-              Run time: <b>{Number(tableData.report.statistics.runtime).toFixed(2)}</b> seconds
-            </li>
-          </ul>
-        </Col>
-      </Row>
-      <Row>
-        <Col>{tableData && <Table title="Association Results" data={tableData.aaData} columns={columns} />}</Col>
-      </Row>
-      <Row>
-        <Col>
-          <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
-            Download association data for all variants
-          </a>
-        </Col>
-      </Row>
-    </Container>
+    <>
+      {results && !results?.error ? (
+        <Container fluid="md" className="justify-content-center">
+          <Row className="align-items-center">
+            <Col sm={12} className="justify-content-end text-end">
+              <Dropdown>
+                <Dropdown.Toggle variant="outline-primary" disabled={!enableExport}>
+                  {enableExport ? (
+                    "Export Plot"
+                  ) : (
+                    <>
+                      <Spinner size="sm" animation="border" /> Export Plot
+                    </>
+                  )}
+                </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item onClick={() => handleDownload("svg")}>SVG</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleDownload("pdf")}>PDF</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleDownload("png")}>PNG</Dropdown.Item>
+                  <Dropdown.Item onClick={() => handleDownload("jpeg")}>JPEG</Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+            </Col>
+            <Col sm={12} className="d-flex justify-content-center">
+              {plotJson && <div ref={plotRef} className="mt-4" />}
+            </Col>
+            <Col sm={12} className="d-flex justify-content-center">
+              <Image
+                src="/images/LDassoc_legend.png"
+                title="LDassoc Legend"
+                alt="LDassoc legend"
+                width={700}
+                height={0}
+                style={{
+                  height: "auto",
+                  width: "100%",
+                  maxWidth: "700px",
+                }}
+              />
+            </Col>
+            <Col sm={12} className="justify-content-center text-center">
+              <a
+                id="ldassoc-genome"
+                href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
+                  formData?.genome_build === "grch37" ? "hg19" : "hg38"
+                }&hgt.customText=http://${location.hostname}/LDlinkRestWeb/tmp/track${ref}.txt`}
+                target="LDProxy-genome-browser_UCSC"
+                title="Genome Browser">
+                View{" "}
+                {(formData as any)?.dprime ? (
+                  "D'"
+                ) : (
+                  <span>
+                    R<sup>2</sup>
+                  </span>
+                )}{" "}
+                data in UCSC Genome Browser
+              </a>
+            </Col>
+            <Col sm={12} className="justify-content-center text-center">
+              <a
+                href="https://forgedb.cancer.gov/about/"
+                target="LDassoc-forgedb-browser_FOREGEdb"
+                title="FORGEdb scoring scheme">
+                View scoring scheme for FORGEdb scores
+              </a>
+            </Col>
+            <Col sm={12} className="justify-content-center text-center">
+              <a
+                href="https://www.regulomedb.org/regulome-help/"
+                target="LDassoc-genome-browser_RegulomeDB"
+                title="RegulomeDB scoring scheme">
+                View scoring scheme for RegulomeDB scores
+              </a>
+            </Col>
+            <Col sm={12} className="justify-content-center">
+              <ul style={{ listStyleType: "none" }}>
+                <li>
+                  Number of Individuals: <b>{results.report.statistics.individuals}</b>
+                </li>
+                <li>
+                  SNPs in Region: <b>{results.report.statistics.in_region}</b>
+                </li>
+                <li>
+                  Run time: <b>{Number(results.report.statistics.runtime).toFixed(2)}</b> seconds
+                </li>
+              </ul>
+            </Col>
+          </Row>
+          <Row>
+            <Col>{results && <Table title="Association Results" data={results.aaData} columns={columns} />}</Col>
+          </Row>
+          <Row>
+            <Col>
+              <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
+                Download association data for all variants
+              </a>
+            </Col>
+          </Row>
+        </Container>
+      ) : (
+        <Alert variant="danger">{results?.error || "An error has occured"}</Alert>
+      )}
+    </>
   );
 }

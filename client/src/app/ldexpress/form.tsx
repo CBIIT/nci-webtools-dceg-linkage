@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
@@ -279,6 +279,11 @@ export default function LDExpressForm() {
         </Col>
       </Row>
       {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isError && (
+        <Alert variant="danger" className="mt-3">
+          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+        </Alert>
+      )}
     </Form>
   );
 }
