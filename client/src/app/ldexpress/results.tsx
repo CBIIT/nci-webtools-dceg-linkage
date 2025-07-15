@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useEffect } from "react";
-import { Row, Col, Container, Accordion, Form } from "react-bootstrap";
+import { Row, Col, Container, Accordion, Form, Alert } from "react-bootstrap";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
@@ -247,63 +247,69 @@ export default function LdExpressResults({ ref }: { ref: string }) {
   ];
 
   return (
-    <Container fluid="md" className="justify-content-center">
-      <Row>
-        <Col sm="2">
-          <Accordion defaultActiveKey={["0", "1", "2"]} alwaysOpen>
-            <Accordion.Item eventKey="0">
-              <Accordion.Header>Variants in LD with GTEx QTL</Accordion.Header>
-              <Accordion.Body>
-                {snpsFields.map((field: any, index) => (
-                  <Form.Check
-                    key={field.id}
-                    type="checkbox"
-                    id={`snp-${index}`}
-                    label={field.value}
-                    {...register(`snps.${index}.checked`)}
-                  />
-                ))}
-              </Accordion.Body>
-            </Accordion.Item>
-            <Accordion.Item eventKey="1">
-              <Accordion.Header>Genes with GTEx QTL</Accordion.Header>
-              <Accordion.Body>
-                {genesFields.map((field: any, index) => (
-                  <Form.Check
-                    key={field.id}
-                    type="checkbox"
-                    id={`gene-${index}`}
-                    label={field.value}
-                    {...register(`genes.${index}.checked`)}
-                  />
-                ))}
-              </Accordion.Body>
-            </Accordion.Item>
-            <Accordion.Item eventKey="2">
-              <Accordion.Header>Tissues with GTEx QTL</Accordion.Header>
-              <Accordion.Body className="overflow-auto">
-                {tissuesFields.map((field: any, index) => (
-                  <Form.Check
-                    key={field.id}
-                    type="checkbox"
-                    id={`tissue-${index}`}
-                    label={field.value}
-                    {...register(`tissues.${index}.checked`)}
-                  />
-                ))}
-              </Accordion.Body>
-            </Accordion.Item>
-          </Accordion>
-        </Col>
-        <Col>
-          <div>
-            {tableData && <Table title="" data={tableData} columns={columns} />}
-            <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
-              Download GTEx QTL annotated variant list
-            </a>
-          </div>
-        </Col>
-      </Row>
-    </Container>
+    <>
+      {results && !results?.error ? (
+        <Container fluid="md" className="justify-content-center">
+          <Row>
+            <Col sm="2">
+              <Accordion defaultActiveKey={["0", "1", "2"]} alwaysOpen>
+                <Accordion.Item eventKey="0">
+                  <Accordion.Header>Variants in LD with GTEx QTL</Accordion.Header>
+                  <Accordion.Body>
+                    {snpsFields.map((field: any, index) => (
+                      <Form.Check
+                        key={field.id}
+                        type="checkbox"
+                        id={`snp-${index}`}
+                        label={field.value}
+                        {...register(`snps.${index}.checked`)}
+                      />
+                    ))}
+                  </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="1">
+                  <Accordion.Header>Genes with GTEx QTL</Accordion.Header>
+                  <Accordion.Body>
+                    {genesFields.map((field: any, index) => (
+                      <Form.Check
+                        key={field.id}
+                        type="checkbox"
+                        id={`gene-${index}`}
+                        label={field.value}
+                        {...register(`genes.${index}.checked`)}
+                      />
+                    ))}
+                  </Accordion.Body>
+                </Accordion.Item>
+                <Accordion.Item eventKey="2">
+                  <Accordion.Header>Tissues with GTEx QTL</Accordion.Header>
+                  <Accordion.Body className="overflow-auto">
+                    {tissuesFields.map((field: any, index) => (
+                      <Form.Check
+                        key={field.id}
+                        type="checkbox"
+                        id={`tissue-${index}`}
+                        label={field.value}
+                        {...register(`tissues.${index}.checked`)}
+                      />
+                    ))}
+                  </Accordion.Body>
+                </Accordion.Item>
+              </Accordion>
+            </Col>
+            <Col>
+              <div>
+                {tableData && <Table title="" data={tableData} columns={columns} />}
+                <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
+                  Download GTEx QTL annotated variant list
+                </a>
+              </div>
+            </Col>
+          </Row>
+        </Container>
+      ) : (
+        <Alert variant="danger">{results?.error || "An error has occured"}</Alert>
+      )}
+    </>
   );
 }
