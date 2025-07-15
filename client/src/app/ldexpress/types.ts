@@ -15,6 +15,7 @@ export interface LocusData {
   thinned_genes: string[];
   thinned_tissues: string[];
   details: LocusDetails;
+  error?: string;
 }
 
 export interface FormData {

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
@@ -214,8 +214,17 @@ export default function LDAssocForm() {
             )}
             <Form.Text className="text-danger">{errors?.filename?.message}</Form.Text>
           </Form.Group>
-          <Form.Group controlId="useEx">
-            <Form.Check type="switch" id="useEx" label="Use example GWAS data" {...register("useEx")} />
+          <Form.Group controlId="useEx" className="mb-3">
+            <Form.Check
+              type="switch"
+              id="useEx"
+              label="Use example GWAS data"
+              {...register("useEx", {})}
+              onChange={(e) => {
+                if (e.target.checked === false) reset();
+                setValue("useEx", e.target.checked);
+              }}
+            />
           </Form.Group>
 
           {filename.length > 0 && (
@@ -249,7 +258,7 @@ export default function LDAssocForm() {
                 <Form.Text className="text-danger">{errors?.columns?.position?.message}</Form.Text>
               </Form.Group>
               <Form.Group controlId="columns.pvalue" className="mb-3">
-                <Form.Label>P-Value</Form.Label>
+                <Form.Label>P-Value Column</Form.Label>
                 <Form.Select {...register("columns.pvalue", { required: "P-value column is required" })}>
                   <option value="" disabled>
                     Select...
@@ -265,10 +274,10 @@ export default function LDAssocForm() {
             </div>
           )}
         </Col>
-        <Col sm={3}>
+        <Col sm={2}>
           <Form.Group controlId="calculateRegion" className="mb-3">
-            <Form.Label>Allele</Form.Label>
-            <Form.Select {...register("calculateRegion", { required: "Allele is required" })}>
+            <Form.Label>Location</Form.Label>
+            <Form.Select {...register("calculateRegion", { required: "Location is required" })}>
               <option value="" disabled>
                 Select...
               </option>
@@ -390,9 +399,11 @@ export default function LDAssocForm() {
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
+        </Col>
+        <Col sm={2}>
           <Form.Group controlId="dprime" className="mb-3">
-            <Form.Label>LD measure:</Form.Label>
-            <ButtonGroup className="ms-3">
+            <Form.Label className="d-block">LD measure</Form.Label>
+            <ButtonGroup className="ms-1">
               <ToggleButton
                 id="radio-r2"
                 type="radio"
@@ -422,8 +433,8 @@ export default function LDAssocForm() {
             </ButtonGroup>
           </Form.Group>
           <Form.Group controlId="transcript" className="mb-3">
-            <Form.Label>Collapse transcripts:</Form.Label>
-            <ButtonGroup className="ms-3">
+            <Form.Label className="d-block">Collapse transcripts</Form.Label>
+            <ButtonGroup className="ms-1">
               <ToggleButton
                 id="radio-transcript-yes"
                 type="radio"
@@ -453,8 +464,8 @@ export default function LDAssocForm() {
             </ButtonGroup>
           </Form.Group>
           <Form.Group controlId="annotate" className="mb-3">
-            <Form.Label>Annotation:</Form.Label>
-            <ButtonGroup className="ms-3">
+            <Form.Label className="d-block">Annotation</Form.Label>
+            <ButtonGroup className="ms-1">
               <ToggleButton
                 id="radio-annotate-forgedb"
                 title="Show ForgeDB annotation"
@@ -497,7 +508,7 @@ export default function LDAssocForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col sm={3}>
+        <Col sm={2}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
@@ -509,6 +520,11 @@ export default function LDAssocForm() {
         </Col>
       </Row>
       {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isError && (
+        <Alert variant="danger" className="mt-3">
+          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+        </Alert>
+      )}
     </Form>
   );
 }

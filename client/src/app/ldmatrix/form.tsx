@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldmatrix } from "@/services/queries";
@@ -198,6 +198,11 @@ export default function LDMatrixForm() {
         </Col>
       </Row>
       {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isError && (
+        <Alert variant="danger" className="mt-3">
+          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+        </Alert>
+      )}
     </Form>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
@@ -11,7 +11,6 @@ import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
-
 
 export default function LDExpressForm() {
   const queryClient = useQueryClient();
@@ -140,7 +139,7 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={2}>
+        <Col sm={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -179,9 +178,9 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <Form.Group controlId="r2_d" className="mb-3">
-            <Form.Label>Pairwise Value:</Form.Label>
-            <ButtonGroup className="ms-3">
+          <Form.Group controlId="r2_d" className="mb-3 text-center">
+            <Form.Label className="d-block">LD measure</Form.Label>
+            <ButtonGroup className="ms-1">
               <ToggleButton
                 id="radio-r2"
                 type="radio"
@@ -211,7 +210,7 @@ export default function LDExpressForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col>
           <Form.Group as={Row} controlId="r2_d_threshold" className="mb-3">
             <Col sm="auto" className="my-auto">
               <Form.Label>
@@ -280,6 +279,11 @@ export default function LDExpressForm() {
         </Col>
       </Row>
       {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isError && (
+        <Alert variant="danger" className="mt-3">
+          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+        </Alert>
+      )}
     </Form>
   );
 }

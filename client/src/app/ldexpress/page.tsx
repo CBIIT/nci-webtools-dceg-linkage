@@ -31,6 +31,7 @@ export default function LdExpress() {
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>{ref && <LdExpressResults ref={ref} />}</Suspense>
             </ErrorBoundary>
+            <i>GTEx v8</i>
           </Col>
         </Row>
       </Container>
