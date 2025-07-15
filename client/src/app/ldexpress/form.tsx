@@ -12,7 +12,6 @@ import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 
-
 export default function LDExpressForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -140,7 +139,7 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={2}>
+        <Col sm={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -179,9 +178,9 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <Form.Group controlId="r2_d" className="mb-3">
-            <Form.Label>Pairwise Value:</Form.Label>
-            <ButtonGroup className="ms-3">
+          <Form.Group controlId="r2_d" className="mb-3 text-center">
+            <Form.Label className="d-block">LD measure</Form.Label>
+            <ButtonGroup className="ms-1">
               <ToggleButton
                 id="radio-r2"
                 type="radio"
@@ -211,7 +210,7 @@ export default function LDExpressForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col>
           <Form.Group as={Row} controlId="r2_d_threshold" className="mb-3">
             <Col sm="auto" className="my-auto">
               <Form.Label>
