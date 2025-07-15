@@ -15,3 +15,9 @@ export const useStore = create<StoreState>((set) => ({
   setGenomeBuild: (genome_build: string) => set(() => ({ genome_build })),
   resetStore: () => set(() => defaultState),
 }));
+
+export const genomeBuildMap: Record<string, string> = {
+    grch37: "GRCh37",
+    grch38: "GRCh38",
+    grch38_high_coverage: "GRCh38 High Coverage",
+  };

@@ -5,10 +5,10 @@ import Image from "next/image";
 
 export default function CitationPage() {
   return (
-    <Container className="py-4">
-      <div className="text-center">
-        {/* If you want to use next/image, place the image in /public and use src="/LDlink_logo_small_clear.png" */}
-        <h2>
+    <Container className="py-4 tab-content mb-0">
+        <div className="not-home">
+            <div className="text-center">
+        <h1 className="h2">
           <Image
             src="/images/LDlink_logo_small_clear.png"
             alt="LDlink"
@@ -17,7 +17,7 @@ export default function CitationPage() {
             height={36}
           />{" "}
           Citations
-        </h2>
+        </h1>
         <p>
           Thank you for using LDlink! If you use LDlink in any publication please cite the LDlink manuscript and any relevant module publications:
         </p>
@@ -102,6 +102,8 @@ export default function CitationPage() {
           <i>BMC Bioinformatics</i>. 2021 Dec 20.
         </p>
       </div>
+    </div>
+      
     </Container>
   );
 }

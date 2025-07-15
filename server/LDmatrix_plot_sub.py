@@ -18,7 +18,22 @@ options.headless = True
 service = Service("/usr/local/bin/geckodriver")
 
 # LDmatrix subprocess to export bokeh to high quality images in the background
-def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True,annotate="forge"):
+def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapseTranscript=True, annotate="forge"):
+    """
+    Calculate and generate matrix plots in SVG format
+    
+    Args:
+        snplst (str): List of SNPs
+        pop (str): Population identifier
+        request (str): Request identifier
+        genome_build (str): Genome build version
+        r2_d (str, optional): r2 or d calculation type. Defaults to "r2"
+        collapseTranscript (bool, optional): Whether to collapse transcripts. Defaults to True
+        annotate (str, optional): Annotation type. Defaults to "forge"
+
+    Returns:
+        None
+    """
 
     # Set data directories using config.yml
     param_list = get_config()
@@ -794,27 +809,21 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
 
 def main():
     # Import LDmatrix options
-    if len(sys.argv) == 5:
-        snplst = sys.argv[1]
-        pop = sys.argv[2]
-        request = sys.argv[3]
-        genome_build = sys.argv[4]
-        r2_d = "r2"
-        collapseTranscript = True
-    elif len(sys.argv) == 8:
+    if len(sys.argv) == 8:
+        # Command line usage
         snplst = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
         genome_build = sys.argv[4]
         r2_d = sys.argv[5]
-        collapseTranscript = sys.argv[6]
+        collapseTranscript = sys.argv[6] == "true"
         annotate = sys.argv[7]
+
+        # Run function
+        calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript, annotate)
     else:
-        sys.exit()
-
-    # Run function
-    calculate_matrix_svg(snplst, pop, request, genome_build, r2_d, collapseTranscript,annotate)
-
+        # Called as imported module
+        pass
 
 if __name__ == "__main__":
     main()

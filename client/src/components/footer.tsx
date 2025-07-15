@@ -2,7 +2,7 @@
 
 export default function Footer() {
   return (
-    <div className="footer text-left text-md-center pt-4 pb-4 text-light flex-none">
+    <footer className="footer text-left text-md-center pt-4 pb-4 text-light flex-none">
 		<div className="container">
 			<ul className="list-inline  text-light">
 			<li className="pb-1 d-block d-md-inline">
@@ -51,10 +51,10 @@ export default function Footer() {
 			</li>
 			</ul>
 			<ul className="list-inline">
-				NIH ... Turning Discovery Into Health<sup>&reg;</sup>
+				<li>NIH ... Turning Discovery Into Health<sup>&reg;</sup></li>
 			</ul>
 			
 		</div>
-	</div>
+	</footer>
   );
 }

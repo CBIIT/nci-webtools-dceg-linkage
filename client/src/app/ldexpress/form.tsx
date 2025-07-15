@@ -1,33 +1,18 @@
 "use client";
 import { useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect, { PopOption } from "@/components/select/pop-select";
+import PopSelect from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
+import { parseSnps } from "@/services/utils";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 
-function parseSnps(text: string): string {
-  const lines = text.split("\n");
-  const snps = lines
-    .map((line) => {
-      const snp = line.trim();
-      const variantRegex = /^(([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))$/;
-      if (variantRegex.test(snp)) {
-        return snp;
-      }
-      return null;
-    })
-    .filter(Boolean)
-    .join("\n");
-  return snps;
-}
-
-export default function LDAssocForm() {
+export default function LDExpressForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -124,7 +109,7 @@ export default function LDAssocForm() {
   return (
     <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm={2}>
+        <Col sm="auto">
           <Form.Group controlId="snps" className="mb-3">
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
@@ -154,7 +139,7 @@ export default function LDAssocForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={2}>
+        <Col sm={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -193,9 +178,9 @@ export default function LDAssocForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <Form.Group controlId="r2_d" className="mb-3">
-            <Form.Label>Pairwise Value:</Form.Label>
-            <ButtonGroup className="ms-3">
+          <Form.Group controlId="r2_d" className="mb-3 text-center">
+            <Form.Label className="d-block">LD measure</Form.Label>
+            <ButtonGroup className="ms-1">
               <ToggleButton
                 id="radio-r2"
                 type="radio"
@@ -225,7 +210,7 @@ export default function LDAssocForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col>
           <Form.Group as={Row} controlId="r2_d_threshold" className="mb-3">
             <Col sm="auto" className="my-auto">
               <Form.Label>
@@ -282,7 +267,7 @@ export default function LDAssocForm() {
             <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
@@ -294,6 +279,11 @@ export default function LDAssocForm() {
         </Col>
       </Row>
       {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isError && (
+        <Alert variant="danger" className="mt-3">
+          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+        </Alert>
+      )}
     </Form>
   );
 }

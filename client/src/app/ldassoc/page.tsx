@@ -21,7 +21,7 @@ export default function LdAssoc() {
     <>
       <ToolBanner
         name="LDassoc Tool"
-        href="/docs/#LDassoc"
+        href="/help/#LDassoc"
         description="Interactively visualize association p-value results and linkage disequilibrium patterns for a genomic
               region of interest."
       />

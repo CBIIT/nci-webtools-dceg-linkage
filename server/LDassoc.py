@@ -3,6 +3,8 @@ import json
 import operator
 import os
 import subprocess
+import httpx
+import threading
 import time
 from multiprocessing.dummy import Pool
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
@@ -1190,17 +1192,34 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# Generate high quality images only if accessed via web instance
 	if web:
 		# Open thread for high quality image exports
-		print("Open thread for high quality image exports.")
-		command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
-		subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+		# print("Open thread for high quality image exports.")
+		# command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
+		# subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+		print("Making request to export service for high quality images")
+		payload = {
+			"file": file,
+			"region": region,
+			"pop": pop,
+			"request": request,
+			"genome_build": genome_build,
+			"args": vars(myargs),
+			"argsName": myargsName,
+			"argsOrigin": myargsOrigin
+		}
+		
+		def send_async():
+			try:
+				with httpx.Client(timeout=None) as client:
+					client.post('http://localhost:5000/ldassoc_svg', json=payload, timeout=None, follow_redirects=True)
+			except Exception as e:
+				print(f"Async export request failed: {e}")
+		threading.Thread(target=send_async, daemon=True).start()
 
 	###########################
 	# Html output for testing #
 	###########################
-	#out_html=open("LDassoc.html","w")
-	#print >> out_html, html
-	#out_html.close()
-
+	# output_file(tmp_dir + f"ldassoc_{request}.html")
+	# save(out_grid)
 
 	out_script,out_div=components(out_grid, CDN)
 	reset_output()

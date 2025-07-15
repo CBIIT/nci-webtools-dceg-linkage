@@ -7,16 +7,35 @@ from multiprocessing.dummy import Pool
 from math import log10
 from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
 from LDutilites import get_config, array_split
+from selenium import webdriver
+from selenium.webdriver.firefox.options import Options
+options = Options()
+options.add_argument("--headless")
 
 # LDassoc subprocess to export bokeh to high quality images in the background
 def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargsName, myargsOrigin):
-
-    # Set data directories using config.yml
+    """
+    Calculate and generate association plots in SVG format
+    
+    Args:
+        file (str): Input file path
+        region (str): Region type ('variant', 'gene', or 'region')
+        pop (str): Population identifier
+        request (str): Request identifier
+        genome_build (str): Genome build version
+        myargs (dict): Arguments dictionary
+        myargsName (str): Name argument
+        myargsOrigin (str): Origin argument
+    
+    Returns:
+        None
+    """
+    # Set data directories using config.yml 
     param_list = get_config()
     data_dir = param_list['data_dir']
     tmp_dir = param_list['tmp_dir']
     genotypes_dir = param_list['genotypes_dir']
-    aws_info = param_list['aws_info']
+    aws_info = param_list['aws_info'] 
     num_subprocesses = param_list['num_subprocesses']
 
     export_s3_keys = retrieveAWSCredentials()
@@ -627,38 +646,38 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         gene_plot.toolbar_location = "below"
 
         # Change output backend to SVG temporarily for headless export
-        assoc_plot.output_backend = "svg"
-        rug.output_backend = "svg"
-        gene_plot.output_backend = "svg"
-        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
-        export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+        # assoc_plot.output_backend = "svg"
+        # rug.output_backend = "svg"
+        # gene_plot.output_backend = "svg"
+        # export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
+        # export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
-        # 1 pixel = 0.0264583333 cm
-        svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
-        svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
+        # # 1 pixel = 0.0264583333 cm
+        # svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
+        # svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
         
-        # Concatenate svgs
-        sg.Figure("24.59cm", svg_height,
-            sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
-            ).save(tmp_dir + "assoc_plot_" + request + ".svg")
+        # # Concatenate svgs
+        # sg.Figure("24.59cm", svg_height,
+        #     sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+        #     sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+        #     ).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
-        sg.Figure("122.95cm", svg_height_scaled,
-            sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
-            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
-            ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+        # sg.Figure("122.95cm", svg_height_scaled,
+        #     sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+        #     sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
+        #     ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
 
-        # Export to PDF
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
-        # Export to PNG
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
-        # Export to JPEG
-        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
-        # Remove individual SVG files after they are combined
-        subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
-        subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
-        # Remove scaled SVG file after it is converted to png and jpeg
-        subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
+        # # Export to PDF
+        # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+        # # Export to PNG
+        # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+        # # Export to JPEG
+        # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+        # # Remove individual SVG files after they are combined
+        # subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+        # subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+        # # Remove scaled SVG file after it is converted to png and jpeg
+        # subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
 
 
@@ -780,8 +799,12 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         assoc_plot.output_backend = "svg"
         rug.output_backend = "svg"
         gene_c_plot.output_backend = "svg"
-        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
-        export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+        driver = webdriver.Firefox(options=options)
+        # export_png(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".png", webdriver=driver)
+        # export_png(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".png", webdriver=driver)
+        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg", webdriver=driver)
+        export_svgs(gene_c_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg", webdriver=driver)
+        driver.quit()
 
         # 1 pixel = 0.0264583333 cm
         svg_height = str(20.00 + (0.0264583333 * plot_c_h_pix)) + "cm"
@@ -825,9 +848,9 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     return None
 
 def main():
-
     # Import LDassoc options
     if len(sys.argv) == 9:
+        # Command line usage
         filename = sys.argv[1]
         file = sys.argv[2]
         region = sys.argv[3]
@@ -836,15 +859,16 @@ def main():
         genome_build = sys.argv[6]
         myargsName = sys.argv[7]
         myargsOrigin = sys.argv[8]
+
+        # Load args parameters passed from LDassoc.py
+        with open(filename) as f:
+            args = json.load(f)
+
+        # Run function
+        calculate_assoc_svg(file, region, pop, request, genome_build, args, myargsName, myargsOrigin)
     else:
-        sys.exit()
-    # Load args parameters passed from LDassoc.py
-    with open(filename) as f:
-        args = json.load(f)
-
-    # Run function
-    calculate_assoc_svg(file, region, pop, request, genome_build, args, myargsName, myargsOrigin)
-
+        # Called as imported module
+        pass
 
 if __name__ == "__main__":
     main()

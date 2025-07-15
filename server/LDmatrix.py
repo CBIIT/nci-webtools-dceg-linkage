@@ -4,6 +4,8 @@ import math
 import os
 import subprocess
 import sys
+import httpx
+import threading
 from LDcommon import retrieveAWSCredentials, genome_build_vars, getRefGene,connectMongoDBReadOnly
 from LDcommon import get_coords,replace_coords_rsid_list,validsnp,get_population
 from LDcommon import set_alleles
@@ -377,7 +379,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
                 box_trans.append(0.1)
         # Import plotting modules
         from collections import OrderedDict
-        from bokeh.embed import components, file_html
+        from bokeh.embed import components, file_html, json_item
         from bokeh.layouts import gridplot
         from bokeh.models import HoverTool, LinearAxis, Range1d
         from bokeh.plotting import ColumnDataSource, curdoc, figure, output_file, reset_output, save
@@ -522,7 +524,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         if len(snps) < threshold:
             matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                                 x_range=xr, y_range=list(reversed(rsnum_lst)),
-                                 border_fill_color='white', x_axis_type=None, 
+                                 border_fill_color='white', 
                                 tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
             # CHANGE AXIS LABELS & LINE COLOR:
             # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
@@ -533,7 +535,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         else:
             matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_bottom=2, min_border_left=100, min_border_right=5,
                                 x_range=xr, y_range=list(reversed(rsnum_lst)),
-                                 border_fill_color='white', x_axis_type=None, y_axis_type=None, 
+                                 border_fill_color='white', 
                                 tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
             # CHANGE AXIS LABELS & LINE COLOR:
             # matrix_plot = figure(outline_line_color="white", min_border_top=0, min_border_right=5,
@@ -596,7 +598,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         # Connecting and Rug Plots
         # Connector Plot
         if len(snps) < threshold:
-            connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+            connector = figure(outline_line_color="white",
                             x_range=xr, y_range=yr2, border_fill_color='white',
                             title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, 
                             width=800, height=90, tools="xpan,tap")
@@ -606,7 +608,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             connector.text(x2, y4, text=snp_id_plot, alpha=1, angle=pi / 2,
                         text_font_size="8pt", text_baseline="middle", text_align="left")
         else:
-            connector = figure(outline_line_color="white", y_axis_type=None, x_axis_type=None,
+            connector = figure(outline_line_color="white",
                             x_range=xr, y_range=yr3, border_fill_color='white',
                             title="", min_border_left=100, min_border_right=5, min_border_top=0, min_border_bottom=0, 
                             width=800, height=30, tools="xpan,tap")
@@ -637,7 +639,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         source_rug = ColumnDataSource(data_rug)
 
         # Rug Plot
-        rug = figure(x_range=xr, y_range=yr, y_axis_type=None,
+        rug = figure(x_range=xr, y_range=yr,
                     title="", min_border_top=1, min_border_bottom=0, min_border_left=100, min_border_right=5, 
                     width=800, height=50, tools="hover,xpan,tap")
         rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
@@ -905,23 +907,44 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             gene_c_plot.toolbar_location = "below"
             
             out_grid = gridplot([matrix_plot, rug, gene_c_plot], ncols=1, toolbar_options=dict(logo=None))
-
+            
         # Generate high quality images only if accessed via web instance
         
-        # Open thread for high quality image exports
-        command = "python3 LDmatrix_plot_sub.py " + snplst + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + collapseTranscript + " "+ annotate
-        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        print("Making request to export service for high quality images")
+        payload = {
+            "snplst": snplst,
+            "pop": pop,
+            "request": request,
+            "genome_build": genome_build,
+            "r2_d": r2_d,
+            "collapseTranscript": str(collapseTranscript).lower(),
+            "annotate": annotate
+        }
+        
+        def send_async():
+            try:
+                with httpx.Client(timeout=None) as client:
+                    client.post('http://localhost:5000/ldmatrix_svg', json=payload, timeout=None, follow_redirects=True)
+            except Exception as e:
+                print(f"Async export request failed: {e}")
+        threading.Thread(target=send_async, daemon=True).start()
 
         ###########################
         # Html output for testing #
         ###########################
-        # html=file_html(out_grid, CDN, "Test Plot")
-        # out_html=open("LDmatrix.html","w")
-        # print >> out_html, html
-        # out_html.close()
+        output_file(tmp_dir + f"ldmatrix_{request}.html")
+        save(out_grid)
 
+        
         out_script, out_div = components(out_grid, CDN)
         reset_output()
+        
+        # save json embedding
+        jsonEmbed = f"ldmatrix_plot_{request}.json"
+        print('Save JSON embedding: '+ jsonEmbed)
+        with open(tmp_dir + jsonEmbed, "w") as f_json:
+            json.dump(json_item(out_grid), f_json)
+
 
     # Return output
     json_output = json.dumps(output, sort_keys=True, indent=2)
