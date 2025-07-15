@@ -81,7 +81,7 @@ export default function LdHapForm() {
   }
 
   return (
-    <Form id="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
+    <Form id="ldhap-form" data-testid="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
           <Form.Group controlId="snps" className="mb-3">

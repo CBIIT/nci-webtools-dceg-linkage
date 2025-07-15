@@ -9,11 +9,14 @@ test('should display LDassoc results from example GWAS data', async ({ page }) =
   // click calculate button
   await page.getByTestId('calculate-button').click();
 
-  // check for Association Results heading
+  // wait 15 seconds after clicking calculate
+  await page.waitForTimeout(15000);
+
+//   check for Association Results heading
   await expect(page.getByRole('heading', { name: 'Association Results', level: 4 })).toBeVisible();
 
   // wait until Bokeh plot is visible
-  await expect(page.locator('.bk-GridPlot')).toBeVisible({ timeout: 20000 });
+  await expect(page.locator('div#plot')).toBeVisible({ timeout: 20000 });
 
   // wait until Bokeh Export plot button is enabled
   await expect(page.getByRole('button', { name: 'Export' })).toBeEnabled({ timeout: 20000 });

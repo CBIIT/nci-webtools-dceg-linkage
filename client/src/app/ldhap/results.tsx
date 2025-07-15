@@ -23,7 +23,7 @@ export default function LdHapResults({ ref }: { ref: string }) {
   return (
     <>
       {results && !results?.error ? (
-        <Container fluid="md" className="justify-content-center">
+        <Container fluid="md" className="justify-content-center" data-testid="ldhap-results">
           <Row>
             <Col sm="auto">
               <table className="table table-condensed w-auto">
