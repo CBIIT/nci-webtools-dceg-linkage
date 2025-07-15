@@ -101,22 +101,24 @@ export default function LdHapResults({ ref }: { ref: string }) {
               </tr>
             </tfoot>
             <tbody>
-              {Object.values(results.haplotypes)?.map((h: Haplotype, i: number) => {
-                const alleles = h.Haplotype?.split("_") || [];
-                return (
-                  <tr key={i}>
-                    {alleles.map((allele: string, j: number) => (
+              {(() => {
+                const haplotypes = Object.values(results.haplotypes);
+                const splitHaps = haplotypes.map((h) => h.Haplotype?.split("_") || []);
+                const maxRows = Math.max(...splitHaps.map((h) => h.length));
+                return Array.from({ length: maxRows }).map((_, rowIdx) => (
+                  <tr key={rowIdx}>
+                    {splitHaps.map((hap, colIdx) => (
                       <td
-                        key={j}
+                        key={colIdx}
                         className={`haplotype ${
-                          allele === "-" ? "haplotype_dash" : `haplotype_${allele.toLowerCase()}`
+                          hap[rowIdx] === "-" ? "haplotype_dash" : `haplotype_${hap[rowIdx]?.toLowerCase()}`
                         }`}>
-                        <span>{allele}</span>
+                        <span>{hap[rowIdx]}</span>
                       </td>
                     ))}
                   </tr>
-                );
-              })}
+                ));
+              })()}
             </tbody>
           </table>
         </Col>
