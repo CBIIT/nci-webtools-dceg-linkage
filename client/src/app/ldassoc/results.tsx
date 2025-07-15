@@ -172,13 +172,11 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         </Col>
         <Col sm={12} className="d-flex justify-content-center">
           <Image
-            id="ldassoc-legend"
             src="/images/LDassoc_legend.png"
             title="LDassoc Legend"
             alt="LDassoc legend"
             width={700}
             height={0}
-            priority
             style={{
               height: "auto",
               width: "100%",
