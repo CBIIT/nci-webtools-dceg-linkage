@@ -1,50 +1,3 @@
-.table-body-border {
-  border: 1px solid #ccc;
-}
-
-.table-body-border tr {
-  border: none;
-}
-
-.table-body-border td {
-  border: none;
-}
-
-#ldhap-table-right {
-  min-width: 300px;
-  width: 65%;
-  display: inline-block;
-  vertical-align: top;
-}
-
-.haplotype {
-  color: black;
-  background: #c0c0c0; /* if a multiple grouped */
-}
-
-/* LDhap Heat Map - Version 4 */
-/* Pastel Colors light red, light orage, light blue, and light green */
-/* Color Code: http://paletton.com/palette.php?uid=7000u0klLMWnHN3kBNFgZMYgZMY */
-.haplotype_dash {
-  background: white !important;
-}
-.haplotype_a {
-  background: #ff7878 !important; /* Light red; */
-}
-.haplotype_t {
-  background: #ffb578 !important; /* Light Orange */
-}
-.haplotype_c {
-  background: #63d2d2 !important; /* Light Blue */
-}
-.haplotype_g {
-  background: #6de96d !important; /* Light Purple; c2b2da; Contrast Ratio: 7.17:1 */
-  /*
-	background: linear-gradient(145deg, #d4c9e5 , #c2b2da);
-	*/
-}
-
-/* Modernized styles for LDpair Results tables */
 .ldpair-table {
   border-collapse: separate;
   border-spacing: 0;
@@ -54,40 +7,30 @@
 }
 
 .ldpair-two-by-two-table {
-  border: 1px solid #dee2e6;
+  border: 1px solid;
   border-radius: 0.25rem;
   width: 100%;
   margin: 0.25rem 0;
-  background: #f8f9fa;
 }
 
 .ldpair-cell {
-  border: 1px solid #dee2e6;
+  border: 1px solid;
   padding: 0.5rem 0.75rem;
   font-weight: 500;
-  background: #fff;
 }
 
 .ldpair-spacer {
   min-width: 2rem;
 }
 
-.text-center {
-  text-align: center !important;
-}
-.text-end {
-  text-align: right !important;
-}
-.text-start {
-  text-align: left !important;
-}
-.align-middle {
-  vertical-align: middle !important;
-}
-
 /* Responsive tweaks */
 @media (max-width: 768px) {
-  .ldpair-table, .ldpair-two-by-two-table {
+  .ldpair-table,
+  .ldpair-two-by-two-table {
     font-size: 0.95rem;
   }
+}
+
+td {
+  padding: 5px
 }

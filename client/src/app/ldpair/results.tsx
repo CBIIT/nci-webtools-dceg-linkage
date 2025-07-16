@@ -46,18 +46,17 @@ export default function LdPairResults({ ref }: { ref: string }) {
   return (
     <>
       {results && !results?.error ? (
-        <Container fluid="md" className="justify-content-center">
-          {/* Main LDpair Table */}
-          <Row>
-            <Col>
-              <table className="ldpair-table w-100">
+        <Container fluid="md">
+          <Row className="justify-content-center w-100">
+            <Col xs={12} md={8} lg={6} className="d-flex flex-column align-items-center">
+              <table className="ldpair-table mb-0" style={{ width: 340, margin: "0 auto" }}>
                 <tbody>
-                  {/* SNP 1 rsnum and coordinates */}
+                  {/* SNP2 header */}
                   <tr>
-                    <td></td>
-                    <td></td>
-                    <td colSpan={2} className="text-center">
-                      <div>
+                    <td />
+                    <td />
+                    <td colSpan={2} className="text-center pb-0">
+                      <div className="ldpair-snp2-rsnum">
                         <a
                           href={getNcbiSnpUrl(results.snp2?.rsnum)}
                           target="_blank"
@@ -66,9 +65,9 @@ export default function LdPairResults({ ref }: { ref: string }) {
                           {results.snp2?.rsnum}
                         </a>
                       </div>
-                      <div>
+                      <div className="ldpair-snp2-coord">
                         <a
-                          href={getUcscUrl(results.snp2?.coord, results.snp2?.rsnum, formData.genome_build)}
+                          href={getUcscUrl(results.snp2?.coord, results.snp2?.rsnum, formData?.genome_build)}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Genome Browser">
@@ -76,22 +75,23 @@ export default function LdPairResults({ ref }: { ref: string }) {
                         </a>
                       </div>
                     </td>
-                    <td></td>
-                    <td></td>
+                    <td />
+                    <td />
                   </tr>
                   {/* Header row */}
                   <tr>
-                    <td></td>
-                    <td></td>
+                    <td />
+                    <td />
                     <td className="text-center">{results.snp2?.allele_1?.allele}</td>
                     <td className="text-center">{results.snp2?.allele_2?.allele}</td>
-                    <td></td>
-                    <td></td>
+                    <td />
+                    <td />
                   </tr>
                   {/* Row 2 */}
                   <tr>
+                    {/* SNP1 label */}
                     <td className="text-center align-middle" rowSpan={2}>
-                      <div>
+                      <div className="ldpair-snp1-rsnum">
                         <a
                           href={getNcbiSnpUrl(results.snp1?.rsnum)}
                           target="_blank"
@@ -100,9 +100,9 @@ export default function LdPairResults({ ref }: { ref: string }) {
                           {results.snp1?.rsnum}
                         </a>
                       </div>
-                      <div>
+                      <div className="ldpair-snp1-coord">
                         <a
-                          href={getUcscUrl(results.snp1?.coord, results.snp1?.rsnum, results.genome_build)}
+                          href={getUcscUrl(results.snp1?.coord, results.snp1?.rsnum, formData?.genome_build)}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Genome Browser">
@@ -113,127 +113,94 @@ export default function LdPairResults({ ref }: { ref: string }) {
                     <td className="text-center">{results.snp1?.allele_1?.allele}</td>
                     <td colSpan={2} rowSpan={2}>
                       {/* Two-by-two sub table */}
-                      <table className="ldpair-two-by-two-table w-100">
+                      <table className="ldpair-two-by-two-table m-0" style={{ width: 120 }}>
                         <tbody>
                           <tr>
-                            <td className="ldpair-cell text-center" width="50%">
+                            <td className="ldpair-cell text-center" style={{ width: 60 }}>
                               {results.two_by_two?.cells?.c11}
                             </td>
-                            <td className="ldpair-cell text-center">{results.two_by_two?.cells?.c12}</td>
+                            <td className="ldpair-cell text-center" style={{ width: 60 }}>
+                              {results.two_by_two?.cells?.c12}
+                            </td>
                           </tr>
                           <tr>
-                            <td className="ldpair-cell text-center">{results.two_by_two?.cells?.c21}</td>
-                            <td className="ldpair-cell text-center">{results.two_by_two?.cells?.c22}</td>
+                            <td className="ldpair-cell text-center" style={{ width: 60 }}>
+                              {results.two_by_two?.cells?.c21}
+                            </td>
+                            <td className="ldpair-cell text-center" style={{ width: 60 }}>
+                              {results.two_by_two?.cells?.c22}
+                            </td>
                           </tr>
                         </tbody>
                       </table>
                     </td>
-                    <td>{results.snp1?.allele_1?.count}</td>
+                    <td className="text-center">{results.snp1?.allele_1?.count}</td>
                     <td className="text-start">({results.snp1?.allele_1?.frequency})</td>
                   </tr>
                   {/* Row 3 */}
                   <tr>
                     <td className="text-center">{results.snp1?.allele_2?.allele}</td>
-                    <td>{results.snp1?.allele_2?.count}</td>
+                    <td className="text-center">{results.snp1?.allele_2?.count}</td>
                     <td className="text-start">({results.snp1?.allele_2?.frequency})</td>
                   </tr>
-                  {/* Row 4 */}
+                  {/* Row 4: Totals and frequencies below the two-by-two table */}
                   <tr>
                     <td></td>
                     <td></td>
                     <td className="text-center">
-                      <span>{results.snp2?.allele_1?.count}</span>
-                      <br />(<span>{results.snp2?.allele_1?.frequency}</span>)
+                      {results.snp2?.allele_1?.count}
+                      <span> ({results.snp2?.allele_1?.frequency})</span>
                     </td>
                     <td className="text-center">
-                      <span>{results.snp2?.allele_2?.count}</span>
-                      <br />(<span>{results.snp2?.allele_2?.frequency}</span>)
+                      {results.snp2?.allele_2?.count}
+                      <span> ({results.snp2?.allele_2?.frequency})</span>
                     </td>
-                    <td>{results.two_by_two?.total}</td>
-                    <td></td>
+                    <td className="text-center" colSpan={2}>
+                      {results.two_by_two?.total}
+                    </td>
                   </tr>
                 </tbody>
               </table>
+
+              {/* Haplotypes and Statistics Section */}
+              <Row className="mt-4 w-100 justify-content-center">
+                <Col sm={3} />
+                <Col sm={3}>
+                  <div className="text-decoration-underline mb-2">Haplotypes</div>
+                  {["hap1", "hap2", "hap3", "hap4"].map((hap) => (
+                    <div key={hap}>
+                      {results.haplotypes?.[hap]?.alleles}: {results.haplotypes?.[hap]?.count} (
+                      {results.haplotypes?.[hap]?.frequency})
+                    </div>
+                  ))}
+                </Col>
+                <Col sm={3} className="text-start">
+                  <div className="text-decoration-underline mb-2">Statistics</div>
+                  <div>D&apos;: {results.statistics?.d_prime}</div>
+                  <div>
+                    R<sup>2</sup>: {results.statistics?.r2}
+                  </div>
+                  <div>Chi-sq: {results.statistics?.chisq}</div>
+                  <div>p-value: {results.statistics?.p}</div>
+                </Col>
+              </Row>
+              {/* Correlated Alleles */}
+              <Row className="w-100 mt-4">
+                <Col sm="2" />
+                {Array.isArray(results.corr_alleles) && results.corr_alleles.length > 0 && (
+                  <Col>
+                    {results.corr_alleles.map((item: string, idx: number) => (
+                      <div key={idx} className="text-center">
+                        {item}
+                      </div>
+                    ))}
+                  </Col>
+                )}
+              </Row>
             </Col>
           </Row>
-          {/* Haplotypes and Statistics */}
           <Row>
             <Col>
-              <table className="ldpair-table w-100">
-                <tbody>
-                  <tr>
-                    <td colSpan={2} className="text-center">
-                      <u>Haplotypes</u>
-                    </td>
-                    <td className="ldpair-spacer"></td>
-                    <td colSpan={2} className="text-center">
-                      <u>Statistics</u>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="text-end">
-                      <span>{results.haplotypes?.hap1?.alleles}</span>:
-                      <br />
-                      <span>{results.haplotypes?.hap2?.alleles}</span>:
-                      <br />
-                      <span>{results.haplotypes?.hap3?.alleles}</span>:
-                      <br />
-                      <span>{results.haplotypes?.hap4?.alleles}</span>:
-                      <br />
-                    </td>
-                    <td style={{ whiteSpace: "nowrap" }}>
-                      <span>{results.haplotypes?.hap1?.count}</span>&nbsp; (
-                      <span>{results.haplotypes?.hap1?.frequency}</span>)
-                      <br />
-                      <span>{results.haplotypes?.hap2?.count}</span>&nbsp; (
-                      <span>{results.haplotypes?.hap2?.frequency}</span>)
-                      <br />
-                      <span>{results.haplotypes?.hap3?.count}</span>&nbsp; (
-                      <span>{results.haplotypes?.hap3?.frequency}</span>)
-                      <br />
-                      <span>{results.haplotypes?.hap4?.count}</span>&nbsp; (
-                      <span>{results.haplotypes?.hap4?.frequency}</span>)
-                      <br />
-                    </td>
-                    <td className="ldpair-spacer"></td>
-                    <td className="text-end">
-                      D&apos;:
-                      <br />R<sup>2</sup>:
-                      <br />
-                      Chi-sq:
-                      <br />
-                      p-value:
-                    </td>
-                    <td>
-                      <span>{results.statistics?.d_prime}</span>
-                      <br />
-                      <span>{results.statistics?.r2}</span>
-                      <br />
-                      <span>{results.statistics?.chisq}</span>
-                      <br />
-                      <span>{results.statistics?.p}</span>
-                      <br />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </Col>
-          </Row>
-          {/* Correlated Alleles */}
-          {Array.isArray(results.corr_alleles) && results.corr_alleles.length > 0 && (
-            <Row className="mb-2">
-              <Col>
-                {results.corr_alleles.map((item: string, idx: number) => (
-                  <div key={idx} className="text-center">
-                    {item}
-                  </div>
-                ))}
-              </Col>
-            </Row>
-          )}
-          {/* Download Links */}
-          <Row>
-            <Col sm="auto">
               <a href={`/LDlinkRestWeb/tmp/LDpair_${ref}.txt`} download>
                 Download Results
               </a>
