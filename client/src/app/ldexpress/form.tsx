@@ -41,6 +41,7 @@ export default function LDExpressForm() {
   });
 
   const ldexpressFile = watch("ldexpressFile") as string | FileList;
+  const r2_d = watch("r2_d");
 
   useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
@@ -177,8 +178,8 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.tissues?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
-          <Form.Group controlId="r2_d" className="mb-3 text-center">
+        <Col sm={"auto"}>
+          <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
               <ToggleButton
@@ -211,10 +212,18 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
         <Col>
-          <Form.Group as={Row} controlId="r2_d_threshold" className="mb-3">
-            <Col sm="auto" className="my-auto">
+          Threshholds
+          <Form.Group as={Row} controlId="r2_d_threshold" className="align-items-center mb-2">
+            <Col sm="auto" className="pe-0">
               <Form.Label>
-                R<sup>2</sup> ≥
+                {r2_d === "r2" ? (
+                  <>
+                    R<sup>2</sup>
+                  </>
+                ) : (
+                  <>D&#39;</>
+                )}{" "}
+                ≥
               </Form.Label>
             </Col>
             <Col>
@@ -228,12 +237,12 @@ export default function LDExpressForm() {
                 })}
                 title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
-              <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
             </Col>
+            <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
           </Form.Group>
-          <Form.Group as={Row} controlId="p_threshold" className="mb-3">
-            <Col sm="auto" className="my-auto">
-              <Form.Label>D&#39; ≥</Form.Label>
+          <Form.Group as={Row} controlId="p_threshold" className="d-flex align-items-center mb-2">
+            <Col sm="auto" className="pe-0">
+              <Form.Label>P {"<"}</Form.Label>
             </Col>
             <Col>
               <Form.Control
@@ -246,10 +255,10 @@ export default function LDExpressForm() {
                 })}
                 title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
-              <Form.Text className="text-danger">{errors?.p_threshold?.message}</Form.Text>
             </Col>
+            <Form.Text className="text-danger">{errors?.p_threshold?.message}</Form.Text>
           </Form.Group>
-          <Form.Group controlId="window" className="mb-3">
+          <Form.Group controlId="window" className="mb-2">
             <Form.Label>Base pair window</Form.Label>
             <div className="d-flex align-items-center">
               ±&nbsp;
