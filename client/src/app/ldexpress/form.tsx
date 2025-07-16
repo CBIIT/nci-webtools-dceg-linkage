@@ -118,7 +118,7 @@ export default function LDExpressForm() {
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "snps are required",
+                required: "Required",
                 pattern: {
                   value:
                     /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
@@ -214,10 +214,10 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
         <Col>
-          Threshholds
+          Thresholds
           <Form.Group as={Row} controlId="r2_d_threshold" className="align-items-center mb-2">
             <Col sm="auto" className="pe-0">
-              <Form.Label>
+              <Form.Label style={{ width: "1.8rem" }}>
                 {r2_d === "r2" ? (
                   <>
                     R<sup>2</sup>
@@ -244,7 +244,7 @@ export default function LDExpressForm() {
           </Form.Group>
           <Form.Group as={Row} controlId="p_threshold" className="d-flex align-items-center mb-2">
             <Col sm="auto" className="pe-0">
-              <Form.Label>P {"<"}</Form.Label>
+              <Form.Label style={{ width: "1.8rem" }}>P {"<"}</Form.Label>
             </Col>
             <Col>
               <Form.Control
@@ -268,8 +268,8 @@ export default function LDExpressForm() {
                 type="number"
                 {...register("window", {
                   required: "Base pair window is required",
-                  min: 0,
-                  max: 1000000,
+                  min: { value: 0, message: "Minimum value is 0" },
+                  max: { value: 1000000, message: "Max value is 1000000" },
                 })}
                 placeholder="500000"
                 title="Value must be a number between 0 and 1,000,000"

@@ -91,7 +91,7 @@ export default function LdHapForm() {
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "snps are required",
+                required: "Required",
                 pattern: {
                   value:
                     /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
