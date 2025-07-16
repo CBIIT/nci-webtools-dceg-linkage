@@ -10,15 +10,15 @@ import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./form";
 
-export default function LdAssocResults({ ref }: { ref: string }) {
+export default function LdProxyResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
-    const url = `/LDlinkRestWeb/tmp/assoc_plot_${ref}.${format}`;
+    const url = `/LDlinkRestWeb/tmp/proxy_plot_${ref}.${format}`;
     const response = await fetch(url);
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = `assoc_plot_${ref}.${format}`;
+    link.download = `proxy_plot_${ref}.${format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -26,23 +26,23 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   };
 
   const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldassoc-form-data", ref],
+    queryKey: ["ldproxy-form-data", ref],
     enabled: !!ref,
     queryFn: async () => {
       return {} as FormData;
     },
   });
   const { data: results } = useSuspenseQuery({
-    queryKey: ["ldassoc_results", ref],
-    queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),
+    queryKey: ["ldproxy_results", ref],
+    queryFn: async () => (ref ? fetchOutput(`proxy${ref}.json`) : null),
   });
   const { data: plotJson } = useSuspenseQuery({
-    queryKey: ["ldassoc_plot", ref],
-    queryFn: async () => (ref && !results?.error ? fetchOutput(`ldassoc_plot_${ref}.json`) : null),
+    queryKey: ["ldproxy_plot", ref],
+    queryFn: async () => (ref && !results?.error ? fetchOutput(`ldproxy_plot_${ref}.json`) : null),
   });
   const { data: enableExport } = useQuery<FormData>({
-    queryKey: ["ldassoc-export", ref],
-    queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
+    queryKey: ["ldproxy-export", ref],
+    queryFn: async () => (ref ? fetchOutputStatus(`proxy_plot_${ref}.jpeg`) : false),
     enabled: !!ref && !results?.error,
     refetchInterval: 5000, // Check every 5 seconds
     retry: 60,
@@ -114,10 +114,6 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       header: "Correlated Alleles",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor((row) => row[9], {
-      header: "Association P-value",
-      cell: (info) => info.getValue(),
-    }),
     columnHelper.accessor((row) => row[10], {
       header: "FORGEdb",
       cell: (info) => info.getValue(),
@@ -141,7 +137,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
     }),
     columnHelper.accessor((row) => row[13], {
       header: "Functional Class",
-      cell: (info) => info.getValue(),
+      cell: (info) => info.getValue() || "NA",
     }),
   ];
 
@@ -174,9 +170,9 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
             <Col sm={12} className="d-flex justify-content-center">
               <Image
-                src="/images/LDassoc_legend.png"
-                title="LDassoc Legend"
-                alt="LDassoc legend"
+                src="/images/LDproxy_legend.png"
+                title="LDproxy Legend"
+                alt="LDproxy legend"
                 width={700}
                 height={0}
                 style={{
@@ -188,7 +184,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
             <Col sm={12} className="justify-content-center text-center">
               <a
-                id="ldassoc-genome"
+                id="ldproxy-genome"
                 href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
                   formData?.genome_build === "grch37" ? "hg19" : "hg38"
                 }&hgt.customText=http://${location.hostname}/LDlinkRestWeb/tmp/track${ref}.txt`}
@@ -208,7 +204,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             <Col sm={12} className="justify-content-center text-center">
               <a
                 href="https://forgedb.cancer.gov/about/"
-                target="LDassoc-forgedb-browser_FOREGEdb"
+                target="LDproxy-forgedb-browser_FOREGEdb"
                 title="FORGEdb scoring scheme">
                 View scoring scheme for FORGEdb scores
               </a>
@@ -216,32 +212,19 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             <Col sm={12} className="justify-content-center text-center">
               <a
                 href="https://www.regulomedb.org/regulome-help/"
-                target="LDassoc-genome-browser_RegulomeDB"
+                target="LDproxy-genome-browser_RegulomeDB"
                 title="RegulomeDB scoring scheme">
                 View scoring scheme for RegulomeDB scores
               </a>
             </Col>
-            <Col sm={12} className="justify-content-center">
-              <ul style={{ listStyleType: "none" }}>
-                <li>
-                  Number of Individuals: <b>{results.report.statistics.individuals}</b>
-                </li>
-                <li>
-                  SNPs in Region: <b>{results.report.statistics.in_region}</b>
-                </li>
-                <li>
-                  Run time: <b>{Number(results.report.statistics.runtime).toFixed(2)}</b> seconds
-                </li>
-              </ul>
-            </Col>
           </Row>
           <Row>
-            <Col>{results && <Table title="Association Results" data={results.aaData} columns={columns} />}</Col>
+            <Col>{results && <Table title="Proxy Variants" data={results.aaData} columns={columns} />}</Col>
           </Row>
           <Row>
             <Col>
-              <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
-                Download association data for all variants
+              <a href={`/LDlinkRestWeb/tmp/proxy${ref}.txt`} download>
+                Download all proxy variants
               </a>
             </Col>
           </Row>
