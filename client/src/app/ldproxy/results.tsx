@@ -10,6 +10,68 @@ import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./form";
 
+// Helper functions for column rendering
+function ldproxy_rs_results_link(data: any) {
+  if (!data || data === ".") return "";
+  const url = `https://www.ncbi.nlm.nih.gov/snp/${data}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {data}
+    </a>
+  );
+}
+
+function ldproxy_chromosome(data: any) {
+  if (typeof data === "string" && data.startsWith("chr")) {
+    return data.substring(3);
+  }
+  return data;
+}
+
+function ldproxy_position_link(data: any, row: any, genomeBuild: string) {
+  if (!data || data === ".") return "";
+  const chr = row[1];
+  const pos = data;
+  const build = genomeBuild === "grch37" ? "hg19" : "hg38";
+  const url = `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${build}&position=${chr}%3A${pos}-${pos}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {pos}
+    </a>
+  );
+}
+
+function ldproxy_FORGEdb_link(data: any) {
+  if (!data || data === ".") return "";
+  const url = `https://forgedb.cancer.gov/search/?q=${data}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {data}
+    </a>
+  );
+}
+
+function ldproxy_regulome_link(data: any) {
+  if (!data || data === ".") return "";
+  const url = `https://www.regulomedb.org/regulome-search/?variant=${data}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {data}
+    </a>
+  );
+}
+
+function ldproxy_haploreg_link(data: any, row: any) {
+  const rs = row[0];
+  if (!rs || rs === ".") return "";
+  const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      Link <i className="bi bi-box-arrow-up-right"></i>
+    </a>
+  );
+}
+
 export default function LdProxyResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
     const url = `/LDlinkRestWeb/tmp/proxy_plot_${ref}.${format}`;
@@ -80,15 +142,15 @@ export default function LdProxyResults({ ref }: { ref: string }) {
   const columns = [
     columnHelper.accessor((row) => row[0], {
       header: "RS Number",
-      cell: (info) => info.getValue(),
+      cell: (info) => ldproxy_rs_results_link(info.getValue()),
     }),
     columnHelper.accessor((row) => row[1], {
       header: "Chr",
-      cell: (info) => info.getValue(),
+      cell: (info) => ldproxy_chromosome(info.getValue()),
     }),
     columnHelper.accessor((row) => row[2], {
       header: `Position (${genomeBuildMap[formData?.genome_build ?? "grch37"]})`,
-      cell: (info) => info.getValue(),
+      cell: (info) => ldproxy_position_link(info.getValue(), info.row.original, formData?.genome_build ?? "grch37"),
     }),
     columnHelper.accessor((row) => row[3], {
       header: "Alleles",
@@ -114,28 +176,19 @@ export default function LdProxyResults({ ref }: { ref: string }) {
       header: "Correlated Alleles",
       cell: (info) => info.getValue(),
     }),
-    columnHelper.accessor((row) => row[10], {
+    columnHelper.accessor((row) => row[9], {
       header: "FORGEdb",
-      cell: (info) => info.getValue(),
+      cell: (info) => ldproxy_FORGEdb_link(info.getValue()),
+    }),
+    columnHelper.accessor((row) => row[10], {
+      header: "RegulomeDB",
+      cell: (info) => ldproxy_regulome_link(info.getValue()),
     }),
     columnHelper.accessor((row) => row[11], {
-      header: "RegulomeDB",
-      cell: (info) => info.getValue(),
+      header: "HaploReg",
+      cell: (info) => ldproxy_haploreg_link(info.getValue(), info.row.original),
     }),
     columnHelper.accessor((row) => row[12], {
-      header: "HaploReg",
-      cell: (info) => {
-        const rs = info.row.original[0];
-        if (!rs || rs === ".") return "";
-        const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs}`;
-        return (
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            Link <i className="bi bi-box-arrow-up-right"></i>
-          </a>
-        );
-      },
-    }),
-    columnHelper.accessor((row) => row[13], {
       header: "Functional Class",
       cell: (info) => info.getValue() || "NA",
     }),
