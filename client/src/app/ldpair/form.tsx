@@ -50,6 +50,7 @@ export default function LdPairForm() {
     };
 
     queryClient.setQueryData(["ldpair-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
 
@@ -71,7 +72,8 @@ export default function LdPairForm() {
                 required: "Required",
                 pattern: {
                   value: /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/,
-                  message: "Invalid SNP or coordinate format",
+                  message:
+                    "Invalid SNP or coordinate format, only one per line. Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               placeholder="Variant 1 RSID or CHR:POS"
@@ -88,7 +90,8 @@ export default function LdPairForm() {
                 required: "Required",
                 pattern: {
                   value: /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/,
-                  message: "Invalid SNP or coordinate format",
+                  message:
+                    "Invalid SNP or coordinate format, only one per line. Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               placeholder="Variant 2 RSID or CHR:POS"

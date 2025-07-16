@@ -97,6 +97,7 @@ export default function LDExpressForm() {
     };
 
     queryClient.setQueryData(["ldexpress-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
 
@@ -121,7 +122,8 @@ export default function LDExpressForm() {
                 pattern: {
                   value:
                     /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
-                  message: "Invalid SNP or coordinate format, only one per line",
+                  message:
+                    "Invalid SNP or coordinate format, only one per line. Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"

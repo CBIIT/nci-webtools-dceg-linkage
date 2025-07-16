@@ -187,6 +187,7 @@ export default function LDAssocForm() {
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
     queryClient.setQueryData(["ldassoc-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
 
