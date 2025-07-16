@@ -13,25 +13,40 @@ export interface Haplotype {
 }
 
 export interface ResultsData {
-  snps: Record<string, SNP>;
-  haplotypes: Record<string, Haplotype>;
-}
-
-export interface SNPClipFormData {
-  snps: string;
-  pop: string;
-  genome_build: string;
-  reference: string;
+  details: string[];
+  warnings: string[];
+  snps_ld_pruned: string[];
 }
 
 export interface FormData {
   snps: string;
   pop: PopOption[];
+  r2_threshold: string;
+  maf_threshold: string;
   genome_build: string;
-  varFile?: FileList | string;
+  varFile: string | FileList;
 }
 
-export interface SNPCip {
+export interface SnpClipData {
+  snps: string;
+  pop: string;
+  r2_threshold: string;
+  maf_threshold: string;
+  genome_build: string;
   reference: string;
+}
+
+export interface Detail {
+  rs_number: string;
+  position: string;
+  alleles: string;
+  comment: string;
+}
+
+export interface Warning {
+  rs_number: string;
+  position: string;
+  alleles: string;
+  comment: string;
 }
 

@@ -68,3 +68,8 @@ export async function snpchip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
 }
 
+export async function snpclip(params: any): Promise<any> {
+  const searchParams = new URLSearchParams(params).toString();
+  return (await axios.post(`/LDlinkRestWeb/snpclip`, searchParams)).data;
+}
+

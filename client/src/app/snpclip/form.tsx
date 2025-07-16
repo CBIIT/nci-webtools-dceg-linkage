@@ -4,12 +4,12 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { ldhap } from "@/services/queries";
+import { snpclip } from "@/services/queries";
 import PopSelect from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
-import { FormData , SNPClipFormData, SNPCip } from "./types";
+import { FormData, SnpClipData } from "./types";
 
 
 export default function SNPClipForm() {
@@ -21,7 +21,10 @@ export default function SNPClipForm() {
   const defaultForm: FormData = {
     snps: "",
     pop: [],
+    r2_threshold: "0.1",
+    maf_threshold: "0.01",
     genome_build: "grch37",
+    varFile: "",
   };
   const {
     control,
@@ -51,8 +54,8 @@ export default function SNPClipForm() {
     }
   }, [varFile, setValue]);
 
-  const submitForm = useMutation<SNPCip, Error, SNPClipFormData>({
-    mutationFn: (params: SNPClipFormData) => ldhap(params),
+  const submitForm = useMutation<any, Error, SnpClipData>({
+    mutationFn: (params: SnpClipData) => snpclip(params),
     onSuccess: (_data, variables) => {
       if (variables && variables.reference) {
         router.push(`${pathname}?ref=${variables.reference}`);
@@ -63,26 +66,26 @@ export default function SNPClipForm() {
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const { varFile, ...data } = form;
-    const formData: SNPChipFormData = {
+    const formData: SnpClipData = {
       ...data,
       reference,
       genome_build,
       pop: data.pop.map((e) => e.value).join("+"),
     };
 
-    queryClient.setQueryData(["ldhap-form-data", reference], formData);
+    queryClient.setQueryData(["snpclip-form-data", reference], formData);
     submitForm.mutate(formData);
   }
 
   function onReset(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    router.push("/ldhap");
+    router.push("/snpclip");
     reset(defaultForm);
-    queryClient.invalidateQueries({ queryKey: ["ldhap-form-data"] });
+    queryClient.invalidateQueries({ queryKey: ["snpclip-form-data"] });
   }
 
   return (
-    <Form id="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
+    <Form id="snpclip-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
           <Form.Group controlId="snps" className="mb-3">
@@ -118,6 +121,32 @@ export default function SNPClipForm() {
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
+          </Form.Group>
+        </Col>
+        <Col sm={2}>
+          <Form.Group controlId="r2_threshold" className="mb-3">
+            <Form.Label>
+              R<sup>2</sup> Threshold
+            </Form.Label>
+            <Form.Control
+              type="number"
+              step="0.01"
+              min="0"
+              max="1"
+              {...register("r2_threshold", { required: true, min: 0, max: 1 })}
+            />
+          </Form.Group>
+        </Col>
+        <Col sm={2}>
+          <Form.Group controlId="maf_threshold" className="mb-3">
+            <Form.Label>MAF Threshold</Form.Label>
+            <Form.Control
+              type="number"
+              step="0.01"
+              min="0"
+              max="1"
+              {...register("maf_threshold", { required: true, min: 0, max: 1 })}
+            />
           </Form.Group>
         </Col>
         <Col />

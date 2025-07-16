@@ -1,135 +1,142 @@
 "use client";
-import { Row, Col, Container } from "react-bootstrap";
+import { Row, Col, Container, Table, Nav } from "react-bootstrap";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
-import { FormData, ResultsData, SNP, Haplotype } from "./types";
+import { FormData, ResultsData, Detail, Warning } from "./types";
 import { genomeBuildMap } from "@/store";
+import { useState } from "react";
 import "./styles.scss";
 
-export default function SNPChipResults({ ref }: { ref: string }) {
+export default function SNPClipResults({ ref_id }: { ref_id: string }) {
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [showWarnings, setShowWarnings] = useState(false);
+
   const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldhap-form-data", ref],
-    enabled: !!ref,
-    queryFn: async () => {
-      return {} as FormData;
-    },
+    queryKey: ["snpclip-form-data", ref_id],
+    enabled: !!ref_id,
+    staleTime: Infinity,
   });
 
   const { data: results } = useSuspenseQuery<ResultsData>({
-    queryKey: ["ldhap_results", ref],
-    queryFn: async () => (ref ? fetchOutput(`ldhap${ref}.json`) : null),
+    queryKey: ["snpclip_results", ref_id],
+    queryFn: async () => (ref_id ? fetchOutput(`snpclip${ref_id}.json`) : null),
   });
 
+  const details: string[] = results?.details || [];
+  const warnings: string[] = results?.warnings || [];
+  const thinnedSnps = results?.snps_ld_pruned || [];
+
+  const selectedDetail = activeKey ? details.find((d) => d.startsWith(activeKey)) : null;
+
+  const getUCSCUrl = (snp: string) => {
+    const parts = snp.split("\t");
+    const rsNumber = parts[0];
+    const position = parts[1];
+    if (!position) return "#";
+    const [chr, pos] = position.split(":");
+    const start = Math.max(0, parseInt(pos) - 250);
+    const end = parseInt(pos) + 250;
+    const newPosition = `${chr}:${start}-${end}`;
+    const db = formData?.genome_build === "grch37" ? "hg19" : "hg38";
+    return `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=${newPosition}&snp151=pack&hgFind.matches=${rsNumber}`;
+  };
+
+  const renderRow = (data: string, isWarning = false) => {
+    const [rs_number, position, alleles, comment] = data.split("\t");
+    return (
+      <tr key={rs_number}>
+        <td>
+          <a href={`http://www.ncbi.nlm.nih.gov/snp/${rs_number}`} target="_blank" rel="noopener noreferrer">
+            {rs_number}
+          </a>
+        </td>
+        <td>
+          <a href={getUCSCUrl(data)} target="_blank" rel="noopener noreferrer">
+            {position}
+          </a>
+        </td>
+        <td>{alleles}</td>
+        <td>{comment}</td>
+      </tr>
+    );
+  };
+
   return (
-    <Container fluid="md" className="justify-content-center">
+    <Container fluid="fluid" className="p-3 jumbotron">
       <Row>
-        <Col sm="auto">
-          <table className="table table-condensed w-auto">
-            <thead>
-              <tr>
-                <th>RS Number</th>
-                <th>Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
-                <th style={{ whiteSpace: "nowrap" }}>Allele Frequencies</th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <td colSpan={2} rowSpan={2}></td>
-                <td>Haplotype Count</td>
-              </tr>
-              <tr>
-                <td style={{ whiteSpace: "nowrap" }}>Haplotype Frequency</td>
-              </tr>
-            </tfoot>
-            <tbody className="table-body-border">
-              {Object.values(results.snps)?.map((snp: SNP, i: number) => (
-                <tr key={i}>
-                  <td>
-                    <a title="Cluster Report" target="_blank" href={`http://www.ncbi.nlm.nih.gov/snp/${snp.RS}`}>
-                      <span>{snp.RS}</span>
-                      <span className="visually-hidden">Cluster Report</span>
-                    </a>
-                  </td>
-                  <td>
-                    {snp.Coord && (
-                      <a
-                        title="Genome Browser"
-                        target="_blank"
-                        href={(() => {
-                          const positions = snp.Coord.split(":");
-                          const chr = positions[0];
-                          const mid_value = parseInt(positions[1]);
-                          const offset = 250;
-                          const range = `${mid_value - offset}-${mid_value + offset}`;
-                          const position = `${chr}:${range}`;
-                          const params = {
-                            "db": formData?.genome_build == "grch37" ? "hg19" : "hg38",
-                            "position": position,
-                            "snp151": "pack",
-                            "hgFind.matches": snp.RS,
-                          };
-                          return `https://genome.ucsc.edu/cgi-bin/hgTracks?${new URLSearchParams(params)}`;
-                        })()}>
-                        <span>{snp.Coord}</span>
-                        <span className="visually-hidden">Genome Browser</span>
-                      </a>
-                    )}
-                  </td>
-                  <td>{snp.Alleles}</td>
+        <Col md={3} xl={2}>
+          <div className="snpclip-table-scroller">
+            <Table striped bordered hover size="sm">
+              <caption>LD Thinned Variant List</caption>
+              <thead>
+                <tr>
+                  <th>RS Number</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </Col>
-        <Col sm="6">
-          <table id="ldhap-table-right" className="table table-condensed text-center">
-            <thead>
-              <tr>
-                <th colSpan={5}>Haplotypes</th>
-              </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                {Object.values(results.haplotypes)?.map((h: Haplotype, i: number) => (
-                  <td key={i}>{h.Count}</td>
-                ))}
-              </tr>
-              <tr>
-                {Object.values(results.haplotypes)?.map((h: Haplotype, i: number) => (
-                  <td key={i}>{h.Frequency}</td>
-                ))}
-              </tr>
-            </tfoot>
-            <tbody>
-              {Object.values(results.haplotypes)?.map((h: Haplotype, i: number) => {
-                const alleles = h.Haplotype?.split("_") || [];
-                return (
-                  <tr key={i}>
-                    {alleles.map((allele: string, j: number) => (
-                      <td
-                        key={j}
-                        className={`haplotype ${
-                          allele === "-" ? "haplotype_dash" : `haplotype_${allele.toLowerCase()}`
-                        }`}>
-                        <span>{allele}</span>
-                      </td>
-                    ))}
+              </thead>
+              <tbody>
+                {thinnedSnps.map((snp, i) => (
+                  <tr
+                    key={i}
+                    className={activeKey === snp ? "active-row" : ""}
+                    onClick={() => {
+                      setActiveKey(snp);
+                      setShowWarnings(false);
+                    }}>
+                    <td>{snp}</td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </Table>
+            {warnings.length > 0 && (
+              <Nav.Link onClick={() => setShowWarnings(true)} className="text-primary">
+                Variants with Warnings
+              </Nav.Link>
+            )}
+          </div>
+        </Col>
+        <Col md={9} xl={10}>
+          <div className="snpclip-table-scroller">
+            {showWarnings ? (
+              <Table striped bordered hover size="sm">
+                <caption>Variants With Warnings</caption>
+                <thead>
+                  <tr>
+                    <th>RS Number</th>
+                    <th>Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
+                    <th>Alleles</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {warnings.map((warning) => renderRow(warning, true))}
+                </tbody>
+              </Table>
+            ) : selectedDetail ? (
+              <Table striped bordered hover size="sm">
+                <caption>Details for {selectedDetail.split("\t")[0]}</caption>
+                <thead>
+                  <tr>
+                    <th>RS Number</th>
+                    <th>Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
+                    <th>Alleles</th>
+                    <th>Details</th>
+                  </tr>
+                </thead>
+                <tbody>{renderRow(selectedDetail)}</tbody>
+              </Table>
+            ) : (
+              <div>Click a variant on the left to view details.</div>
+            )}
+          </div>
         </Col>
       </Row>
-      <Row>
-        <Col sm="auto">
-          <a href={`/LDlinkRestWeb/tmp/snps_${ref}.txt`} download>
-            Download Variant File
-          </a>
-        </Col>
+      <Row className="mt-3">
         <Col>
-          <a href={`/LDlinkRestWeb/tmp/haplotypes_${ref}.txt`} download>
-            Download Haplotype File
+          <a href={`/LDlinkRestWeb/tmp/snpclip_snps_${ref_id}.txt`} download className="me-4">
+            Download Thinned Variant List
+          </a>
+          <a href={`/LDlinkRestWeb/tmp/snpclip_details_${ref_id}.txt`} download>
+            Download Thinned Variant List with Details
           </a>
         </Col>
       </Row>
