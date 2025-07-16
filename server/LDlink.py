@@ -1731,7 +1731,7 @@ def ldpair():
         # WEB REQUEST
         if request.headers.get("User-Agent"):
             web = True
-            reference = str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
+            reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
             app.logger.debug(
                 "ldpair params "
                 + json.dumps(
@@ -1751,6 +1751,8 @@ def ldpair():
             # print('request: ' + str(reference))
             try:
                 out_json = calculate_pair(snp_pairs, pop, web, genome_build, reference)
+                with open(tmp_dir + "ldpair" + reference + ".json", "w") as f:
+                    json.dump(json.loads(out_json)[0], f)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))

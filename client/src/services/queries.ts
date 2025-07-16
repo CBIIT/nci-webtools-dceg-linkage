@@ -48,6 +48,11 @@ export async function ldmatrix(params: any): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/ldmatrix?${searchParams}`)).data;
 }
 
+export async function ldpair(params: any): Promise<any> {
+  const searchParams = new URLSearchParams(flattenForParams(params)).toString();
+  return (await axios.get(`/LDlinkRestWeb/ldpair?${searchParams}`)).data;
+}
+
 export async function fetchOutput(filename: string): Promise<any> {
   return (await axios.get(`/LDlinkRestWeb/tmp/${filename}`)).data;
 }
