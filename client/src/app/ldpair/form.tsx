@@ -64,7 +64,7 @@ export default function LdPairForm() {
     <Form id="ldpair-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm={2}>
-          <Form.Group controlId="snps" className="mb-3">
+          <Form.Group controlId="var1" className="mb-3">
             <Form.Label>Variant 1</Form.Label>
             <Form.Control
               {...register("var1", {
@@ -81,7 +81,7 @@ export default function LdPairForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <Form.Group controlId="snps" className="mb-3">
+          <Form.Group controlId="var2" className="mb-3">
             <Form.Label>Variant 2</Form.Label>
             <Form.Control
               {...register("var2", {
