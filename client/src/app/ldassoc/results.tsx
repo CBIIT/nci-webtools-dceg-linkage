@@ -103,7 +103,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[6], {
-      header: "D&#39;",
+      header: "D'",
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[7], {
