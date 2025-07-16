@@ -184,10 +184,17 @@ def calculate_proxy_svg(snp, pop, request, genome_build, r2_d="r2", window=50000
     # Return plot output
     return None
 
-def main():
-
-    # Import LDproxy options
-    if len(sys.argv) == 9:
+def main(snp=None, pop=None, request=None, genome_build=None, r2_d="r2", window=500000, collapseTranscript=True, annotate="forge"):
+    """
+    Main entry point for LDproxy_plot_sub.
+    If arguments are provided, runs calculate_proxy_svg with them.
+    If called from command line, parses sys.argv.
+    """
+    if snp is not None:
+        # Called as imported module
+        calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript, annotate)
+    elif len(sys.argv) == 9:
+        # Called from command line
         snp = sys.argv[1]
         pop = sys.argv[2]
         request = sys.argv[3]
@@ -196,12 +203,10 @@ def main():
         window = sys.argv[6]
         collapseTranscript = sys.argv[7]
         annotate = sys.argv[8]
+        calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript, annotate)
     else:
-        sys.exit()
-
-    # Run function
-    calculate_proxy_svg(snp, pop, request, genome_build, r2_d, int(window), collapseTranscript, annotate)
-
+        # Do nothing if imported without arguments
+        pass
 
 if __name__ == "__main__":
     main()
