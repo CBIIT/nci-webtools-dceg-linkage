@@ -20,9 +20,9 @@ export default function SNPchip() {
   return (
     <>
       <ToolBanner
-        name="LDhap Tool"
-        href="/help/#LDhap"
-        description="Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants."
+        name="SNPClip"
+        href="/help/#SNPClip"
+        description="Prune a list of variants by linkage disequilibrium."
       />
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">

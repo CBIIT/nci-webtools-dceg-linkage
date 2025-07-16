@@ -17,7 +17,7 @@ export interface ResultsData {
   haplotypes: Record<string, Haplotype>;
 }
 
-export interface SNPChipFormData {
+export interface SNPClipFormData {
   snps: string;
   pop: string;
   genome_build: string;
@@ -31,7 +31,7 @@ export interface FormData {
   varFile?: FileList | string;
 }
 
-export interface SNPChip {
+export interface SNPCip {
   reference: string;
 }
 

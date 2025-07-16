@@ -9,7 +9,7 @@ import PopSelect from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
-import { FormData, LdhapFormData, Ldhap } from "./types";
+import { FormData , SNPClipFormData, SNPCip } from "./types";
 
 
 export default function SNPClipForm() {
@@ -51,8 +51,8 @@ export default function SNPClipForm() {
     }
   }, [varFile, setValue]);
 
-  const submitForm = useMutation<Ldhap, Error, LdhapFormData>({
-    mutationFn: (params: LdhapFormData) => ldhap(params),
+  const submitForm = useMutation<SNPCip, Error, SNPClipFormData>({
+    mutationFn: (params: SNPClipFormData) => ldhap(params),
     onSuccess: (_data, variables) => {
       if (variables && variables.reference) {
         router.push(`${pathname}?ref=${variables.reference}`);
@@ -63,7 +63,7 @@ export default function SNPClipForm() {
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const { varFile, ...data } = form;
-    const formData: LdhapFormData = {
+    const formData: SNPChipFormData = {
       ...data,
       reference,
       genome_build,
