@@ -74,23 +74,19 @@ function isRouteActive(route: Route, pathName: string): boolean {
   return false;
 }
 
-const CustomNavDropdownToggle = React.forwardRef<HTMLAnchorElement, any>(
-  ({ children, onClick, className }, ref) => (
-    <a
-      href="#"
-      ref={ref}
-      className={clsx("nav-link", className)}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick(e);
-      }}
-    >
-      {children}
-    </a>
-  )
-);
+const CustomNavDropdownToggle = React.forwardRef<HTMLAnchorElement, any>(({ children, onClick, className }, ref) => (
+  <a
+    href="#"
+    ref={ref}
+    className={clsx("nav-link", className)}
+    onClick={(e) => {
+      e.preventDefault();
+      onClick(e);
+    }}>
+    {children}
+  </a>
+));
 CustomNavDropdownToggle.displayName = "CustomNavDropdownToggle";
-
 
 // Function to render routes
 function renderRoutes({
@@ -114,9 +110,8 @@ function renderRoutes({
       return (
         <Nav.Item key={route.path || route.title}>
           <Link href={route.path || "#"} className={clsx("nav-link", isActive && "nav-menu-active", "pointer-cursor")}>
-            {route.title}            
+            {route.title}
           </Link>
-          
         </Nav.Item>
       );
     }
@@ -134,16 +129,14 @@ function renderRoutes({
         key={route.title}
         className={clsx("dropdown", isActive && "nav-menu-active")}
         onMouseEnter={() => !isMobileView && setOpenSubmenu(route.title)}
-        onMouseLeave={() => !isMobileView && setOpenSubmenu(null)}
-      >
+        onMouseLeave={() => !isMobileView && setOpenSubmenu(null)}>
         <span
           className={clsx("nav-link pointer-cursor", isActive && "nav-menu-active")}
           onClick={() => {
             if (isMobileView) {
               setOpenSubmenu(openSubmenu === route.title ? null : route.title);
             }
-          }}
-        >
+          }}>
           {route.title}
           <i className="bi bi-caret-down-fill ms-2"></i>
         </span>
@@ -154,8 +147,7 @@ function renderRoutes({
               <Link
                 key={subRoute.path}
                 href={subRoute.path}
-                className={clsx("dropdown-item", pathsMatch(pathName, subRoute.path) && "active")}
-              >
+                className={clsx("dropdown-item", pathsMatch(pathName, subRoute.path) && "active")}>
                 {subRoute.title}
               </Link>
             ))}
@@ -163,9 +155,6 @@ function renderRoutes({
         )}
       </Nav.Item>
     );
-
-
-
   });
 }
 
@@ -185,15 +174,13 @@ export default function AppNavbar({ routes = [] }: AppNavbarProps): React.ReactE
   }, []);
 
   return (
-    <Navbar expand="md" className=" font-title pt-1 pb-1">
+    <Navbar expand="md">
       <Container>
         <Navbar.Toggle aria-controls="navbar-nav" className="px-0 py-3">
           <i className="bi bi-list me-1"></i> Menu
         </Navbar.Toggle>
         <Navbar.Collapse id="navbar-nav" className="align-items-stretch">
-          <Nav className="me-auto">
-            {renderRoutes({ routes, pathName, openSubmenu, setOpenSubmenu, isMobileView })}
-          </Nav>
+          <Nav className="me-auto">{renderRoutes({ routes, pathName, openSubmenu, setOpenSubmenu, isMobileView })}</Nav>
         </Navbar.Collapse>
       </Container>
     </Navbar>
