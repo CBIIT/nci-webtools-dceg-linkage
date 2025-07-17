@@ -41,8 +41,7 @@ export default function LdPairResults({ ref }: { ref: string }) {
     queryKey: ["ldpair_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldpair${ref}.json`) : null),
   });
-  console.log(results);
-  console.log(formData);
+
   return (
     <>
       {results && !results?.error ? (
