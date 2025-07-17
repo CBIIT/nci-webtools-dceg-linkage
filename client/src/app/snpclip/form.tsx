@@ -64,7 +64,7 @@ export default function SNPClipForm() {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1));
     const { varFile, ...data } = form;
     const formData: SnpClipData = {
       ...data,
@@ -73,7 +73,9 @@ export default function SNPClipForm() {
       pop: data.pop.map((e) => e.value).join("+"),
     };
 
-    queryClient.setQueryData(["snpclip-form-data", reference], formData);
+    console.log("Submitting SNPClip form with data:", formData);
+
+    queryClient.setQueryData(["snpclip-form-data", reference.toString()], formData);
     submitForm.mutate(formData);
   }
 
@@ -94,7 +96,7 @@ export default function SNPClipForm() {
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "snps are required",
+                required: "SNPs are required.",
                 pattern: {
                   value:
                     /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
