@@ -65,15 +65,15 @@ export default function LdPairForm() {
     <Form id="ldpair-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm={2}>
-          <Form.Group controlId="var1" className="mb-3">
+          <Form.Group controlId="var1" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>Variant 1</Form.Label>
             <Form.Control
               {...register("var1", {
-                required: "Required",
+                required: "This field is required",
                 pattern: {
                   value: /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/,
                   message:
-                    "Invalid SNP or coordinate format, only one per line. Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
+                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               placeholder="Variant 1 RSID or CHR:POS"
@@ -83,15 +83,15 @@ export default function LdPairForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <Form.Group controlId="var2" className="mb-3">
+          <Form.Group controlId="var2" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>Variant 2</Form.Label>
             <Form.Control
               {...register("var2", {
-                required: "Required",
+                required: "This field is required",
                 pattern: {
                   value: /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/,
                   message:
-                    "Invalid SNP or coordinate format, only one per line. Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
+                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               placeholder="Variant 2 RSID or CHR:POS"

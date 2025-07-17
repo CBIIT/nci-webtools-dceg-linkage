@@ -112,18 +112,18 @@ export default function LDExpressForm() {
     <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
-          <Form.Group controlId="snps" className="mb-3">
+          <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "Required",
+                required: "This field is required",
                 pattern: {
                   value:
                     /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
                   message:
-                    "Invalid SNP or coordinate format, only one per line. Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
+                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
@@ -231,7 +231,7 @@ export default function LDExpressForm() {
             <Col>
               <Form.Control
                 {...register("r2_d_threshold", {
-                  required: "Threshold required",
+                  required: "Threshold is required",
                   pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
@@ -249,7 +249,7 @@ export default function LDExpressForm() {
             <Col>
               <Form.Control
                 {...register("p_threshold", {
-                  required: "Threshold required",
+                  required: "Threshold is required",
                   pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
