@@ -95,9 +95,9 @@ export default function LDMatrixForm() {
               {...register("snps", {
                 required: "This field is required",
                 pattern: {
-                  value:
-                    /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
-                  message: "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
+                  value: /^([ \t]*([rR][sS]\d+|[cC][hH][rR](?:\d+|[xXyY]):\d+)[ \t]*\n?)+$/m,
+                  message:
+                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
