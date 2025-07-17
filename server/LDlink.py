@@ -2240,7 +2240,7 @@ def ldtraitgwas():
     # Required parameters
     snps = request.args.get("snps", False)
     pop = request.args.get("pop", False)
-    r2_d = "r2_d"
+    r2_d = "r2"
     r2_d_threshold = 0.1
 
     # Optional parameters
@@ -2248,10 +2248,8 @@ def ldtraitgwas():
     genome_build ="grch37"
     
     reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
-    ifContinue = True
+   
     # Run calculate_trait in a separate thread
-    print("####################")
-    print(snps, pop, r2_d, r2_d_threshold, reference, genome_build, window)
     if request.user_agent.browser is not None:
             web = True
             snpfile = str(tmp_dir + "snps" + reference + ".txt")
@@ -2266,7 +2264,7 @@ def ldtraitgwas():
                 # snplst, pop, request, web, r2_d, threshold
                 print(snpfile, pop, r2_d, r2_d_threshold, reference, genome_build, window)
                 (query_snps, thinned_snps, details) = calculate_trait(
-                    snplist, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window), ifContinue
+                    snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window)
                 )
                 trait["query_snps"] = query_snps
                 trait["thinned_snps"] = thinned_snps
