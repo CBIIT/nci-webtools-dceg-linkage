@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Spinner } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
@@ -232,7 +232,9 @@ export default function LDAssocForm() {
             <div>
               <Form.Group controlId="columns.chromosome" className="mb-3">
                 <Form.Label>Chromosome Column</Form.Label>
-                <Form.Select {...register("columns.chromosome", { required: "Chromosome column is required" })}>
+                <Form.Select
+                  {...register("columns.chromosome", { required: "Chromosome column is required" })}
+                  disabled={!columnOptions.length}>
                   <option value="" disabled>
                     Select...
                   </option>
@@ -246,7 +248,9 @@ export default function LDAssocForm() {
               </Form.Group>
               <Form.Group controlId="columns.position" className="mb-3">
                 <Form.Label>Position Column</Form.Label>
-                <Form.Select {...register("columns.position", { required: "Position column is required" })}>
+                <Form.Select
+                  {...register("columns.position", { required: "Position column is required" })}
+                  disabled={!columnOptions.length}>
                   <option value="" disabled>
                     Select...
                   </option>
@@ -260,7 +264,9 @@ export default function LDAssocForm() {
               </Form.Group>
               <Form.Group controlId="columns.pvalue" className="mb-3">
                 <Form.Label>P-Value Column</Form.Label>
-                <Form.Select {...register("columns.pvalue", { required: "P-value column is required" })}>
+                <Form.Select
+                  {...register("columns.pvalue", { required: "P-value column is required" })}
+                  disabled={!columnOptions.length}>
                   <option value="" disabled>
                     Select...
                   </option>
