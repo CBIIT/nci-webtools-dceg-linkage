@@ -12,38 +12,42 @@ import { FormData } from "./form";
 
 // Helper functions for column rendering
 function ldproxy_rs_results_link(data: any) {
-  if (!data || data === ".") return "";
-  const url = `https://www.ncbi.nlm.nih.gov/snp/${data}`;
+  if (!data || !data.includes("rs") || data.length <= 2) return ".";
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer">
+    <a href={`https://www.ncbi.nlm.nih.gov/snp/${data}`} target={`rs_number_${Math.floor(Math.random() * 90000 + 10000)}`} rel="noopener noreferrer">
       {data}
     </a>
   );
-}
-
-function ldproxy_chromosome(data: any) {
-  if (typeof data === "string" && data.startsWith("chr")) {
-    return data.substring(3);
-  }
-  return data;
 }
 
 function ldproxy_position_link(data: any, row: any, genomeBuild: string) {
-  if (!data || data === ".") return "";
   const chr = row[1];
-  const pos = data;
+  const mid_value = parseInt(data);
+  const offset = 250;
+  const position = `${chr}:${mid_value - offset}-${mid_value + offset}`;
   const build = genomeBuild === "grch37" ? "hg19" : "hg38";
-  const url = `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${build}&position=${chr}%3A${pos}-${pos}`;
+  const url = `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${build}&position=${position}&snp151=pack&hgFind.matches=${row[0]}`;
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer">
-      {pos}
+    <a href={url} target={`position_${Math.floor(Math.random() * 90000 + 10000)}`} rel="noopener noreferrer">
+      {data}
     </a>
   );
 }
 
-function ldproxy_FORGEdb_link(data: any) {
-  if (!data || data === ".") return "";
-  const url = `https://forgedb.cancer.gov/search/?q=${data}`;
+function ldproxy_FORGEdb_link(score: any, row: any) {
+  return (
+    <a href={`https://forgedb.cancer.gov/explore?rsid=${row[0]}`} target="_blank" rel="noopener noreferrer">
+      {score}
+    </a>
+  );
+}
+
+function ldproxy_regulome_link(data: any, row: any, genomeBuild: string) {
+  const chr = row[1];
+  const mid_value = parseInt(row[2]);
+  const zero_base = mid_value - 1;
+  const genome = genomeBuild === "grch37" ? "GRCh37" : "GRCh38";
+  const url = `https://www.regulomedb.org/regulome-search/?genome=${genome}&regions=${chr}:${zero_base}-${mid_value}`;
   return (
     <a href={url} target="_blank" rel="noopener noreferrer">
       {data}
@@ -51,23 +55,14 @@ function ldproxy_FORGEdb_link(data: any) {
   );
 }
 
-function ldproxy_regulome_link(data: any) {
-  if (!data || data === ".") return "";
-  const url = `https://www.regulomedb.org/regulome-search/?variant=${data}`;
+function ldproxy_haploreg_link(row: any) {
+  const rs_number = row[0];
+  if (!rs_number || rs_number === ".") return "";
+  const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs_number}`;
+  const target = `haploreg_${Math.floor(Math.random() * 90000 + 10000)}`;
   return (
-    <a href={url} target="_blank" rel="noopener noreferrer">
-      {data}
-    </a>
-  );
-}
-
-function ldproxy_haploreg_link(data: any, row: any) {
-  const rs = row[0];
-  if (!rs || rs === ".") return "";
-  const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs}`;
-  return (
-    <a href={url} target="_blank" rel="noopener noreferrer">
-      Link <i className="bi bi-box-arrow-up-right"></i>
+    <a href={url} target={target} rel="noopener noreferrer">
+      <Image src="/images/LDproxy_external_link.png" alt="HaploReg Details" title="HaploReg Details" className="haploreg_external_link" width={16} height={16} />
     </a>
   );
 }
@@ -146,7 +141,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     }),
     columnHelper.accessor((row) => row[1], {
       header: "Chr",
-      cell: (info) => ldproxy_chromosome(info.getValue()),
+      cell: (info) => info.getValue().substring(3),
     }),
     columnHelper.accessor((row) => row[2], {
       header: `Position (${genomeBuildMap[formData?.genome_build ?? "grch37"]})`,
@@ -178,15 +173,15 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     }),
     columnHelper.accessor((row) => row[9], {
       header: "FORGEdb",
-      cell: (info) => ldproxy_FORGEdb_link(info.getValue()),
+      cell: (info) => ldproxy_FORGEdb_link(info.getValue(), info.row.original),
     }),
     columnHelper.accessor((row) => row[10], {
       header: "RegulomeDB",
-      cell: (info) => ldproxy_regulome_link(info.getValue()),
+      cell: (info) => ldproxy_regulome_link(info.getValue(), info.row.original, formData?.genome_build ?? "grch37"),
     }),
     columnHelper.accessor((row) => row[11], {
       header: "HaploReg",
-      cell: (info) => ldproxy_haploreg_link(info.getValue(), info.row.original),
+      cell: (info) => ldproxy_haploreg_link(info.row.original),
     }),
     columnHelper.accessor((row) => row[12], {
       header: "Functional Class",
