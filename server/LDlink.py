@@ -2163,6 +2163,8 @@ def ldtrait():
             # lock token preventing concurrent requests
             toggleLocked(token, 1)
             app.logger.debug("begin to call trait")
+            print("####################")
+            print(snpfile, pop, r2_d, r2_d_threshold, reference, genome_build, window)
             try:
                 (query_snps, thinned_snps, details) = calculate_trait(
                     snpfile, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window)
@@ -2228,6 +2230,84 @@ def ldtrait():
     app.logger.info("Executed LDtrait (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype="application/json")
+
+
+
+# API route for LDtrait GWAS Catalog
+@app.route("/LDlinkRestWeb/ldtraitgwas", methods=["GET"])
+def ldtraitgwas():
+    start_time = time.time()
+    # Required parameters
+    snps = request.args.get("snps", False)
+    pop = request.args.get("pop", False)
+    r2_d = "r2_d"
+    r2_d_threshold = 0.1
+
+    # Optional parameters
+    window = "500000"
+    genome_build ="grch37"
+    
+    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    ifContinue = True
+    # Run calculate_trait in a separate thread
+    print("####################")
+    print(snps, pop, r2_d, r2_d_threshold, reference, genome_build, window)
+    if request.user_agent.browser is not None:
+            web = True
+            snpfile = str(tmp_dir + "snps" + reference + ".txt")
+            snplist = snps.splitlines()
+            with open(snpfile, "w") as f:
+                for s in snplist:
+                    s = s.lstrip()
+                    if s[:2].lower() == "rs" or s[:3].lower() == "chr":
+                        f.write(s.lower() + "\n")
+            try:
+                trait = {}
+                # snplst, pop, request, web, r2_d, threshold
+                print(snpfile, pop, r2_d, r2_d_threshold, reference, genome_build, window)
+                (query_snps, thinned_snps, details) = calculate_trait(
+                    snplist, pop, reference, web, r2_d, genome_build, float(r2_d_threshold), int(window), ifContinue
+                )
+                trait["query_snps"] = query_snps
+                trait["thinned_snps"] = thinned_snps
+                trait["details"] = details
+
+                with open(tmp_dir + "trait" + reference + ".json") as f:
+                    json_dict = json.load(f)
+                if "error" in json_dict:
+                    trait["error"] = json_dict["error"]
+                else:
+                    with open(tmp_dir + "trait_variants_annotated" + reference + ".txt", "w") as f:
+                        f.write(
+                            "Query\tGWAS Trait\tPMID\tRS Number\tPosition ("
+                            + genome_build_vars[genome_build]["title"]
+                            + ")\tAlleles\tR2\tD'\tRisk Allele\tEffect Size (95% CI)\tBeta or OR\tP-value\n"
+                        )
+                        for snp in thinned_snps:
+                            for matched_gwas in details[snp]["aaData"]:
+                                f.write(snp + "\t")
+                                f.write(
+                                    "\t".join(
+                                        [str(element) for i, element in enumerate(matched_gwas) if i not in {7, 12}]
+                                    )
+                                    + "\n"
+                                )
+                        if "warning" in json_dict:
+                            trait["warning"] = json_dict["warning"]
+                            f.write("Warning(s):\n")
+                            f.write(trait["warning"])
+                out_json = json.dumps(trait, sort_keys=False)
+                print("####################")
+                print(out_json)
+                return current_app.response_class(out_json, mimetype="application/json")
+            except Exception as e:
+                exc_obj = e
+                app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+                return sendTraceback(None)
+    else:
+            return sendJSON(
+                "This web API route does not support programmatic access. Please use the API routes specified on the API Access web page."
+            )
 
 
 # Web and API route for SNPchip

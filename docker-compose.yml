@@ -19,7 +19,7 @@ services:
       context: .
       dockerfile: docker/frontend.dockerfile
     ports:
-      - "9000:80"
+      - "9090:80"
     environment:
       API_HOST: "http://backend:80"
     networks:

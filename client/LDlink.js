@@ -2895,6 +2895,7 @@ function autoCalculate() {
   } else {
     return;
   }
+  console.log(url)
   var id = url.tab.toLowerCase();
   switch (id) {
     case "ldpair":
@@ -2929,6 +2930,30 @@ function autoCalculate() {
         refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
         initCalculate(id);
         updateData(id);
+      }
+      break;
+     case "ldtrait":
+      if (url.snps && url.pop && url.r2_d) {
+        $("#ldtrait-file-snp-numbers").prop("value", url.snps);
+        $("#trait_color_r2").toggleClass("active", url.r2_d == "r2");
+        $("#trait_color_r2")
+          .next()
+          .toggleClass("active", url.r2_d == "d");
+        refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
+        initCalculate(id);
+        updateData("ldtrait");
+      }
+      break;
+    case "ldtraitgwas":
+      if (url.snps && url.pop && url.r2_d) {
+        $("#ldtrait-file-snp-numbers").prop("value", url.snps);
+        $("#trait_color_r2").toggleClass("active", url.r2_d == "r2");
+        $("#trait_color_r2")
+          .next()
+          .toggleClass("active", url.r2_d == "d");
+        refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldtrait");
+        initCalculate("ldtrait");
+        updateData("ldtraitgwas");
       }
       break;
   }
@@ -3806,6 +3831,12 @@ function updateData(id) {
       if (isPopulationSet(id) && validateLDtraitBasePairWindow()) {
         $("#" + id + "-loading").show();
         updateLDtrait();
+      }
+      break;
+    case "ldtraitgwas":
+      if (isPopulationSet("ldtrait") && validateLDtraitBasePairWindow()) {
+        $("#" + "ldtrait" + "-loading").show();
+        updateLDtraitGWAS();
       }
       break;
     case "snpclip":
@@ -5592,7 +5623,6 @@ function updateLDtrait() {
     genome_build: genomeBuild,
     ifContinue: ifContinue,
   };
-
   //Show inital message
   $("#new-ldtrait_wrapper").hide();
   $("#new-ldtrait-query-warnings_wrapper").hide();
@@ -5620,6 +5650,116 @@ function updateLDtrait() {
     type: "POST",
     url: url,
     data: JSON.stringify(ldInputs),
+    contentType: "application/json", // JSON
+  });
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    var jsonObj = data;
+    if (displayError(id, jsonObj) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container").show();
+      $("#" + id + "-links-container").show();
+      $("#" + id + "-loading").hide();
+      initTrait(data, r2_d);
+    }
+    if (data.warning != null) {
+      if (data.warning.includes("timeout")) {
+        $("#" + id + "-results-container").hide();
+        $("#" + id + "-links-container").hide();
+        $("#" + id + "-loading").hide();
+        $("#ldtrait-continue").attr("style", "display:block");
+        $("#ldtrait-cancel").attr("style", "display:block");
+      }
+    }
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
+  document.getElementById("ldtrait-continue").value = "Continue";
+}
+
+function updateLDtraitGWAS() {
+  var id = "ldtrait";
+
+  var $btn = $("#" + id).button("loading");
+  var snps = DOMPurify.sanitize($("#" + id + "-file-snp-numbers").val());
+  var population = getPopulationCodes(id + "-population-codes");
+  var r2_d;
+  var window = $("#" + id + "-bp-window")
+    .val()
+    .replace(/\,/g, "");
+  var ifContinue = document.getElementById("ldtrait-continue").value;
+
+  if ($("#ldtrait_ld_r2").hasClass("active")) {
+    r2_d = "r2"; // i.e. R2
+  } else {
+    r2_d = "d"; // i.e. Dprime
+  }
+
+  var estimateWindowSizeMultiplier = window / 500000.0;
+  var estimateSeconds = Math.round(
+    snps.split("\n").length * 5 * estimateWindowSizeMultiplier
+  );
+  // console.log("estimate seconds", estimateSeconds);
+  var estimateMinutes = estimateSeconds / 60;
+  if (estimateSeconds < 60) {
+    $("#ldtrait-estimate-loading").text(estimateSeconds + " seconds");
+  } else {
+    $("#ldtrait-estimate-loading").text(
+      estimateMinutes.toFixed(2) + " minute(s)"
+    );
+  }
+
+  var ldInputs = {
+    snps: snps,
+    pop: population.join("+"),
+    r2_d: r2_d,
+    r2_d_threshold: $("#" + id + "_r2_d_threshold").val(),
+    window: window,
+    reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
+    genome_build: genomeBuild,
+    ifContinue: ifContinue,
+  };
+  //updateHistoryURL(id, ldInputs);
+  //Show inital message
+  $("#new-ldtrait_wrapper").hide();
+  $("#new-ldtrait-query-warnings_wrapper").hide();
+  $("#ldtrait-initial-message").show();
+  $("#ldtrait-continue").attr("style", "display:none");
+  $("#ldtrait-cancel").attr("style", "display:none");
+  //Update href on
+  //Set file links
+  $("#ldtrait-variants-annotated-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/trait_variants_annotated" + ldInputs.reference + ".txt"
+  );
+  $("#ldtrait-variants-annotated-link").attr(
+    "target",
+    "trait_variants_annotated" + ldInputs.reference
+  );
+  var url = restServerUrl + "/ldtraitgwas";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+   // data: JSON.stringify(ldInputs),
+    data: ldInputs,
     contentType: "application/json", // JSON
   });
   ajaxRequest.success(function (data) {

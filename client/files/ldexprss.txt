@@ -1,0 +1,6 @@
+rs73062623
+rs187103513
+rs17880489
+rS1457504894
+
+GRCH38 high coverage, pop:  chb, tissure: brain (choose first three)
