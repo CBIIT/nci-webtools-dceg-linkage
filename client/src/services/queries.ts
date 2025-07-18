@@ -39,22 +39,27 @@ export async function ldexpressTissues(): Promise<any> {
 }
 
 export async function ldhap(params: any): Promise<any> {
-  const searchParams = new URLSearchParams(flattenForParams(params)).toString();
+  const searchParams = new URLSearchParams(params).toString();
   return (await axios.get(`/LDlinkRestWeb/ldhap?${searchParams}`)).data;
 }
 
 export async function ldmatrix(params: any): Promise<any> {
-  const searchParams = new URLSearchParams(flattenForParams(params)).toString();
+  const searchParams = new URLSearchParams(params).toString();
   return (await axios.get(`/LDlinkRestWeb/ldmatrix?${searchParams}`)).data;
 }
 
 export async function ldpair(params: any): Promise<any> {
-  const searchParams = new URLSearchParams(flattenForParams(params)).toString();
+  const searchParams = new URLSearchParams(params).toString();
   return (await axios.get(`/LDlinkRestWeb/ldpair?${searchParams}`)).data;
 }
 
+export async function ldpop(params: any): Promise<any> {
+  const searchParams = new URLSearchParams(params).toString();
+  return (await axios.get(`/LDlinkRestWeb/ldpop?${searchParams}`)).data;
+}
+
 export async function ldproxy(params: any): Promise<any> {
-  const searchParams = new URLSearchParams(flattenForParams(params)).toString();
+  const searchParams = new URLSearchParams(params).toString();
   return (await axios.get(`/LDlinkRestWeb/ldproxy?${searchParams}`)).data;
 }
 
@@ -77,4 +82,3 @@ export async function snpchipPlatforms(): Promise<any> {
 export async function snpchip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
 }
-

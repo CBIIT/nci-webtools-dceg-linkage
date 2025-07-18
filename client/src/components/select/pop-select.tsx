@@ -75,30 +75,37 @@ export const populations: Populations = {
   },
 };
 
-export default function PopSelect({
-  name,
-  control,
-  rules,
-}: {
-  name: string;
-  control: any;
-  rules?: any;
-}) {
-  const popGroups: GroupedOption[] = Object.entries(populations).map(
-    ([key, group]) => ({
-      label: `(${key}) ${group.label}`,
-      value: key,
-      options: Object.entries(group.subPopulations).map(([value, label]) => ({
-        value,
-        label: `(${value}) ${label}`,
-      })),
-    })
-  );
+// Helper to convert params.pop to array of { value, label }
+/**
+ * Converts a population parameter (string or array) to an array of objects with value and label.
+ *
+ * @param pop - Population parameter, either a string (e.g. "YRI+LWK") or an array of objects.
+ * @returns Array of objects: [{ value: string, label: string }]
+ */
+export function getPopArrayFromParams(pop: string | any[]): any[] {
+  if (typeof pop === "string") {
+    const codes = pop.split("+");
+    return codes.map((code) => {
+      const group = Object.values(populations).find((g) => g.subPopulations[code]);
+      const label = group ? `(${code}) ${group.subPopulations[code]}` : code;
+      return { value: code, label };
+    });
+  } else {
+    return pop;
+  }
+}
 
-  const popOptions: any[] = [
-    { label: "(ALL) All Populations", value: "ALL" },
-    ...popGroups,
-  ];
+export default function PopSelect({ name, control, rules }: { name: string; control: any; rules?: any }) {
+  const popGroups: GroupedOption[] = Object.entries(populations).map(([key, group]) => ({
+    label: `(${key}) ${group.label}`,
+    value: key,
+    options: Object.entries(group.subPopulations).map(([value, label]) => ({
+      value,
+      label: `(${value}) ${label}`,
+    })),
+  }));
+
+  const popOptions: any[] = [{ label: "(ALL) All Populations", value: "ALL" }, ...popGroups];
 
   const Group = (props: any) => {
     const onClick = () => {
@@ -107,14 +114,15 @@ export default function PopSelect({
       const currentValues = props.selectProps.value || [];
 
       // Check if all options in this group are already selected
-      const allSelected = groupOptions.every((opt: any) =>
-        currentValues.some((sel: any) => sel.value === opt.value)
-      );
+      const allSelected = groupOptions.every((opt: any) => currentValues.some((sel: any) => sel.value === opt.value));
 
       // If all selected, deselect the group, otherwise select all in group
       const newSelection = allSelected
         ? currentValues.filter((sel: any) => !groupOptions.some((opt: any) => opt.value === sel.value))
-        : [...currentValues, ...groupOptions.filter((opt: any) => !currentValues.some((sel: any) => sel.value === opt.value))];
+        : [
+            ...currentValues,
+            ...groupOptions.filter((opt: any) => !currentValues.some((sel: any) => sel.value === opt.value)),
+          ];
 
       props.selectProps.onChange(newSelection);
     };
