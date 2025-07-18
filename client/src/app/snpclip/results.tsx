@@ -4,7 +4,7 @@ import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, Detail, Warning } from "./types";
 import { genomeBuildMap } from "@/store";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import "./styles.scss";
 
 export default function SNPClipResults({ ref_id }: { ref_id: string }) {
@@ -26,11 +26,33 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
     },
   });
 
-  const details = results?.details || {};
-  const warnings = results?.warnings || [];
-  const thinnedSnps = results?.snp_list || [];
+  const { details, warnings, thinnedSnps } = useMemo(() => {
+    const d = results?.details || {};
+    const w = results?.warnings || [];
+    const t = results?.snp_list || [];
+    return { details: d, warnings: w, thinnedSnps: t };
+  }, [results]);
 
-  const selectedDetail = activeKey ? details[activeKey] : null;
+  const detailsToShow = useMemo(() => {
+    if (!activeKey || !details) {
+      return [];
+    }
+    const allDetails = Object.entries(details);
+    const relevantDetails: [string, string[]][] = [];
+    const match = `Variant in LD with ${activeKey}`;
+
+    for (const [rs_number, value] of allDetails) {
+      const comment = value[2];
+      if (rs_number === activeKey) {
+        if (comment?.includes("Variant kept.")) {
+          relevantDetails.push([rs_number, value]);
+        }
+      } else if (comment?.includes(match)) {
+        relevantDetails.push([rs_number, value]);
+      }
+    }
+    return relevantDetails;
+  }, [activeKey, details]);
 
   const getUCSCUrl = (rsNumber: string, position: string) => {
     if (!position) return "#";
@@ -97,7 +119,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
             </div>
 
             <div className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
-              {selectedDetail && (
+              {activeKey && (
                 <table id="snpclip-details" className="table table-striped table-chip">
                   <caption id="snpclip-detail-title">Details for {activeKey}</caption>
                   <thead>
@@ -114,7 +136,9 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
                       <th>Details</th>
                     </tr>
                   </thead>
-                  <tbody>{selectedDetail && renderRow(activeKey as string, selectedDetail)}</tbody>
+                  <tbody>
+                    {detailsToShow.map(([rs_number, detail]) => renderRow(rs_number, detail))}
+                  </tbody>
                 </table>
               )}
 
@@ -141,7 +165,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
                 </table>
               )}
 
-              {!selectedDetail && !showWarnings && (
+              {!activeKey && !showWarnings && (
                 <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
               )}
             </div>
