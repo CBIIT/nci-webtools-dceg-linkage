@@ -19,30 +19,31 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["snpclip_results", ref_id],
-    queryFn: async () => (ref_id ? fetchOutput(`snpclip${ref_id}.json`) : null),
+    queryFn: async () => {
+      if (!ref_id) return null;
+      const output = await fetchOutput(`snpclip${ref_id}.json`);
+      return typeof output === "string" ? JSON.parse(output) : output;
+    },
   });
 
-  const details: string[] = results?.details || [];
-  const warnings: string[] = results?.warnings || [];
-  const thinnedSnps = results?.snps_ld_pruned || [];
+  const details = results?.details || {};
+  const warnings = results?.warnings || [];
+  const thinnedSnps = results?.snp_list || [];
 
-  const selectedDetail = activeKey ? details.find((d) => d.startsWith(activeKey)) : null;
+  const selectedDetail = activeKey ? details[activeKey] : null;
 
-  const getUCSCUrl = (snp: string) => {
-    const parts = snp.split("\t");
-    const rsNumber = parts[0];
-    const position = parts[1];
+  const getUCSCUrl = (rsNumber: string, position: string) => {
     if (!position) return "#";
     const [chr, pos] = position.split(":");
     const start = Math.max(0, parseInt(pos) - 250);
     const end = parseInt(pos) + 250;
     const newPosition = `${chr}:${start}-${end}`;
     const db = formData?.genome_build === "grch37" ? "hg19" : "hg38";
-    return `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=${newPosition}&snp151=pack&hgFind.matches=${rsNumber}`;
+    return `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=${newPosition}&hgFind.matches=${rsNumber}`;
   };
 
-  const renderRow = (data: string, isWarning = false) => {
-    const [rs_number, position, alleles, comment] = data.split("\t");
+  const renderRow = (rs_number: string, data: string[], isWarning = false) => {
+    const [position, alleles, comment] = data;
     return (
       <tr key={rs_number}>
         <td>
@@ -51,7 +52,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
           </a>
         </td>
         <td>
-          <a href={getUCSCUrl(data)} target="_blank" rel="noopener noreferrer">
+          <a href={getUCSCUrl(rs_number, position)} target="_blank" rel="noopener noreferrer">
             {position}
           </a>
         </td>
@@ -63,73 +64,90 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
 
   return (
     <Container fluid="fluid" className="p-3 jumbotron">
-      <Row>
-        <Col md={3} xl={2}>
-          <div className="snpclip-table-scroller">
-            <Table striped bordered hover size="sm">
-              <caption>LD Thinned Variant List</caption>
-              <thead>
-                <tr>
-                  <th>RS Number</th>
-                </tr>
-              </thead>
-              <tbody>
-                {thinnedSnps.map((snp, i) => (
-                  <tr
-                    key={i}
-                    className={activeKey === snp ? "active-row" : ""}
-                    onClick={() => {
-                      setActiveKey(snp);
-                      setShowWarnings(false);
-                    }}>
-                    <td>{snp}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            {warnings.length > 0 && (
-              <Nav.Link onClick={() => setShowWarnings(true)} className="text-primary">
-                Variants with Warnings
-              </Nav.Link>
-            )}
-          </div>
-        </Col>
-        <Col md={9} xl={10}>
-          <div className="snpclip-table-scroller">
-            {showWarnings ? (
-              <Table striped bordered hover size="sm">
-                <caption>Variants With Warnings</caption>
+      <div className="jumbotron">
+        <div className="container-fluid" id="snpclip-results-container">
+          <div id="snpclip-table-container" className="row">
+            <div className="col-md-2 snpclip-table-scroller">
+              <table id="snpclip-table-thin" className="table table-striped table-chip">
+                <caption>LD Thinned Variant List</caption>
                 <thead>
                   <tr>
                     <th>RS Number</th>
-                    <th>Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
-                    <th>Alleles</th>
-                    <th>Details</th>
                   </tr>
                 </thead>
-                <tbody>
-                  {warnings.map((warning) => renderRow(warning, true))}
+                <tbody id="snpclip-snp-list">
+                  {thinnedSnps.map((snp: string) => (
+                    <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
+                      <td>
+                        <a>{snp}</a>
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
-              </Table>
-            ) : selectedDetail ? (
-              <Table striped bordered hover size="sm">
-                <caption>Details for {selectedDetail.split("\t")[0]}</caption>
-                <thead>
-                  <tr>
-                    <th>RS Number</th>
-                    <th>Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
-                    <th>Alleles</th>
-                    <th>Details</th>
-                  </tr>
-                </thead>
-                <tbody>{renderRow(selectedDetail)}</tbody>
-              </Table>
-            ) : (
-              <div>Click a variant on the left to view details.</div>
-            )}
+              </table>
+              {warnings.length > 0 && (
+                <a
+                  id="snpclip-warnings-button"
+                  title="View details."
+                  onClick={() => setShowWarnings(!showWarnings)}
+                  style={{ cursor: "pointer" }}>
+                  {showWarnings ? "Hide" : "Show"} Variants with Warnings
+                </a>
+              )}
+            </div>
+
+            <div className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
+              {selectedDetail && (
+                <table id="snpclip-details" className="table table-striped table-chip">
+                  <caption id="snpclip-detail-title">Details for {activeKey}</caption>
+                  <thead>
+                    <tr>
+                      <th>RS Number</th>
+                      <th>
+                        Position (
+                        <span className="snpclip-position-genome-build-header">
+                          {genomeBuildMap[formData?.genome_build || "grch37"]}
+                        </span>
+                        )
+                      </th>
+                      <th>Alleles</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody>{selectedDetail && renderRow(activeKey as string, selectedDetail)}</tbody>
+                </table>
+              )}
+
+              {showWarnings && warnings.length > 0 && (
+                <table id="snpclip-warnings" className="table table-striped table-chip">
+                  <caption>Variants With Warnings</caption>
+                  <thead>
+                    <tr>
+                      <th>RS Number</th>
+                      <th>
+                        Position (
+                        <span className="snpclip-position-genome-build-header">
+                          {genomeBuildMap[formData?.genome_build || "grch37"]}
+                        </span>
+                        )
+                      </th>
+                      <th>Alleles</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody style={{ border: "1px solid #ccc" }}>
+                    {warnings.map((warning: string[]) => renderRow(warning[0], warning.slice(1), true))}
+                  </tbody>
+                </table>
+              )}
+
+              {!selectedDetail && !showWarnings && (
+                <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
+              )}
+            </div>
           </div>
-        </Col>
-      </Row>
+        </div>
+      </div>
       <Row className="mt-3">
         <Col>
           <a href={`/LDlinkRestWeb/tmp/snpclip_snps_${ref_id}.txt`} download className="me-4">

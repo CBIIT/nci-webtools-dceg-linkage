@@ -13,9 +13,10 @@ export interface Haplotype {
 }
 
 export interface ResultsData {
-  details: string[];
-  warnings: string[];
-  snps_ld_pruned: string[];
+  details: Record<string, string[]>;
+  warnings: string[][];
+  snp_list: string[];
+  snps_ld_pruned?: string[];
 }
 
 export interface FormData {
