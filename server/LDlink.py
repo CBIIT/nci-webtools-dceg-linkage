@@ -2295,8 +2295,7 @@ def ldtraitgwas():
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
                 out_json = json.dumps(trait, sort_keys=False)
-                print("####################")
-                print(out_json)
+                schedule_tmp_cleanup(reference, app.logger)
                 return current_app.response_class(out_json, mimetype="application/json")
             except Exception as e:
                 exc_obj = e
@@ -2306,6 +2305,78 @@ def ldtraitgwas():
             return sendJSON(
                 "This web API route does not support programmatic access. Please use the API routes specified on the API Access web page."
             )
+    
+
+@app.route("/LDlinkRestWeb/ldexpressgwas", methods=["GET"])
+def ldexpressgwas():
+    start_time = time.time()
+       # Required parameters
+    snps = request.args.get("snps", False)
+    pop = request.args.get("pop", False)
+    r2_d = "r2"
+    r2_d_threshold = 0.1
+    p_threshold = 0.1
+    # Optional parameters
+    tissues = "Adipose_Subcutaneous+Adipose_Visceral_Omentum+Adrenal_Gland+Artery_Aorta+Artery_Coronary+Artery_Tibial+Bladder+Brain_Amygdala+Brain_Anterior_cingulate_cortex_BA24+Brain_Caudate_basal_ganglia+Brain_Cerebellar_Hemisphere+Brain_Cerebellum+Brain_Cortex+Brain_Frontal_Cortex_BA9+Brain_Hippocampus+Brain_Hypothalamus+Brain_Nucleus_accumbens_basal_ganglia+Brain_Putamen_basal_ganglia+Brain_Spinal_cord_cervical_c-1+Brain_Substantia_nigra+Breast_Mammary_Tissue+Cells_EBV-transformed_lymphocytes+Cells_Cultured_fibroblasts+Cervix_Ectocervix+Cervix_Endocervix+Colon_Sigmoid+Colon_Transverse+Esophagus_Gastroesophageal_Junction+Esophagus_Mucosa+Esophagus_Muscularis+Fallopian_Tube+Heart_Atrial_Appendage+Heart_Left_Ventricle+Kidney_Cortex+Kidney_Medulla+Liver+Lung+Minor_Salivary_Gland+Muscle_Skeletal+Nerve_Tibial+Ovary+Pancreas+Pituitary+Prostate+Skin_Not_Sun_Exposed_Suprapubic+Skin_Sun_Exposed_Lower_leg+Small_Intestine_Terminal_Ileum+Spleen+Stomach+Testis+Thyroid+Uterus+Vagina+Whole_Blood"
+    window = "500000"
+    genome_build ="grch37"  
+    reference = request.args.get("reference", str(time.strftime("%I%M%S")) + str(random.randint(0, 10000)))
+    # differentiate web or api request
+    if "LDlinkRestWeb" in request.path:
+        # WEB REQUEST
+        if request.user_agent.browser is not None:
+            web = True
+            # reference = str(data['reference'])
+            snplist = "+".join([snp.strip().lower() for snp in snps.splitlines()])
+            try:
+                express = {}
+                (query_snps, thinned_snps, thinned_genes, thinned_tissues, details, errors_warnings) = (
+                    calculate_express(
+                        snplist,
+                        pop,
+                        reference,
+                        web,
+                        tissues,
+                        r2_d,
+                        genome_build,
+                        float(r2_d_threshold),
+                        float(p_threshold),
+                        int(window),
+                    )
+                )
+                express["query_snps"] = query_snps
+                express["thinned_snps"] = thinned_snps
+                express["thinned_genes"] = thinned_genes
+                express["thinned_tissues"] = thinned_tissues
+                express["details"] = details
+
+                if "error" in errors_warnings:
+                    express["error"] = errors_warnings["error"]
+                else:
+                    with open(tmp_dir + "express_variants_annotated" + reference + ".txt", "w") as f:
+                        f.write(
+                            "Query\tRS ID\tPosition\tR2\tD'\tGene Symbol\tGencode ID\tTissue\tNon-effect Allele Freq\tEffect Allele Freq\tEffect Size\tP-value\n"
+                        )
+                        # for snp in thinned_snps:
+                        for matched_gwas in details["results"]["aaData"]:
+                            f.write("\t".join(str(element.split("__")[0]) for element in matched_gwas) + "\n")
+                        if "warning" in errors_warnings:
+                            express["warning"] = errors_warnings["warning"]
+                            f.write("Warning(s):\n")
+                            f.write(express["warning"])
+                out_json = json.dumps(express, sort_keys=False)
+            except Exception as e:
+                exc_obj = e
+                app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+                return sendTraceback(None)
+        else:
+            return sendJSON(
+                "This web API route does not support programmatic access. Please use the API routes specified on the API Access web page."
+            )
+    end_time = time.time()
+    app.logger.info("Executed LDexpress (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
+    return current_app.response_class(out_json, mimetype="application/json")
 
 
 # Web and API route for SNPchip

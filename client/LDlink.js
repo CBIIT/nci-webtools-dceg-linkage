@@ -1006,6 +1006,7 @@ $(document).ready(function () {
   }
   });
 
+
   setupLDexpressControls();
   setupLDtraitControls();
   setupSNPclipControls();
@@ -2875,6 +2876,9 @@ function refreshPopulation(pop, id) {
   $("#" + id + "-population-codes").multiselect("refresh");
 }
 
+
+
+
 function autoCalculate() {
   // if valid parameters exist in the url then calcluate
   var url = {};
@@ -2932,20 +2936,8 @@ function autoCalculate() {
         updateData(id);
       }
       break;
-     case "ldtrait":
-      if (url.snps && url.pop && url.r2_d) {
-        $("#ldtrait-file-snp-numbers").prop("value", url.snps);
-        $("#trait_color_r2").toggleClass("active", url.r2_d == "r2");
-        $("#trait_color_r2")
-          .next()
-          .toggleClass("active", url.r2_d == "d");
-        refreshPopulation(decodeURIComponent(url.pop).split("+"), id);
-        initCalculate(id);
-        updateData("ldtrait");
-      }
-      break;
-    case "ldtraitgwas":
-      if (url.snps && url.pop && url.r2_d) {
+     case "ldtraitgwas":
+      if (url.snps && url.pop ) {
         $("#ldtrait-file-snp-numbers").prop("value", url.snps);
         $("#trait_color_r2").toggleClass("active", url.r2_d == "r2");
         $("#trait_color_r2")
@@ -2954,6 +2946,19 @@ function autoCalculate() {
         refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldtrait");
         initCalculate("ldtrait");
         updateData("ldtraitgwas");
+      }
+      break;
+    case "ldexpressgwas":
+      if (url.snps && url.pop ) {
+        $("#ldexpress-file-snp-numbers").prop("value", url.snps);
+        $("#express_color_r2").toggleClass("active", url.r2_d == "r2");
+        $("#express_color_r2")
+          .next()
+          .toggleClass("active", url.r2_d == "d");
+        refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldexpress");
+        initCalculate("ldexpress");
+        
+        updateData("ldexpressgwas");
       }
       break;
   }
@@ -3074,7 +3079,13 @@ function setupLDexpressControls() {
     loadLDexpressQueryWarnings(ldExpressRaw);
     $("#ldexpress-initial-message").hide();
   });
-  initExpressTissues();
+    const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('tab') === 'ldexpressgwas') {
+   initExpressTissues(true);
+  } else {
+   initExpressTissues();
+  }
+  
 }
 
 function setupLDtraitControls() {
@@ -3837,6 +3848,12 @@ function updateData(id) {
       if (isPopulationSet("ldtrait") && validateLDtraitBasePairWindow()) {
         $("#" + "ldtrait" + "-loading").show();
         updateLDtraitGWAS();
+      }
+      break;
+    case "ldexpressgwas":
+      if (isPopulationSet("ldexpress") && validateLDexpressBasePairWindow()) {
+        $("#" + "ldexpress" + "-loading").show();
+        updateLDexpressGWAS();
       }
       break;
     case "snpclip":
@@ -5581,6 +5598,87 @@ function updateLDexpress() {
   hideLoadingIcon(ajaxRequest, id);
 }
 
+
+function updateLDexpressGWAS() {
+  var id = "ldexpress";
+
+  var $btn = $("#" + id).button("loading");
+  var snps = DOMPurify.sanitize($("#" + id + "-file-snp-numbers").val());
+  var population = getPopulationCodes(id + "-population-codes");
+  var r2_d;
+  var window = $("#" + id + "-bp-window")
+    .val()
+    .replace(/\,/g, "");
+
+  if ($("#ldexpress_ld_r2").hasClass("active")) {
+    r2_d = "r2"; // i.e. R2
+  } else {
+    r2_d = "d"; // i.e. Dprime
+  }
+
+  var ldInputs = {
+    snps: snps,
+    pop: population.join("+"),
+  };
+
+  //Show inital message
+  $("#new-ldexpress_wrapper").hide();
+  $("#new-ldexpress-query-warnings_wrapper").hide();
+  $("#ldexpress-initial-message").show();
+
+  //Update href on
+  //Set file links
+  $("#ldexpress-variants-annotated-link").attr(
+    "href",
+    "/LDlinkRestWeb/tmp/express_variants_annotated" +
+      ldInputs.reference +
+      ".txt"
+  );
+  $("#ldexpress-variants-annotated-link").attr(
+    "target",
+    "express_variants_annotated" + ldInputs.reference
+  );
+  var url = restServerUrl + "/ldexpressgwas";
+  var ajaxRequest = $.ajax({
+    type: "GET",
+    url: url,
+    data: ldInputs,
+    contentType: "application/json", // JSON
+  });
+  ajaxRequest.success(function (data) {
+    //data is returned as a string representation of JSON instead of JSON obj
+    var jsonObj = data;
+    // console.log(data);
+    if (displayError(id, jsonObj) == false) {
+      switch (genomeBuild) {
+        case "grch37":
+          $("." + id + "-position-genome-build-header").text("GRCh37");
+          break;
+        case "grch38":
+          $("." + id + "-position-genome-build-header").text("GRCh38");
+          break;
+        case "grch38_high_coverage":
+          $("." + id + "-position-genome-build-header").text(
+            "GRCh38 High Coverage"
+          );
+          break;
+      }
+      $("#" + id + "-results-container").show();
+      $("#" + id + "-links-container").show();
+      $("#" + id + "-loading").hide();
+      initExpress(data, r2_d);
+    }
+  });
+  ajaxRequest.fail(function (jqXHR, textstatus) {
+    displayCommFail(id, jqXHR, textstatus);
+  });
+  ajaxRequest.always(function () {
+    $btn.button("reset");
+  });
+
+  hideLoadingIcon(ajaxRequest, id);
+}
+
 function updateLDtrait() {
   var id = "ldtrait";
 
@@ -5730,12 +5828,6 @@ function updateLDtraitGWAS() {
   var ldInputs = {
     snps: snps,
     pop: population.join("+"),
-    r2_d: r2_d,
-    r2_d_threshold: $("#" + id + "_r2_d_threshold").val(),
-    window: window,
-    reference: Math.floor(Math.random() * (99999 - 10000 + 1)),
-    genome_build: genomeBuild,
-    ifContinue: ifContinue,
   };
   //updateHistoryURL(id, ldInputs);
   //Show inital message
@@ -6772,7 +6864,7 @@ function initTrait(data, r2_d) {
   }
 }
 
-function initExpressTissues() {
+function initExpressTissues(all=false) {
   var id = "ldexpress";
   var url = restServerUrl + "/ldexpress_tissues";
   var ajaxRequest = $.ajax({
@@ -6781,11 +6873,19 @@ function initExpressTissues() {
     contentType: "application/json", // JSON
   });
   ajaxRequest.success(function (data) {
+   
     if (displayError(id, data) == false) {
       buildTissueDropdown(id + "-tissue-codes", data);
+      if (all){
+        const selectElement = $("#ldexpress-tissue-codes");
+        selectElement.find("option").prop("selected", true);
+        selectElement.multiselect("refresh");
+      }
     } else {
       buildTissueDropdown("ldexpress-tissue-codes", data);
     }
+
+   
   });
   ajaxRequest.fail(function (jqXHR, textstatus) {
     var errorObj = {
