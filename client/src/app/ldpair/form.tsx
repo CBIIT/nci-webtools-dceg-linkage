@@ -1,16 +1,16 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldpair } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import PopSelect, { getPopArrayFromParams } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPair } from "./types";
+import { useEffect } from "react";
 
-export default function LdPairForm() {
-  const queryClient = useQueryClient();
+export default function LdPairForm({ params }: { params: submitFormData }) {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state: { genome_build: string }) => state);
@@ -31,13 +31,32 @@ export default function LdPairForm() {
     defaultValues: defaultForm,
   });
 
+  // load form form url params
+  useEffect(() => {
+    if (params && Object.keys(params).length > 0) {
+      const popArray = getPopArrayFromParams(params.pop);
+      reset({ ...params, pop: popArray });
+    }
+  }, [params, reset]);
+
+  // Automatically submit if all params except reference are available
+  useEffect(() => {
+    const hasAllParams = params && params.var1 && params.var2 && params.pop && params.genome_build && !params.reference;
+    if (hasAllParams) {
+      // Prepare form data for submission
+      const popArray = getPopArrayFromParams(params.pop);
+      onSubmit({
+        var1: params.var1,
+        var2: params.var2,
+        pop: popArray,
+        genome_build: params.genome_build,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
+
   const submitForm = useMutation<LdPair, Error, submitFormData>({
     mutationFn: (params: submitFormData) => ldpair(params),
-    onSuccess: (_data, variables) => {
-      if (variables && variables.reference) {
-        router.push(`${pathname}?ref=${variables.reference}`);
-      }
-    },
   });
 
   async function onSubmit(form: FormData) {
@@ -48,17 +67,23 @@ export default function LdPairForm() {
       genome_build,
       pop: form.pop.map((e) => e.value).join("+"),
     };
-
-    queryClient.setQueryData(["ldpair-form-data", reference], formData);
-    router.push(`${pathname}`);
-    submitForm.mutate(formData);
+    router.push(pathname);
+    await submitForm.mutateAsync(formData);
+    const paramsObj: Record<string, string> = {
+      var1: String(formData.var1),
+      var2: String(formData.var2),
+      pop: String(formData.pop),
+      genome_build: String(formData.genome_build),
+      reference: String(formData.reference),
+    };
+    const params = new URLSearchParams(paramsObj).toString();
+    router.push(pathname + "?" + params);
   }
 
   function onReset(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     router.push("/ldpair");
     reset(defaultForm);
-    queryClient.invalidateQueries({ queryKey: ["ldpair-form-data"] });
   }
 
   return (

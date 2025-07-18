@@ -8,6 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import { submitFormData } from "./types";
 
 const Results = dynamic(() => import("./results"), {
   ssr: false,
@@ -15,7 +16,7 @@ const Results = dynamic(() => import("./results"), {
 
 export default function LdPair() {
   const searchParams = useSearchParams();
-  const ref = searchParams.get("ref");
+  const params = Object.fromEntries(searchParams.entries()) as unknown as submitFormData;
 
   return (
     <>
@@ -27,9 +28,9 @@ export default function LdPair() {
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
-            <Form />
+            <Form params={params} />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-              <Suspense fallback={<CalculateLoading />}>{ref && <Results ref={ref} />}</Suspense>
+              <Suspense fallback={<CalculateLoading />}>{params?.reference && <Results {...params} />}</Suspense>
             </ErrorBoundary>
           </Col>
         </Row>

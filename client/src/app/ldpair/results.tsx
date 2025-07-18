@@ -1,11 +1,11 @@
 "use client";
 import { Row, Col, Container, Alert } from "react-bootstrap";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
-import { FormData, ResultsData } from "./types";
+import { submitFormData, ResultsData } from "./types";
 import "./styles.scss";
 
-export default function LdPairResults({ ref }: { ref: string }) {
+export default function LdPairResults({ reference, ...params }: { reference: string } & submitFormData) {
   // Helper to get NCBI SNP URL
   function getNcbiSnpUrl(rsnum?: string) {
     if (!rsnum) return undefined;
@@ -29,17 +29,9 @@ export default function LdPairResults({ ref }: { ref: string }) {
     return `https://genome.ucsc.edu/cgi-bin/hgTracks?${params.toString()}`;
   }
 
-  const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldpair-form-data", ref],
-    enabled: !!ref,
-    queryFn: async () => {
-      return {} as FormData;
-    },
-  });
-
   const { data: results } = useSuspenseQuery<ResultsData>({
-    queryKey: ["ldpair_results", ref],
-    queryFn: async () => (ref ? fetchOutput(`ldpair${ref}.json`) : null),
+    queryKey: ["ldpair_results", reference],
+    queryFn: async () => (reference ? fetchOutput(`ldpair${reference}.json`) : null),
   });
 
   return (
@@ -66,7 +58,7 @@ export default function LdPairResults({ ref }: { ref: string }) {
                       </div>
                       <div className="ldpair-snp2-coord">
                         <a
-                          href={getUcscUrl(results.snp2?.coord, results.snp2?.rsnum, formData?.genome_build)}
+                          href={getUcscUrl(results.snp2?.coord, results.snp2?.rsnum, params?.genome_build)}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Genome Browser">
@@ -101,7 +93,7 @@ export default function LdPairResults({ ref }: { ref: string }) {
                       </div>
                       <div className="ldpair-snp1-coord">
                         <a
-                          href={getUcscUrl(results.snp1?.coord, results.snp1?.rsnum, formData?.genome_build)}
+                          href={getUcscUrl(results.snp1?.coord, results.snp1?.rsnum, params?.genome_build)}
                           target="_blank"
                           rel="noopener noreferrer"
                           title="Genome Browser">
@@ -200,7 +192,7 @@ export default function LdPairResults({ ref }: { ref: string }) {
           </Row>
           <Row>
             <Col>
-              <a href={`/LDlinkRestWeb/tmp/LDpair_${ref}.txt`} download>
+              <a href={`/LDlinkRestWeb/tmp/LDpair_${reference}.txt`} download>
                 Download Results
               </a>
             </Col>
