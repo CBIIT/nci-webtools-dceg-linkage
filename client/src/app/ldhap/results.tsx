@@ -1,19 +1,14 @@
 "use client";
 import { Row, Col, Container, Alert } from "react-bootstrap";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, SNP, Haplotype } from "./types";
 import { genomeBuildMap } from "@/store";
 import "./styles.scss";
 
 export default function LdHapResults({ ref }: { ref: string }) {
-  const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldhap-form-data", ref],
-    enabled: !!ref,
-    queryFn: async () => {
-      return {} as FormData;
-    },
-  });
+  const queryClient = useQueryClient();
+  const formData = queryClient.getQueryData(["ldhap-form-data", ref]) as FormData | undefined;
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldhap_results", ref],

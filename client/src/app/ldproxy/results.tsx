@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Row, Col, Container, Dropdown, Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
@@ -14,7 +14,10 @@ import { FormData } from "./form";
 function ldproxy_rs_results_link(data: any) {
   if (!data || !data.includes("rs") || data.length <= 2) return ".";
   return (
-    <a href={`https://www.ncbi.nlm.nih.gov/snp/${data}`} target={`rs_number_${Math.floor(Math.random() * 90000 + 10000)}`} rel="noopener noreferrer">
+    <a
+      href={`https://www.ncbi.nlm.nih.gov/snp/${data}`}
+      target={`rs_number_${Math.floor(Math.random() * 90000 + 10000)}`}
+      rel="noopener noreferrer">
       {data}
     </a>
   );
@@ -62,7 +65,14 @@ function ldproxy_haploreg_link(row: any) {
   const target = `haploreg_${Math.floor(Math.random() * 90000 + 10000)}`;
   return (
     <a href={url} target={target} rel="noopener noreferrer">
-      <Image src="/images/LDproxy_external_link.png" alt="HaploReg Details" title="HaploReg Details" className="haploreg_external_link" width={16} height={16} />
+      <Image
+        src="/images/LDproxy_external_link.png"
+        alt="HaploReg Details"
+        title="HaploReg Details"
+        className="haploreg_external_link"
+        width={16}
+        height={16}
+      />
     </a>
   );
 }
@@ -81,14 +91,8 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
   };
-
-  const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldproxy-form-data", ref],
-    enabled: !!ref,
-    queryFn: async () => {
-      return {} as FormData;
-    },
-  });
+  const queryClient = useQueryClient();
+  const formData = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldproxy_results", ref],
     queryFn: async () => (ref ? fetchOutput(`proxy${ref}.json`) : null),

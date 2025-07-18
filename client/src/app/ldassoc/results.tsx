@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { Row, Col, Container, Dropdown, Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
@@ -25,13 +25,8 @@ export default function LdAssocResults({ ref }: { ref: string }) {
     window.URL.revokeObjectURL(downloadUrl);
   };
 
-  const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldassoc-form-data", ref],
-    enabled: !!ref,
-    queryFn: async () => {
-      return {} as FormData;
-    },
-  });
+  const queryClient = useQueryClient();
+  const formData = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
   const { data: results } = useSuspenseQuery({
     queryKey: ["ldassoc_results", ref],
     queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),

@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useEffect } from "react";
 import { Row, Col, Container, Accordion, Form, Alert } from "react-bootstrap";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import Table from "@/components/table";
@@ -16,15 +16,8 @@ type FormValues = {
 
 export default function LdExpressResults({ ref }: { ref: string }) {
   const { register, reset, control } = useForm<FormValues>();
-
-  const { data: formData } = useQuery<FormData>({
-    queryKey: ["ldexpress-form-data", ref],
-    enabled: !!ref,
-    queryFn: async () => {
-      return {} as FormData;
-    },
-  });
-
+  const queryClient = useQueryClient();
+  const formData = queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData | undefined;
   const { data: results } = useSuspenseQuery<LocusData | null>({
     queryKey: ["ldexpress_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldexpress${ref}.json`) : null),
