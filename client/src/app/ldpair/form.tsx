@@ -1,14 +1,14 @@
 "use client";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldpair } from "@/services/queries";
-import PopSelect, { getPopArrayFromParams } from "@/components/select/pop-select";
+import PopSelect, { getOptionsFromKeys, getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPair } from "./types";
-import { useEffect } from "react";
 
 export default function LdPairForm({ params }: { params: submitFormData }) {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
   // load form form url params
   useEffect(() => {
     if (params && Object.keys(params).length > 0) {
-      const popArray = getPopArrayFromParams(params.pop);
+      const popArray = getOptionsFromKeys(params.pop);
       reset({ ...params, pop: popArray });
     }
   }, [params, reset]);
@@ -44,7 +44,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
     const hasAllParams = params && params.var1 && params.var2 && params.pop && params.genome_build && !params.reference;
     if (hasAllParams) {
       // Prepare form data for submission
-      const popArray = getPopArrayFromParams(params.pop);
+      const popArray = getOptionsFromKeys(params.pop);
       onSubmit({
         var1: params.var1,
         var2: params.var2,
@@ -65,7 +65,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
       ...form,
       reference,
       genome_build,
-      pop: form.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(form.pop),
     };
     router.push(pathname);
     await submitForm.mutateAsync(formData);

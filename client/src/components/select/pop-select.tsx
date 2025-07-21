@@ -82,17 +82,64 @@ export const populations: Populations = {
  * @param pop - Population parameter, either a string (e.g. "YRI+LWK") or an array of objects.
  * @returns Array of objects: [{ value: string, label: string }]
  */
-export function getPopArrayFromParams(pop: string | any[]): any[] {
+export function getOptionsFromKeys(pop: string | any[]): any[] {
   if (typeof pop === "string") {
     const codes = pop.split("+");
-    return codes.map((code) => {
-      const group = Object.values(populations).find((g) => g.subPopulations[code]);
-      const label = group ? `(${code}) ${group.subPopulations[code]}` : code;
-      return { value: code, label };
+    return codes.flatMap((code) => {
+      // If code is a population group (e.g., AFR), return all its subPopulations
+      if (populations[code]) {
+        return Object.entries(populations[code].subPopulations).map(([subCode, subLabel]) => ({
+          value: subCode,
+          label: `(${subCode}) ${subLabel}`,
+        }));
+      } else {
+        // Otherwise, treat as subPopulation code
+        const group = Object.values(populations).find((g) => g.subPopulations[code]);
+        const label = group ? `(${code}) ${group.subPopulations[code]}` : code;
+        return { value: code, label };
+      }
     });
   } else {
     return pop;
   }
+}
+
+/**
+ * Returns a string representing the selected population groups or individual population codes.
+ *
+ * This function determines which population groups are fully selected based on the provided
+ * selection. If all sub-populations of a group are selected, the group key is included in the result.
+ * Otherwise, any remaining selected codes that are not part of a fully selected group are included individually.
+ * The result is a string of group keys and/or individual codes, joined by "+".
+ *
+ * @param selected - An array of selected population options.
+ * @param populationsObj - An optional object containing all population groups and their sub-populations.
+ *                         Defaults to the global `populations` object if not provided.
+ * @returns A string of selected group keys and/or individual codes, joined by "+".
+ */
+export function getSelectedPopulationGroups(selected: PopOption[], populationsObj: Populations = populations): string {
+  const selectedCodes = new Set(selected.map((opt) => opt.value));
+  const groupKeys: string[] = [];
+  const coveredCodes = new Set<string>();
+
+  // Check for fully selected groups
+  for (const [key, group] of Object.entries(populationsObj)) {
+    const subCodes = Object.keys(group.subPopulations);
+    const allSelected = subCodes.every((code) => selectedCodes.has(code));
+    if (allSelected) {
+      groupKeys.push(key);
+      subCodes.forEach((code) => coveredCodes.add(code));
+    }
+  }
+
+  // Add any remaining selected codes not covered by a full group
+  for (const code of selectedCodes) {
+    if (!coveredCodes.has(code)) {
+      groupKeys.push(code);
+    }
+  }
+
+  return groupKeys.join("+");
 }
 
 export default function PopSelect({ name, control, rules }: { name: string; control: any; rules?: any }) {

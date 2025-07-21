@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
@@ -89,7 +89,7 @@ export default function LDExpressForm() {
       reference,
       genome_build,
       window: data.window.toString(),
-      pop: data.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(data.pop),
       tissues:
         data.tissues[0].value === "all"
           ? (tissues.tissueInfo as Tissue[]).map((e) => e.tissueSiteDetailId).join("+")

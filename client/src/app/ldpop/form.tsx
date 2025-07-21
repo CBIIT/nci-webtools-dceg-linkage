@@ -4,7 +4,7 @@ import { Row, Col, Form, Button, Alert, ButtonGroup, ToggleButton } from "react-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldpop } from "@/services/queries";
-import PopSelect, { getPopArrayFromParams } from "@/components/select/pop-select";
+import PopSelect, { getOptionsFromKeys, getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPop } from "./types";
@@ -35,16 +35,17 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
     defaultValues: defaultForm,
   });
 
-  const submitForm = useMutation<LdPop, Error, submitFormData>({
-    mutationFn: (params: submitFormData) => ldpop(params),
-  });
-
+  // load form form url params
   useEffect(() => {
     if (params && Object.keys(params).length > 0) {
-      const popArray = getPopArrayFromParams(params.pop);
+      const popArray = getOptionsFromKeys(params.pop);
       reset({ ...params, pop: popArray });
     }
   }, [params, reset]);
+
+  const submitForm = useMutation<LdPop, Error, submitFormData>({
+    mutationFn: (params: submitFormData) => ldpop(params),
+  });
 
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
@@ -52,7 +53,7 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
       ...form,
       reference,
       genome_build,
-      pop: form.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(form.pop),
     };
 
     router.push(pathname);

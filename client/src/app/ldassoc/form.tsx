@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Spinner } fro
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
-import PopSelect, { PopOption } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 
@@ -183,7 +183,7 @@ export default function LDAssocForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e: PopOption) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(data.pop),
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
     queryClient.setQueryData(["ldassoc-form-data", reference], formData);

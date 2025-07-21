@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldhap } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
@@ -66,7 +66,7 @@ export default function LdHapForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(form.pop),
     };
 
     queryClient.setQueryData(["ldhap-form-data", reference], formData);

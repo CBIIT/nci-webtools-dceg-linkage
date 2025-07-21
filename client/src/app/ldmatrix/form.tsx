@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldmatrix } from "@/services/queries";
-import PopSelect, { PopOption } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
@@ -69,7 +69,7 @@ export default function LDMatrixForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e: PopOption) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(data.pop),
     };
     queryClient.setQueryData(["ldmatrix-form-data", reference], formData);
     router.push(`${pathname}`);
