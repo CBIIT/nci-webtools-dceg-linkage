@@ -7,7 +7,7 @@ import sys
 import time
 import threading
 import weakref
-import time
+import httpx
 from multiprocessing.dummy import Pool
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,replace_coord_rsid,get_population,get_query_variant_c,chunkWindow,get_output,ldproxy_figure
@@ -373,8 +373,29 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         # Generate high quality images only if accessed via web instance
         
         # Open thread for high quality image exports
-        command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window) + " " + collapseTranscript+" "+annotate
-        subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        # command = "python3 LDproxy_plot_sub.py " + snp + " " + pop + " " + request + " " + genome_build + " " + r2_d + " " + str(window) + " " + collapseTranscript+" "+annotate
+        # subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
+        print("Making request to export service for high quality images")
+        payload = {
+            "snp": snp,
+            "pop": pop,
+            "request": request,
+            "genome_build": genome_build,
+            "r2_d": r2_d,
+            "window": window,
+            "collapseTranscript": collapseTranscript,
+            "annotate": annotate
+        }
+        
+        def send_async():
+            try:
+                with httpx.Client(timeout=None) as client:
+                    client.post('http://localhost:5000/ldproxy_svg', json=payload, timeout=None, follow_redirects=True)
+            except Exception as e:
+                print(f"Async export request failed: {e}")
+        threading.Thread(target=send_async, daemon=True).start()
+
+
 
         ###########################
         # Html output for testing #
@@ -384,12 +405,16 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
         #print >> out_html, html
         # out_html.close()
        
-        from bokeh.embed import components
-      
+        from bokeh.embed import components, json_item
         from bokeh.resources import CDN
  
         out_script, out_div = components(out_grid, CDN)
-        #reset_output()
+
+        # save json embedding
+        jsonEmbed = f"ldproxy_plot_{request}.json"
+        print('Save JSON embedding: '+ jsonEmbed)
+        with open(tmp_dir + jsonEmbed, "w") as f_json:
+            json.dump(json_item(out_grid), f_json)
 
         # Print run time statistics
         pop_list = open(tmp_dir + "pops_" + request + ".txt").readlines()

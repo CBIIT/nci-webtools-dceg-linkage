@@ -10,34 +10,100 @@ import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
 import { FormData } from "./form";
 
-export default function LdAssocResults({ ref }: { ref: string }) {
+// Helper functions for column rendering
+function ldproxy_rs_results_link(data: any) {
+  if (!data || !data.includes("rs") || data.length <= 2) return ".";
+  return (
+    <a
+      href={`https://www.ncbi.nlm.nih.gov/snp/${data}`}
+      target={`rs_number_${Math.floor(Math.random() * 90000 + 10000)}`}
+      rel="noopener noreferrer">
+      {data}
+    </a>
+  );
+}
+
+function ldproxy_position_link(data: any, row: any, genomeBuild: string) {
+  const chr = row[1];
+  const mid_value = parseInt(data);
+  const offset = 250;
+  const position = `${chr}:${mid_value - offset}-${mid_value + offset}`;
+  const build = genomeBuild === "grch37" ? "hg19" : "hg38";
+  const url = `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${build}&position=${position}&snp151=pack&hgFind.matches=${row[0]}`;
+  return (
+    <a href={url} target={`position_${Math.floor(Math.random() * 90000 + 10000)}`} rel="noopener noreferrer">
+      {data}
+    </a>
+  );
+}
+
+function ldproxy_FORGEdb_link(score: any, row: any) {
+  return (
+    <a href={`https://forgedb.cancer.gov/explore?rsid=${row[0]}`} target="_blank" rel="noopener noreferrer">
+      {score}
+    </a>
+  );
+}
+
+function ldproxy_regulome_link(data: any, row: any, genomeBuild: string) {
+  const chr = row[1];
+  const mid_value = parseInt(row[2]);
+  const zero_base = mid_value - 1;
+  const genome = genomeBuild === "grch37" ? "GRCh37" : "GRCh38";
+  const url = `https://www.regulomedb.org/regulome-search/?genome=${genome}&regions=${chr}:${zero_base}-${mid_value}`;
+  return (
+    <a href={url} target="_blank" rel="noopener noreferrer">
+      {data}
+    </a>
+  );
+}
+
+function ldproxy_haploreg_link(row: any) {
+  const rs_number = row[0];
+  if (!rs_number || rs_number === ".") return "";
+  const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs_number}`;
+  const target = `haploreg_${Math.floor(Math.random() * 90000 + 10000)}`;
+  return (
+    <a href={url} target={target} rel="noopener noreferrer">
+      <Image
+        src="/images/LDproxy_external_link.png"
+        alt="HaploReg Details"
+        title="HaploReg Details"
+        className="haploreg_external_link"
+        width={16}
+        height={16}
+      />
+    </a>
+  );
+}
+
+export default function LdProxyResults({ ref }: { ref: string }) {
   const handleDownload = async (format: string) => {
-    const url = `/LDlinkRestWeb/tmp/assoc_plot_${ref}.${format}`;
+    const url = `/LDlinkRestWeb/tmp/proxy_plot_${ref}.${format}`;
     const response = await fetch(url);
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = `assoc_plot_${ref}.${format}`;
+    link.download = `proxy_plot_${ref}.${format}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
   };
-
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["ldassoc-form-data", ref]) as FormData | undefined;
+  const formData = queryClient.getQueryData(["ldproxy-form-data", ref]) as FormData | undefined;
   const { data: results } = useSuspenseQuery({
-    queryKey: ["ldassoc_results", ref],
-    queryFn: async () => (ref ? fetchOutput(`assoc${ref}.json`) : null),
+    queryKey: ["ldproxy_results", ref],
+    queryFn: async () => (ref ? fetchOutput(`proxy${ref}.json`) : null),
   });
   const { data: plotJson } = useSuspenseQuery({
-    queryKey: ["ldassoc_plot", ref],
-    queryFn: async () => (ref && !results?.error ? fetchOutput(`ldassoc_plot_${ref}.json`) : null),
+    queryKey: ["ldproxy_plot", ref],
+    queryFn: async () => (ref && !results?.error ? fetchOutput(`ldproxy_plot_${ref}.json`) : null),
   });
   const { data: enableExport } = useQuery<FormData>({
-    queryKey: ["ldassoc-export", ref],
-    queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
+    queryKey: ["ldproxy-export", ref],
+    queryFn: async () => (ref ? fetchOutputStatus(`proxy_plot_${ref}.jpeg`) : false),
     enabled: !!ref && !results?.error,
     refetchInterval: 5000, // Check every 5 seconds
     retry: 60,
@@ -75,15 +141,15 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   const columns = [
     columnHelper.accessor((row) => row[0], {
       header: "RS Number",
-      cell: (info) => info.getValue(),
+      cell: (info) => ldproxy_rs_results_link(info.getValue()),
     }),
     columnHelper.accessor((row) => row[1], {
       header: "Chr",
-      cell: (info) => info.getValue(),
+      cell: (info) => info.getValue().substring(3),
     }),
     columnHelper.accessor((row) => row[2], {
       header: `Position (${genomeBuildMap[formData?.genome_build ?? "grch37"]})`,
-      cell: (info) => info.getValue(),
+      cell: (info) => ldproxy_position_link(info.getValue(), info.row.original, formData?.genome_build ?? "grch37"),
     }),
     columnHelper.accessor((row) => row[3], {
       header: "Alleles",
@@ -110,33 +176,20 @@ export default function LdAssocResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[9], {
-      header: "Association P-value",
-      cell: (info) => info.getValue(),
+      header: "FORGEdb",
+      cell: (info) => ldproxy_FORGEdb_link(info.getValue(), info.row.original),
     }),
     columnHelper.accessor((row) => row[10], {
-      header: "FORGEdb",
-      cell: (info) => info.getValue(),
+      header: "RegulomeDB",
+      cell: (info) => ldproxy_regulome_link(info.getValue(), info.row.original, formData?.genome_build ?? "grch37"),
     }),
     columnHelper.accessor((row) => row[11], {
-      header: "RegulomeDB",
-      cell: (info) => info.getValue(),
+      header: "HaploReg",
+      cell: (info) => ldproxy_haploreg_link(info.row.original),
     }),
     columnHelper.accessor((row) => row[12], {
-      header: "HaploReg",
-      cell: (info) => {
-        const rs = info.row.original[0];
-        if (!rs || rs === ".") return "";
-        const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs}`;
-        return (
-          <a href={url} target="_blank" rel="noopener noreferrer">
-            Link <i className="bi bi-box-arrow-up-right"></i>
-          </a>
-        );
-      },
-    }),
-    columnHelper.accessor((row) => row[13], {
       header: "Functional Class",
-      cell: (info) => info.getValue(),
+      cell: (info) => info.getValue() || "NA",
     }),
   ];
 
@@ -169,9 +222,9 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
             <Col sm={12} className="d-flex justify-content-center">
               <Image
-                src="/images/LDassoc_legend.png"
-                title="LDassoc Legend"
-                alt="LDassoc legend"
+                src="/images/LDproxy_legend.png"
+                title="LDproxy Legend"
+                alt="LDproxy legend"
                 width={700}
                 height={0}
                 style={{
@@ -183,7 +236,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
             <Col sm={12} className="justify-content-center text-center">
               <a
-                id="ldassoc-genome"
+                id="ldproxy-genome"
                 href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
                   formData?.genome_build === "grch37" ? "hg19" : "hg38"
                 }&hgt.customText=http://${location.hostname}/LDlinkRestWeb/tmp/track${ref}.txt`}
@@ -203,7 +256,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             <Col sm={12} className="justify-content-center text-center">
               <a
                 href="https://forgedb.cancer.gov/about/"
-                target="LDassoc-forgedb-browser_FOREGEdb"
+                target="LDproxy-forgedb-browser_FOREGEdb"
                 title="FORGEdb scoring scheme">
                 View scoring scheme for FORGEdb scores
               </a>
@@ -211,32 +264,19 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             <Col sm={12} className="justify-content-center text-center">
               <a
                 href="https://www.regulomedb.org/regulome-help/"
-                target="LDassoc-genome-browser_RegulomeDB"
+                target="LDproxy-genome-browser_RegulomeDB"
                 title="RegulomeDB scoring scheme">
                 View scoring scheme for RegulomeDB scores
               </a>
             </Col>
-            <Col sm={12} className="justify-content-center">
-              <ul style={{ listStyleType: "none" }}>
-                <li>
-                  Number of Individuals: <b>{results.report.statistics.individuals}</b>
-                </li>
-                <li>
-                  SNPs in Region: <b>{results.report.statistics.in_region}</b>
-                </li>
-                <li>
-                  Run time: <b>{Number(results.report.statistics.runtime).toFixed(2)}</b> seconds
-                </li>
-              </ul>
-            </Col>
           </Row>
           <Row>
-            <Col>{results && <Table title="Association Results" data={results.aaData} columns={columns} />}</Col>
+            <Col>{results && <Table title="Proxy Variants" data={results.aaData} columns={columns} />}</Col>
           </Row>
           <Row>
             <Col>
-              <a href={`/LDlinkRestWeb/tmp/assoc${ref}.txt`} download>
-                Download association data for all variants
+              <a href={`/LDlinkRestWeb/tmp/proxy${ref}.txt`} download>
+                Download all proxy variants
               </a>
             </Col>
           </Row>

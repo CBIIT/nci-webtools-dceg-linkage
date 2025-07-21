@@ -13,3 +13,5 @@ export function parseSnps(text: string): string {
     .join("\n");
   return snps;
 }
+
+export const rsChrRegex = /^\s*(?:[rR][sS]\d+|[cC][hH][rR](?:[xXyY]|\d+)?(?::\d+))\s*$/;

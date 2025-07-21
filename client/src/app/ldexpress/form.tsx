@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
@@ -41,6 +41,7 @@ export default function LDExpressForm() {
   });
 
   const ldexpressFile = watch("ldexpressFile") as string | FileList;
+  const r2_d = watch("r2_d");
 
   useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
@@ -88,7 +89,7 @@ export default function LDExpressForm() {
       reference,
       genome_build,
       window: data.window.toString(),
-      pop: data.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(data.pop),
       tissues:
         data.tissues[0].value === "all"
           ? (tissues.tissueInfo as Tissue[]).map((e) => e.tissueSiteDetailId).join("+")
@@ -96,6 +97,7 @@ export default function LDExpressForm() {
     };
 
     queryClient.setQueryData(["ldexpress-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
 
@@ -110,17 +112,17 @@ export default function LDExpressForm() {
     <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
-          <Form.Group controlId="snps" className="mb-3">
+          <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "snps are required",
+                required: "This field is required",
                 pattern: {
-                  value:
-                    /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
-                  message: "Invalid SNP or coordinate format, only one per line",
+                  value: /^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/m,
+                  message:
+                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
@@ -177,8 +179,8 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.tissues?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
-          <Form.Group controlId="r2_d" className="mb-3 text-center">
+        <Col sm={"auto"}>
+          <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
               <ToggleButton
@@ -211,16 +213,24 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
         <Col>
-          <Form.Group as={Row} controlId="r2_d_threshold" className="mb-3">
-            <Col sm="auto" className="my-auto">
-              <Form.Label>
-                R<sup>2</sup> ≥
+          Thresholds
+          <Form.Group as={Row} controlId="r2_d_threshold" className="align-items-center mb-2">
+            <Col sm="auto" className="pe-0">
+              <Form.Label style={{ width: "1.8rem" }}>
+                {r2_d === "r2" ? (
+                  <>
+                    R<sup>2</sup>
+                  </>
+                ) : (
+                  <>D&#39;</>
+                )}{" "}
+                ≥
               </Form.Label>
             </Col>
             <Col>
               <Form.Control
                 {...register("r2_d_threshold", {
-                  required: "Threshold required",
+                  required: "Threshold is required",
                   pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
@@ -228,17 +238,17 @@ export default function LDExpressForm() {
                 })}
                 title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
-              <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
             </Col>
+            <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
           </Form.Group>
-          <Form.Group as={Row} controlId="p_threshold" className="mb-3">
-            <Col sm="auto" className="my-auto">
-              <Form.Label>D&#39; ≥</Form.Label>
+          <Form.Group as={Row} controlId="p_threshold" className="d-flex align-items-center mb-2">
+            <Col sm="auto" className="pe-0">
+              <Form.Label style={{ width: "1.8rem" }}>P {"<"}</Form.Label>
             </Col>
             <Col>
               <Form.Control
                 {...register("p_threshold", {
-                  required: "Threshold required",
+                  required: "Threshold is required",
                   pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
@@ -246,10 +256,10 @@ export default function LDExpressForm() {
                 })}
                 title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
-              <Form.Text className="text-danger">{errors?.p_threshold?.message}</Form.Text>
             </Col>
+            <Form.Text className="text-danger">{errors?.p_threshold?.message}</Form.Text>
           </Form.Group>
-          <Form.Group controlId="window" className="mb-3">
+          <Form.Group controlId="window" className="mb-2">
             <Form.Label>Base pair window</Form.Label>
             <div className="d-flex align-items-center">
               ±&nbsp;
@@ -257,8 +267,8 @@ export default function LDExpressForm() {
                 type="number"
                 {...register("window", {
                   required: "Base pair window is required",
-                  min: 0,
-                  max: 1000000,
+                  min: { value: 0, message: "Minimum value is 0" },
+                  max: { value: 1000000, message: "Max value is 1000000" },
                 })}
                 placeholder="500000"
                 title="Value must be a number between 0 and 1,000,000"

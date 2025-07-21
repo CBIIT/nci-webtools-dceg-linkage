@@ -1,11 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Spinner } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { upload, ldassoc, ldassocExample } from "@/services/queries";
-import PopSelect, { PopOption } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 
@@ -183,10 +183,11 @@ export default function LDAssocForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e: PopOption) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(data.pop),
       filename: typeof filename === "string" ? filename : (filename && filename[0] && (filename[0] as File).name) || "",
     };
     queryClient.setQueryData(["ldassoc-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
 
@@ -231,7 +232,9 @@ export default function LDAssocForm() {
             <div>
               <Form.Group controlId="columns.chromosome" className="mb-3">
                 <Form.Label>Chromosome Column</Form.Label>
-                <Form.Select {...register("columns.chromosome", { required: "Chromosome column is required" })}>
+                <Form.Select
+                  {...register("columns.chromosome", { required: "Chromosome column is required" })}
+                  disabled={!columnOptions.length}>
                   <option value="" disabled>
                     Select...
                   </option>
@@ -245,7 +248,9 @@ export default function LDAssocForm() {
               </Form.Group>
               <Form.Group controlId="columns.position" className="mb-3">
                 <Form.Label>Position Column</Form.Label>
-                <Form.Select {...register("columns.position", { required: "Position column is required" })}>
+                <Form.Select
+                  {...register("columns.position", { required: "Position column is required" })}
+                  disabled={!columnOptions.length}>
                   <option value="" disabled>
                     Select...
                   </option>
@@ -259,7 +264,9 @@ export default function LDAssocForm() {
               </Form.Group>
               <Form.Group controlId="columns.pvalue" className="mb-3">
                 <Form.Label>P-Value Column</Form.Label>
-                <Form.Select {...register("columns.pvalue", { required: "P-value column is required" })}>
+                <Form.Select
+                  {...register("columns.pvalue", { required: "P-value column is required" })}
+                  disabled={!columnOptions.length}>
                   <option value="" disabled>
                     Select...
                   </option>
@@ -441,10 +448,10 @@ export default function LDAssocForm() {
                 variant="outline-primary"
                 {...register("transcript")}
                 title="Collapse transcripts"
-                value="true"
-                checked={!!watch("transcript")}
+                value="false"
+                checked={!watch("transcript")}
                 onChange={() => {
-                  setValue("transcript", true);
+                  setValue("transcript", false);
                 }}>
                 Yes
               </ToggleButton>
@@ -454,10 +461,10 @@ export default function LDAssocForm() {
                 variant="outline-primary"
                 {...register("transcript")}
                 title="Show transcripts"
-                value="false"
-                checked={!watch("transcript")}
+                value="true"
+                checked={!!watch("transcript")}
                 onChange={() => {
-                  setValue("transcript", false);
+                  setValue("transcript", true);
                 }}>
                 No
               </ToggleButton>

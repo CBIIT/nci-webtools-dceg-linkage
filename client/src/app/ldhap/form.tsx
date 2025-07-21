@@ -5,7 +5,7 @@ import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldhap } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
@@ -66,10 +66,11 @@ export default function LdHapForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(form.pop),
     };
 
     queryClient.setQueryData(["ldhap-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
 
@@ -84,17 +85,17 @@ export default function LdHapForm() {
     <Form id="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
-          <Form.Group controlId="snps" className="mb-3">
+          <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "snps are required",
+                required: "This field is required",
                 pattern: {
-                  value:
-                    /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
-                  message: "Invalid SNP or coordinate format, only one per line",
+                  value: /^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/m,
+                  message:
+                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
