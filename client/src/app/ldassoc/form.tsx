@@ -448,10 +448,10 @@ export default function LDAssocForm() {
                 variant="outline-primary"
                 {...register("transcript")}
                 title="Collapse transcripts"
-                value="true"
-                checked={!!watch("transcript")}
+                value="false"
+                checked={!watch("transcript")}
                 onChange={() => {
-                  setValue("transcript", true);
+                  setValue("transcript", false);
                 }}>
                 Yes
               </ToggleButton>
@@ -461,10 +461,10 @@ export default function LDAssocForm() {
                 variant="outline-primary"
                 {...register("transcript")}
                 title="Show transcripts"
-                value="false"
-                checked={!watch("transcript")}
+                value="true"
+                checked={!!watch("transcript")}
                 onChange={() => {
-                  setValue("transcript", false);
+                  setValue("transcript", true);
                 }}>
                 No
               </ToggleButton>
