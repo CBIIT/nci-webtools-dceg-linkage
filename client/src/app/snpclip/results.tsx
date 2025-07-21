@@ -26,12 +26,9 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
     },
   });
 
-  const { details, warnings, thinnedSnps } = useMemo(() => {
-    const d = results?.details || {};
-    const w = results?.warnings || [];
-    const t = results?.snp_list || [];
-    return { details: d, warnings: w, thinnedSnps: t };
-  }, [results]);
+  const details = results?.details || {};
+  const warnings = results?.warnings || [];
+  const thinnedSnps = results?.snp_list || [];
 
   const detailsToShow = useMemo(() => {
     if (!activeKey || !details) {
@@ -88,10 +85,10 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
     <Container fluid="fluid" className="p-3 jumbotron">
       <div className="jumbotron">
         <div className="container-fluid" id="snpclip-results-container">
-          <div id="snpclip-table-container" className="row">
+          <div id="snpclip-table-container" className="row">            
             <div className="col-md-2 snpclip-table-scroller">
-              <table id="snpclip-table-thin" className="table table-striped table-chip">
-                <caption>LD Thinned Variant List</caption>
+              <div>LD Thinned Variant List</div>               
+              <table id="snpclip-table-thin" className="table table-striped table-chip">               
                 <thead>
                   <tr>
                     <th>RS Number</th>
@@ -101,7 +98,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
                   {thinnedSnps.map((snp: string) => (
                     <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
                       <td>
-                        <a>{snp}</a>
+                        <a className="snpclip-link">{snp}</a>
                       </td>
                     </tr>
                   ))}
@@ -119,9 +116,15 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
             </div>
 
             <div className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
+              
               {activeKey && (
-                <table id="snpclip-details" className="table table-striped table-chip">
-                  <caption id="snpclip-detail-title">Details for {activeKey}</caption>
+                <div>
+                <Row>
+                  <Col col={12}>
+                    <div id="snpclip-detail-title">Details for {activeKey}</div>
+                  </Col>
+                </Row>
+                <table id="snpclip-details" className="table table-striped table-chip">                  
                   <thead>
                     <tr>
                       <th>RS Number</th>
@@ -140,6 +143,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
                     {detailsToShow.map(([rs_number, detail]) => renderRow(rs_number, detail))}
                   </tbody>
                 </table>
+                </div>
               )}
 
               {showWarnings && warnings.length > 0 && (
