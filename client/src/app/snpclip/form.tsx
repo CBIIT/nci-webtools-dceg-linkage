@@ -108,7 +108,7 @@ export default function SNPClipForm() {
             <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col sm={3}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>File With Variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
@@ -118,7 +118,7 @@ export default function SNPClipForm() {
             )}
           </Form.Group>
         </Col>
-        <Col sm="3">
+        <Col sm={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -126,30 +126,44 @@ export default function SNPClipForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
+          <div>Threshold</div>
           <Form.Group controlId="r2_threshold" className="mb-3">
-            <Form.Label>
-              R<sup>2</sup> Threshold
-            </Form.Label>
-            <Form.Control
-              type="number"
-              step="0.01"
-              min="0"
-              max="1"
-              {...register("r2_threshold", { required: true, min: 0, max: 1 })}
-            />
+            <Row className="align-items-center">
+              <Col md="2" xs="auto">
+                <Form.Label className="mb-0">
+                  R<sup>2</sup>
+                </Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  {...register("r2_threshold", { required: true, min: 0, max: 1 })}
+                />
+              </Col>
+            </Row>
+          </Form.Group>
+          <Form.Group controlId="maf_threshold" className="mb-3">
+            <Row className="align-items-center">
+              <Col md="2" xs="auto">
+                <Form.Label className="mb-0">MAF</Form.Label>
+              </Col>
+              <Col>
+                <Form.Control
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="1"
+                  {...register("maf_threshold", { required: true, min: 0, max: 1 })}
+                />
+              </Col>
+            </Row>
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <Form.Group controlId="maf_threshold" className="mb-3">
-            <Form.Label>MAF Threshold</Form.Label>
-            <Form.Control
-              type="number"
-              step="0.01"
-              min="0"
-              max="1"
-              {...register("maf_threshold", { required: true, min: 0, max: 1 })}
-            />
-          </Form.Group>
+          
         </Col>
         <Col />
         <Col sm="2">
