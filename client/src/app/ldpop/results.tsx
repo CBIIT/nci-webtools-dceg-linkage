@@ -29,6 +29,100 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
   const [activeMarker2, setActiveMarker2] = useState<number | null>(null);
   const [activeMarker3, setActiveMarker3] = useState<number | null>(null);
 
+  // Utility to select color from a palette based on a value between 0 and 1
+  function getColorByValue(value: number, palette: string[]) {
+    const idx = Math.round(Math.max(0, Math.min(1, value)) * (palette.length - 1));
+    return palette[idx] || palette[0];
+  }
+
+  const LD_COLORS = [
+    "#FFFFFF", // 0.0
+    "#FBE6E6", // 0.1
+    "#F8D3D2", // 0.2
+    "#F4B5B4", // 0.3
+    "#F19E9C", // 0.4
+    "#EF8683", // 0.5
+    "#EC706B", // 0.6
+    "#EB5A54", // 0.7
+    "#EB483F", // 0.8
+    "#E9392D", // 0.9
+    "#E9392D", // 1.0
+  ];
+
+  const MAF_COLORS = [
+    "#FFFFFF", // 0.0
+    "#E5E7FD", // 0.1
+    "#D0D4FB", // 0.2
+    "#B3BAFA", // 0.3
+    "#9AA3F8", // 0.4
+    "#828EF7", // 0.5
+    "#6877F6", // 0.6
+    "#4E60F5", // 0.7
+    "#354CF5", // 0.8
+    "#1B37F3", // 0.9
+    "#1B37F3", // 1.0
+  ];
+
+  // Generalized color function
+  function getMarkerColor(type: "LD" | "MAF", value: number | string) {
+    if (value === "NA" || value === undefined || value === null) return "#E9F3F9";
+    const num = typeof value === "number" ? value : Number(value);
+    if (isNaN(num)) return "#E9F3F9";
+    return type === "LD"
+      ? getColorByValue(num, LD_COLORS)
+      : getColorByValue(num, MAF_COLORS);
+  }
+
+  // For LD markers
+  function colorMarkerLD(LD: "r2" | "dprime", location: any[]) {
+    const value = LD === "r2" ? location[7] : location[8];
+    return getMarkerColor("LD", value);
+  }
+
+  // For MAF markers
+  function colorMarkerMAF(minorAllele: string, location: any[]) {
+    const alleleData = location[5]?.replace(/[\s\%]/g, "").split(/[\,\:]/);
+    if (!alleleData || alleleData.length < 4) return "#FFFFFF";
+    const alleleDataHash: Record<string, number> = {
+      [alleleData[0]]: parseFloat(alleleData[1]),
+      [alleleData[2]]: parseFloat(alleleData[3])
+    };
+    const MAF = (alleleDataHash[minorAllele] ?? 0) / 100.0;
+    return getMarkerColor("MAF", MAF);
+  }
+
+  // Helper to get minor allele for a variant index (2 for rs1, 3 for rs2)
+  function getMinorAllele(variantIndex: number, aaData: any[][]) {
+    const alleles = aaData[0][variantIndex].replace(/[\s\%]/g, "").split(/[\,\:]/);
+    const allele1 = alleles[0];
+    const allele2 = alleles[2];
+    let allele1PopSize = 0;
+    let allele2PopSize = 0;
+    const pop_groups = ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS"];
+    for (let i = 0; i < aaData.length; i++) {
+      if (!pop_groups.includes(aaData[i][0])) {
+        const alleleData = aaData[i][variantIndex].replace(/[\s\%]/g, "").split(/[\,\:]/);
+        const allele1Freq = parseFloat(alleleData[1]);
+        const allele2Freq = parseFloat(alleleData[3]);
+        if (allele1Freq === allele2Freq) {
+          allele1PopSize += aaData[i][1];
+          allele2PopSize += aaData[i][1];
+        } else if (allele1Freq < allele2Freq) {
+          allele1PopSize += aaData[i][1];
+        } else {
+          allele2PopSize += aaData[i][1];
+        }
+      }
+    }
+    if (allele1PopSize === allele2PopSize) {
+      return allele1 < allele2 ? allele1 : allele2;
+    } else if (allele1PopSize > allele2PopSize) {
+      return allele1;
+    } else {
+      return allele2;
+    }
+  }
+
   // Create markerIcon only after Google Maps API is loaded
   const markerIcon =
     isLoaded && typeof google !== "undefined"
@@ -75,12 +169,12 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
     }),
     columnHelper.accessor((row: any) => row[2], {
       id: "rs1_allele_freq",
-      header: `${params?.var1} Allele Freq`,
+      header: `${results.inputs.rs1} Allele Freq`,
       cell: (info: any) => info.getValue(),
     }),
     columnHelper.accessor((row: any) => row[3], {
       id: "rs2_allele_freq",
-      header: `${params?.var2} Allele Freq`,
+      header: `${results.inputs.rs2} Allele Freq`,
       cell: (info: any) => info.getValue(),
     }),
     columnHelper.accessor((row: any) => row[4], {
@@ -100,7 +194,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
         const row = info.row.original;
         const pops = row[0]; // Population
         const genomeBuild = params?.genome_build || "grch38";
-        return <LdpairLink snp1={params?.var1} snp2={params?.var2} pops={pops} genomeBuild={genomeBuild} />;
+        return <LdpairLink snp1={results.inputs.rs1} snp2={results.inputs.rs2} pops={pops} genomeBuild={genomeBuild} />;
       },
     }),
   ];
@@ -112,14 +206,25 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
           <Row>
             <Col>
               <Tabs defaultActiveKey="1" className="mb-3">
-                <Tab eventKey="1" title={`${params?.var1} ${params?.var2} LD`}>
+                <Tab eventKey="1" title={`${results.inputs.rs1} ${results.inputs.rs2} LD`}>
                   {isLoaded && (
                     <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} options={mapOptions}>
                       {results.locations?.rs1_rs2_LD_map?.map((loc, i) => (
                         <Marker
                           key={i}
                           position={{ lat: loc[3], lng: loc[4] }}
-                          icon={markerIcon}
+                          icon={
+                            isLoaded && typeof google !== "undefined"
+                              ? {
+                                  path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+                                  strokeColor: "black",
+                                  fillColor: colorMarkerLD("r2", loc), // Dynamic color by r2
+                                  fillOpacity: 1,
+                                  scale: 0.85,
+                                  labelOrigin: new google.maps.Point(0, -30),
+                                }
+                              : undefined
+                          }
                           label={{ text: loc[0], fontSize: "12px" }}
                           title={`(${loc[0]}) ${loc[1]}`}
                           onClick={() => setActiveMarker1(i)}
@@ -138,9 +243,9 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                               {results.locations.rs1_rs2_LD_map[activeMarker1][1]}
                             </b>
                             <hr style={{ marginTop: 5, marginBottom: 5 }} />
-                            <b>{params?.var1}</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][5]}
+                            <b>{results.inputs.rs1}</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][5]}
                             <br />
-                            <b>{params?.var2}</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][6]}
+                            <b>{results.inputs.rs2}</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][6]}
                             <br />
                             <b>
                               R<sup>2</sup>
@@ -165,14 +270,25 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                     />
                   </div>
                 </Tab>
-                <Tab eventKey="2" title={`${params?.var1} Allele Frequency`}>
+                <Tab eventKey="2" title={`${results.inputs.rs1} Allele Frequency`}>
                   {isLoaded && (
                     <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} options={mapOptions}>
                       {results.locations?.rs1_map?.map((loc, i) => (
                         <Marker
                           key={i}
                           position={{ lat: loc[3], lng: loc[4] }}
-                          icon={markerIcon}
+                          icon={
+                            isLoaded && typeof google !== "undefined"
+                              ? {
+                                  path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+                                  strokeColor: "black",
+                                  fillColor: colorMarkerMAF(getMinorAllele(2, results.aaData), loc), // Dynamic color by MAF (rs1)
+                                  fillOpacity: 1,
+                                  scale: 0.85,
+                                  labelOrigin: new google.maps.Point(0, -30),
+                                }
+                              : undefined
+                          }
                           label={{ text: loc[0], fontSize: "12px" }}
                           title={`(${loc[0]}) ${loc[1]}`}
                           onClick={() => setActiveMarker2(i)}
@@ -209,14 +325,25 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                     />
                   </div>
                 </Tab>
-                <Tab eventKey="3" title={`${params?.var2} Allele Frequency`}>
+                <Tab eventKey="3" title={`${results.inputs.rs2} Allele Frequency`}>
                   {isLoaded && (
                     <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} options={mapOptions}>
                       {results.locations?.rs2_map?.map((loc, i) => (
                         <Marker
                           key={i}
                           position={{ lat: loc[3], lng: loc[4] }}
-                          icon={markerIcon}
+                          icon={
+                            isLoaded && typeof google !== "undefined"
+                              ? {
+                                  path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
+                                  strokeColor: "black",
+                                  fillColor: colorMarkerMAF(getMinorAllele(3, results.aaData), loc), // Dynamic color by MAF (rs2)
+                                  fillOpacity: 1,
+                                  scale: 0.85,
+                                  labelOrigin: new google.maps.Point(0, -30),
+                                }
+                              : undefined
+                          }
                           label={{ text: loc[0], fontSize: "12px" }}
                           title={`(${loc[0]}) ${loc[1]}`}
                           onClick={() => setActiveMarker3(i)}
