@@ -2,12 +2,15 @@
 import { Row, Col, Container, Alert, Tabs, Tab } from "react-bootstrap";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
-import { submitFormData, ResultsData } from "./types";
-import { GoogleMap, Marker, InfoWindow, useJsApiLoader } from "@react-google-maps/api";
-import { useState } from "react";
+import { submitFormData, ResultsData, Rs1MapLocation, Rs2MapLocation, Rs1Rs2LDMapLocation, AaDataRow } from "./types";
+import { useJsApiLoader } from "@react-google-maps/api";
+import { useState, useRef } from "react";
 import Image from "next/image";
 import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
+import PopMap, { colorMarkerLD, colorMarkerMAF, getMinorAllele } from "@/app/ldpop/PopMap";
+import html2canvas from "html2canvas";
+import { Dropdown } from "react-bootstrap";
 
 export default function LdPopResults({ reference, ...params }: { reference: string } & submitFormData) {
   const { data: results } = useSuspenseQuery<ResultsData>({
@@ -29,11 +32,21 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
   const [activeMarker2, setActiveMarker2] = useState<number | null>(null);
   const [activeMarker3, setActiveMarker3] = useState<number | null>(null);
 
-  // Utility to select color from a palette based on a value between 0 and 1
-  function getColorByValue(value: number, palette: string[]) {
-    const idx = Math.round(Math.max(0, Math.min(1, value)) * (palette.length - 1));
-    return palette[idx] || palette[0];
-  }
+  // Add refs for each map
+  const mapRef1 = useRef<HTMLDivElement>(null);
+  const mapRef2 = useRef<HTMLDivElement>(null);
+  const mapRef3 = useRef<HTMLDivElement>(null);
+
+  // Download handler (fix type to accept any ref)
+  const handleDownload = async (ref: React.RefObject<HTMLDivElement>, type: "png" | "jpeg", name: string = "map") => {
+    if (ref.current) {
+      const canvas = await html2canvas(ref.current, { useCORS: true });
+      const link = document.createElement("a");
+      link.download = `${name}.${type}`;
+      link.href = canvas.toDataURL(`image/${type}`);
+      link.click();
+    }
+  };
 
   const LD_COLORS = [
     "#FFFFFF", // 0.0
@@ -62,79 +75,6 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
     "#1B37F3", // 0.9
     "#1B37F3", // 1.0
   ];
-
-  // Generalized color function
-  function getMarkerColor(type: "LD" | "MAF", value: number | string) {
-    if (value === "NA" || value === undefined || value === null) return "#E9F3F9";
-    const num = typeof value === "number" ? value : Number(value);
-    if (isNaN(num)) return "#E9F3F9";
-    return type === "LD"
-      ? getColorByValue(num, LD_COLORS)
-      : getColorByValue(num, MAF_COLORS);
-  }
-
-  // For LD markers
-  function colorMarkerLD(LD: "r2" | "dprime", location: any[]) {
-    const value = LD === "r2" ? location[7] : location[8];
-    return getMarkerColor("LD", value);
-  }
-
-  // For MAF markers
-  function colorMarkerMAF(minorAllele: string, location: any[]) {
-    const alleleData = location[5]?.replace(/[\s\%]/g, "").split(/[\,\:]/);
-    if (!alleleData || alleleData.length < 4) return "#FFFFFF";
-    const alleleDataHash: Record<string, number> = {
-      [alleleData[0]]: parseFloat(alleleData[1]),
-      [alleleData[2]]: parseFloat(alleleData[3])
-    };
-    const MAF = (alleleDataHash[minorAllele] ?? 0) / 100.0;
-    return getMarkerColor("MAF", MAF);
-  }
-
-  // Helper to get minor allele for a variant index (2 for rs1, 3 for rs2)
-  function getMinorAllele(variantIndex: number, aaData: any[][]) {
-    const alleles = aaData[0][variantIndex].replace(/[\s\%]/g, "").split(/[\,\:]/);
-    const allele1 = alleles[0];
-    const allele2 = alleles[2];
-    let allele1PopSize = 0;
-    let allele2PopSize = 0;
-    const pop_groups = ["ALL", "AFR", "AMR", "EAS", "EUR", "SAS"];
-    for (let i = 0; i < aaData.length; i++) {
-      if (!pop_groups.includes(aaData[i][0])) {
-        const alleleData = aaData[i][variantIndex].replace(/[\s\%]/g, "").split(/[\,\:]/);
-        const allele1Freq = parseFloat(alleleData[1]);
-        const allele2Freq = parseFloat(alleleData[3]);
-        if (allele1Freq === allele2Freq) {
-          allele1PopSize += aaData[i][1];
-          allele2PopSize += aaData[i][1];
-        } else if (allele1Freq < allele2Freq) {
-          allele1PopSize += aaData[i][1];
-        } else {
-          allele2PopSize += aaData[i][1];
-        }
-      }
-    }
-    if (allele1PopSize === allele2PopSize) {
-      return allele1 < allele2 ? allele1 : allele2;
-    } else if (allele1PopSize > allele2PopSize) {
-      return allele1;
-    } else {
-      return allele2;
-    }
-  }
-
-  // Create markerIcon only after Google Maps API is loaded
-  const markerIcon =
-    isLoaded && typeof google !== "undefined"
-      ? {
-          path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
-          strokeColor: "black",
-          fillColor: "red",
-          fillOpacity: 1,
-          scale: 0.85,
-          labelOrigin: new google.maps.Point(0, -30),
-        }
-      : undefined;
 
   function LdpairLink({
     snp1,
@@ -199,6 +139,34 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
     }),
   ];
 
+  function ExportDropdown({
+    mapRef,
+    handleDownload,
+    dropdownId,
+    mapName,
+  }: {
+    mapRef: React.RefObject<HTMLDivElement>;
+    handleDownload: (ref: React.RefObject<HTMLDivElement>, type: "png" | "jpeg", name: string) => void;
+    dropdownId: string;
+    mapName: string;
+  }) {
+    return (
+      <Dropdown>
+        <Dropdown.Toggle split variant="outline-primary" id={dropdownId}>
+          Export {mapName}
+        </Dropdown.Toggle>
+        <Dropdown.Menu>
+          <Dropdown.Item onClick={() => handleDownload(mapRef, "png", mapName.replace(/\s/g, "-").toLowerCase())}>
+            Download PNG
+          </Dropdown.Item>
+          <Dropdown.Item onClick={() => handleDownload(mapRef, "jpeg", mapName.replace(/\s/g, "-").toLowerCase())}>
+            Download JPEG
+          </Dropdown.Item>
+        </Dropdown.Menu>
+      </Dropdown>
+    );
+  }
+
   return (
     <>
       {results && !results?.error ? (
@@ -207,184 +175,212 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
             <Col>
               <Tabs defaultActiveKey="1" className="mb-3">
                 <Tab eventKey="1" title={`${results.inputs.rs1} ${results.inputs.rs2} LD`}>
+                  <Row className="mb-1">
+                    <Col md={4} />
+                    <Col md={4} className="text-center">
+                      <h3>{`${results.inputs.rs1} ${results.inputs.rs1} LD`}</h3>
+                    </Col>
+                    <Col md={4} className="d-flex justify-content-end">
+                      <ExportDropdown
+                        mapRef={mapRef1 as React.RefObject<HTMLDivElement>}
+                        handleDownload={handleDownload}
+                        dropdownId="dropdown-split-basic"
+                        mapName="LD Map"
+                      />
+                    </Col>
+                  </Row>
                   {isLoaded && (
-                    <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} options={mapOptions}>
-                      {results.locations?.rs1_rs2_LD_map?.map((loc, i) => (
-                        <Marker
-                          key={i}
-                          position={{ lat: loc[3], lng: loc[4] }}
-                          icon={
+                    <div ref={mapRef1}>
+                      <PopMap
+                        mapOptions={mapOptions}
+                        markers={results.locations?.rs1_rs2_LD_map?.map((loc: Rs1Rs2LDMapLocation, i: number) => ({
+                          position: { lat: loc[3], lng: loc[4] },
+                          icon:
                             isLoaded && typeof google !== "undefined"
                               ? {
                                   path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
                                   strokeColor: "black",
-                                  fillColor: colorMarkerLD("r2", loc), // Dynamic color by r2
+                                  fillColor: colorMarkerLD("r2", loc, LD_COLORS, MAF_COLORS),
                                   fillOpacity: 1,
                                   scale: 0.85,
                                   labelOrigin: new google.maps.Point(0, -30),
                                 }
-                              : undefined
-                          }
-                          label={{ text: loc[0], fontSize: "12px" }}
-                          title={`(${loc[0]}) ${loc[1]}`}
-                          onClick={() => setActiveMarker1(i)}
-                        />
-                      ))}
-                      {activeMarker1 !== null && (
-                        <InfoWindow
-                          position={{
-                            lat: results.locations.rs1_rs2_LD_map[activeMarker1][3],
-                            lng: results.locations.rs1_rs2_LD_map[activeMarker1][4],
-                          }}
-                          onCloseClick={() => setActiveMarker1(null)}>
-                          <div>
-                            <b>
-                              ({results.locations.rs1_rs2_LD_map[activeMarker1][0]}) -{" "}
-                              {results.locations.rs1_rs2_LD_map[activeMarker1][1]}
-                            </b>
-                            <hr style={{ marginTop: 5, marginBottom: 5 }} />
-                            <b>{results.inputs.rs1}</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][5]}
-                            <br />
-                            <b>{results.inputs.rs2}</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][6]}
-                            <br />
-                            <b>
-                              R<sup>2</sup>
-                            </b>
-                            : {results.locations.rs1_rs2_LD_map[activeMarker1][7]}
-                            <br />
-                            <b>D&#39;</b>: {results.locations.rs1_rs2_LD_map[activeMarker1][8]}
-                          </div>
-                        </InfoWindow>
-                      )}
-                    </GoogleMap>
+                              : undefined,
+                          label: { text: loc[0], fontSize: "12px" },
+                          title: `(${loc[0]}) ${loc[1]}`,
+                          onClick: () => setActiveMarker1(i),
+                          infoWindowOpen: activeMarker1 === i,
+                          infoWindowContent: (
+                            <div>
+                              <b>
+                                ({loc[0]}) - {loc[1]}
+                              </b>
+                              <hr style={{ marginTop: 5, marginBottom: 5 }} />
+                              <b>{results.inputs.rs1}</b>: {loc[5]}
+                              <br />
+                              <b>{results.inputs.rs2}</b>: {loc[6]}
+                              <br />
+                              <b>
+                                R<sup>2</sup>
+                              </b>
+                              : {loc[7]}
+                              <br />
+                              <b>D&#39;</b>: {loc[8]}
+                            </div>
+                          ),
+                        }))}>
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
+                          <Image
+                            src="/images/LDpop_legend_R2.png"
+                            alt="LDpop LD legend"
+                            title="LDpop LD Legend"
+                            width={300}
+                            height={120}
+                            style={{ width: 300, height: "auto" }}
+                            priority
+                          />
+                        </div>
+                      </PopMap>
+                    </div>
                   )}
-                  <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                    <Image
-                      src="/images/LDpop_legend_R2.png"
-                      alt="LDpop LD legend"
-                      title="LDpop LD Legend"
-                      width={300}
-                      height={120}
-                      style={{ width: 300, height: "auto" }}
-                      priority
-                    />
-                  </div>
                 </Tab>
                 <Tab eventKey="2" title={`${results.inputs.rs1} Allele Frequency`}>
+                  <Row className="mb-1">
+                    <Col md={4} />
+                    <Col md={4} className="text-center">
+                      <h3>{`${results.inputs.rs1} Allele Frequency`}</h3>
+                    </Col>
+                    <Col md={4} className="d-flex justify-content-end">
+                      <ExportDropdown
+                        mapRef={mapRef2 as React.RefObject<HTMLDivElement>}
+                        handleDownload={handleDownload}
+                        dropdownId="dropdown-split-basic2"
+                        mapName="AF Map"
+                      />
+                    </Col>
+                  </Row>
                   {isLoaded && (
-                    <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} options={mapOptions}>
-                      {results.locations?.rs1_map?.map((loc, i) => (
-                        <Marker
-                          key={i}
-                          position={{ lat: loc[3], lng: loc[4] }}
-                          icon={
+                    <div ref={mapRef2}>
+                      <PopMap
+                        mapOptions={mapOptions}
+                        markers={results.locations?.rs1_map?.map((loc: Rs1MapLocation, i: number) => ({
+                          position: { lat: loc[3], lng: loc[4] },
+                          icon:
                             isLoaded && typeof google !== "undefined"
                               ? {
                                   path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
                                   strokeColor: "black",
-                                  fillColor: colorMarkerMAF(getMinorAllele(2, results.aaData), loc), // Dynamic color by MAF (rs1)
+                                  fillColor: colorMarkerMAF(
+                                    getMinorAllele(2, results.aaData),
+                                    loc,
+                                    LD_COLORS,
+                                    MAF_COLORS
+                                  ),
                                   fillOpacity: 1,
                                   scale: 0.85,
                                   labelOrigin: new google.maps.Point(0, -30),
                                 }
-                              : undefined
-                          }
-                          label={{ text: loc[0], fontSize: "12px" }}
-                          title={`(${loc[0]}) ${loc[1]}`}
-                          onClick={() => setActiveMarker2(i)}
-                        />
-                      ))}
-                      {activeMarker2 !== null && (
-                        <InfoWindow
-                          position={{
-                            lat: results.locations.rs1_map[activeMarker2][3],
-                            lng: results.locations.rs1_map[activeMarker2][4],
-                          }}
-                          onCloseClick={() => setActiveMarker2(null)}>
-                          <div>
-                            <b>
-                              ({results.locations.rs1_map[activeMarker2][0]}) -{" "}
-                              {results.locations.rs1_map[activeMarker2][1]}
-                            </b>
-                            <hr style={{ marginTop: 5, marginBottom: 5 }} />
-                            {results.locations.rs1_map[activeMarker2][5]}
-                          </div>
-                        </InfoWindow>
-                      )}
-                    </GoogleMap>
+                              : undefined,
+                          label: { text: loc[0], fontSize: "12px" },
+                          title: `(${loc[0]}) ${loc[1]}`,
+                          onClick: () => setActiveMarker2(i),
+                          infoWindowOpen: activeMarker2 === i,
+                          infoWindowContent: (
+                            <div>
+                              <b>
+                                ({loc[0]}) - {loc[1]}
+                              </b>
+                              <hr style={{ marginTop: 5, marginBottom: 5 }} />
+                              {loc[5]}
+                            </div>
+                          ),
+                        }))}>
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
+                          <Image
+                            src="/images/LDpop_legend_MAF.png"
+                            alt="LDpop MAF legend"
+                            title="LDpop MAF Legend"
+                            width={200}
+                            height={120}
+                            style={{ width: 200, height: "auto" }}
+                            priority
+                          />
+                        </div>
+                      </PopMap>
+                    </div>
                   )}
-                  <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                    <Image
-                      src="/images/LDpop_legend_MAF.png"
-                      alt="LDpop MAF legend"
-                      title="LDpop MAF Legend"
-                      width={200}
-                      height={120}
-                      style={{ width: 200, height: "auto" }}
-                      priority
-                    />
-                  </div>
                 </Tab>
                 <Tab eventKey="3" title={`${results.inputs.rs2} Allele Frequency`}>
+                  <Row className="mb-1">
+                    <Col md={4} />
+                    <Col md={4} className="text-center">
+                      <h3>{`${results.inputs.rs2} Allele Frequency`}</h3>
+                    </Col>
+                    <Col md={4} className="d-flex justify-content-end">
+                      <ExportDropdown
+                        mapRef={mapRef3 as React.RefObject<HTMLDivElement>}
+                        handleDownload={handleDownload}
+                        dropdownId="dropdown-split-basic3"
+                        mapName="AF Map"
+                      />
+                    </Col>
+                  </Row>
                   {isLoaded && (
-                    <GoogleMap mapContainerStyle={{ width: "100%", height: "400px" }} options={mapOptions}>
-                      {results.locations?.rs2_map?.map((loc, i) => (
-                        <Marker
-                          key={i}
-                          position={{ lat: loc[3], lng: loc[4] }}
-                          icon={
+                    <div ref={mapRef3}>
+                      <PopMap
+                        mapOptions={mapOptions}
+                        markers={results.locations?.rs2_map?.map((loc: Rs2MapLocation, i: number) => ({
+                          position: { lat: loc[3], lng: loc[4] },
+                          icon:
                             isLoaded && typeof google !== "undefined"
                               ? {
                                   path: "M0-48c-9.8 0-17.7 7.8-17.7 17.4 0 15.5 17.7 30.6 17.7 30.6s17.7-15.4 17.7-30.6c0-9.6-7.9-17.4-17.7-17.4z",
                                   strokeColor: "black",
-                                  fillColor: colorMarkerMAF(getMinorAllele(3, results.aaData), loc), // Dynamic color by MAF (rs2)
+                                  fillColor: colorMarkerMAF(
+                                    getMinorAllele(3, results.aaData),
+                                    loc,
+                                    LD_COLORS,
+                                    MAF_COLORS
+                                  ),
                                   fillOpacity: 1,
                                   scale: 0.85,
                                   labelOrigin: new google.maps.Point(0, -30),
                                 }
-                              : undefined
-                          }
-                          label={{ text: loc[0], fontSize: "12px" }}
-                          title={`(${loc[0]}) ${loc[1]}`}
-                          onClick={() => setActiveMarker3(i)}
-                        />
-                      ))}
-                      {activeMarker3 !== null && (
-                        <InfoWindow
-                          position={{
-                            lat: results.locations.rs2_map[activeMarker3][3],
-                            lng: results.locations.rs2_map[activeMarker3][4],
-                          }}
-                          onCloseClick={() => setActiveMarker3(null)}>
-                          <div>
-                            <b>
-                              ({results.locations.rs2_map[activeMarker3][0]}) -{" "}
-                              {results.locations.rs2_map[activeMarker3][1]}
-                            </b>
-                            <hr style={{ marginTop: 5, marginBottom: 5 }} />
-                            {results.locations.rs2_map[activeMarker3][5]}
-                          </div>
-                        </InfoWindow>
-                      )}
-                    </GoogleMap>
+                              : undefined,
+                          label: { text: loc[0], fontSize: "12px" },
+                          title: `(${loc[0]}) ${loc[1]}`,
+                          onClick: () => setActiveMarker3(i),
+                          infoWindowOpen: activeMarker3 === i,
+                          infoWindowContent: (
+                            <div>
+                              <b>
+                                ({loc[0]}) - {loc[1]}
+                              </b>
+                              <hr style={{ marginTop: 5, marginBottom: 5 }} />
+                              {loc[5]}
+                            </div>
+                          ),
+                        }))}>
+                        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
+                          <Image
+                            src="/images/LDpop_legend_MAF.png"
+                            alt="LDpop MAF legend"
+                            title="LDpop MAF Legend"
+                            width={200}
+                            height={120}
+                            style={{ width: 200, height: "auto" }}
+                            priority
+                          />
+                        </div>
+                      </PopMap>
+                    </div>
                   )}
-                  <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                    <Image
-                      src="/images/LDpop_legend_MAF.png"
-                      alt="LDpop MAF legend"
-                      title="LDpop MAF Legend"
-                      width={200}
-                      height={120}
-                      style={{ width: 200, height: "auto" }}
-                      priority
-                    />
-                  </div>
                 </Tab>
               </Tabs>
             </Col>
           </Row>
           <Row className="mt-3">
-            <Col>{results && <Table title="" data={results.aaData} columns={columns} />}</Col>
+            <Col>{results && <Table title="" data={results.aaData as AaDataRow[]} columns={columns} />}</Col>
           </Row>
           <Row>
             <Col>
