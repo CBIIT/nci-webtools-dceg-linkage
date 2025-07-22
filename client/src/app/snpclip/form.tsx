@@ -85,6 +85,7 @@ export default function SNPClipForm() {
     router.push("/snpclip");
     reset(defaultForm);
     queryClient.invalidateQueries({ queryKey: ["snpclip-form-data"] });
+    submitForm.reset();
   }
 
   return (
