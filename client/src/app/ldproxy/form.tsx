@@ -87,17 +87,17 @@ export default function LdProxyForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={3}>
+        <Col sm={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
-            <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+              <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
         <Col sm={"auto"}>
-          <Form.Group controlId="r2_d" className="mb-3">
-            <Form.Label className="d-block">LD measure</Form.Label>
-            <ButtonGroup className="ms-1">
+          <Form.Group controlId="r2_d" className="mb-3 d-flex align-items-center ">
+            <Form.Label className="mb-0 text-end"  style={{ width: '125px', marginRight: '0.5rem' }}>LD measure:</Form.Label>
+            <ButtonGroup >
               <ToggleButton
                 id="radio-r2"
                 type="radio"
@@ -126,9 +126,9 @@ export default function LdProxyForm() {
               </ToggleButton>
             </ButtonGroup>
           </Form.Group>
-          <Form.Group controlId="collapseTranscript" className="mb-3">
-            <Form.Label className="d-block">Collapse transcripts</Form.Label>
-            <ButtonGroup className="ms-1">
+          <Form.Group controlId="collapseTranscript" className="mb-3 d-flex align-items-center">
+            <Form.Label className="mb-0 text-end"  style={{ width: '125px', marginRight: '0.5rem' }}>Collapse transcripts:</Form.Label>
+            <ButtonGroup >
               <ToggleButton
                 id="radio-transcript-yes"
                 type="radio"
@@ -157,9 +157,9 @@ export default function LdProxyForm() {
               </ToggleButton>
             </ButtonGroup>
           </Form.Group>
-          <Form.Group controlId="annotate" className="mb-3">
-            <Form.Label className="d-block">Annotation</Form.Label>
-            <ButtonGroup className="ms-1">
+          <Form.Group controlId="annotate" className="mb-3 d-flex align-items-center">
+            <Form.Label className="mb-0 text-end" style={{ width: '125px', marginRight: '0.5rem' }}>Annotation:</Form.Label>
+            <ButtonGroup >
               <ToggleButton
                 id="radio-annotate-forgedb"
                 title="Show ForgeDB annotation"
@@ -202,9 +202,9 @@ export default function LdProxyForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col>
+        <Col >
           <Form.Group controlId="window" className="mb-3">
-            <Form.Label>Base pair window</Form.Label>
+            <Form.Label style={{ whiteSpace: 'nowrap' }}>Base pair window</Form.Label>
             <div className="d-flex align-items-center">
               ±&nbsp;
               <Form.Control

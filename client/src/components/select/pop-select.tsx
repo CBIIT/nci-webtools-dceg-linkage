@@ -152,6 +152,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
     })),
   }));
 
+  
   const popOptions: any[] = [{ label: "(ALL) All Populations", value: "ALL" }, ...popGroups];
 
   const Group = (props: any) => {
@@ -185,7 +186,12 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
         paddingLeft: isGroupOption ? 32 : provided.paddingLeft,
       };
     },
-    menu: (provided: any) => ({ ...provided, zIndex: 9999 }),
+    menu: (provided: any) => ({ ...provided, zIndex: 9999,   minWidth: '350px',
+      width: 'max-content' }),
+    menuPortal: (provided: any) => ({
+      ...provided,
+      zIndex: 9999,
+    }),
   };
 
   const formatGroupLabel = (data: GroupedOption) => (
@@ -244,6 +250,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
     onchange(selected);
   }
 
+  
   return (
     <Controller
       name={name}
