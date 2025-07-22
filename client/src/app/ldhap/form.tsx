@@ -79,6 +79,7 @@ export default function LdHapForm() {
     router.push("/ldhap");
     reset(defaultForm);
     queryClient.invalidateQueries({ queryKey: ["ldhap-form-data"] });
+    submitForm.reset();
   }
 
   return (

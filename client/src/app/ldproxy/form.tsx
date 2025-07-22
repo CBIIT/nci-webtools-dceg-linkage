@@ -74,6 +74,7 @@ export default function LdProxyForm() {
     router.push("/ldproxy");
     reset(defaultForm);
     queryClient.invalidateQueries();
+    submitForm.reset();
   }
 
   return (

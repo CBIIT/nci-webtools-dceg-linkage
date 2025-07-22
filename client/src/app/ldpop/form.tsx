@@ -76,6 +76,7 @@ export default function LdPopForm({ params }: { params: submitFormData }) {
     router.push("/ldpop");
     reset(defaultForm);
     queryClient.invalidateQueries({ queryKey: ["ldpop-form-data"] });
+    submitForm.reset();
   }
 
   return (
