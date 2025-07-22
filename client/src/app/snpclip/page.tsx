@@ -7,32 +7,12 @@ import { Container, Row, Col } from "react-bootstrap";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 
 const Results = dynamic(() => import("./results"), {
   ssr: false,
 });
 
-class ErrorBoundary extends React.Component<
-  { children: React.ReactNode },
-  { hasError: boolean; error: Error | null }
-> {
-  constructor(props: { children: React.ReactNode }) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-
-  static getDerivedStateFromError(error: Error) {
-    return { hasError: true, error };
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return <Alert variant="warning">Error loading results</Alert>;
-    }
-
-    return this.props.children;
-  }
-}
 
 export default function SNPclip() {
   const searchParams = useSearchParams();
@@ -49,7 +29,7 @@ export default function SNPclip() {
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
             <Form />
-            <ErrorBoundary>
+            <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>            
               <Suspense fallback={<CalculateLoading />}>{ref && <Results ref_id={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
