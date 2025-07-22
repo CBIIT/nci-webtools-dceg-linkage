@@ -1,6 +1,6 @@
 "use client";
 import { Row, Col, Container, Table, Nav } from "react-bootstrap";
-import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import {  useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, Detail, Warning } from "./types";
 import { genomeBuildMap } from "@/store";
@@ -79,13 +79,12 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
   };
 
   return (
-    <Container fluid="fluid" className="p-3 jumbotron">
-      <div className="jumbotron">
+    <Container fluid="fluid" className="p-3">
         <div className="container-fluid" id="snpclip-results-container">
-          <div id="snpclip-table-container" className="row">            
+          <Row id="snpclip-table-container">            
             <div className="col-md-2 snpclip-table-scroller">
               <div>LD Thinned Variant List</div>               
-              <table id="snpclip-table-thin" className="table table-striped table-chip">               
+              <table id="snpclip-table-thin" className="table table-striped">               
                 <thead>
                   <tr>
                     <th>RS Number</th>
@@ -170,9 +169,9 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
                 <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
               )}
             </div>
-          </div>
+          </Row>
         </div>
-      </div>
+      
       <Row className="mt-3">
         <Col>
           <a href={`/LDlinkRestWeb/tmp/snpclip_snps_${ref_id}.txt`} download className="me-4">
