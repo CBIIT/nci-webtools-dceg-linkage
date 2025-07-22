@@ -5,11 +5,12 @@ import { Row, Col, Form, Button } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { snpclip } from "@/services/queries";
-import PopSelect from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
 import { FormData, SnpClipData } from "./types";
+import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
+
 
 
 export default function SNPClipForm() {
@@ -70,7 +71,7 @@ export default function SNPClipForm() {
       ...data,
       reference,
       genome_build,
-      pop: data.pop.map((e) => e.value).join("+"),
+      pop: getSelectedPopulationGroups(data.pop),
     };
 
     console.log("Submitting SNPClip form with data:", formData);
