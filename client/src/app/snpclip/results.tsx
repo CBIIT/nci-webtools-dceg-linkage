@@ -1,6 +1,6 @@
 "use client";
 import { Row, Col, Container, Table, Nav } from "react-bootstrap";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, Detail, Warning } from "./types";
 import { genomeBuildMap } from "@/store";
@@ -11,11 +11,8 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const [showWarnings, setShowWarnings] = useState(false);
 
-  const { data: formData } = useQuery<FormData>({
-    queryKey: ["snpclip-form-data", ref_id],
-    enabled: !!ref_id,
-    staleTime: Infinity,
-  });
+  const queryClient = useQueryClient();
+  const formData = queryClient.getQueryData(["snpclip-form-data", ref_id]) as FormData | undefined;
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["snpclip_results", ref_id],
