@@ -1,5 +1,5 @@
 "use client";
-import { Row, Col, Container, Table, Nav } from "react-bootstrap";
+import { Row, Col, Container, Table, Nav, Alert } from "react-bootstrap";
 import {  useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, Detail, Warning } from "./types";
@@ -23,6 +23,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
     },
   });
 
+  console.log("results", results);
   const details = results?.details || {};
   const warnings = results?.warnings || [];
   const thinnedSnps = results?.snp_list || [];
@@ -79,6 +80,8 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
   };
 
   return (
+    <>
+    {results ? (
     <Container fluid="fluid" className="p-3" id="snpclip-results-container">        
       <Row id="snpclip-table-container">            
         <Col md={2} className="snpclip-table-scroller">
@@ -182,5 +185,9 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
         </Col>
       </Row>
     </Container>
+  ) : (
+        <Alert variant="danger">{"An error has occured"}</Alert>
+      )}
+      </>
   );
 }
