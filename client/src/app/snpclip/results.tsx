@@ -1,6 +1,6 @@
 "use client";
 import { Row, Col, Container, Table, Nav, Alert } from "react-bootstrap";
-import {  useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, Detail, Warning } from "./types";
 import { genomeBuildMap } from "@/store";
@@ -80,113 +80,109 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
 
   return (
     <>
-    {results ? (
-    <Container fluid="fluid" className="p-3" id="snpclip-results-container">        
-      <Row id="snpclip-table-container">            
-        <Col md={2} className="snpclip-table-scroller">
-          <div>LD Thinned Variant List</div>               
-          <table id="snpclip-table-thin" className="table table-striped">               
-            <thead >
-              <tr >
-                <th className="rs-number">RS Number</th>
-              </tr>
-            </thead>
-            <tbody id="snpclip-snp-list">
-              {thinnedSnps.map((snp: string) => (
-                <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
-                  <td>
-                    <a className="snpclip-link">{snp}</a>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {warnings.length > 0 && (
-            <a
-              id="snpclip-warnings-button"
-              title="View details."
-              onClick={() => setShowWarnings(!showWarnings)}
-              style={{ cursor: "pointer" }}>
-              {showWarnings ? "Hide" : "Show"} Variants with Warnings
-            </a>
-          )}
-        </Col>
+      {results ? (
+        <Container fluid="fluid" className="p-3" id="snpclip-results-container">
+          <Row id="snpclip-table-container">
+            <Col md={2} className="snpclip-table-scroller">
+              <div>LD Thinned Variant List</div>
+              <table id="snpclip-table-thin" className="table table-striped">
+                <thead>
+                  <tr>
+                    <th className="rs-number">RS Number</th>
+                  </tr>
+                </thead>
+                <tbody id="snpclip-snp-list">
+                  {thinnedSnps.map((snp: string) => (
+                    <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
+                      <td>
+                        <a className="snpclip-link">{snp}</a>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {warnings.length > 0 && (
+                <a
+                  id="snpclip-warnings-button"
+                  title="View details."
+                  onClick={() => setShowWarnings(!showWarnings)}
+                  style={{ cursor: "pointer" }}>
+                  {showWarnings ? "Hide" : "Show"} Variants with Warnings
+                </a>
+              )}
+            </Col>
 
-        <Col md={9} className="snpclip-table-scroller" id="snpclip-detail">
+            <Col md={9} className="snpclip-table-scroller" id="snpclip-detail">
+              {activeKey && (
+                <div>
+                  <Row>
+                    <Col col={12}>
+                      <div id="snpclip-detail-title">Details for {activeKey}</div>
+                    </Col>
+                  </Row>
+                  <table id="snpclip-details" className="table table-striped table-chip">
+                    <thead>
+                      <tr>
+                        <th>RS Number</th>
+                        <th>
+                          Position (
+                          <span className="snpclip-position-genome-build-header">
+                            {genomeBuildMap[formData?.genome_build || "grch37"]}
+                          </span>
+                          )
+                        </th>
+                        <th>Alleles</th>
+                        <th>Details</th>
+                      </tr>
+                    </thead>
+                    <tbody>{detailsToShow.map(([rs_number, detail]) => renderRow(rs_number, detail))}</tbody>
+                  </table>
+                </div>
+              )}
 
-          {activeKey && (
-            <div>
-            <Row>
-              <Col col={12}>
-                <div id="snpclip-detail-title">Details for {activeKey}</div>
-              </Col>
-            </Row>
-            <table id="snpclip-details" className="table table-striped table-chip">                  
-              <thead>
-                <tr>
-                  <th>RS Number</th>
-                  <th>
-                    Position (
-                    <span className="snpclip-position-genome-build-header">
-                      {genomeBuildMap[formData?.genome_build || "grch37"]}
-                    </span>
-                    )
-                  </th>
-                  <th>Alleles</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                {detailsToShow.map(([rs_number, detail]) => renderRow(rs_number, detail))}
-              </tbody>
-            </table>
-            </div>
-          )}
+              {showWarnings && warnings.length > 0 && (
+                <table id="snpclip-warnings" className="table table-striped table-chip">
+                  <caption>Variants With Warnings</caption>
+                  <thead>
+                    <tr>
+                      <th>RS Number</th>
+                      <th>
+                        Position (
+                        <span className="snpclip-position-genome-build-header">
+                          {genomeBuildMap[formData?.genome_build || "grch37"]}
+                        </span>
+                        )
+                      </th>
+                      <th>Alleles</th>
+                      <th>Details</th>
+                    </tr>
+                  </thead>
+                  <tbody style={{ border: "1px solid #ccc" }}>
+                    {warnings.map((warning: string[]) => renderRow(warning[0], warning.slice(1), true))}
+                  </tbody>
+                </table>
+              )}
 
-          {showWarnings && warnings.length > 0 && (
-            <table id="snpclip-warnings" className="table table-striped table-chip">
-              <caption>Variants With Warnings</caption>
-              <thead>
-                <tr>
-                  <th>RS Number</th>
-                  <th>
-                    Position (
-                    <span className="snpclip-position-genome-build-header">
-                      {genomeBuildMap[formData?.genome_build || "grch37"]}
-                    </span>
-                    )
-                  </th>
-                  <th>Alleles</th>
-                  <th>Details</th>
-                </tr>
-              </thead>
-              <tbody style={{ border: "1px solid #ccc" }}>
-                {warnings.map((warning: string[]) => renderRow(warning[0], warning.slice(1), true))}
-              </tbody>
-            </table>
-          )}
+              {!activeKey && !showWarnings && (
+                <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
+              )}
+            </Col>
+          </Row>
 
-          {!activeKey && !showWarnings && (
-            <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
-          )}
-        </Col>
-      </Row>
-        
-      
-      <Row className="mt-3">
-        <Col>
-          <a href={`/LDlinkRestWeb/tmp/snpclip_snps_${ref_id}.txt`} download className="me-4">
-            Download Thinned Variant List
-          </a>
-          <a href={`/LDlinkRestWeb/tmp/snpclip_details_${ref_id}.txt`} download>
-            Download Thinned Variant List with Details
-          </a>
-        </Col>
-      </Row>
-    </Container>
-  ) : (
+          <Row className="mt-3">
+            <Col>
+              <a href={`/LDlinkRestWeb/tmp/snpclip_snps_${ref_id}.txt`} download className="me-4">
+                Download Thinned Variant List
+              </a>
+              <a href={`/LDlinkRestWeb/tmp/snpclip_details_${ref_id}.txt`} download>
+                Download Thinned Variant List with Details
+              </a>
+            </Col>
+          </Row>
+        </Container>
+      ) : (
         <Alert variant="danger">{"An error has occured"}</Alert>
       )}
-      </>
+    </>
   );
 }

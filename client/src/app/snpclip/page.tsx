@@ -13,7 +13,6 @@ const Results = dynamic(() => import("./results"), {
   ssr: false,
 });
 
-
 export default function SNPclip() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
@@ -29,7 +28,7 @@ export default function SNPclip() {
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
             <Form />
-            <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>            
+            <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>{ref && <Results ref_id={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
