@@ -79,98 +79,97 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
   };
 
   return (
-    <Container fluid="fluid" className="p-3">
-        <div className="container-fluid" id="snpclip-results-container">
-          <Row id="snpclip-table-container">            
-            <div className="col-md-2 snpclip-table-scroller">
-              <div>LD Thinned Variant List</div>               
-              <table id="snpclip-table-thin" className="table table-striped">               
-                <thead>
-                  <tr>
-                    <th>RS Number</th>
-                  </tr>
-                </thead>
-                <tbody id="snpclip-snp-list">
-                  {thinnedSnps.map((snp: string) => (
-                    <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
-                      <td>
-                        <a className="snpclip-link">{snp}</a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {warnings.length > 0 && (
-                <a
-                  id="snpclip-warnings-button"
-                  title="View details."
-                  onClick={() => setShowWarnings(!showWarnings)}
-                  style={{ cursor: "pointer" }}>
-                  {showWarnings ? "Hide" : "Show"} Variants with Warnings
-                </a>
-              )}
-            </div>
-
-            <div className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
-              
-              {activeKey && (
-                <div>
-                <Row>
-                  <Col col={12}>
-                    <div id="snpclip-detail-title">Details for {activeKey}</div>
-                  </Col>
-                </Row>
-                <table id="snpclip-details" className="table table-striped table-chip">                  
-                  <thead>
-                    <tr>
-                      <th>RS Number</th>
-                      <th>
-                        Position (
-                        <span className="snpclip-position-genome-build-header">
-                          {genomeBuildMap[formData?.genome_build || "grch37"]}
-                        </span>
-                        )
-                      </th>
-                      <th>Alleles</th>
-                      <th>Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {detailsToShow.map(([rs_number, detail]) => renderRow(rs_number, detail))}
-                  </tbody>
-                </table>
-                </div>
-              )}
-
-              {showWarnings && warnings.length > 0 && (
-                <table id="snpclip-warnings" className="table table-striped table-chip">
-                  <caption>Variants With Warnings</caption>
-                  <thead>
-                    <tr>
-                      <th>RS Number</th>
-                      <th>
-                        Position (
-                        <span className="snpclip-position-genome-build-header">
-                          {genomeBuildMap[formData?.genome_build || "grch37"]}
-                        </span>
-                        )
-                      </th>
-                      <th>Alleles</th>
-                      <th>Details</th>
-                    </tr>
-                  </thead>
-                  <tbody style={{ border: "1px solid #ccc" }}>
-                    {warnings.map((warning: string[]) => renderRow(warning[0], warning.slice(1), true))}
-                  </tbody>
-                </table>
-              )}
-
-              {!activeKey && !showWarnings && (
-                <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
-              )}
-            </div>
-          </Row>
+    <Container fluid="fluid" className="p-3" id="snpclip-results-container">        
+      <Row id="snpclip-table-container">            
+        <div className="col-md-2 snpclip-table-scroller">
+          <div>LD Thinned Variant List</div>               
+          <table id="snpclip-table-thin" className="table table-striped">               
+            <thead>
+              <tr>
+                <th>RS Number</th>
+              </tr>
+            </thead>
+            <tbody id="snpclip-snp-list">
+              {thinnedSnps.map((snp: string) => (
+                <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
+                  <td>
+                    <a className="snpclip-link">{snp}</a>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {warnings.length > 0 && (
+            <a
+              id="snpclip-warnings-button"
+              title="View details."
+              onClick={() => setShowWarnings(!showWarnings)}
+              style={{ cursor: "pointer" }}>
+              {showWarnings ? "Hide" : "Show"} Variants with Warnings
+            </a>
+          )}
         </div>
+
+        <div className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
+          
+          {activeKey && (
+            <div>
+            <Row>
+              <Col col={12}>
+                <div id="snpclip-detail-title">Details for {activeKey}</div>
+              </Col>
+            </Row>
+            <table id="snpclip-details" className="table table-striped table-chip">                  
+              <thead>
+                <tr>
+                  <th>RS Number</th>
+                  <th>
+                    Position (
+                    <span className="snpclip-position-genome-build-header">
+                      {genomeBuildMap[formData?.genome_build || "grch37"]}
+                    </span>
+                    )
+                  </th>
+                  <th>Alleles</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                {detailsToShow.map(([rs_number, detail]) => renderRow(rs_number, detail))}
+              </tbody>
+            </table>
+            </div>
+          )}
+
+          {showWarnings && warnings.length > 0 && (
+            <table id="snpclip-warnings" className="table table-striped table-chip">
+              <caption>Variants With Warnings</caption>
+              <thead>
+                <tr>
+                  <th>RS Number</th>
+                  <th>
+                    Position (
+                    <span className="snpclip-position-genome-build-header">
+                      {genomeBuildMap[formData?.genome_build || "grch37"]}
+                    </span>
+                    )
+                  </th>
+                  <th>Alleles</th>
+                  <th>Details</th>
+                </tr>
+              </thead>
+              <tbody style={{ border: "1px solid #ccc" }}>
+                {warnings.map((warning: string[]) => renderRow(warning[0], warning.slice(1), true))}
+              </tbody>
+            </table>
+          )}
+
+          {!activeKey && !showWarnings && (
+            <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
+          )}
+        </div>
+      </Row>
+        
       
       <Row className="mt-3">
         <Col>
