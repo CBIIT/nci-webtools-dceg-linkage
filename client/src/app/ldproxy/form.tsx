@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldproxy } from "@/services/queries";
@@ -82,7 +82,19 @@ export default function LdProxyForm() {
         <Col sm={2}>
           <Form.Group controlId="var">
             <Form.Label>Variant</Form.Label>
-            <Form.Control {...register("var", { required: "Required" })} placeholder="Variant RSID or CHR:POS" />
+            <OverlayTrigger
+              placement="top"
+              overlay={
+                <Tooltip id="variant-input-tooltip">
+                  rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted
+                </Tooltip>
+              }
+            >
+              <Form.Control
+                {...register("var", { required: "This field is required" })}
+                placeholder="Variant RSID or CHR:POS"
+              />
+            </OverlayTrigger>
             <Form.Text className="text-danger">{errors?.var?.message}</Form.Text>
           </Form.Group>
         </Col>
@@ -103,7 +115,7 @@ export default function LdProxyForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("r2_d")}
-                title="Select R-squared attribute"
+                title="Select pairwise value"
                 value="r2"
                 checked={watch("r2_d") === "r2"}
                 onChange={() => {
@@ -116,7 +128,7 @@ export default function LdProxyForm() {
                 type="radio"
                 variant="outline-primary"
                 {...register("r2_d")}
-                title="Select D-prime attribute"
+                title="Select pairwise value"
                 value="d"
                 checked={watch("r2_d") === "d"}
                 onChange={() => {
@@ -203,21 +215,42 @@ export default function LdProxyForm() {
           </Form.Group>
         </Col>
         <Col>
+       <OverlayTrigger
+          placement="top"
+          overlay={
+            <Tooltip id="window-tooltip">
+              Value must be a number between 0 and 1,000,000
+            </Tooltip>
+          }
+        >
           <Form.Group controlId="window" className="mb-3">
-            <Form.Label>Base pair window</Form.Label>
-            <div className="d-flex align-items-center">
+            <Form.Label style={{ whiteSpace: "nowrap" }}>Base pair window</Form.Label>
+            <div className="d-flex align-items-center" >
               ±&nbsp;
               <Form.Control
-                type="number"
-                {...register("window", {
-                  required: "Base pair window is required",
-                  pattern: { value: /^\d+$/, message: "Invalid base pair window" },
-                })}
-                placeholder="100000"
-              />
+                  type="number"
+                  {...register("window", {
+                    required: "Base pair window is required",
+                    valueAsNumber: true,
+                    min: {
+                      value: 0,
+                      message: "Minimum value is 0"
+                    },
+                    max: {
+                      value: 1000000,
+                      message: "Max value is 1000000"
+                    },
+                    validate: {
+                      isInteger: (value) => {
+                        return Number.isInteger(value) || "Must be a whole number";
+                      }
+                    }
+                  })}
+                />
             </div>
             <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
           </Form.Group>
+        </OverlayTrigger>
         </Col>
         <Col />
         <Col sm={2}>

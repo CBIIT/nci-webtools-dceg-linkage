@@ -889,6 +889,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
     if collapseTranscript == "false":
         # Gene Plot (All Transcripts)
+        print("Making request to export service for high quality images for all transcripts")
         genes_file = tmp_dir + "genes_" + request + ".json"
         genes_json = getRefGene(db, genes_file, snp_coord['chromosome'], int(coord1), int(coord2), genome_build, False)
         #genes_json = open(genes_file).readlines()
@@ -1018,6 +1019,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
 
         # Combine plots into a grid
         out_grid = gridplot([proxy_plot, rug, gene_plot], ncols=1, toolbar_options=dict(logo=None))
+        return (out_grid,proxy_plot,gene_plot,rug,plot_h_pix)
     # Gene Plot (Collapsed)                        
     else:
         genes_c_file = tmp_dir + "genes_c_" + request + ".json"
@@ -1132,4 +1134,4 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         gene_c_plot.toolbar_location = "below"
         
         out_grid = gridplot([proxy_plot, rug, gene_c_plot], ncols=1, toolbar_options=dict(logo=None))
-    return (out_grid,proxy_plot,gene_c_plot,rug,plot_h_pix)
+        return (out_grid,proxy_plot,gene_c_plot,rug,plot_h_pix)
