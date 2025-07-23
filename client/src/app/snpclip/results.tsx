@@ -81,7 +81,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
   return (
     <Container fluid="fluid" className="p-3" id="snpclip-results-container">        
       <Row id="snpclip-table-container">            
-        <div className="col-md-2 snpclip-table-scroller">
+        <Col className="col-md-2 snpclip-table-scroller">
           <div>LD Thinned Variant List</div>               
           <table id="snpclip-table-thin" className="table table-striped">               
             <thead>
@@ -108,10 +108,10 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
               {showWarnings ? "Hide" : "Show"} Variants with Warnings
             </a>
           )}
-        </div>
+        </Col>
 
-        <div className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
-          
+        <Col className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
+
           {activeKey && (
             <div>
             <Row>
@@ -167,7 +167,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
           {!activeKey && !showWarnings && (
             <div id="snpclip-initial-message">Click a variant on the left to view details.</div>
           )}
-        </div>
+        </Col>
       </Row>
         
       

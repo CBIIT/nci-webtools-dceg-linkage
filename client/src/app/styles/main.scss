@@ -10,9 +10,6 @@ body {
   color: #444;
 }
 
-.accordion-button {
-  color: $blue;
-}
 
 .disabled-contrast {
   label {
@@ -383,6 +380,21 @@ nav {
 .ng-warning {
   color: #ffc007;
 }
+
+#snpclip-initial-message {
+	font-weight: bold;
+	font-size: 110%;
+	margin-top: 50px;
+}
+#snpclip-table-container {
+	min-height: 580px;
+}
+.snpclip-table-scroller {
+	overflow-y: auto;
+	max-height: 575px;
+	padding-top: 10px;
+}
+
 
 @media only screen and (max-width: 930px) {
   .card-outside {
