@@ -82,3 +82,8 @@ export async function snpchipPlatforms(): Promise<any> {
 export async function snpchip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
 }
+
+export async function snpclip(params: any): Promise<any> {
+  return (await axios.post(`/LDlinkRestWeb/snpclip`, params)).data;
+}
+
