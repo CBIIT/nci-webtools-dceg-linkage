@@ -81,12 +81,12 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
   return (
     <Container fluid="fluid" className="p-3" id="snpclip-results-container">        
       <Row id="snpclip-table-container">            
-        <Col className="col-md-2 snpclip-table-scroller">
+        <Col md={2} className="snpclip-table-scroller">
           <div>LD Thinned Variant List</div>               
           <table id="snpclip-table-thin" className="table table-striped">               
-            <thead>
-              <tr>
-                <th>RS Number</th>
+            <thead >
+              <tr >
+                <th className="rs-number">RS Number</th>
               </tr>
             </thead>
             <tbody id="snpclip-snp-list">
@@ -110,7 +110,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
           )}
         </Col>
 
-        <Col className="col-sm-9 col-md-9 snpclip-table-scroller" id="snpclip-detail">
+        <Col md={9} className="snpclip-table-scroller" id="snpclip-detail">
 
           {activeKey && (
             <div>
