@@ -23,7 +23,6 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
     },
   });
 
-  console.log("results", results);
   const details = results?.details || {};
   const warnings = results?.warnings || [];
   const thinnedSnps = results?.snp_list || [];

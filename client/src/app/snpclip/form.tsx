@@ -74,7 +74,6 @@ export default function SNPClipForm() {
       pop: getSelectedPopulationGroups(data.pop),
     };
 
-    console.log("Submitting SNPClip form with data:", formData);
 
     queryClient.setQueryData(["snpclip-form-data", reference.toString()], formData);
     submitForm.mutate(formData);
