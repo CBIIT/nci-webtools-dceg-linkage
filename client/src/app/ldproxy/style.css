@@ -1,0 +1,12 @@
+.grey-tooltip .tooltip-inner {
+  background-color: #e0e0e0 !important;
+  color: rgb(0, 0, 0);
+}
+
+.grey-tooltip.bs-tooltip-top .tooltip-arrow::before {
+  border-top-color: #e0e0e0 !important;
+}
+
+.grey-tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+  border-bottom-color: #e0e0e0 !important;
+}

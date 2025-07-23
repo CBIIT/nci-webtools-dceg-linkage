@@ -7,6 +7,7 @@ import { ldproxy } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
+import './style.css';
 
 export interface FormData {
   var: string;
@@ -85,7 +86,7 @@ export default function LdProxyForm() {
             <OverlayTrigger
               placement="top"
               overlay={
-                <Tooltip id="variant-input-tooltip">
+                <Tooltip id="variant-input-tooltip" className="grey-tooltip">
                   rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted
                 </Tooltip>
               }
@@ -218,7 +219,7 @@ export default function LdProxyForm() {
        <OverlayTrigger
           placement="top"
           overlay={
-            <Tooltip id="window-tooltip">
+            <Tooltip id="window-tooltip"  className="grey-tooltip">
               Value must be a number between 0 and 1,000,000
             </Tooltip>
           }
