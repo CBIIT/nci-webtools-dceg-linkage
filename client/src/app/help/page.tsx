@@ -138,30 +138,12 @@ export default function HelpPage() {
             <section id="FAQ">
             <h3>Frequently Asked Questions</h3>
             <div style={{ marginLeft: 40 }}>
-                <p><strong>Why is my variant RS number bringing up an error?</strong></p>
-                <p>LDlink modules only accepts...</p>
-                <p><strong>What 1000 Genomes population should I select for my LDlink query?</strong></p>
-                <p>Choosing the correct...</p>
-                <p><strong>What is the estimated running time for an LDproxy query?</strong></p>
-                <p>Running time varies greatly...</p>
-                <p><strong>How do I save output files?</strong></p>
-                <p>Output from a variety of...</p>
-                <p><strong>Can I save the plots generated in LDmatrix or LDproxy?</strong></p>
-                <p>Yes. Click the Save icon on...</p>
-                <p><strong>Does LDproxy display all variants in the window around the query variant?</strong></p>
-                <p>For plotting and performance issues, LDproxy plots only include variants with R<sup>2</sup>...</p>
-                <p><strong>What is the maximum number of variants LDhap and LDmatrix can accept as input?</strong></p>
-                <p>LDhap has a limit of 30 variants...</p>
-                <p><strong>Why are the variants in LDhap and LDmatrix output not in the same order as the input?</strong></p>
-                <p>Variants in LDhap and LDmatrix...</p>
-                <p><strong>Why does my computer seem slow when using LDlink?</strong></p>
-                <p>The interactive plots...</p>
-                <p><strong>What genome build does LDlink use for genomic coordinates?</strong></p>
-                <p>LDlink supports...</p>
-                <p><strong>Why do variant coordinates not always match dbSNP or UCSC coordinates?</strong></p>
-                <p>All coordinates in LDlink are based on...</p>
-                <p><strong>What browsers are supported by LDlink?</strong></p>
-                <p>LDlink has been tested to... will not display correctly with Internet Explorer 9 and below or Firefox 35 and below.</p>
+              {faqList.map((faq, idx) => (
+                <div key={idx} style={{ marginBottom: 16 }}>
+                  <p><strong>{faq.question}</strong></p>
+                  <p dangerouslySetInnerHTML={{ __html: faq.answer }} />
+                </div>
+              ))}
             </div>
             </section>
             {/* Continue converting the rest of the help.html content as needed. */}
@@ -170,3 +152,108 @@ export default function HelpPage() {
     </Container>
   );
 }
+
+// FAQ data array
+const faqList = [
+  {
+    question: "Why is my variant RS number bringing up an error?",
+    answer: `LDlink modules only accepts input for variant RS numbers that are
+      bi-allelic. Ensure your query SNP has A/C, A/G, A/T, C/G,
+      C/T, or G/T alleles. RS numbers for insertions or deletions (i.e.
+      "indels") are also now accepted as input. If a variant you believe is
+      bi-allelic is not accepted, check dbSNP to ensure there are only two
+      alleles for the variant. Even if there is only one reports of a
+      variant being tri- or multi-allelic in dbSNP, the variant is not considered
+      valid input under the current implementation of LDlink.`
+  },
+  {
+    question: "What 1000 Genomes population should I select for my LDlink query?",
+    answer: `Choosing the correct
+      reference 1000 Genomes Project population
+      is essential for comparability of results from LDlink to your
+      population of interest. In general, try to select the sub-population
+      that best matches the ancestry of your study population. While LDlink
+      allows for multiple 1000 Genomes sub-populations to be selected
+      simultaneously, it is recommended to first investigate the patterns of
+      linkage disequilibrium in the query region of each sub-population
+      before considering whether to combine sub-populations in a query.`
+  },
+  {
+    question: "What is the estimated running time for an LDproxy query?",
+    answer: `Running time varies greatly
+      for LDproxy ranging from a few
+      seconds to approximately one minute. For each query, LDproxy actively
+      calculates all LD metrics based on user input. A variety of factors
+      affect overall running time including: (1) the number of haplotypes
+      available for the sub-population(s), (2) the number of dbSNP variants in
+      the region queried, (3) the current utilization of the LDlink server,
+      and (4) the download speed of your internet connection. In general, the
+      best way to speed up an LDlink query is to only select one
+      sub-population per query. Queries that include multiple sub-populations
+      or ancestral groups take much longer to complete than single
+      sub-population queries and tie up limited system resources.`
+  },
+  {
+    question: "How do I save output files?",
+    answer: `Output from a variety of
+      LDlink modules (LDhap, LDmatrix, and
+      LDproxy) is available for download. To save output either (1) right
+      click or long press on the link and select the "Save Link As…" option
+      or (2) open the link in a new browser window and copy and paste the
+      contents to a new file.`
+  },
+  {
+    question: "Can I save the plots generated in LDmatrix or LDproxy?",
+    answer: `Yes. Click the Save icon on
+      the top right of the plot. A
+      preview window will appear. Right click or long press on the preview
+      image, select "Save As…", and choose a filename for the plot image.`
+  },
+  {
+    question: "Does LDproxy display all variants in the window around the query variant?",
+    answer: `For plotting and performance issues, LDproxy plots only include variants with R<sup>2</sup>
+      values greater than 0.01.
+      Additionally, the LDproxy download also only includes variants with R<sup>2</sup> values greater than 0.01.`
+  },
+  {
+    question: "What is the maximum number of variants LDhap and LDmatrix can accept as input?",
+    answer: `LDhap has a limit of 30 variants
+      and LDmatrix has a limit of 300 variants. LDmatrix supports up to 1,000 variants via API call. These limits were selected to optimize query speed and
+      visualization of results.`
+  },
+  {
+    question: "Why are the variants in LDhap and LDmatrix output not in the same order as the input?",
+    answer: `Variants in LDhap and LDmatrix
+      output are not ordered based on user
+      input. Rather, results are ordered based on chromosomal order.`
+  },
+  {
+    question: "Why does my computer seem slow when using LDlink?",
+    answer: `The interactive plots
+      produced by LDmatrix and LDproxy require
+      a sizeable amount of data and java script to be loaded into the web
+      browser. On some computers this results in a notable lag in
+      performance. To improve performance, simply
+      refresh the LDlink webpage to clear the temporary data from memory.
+      Refreshing the LDlink webpage will remove all interactive plots.`
+  },
+  {
+    question: "What genome build does LDlink use for genomic coordinates?",
+    answer: `LDlink supports
+      GRCh37 (hg19) and GRCh38 (hg38). Choose between GRCh37 (hg19), GRCh38 (hg38), and GRCh38 High Coverage (hg38) 1000 Genome Project datasets with the Genome Build (1000G) dropdown menu on the top left.`
+  },
+  {
+    question: "Why do variant coordinates not always match dbSNP or UCSC coordinates?",
+    answer: `All coordinates in LDlink are based on
+      variant positions in the 1000 Genomes VCF files. Slight difference in
+      positions may be observed due to updates in mapping and alignment. Please
+      refer to <a href="#dbSNP">dbSNP</a>
+      for the most up-to-date information on variant coordinates.`
+  },
+  {
+    question: "What browsers are supported by LDlink?",
+    answer: `LDlink has been tested to
+      work with Internet Explorer 10+, Chrome, Firefox 36+ and Safari. LDlink
+      will not display correctly with Internet Explorer 9 and below or Firefox 35 and below.`
+  }
+];
