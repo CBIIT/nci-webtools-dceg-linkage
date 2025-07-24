@@ -1,5 +1,5 @@
 "use client";
-import { Form, Button, Accordion, Row, Col, Spinner } from "react-bootstrap";
+import { Form, Button, Accordion, Row, Col, Spinner  } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { snpchipPlatforms } from "../../services/queries";
 
@@ -70,9 +70,7 @@ export default function SnpChipForm({
   setAffymetrixChips,
 }: SnpChipFormProps) {
   const [availableIllumina, setAvailableIllumina] = useState<Platform[]>([]);
-  const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>(
-    [],
-  );
+  const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>([]);
   const [platformsLoading, setPlatformsLoading] = useState(true);
   const [selectAllIllumina, setSelectAllIllumina] = useState(true);
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
@@ -107,20 +105,14 @@ export default function SnpChipForm({
   }, [setIlluminaChips, setAffymetrixChips]);
 
   useEffect(() => {
-    setSelectAllIllumina(
-      availableIllumina.length > 0 &&
-        illuminaChips.length === availableIllumina.length,
-    );
-    setSelectAllAffymetrix(
-      availableAffymetrix.length > 0 &&
-        affymetrixChips.length === availableAffymetrix.length,
-    );
+    setSelectAllIllumina(availableIllumina.length > 0 && illuminaChips.length === availableIllumina.length);
+    setSelectAllAffymetrix(availableAffymetrix.length > 0 && affymetrixChips.length === availableAffymetrix.length);
   }, [illuminaChips, affymetrixChips, availableIllumina, availableAffymetrix]);
 
   return (
     <>
       <Form onSubmit={handleSubmit} className="mb-4">
-        <Row className="mb-3">
+        <Row className="mb-3 align-items-end">
           <Col md={4}>
             <Form.Group controlId="snpchip-file-snp-numbers">
               <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
@@ -131,6 +123,7 @@ export default function SnpChipForm({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 required={!file}
+                title="Enter list of RS numbers or Genomic Coordinates (one per line)"
               />
             </Form.Group>
           </Col>
@@ -148,7 +141,10 @@ export default function SnpChipForm({
               />
             </Form.Group>
           </Col>
-          <Col md={3} className="d-flex align-items-end">
+          <Col md={3} className="d-flex justify-content-end">
+            <Button type="reset" variant="outline-danger" className="me-1">
+              Reset
+            </Button>
             <Button type="submit" variant="primary" disabled={loading}>
               {loading ? <Spinner animation="border" size="sm" /> : "Calculate"}
             </Button>
@@ -159,12 +155,12 @@ export default function SnpChipForm({
       <Accordion className="mb-4">
         <Accordion.Item eventKey="0">
           <Accordion.Header>
-            <div className="d-flex justify-content-between w-100 align-items-center">
+            <div className="d-flex justify-content-between w-100 align-items-center snpchip-accordion">
               <span>Filter by array</span>
               {!platformsLoading && (
                 <small className="text-muted me-2">
-                  {illuminaChips?.length || 0} Illumina array(s), and{" "}
-                  {affymetrixChips?.length || 0} Affymetrix array(s) selected
+                  {illuminaChips?.length || 0} Illumina array(s), and {affymetrixChips?.length || 0} Affymetrix array(s)
+                  selected
                 </small>
               )}
             </div>
@@ -176,33 +172,44 @@ export default function SnpChipForm({
               </div>
             ) : (
               <>
-                <Button
-                  variant="link"
-                  className="p-0 mb-3"
-                  onClick={() => {
-                    const allSelected =
-                      illuminaChips.length === availableIllumina.length &&
-                      affymetrixChips.length === availableAffymetrix.length;
-                    if (allSelected) {
-                      setIlluminaChips([]);
-                      setAffymetrixChips([]);
-                    } else {
-                      setIlluminaChips(availableIllumina);
-                      setAffymetrixChips(availableAffymetrix);
-                    }
-                  }}
-                >
-                  {illuminaChips.length === availableIllumina.length &&
-                  affymetrixChips.length === availableAffymetrix.length
-                    ? "Deselect All"
-                    : "Select All"}
-                </Button>
+                {illuminaChips.length === availableIllumina.length &&
+                affymetrixChips.length === availableAffymetrix.length ? (
+                  <p className="instruction">
+                    Limit search results to only SNPs on the selected arrays (
+                    <span
+                      id="selectAllChipTypes"
+                      className="underlined"
+                      style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}
+                      onClick={() => {
+                        setIlluminaChips([]);
+                        setAffymetrixChips([]);
+                      }}>
+                      unselect all
+                    </span>
+                    )
+                  </p>
+                ) : (
+                  <p className="instruction">
+                    Limit search results to only SNPs on the selected arrays (
+                    <span
+                      id="selectAllChipTypes"
+                      className="underlined"
+                      style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}
+                      onClick={() => {
+                        setIlluminaChips(availableIllumina);
+                        setAffymetrixChips(availableAffymetrix);
+                      }}>
+                      select all
+                    </span>
+                    )
+                  </p>
+                )}
                 <Row>
                   <Col>
                     <Form.Check
                       type="checkbox"
                       id="selectAllIllumina"
-                      label="Select All Illumina"
+                      label={<strong>Select All Illumina</strong>}
                       checked={selectAllIllumina}
                       onChange={(e) => {
                         const checked = e.target.checked;
@@ -221,7 +228,7 @@ export default function SnpChipForm({
                     <Form.Check
                       type="checkbox"
                       id="selectAllAffymetrix"
-                      label="Select All Affymetrix"
+                      label={<strong>Select All Affymetrix</strong>}
                       checked={selectAllAffymetrix}
                       onChange={(e) => {
                         const checked = e.target.checked;
@@ -242,6 +249,7 @@ export default function SnpChipForm({
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+      <hr />
     </>
   );
 }
