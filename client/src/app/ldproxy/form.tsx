@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldproxy } from "@/services/queries";
@@ -83,19 +83,17 @@ export default function LdProxyForm() {
         <Col sm={2}>
           <Form.Group controlId="var">
             <Form.Label>Variant</Form.Label>
-            <OverlayTrigger
-              placement="top"
-              overlay={
-                <Tooltip id="variant-input-tooltip" className="grey-tooltip">
-                  rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted
-                </Tooltip>
-              }
-            >
-              <Form.Control
-                {...register("var", { required: "This field is required" })}
-                placeholder="Variant RSID or CHR:POS"
-              />
-            </OverlayTrigger>
+            <Form.Control
+              {...register("var", { 
+                required: "This field is required",
+                pattern: {
+                  value: /^(rs\d+|\d+:\d+)$/,
+                  message: "Please match the requested format. rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted"
+                }
+              })} 
+              title="rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted"
+              placeholder="Variant RSID or CHR:POS"
+            />
             <Form.Text className="text-danger">{errors?.var?.message}</Form.Text>
           </Form.Group>
         </Col>
@@ -216,14 +214,6 @@ export default function LdProxyForm() {
           </Form.Group>
         </Col>
         <Col>
-       <OverlayTrigger
-          placement="top"
-          overlay={
-            <Tooltip id="window-tooltip"  className="grey-tooltip">
-              Value must be a number between 0 and 1,000,000
-            </Tooltip>
-          }
-        >
           <Form.Group controlId="window" className="mb-3">
             <Form.Label style={{ whiteSpace: "nowrap" }}>Base pair window</Form.Label>
             <div className="d-flex align-items-center" >
@@ -247,11 +237,11 @@ export default function LdProxyForm() {
                       }
                     }
                   })}
+                  title="Value must be a number between 0 and 1,000,000"
                 />
             </div>
             <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
           </Form.Group>
-        </OverlayTrigger>
         </Col>
         <Col />
         <Col sm={2}>
