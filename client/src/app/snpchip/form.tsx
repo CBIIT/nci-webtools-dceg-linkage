@@ -1,5 +1,5 @@
 "use client";
-import { Form, Button, Accordion, Row, Col, Spinner, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { Form, Button, Accordion, Row, Col, Spinner  } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { snpchipPlatforms } from "../../services/queries";
 
