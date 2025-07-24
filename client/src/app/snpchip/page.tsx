@@ -190,7 +190,7 @@ export default function SNPchip() {
             SNPchip Tool
             <sup>
               <a
-                href="/docs/#SNPchip"
+                href="/help/#SNPchip"
                 target="_blank"
                 style={{
                   fontSize: 20,
