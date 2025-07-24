@@ -386,7 +386,6 @@ def calculate_proxy(snp, pop, request, web, genome_build, r2_d="r2", window=5000
             "collapseTranscript": collapseTranscript,
             "annotate": annotate
         }
-        
         def send_async():
             try:
                 with httpx.Client(timeout=None) as client:

@@ -250,19 +250,21 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
       control={control}
       rules={rules}
       render={({ field }) => (
-        <Select
-          {...field}
-          isMulti
-          options={popOptions}
-          closeMenuOnSelect={false}
-          components={{ Group }}
-          className="basic-multi-select"
-          classNamePrefix="select"
-          value={field.value || []}
-          styles={customStyles}
-          formatGroupLabel={formatGroupLabel}
-          onChange={(selected) => handleChange(Array.from(selected), field.value, field.onChange)}
-        />
+        <div title="Select Population">
+          <Select
+            {...field}
+            isMulti
+            options={popOptions}
+            closeMenuOnSelect={false}
+            components={{ Group }}
+            className="basic-multi-select"
+            classNamePrefix="select"
+            value={field.value || []}
+            styles={customStyles}
+            formatGroupLabel={formatGroupLabel}
+            onChange={(selected) => handleChange(Array.from(selected), field.value, field.onChange)}
+          />
+        </div>
       )}
     />
   );

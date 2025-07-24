@@ -11,7 +11,7 @@ from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, get
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
 from LDutilites import get_config,array_split
 
-# Create LDproxy function
+# Create LDassoc function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	start_time=time.time()
 
@@ -1206,7 +1206,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			"argsName": myargsName,
 			"argsOrigin": myargsOrigin
 		}
-		
 		def send_async():
 			try:
 				with httpx.Client(timeout=None) as client:
