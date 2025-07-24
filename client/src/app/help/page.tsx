@@ -296,70 +296,76 @@ const modules = [
 		],
 		output: [
 			"<u>Table of observed haplotypes</u>  - haplotypes with frequencies greater than 1 percent are displayed vertically and ordered by observed frequency in the selected query sub-population. Variant genotypes are reported in rows and and are sorted by genomic position. Queries should be limited to nearby variants, since haplotype switch rate errors become more common as genomic distance increases. Links are available to <a href=\"#dbSNP\">dbSNP</a> RS numbers and coordinates in the<a href=\"https://genome.ucsc.edu/cgi-bin/hgGateway\" target=\"_blank\">UCSC Genome Browser</a>.",
-			"<u>Variant file download</u>"
+			"<u>Variant file download</u> - download a file listing the order of the queried variants. Variants are ordered by genomic location. This file is used as a key for the order of genotypes in the haplotype file. Only bi-allelic variants with matching dbSNP RS numbers are included. All others are filtered out.",
+            "<u>Haplotype file download</u> - download a file of all observed haplotypes. Haplotype genotypes are in the order of the above variant file."
 		]
 	},
 	{
 		id: "LDmatrix",
 		name: "LDmatrix",
 		description:
-			"Generate an interactive matrix of pairwise linkage disequilibrium statistics for up to 300 bi-allelic variants. Results include a color-coded matrix and downloadable data.",
+			"Create an interactive heatmap matrix of pairwise linkage disequilibrium statistics.",
 		input: [
-			"<u>List of RS numbers</u> - enter up to 300 bi-allelic variant RS numbers, one per line, or upload a file with RS numbers in the first column.",
-			"<u>Reference population(s)</u> - select at least one 1000 Genomes Project sub-population.",
-			"<u>Genome build</u> - choose GRCh37 or GRCh38."
+			"<u>List of RS numbers</u> - this can either be entered one per line in the text entry box or uploaded as a file that contains a list of RS numbers in the first column. A maximum of 300 variant RS numbers are permitted. All input variants must be on the same chromosome and match a bi-allelic variant. The text entry field is automatically filled with the contents of the uploaded file.",
+			"<u>Reference population(s)</u> - selected from the drop down menu. At least one 1000 Genomes Project sub-population is required, but more than one may be selected.",
+			"<u>Genome build</u> - choose to combine gene transcripts with the same name in the gene plot."
 		],
 		output: [
-			"<u>Interactive LD matrix</u>",
-			"<u>Download LD matrix data</u>"
+			"<u>Interactive heat map</u> - a square plot with dimensions equal to the number of query variants that match a dbSNP RS number. Hovering over the plot with the mouse will display pairwise LD metrics for the respective row and column variants. Variants are ordered by genomic coordinates.",
+			"<u>D prime download </u> - download a file of all pairwise D' statistics.",
+            "<u>R squared download</u> - - download a file of all pairwise R2 statistics."
 		]
 	},
 	{
 		id: "LDpair",
 		name: "LDpair",
 		description:
-			"Calculate LD statistics for a pair of bi-allelic variants in a selected population. Results include LD measures and variant details.",
+			"Investigate correlated alleles for a pair of variants in high LD.",
 		input: [
-			"<u>Pair of RS numbers</u> - enter two bi-allelic variant RS numbers.",
-			"<u>Reference population(s)</u> - select at least one 1000 Genomes Project sub-population.",
-			"<u>Genome build</u> - choose GRCh37 or GRCh38."
+			"<u>Pair of RS numbers</u> - RS number for query variant 1. RS number must match a bi-allelic variant.",
+			"<u>Reference population(s)</u> - RS number for query variant 2. RS number must match a bi-allelic variant.",
+			"<u>Genome build</u>  selected from the drop down menu. At least one 1000 Genomes Project sub-population is required, but more than one may be selected."
 		],
 		output: [
-			"<u>LD statistics</u>",
-			"<u>Variant details</u>"
+			"<u>Two-by-two table</u> - contingency table displaying haplotype counts and allele frequencies for the two query variants. External links are available to dbSNP RS numbers and coordinates in the <a href=\"https://genome.ucsc.edu/cgi-bin/hgGateway\" target=\"_blank\" rel=\"noopener noreferrer\">UCSC Genome Browser</a>.",
+			"<u>Haplotypes</u> - haplotype genotypes, counts, and frequencies.",
+            "<u>Statistics</u> - calculated metrics of linkage disequilibrium including: D prime (D'), R square (R<sup>2</sup>), and goodness-of-fit (Chi-square and p-value). Goodness-of-fit tests for deviations of expected haplotype frequencies based on allele frequencies.",
+            "<u>Correlated Alleles </u> - alleles that are correlated if linkage disequilibrium is present (R<sup>2</sup> > 0.1). If linkage equilibrium, no alleles are reported."
 		]
 	},
 	{
 		id: "LDpop",
 		name: "LDpop",
 		description:
-			"Visualize LD patterns for a variant across multiple populations. Results include population-specific LD statistics and plots.",
+			"Investigate allele frequencies and linkage disequilibrium patterns across 1000G populations.",
 		input: [
-			"<u>RS number</u> - enter a bi-allelic variant RS number.",
-			"<u>Populations</u> - select one or more 1000 Genomes Project populations.",
-			"<u>Genome build</u> - choose GRCh37 or GRCh38."
+			"<u>Variant1 RS number</u> -  RS number for query variant 1. RS number must match a bi-allelic variant.",
+			"<u>Variant2 RS number</u> - RS number for query variant 2. RS number must match a bi-allelic variant.",
+			"<u>Reference population(s)</u>  selected from the drop down menu. At least one 1000 Genomes Project sub-population is required, but more than one may be selected.",
+            "<u>R<sup>2</sup>/D' toggle </u> - select if desired output is based on estimated R<sup>2</sup> or D'."
 		],
 		output: [
-			"<u>Population LD statistics</u>",
-			"<u>LD plots</u>"
+			"<u>Interactive maps</u> - three interactive maps will be returned as tabbed output. The first tab displays a map with the chosen linkage disequilibrium measure between query variants 1 and 2 for the selected 1000G populations. The second and third tabs will display maps of allele frequency distribution for query variants 1 and 2, respectively, for the selected 1000G populations. Map pins are color coded based on LD/allele frequency and when clicked display additional information for the population.",
+			"<u>Table of populations</u> - a searchable and sortable table is generated showing allele frequency and LD values for the query variants and selected 1000G populations.",
+            "<u>Download table</u> - link to download data in the table of populations."
 		]
 	},
 	{
 		id: "LDproxy",
 		name: "LDproxy",
 		description:
-			"Find proxy variants in LD with a query variant in a selected population. Results include a table of proxy variants, LD measures, and external links.",
+			"Interactively explore proxy and putatively functional variants for a query variant. Based on the selected query populations, this module may take some time to run.",
 		input: [
-			"<u>RS number</u> - enter a bi-allelic variant RS number.",
-			"<u>Reference population(s)</u> - select at least one 1000 Genomes Project sub-population.",
-			"<u>Genome build</u> - choose GRCh37 or GRCh38.",
-			"<u>Window size</u> - set the genomic window for searching proxies."
+			"<u>Variant RS number</u> - RS number for query variant. RS number must match a bi-allelic variant.",
+			"<u>Reference population(s)</u> - selected from the drop down menu. At least one 1000 Genomes Project sub-population is required, but more than one may be selected.",
+			"<u>LD measure</u> - select if desired output is based on estimated R<sup>2</sup> or D'.",
+			"<u>Collapse transcripts</u> - choose to combine gene transcripts with the same name in the gene plot."
 		],
 		output: [
-			"<u>Proxy variant table</u>",
-			"<u>LD measures</u>",
-			"<u>External links</u>",
-			"<u>Download proxy data</u>"
+			"<u>Interactive plot </u> - interactive plot of query variant and all bi-allelic dbSNP variants plus or minus 500 kilobases(Kb) of the query variant. X axis is the chromosomal coordinates and the Y axis is the pairwise R2 value with the query variant as well as the combined recombination rate. Each point represents a proxy variant and is colored based on function, sized based on minor allele frequency, and labeled based on regulatory potential. Hovering over the point will display detailed information on the query and proxy variants.",
+			"<u>UCSC link</u> - external link to the plotted region (query variant -/+ 500 Kb) in the UCSC Genome Browser. This is useful for exploring nearby genes and regulatory elements in the region.",
+			"<u>Table of proxy variants</u> - by default, the ten variants with the highest R2 values and closest distance to the query variant are displayed. External links lead to the variant RS number in <a href=\"#dbSNP\">dbSNP</a>, coordinates in the <a href=\"https://genome.ucsc.edu/cgi-bin/hgGateway\"  target=\"_blank\">UCSC Genome Browser</a>, and regulatory information (if any) in <a href=\"#regulomedb\">RegulomeDB</a>.",
+			"<u>Download all proxy variants </u> - download a file with information on all variants -/+ 500 Kb of the query variant with a pairwise R<sup>2</sup> value greater than 0.01."
 		]
 	},
 	{
