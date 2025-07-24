@@ -255,6 +255,7 @@ export default function SnpChipForm({
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+      <hr />
     </>
   );
 }
