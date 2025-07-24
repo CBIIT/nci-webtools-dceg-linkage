@@ -79,7 +79,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
               </table>
             </Col>
             <Col sm="6">
-              <table id="ldhap-table-right" className="table table-condensed text-center">
+              <table id="ldtrait-table-right" className="table table-condensed text-center">
                 <thead>
                   <tr>
                     <th colSpan={5}>Haplotypes</th>
