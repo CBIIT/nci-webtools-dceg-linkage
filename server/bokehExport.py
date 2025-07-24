@@ -50,7 +50,7 @@ def ldmatrixExport():
             data['request'],
             data['genome_build'],
             data['r2_d'],
-            data['collapseTranscript'] == 'true',
+            data['collapseTranscript'],
             data['annotate']
         )
         
@@ -74,7 +74,7 @@ def ldproxyExport():
             data['genome_build'],
             data['r2_d'],
             int(data['window']),
-            data['collapseTranscript'] == 'true' if isinstance(data['collapseTranscript'], str) else bool(data['collapseTranscript']),
+            data['collapseTranscript'],
             data['annotate']
         )
         return jsonify({'status': 'success'}), 200

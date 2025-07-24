@@ -886,7 +886,6 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
     rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug,
                 color='color', alpha=0.5, line_width=1)
     rug.toolbar_location = None
-
     if collapseTranscript == "false":
         # Gene Plot (All Transcripts)
         print("Making request to export service for high quality images for all transcripts")
