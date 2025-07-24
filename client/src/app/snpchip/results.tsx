@@ -101,8 +101,7 @@ export default function Results({ results, genome_build }: ResultsProps) {
               <a
                 id="snp_chip_list"
                 target="snp_chip_list"
-                onClick={downloadResults}
-                style={{ cursor: "pointer" }}
+                onClick={downloadResults}                
               >
                 Download Chip Details
               </a>
