@@ -442,6 +442,11 @@ table.table-chip > tbody {
 .snpchip-card-body{
   height: auto !important;
 }
+
+#snp_chip_list {
+  cursor: pointer;
+  color: #2a71a5; // Change this to your desired color
+}
 @media only screen and (max-width: 930px) {
   .card-outside {
     height: 210px;
