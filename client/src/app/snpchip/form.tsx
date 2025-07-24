@@ -70,9 +70,7 @@ export default function SnpChipForm({
   setAffymetrixChips,
 }: SnpChipFormProps) {
   const [availableIllumina, setAvailableIllumina] = useState<Platform[]>([]);
-  const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>(
-    [],
-  );
+  const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>([]);
   const [platformsLoading, setPlatformsLoading] = useState(true);
   const [selectAllIllumina, setSelectAllIllumina] = useState(true);
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
@@ -107,14 +105,8 @@ export default function SnpChipForm({
   }, [setIlluminaChips, setAffymetrixChips]);
 
   useEffect(() => {
-    setSelectAllIllumina(
-      availableIllumina.length > 0 &&
-        illuminaChips.length === availableIllumina.length,
-    );
-    setSelectAllAffymetrix(
-      availableAffymetrix.length > 0 &&
-        affymetrixChips.length === availableAffymetrix.length,
-    );
+    setSelectAllIllumina(availableIllumina.length > 0 && illuminaChips.length === availableIllumina.length);
+    setSelectAllAffymetrix(availableAffymetrix.length > 0 && affymetrixChips.length === availableAffymetrix.length);
   }, [illuminaChips, affymetrixChips, availableIllumina, availableAffymetrix]);
 
   return (
@@ -123,16 +115,7 @@ export default function SnpChipForm({
         <Row className="mb-3 align-items-end">
           <Col md={4}>
             <Form.Group controlId="snpchip-file-snp-numbers">
-              <OverlayTrigger
-                placement="top"
-                overlay={
-                  <Tooltip id="snpchip-file-snp-numbers-tooltip">
-                    Enter list of RS numbers or Genomic Coordinates (one per line)
-                  </Tooltip>
-                }
-              >
-                <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-              </OverlayTrigger>
+              <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
               <Form.Control
                 as="textarea"
                 rows={5}
@@ -176,8 +159,8 @@ export default function SnpChipForm({
               <span>Filter by array</span>
               {!platformsLoading && (
                 <small className="text-muted me-2">
-                  {illuminaChips?.length || 0} Illumina array(s), and{" "}
-                  {affymetrixChips?.length || 0} Affymetrix array(s) selected
+                  {illuminaChips?.length || 0} Illumina array(s), and {affymetrixChips?.length || 0} Affymetrix array(s)
+                  selected
                 </small>
               )}
             </div>
@@ -200,8 +183,7 @@ export default function SnpChipForm({
                       onClick={() => {
                         setIlluminaChips([]);
                         setAffymetrixChips([]);
-                      }}
-                    >
+                      }}>
                       unselect all
                     </span>
                     )
@@ -212,12 +194,11 @@ export default function SnpChipForm({
                     <span
                       id="selectAllChipTypes"
                       className="underlined"
-                      style={{ textDecoration: "underline", cursor: "pointer", color:"blue" }}
+                      style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}
                       onClick={() => {
                         setIlluminaChips(availableIllumina);
                         setAffymetrixChips(availableAffymetrix);
-                      }}
-                    >
+                      }}>
                       select all
                     </span>
                     )
