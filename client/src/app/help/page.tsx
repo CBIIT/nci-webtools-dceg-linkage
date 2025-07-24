@@ -459,22 +459,25 @@ export default function HelpPage() {
                     <h4 style={{ textDecoration: "underline", margin: 0 }}>{mod.name}</h4>
                     <span dangerouslySetInnerHTML={{ __html: `- ${mod.description}` }} />
                   </div>
-                  <p>
-                    <strong>Input:</strong>
-                  </p>
-                  <ul>
-                    {mod.input.map((item, idx) => (
-                      <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
-                    ))}
-                  </ul>
-                  <p>
-                    <strong>Output:</strong>
-                  </p>
-                  <ul>
-                    {mod.output.map((item, idx) => (
-                      <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
-                    ))}
-                  </ul>
+                  <div className="pt-3" style={{ marginLeft: 24 }}>
+                    <p>
+                      <strong>Input:</strong>
+                    </p>
+                    <ul>
+                      {mod.input.map((item, idx) => (
+                        <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
+                      ))}
+                    </ul>
+
+                    <p>
+                      <strong>Output:</strong>
+                    </p>
+                    <ul>
+                      {mod.output.map((item, idx) => (
+                        <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
+                      ))}
+                    </ul>
+                  </div>
                 </section>
               ))}
             </div>
