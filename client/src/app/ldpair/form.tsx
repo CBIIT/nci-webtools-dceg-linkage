@@ -84,6 +84,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
     event.preventDefault();
     router.push("/ldpair");
     reset(defaultForm);
+    submitForm.reset();
   }
 
   return (

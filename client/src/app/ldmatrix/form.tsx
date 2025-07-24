@@ -81,6 +81,7 @@ export default function LDMatrixForm() {
     router.push("/ldmatrix");
     reset(defaultForm);
     queryClient.invalidateQueries();
+    submitForm.reset();
   }
 
   return (

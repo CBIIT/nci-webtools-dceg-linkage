@@ -69,3 +69,46 @@ export interface FormData {
 export interface LdPop {
   reference: string;
 }
+
+// Types for LDpop map locations and aaData
+export interface Rs1MapLocation {
+  0: string; // population code
+  1: string; // population name
+  2: string; // super population
+  3: number; // latitude
+  4: number; // longitude
+  5: string; // allele frequency
+}
+
+export interface Rs2MapLocation {
+  0: string; // population code
+  1: string; // population name
+  2: string; // super population
+  3: number; // latitude
+  4: number; // longitude
+  5: string; // allele frequency
+}
+
+export interface Rs1Rs2LDMapLocation {
+  0: string; // population code
+  1: string; // population name
+  2: string; // super population
+  3: number; // latitude
+  4: number; // longitude
+  5: string; // allele frequency 1
+  6: string; // allele frequency 2
+  7: number; // LD value 1 (R2)
+  8: number; // LD value 2 (D')
+}
+
+export interface AaDataRow {
+  0: string; // population code
+  1: number; // count
+  2: string; // allele frequency 1
+  3: string; // allele frequency 2
+  4: number; // LD value 1
+  5: number; // LD value 2
+  6: [string, string, string]; // rs1, rs2, population code
+  7: number; // count * 2
+  8: number; // always 0
+}

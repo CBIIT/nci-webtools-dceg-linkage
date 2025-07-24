@@ -106,6 +106,7 @@ export default function LDExpressForm() {
     router.push("/ldexpress");
     reset(defaultForm);
     queryClient.invalidateQueries();
+    submitForm.reset();
   }
 
   return (

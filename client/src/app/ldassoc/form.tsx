@@ -196,6 +196,7 @@ export default function LDAssocForm() {
     router.push("/ldassoc");
     reset(defaultForm);
     queryClient.invalidateQueries();
+    submitForm.reset();
   }
 
   return (

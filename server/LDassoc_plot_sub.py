@@ -514,7 +514,6 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     rug.segment(x0='x', y0='y2_ll', x1='x', y1='y2_ul', source=source_rug, color='color', alpha='alpha', line_width=1)
     rug.toolbar_location=None
 
-
     # Gene Plot (All Transcripts)
     if myargs['transcript']==True:
         # Get genes from LDassoc.py output file
@@ -646,38 +645,38 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
         gene_plot.toolbar_location = "below"
 
         # Change output backend to SVG temporarily for headless export
-        # assoc_plot.output_backend = "svg"
-        # rug.output_backend = "svg"
-        # gene_plot.output_backend = "svg"
-        # export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
-        # export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
+        assoc_plot.output_backend = "svg"
+        rug.output_backend = "svg"
+        gene_plot.output_backend = "svg"
+        export_svgs(assoc_plot, filename=tmp_dir + "assoc_plot_1_" + request + ".svg")
+        export_svgs(gene_plot, filename=tmp_dir + "gene_plot_1_" + request + ".svg")
 
         # # 1 pixel = 0.0264583333 cm
-        # svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
-        # svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
+        svg_height = str(20.00 + (0.0264583333 * plot_h_pix)) + "cm"
+        svg_height_scaled = str(100.00 + (0.1322916665 * plot_h_pix)) + "cm"
         
         # # Concatenate svgs
-        # sg.Figure("24.59cm", svg_height,
-        #     sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
-        #     sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
-        #     ).save(tmp_dir + "assoc_plot_" + request + ".svg")
+        sg.Figure("24.59cm", svg_height,
+             sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg"),
+             sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").move(-40, 630)
+            ).save(tmp_dir + "assoc_plot_" + request + ".svg")
 
-        # sg.Figure("122.95cm", svg_height_scaled,
-        #     sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
-        #     sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
-        #     ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
+        sg.Figure("122.95cm", svg_height_scaled,
+            sg.SVG(tmp_dir + "assoc_plot_1_" + request + ".svg").scale(5),
+            sg.SVG(tmp_dir + "gene_plot_1_" + request + ".svg").scale(5).move(-200, 3150)
+            ).save(tmp_dir + "assoc_plot_scaled_" + request + ".svg")
 
         # # Export to PDF
-        # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
+        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".pdf", shell=True)
         # # Export to PNG
-        # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
+        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".png", shell=True)
         # # Export to JPEG
-        # subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
+        subprocess.call("phantomjs ./rasterize.js " + tmp_dir + "assoc_plot_scaled_" + request + ".svg " + tmp_dir + "assoc_plot_" + request + ".jpeg", shell=True)    
         # # Remove individual SVG files after they are combined
-        # subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
-        # subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
-        # # Remove scaled SVG file after it is converted to png and jpeg
-        # subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
+        subprocess.call("rm " + tmp_dir + "assoc_plot_1_" + request + ".svg", shell=True)
+        subprocess.call("rm " + tmp_dir + "gene_plot_1_" + request + ".svg", shell=True)
+        # Remove scaled SVG file after it is converted to png and jpeg
+        subprocess.call("rm " + tmp_dir + "assoc_plot_scaled_" + request + ".svg", shell=True)
 
 
 

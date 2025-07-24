@@ -7,7 +7,6 @@ import sys
 import time
 import threading
 import weakref
-import time
 import httpx
 from multiprocessing.dummy import Pool
 from LDcommon import retrieveAWSCredentials, genome_build_vars, connectMongoDBReadOnly
