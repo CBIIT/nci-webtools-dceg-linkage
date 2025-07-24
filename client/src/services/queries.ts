@@ -82,3 +82,7 @@ export async function snpchipPlatforms(): Promise<any> {
 export async function snpchip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
 }
+
+export async function ldscore(params: any): Promise<any> {
+  return (await axios.post(`/LDlinkRestWeb/ldscore`, params)).data;
+}
