@@ -172,7 +172,7 @@ export default function SnpChipForm({
       <Accordion className="mb-4">
         <Accordion.Item eventKey="0">
           <Accordion.Header>
-            <div className="d-flex justify-content-between w-100 align-items-center">
+            <div className="d-flex justify-content-between w-100 align-items-center snpchip-accordion">
               <span>Filter by array</span>
               {!platformsLoading && (
                 <small className="text-muted me-2">
@@ -189,33 +189,46 @@ export default function SnpChipForm({
               </div>
             ) : (
               <>
-                <Button
-                  variant="link"
-                  className="p-0 mb-3"
-                  onClick={() => {
-                    const allSelected =
-                      illuminaChips.length === availableIllumina.length &&
-                      affymetrixChips.length === availableAffymetrix.length;
-                    if (allSelected) {
-                      setIlluminaChips([]);
-                      setAffymetrixChips([]);
-                    } else {
-                      setIlluminaChips(availableIllumina);
-                      setAffymetrixChips(availableAffymetrix);
-                    }
-                  }}
-                >
-                  {illuminaChips.length === availableIllumina.length &&
-                  affymetrixChips.length === availableAffymetrix.length
-                    ? "Deselect All"
-                    : "Select All"}
-                </Button>
+                {illuminaChips.length === availableIllumina.length &&
+                affymetrixChips.length === availableAffymetrix.length ? (
+                  <p className="instruction">
+                    Limit search results to only SNPs on the selected arrays (
+                    <span
+                      id="selectAllChipTypes"
+                      className="underlined"
+                      style={{ textDecoration: "underline", cursor: "pointer", color: "blue" }}
+                      onClick={() => {
+                        setIlluminaChips([]);
+                        setAffymetrixChips([]);
+                      }}
+                    >
+                      unselect all
+                    </span>
+                    )
+                  </p>
+                ) : (
+                  <p className="instruction">
+                    Limit search results to only SNPs on the selected arrays (
+                    <span
+                      id="selectAllChipTypes"
+                      className="underlined"
+                      style={{ textDecoration: "underline", cursor: "pointer", color:"blue" }}
+                      onClick={() => {
+                        setIlluminaChips(availableIllumina);
+                        setAffymetrixChips(availableAffymetrix);
+                      }}
+                    >
+                      select all
+                    </span>
+                    )
+                  </p>
+                )}
                 <Row>
                   <Col>
                     <Form.Check
                       type="checkbox"
                       id="selectAllIllumina"
-                      label="Select All Illumina"
+                      label={<strong>Select All Illumina</strong>}
                       checked={selectAllIllumina}
                       onChange={(e) => {
                         const checked = e.target.checked;
@@ -234,7 +247,7 @@ export default function SnpChipForm({
                     <Form.Check
                       type="checkbox"
                       id="selectAllAffymetrix"
-                      label="Select All Affymetrix"
+                      label={<strong>Select All Affymetrix</strong>}
                       checked={selectAllAffymetrix}
                       onChange={(e) => {
                         const checked = e.target.checked;

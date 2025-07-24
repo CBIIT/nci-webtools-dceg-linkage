@@ -434,6 +434,14 @@ table.table-chip > tbody {
 .rs-number{
   border-style: none !important;
 }
+
+.snpchip-accordion{
+  font-size: medium;
+}
+
+.snpchip-card-body{
+  height: auto !important;
+}
 @media only screen and (max-width: 930px) {
   .card-outside {
     height: 210px;
