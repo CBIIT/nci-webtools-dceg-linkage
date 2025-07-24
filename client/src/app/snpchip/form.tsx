@@ -1,5 +1,5 @@
 "use client";
-import { Form, Button, Accordion, Row, Col, Spinner } from "react-bootstrap";
+import { Form, Button, Accordion, Row, Col, Spinner, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useState, useEffect } from "react";
 import { snpchipPlatforms } from "../../services/queries";
 
@@ -123,7 +123,16 @@ export default function SnpChipForm({
         <Row className="mb-3 align-items-end">
           <Col md={4}>
             <Form.Group controlId="snpchip-file-snp-numbers">
-              <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
+              <OverlayTrigger
+                placement="top"
+                overlay={
+                  <Tooltip id="snpchip-file-snp-numbers-tooltip">
+                    Enter list of RS numbers or Genomic Coordinates (one per line)
+                  </Tooltip>
+                }
+              >
+                <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
+              </OverlayTrigger>
               <Form.Control
                 as="textarea"
                 rows={5}
@@ -131,6 +140,7 @@ export default function SnpChipForm({
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 required={!file}
+                title="Enter list of RS numbers or Genomic Coordinates (one per line)"
               />
             </Form.Group>
           </Col>
