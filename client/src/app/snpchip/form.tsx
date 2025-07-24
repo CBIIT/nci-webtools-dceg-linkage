@@ -120,7 +120,7 @@ export default function SnpChipForm({
   return (
     <>
       <Form onSubmit={handleSubmit} className="mb-4">
-        <Row className="mb-3">
+        <Row className="mb-3 align-items-end">
           <Col md={4}>
             <Form.Group controlId="snpchip-file-snp-numbers">
               <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
@@ -148,7 +148,10 @@ export default function SnpChipForm({
               />
             </Form.Group>
           </Col>
-          <Col md={3} className="d-flex align-items-end">
+          <Col md={3} className="d-flex justify-content-end">
+            <Button type="reset" variant="outline-danger" className="me-1">
+              Reset
+            </Button>
             <Button type="submit" variant="primary" disabled={loading}>
               {loading ? <Spinner animation="border" size="sm" /> : "Calculate"}
             </Button>
