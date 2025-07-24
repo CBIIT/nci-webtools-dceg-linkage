@@ -4,7 +4,7 @@ import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Nav, Tab } fr
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldscore } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
+import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import "./style.css";
@@ -13,7 +13,7 @@ export interface FormData {
   file?: File;
   file2?: File; // Second file for genetic correlation
   analysis_type: "heritability" | "genetic_correlation" | "ld_calculation";
-  pop: PopOption[];
+  pop: LdscorePopOption[];
 }
 
 export default function LdScoreForm() {
@@ -66,7 +66,7 @@ export default function LdScoreForm() {
     }
     
     formData.append("analysis_type", data.analysis_type);
-    formData.append("pop", getSelectedPopulationGroups(data.pop));
+    formData.append("pop", data.pop[0]?.value || "");
 
     mutation.mutate(formData);
   };
@@ -106,14 +106,15 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
-                  <Form.Label>Upload File</Form.Label>
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
                   <Form.Control 
                     type="file" 
                     {...register("file", { required: "File is required" })}
                     accept=".txt,.tsv,.csv"
+                    placeholder="Upload pre-munged GWAS sumstats"
                   />
                   <Form.Text className="text-muted">
-                    Upload your GWAS summary statistics file for heritability analysis
+                    
                   </Form.Text>
                   <div className="mt-2">
                     <a href="#" className="text-decoration-none">
@@ -144,7 +145,7 @@ export default function LdScoreForm() {
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
-                  <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+                  <LdscorePopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
                   <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
                 </Form.Group>
               </Col>
@@ -167,14 +168,14 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
-                  <Form.Label>Upload Trait 1 File</Form.Label>
+                  <Form.Label>Upload pre-munged GWAS sumstats file for the first trait</Form.Label>
                   <Form.Control 
                     type="file" 
                     {...register("file", { required: "Trait 1 file is required" })}
                     accept=".txt,.tsv,.csv"
                   />
                   <Form.Text className="text-muted">
-                    Upload GWAS summary statistics for the first trait
+                    
                   </Form.Text>
                   <div className="mt-2">
                     <a href="#" className="text-decoration-none">
@@ -187,14 +188,14 @@ export default function LdScoreForm() {
 
               <Col sm={3}>
                 <Form.Group controlId="file2" className="mb-3">
-                  <Form.Label>Upload Trait 2 File</Form.Label>
+                  <Form.Label> Upload pre-munged GWAS sumstats file for the second trait</Form.Label>
                   <Form.Control 
                     type="file" 
                     {...register("file2", { required: "Trait 2 file is required" })}
                     accept=".txt,.tsv,.csv"
                   />
                   <Form.Text className="text-muted">
-                    Upload GWAS summary statistics for the second trait
+                   
                   </Form.Text>
                   <div className="mt-2">
                     <a href="#" className="text-decoration-none">
@@ -208,7 +209,7 @@ export default function LdScoreForm() {
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
-                  <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+                  <LdscorePopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
                   <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
                 </Form.Group>
               </Col>
@@ -253,14 +254,14 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
-                  <Form.Label>Upload File</Form.Label>
+                  <Form.Label> *.bed *.bim *.fam are required</Form.Label>
                   <Form.Control 
                     type="file" 
                     {...register("file", { required: "File is required" })}
                     accept=".txt,.tsv,.csv"
                   />
                   <Form.Text className="text-muted">
-                    Upload your variant list for LD score calculation
+                   
                   </Form.Text>
                   <div className="mt-2">
                     <a href="#" className="text-decoration-none">
@@ -291,7 +292,7 @@ export default function LdScoreForm() {
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
-                  <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+                  <LdscorePopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
                   <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
                 </Form.Group>
               </Col>
