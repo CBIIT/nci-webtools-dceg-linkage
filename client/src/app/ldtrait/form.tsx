@@ -24,6 +24,7 @@ export default function LdtraitForm() {
     r2_d: "r2",
     r2_d_threshold: "0.1",
     window: "500000",
+    ifContinue: "Continue",
   };
 
   const {
@@ -65,17 +66,18 @@ export default function LdtraitForm() {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
     const { varFile, ...data } = form;
     const formData: LdtraitFormData = {
       ...data,
       reference,
       genome_build,
       pop: getSelectedPopulationGroups(form.pop),
+      ifContinue: form.ifContinue || "Continue",
     };
 
     queryClient.setQueryData(["ldtrait-form-data", reference], formData);
-    router.push(`${pathname}`);
+    router.push(`${pathname}?ref=${reference}`);
     submitForm.mutate(formData);
   }
 
