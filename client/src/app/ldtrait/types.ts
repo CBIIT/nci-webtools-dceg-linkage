@@ -27,11 +27,33 @@ export interface LdhapFormData {
 
 export interface FormData {
   snps: string;
+  varFile?: string | FileList;
   pop: PopOption[];
+  r2_d: "r2" | "d";
+  r2_d_threshold: string;
+  window: string;
   genome_build: string;
-  varFile?: FileList | string;
 }
 
-export interface Ldhap {
+export interface LdtraitFormData {
+  snps: string;
+  pop: string;
+  r2_d: "r2" | "d";
+  r2_d_threshold: string;
+  window: string;
+  genome_build: string;
   reference: string;
+  ifContinue?: string;
+}
+
+export interface Ldtrait {
+  query_snps: string[];
+  thinned_snps: string[];
+  details: {
+    [key: string]: {
+      aaData: Array<any>;
+    };
+  };
+  warning?: string;
+  error?: string;
 }

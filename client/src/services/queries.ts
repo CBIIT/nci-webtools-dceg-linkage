@@ -87,3 +87,6 @@ export async function snpclip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpclip`, params)).data;
 }
 
+export async function ldtrait(params: any): Promise<any> {
+  return (await axios.post(`/LDlinkRestWeb/ldtrait`, params)).data;
+}
