@@ -23,6 +23,7 @@ export default function LdScore() {
         name="LDscore Tool"
         href="/help/#LDscore"
         description="Calculate LD scores and perform LD score regression"
+        showGenomeSelect={false}
       />
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">

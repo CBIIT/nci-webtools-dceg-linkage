@@ -168,7 +168,7 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
-                  <Form.Label>Upload pre-munged GWAS sumstats file for the first trait</Form.Label>
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
                   <Form.Control 
                     type="file" 
                     {...register("file", { required: "Trait 1 file is required" })}
@@ -177,18 +177,9 @@ export default function LdScoreForm() {
                   <Form.Text className="text-muted">
                     
                   </Form.Text>
-                  <div className="mt-2">
-                    <a href="#" className="text-decoration-none">
-                      Click here for sample format
-                    </a>
-                  </div>
                   <Form.Text className="text-danger">{errors?.file?.message}</Form.Text>
                 </Form.Group>
-              </Col>
-
-              <Col sm={3}>
                 <Form.Group controlId="file2" className="mb-3">
-                  <Form.Label> Upload pre-munged GWAS sumstats file for the second trait</Form.Label>
                   <Form.Control 
                     type="file" 
                     {...register("file2", { required: "Trait 2 file is required" })}
@@ -205,7 +196,8 @@ export default function LdScoreForm() {
                   <Form.Text className="text-danger">{errors?.file2?.message}</Form.Text>
                 </Form.Group>
               </Col>
-
+              <Col sm={1}>
+              </Col>
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
@@ -215,7 +207,7 @@ export default function LdScoreForm() {
               </Col>
 
               <Col />
-              <Col sm={2}>
+              <Col sm={3}>
                 <div className="text-end">
                   <Button type="reset" variant="outline-danger" className="me-1">
                     Reset
