@@ -18,12 +18,6 @@ export interface ResultsData {
   error?: string;
 }
 
-export interface LdhapFormData {
-  snps: string;
-  pop: string;
-  genome_build: string;
-  reference: string;
-}
 
 export interface FormData {
   snps: string;
@@ -57,4 +51,17 @@ export interface Ldtrait {
   };
   warning?: string;
   error?: string;
+}
+
+export interface Warning {
+  rs_number: string;
+  position: string;
+  alleles: string;
+  comment: string;
+}
+export interface Detail {
+  rs_number: string;
+  position: string;
+  alleles: string;
+  comment: string;
 }

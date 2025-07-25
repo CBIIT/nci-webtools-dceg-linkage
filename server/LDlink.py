@@ -2143,6 +2143,8 @@ def ldtrait():
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
                 out_json = json.dumps(trait, sort_keys=False)
+                with open(tmp_dir + "ldtrait" + reference + ".json", "w") as f:
+                    json.dump(out_json, f)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
