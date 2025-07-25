@@ -14,6 +14,8 @@ export interface FormData {
   file2?: File; // Second file for genetic correlation
   analysis_type: "heritability" | "genetic_correlation" | "ld_calculation";
   pop: LdscorePopOption[];
+  window: number;
+  windowUnit: "kb" | "cM";
 }
 
 export default function LdScoreForm() {
@@ -22,24 +24,16 @@ export default function LdScoreForm() {
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
 
-  const defaultForm: FormData = {
-    analysis_type: "heritability",
-    pop: [],
-  };
-
-  const {
-    control,
-    register,
-    handleSubmit,
-    reset,
-    watch,
-    setValue,
-    formState: { errors },
-  } = useForm({
-    defaultValues: defaultForm,
+  // Heritability form state
+  const heritabilityForm = useForm<FormData>({
+    defaultValues: {
+      analysis_type: "heritability",
+      pop: [],
+      window: 0,
+      windowUnit: "cM"
+    }
   });
-
-  const mutation = useMutation({
+  const heritabilityMutation = useMutation({
     mutationFn: ldscore,
     onSuccess: (data: any) => {
       if (data?.error) {
@@ -53,63 +47,122 @@ export default function LdScoreForm() {
       console.error("LDscore mutation error:", error);
     },
   });
-
-  const onSubmit = async (data: FormData) => {
+  const onHeritabilitySubmit = async (data: FormData) => {
     const formData = new FormData();
-    
-    if (data.file) {
-      formData.append("file", data.file);
-    }
-    
-    if (data.file2) {
-      formData.append("file2", data.file2);
-    }
-    
-    formData.append("analysis_type", data.analysis_type);
+    if (data.file) formData.append("file", data.file);
+    formData.append("analysis_type", "heritability");
     formData.append("pop", data.pop[0]?.value || "");
-
-    mutation.mutate(formData);
+    heritabilityMutation.mutate(formData);
+  };
+  const onHeritabilityReset = () => {
+    heritabilityForm.reset();
   };
 
-  const onReset = () => {
-    reset(defaultForm);
-    router.push(pathname);
+  // Genetic correlation form state
+  const geneticForm = useForm<FormData>({
+    defaultValues: {
+      analysis_type: "genetic_correlation",
+      pop: [],
+      window: 0,
+      windowUnit: "cM"
+    }
+  });
+  const geneticMutation = useMutation({
+    mutationFn: ldscore,
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        console.error("LDscore calculation failed:", data.error);
+        return;
+      }
+      queryClient.setQueryData(["ldscore", data.id], data);
+      router.push(`${pathname}?ref=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("LDscore mutation error:", error);
+    },
+  });
+  const onGeneticSubmit = async (data: FormData) => {
+    const formData = new FormData();
+    if (data.file) formData.append("file", data.file);
+    if (data.file2) formData.append("file2", data.file2);
+    formData.append("analysis_type", "genetic_correlation");
+    formData.append("pop", data.pop[0]?.value || "");
+    geneticMutation.mutate(formData);
+  };
+  const onGeneticReset = () => {
+    geneticForm.reset();
   };
 
-  const analysisType = watch("analysis_type");
+  // LD calculation form state
+  const ldForm = useForm<FormData>({
+    defaultValues: {
+      analysis_type: "ld_calculation",
+      pop: [],
+      window: 0,
+      windowUnit: "cM"
+    }
+  });
+  const ldMutation = useMutation({
+    mutationFn: ldscore,
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        console.error("LDscore calculation failed:", data.error);
+        return;
+      }
+      queryClient.setQueryData(["ldscore", data.id], data);
+      router.push(`${pathname}?ref=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("LDscore mutation error:", error);
+    },
+  });
+  const onLdSubmit = async (data: FormData) => {
+    const formData = new FormData();
+    if (data.file) formData.append("file", data.file);
+    formData.append("analysis_type", "ld_calculation");
+    formData.append("pop", data.pop[0]?.value || "");
+    formData.append("window", String(data.window));
+    formData.append("windowUnit", data.windowUnit);
+    ldMutation.mutate(formData);
+  };
+  const onLdReset = () => {
+    ldForm.reset();
+  };
 
-  if (mutation.isPending) {
+  const analysisType = heritabilityForm.watch("analysis_type");
+
+  if (heritabilityMutation.isPending || geneticMutation.isPending || ldMutation.isPending) {
     return <CalculateLoading />;
   }
 
   return (
-    <Form id="ldscore-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
-      <Tab.Container activeKey={analysisType} onSelect={(key) => setValue("analysis_type", key as any)}>
-        <Row>
-          <Col sm={12}>
-            <Nav variant="tabs" className="mb-3">
-              <Nav.Item>
-                <Nav.Link eventKey="heritability">Heritability Analysis</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="genetic_correlation">Genetic Correlation</Nav.Link>
-              </Nav.Item>
-              <Nav.Item>
-                <Nav.Link eventKey="ld_calculation">LD Score Calculation</Nav.Link>
-              </Nav.Item>
-            </Nav>
-          </Col>
-        </Row>
+    <Tab.Container activeKey={analysisType} onSelect={(key) => heritabilityForm.setValue("analysis_type", key as any)}>
+      <Row>
+        <Col sm={12}>
+          <Nav variant="tabs" className="mb-3">
+            <Nav.Item>
+              <Nav.Link eventKey="heritability">Heritability Analysis</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="genetic_correlation">Genetic Correlation</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="ld_calculation">LD Score Calculation</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        </Col>
+      </Row>
 
-        <Tab.Content>
-          <Tab.Pane eventKey="heritability">
+      <Tab.Content>
+        <Tab.Pane eventKey="heritability">
+          <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
                   <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
                   <Form.Control 
                     type="file" 
-                    {...register("file", { required: "File is required" })}
+                    {...heritabilityForm.register("file", { required: "File is required" })}
                     accept=".txt,.tsv,.csv"
                     placeholder="Upload pre-munged GWAS sumstats"
                   />
@@ -129,24 +182,24 @@ export default function LdScoreForm() {
                       onChange={(e) => {
                         if (e.target.checked) {
                           // Load example data for heritability
-                          setValue("analysis_type", "heritability");
-                          setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
+                          heritabilityForm.setValue("analysis_type", "heritability");
+                          heritabilityForm.setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
                         } else {
                           // Clear example data
-                          setValue("pop", []);
+                          heritabilityForm.setValue("pop", []);
                         }
                       }}
                     />
                   </div>
-                  <Form.Text className="text-danger">{errors?.file?.message}</Form.Text>
+                  <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
               </Col>
 
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
-                  <LdscorePopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
-                  <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
+                  <LdscorePopSelect name="pop" control={heritabilityForm.control} rules={{ required: "Population is required" }} />
+                  <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
                 </Form.Group>
               </Col>
 
@@ -156,33 +209,46 @@ export default function LdScoreForm() {
                   <Button type="reset" variant="outline-danger" className="me-1">
                     Reset
                   </Button>
-                  <Button type="submit" variant="primary" disabled={mutation.isPending}>
+                  <Button type="submit" variant="primary" disabled={heritabilityMutation.isPending}>
                     Calculate
                   </Button>
                 </div>
               </Col>
             </Row>
-          </Tab.Pane>
+          </Form>
 
-          <Tab.Pane eventKey="genetic_correlation">
+          {heritabilityMutation.isError && (
+            <Row>
+              <Col>
+                <Alert variant="danger" className="mt-3">
+                  <Alert.Heading>Error</Alert.Heading>
+                  <p>Failed to process Heritability calculation. Please check your input and try again.</p>
+                </Alert>
+              </Col>
+            </Row>
+          )}
+        </Tab.Pane>
+
+        <Tab.Pane eventKey="genetic_correlation">
+          <Form id="ldscore-form-genetic-correlation" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
                   <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
                   <Form.Control 
                     type="file" 
-                    {...register("file", { required: "Trait 1 file is required" })}
+                    {...geneticForm.register("file", { required: "Trait 1 file is required" })}
                     accept=".txt,.tsv,.csv"
                   />
                   <Form.Text className="text-muted">
                     
                   </Form.Text>
-                  <Form.Text className="text-danger">{errors?.file?.message}</Form.Text>
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
                 <Form.Group controlId="file2" className="mb-3">
                   <Form.Control 
                     type="file" 
-                    {...register("file2", { required: "Trait 2 file is required" })}
+                    {...geneticForm.register("file2", { required: "Trait 2 file is required" })}
                     accept=".txt,.tsv,.csv"
                   />
                   <Form.Text className="text-muted">
@@ -193,7 +259,7 @@ export default function LdScoreForm() {
                       Click here for sample format
                     </a>
                   </div>
-                  <Form.Text className="text-danger">{errors?.file2?.message}</Form.Text>
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
                 </Form.Group>
               </Col>
               <Col sm={1}>
@@ -201,8 +267,8 @@ export default function LdScoreForm() {
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
-                  <LdscorePopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
-                  <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
+                  <LdscorePopSelect name="pop" control={geneticForm.control} rules={{ required: "Population is required" }} />
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
                 </Form.Group>
               </Col>
 
@@ -212,7 +278,7 @@ export default function LdScoreForm() {
                   <Button type="reset" variant="outline-danger" className="me-1">
                     Reset
                   </Button>
-                  <Button type="submit" variant="primary" disabled={mutation.isPending}>
+                  <Button type="submit" variant="primary" disabled={geneticMutation.isPending}>
                     Calculate
                   </Button>
                 </div>
@@ -229,27 +295,40 @@ export default function LdScoreForm() {
                     onChange={(e) => {
                       if (e.target.checked) {
                         // Load example data for genetic correlation
-                        setValue("analysis_type", "genetic_correlation");
-                        setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
+                        geneticForm.setValue("analysis_type", "genetic_correlation");
+                        //setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
                       } else {
                         // Clear example data
-                        setValue("pop", []);
+                        geneticForm.setValue("pop", []);
                       }
                     }}
                   />
                 </div>
               </Col>
             </Row>
-          </Tab.Pane>
 
-          <Tab.Pane eventKey="ld_calculation">
+            {geneticMutation.isError && (
+              <Row>
+                <Col>
+                  <Alert variant="danger" className="mt-3">
+                    <Alert.Heading>Error</Alert.Heading>
+                    <p>Failed to process Genetic Correlation calculation. Please check your input and try again.</p>
+                  </Alert>
+                </Col>
+              </Row>
+            )}
+          </Form>
+        </Tab.Pane>
+
+        <Tab.Pane eventKey="ld_calculation">
+          <Form id="ldscore-form-ld-calculation" onSubmit={ldForm.handleSubmit(onLdSubmit)} onReset={onLdReset} noValidate>
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
                   <Form.Label> *.bed *.bim *.fam are required</Form.Label>
                   <Form.Control 
                     type="file" 
-                    {...register("file", { required: "File is required" })}
+                    {...ldForm.register("file", { required: "File is required" })}
                     accept=".txt,.tsv,.csv"
                   />
                   <Form.Text className="text-muted">
@@ -268,24 +347,39 @@ export default function LdScoreForm() {
                       onChange={(e) => {
                         if (e.target.checked) {
                           // Load example data for LD calculation
-                          setValue("analysis_type", "ld_calculation");
-                          setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
+                          ldForm.setValue("analysis_type", "ld_calculation");
+                          //setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
                         } else {
                           // Clear example data
-                          setValue("pop", []);
+                          ldForm.setValue("pop", []);
                         }
                       }}
                     />
                   </div>
-                  <Form.Text className="text-danger">{errors?.file?.message}</Form.Text>
+                  <Form.Text className="text-danger">{ldForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
               </Col>
 
               <Col sm={3}>
-                <Form.Group controlId="pop" className="mb-3">
-                  <Form.Label>Population</Form.Label>
-                  <LdscorePopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
-                  <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
+                <Form.Group controlId="window" className="mb-3">
+                  <Form.Label>Window</Form.Label>
+                  <div className="d-flex">
+                    <Form.Control
+                      type="number"
+                      {...ldForm.register("window", { required: "Window is required" })}
+                      style={{ maxWidth: "120px", marginRight: "8px" }}
+                      title="Please enter an integer greater than 0"
+                    />
+                    <Form.Select
+                      {...ldForm.register("windowUnit")}
+                      style={{ maxWidth: "80px" }}
+                      defaultValue="cM"
+                    >
+                      <option value="kb">kb</option>
+                      <option value="cM">cM</option>
+                    </Form.Select>
+                  </div>
+                  <Form.Text className="text-danger">{ldForm.formState.errors?.window?.message}</Form.Text>
                 </Form.Group>
               </Col>
 
@@ -295,26 +389,26 @@ export default function LdScoreForm() {
                   <Button type="reset" variant="outline-danger" className="me-1">
                     Reset
                   </Button>
-                  <Button type="submit" variant="primary" disabled={mutation.isPending}>
+                  <Button type="submit" variant="primary" disabled={ldMutation.isPending}>
                     Calculate
                   </Button>
                 </div>
               </Col>
             </Row>
-          </Tab.Pane>
-        </Tab.Content>
-      </Tab.Container>
+          </Form>
 
-      {mutation.isError && (
-        <Row>
-          <Col>
-            <Alert variant="danger" className="mt-3">
-              <Alert.Heading>Error</Alert.Heading>
-              <p>Failed to process LDscore calculation. Please check your input and try again.</p>
-            </Alert>
-          </Col>
-        </Row>
-      )}
-    </Form>
+          {ldMutation.isError && (
+            <Row>
+              <Col>
+                <Alert variant="danger" className="mt-3">
+                  <Alert.Heading>Error</Alert.Heading>
+                  <p>Failed to process LD Score calculation. Please check your input and try again.</p>
+                </Alert>
+              </Col>
+            </Row>
+          )}
+        </Tab.Pane>
+      </Tab.Content>
+    </Tab.Container>
   );
 }
