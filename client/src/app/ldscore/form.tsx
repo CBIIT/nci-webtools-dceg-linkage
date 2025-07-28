@@ -25,6 +25,7 @@ export default function LdScoreForm() {
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
   const [exampleFilename, setExampleFilename] = useState<string>("");
+  const [exampleFilepath, setExampleFilepath] = useState<string>("");
   const [heritabilityResult, setHeritabilityResult] = useState<string>("");
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritPanelOpen, setHeritPanelOpen] = useState(false);
@@ -227,23 +228,39 @@ export default function LdScoreForm() {
                             if (response.ok) {
                               const data = await response.json();
                               setExampleFilename(data.filenames || "");
+                              setExampleFilepath(data.filepaths || "");
                             } else {
                               setExampleFilename("");
+                              setExampleFilepath("");
                               console.error("Failed to fetch example data");
                             }
                           } catch (error) {
                             setExampleFilename("");
+                            setExampleFilepath("");
                             console.error("Error fetching example data:", error);
                           }
                         } else {
                           setExampleFilename("");
+                          setExampleFilepath("");
                           heritabilityForm.setValue("pop", []);
                         }
                       }}
                     />
                     {exampleFilename && (
                       <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                        Example file: {exampleFilename}
+                        <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
+                        {exampleFilepath ? (
+                          <a
+                            href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                          >
+                            {exampleFilename}
+                          </a>
+                        ) : (
+                          exampleFilename
+                        )}
                       </div>
                     )}
                   </div>
@@ -296,8 +313,8 @@ export default function LdScoreForm() {
             <>
               <Row>
                 <Col>
-                  <div id="herit-table-container">
-                    <table className="table table-bordered table-sm mb-0" style={{ width: "auto", margin: "0 auto" }}>
+                  <div id="herit-table-download-raw-container" style={{ maxWidth: 600, margin: '0 auto' }}>
+                    <table className="table table-bordered table-sm mb-0" style={{ width: "100%", margin: "0 auto" }}>
                       <caption style={{ captionSide: 'top', fontWeight: 600, fontSize: '1.1em', color: '#084298', textAlign: 'center', marginBottom: 0 }}>
                         Heritability Result
                       </caption>
@@ -328,7 +345,7 @@ export default function LdScoreForm() {
                         })()}
                       </tbody>
                     </table>
-                    <div className="panel panel-default mt-3" style={{ maxWidth: 400, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
                       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
                         Download Options
                       </div>
@@ -561,9 +578,9 @@ function handleDownloadInput(result: string, exampleFilename?: string) {
       URL.revokeObjectURL(url);
     }, 0);
   } else if (exampleFilename) {
-    const blob = new Blob([exampleFilename], { type: "text/plain" });
+    // Download from backend API
     const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
+    a.href = `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`;
     a.download = exampleFilename || "example_input.txt";
     document.body.appendChild(a);
     a.click();
@@ -623,11 +640,11 @@ function RawHeritabilityPanel({ result }: { result: string }) {
 }
 function parseHeritabilityResult(result: string) {
   // Extract values using regex
-  const h2Match = result.match(/Total Observed scale h2:\s*([\d.eE+-]+) \(([^)]+)\)/);
-  const lambdaMatch = result.match(/Lambda GC:\s*([\d.eE+-]+)/);
-  const meanChi2Match = result.match(/Mean Chi\^2:\s*([\d.eE+-]+)/);
-  const interceptMatch = result.match(/Intercept:\s*([\d.eE+-]+) \(([^)]+)\)/);
-  const ratioMatch = result.match(/Ratio\s*([<>=-]*)\s*([\d.eE+-]+)/);
+  const h2Match = result.match(/Total Observed scale h2:\s*([\d.eA-Z+-]+) \(([^)]+)\)/);
+  const lambdaMatch = result.match(/Lambda GC:\s*([\d.eA-Z+-]+)/);
+  const meanChi2Match = result.match(/Mean Chi\^2:\s*([\d.eA-Z+-]+)/);
+  const interceptMatch = result.match(/Intercept:\s*([\d.eA-Z+-]+) \(([^)]+)\)/);
+  const ratioMatch = result.match(/Ratio\s*([<>=-]*)\s*([\d.eA-Z+-]+)/);
   return {
     h2: h2Match ? `${h2Match[1]} (${h2Match[2]})` : "",
     lambdaGC: lambdaMatch ? lambdaMatch[1] : "",
