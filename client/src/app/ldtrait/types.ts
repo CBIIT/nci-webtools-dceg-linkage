@@ -13,8 +13,27 @@ export interface Haplotype {
 }
 
 export interface ResultsData {
-  snps: Record<string, SNP>;
-  haplotypes: Record<string, Haplotype>;
+  query_snps: Array<Array<string>>;
+  thinned_snps: string[];
+  details: {
+    [key: string]: {
+      aaData: Array<[
+        string, // GWAS Trait
+        string, // PMID
+        string, // RS Number
+        string, // Position
+        string, // Alleles
+        number, // R²
+        number, // D'
+        Array<string>, // LDpair link data
+        string, // Risk Allele
+        number | string, // Beta or OR
+        string, // Effect Size
+        string, // P-value
+        string  // RS Number for link
+      ]>;
+    };
+  };
   error?: string;
 }
 
