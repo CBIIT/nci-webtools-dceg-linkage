@@ -29,6 +29,29 @@ export default function LdScoreForm() {
   const [heritabilityResult, setHeritabilityResult] = useState<string>("");
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
   const [heritPanelOpen, setHeritPanelOpen] = useState(false);
+  const [uploadedFilename, setUploadedFilename] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("ldscoreFile", file);
+    try {
+      const response = await fetch("/LDlinkRestWeb/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (response.ok) {
+        setUploadedFilename(file.name);
+      } else {
+        setUploadedFilename("");
+      }
+    } catch (e) {
+      setUploadedFilename("");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   // Heritability form state
   const heritabilityForm = useForm<FormData>({
@@ -55,42 +78,32 @@ export default function LdScoreForm() {
   });
   const onHeritabilitySubmit = async (data: FormData) => {
     setHeritabilityResult("");
-    if (exampleFilename) {
-      setHeritabilityLoading(true);
-      // Use example file: call backend with query params
-      const pop = data.pop[0]?.value || "";
-      const genomeBuild = genome_build || "grch37";
-      const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-      const params = new URLSearchParams({
-        filename: exampleFilename,
-        pop,
-        genome_build: genomeBuild,
-        isExample: "true",
-        reference,
-      });
-      try {
-        const response = await fetch(`/LDlinkRestWeb/ldherit?${params.toString()}`);
-        if (response.ok) {
-          const result = await response.json();
-          setHeritabilityResult(result.result || JSON.stringify(result));
-        } else {
-          setHeritabilityResult("Failed to fetch heritability result.");
-        }
-      } catch (error) {
-        setHeritabilityResult("Error fetching heritability result.");
-      } finally {
-        setHeritabilityLoading(false);
+    setUploadedFilename("");
+    setHeritabilityLoading(true);
+    const pop = data.pop[0]?.value || "";
+    const genomeBuild = genome_build || "grch37";
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const isExample = !!exampleFilename;
+    const filename = exampleFilename || uploadedFilename;
+    const params = new URLSearchParams({
+      filename,
+      pop,
+      genome_build: genomeBuild,
+      isExample: isExample ? "true" : "false",
+      reference,
+    });
+    try {
+      const response = await fetch(`/LDlinkRestWeb/ldherit?${params.toString()}`);
+      if (response.ok) {
+        const result = await response.json();
+        setHeritabilityResult(result.result || JSON.stringify(result));
+      } else {
+        setHeritabilityResult("Failed to fetch heritability result.");
       }
-    } else {
-      // File upload
-      setHeritabilityLoading(true);
-      const formData = new FormData();
-      if (data.file) formData.append("file", data.file);
-      formData.append("analysis_type", "heritability");
-      formData.append("pop", data.pop[0]?.value || "");
-      heritabilityMutation.mutate(formData, {
-        onSettled: () => setHeritabilityLoading(false)
-      });
+    } catch (error) {
+      setHeritabilityResult("Error fetching heritability result.");
+    } finally {
+      setHeritabilityLoading(false);
     }
   };
   const onHeritabilityReset = () => {
@@ -199,8 +212,20 @@ export default function LdScoreForm() {
               <Col sm={4}>
                 <Form.Group controlId="file" className="mb-3">
                   <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
-                  {exampleFilename ? (
-                    <div className="form-control bg-light">{exampleFilename}</div>
+                  {(exampleFilename || uploadedFilename) ? (
+                    <div className="form-control bg-light" style={{ height: '38px', display: 'flex', alignItems: 'center' }}>
+                      <a
+                        href={exampleFilename
+                          ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
+                          : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFilename || uploadedFilename}
+                      </a>
+                    </div>
                   ) : (
                     <Form.Control 
                       type="file" 
@@ -208,6 +233,17 @@ export default function LdScoreForm() {
                       accept=".txt,.tsv,.csv"
                       title="Upload pre-munged GWAS sumstats"
                       disabled={!!exampleFilename}
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        const file = input.files && input.files[0];
+                        if (file) {
+                          setUploading(true);
+                          await handleFileUpload(file);
+                          setUploading(false);
+                          heritabilityForm.setValue("file", file);
+                          setUploadedFilename(file.name);
+                        }
+                      }}
                     />
                   )}
                   <div className="mt-2">
@@ -309,6 +345,26 @@ export default function LdScoreForm() {
               </div>
             </div>
           )}
+          {uploading && (
+            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(255,255,255,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="d-flex flex-column align-items-center">
+                <span
+                  className="px-3 py-2 mb-2"
+                  style={{
+                    background: '#e3f0ff',
+                    color: '#084298',
+                    borderRadius: '6px',
+                    fontWeight: 500,
+                    textAlign: 'center',
+                    maxWidth: 800,
+                  }}
+                >
+                  Uploading file, please wait...
+                </span>
+                <CalculateLoading />
+              </div>
+            </div>
+          )}
           {heritabilityResult && (
             <>
               <Row>
@@ -359,6 +415,20 @@ export default function LdScoreForm() {
                 </Col>
               </Row>
             </>
+          )}
+          {uploadedFilename && !exampleFilename && (
+            <div className="mt-1" style={{ fontSize: "0.95em" }}>
+              <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
+              <a
+                href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                download
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                {uploadedFilename}
+              </a>
+            </div>
           )}
           {heritabilityMutation.isError && (
             <Row>
