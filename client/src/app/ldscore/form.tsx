@@ -27,6 +27,7 @@ export default function LdScoreForm() {
   const [exampleFilename, setExampleFilename] = useState<string>("");
   const [heritabilityResult, setHeritabilityResult] = useState<string>("");
   const [heritabilityLoading, setHeritabilityLoading] = useState(false);
+  const [heritPanelOpen, setHeritPanelOpen] = useState(false);
 
   // Heritability form state
   const heritabilityForm = useForm<FormData>({
@@ -292,13 +293,55 @@ export default function LdScoreForm() {
             </div>
           )}
           {heritabilityResult && (
-            <Row>
-              <Col>
-                
-                  <HeritabilityResultTable result={heritabilityResult} />
-           
-              </Col>
-            </Row>
+            <>
+              <Row>
+                <Col>
+                  <div id="herit-table-container">
+                    <table className="table table-bordered table-sm mb-0" style={{ width: "auto", margin: "0 auto" }}>
+                      <caption style={{ captionSide: 'top', fontWeight: 600, fontSize: '1.1em', color: '#084298', textAlign: 'center', marginBottom: 0 }}>
+                        Heritability Result
+                      </caption>
+                      <thead>
+                        <tr>
+                          <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}></th>
+                          <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {(() => {
+                          const parsed = parseHeritabilityResult(heritabilityResult);
+                          const ratioDisplay = parsed.ratio.trim().startsWith('< 0')
+                            ? '< 0 (usually indicates GC correction)'
+                            : parsed.ratio;
+                          return [
+                            ['Total Observed scale h²', parsed.h2],
+                            ['Lambda GC', parsed.lambdaGC],
+                            ['Mean Chi²', parsed.meanChi2],
+                            ['Intercept', parsed.intercept],
+                            ['Ratio', ratioDisplay],
+                          ].map(([label, value]) => (
+                            <tr key={label}>
+                              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{label}</td>
+                              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{value}</td>
+                            </tr>
+                          ));
+                        })()}
+                      </tbody>
+                    </table>
+                    <div className="panel panel-default mt-3" style={{ maxWidth: 400, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
+                        Download Options
+                      </div>
+                      <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <button id="download-herit-input-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadInput(heritabilityResult, exampleFilename)}>Download Input</button>
+                        <button id="download-herit-tables-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadTable(heritabilityResult)}>Download Table</button>
+                      </div>
+                    </div>
+                    <RawHeritabilityPanel result={heritabilityResult} />
+                  </div>
+                </Col>
+              </Row>
+            </>
           )}
           {heritabilityMutation.isError && (
             <Row>
@@ -501,59 +544,83 @@ export default function LdScoreForm() {
   );
 }
 
-// Table component for parsed results
-function HeritabilityResultTable({ result }: { result: string }) {
+// Helper functions and components
+function handleDownloadInput(result: string, exampleFilename?: string) {
+  // Try to get the input file from the DOM or state
+  const fileInput = document.getElementById("ldscore-form-heritability-file-input") as HTMLInputElement | null;
+  if (fileInput && fileInput.files && fileInput.files[0]) {
+    const file = fileInput.files[0];
+    const url = URL.createObjectURL(file);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 0);
+  } else if (exampleFilename) {
+    const blob = new Blob([exampleFilename], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = exampleFilename || "example_input.txt";
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+    }, 0);
+  } else {
+    alert("No input file available to download.");
+  }
+}
+function handleDownloadTable(result: string) {
   const parsed = parseHeritabilityResult(result);
-  const cellStyle = {
-    border: "1px solid black",
-    padding: "4px 8px",
-    textAlign: "left" as const,
-    fontSize: "0.97em",
-  };
-  const headerStyle = {
-    ...cellStyle,
-    backgroundColor: "rgb(242, 242, 242)",
-    fontWeight: 600,
-  };
+  const lines = [
+    "Heritability Result",
+    "-------------------",
+    `Total Observed scale h2:\t${parsed.h2}`,
+    `Lambda GC:\t${parsed.lambdaGC}`,
+    `Mean Chi^2:\t${parsed.meanChi2}`,
+    `Intercept:\t${parsed.intercept}`,
+    `Ratio:\t${parsed.ratio}`,
+  ];
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "heritability_result.txt";
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+  }, 0);
+}
+function RawHeritabilityPanel({ result }: { result: string }) {
+  const [showRaw, setShowRaw] = useState(false);
   return (
-    <div id="herit-table-container">
-      <table className="table table-bordered table-sm mb-0" style={{ width: "auto", margin: "0 auto" }}>
-        <caption style={{ captionSide: 'top', fontWeight: 600, fontSize: '1.1em', color: 'black', textAlign: 'center', marginBottom: 0 }}>
-          Heritability Result
-        </caption>
-        <thead>
-          <tr>
-            <th style={headerStyle}></th>
-            <th style={headerStyle}>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td style={cellStyle}>Total Observed scale h²</td>
-            <td style={cellStyle}> {parsed.h2}</td>
-          </tr>
-          <tr>
-            <td style={cellStyle}>Lambda GC</td>
-            <td style={cellStyle}> {parsed.lambdaGC}</td>
-          </tr>
-          <tr>
-            <td style={cellStyle}>Mean Chi²</td>
-            <td style={cellStyle}> {parsed.meanChi2}</td>
-          </tr>
-          <tr>
-            <td style={cellStyle}>Intercept</td>
-            <td style={cellStyle}> {parsed.intercept}</td>
-          </tr>
-          <tr>
-            <td style={cellStyle}>Ratio</td>
-            <td style={cellStyle}> {parsed.ratio} (usually indicates GC correction).</td>
-          </tr>
-        </tbody>
-      </table>
+    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <span>Raw Heritability Output</span>
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-primary"
+          onClick={() => setShowRaw((open) => !open)}
+          aria-expanded={showRaw}
+          aria-controls="heritRawPanelBody"
+        >
+          {showRaw ? "Collapse" : "Expand"}
+        </button>
+      </div>
+      <div
+        id="heritRawPanelBody"
+        className={showRaw ? "panel-body" : "panel-body collapse"}
+        style={{ padding: showRaw ? '12px' : 0, display: showRaw ? 'block' : 'none', background: '#f9f9f9' }}
+      >
+        <pre style={{ fontSize: '0.97em', whiteSpace: 'pre-wrap', margin: 0 }}>{result}</pre>
+      </div>
     </div>
   );
 }
-
 function parseHeritabilityResult(result: string) {
   // Extract values using regex
   const h2Match = result.match(/Total Observed scale h2:\s*([\d.eE+-]+) \(([^)]+)\)/);
@@ -566,6 +633,6 @@ function parseHeritabilityResult(result: string) {
     lambdaGC: lambdaMatch ? lambdaMatch[1] : "",
     meanChi2: meanChi2Match ? meanChi2Match[1] : "",
     intercept: interceptMatch ? `${interceptMatch[1]} (${interceptMatch[2]})` : "",
-    ratio: ratioMatch ? `${ratioMatch[1]} ${ratioMatch[2]}`.trim() : "",
+    ratio: ratioMatch ? `${ratioMatch[1]} ${ratioMatch[2]}` : "",
   };
 }
