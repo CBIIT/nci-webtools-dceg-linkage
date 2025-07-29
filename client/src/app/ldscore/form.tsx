@@ -36,6 +36,7 @@ export default function LdScoreForm() {
     setUploading(true);
     const formData = new FormData();
     formData.append("ldscoreFile", file);
+   
     try {
       const response = await fetch("/LDlinkRestWeb/upload", {
         method: "POST",
@@ -212,28 +213,16 @@ export default function LdScoreForm() {
               <Col sm={4}>
                 <Form.Group controlId="file" className="mb-3">
                   <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
-                  {(exampleFilename || uploadedFilename) ? (
-                    <div className="form-control bg-light" style={{ height: '38px', display: 'flex', alignItems: 'center' }}>
-                      <a
-                        href={exampleFilename
-                          ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
-                          : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        download
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                      >
-                        {exampleFilename || uploadedFilename}
-                      </a>
-                    </div>
-                  ) : (
+                  {typeof exampleFilename === "string" && exampleFilename !== "" ? (
+              <div className="form-control bg-light">{exampleFilename}</div>
+            ) : (
                     <Form.Control 
                       type="file" 
                       {...heritabilityForm.register("file", { required: "File is required" })}
                       accept=".txt,.tsv,.csv"
                       title="Upload pre-munged GWAS sumstats"
-                      disabled={!!exampleFilename}
                       onChange={async (e) => {
+                        //e.target.value = "";
                         const input = e.target as HTMLInputElement;
                         const file = input.files && input.files[0];
                         setHeritabilityResult("")
@@ -241,7 +230,6 @@ export default function LdScoreForm() {
                           setUploading(true);
                           await handleFileUpload(file);
                           setUploading(false);
-                          heritabilityForm.setValue("file", file);
                           setUploadedFilename(file.name);
                         }
                       }}
@@ -252,6 +240,9 @@ export default function LdScoreForm() {
                       Click here for sample format
                     </a>
                   </div>
+             <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
+             </Form.Group>
+             <Form.Group controlId="useEx" className="mb-3">
                   <div className="mt-2">
                     <Form.Check 
                       type="switch"
@@ -285,32 +276,22 @@ export default function LdScoreForm() {
                         }
                       }}
                     />
-                    {(uploadedFilename || exampleFilename) && (
-                        <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                        <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />                     
-                       {exampleFilename && (
-                          <a
-                            href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                          >
-                            {exampleFilename}
-                          </a>
-                        )}
-                       { uploadedFilename && (
-                          <a
-                            href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            download
-                            style={{ textDecoration: 'none', color: 'inherit' }}
-                        >
-                            {uploadedFilename}
-                        </a>)
-                        }
-                        </div>
-                    )}
+                  {(exampleFilename || uploadedFilename) && (
+                    <div className="mt-1" style={{ fontSize: "0.95em" }}>
+                      <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
+                     <a
+                        href={exampleFilename
+                          ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
+                          : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFilename || uploadedFilename}
+                      </a>
+                    </div>
+                  )}
                   </div>
                   <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
@@ -418,7 +399,7 @@ export default function LdScoreForm() {
                         Download Options
                       </div>
                       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                        <button id="download-herit-input-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadInput(heritabilityResult, exampleFilename)}>Download Input</button>
+                        <button id="download-herit-input-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadInput(heritabilityResult, exampleFilename||uploadedFilename)}>Download Input</button>
                         <button id="download-herit-tables-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadTable(heritabilityResult)}>Download Table</button>
                       </div>
                     </div>
