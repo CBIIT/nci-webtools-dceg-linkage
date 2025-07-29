@@ -99,7 +99,7 @@ export default function LdProxyForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={3}>
+        <Col sm={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -241,7 +241,7 @@ export default function LdProxyForm() {
                   title="Value must be a number between 0 and 1,000,000"
                 />
             </div>
-            <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
+            <Form.Text className="text-danger nowrap-text">{errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
         <Col />
