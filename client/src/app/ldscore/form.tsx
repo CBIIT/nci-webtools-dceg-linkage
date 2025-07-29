@@ -231,6 +231,7 @@ export default function LdScoreForm() {
                           await handleFileUpload(file);
                           setUploading(false);
                           setUploadedFilename(file.name);
+                          heritabilityForm.clearErrors("file");
                         }
                       }}
                     />
@@ -253,6 +254,7 @@ export default function LdScoreForm() {
                           heritabilityForm.setValue("analysis_type", "heritability");
                           setUploadedFilename("")
                           setHeritabilityResult("")
+                          heritabilityForm.clearErrors("file");
                           try {
                             const response = await fetch("/LDlinkRestWeb/ldherit_example");
                             if (response.ok) {
@@ -293,7 +295,7 @@ export default function LdScoreForm() {
                     </div>
                   )}
                   </div>
-                  <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
+               
                 </Form.Group>
               </Col>
 
