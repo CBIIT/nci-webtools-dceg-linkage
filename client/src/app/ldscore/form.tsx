@@ -78,7 +78,7 @@ export default function LdScoreForm() {
   });
   const onHeritabilitySubmit = async (data: FormData) => {
     setHeritabilityResult("");
-    setUploadedFilename("");
+   // setUploadedFilename("");
     setHeritabilityLoading(true);
     const pop = data.pop[0]?.value || "";
     const genomeBuild = genome_build || "grch37";
@@ -236,6 +236,7 @@ export default function LdScoreForm() {
                       onChange={async (e) => {
                         const input = e.target as HTMLInputElement;
                         const file = input.files && input.files[0];
+                        setHeritabilityResult("")
                         if (file) {
                           setUploading(true);
                           await handleFileUpload(file);
@@ -259,6 +260,8 @@ export default function LdScoreForm() {
                       onChange={async (e) => {
                         if (e.target.checked) {
                           heritabilityForm.setValue("analysis_type", "heritability");
+                          setUploadedFilename("")
+                          setHeritabilityResult("")
                           try {
                             const response = await fetch("/LDlinkRestWeb/ldherit_example");
                             if (response.ok) {
@@ -282,10 +285,10 @@ export default function LdScoreForm() {
                         }
                       }}
                     />
-                    {exampleFilename && (
-                      <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                        <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
-                        {exampleFilepath ? (
+                    {(uploadedFilename || exampleFilename) && (
+                        <div className="mt-1" style={{ fontSize: "0.95em" }}>
+                        <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />                     
+                       {exampleFilename && (
                           <a
                             href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`}
                             target="_blank"
@@ -294,10 +297,19 @@ export default function LdScoreForm() {
                           >
                             {exampleFilename}
                           </a>
-                        ) : (
-                          exampleFilename
                         )}
-                      </div>
+                       { uploadedFilename && (
+                          <a
+                            href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            download
+                            style={{ textDecoration: 'none', color: 'inherit' }}
+                        >
+                            {uploadedFilename}
+                        </a>)
+                        }
+                        </div>
                     )}
                   </div>
                   <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
@@ -416,20 +428,7 @@ export default function LdScoreForm() {
               </Row>
             </>
           )}
-          {uploadedFilename && !exampleFilename && (
-            <div className="mt-1" style={{ fontSize: "0.95em" }}>
-              <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
-              <a
-                href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                download
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                {uploadedFilename}
-              </a>
-            </div>
-          )}
+
           {heritabilityMutation.isError && (
             <Row>
               <Col>
