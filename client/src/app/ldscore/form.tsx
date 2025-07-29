@@ -14,7 +14,7 @@ export interface FormData {
   file?: File;
   file2?: File; // Second file for genetic correlation
   analysis_type: "heritability" | "genetic_correlation" | "ld_calculation";
-  pop: LdscorePopOption[];
+  pop: LdscorePopOption;
   window: number;
   windowUnit: "kb" | "cM";
 }
@@ -58,7 +58,7 @@ export default function LdScoreForm() {
   const heritabilityForm = useForm<FormData>({
     defaultValues: {
       analysis_type: "heritability",
-      pop: [],
+      pop: undefined,
       window: 0,
       windowUnit: "cM"
     }
@@ -80,8 +80,9 @@ export default function LdScoreForm() {
   const onHeritabilitySubmit = async (data: FormData) => {
     setHeritabilityResult("");
    // setUploadedFilename("");
+    //console.log("Submitting heritability form with data:", data.pop.value); 
     setHeritabilityLoading(true);
-    const pop = data.pop[0]?.value || "";
+    const pop =  data.pop.value ;
     const genomeBuild = genome_build || "grch37";
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFilename;
@@ -94,6 +95,7 @@ export default function LdScoreForm() {
       reference,
     });
     try {
+      console.log("Fetching heritability result with params:", params.toString());
       const response = await fetch(`/LDlinkRestWeb/ldherit?${params.toString()}`);
       if (response.ok) {
         const result = await response.json();
@@ -115,7 +117,7 @@ export default function LdScoreForm() {
   const geneticForm = useForm<FormData>({
     defaultValues: {
       analysis_type: "genetic_correlation",
-      pop: [],
+      pop: undefined,
       window: 0,
       windowUnit: "cM"
     }
@@ -139,7 +141,7 @@ export default function LdScoreForm() {
     if (data.file) formData.append("file", data.file);
     if (data.file2) formData.append("file2", data.file2);
     formData.append("analysis_type", "genetic_correlation");
-    formData.append("pop", data.pop[0]?.value || "");
+    formData.append("pop", data.pop.value || "");
     geneticMutation.mutate(formData);
   };
   const onGeneticReset = () => {
@@ -150,7 +152,7 @@ export default function LdScoreForm() {
   const ldForm = useForm<FormData>({
     defaultValues: {
       analysis_type: "ld_calculation",
-      pop: [],
+      pop: undefined,
       window: 0,
       windowUnit: "cM"
     }
@@ -173,7 +175,7 @@ export default function LdScoreForm() {
     const formData = new FormData();
     if (data.file) formData.append("file", data.file);
     formData.append("analysis_type", "ld_calculation");
-    formData.append("pop", data.pop[0]?.value || "");
+    formData.append("pop", data.pop.value || "");
     formData.append("window", String(data.window));
     formData.append("windowUnit", data.windowUnit);
     ldMutation.mutate(formData);
