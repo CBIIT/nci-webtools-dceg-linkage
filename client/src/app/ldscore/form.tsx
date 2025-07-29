@@ -276,7 +276,7 @@ export default function LdScoreForm() {
                         } else {
                           setExampleFilename("");
                           setExampleFilepath("");
-                          heritabilityForm.setValue("pop", []);
+                          heritabilityForm.setValue("pop", { label: "", value: "" });
                         }
                       }}
                     />
@@ -498,7 +498,7 @@ export default function LdScoreForm() {
                         //setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
                       } else {
                         // Clear example data
-                        geneticForm.setValue("pop", []);
+                        geneticForm.setValue("pop", { label: "", value: "" });
                       }
                     }}
                   />
@@ -551,7 +551,7 @@ export default function LdScoreForm() {
                           //setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
                         } else {
                           // Clear example data
-                          ldForm.setValue("pop", []);
+                          ldForm.setValue("pop", { label: "", value: "" });
                         }
                       }}
                     />
