@@ -31,9 +31,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       
     ] },
     { title: "API Access", path: "/apiaccess", subRoutes: [] },
+    { title: "Documentation", path: "/help", subRoutes: [] },
     { title: "Citations", path: "/citations", subRoutes: [] },
     { title: "Version History", path: "/version", subRoutes: [] },
-    { title: "Documentation", path: "/help", subRoutes: [] },
+    
   ];
   const queryClient = new QueryClient({});
   const pathname = usePathname();
@@ -51,7 +52,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <title>{pageTitle}</title>
         <meta name="keywords" content="ldlink" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
-        <GoogleAnalytics id="G-DGFTR3EY14" />
+        <GoogleAnalytics id="G-JKSF0J7NH9" />
         <Script src="https://cbiit.github.io/nci-softwaresolutions-elements/components/include-html.js" />
       </head>
       <body>

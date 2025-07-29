@@ -190,7 +190,7 @@ export default function SNPchip() {
             SNPchip Tool
             <sup>
               <a
-                href="/docs/#SNPchip"
+                href="/help/#SNPchip"
                 target="_blank"
                 style={{
                   fontSize: 20,
@@ -230,10 +230,10 @@ export default function SNPchip() {
           {warning && (
             <Row className="justify-content-center my-3">
               <Col sm={8} md={7}>
-                <Card border="warning">
+                <Card border="warning" className="w-100">
                   <Card.Header className="bg-warning">Warning</Card.Header>
-                  <Card.Body>
-                    <Card.Text>{warning}</Card.Text>
+                  <Card.Body className="py-2 snpchip-card-body">
+                    <Card.Text style={{ marginBottom: 0 }}>{warning}</Card.Text>
                   </Card.Body>
                 </Card>
               </Col>
@@ -247,4 +247,4 @@ export default function SNPchip() {
     </Container>
   );
 }
-            
+
