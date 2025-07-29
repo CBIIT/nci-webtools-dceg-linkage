@@ -18,15 +18,26 @@ export default function LdTraitResults({ ref }: { ref: string }) {
     queryKey: ["ldtrait_results", ref],
     queryFn: async () => {
       if (!ref) return null;
-      const data = await fetchOutput(`ldtrait${ref}.json`);
+      console.log("Fetching data for ref:", ref);
       try {
+        let data = await fetchOutput(`ldtrait${ref}.json`);
+        console.log("Raw API response:", data);
+        
+        // Ensure we're working with an object, not a string
         const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+        console.log("Parsed results:", parsed);
+        
+        if (parsed.error) {
+          throw new Error(parsed.error);
+        }
+        
         return parsed;
       } catch (e) {
-        console.error("Error parsing results:", e);
-        return data;
+        console.error("Error fetching or parsing results:", e);
+        throw e;
       }
     },
+    retry: 3,
   });
 
   // Early return if no meaningful data
@@ -57,7 +68,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                   ))}
                 </tbody>
               </table>
-              {results.details.queryWarnings?.aaData?.length > 0 && (
+              {(results.queryWarnings?.aaData?.length ?? 0) > 0 && (
                 <a
                   id="ldtrait-warnings-button"
                   title="View details."
@@ -108,8 +119,8 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                             </td>
                             <td>{row[3]}</td>
                             <td>{row[4]}</td>
-                            <td>{row[5].toFixed(3)}</td>
-                            <td>{row[6].toFixed(3)}</td>
+                            <td>{typeof row[5] === 'number' ? row[5].toFixed(3) : row[5]}</td>
+                            <td>{typeof row[6] === 'number' ? row[6].toFixed(3) : row[6]}</td>
                             <td>{row[8]}</td>
                             <td>{row[10]}</td>
                             <td>{row[11]}</td>
@@ -120,7 +131,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                 </>
               )}
 
-              {showWarnings && results.details.queryWarnings?.aaData?.length > 0 && (
+              {showWarnings && (results.queryWarnings?.aaData?.length ?? 0) > 0 && (
                 <table id="new-ldtrait-query-warnings" className="table table-striped table-chip">
                   <caption>Query Variants with Warnings</caption>
                   <thead>
@@ -131,7 +142,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {results.details.queryWarnings.aaData.map((warning, i) => (
+                    {results.queryWarnings?.aaData?.map((warning, i) => (
                       <tr key={i}>
                         <td>{warning[0]}</td>
                         <td>{warning[1]}</td>
@@ -148,6 +159,14 @@ export default function LdTraitResults({ ref }: { ref: string }) {
             </Col>
           </Row>
 
+          {results.warning && (
+            <Row className="mt-3">
+              <Col>
+                <Alert variant="warning">{results.warning}</Alert>
+              </Col>
+            </Row>
+          )}
+
           <Row className="mt-3">
             <Col>
               <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated_${ref}.txt`} download>
@@ -162,7 +181,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
           </Row>
         </Container>
       ) : (
-        <Alert variant="danger">{results?.error || "An error has occurred"}</Alert>
+        <Alert variant="danger">{results.error || "An error has occurred"}</Alert>
       )}
     </>
   );
