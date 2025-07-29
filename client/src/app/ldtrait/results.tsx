@@ -19,18 +19,43 @@ export default function LdTraitResults({ ref }: { ref: string }) {
     queryFn: async () => {
       if (!ref) return null;
       console.log("Fetching data for ref:", ref);
-      try {
-        let data = await fetchOutput(`ldtrait${ref}.json`);
-        console.log("Raw API response:", data);
-        
-        // Ensure we're working with an object, not a string
-        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-        console.log("Parsed results:", parsed);
-        
-        if (parsed.error) {
-          throw new Error(parsed.error);
+
+      // Helper function to add delay between retries
+      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+      // Helper function to fetch with retries
+      const fetchWithRetry = async (path: string, retries = 3, delayMs = 1000) => {
+        for (let i = 0; i < retries; i++) {
+          try {
+            console.log(`Attempt ${i + 1}: Fetching from ${path}`);
+            const data = await fetchOutput(path);
+            return data;
+          } catch (e) {
+            if (i === retries - 1) throw e;
+            console.log(`Attempt ${i + 1} failed, waiting ${delayMs}ms before retry`);
+            await delay(delayMs);
+          }
         }
+      };
+
+      try {
+        // First try the trait file
+        try {
+          console.log("Attempting to fetch from ldtrait file");
+          const data = await fetchWithRetry(`ldtrait${ref}.json`);
+          console.log("Successfully fetched from ldtrait file:", data);
+          const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+          return parsed;
+        } catch (e) {
+          console.log("..Failed to fetch ldtrait file, trying ldtrait file");
+        }
+
+        // If trait file fails, try the ldtrait file
+        const data = await fetchWithRetry(`ldtrait${ref}.json`);
+        console.log("---Successfully fetched from ldtrait file:", data);
         
+        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+        console.log("Parsed results structure:", Object.keys(parsed));
         return parsed;
       } catch (e) {
         console.error("Error fetching or parsing results:", e);
@@ -38,6 +63,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       }
     },
     retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Early return if no meaningful data
@@ -45,6 +71,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
     return <Alert variant="warning">No data available</Alert>;
   }
 
+  console.log("Debug: Results data", results);
   return (
     <>
       {!results.error ? (
@@ -68,7 +95,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                   ))}
                 </tbody>
               </table>
-              {(results.queryWarnings?.aaData?.length ?? 0) > 0 && (
+              {results.details.queryWarnings?.aaData?.length > 0 && (
                 <a
                   id="ldtrait-warnings-button"
                   title="View details."
@@ -119,8 +146,8 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                             </td>
                             <td>{row[3]}</td>
                             <td>{row[4]}</td>
-                            <td>{typeof row[5] === 'number' ? row[5].toFixed(3) : row[5]}</td>
-                            <td>{typeof row[6] === 'number' ? row[6].toFixed(3) : row[6]}</td>
+                            <td>{row[5].toFixed(3)}</td>
+                            <td>{row[6].toFixed(3)}</td>
                             <td>{row[8]}</td>
                             <td>{row[10]}</td>
                             <td>{row[11]}</td>
@@ -131,7 +158,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                 </>
               )}
 
-              {showWarnings && (results.queryWarnings?.aaData?.length ?? 0) > 0 && (
+              {showWarnings && results.details.queryWarnings?.aaData?.length > 0 && (
                 <table id="new-ldtrait-query-warnings" className="table table-striped table-chip">
                   <caption>Query Variants with Warnings</caption>
                   <thead>
@@ -142,7 +169,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                     </tr>
                   </thead>
                   <tbody>
-                    {results.queryWarnings?.aaData?.map((warning, i) => (
+                    {results.details.queryWarnings.aaData.map((warning, i) => (
                       <tr key={i}>
                         <td>{warning[0]}</td>
                         <td>{warning[1]}</td>
@@ -159,14 +186,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
             </Col>
           </Row>
 
-          {results.warning && (
-            <Row className="mt-3">
-              <Col>
-                <Alert variant="warning">{results.warning}</Alert>
-              </Col>
-            </Row>
-          )}
-
           <Row className="mt-3">
             <Col>
               <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated_${ref}.txt`} download>
@@ -181,7 +200,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
           </Row>
         </Container>
       ) : (
-        <Alert variant="danger">{results.error || "An error has occurred"}</Alert>
+        <Alert variant="danger">{results?.error || "An error has occurred"}</Alert>
       )}
     </>
   );
