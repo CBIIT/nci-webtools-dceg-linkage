@@ -179,7 +179,9 @@ export default function LdtraitForm() {
                 })}
               />
             </InputGroup>
+            <Form.Label>Base pair window</Form.Label>
             <InputGroup>
+            
               <InputGroup.Text>±</InputGroup.Text>
               <Form.Control
                 type="number"
@@ -195,7 +197,7 @@ export default function LdtraitForm() {
                   },
                 })}
               />
-              <InputGroup.Text>base pair window</InputGroup.Text>
+              
             </InputGroup>
             <Form.Text className="text-danger">
               {errors?.r2_d_threshold?.message || errors?.window?.message}
