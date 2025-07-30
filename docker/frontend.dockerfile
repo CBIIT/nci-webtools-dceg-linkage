@@ -7,6 +7,7 @@ RUN dnf -y update \
    make \
    nodejs \
    npm \
+   nginx \
    && dnf clean all
 
 RUN mkdir -p /app/client
@@ -26,7 +27,11 @@ ARG GOOGLE_MAPS_API_KEY=none
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 RUN npm run build 
 
+# Copy nginx config
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+
 EXPOSE 80
 EXPOSE 443
 
-CMD npm run start
+# Start Next.js on 3001 and Nginx on 80
+CMD npm run start -- -p 3001 & nginx -g 'daemon off;'

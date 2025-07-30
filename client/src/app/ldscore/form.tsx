@@ -31,6 +31,10 @@ export default function LdScoreForm() {
   const [heritPanelOpen, setHeritPanelOpen] = useState(false);
   const [uploadedFilename, setUploadedFilename] = useState<string>("");
   const [uploading, setUploading] = useState(false);
+  const [exampleFile1, setExampleFile1] = useState<string>("");
+  const [exampleFile2, setExampleFile2] = useState<string>("");
+  const [uploadedFile1, setUploadedFile1] = useState<string>("");
+  const [uploadedFile2, setUploadedFile2] = useState<string>("");
 
   const handleFileUpload = async (file: File) => {
     setUploading(true);
@@ -49,6 +53,31 @@ export default function LdScoreForm() {
       }
     } catch (e) {
       setUploadedFilename("");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Update file upload handlers for genetic correlation
+  const handleGeneticFileUpload = async (file: File, fileNum: 1 | 2) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("ldscoreFile", file);
+    try {
+      const response = await fetch("/LDlinkRestWeb/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (response.ok) {
+        if (fileNum === 1) setUploadedFile1(file.name);
+        else setUploadedFile2(file.name);
+      } else {
+        if (fileNum === 1) setUploadedFile1("");
+        else setUploadedFile2("");
+      }
+    } catch (e) {
+      if (fileNum === 1) setUploadedFile1("");
+      else setUploadedFile2("");
     } finally {
       setUploading(false);
     }
@@ -136,13 +165,43 @@ export default function LdScoreForm() {
       console.error("LDscore mutation error:", error);
     },
   });
+  const [geneticLoading, setGeneticLoading] = useState(false);
+  const [geneticResult, setGeneticResult] = useState("");
   const onGeneticSubmit = async (data: FormData) => {
-    const formData = new FormData();
-    if (data.file) formData.append("file", data.file);
-    if (data.file2) formData.append("file2", data.file2);
-    formData.append("analysis_type", "genetic_correlation");
-    formData.append("pop", data.pop.value || "");
-    geneticMutation.mutate(formData);
+    setGeneticResult("");
+    setGeneticLoading(true);
+    const pop = data.pop.value;
+    const genomeBuild = genome_build || "grch37";
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const isExample = !!exampleFile1;
+    const filename = exampleFile1 || uploadedFile1;
+    const filename2 = exampleFile2 || uploadedFile2;
+    const params = new URLSearchParams({
+      filename,
+      filename2,
+      pop,
+      genome_build: genomeBuild,
+      isExample: isExample ? "true" : "false",
+      reference,
+    });
+    console.log(filename2)
+    console.log(params.toString())
+    try {
+      const response = await fetch(`/LDlinkRestWeb/ldcorrelation?${params.toString()}`);
+      
+      if (response.ok) {
+        const result = await response.json();
+        setGeneticResult(result.result || JSON.stringify(result));
+ 
+      } else {
+               console.log(response)
+        setGeneticResult("Failed to fetch genetic correlation result.");
+      }
+    } catch (error) {
+      setGeneticResult("Error fetching genetic correlation result.");
+    } finally {
+      setGeneticLoading(false);
+    }
   };
   const onGeneticReset = () => {
     geneticForm.reset();
@@ -431,28 +490,50 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
-                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
-                  <Form.Control 
-                    type="file" 
-                    {...geneticForm.register("file", { required: "Trait 1 file is required" })}
-                    accept=".txt,.tsv,.csv"
-                     title="Upload pre-munged GWAS sumstats"
-                  />
-                  <Form.Text className="text-muted">
-                    
-                  </Form.Text>
+                  <Form.Label>Upload pre-munged GWAS sumstats file (Trait 1)</Form.Label>
+                  {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
+                    <div className="form-control bg-light">{exampleFile1}</div>
+                  ) : (
+                    <Form.Control 
+                      type="file" 
+                      {...geneticForm.register("file", { required: "Trait 1 file is required" })}
+                      accept=".txt,.tsv,.csv"
+                      title="Upload pre-munged GWAS sumstats"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        const file = input.files && input.files[0];
+                        if (file) {
+                          await handleFileUpload(file);
+                          setUploadedFile1(file.name);
+                          geneticForm.clearErrors("file");
+                        }
+                      }}
+                    />
+                  )}
                   <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
                 <Form.Group controlId="file2" className="mb-3">
-                  <Form.Control 
-                    type="file" 
-                    {...geneticForm.register("file2", { required: "Trait 2 file is required" })}
-                    accept=".txt,.tsv,.csv"
-                     title="Upload pre-munged GWAS sumstats"
-                  />
-                  <Form.Text className="text-muted">
-                   
-                  </Form.Text>
+                  <Form.Label>Upload pre-munged GWAS sumstats file (Trait 2)</Form.Label>
+                  {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
+                    <div className="form-control bg-light">{exampleFile2}</div>
+                  ) : (
+                    <Form.Control 
+                      type="file" 
+                      {...geneticForm.register("file2", { required: "Trait 2 file is required" })}
+                      accept=".txt,.tsv,.csv"
+                      title="Upload pre-munged GWAS sumstats"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        const file = input.files && input.files[0];
+                        if (file) {
+   
+                          await handleFileUpload(file);
+                          setUploadedFile2(file.name);
+                          geneticForm.clearErrors("file2");
+                        }
+                      }}
+                    />
+                  )}
                   <div className="mt-2">
                     <a href="/help#LDscore" className="text-decoration-none" target="_blank" rel="noopener noreferrer">
                       Click here for sample format
@@ -460,9 +541,9 @@ export default function LdScoreForm() {
                   </div>
                   <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
                 </Form.Group>
+              
               </Col>
-              <Col sm={1}>
-              </Col>
+              <Col sm={1}></Col>
               <Col sm={3}>
                 <Form.Group controlId="pop" className="mb-3">
                   <Form.Label>Population</Form.Label>
@@ -470,7 +551,6 @@ export default function LdScoreForm() {
                   <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
                 </Form.Group>
               </Col>
-
               <Col />
               <Col sm={3}>
                 <div className="text-end">
@@ -483,7 +563,6 @@ export default function LdScoreForm() {
                 </div>
               </Col>
             </Row>
-
             <Row>
               <Col sm={12}>
                 <div className="mb-3">
@@ -493,19 +572,46 @@ export default function LdScoreForm() {
                     label="Use Example Data"
                     onChange={(e) => {
                       if (e.target.checked) {
-                        // Load example data for genetic correlation
+                        setExampleFile1("BBJ_HDLC22.txt");
+                        setExampleFile2("BBJ_LDLC22.txt");
+                        setUploadedFile1("");
+                        setUploadedFile2("");
                         geneticForm.setValue("analysis_type", "genetic_correlation");
-                        //setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
                       } else {
-                        // Clear example data
+                        setExampleFile1("");
+                        setExampleFile2("");
                         geneticForm.setValue("pop", { label: "", value: "" });
                       }
                     }}
                   />
+                   {(exampleFile1 || uploadedFile1) && (exampleFile2 || uploadedFile2) && (
+                    <>
+                      <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
+                      <a
+                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile1)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFile1 || uploadedFile1}
+                      </a>
+                     <br></br>
+                      <a
+                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile2)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFile2 || uploadedFile2}
+                      </a>
+                    </>
+                  )}
                 </div>
               </Col>
             </Row>
-
+            
             {geneticMutation.isError && (
               <Row>
                 <Col>
@@ -517,6 +623,56 @@ export default function LdScoreForm() {
               </Row>
             )}
           </Form>
+        {geneticLoading && (
+            <div className="d-flex flex-column align-items-center my-3">
+              <span
+                className="px-3 py-2 mb-2"
+                style={{
+                  background: '#e3f0ff',
+                  color: '#084298',
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  maxWidth: 800,
+                }}
+              >
+                Computational time may vary based on the number of samples and genetic markers provided in the data
+              </span>
+              <div>
+                <CalculateLoading />
+              </div>
+            </div>
+          )}
+        {geneticResult && (
+          <div className="mt-3">
+            <div className="panel panel-default">
+              <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px' }}>
+                Genetic Correlation Result
+              </div>
+              <div className="panel-body" style={{ padding: '12px', background: '#f9f9f9' }}>
+                {(() => {
+          const parsed = parseGeneticCorrelationResult(geneticResult);
+           {geneticResult}
+          return (
+            <>
+             
+              <h5>Heritability of phenotype 1</h5>
+              {renderKeyValueTable(parsed.herit1)}
+              <h5>Heritability of phenotype 2</h5>
+              {renderKeyValueTable(parsed.herit2)}
+              <h5>Genetic Covariance</h5>
+              {renderKeyValueTable(parsed.gencov)}
+              <h5>Genetic Correlation</h5>
+              {renderKeyValueTable(parsed.gencorr)}
+              <h5>Summary of Genetic Correlation Results</h5>
+              {renderSummaryTable(parsed.summary)}
+            </>
+          );
+        })()}
+              </div>
+            </div>
+          </div>
+        )}
         </Tab.Pane>
 
         <Tab.Pane eventKey="ld_calculation">
@@ -706,4 +862,58 @@ function parseHeritabilityResult(result: string) {
     intercept: interceptMatch ? `${interceptMatch[1]} (${interceptMatch[2]})` : "",
     ratio: ratioMatch ? `${ratioMatch[1]} ${ratioMatch[2]}` : "",
   };
+}
+
+// Helper to parse genetic correlation result string into sections
+function parseGeneticCorrelationResult(resultStr: string) {
+  // Split by section headers
+  const getSection = (header: string) => {
+    const re = new RegExp(`${header}([\s\S]*?)(?=\n[A-Z]|\nSummary|$)`, 'm');
+    const match = resultStr.match(re);
+    return match ? match[1].trim() : '';
+  };
+  return {
+    herit1: getSection('Heritability of phenotype 1'),
+    herit2: getSection('Heritability of phenotype 2'),
+    gencov: getSection('Genetic Covariance'),
+    gencorr: getSection('Genetic Correlation'),
+    summary: (() => {
+      const re = /Summary of Genetic Correlation Results([\s\S]*)/m;
+      const match = resultStr.match(re);
+      return match ? match[1].trim() : '';
+    })(),
+  };
+}
+
+function renderKeyValueTable(section: string) {
+  if (!section) return null;
+  const lines = section.split('\n').filter(l => l.trim() && !/^[-]+$/.test(l));
+  return (
+    <table className="table table-bordered table-sm mb-3"><tbody>
+      {lines.map((l, i) => {
+        const kv = l.split(/:|\t/);
+        if (kv.length >= 2) {
+          return <tr key={i}><th>{kv[0].trim()}</th><td>{kv.slice(1).join(':').trim()}</td></tr>;
+        }
+        // fallback: just show the line
+        return <tr key={i}><td colSpan={2}>{l}</td></tr>;
+      })}
+    </tbody></table>
+  );
+}
+
+function renderSummaryTable(section: string) {
+  if (!section) return null;
+  const lines = section.split('\n').filter(l => l.trim());
+  if (lines.length < 2) return <pre>{section}</pre>;
+  const header = lines[0].split(/\s{2,}|\t/).filter(Boolean);
+  const rows = lines.slice(1).map(l => l.split(/\s{2,}|\t/).filter(Boolean));
+  return (
+    <table className="table table-bordered table-sm mb-3">
+      <thead><tr>{header.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
+      <tbody>
+        {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j}>{c}</td>)}</tr>)}
+      </tbody>
+    </table>
+  );
 }
