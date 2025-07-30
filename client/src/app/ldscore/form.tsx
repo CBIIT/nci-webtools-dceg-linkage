@@ -463,10 +463,10 @@ export default function LdScoreForm() {
                       </div>
                       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
                         <button id="download-herit-input-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadInput(heritabilityResult, exampleFilename||uploadedFilename)}>Download Input</button>
-                        <button id="download-herit-tables-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadTable(heritabilityResult)}>Download Table</button>
+                        <button id="download-herit-tables-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadTable(heritabilityResult, "heritability_result.txt")}>Download Table</button>
                       </div>
                     </div>
-                    <RawHeritabilityPanel result={heritabilityResult} />
+                    <RawHeritabilityPanel result={heritabilityResult} title="Heritability Analysis Output" />
                   </div>
                 </Col>
               </Row>
@@ -490,7 +490,7 @@ export default function LdScoreForm() {
             <Row>
               <Col sm={3}>
                 <Form.Group controlId="file" className="mb-3">
-                  <Form.Label>Upload pre-munged GWAS sumstats file (Trait 1)</Form.Label>
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
                   {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
                     <div className="form-control bg-light">{exampleFile1}</div>
                   ) : (
@@ -513,7 +513,7 @@ export default function LdScoreForm() {
                   <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
                 <Form.Group controlId="file2" className="mb-3">
-                  <Form.Label>Upload pre-munged GWAS sumstats file (Trait 2)</Form.Label>
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
                   {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
                     <div className="form-control bg-light">{exampleFile2}</div>
                   ) : (
@@ -646,26 +646,56 @@ export default function LdScoreForm() {
         {geneticResult && (
           <div className="mt-3">
             <div className="panel panel-default">
-              <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px' }}>
-                Genetic Correlation Result
-              </div>
-              <div className="panel-body" style={{ padding: '12px', background: '#f9f9f9' }}>
+              <div className="panel-body" style={{ padding: '12px', background: '#ffffff' }}>
                 {(() => {
           const parsed = parseGeneticCorrelationResult(geneticResult);
-           {geneticResult}
           return (
             <>
-             
               <h5>Heritability of phenotype 1</h5>
-              {renderKeyValueTable(parsed.herit1)}
+              {renderKeyValueTable(parsed.herit1 || '')}
               <h5>Heritability of phenotype 2</h5>
-              {renderKeyValueTable(parsed.herit2)}
+              {renderKeyValueTable(parsed.herit2 || '')}
               <h5>Genetic Covariance</h5>
-              {renderKeyValueTable(parsed.gencov)}
+              {renderKeyValueTable(parsed.gencov || '')}
               <h5>Genetic Correlation</h5>
-              {renderKeyValueTable(parsed.gencorr)}
+              {renderKeyValueTable(parsed.gencorr || '')}
               <h5>Summary of Genetic Correlation Results</h5>
-              {renderSummaryTable(parsed.summary)}
+              {renderSummaryTable(parsed.summary || '')}
+                 <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+                      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
+                        Download Options
+                      </div>
+                      <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <button
+                          id="download-correlation-input1-btn"
+                          type="button"
+                          className="btn btn-default"
+                          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+                          onClick={() => handleDownloadInput(geneticResult, exampleFile1 || uploadedFile1)}
+                        >
+                          Download Input 1
+                        </button>
+                        <button
+                          id="download-correlation-input2-btn"
+                          type="button"
+                          className="btn btn-default"
+                          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+                          onClick={() => handleDownloadInput(geneticResult, exampleFile2 || uploadedFile2)}
+                        >
+                          Download Input 2
+                        </button>
+                        <button
+                          id="download-correlation-tables-btn"
+                          type="button"
+                          className="btn btn-default"
+                          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+                          onClick={() => handleDownloadTable(geneticResult, "correlation_result.txt")}
+                        >
+                          Download Table
+                        </button>
+                      </div>
+                    </div>
+                    <RawHeritabilityPanel result={geneticResult} title="Correlation Analysis Output" />
             </>
           );
         })()}
@@ -801,33 +831,68 @@ function handleDownloadInput(result: string, exampleFilename?: string) {
     alert("No input file available to download.");
   }
 }
-function handleDownloadTable(result: string) {
-  const parsed = parseHeritabilityResult(result);
-  const lines = [
-    "Heritability Result",
-    "-------------------",
-    `Total Observed scale h2:\t${parsed.h2}`,
-    `Lambda GC:\t${parsed.lambdaGC}`,
-    `Mean Chi^2:\t${parsed.meanChi2}`,
-    `Intercept:\t${parsed.intercept}`,
-    `Ratio:\t${parsed.ratio}`,
-  ];
-  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "heritability_result.txt";
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-  }, 0);
+function handleDownloadTable(result: string, filename: string) {
+  if (filename.includes('correlation')) {
+    const parsed = parseGeneticCorrelationResult(result);
+    const sections = [
+      { title: "Heritability of phenotype 1", content: parsed.herit1 },
+      { title: "Heritability of phenotype 2", content: parsed.herit2 },
+      { title: "Genetic Covariance", content: parsed.gencov },
+      { title: "Genetic Correlation", content: parsed.gencorr },
+      { title: "Summary of Genetic Correlation Results", content: parsed.summary },
+    ];
+    const lines: string[] = [];
+    for (const section of sections) {
+      if (section.content && section.content.trim()) {
+        lines.push(section.title);
+       // lines.push("-".repeat(section.title.length));
+        // For summary, keep as is; for others, format as key-value
+        if (section.title === "Summary of Genetic Correlation Results") {
+          lines.push(section.content);
+        } else {
+          section.content.split(/\r?\n/).forEach(line => lines.push(line));
+        }
+        lines.push(""); // blank line between sections
+      }
+    }
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+    }, 0);
+  } else {
+    // Heritability mode (default)
+    const parsed = parseHeritabilityResult(result);
+    const lines = [
+      "Heritability Result",
+      "-------------------",
+      `Total Observed scale h2:\t${parsed.h2}`,
+      `Lambda GC:\t${parsed.lambdaGC}`,
+      `Mean Chi^2:\t${parsed.meanChi2}`,
+      `Intercept:\t${parsed.intercept}`,
+      `Ratio:\t${parsed.ratio}`,
+    ];
+    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+    }, 0);
+  }
 }
-function RawHeritabilityPanel({ result }: { result: string }) {
+function RawHeritabilityPanel({ result, title }: { result: string; title: string }) {
   const [showRaw, setShowRaw] = useState(false);
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>Raw Heritability Output</span>
+        <span>{title}</span>
         <button
           type="button"
           className="btn btn-sm btn-outline-primary"
@@ -866,54 +931,121 @@ function parseHeritabilityResult(result: string) {
 
 // Helper to parse genetic correlation result string into sections
 function parseGeneticCorrelationResult(resultStr: string) {
-  // Split by section headers
-  const getSection = (header: string) => {
-    const re = new RegExp(`${header}([\s\S]*?)(?=\n[A-Z]|\nSummary|$)`, 'm');
-    const match = resultStr.match(re);
-    return match ? match[1].trim() : '';
-  };
+  // Only parse from the first result section onward
+  const startIdx = resultStr.search(/Heritability of phenotype 1/i);
+  if (startIdx === -1) return {};
+  const trimmed = resultStr.slice(startIdx);
+  // Section headers in order
+  const headers = [
+    'Heritability of phenotype 1',
+    'Heritability of phenotype 2',
+    'Genetic Covariance',
+    'Genetic Correlation',
+    'Summary of Genetic Correlation Results',
+  ];
+  // Find section indices
+  const indices = headers.map(h => {
+    const re = new RegExp(`^${h}`, 'im');
+    const m = trimmed.match(re);
+    return m ? trimmed.indexOf(m[0]) : -1;
+  });
+  // Extract sections
+  const sections: Record<string, string> = {};
+  for (let i = 0; i < headers.length; ++i) {
+    if (indices[i] === -1) continue;
+    const start = indices[i] + headers[i].length;
+    const end = indices.slice(i + 1).find(idx => idx > indices[i]) ?? trimmed.length;
+    sections[headers[i]] = trimmed.slice(start, end).trim();
+  }
   return {
-    herit1: getSection('Heritability of phenotype 1'),
-    herit2: getSection('Heritability of phenotype 2'),
-    gencov: getSection('Genetic Covariance'),
-    gencorr: getSection('Genetic Correlation'),
-    summary: (() => {
-      const re = /Summary of Genetic Correlation Results([\s\S]*)/m;
-      const match = resultStr.match(re);
-      return match ? match[1].trim() : '';
-    })(),
+    herit1: sections['Heritability of phenotype 1'] || '',
+    herit2: sections['Heritability of phenotype 2'] || '',
+    gencov: sections['Genetic Covariance'] || '',
+    gencorr: sections['Genetic Correlation'] || '',
+    summary: sections['Summary of Genetic Correlation Results'] || '',
   };
+}
+
+function TableContainer({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="table-responsive" style={{ maxWidth: 600, margin: '0 auto', overflowX: 'auto' }}>
+      {children}
+    </div>
+  );
 }
 
 function renderKeyValueTable(section: string) {
   if (!section) return null;
-  const lines = section.split('\n').filter(l => l.trim() && !/^[-]+$/.test(l));
+  // Split by newlines, but also handle multiple key-value pairs on a single line
+  const lines = section.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
+  const kvPairs: [string, string][] = [];
+  lines.forEach(line => {
+    // Try to match all key-value pairs in the line (colon or angle brackets)
+    let found = false;
+    // Colon-separated pairs
+    const colonPairs = line.matchAll(/([\w\s²\*\-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
+    for (const pair of colonPairs) {
+      kvPairs.push([pair[1].trim(), pair[2].trim()]);
+      found = true;
+    }
+    // Angle bracket pairs (e.g., Key < Value)
+    if (!found) {
+      const angleMatch = line.match(/([\w\s²\*\-]+?)([<>])\s*([^<>=]+)/);
+      if (angleMatch) {
+        kvPairs.push([angleMatch[1].trim(), angleMatch[2] + ' ' + angleMatch[3].trim()]);
+        found = true;
+      }
+    }
+    // Fallback: treat the whole line as a value with an empty key
+    if (!found) {
+      kvPairs.push(['', line.trim()]);
+      // { border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }
+    }
+  });
   return (
-    <table className="table table-bordered table-sm mb-3"><tbody>
-      {lines.map((l, i) => {
-        const kv = l.split(/:|\t/);
-        if (kv.length >= 2) {
-          return <tr key={i}><th>{kv[0].trim()}</th><td>{kv.slice(1).join(':').trim()}</td></tr>;
-        }
-        // fallback: just show the line
-        return <tr key={i}><td colSpan={2}>{l}</td></tr>;
-      })}
-    </tbody></table>
+    <TableContainer>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+        <thead>
+          <tr>
+            <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}></th>
+            <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {kvPairs.map(([k, v], i) => (
+            <tr key={i}>
+              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{k}</td>
+              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{v}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </TableContainer>
   );
 }
 
 function renderSummaryTable(section: string) {
   if (!section) return null;
-  const lines = section.split('\n').filter(l => l.trim());
-  if (lines.length < 2) return <pre>{section}</pre>;
-  const header = lines[0].split(/\s{2,}|\t/).filter(Boolean);
-  const rows = lines.slice(1).map(l => l.split(/\s{2,}|\t/).filter(Boolean));
+  // Exclude 'Analysis finished at' and all following lines
+  const lines = section.split(/\r?\n/).filter(l => l.trim());
+  const endIdx = lines.findIndex(l => /^Analysis\s+finished\s+at/i.test(l));
+  const filteredLines = endIdx === -1 ? lines : lines.slice(0, endIdx);
+  // Find the first line with at least two columns (header)
+  let headerIdx = 0;
+  while (headerIdx < filteredLines.length && filteredLines[headerIdx].split(/\s+/).length < 2) headerIdx++;
+  if (headerIdx >= filteredLines.length - 1) return <pre>{section}</pre>;
+  const header = filteredLines[headerIdx].split(/\s+/).filter(Boolean);
+  const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
   return (
-    <table className="table table-bordered table-sm mb-3">
-      <thead><tr>{header.map((h, i) => <th key={i}>{h}</th>)}</tr></thead>
-      <tbody>
-        {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j}>{c}</td>)}</tr>)}
-      </tbody>
-    </table>
+    <TableContainer>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+        <thead >
+          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{c}</td>)}</tr>)}
+        </tbody>
+      </table>
+    </TableContainer>
   );
 }
