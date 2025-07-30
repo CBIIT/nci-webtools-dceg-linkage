@@ -264,14 +264,46 @@ export default function LdScoreForm() {
       console.error("LDscore mutation error:", error);
     },
   });
-  const onLdSubmit = async (data: FormData) => {
-    const formData = new FormData();
-    if (data.file) formData.append("file", data.file);
-    formData.append("analysis_type", "ld_calculation");
-    formData.append("pop", data.pop.value || "");
-    formData.append("window", String(data.window));
-    formData.append("windowUnit", data.windowUnit);
-    ldMutation.mutate(formData);
+  const [ldResult, setLdResult] = useState<string>("");
+
+  const onLdSubmit = async () => {
+    // Use example or uploaded filenames
+    const bed = exampleBed || uploadedBed;
+    const bim = exampleBim || uploadedBim;
+    const fam = exampleFam || uploadedFam;
+    const window = ldForm.getValues("window");
+    const windowUnit = ldForm.getValues("windowUnit");
+    if (!bed || !bim || !fam) {
+      alert("Please provide all three files: .bed, .bim, .fam");
+      return;
+    }
+    const isExample = !!exampleBed;
+    // Join filenames as required by backend
+    const filename = `${bed};${bim};${fam}`;
+    const params = new URLSearchParams({
+      filename,
+      window: String(window),
+      windowUnit,
+      isExample: isExample ? "true" : "false",
+    });
+    try {
+      setUploading(true);
+      // Try both routes, prefer /LDlinkRestWeb/ldscore
+      let response = await fetch(`/LDlinkRestWeb/ldscore?${params.toString()}`);
+      if (!response.ok) {
+        response = await fetch(`/LDlinkRest/ldscore?${params.toString()}`);
+      }
+      if (response.ok) {
+        const result = await response.json();
+        setLdResult(result.result || JSON.stringify(result));
+      } else {
+        setLdResult("Failed to fetch LD Score calculation result.");
+      }
+    } catch (error) {
+      setLdResult("Error fetching LD Score calculation result.");
+    } finally {
+      setUploading(false);
+    }
   };
   const onLdReset = () => {
     ldForm.reset();
@@ -835,6 +867,13 @@ export default function LdScoreForm() {
               </Col>
             </Row>
           </Form>
+
+          {ldResult && (
+            <div className="mt-3" style={{ maxWidth: 600, margin: '0 auto', background: '#f9f9f9', border: '1px solid #bdbdbd', borderRadius: 6, padding: 16 }}>
+              <div style={{ fontWeight: 600, marginBottom: 8, color: '#084298' }}>LD Score Calculation Result</div>
+              <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.97em', margin: 0 }}>{ldResult}</pre>
+            </div>
+          )}
 
           {ldMutation.isError && (
             <Row>
