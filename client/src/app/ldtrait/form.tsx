@@ -77,7 +77,7 @@ export default function LdtraitForm() {
     };
 
     queryClient.setQueryData(["ldtrait-form-data", reference], formData);
-    router.push(`${pathname}?ref=${reference}`);
+    
     submitForm.mutate(formData);
   }
 

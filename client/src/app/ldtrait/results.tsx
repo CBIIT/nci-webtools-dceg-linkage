@@ -1,10 +1,12 @@
 "use client";
 import { Row, Col, Container, Alert } from "react-bootstrap";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { createColumnHelper } from "@tanstack/react-table";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData } from "./types";
 import { genomeBuildMap } from "@/store";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import Table from "@/components/table";
 import "./styles.scss";
 
 export default function LdTraitResults({ ref }: { ref: string }) {
@@ -16,54 +18,22 @@ export default function LdTraitResults({ ref }: { ref: string }) {
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldtrait_results", ref],
+    queryFn: async () => (ref ? fetchOutput(`ldtrait${ref}.json`) : null),
+  });
+
+  // Fetch GWAS Catalog timestamp
+  const { data: timestampData } = useSuspenseQuery({
+    queryKey: ["ldtrait_timestamp"],
     queryFn: async () => {
-      if (!ref) return null;
-      console.log("Fetching data for ref:", ref);
-
-      // Helper function to add delay between retries
-      const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-      // Helper function to fetch with retries
-      const fetchWithRetry = async (path: string, retries = 3, delayMs = 1000) => {
-        for (let i = 0; i < retries; i++) {
-          try {
-            console.log(`Attempt ${i + 1}: Fetching from ${path}`);
-            const data = await fetchOutput(path);
-            return data;
-          } catch (e) {
-            if (i === retries - 1) throw e;
-            console.log(`Attempt ${i + 1} failed, waiting ${delayMs}ms before retry`);
-            await delay(delayMs);
-          }
-        }
-      };
-
       try {
-        // First try the trait file
-        try {
-          console.log("Attempting to fetch from ldtrait file");
-          const data = await fetchWithRetry(`ldtrait${ref}.json`);
-          console.log("Successfully fetched from ldtrait file:", data);
-          const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-          return parsed;
-        } catch (e) {
-          console.log("..Failed to fetch ldtrait file, trying ldtrait file");
-        }
-
-        // If trait file fails, try the ldtrait file
-        const data = await fetchWithRetry(`ldtrait${ref}.json`);
-        console.log("---Successfully fetched from ldtrait file:", data);
-        
-        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
-        console.log("Parsed results structure:", Object.keys(parsed));
-        return parsed;
-      } catch (e) {
-        console.error("Error fetching or parsing results:", e);
-        throw e;
+        const response = await fetch("/LDlinkRestWeb/ldtrait_timestamp");
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error("Failed to fetch timestamp:", error);
+        return null;
       }
     },
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
 
   // Early return if no meaningful data
@@ -72,6 +42,188 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   }
 
   console.log("Debug: Results data", results);
+
+  // Format timestamp similar to the original JavaScript implementation
+  const formatTimestamp = (timestampData: any) => {
+    if (!timestampData || !timestampData.$date) return "...";
+    
+    try {
+      const datetime = new Date(timestampData.$date);
+      const date = datetime.toLocaleDateString("en-US");
+      const time = datetime.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+      const timezone = datetime.toString().match(/([A-Z]+[\+-][0-9]+)/)?.[1] || "";
+      return `${date}, ${time} (${timezone})`;
+    } catch (error) {
+      console.error("Error formatting timestamp:", error);
+      return "...";
+    }
+  };
+
+  // Transform data for the table
+  const tableData = useMemo(() => {
+    if (!results || !activeKey || !results.details[activeKey]?.aaData) return [];
+    
+    return results.details[activeKey].aaData;
+  }, [results, activeKey]);
+
+  // Create table columns
+  const columnHelper = createColumnHelper<any>();
+  const columns = [
+    columnHelper.accessor((row) => row[0], {
+      header: "GWAS Trait",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row[1], {
+      header: "PMID",
+      cell: (info) => {
+        const value = info.getValue();
+        return (
+          <a href={`https://pubmed.ncbi.nlm.nih.gov/${value}`} target="_blank" rel="noopener noreferrer">
+            {value}
+          </a>
+        );
+      },
+    }),
+    columnHelper.accessor((row) => row[2], {
+      header: "RS Number",
+      cell: (info) => {
+        const value = info.getValue();
+        return value;
+      },
+    }),
+    columnHelper.accessor((row) => row[3], {
+      header: `Position (${genomeBuildMap[formData?.genome_build || "grch37"]})`,
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row[4], {
+      header: "Alleles",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row[5], {
+      header: "R²",
+      cell: (info) => {
+        const value = info.getValue();
+        return typeof value === 'number' ? value.toFixed(3) : value;
+      },
+    }),
+    columnHelper.accessor((row) => row[6], {
+      header: "D'",
+      cell: (info) => {
+        const value = info.getValue();
+        return typeof value === 'number' ? value.toFixed(3) : value;
+      },
+    }),
+    columnHelper.accessor((row) => row[7], {
+      header: "LDpair",
+      cell: (info) => {
+        const value = info.getValue();
+        if (value && value !== "NA") {
+          // Create LDpair link - this would typically link to LDpair tool with specific parameters
+          return (
+            <a href={`#LDpair`} target="_blank" rel="noopener noreferrer">
+              {value}
+            </a>
+          );
+        }
+        return value || "NA";
+      },
+    }),
+    columnHelper.accessor((row) => row[8], {
+      header: "Risk Allele Frequency", 
+      cell: (info) => {
+        const value = info.getValue();
+        if (typeof value === 'number') {
+          return value.toFixed(3);
+        } else if (typeof value === 'string' && !isNaN(parseFloat(value))) {
+          return parseFloat(value).toFixed(3);
+        }
+        return value;
+      },
+    }),
+    columnHelper.accessor((row) => row[9], {
+      header: "Beta or OR",
+      cell: (info) => {
+        const value = info.getValue();
+        return typeof value === 'number' ? value.toFixed(3) : value;
+      },
+    }),
+    columnHelper.accessor((row) => row[10], {
+      header: "Effect Size (95% CI)",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row[11], {
+      header: "P-value",
+      cell: (info) => {
+        const value = info.getValue();
+        if (value !== "NA" && !isNaN(parseFloat(value))) {
+          const floatData = parseFloat(value);
+          if (floatData === 1.0) {
+            return "1.0";
+          } else if (floatData === 0.0) {
+            if (value.includes("e") || value.includes("E")) {
+              const [mantissa, exponent] = value.split(/e/i);
+              return (
+                <>
+                  {mantissa}x10<sup>{exponent}</sup>
+                </>
+              );
+            } else {
+              return "0.0";
+            }
+          } else {
+            const [mantissa, exponent] = floatData.toExponential(0).split(/e/i);
+            return (
+              <>
+                {mantissa}x10<sup>{exponent}</sup>
+              </>
+            );
+          }
+        }
+        return value;
+      },
+    }),
+    columnHelper.accessor((row) => row[12], {
+      header: "GWAS Catalog",
+      cell: (info) => {
+        //const rsNumber = info.row.original[2]; // Get RS number from column 2
+        return (
+          <a 
+            href={`https://www.ebi.ac.uk/gwas/variants/${info.getValue()}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+          >
+            Link
+          </a>
+        );
+      },
+    }),
+  ];
+
+  // Transform warnings data for the table
+  const warningsTableData = useMemo(() => {
+    if (!results || !results.details.queryWarnings?.aaData) return [];
+    return results.details.queryWarnings.aaData;
+  }, [results]);
+
+  // Create warnings table columns
+  const warningsColumns = [
+    columnHelper.accessor((row) => row[0], {
+      header: "Variant",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row[1], {
+      header: `Position (${genomeBuildMap[formData?.genome_build || "grch37"]})`,
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row[2], {
+      header: "Details",
+      cell: (info) => info.getValue(),
+    }),
+  ];
+
   return (
     <>
       {!results.error ? (
@@ -114,70 +266,12 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                       <div id="ldtrait-detail-title">Details for {activeKey}</div>
                     </Col>
                   </Row>
-                  <table id="new-ldtrait" className="table table-striped table-chip">
-                    <thead title="Shift-click column headers to sort by multiple levels">
-                      <tr>
-                        <th className="dt-head-left dt-body-left">GWAS Trait</th>
-                        <th className="dt-head-left dt-body-left">PMID</th>
-                        <th className="dt-head-left dt-body-left">RS Number</th>
-                        <th className="dt-head-left dt-body-left">Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
-                        <th className="dt-head-left dt-body-left">Alleles</th>
-                        <th className="dt-head-left dt-body-left">R²</th>
-                        <th className="dt-head-left dt-body-left">D'</th>
-                        <th className="dt-head-left dt-body-left">Risk Allele</th>
-                        <th className="dt-head-left dt-body-left">Effect Size</th>
-                        <th className="dt-head-left dt-body-left">P-value</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {results.thinned_snps.includes(activeKey) &&
-                        results.details[activeKey]?.aaData.map((row, i) => (
-                          <tr key={`${activeKey}-${i}`}>
-                            <td>{row[0]}</td>
-                            <td>
-                              <a href={`https://pubmed.ncbi.nlm.nih.gov/${row[1]}`} target="_blank" rel="noopener noreferrer">
-                                {row[1]}
-                              </a>
-                            </td>
-                            <td>
-                              <a href={`http://www.ncbi.nlm.nih.gov/snp/${row[2]}`} target="_blank" rel="noopener noreferrer">
-                                {row[2]}
-                              </a>
-                            </td>
-                            <td>{row[3]}</td>
-                            <td>{row[4]}</td>
-                            <td>{row[5].toFixed(3)}</td>
-                            <td>{row[6].toFixed(3)}</td>
-                            <td>{row[8]}</td>
-                            <td>{row[10]}</td>
-                            <td>{row[11]}</td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                  {tableData.length > 0 && <Table title="" data={tableData} columns={columns} />}
                 </>
               )}
 
-              {showWarnings && results.details.queryWarnings?.aaData?.length > 0 && (
-                <table id="new-ldtrait-query-warnings" className="table table-striped table-chip">
-                  <caption>Query Variants with Warnings</caption>
-                  <thead>
-                    <tr>
-                      <th className="dt-head-left dt-body-left">Variant</th>
-                      <th className="dt-head-left dt-body-left">Position ({genomeBuildMap[formData?.genome_build || "grch37"]})</th>
-                      <th className="dt-head-left dt-body-left">Details</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {results.details.queryWarnings.aaData.map((warning, i) => (
-                      <tr key={i}>
-                        <td>{warning[0]}</td>
-                        <td>{warning[1]}</td>
-                        <td>{warning[2]}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              {showWarnings && warningsTableData.length > 0 && (
+                <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
               )}
 
               {!activeKey && !showWarnings && (
@@ -195,7 +289,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
           </Row>
           <Row className="mt-2">
             <Col>
-              <i>GWAS Catalog last updated on <span id="ldtrait-timestamp">...</span></i>
+              <i>GWAS Catalog last updated on <span id="ldtrait-timestamp">{formatTimestamp(timestampData)}</span></i>
             </Col>
           </Row>
         </Container>
