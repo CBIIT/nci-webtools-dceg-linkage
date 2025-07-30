@@ -36,6 +36,14 @@ export default function LdScoreForm() {
   const [uploadedFile1, setUploadedFile1] = useState<string>("");
   const [uploadedFile2, setUploadedFile2] = useState<string>("");
 
+  // Add state for LD calculation example and uploaded files
+  const [exampleBed, setExampleBed] = useState<string>("");
+  const [exampleBim, setExampleBim] = useState<string>("");
+  const [exampleFam, setExampleFam] = useState<string>("");
+  const [uploadedBed, setUploadedBed] = useState<string>("");
+  const [uploadedBim, setUploadedBim] = useState<string>("");
+  const [uploadedFam, setUploadedFam] = useState<string>("");
+
   const handleFileUpload = async (file: File) => {
     setUploading(true);
     const formData = new FormData();
@@ -81,6 +89,32 @@ export default function LdScoreForm() {
     } finally {
       setUploading(false);
     }
+  };
+
+  // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
+  const handleLdFilesUpload = async (files: FileList) => {
+    setUploading(true);
+    setUploadedBed(""); setUploadedBim(""); setUploadedFam("");
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      const formData = new FormData();
+      formData.append("ldscoreFile", file);
+      try {
+        const response = await fetch("/LDlinkRestWeb/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (response.ok) {
+          if (ext === 'bed') setUploadedBed(file.name);
+          if (ext === 'bim') setUploadedBim(file.name);
+          if (ext === 'fam') setUploadedFam(file.name);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    setUploading(false);
   };
 
   // Heritability form state
@@ -708,52 +742,70 @@ export default function LdScoreForm() {
         <Tab.Pane eventKey="ld_calculation">
           <Form id="ldscore-form-ld-calculation" onSubmit={ldForm.handleSubmit(onLdSubmit)} onReset={onLdReset} noValidate>
             <Row>
-              <Col sm={3}>
-                <Form.Group controlId="file" className="mb-3">
-                  <Form.Label> *.bed *.bim *.fam are required</Form.Label>
-                  <Form.Control 
-                    type="file" 
-                    {...ldForm.register("file", { required: "File is required" })}
-                    accept=".txt,.tsv,.csv"
-                     title="*.bed *.bim *.fam are required"
-                  />
-                  <Form.Text className="text-muted">
-                   
-                  </Form.Text>
-                  <div className="mt-2">
-                    <a href="/help#LDscore" className="text-decoration-none" target="_blank" rel="noopener noreferrer">
-                      Click here for sample format
-                    </a>
-                  </div>
-                  <div className="mt-2">
-                    <Form.Check 
-                      type="switch"
-                      id="use-example-ld"
-                      label="Use Example Data"
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          // Load example data for LD calculation
-                          ldForm.setValue("analysis_type", "ld_calculation");
-                          //setValue("pop", [{ label: "(ALL) All Populations", value: "ALL" }]);
-                        } else {
-                          // Clear example data
-                          ldForm.setValue("pop", { label: "", value: "" });
+              <Col sm={4}>
+                <Form.Group controlId="ldfiles" className="mb-3">
+                  <Form.Label>Upload .bed, .bim, .fam files (all three required)</Form.Label>
+                  {(exampleBed || exampleBim || exampleFam) ? (
+                    <div className="form-control bg-light">
+                      {exampleBed && <div>{exampleBed}</div>}
+                      {exampleBim && <div>{exampleBim}</div>}
+                      {exampleFam && <div>{exampleFam}</div>}
+                    </div>
+                  ) : (
+                    <Form.Control
+                      type="file"
+                      accept=".bed,.bim,.fam"
+                      multiple
+                      title="Upload .bed, .bim, .fam files"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        if (input.files) {
+                          handleLdFilesUpload(input.files);
                         }
                       }}
                     />
+                  )}
+                </Form.Group>
+                <Form.Group controlId="useExLd" className="mb-3">
+                  <div className="mt-2">
+                    <Form.Check
+                      type="switch"
+                      id="use-example-ld"
+                      label="Use Example Data"
+                      onChange={async (e) => {
+                        if (e.target.checked) {
+                          setExampleBed("22.bed");
+                          setExampleBim("22.bim");
+                          setExampleFam("22.fam");
+                          setUploadedBed("");
+                          setUploadedBim("");
+                          setUploadedFam("");
+                        } else {
+                          setExampleBed("");
+                          setExampleBim("");
+                          setExampleFam("");
+                        }
+                      }}
+                    />
+                    {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
+                      <div className="mt-1" style={{ fontSize: "0.95em" }}>
+                        <span style={{ fontWeight: 600 }}>Input files:</span><br />
+                        <div>{exampleBed || uploadedBed}</div>
+                        <div>{exampleBim || uploadedBim}</div>
+                        <div>{exampleFam || uploadedFam}</div>
+                      </div>
+                    )}
                   </div>
-                  <Form.Text className="text-danger">{ldForm.formState.errors?.file?.message}</Form.Text>
                 </Form.Group>
               </Col>
-
               <Col sm={3}>
+                {/* Keep window option as before */}
                 <Form.Group controlId="window" className="mb-3">
                   <Form.Label>Window</Form.Label>
                   <div className="d-flex">
                     <Form.Control
                       type="number"
-                      {...ldForm.register("window", { required: "Window is required",  
-                        min: { value: 1, message: "Window must be greater than 0" } } )}
+                      {...ldForm.register("window", { required: "Window is required",  min: { value: 1, message: "Window must be greater than 0" } })}
                       style={{ maxWidth: "120px", marginRight: "8px" }}
                       title="Please enter an integer greater than 0"
                     />
@@ -770,7 +822,6 @@ export default function LdScoreForm() {
                   <Form.Text className="text-danger">{ldForm.formState.errors?.window?.message}</Form.Text>
                 </Form.Group>
               </Col>
-
               <Col />
               <Col sm={2}>
                 <div className="text-end">
