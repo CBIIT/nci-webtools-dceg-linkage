@@ -3,7 +3,7 @@ import { Row, Col, Container, Alert } from "react-bootstrap";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import { fetchOutput } from "@/services/queries";
-import { FormData, ResultsData } from "./types";
+import { FormData, ResultsData, LdtraitFormData } from "./types";
 import { genomeBuildMap } from "@/store";
 import { useState, useMemo } from "react";
 import Table from "@/components/table";
@@ -14,8 +14,14 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   const [showWarnings, setShowWarnings] = useState(false);
 
   const queryClient = useQueryClient();
-  const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as FormData | undefined;
+  let formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
+  if (!formData && typeof window !== "undefined") {
+    const local = localStorage.getItem(`ldtrait-form-data-${ref}`);
+    if (local) formData = JSON.parse(local);
+  }
+  //const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
 
+  console.log("formData---", formData);
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldtrait_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldtrait${ref}.json`) : null),
@@ -106,29 +112,44 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       header: "R²",
       cell: (info) => {
         const value = info.getValue();
-        return typeof value === 'number' ? value.toFixed(3) : value;
+        const var1 = activeKey; // RS number from the selected variant in the left table
+        const var2 = info.row.original[2]; // RS number from current row
+        // Use the already processed population string from formData
+        const popCodes = formData?.pop || 'ALL';
+        const genomeBuild = formData?.genome_build || 'grch37'; // Genome build from form data
+        
+        console.log("R² Link - var1:", var1, "var2:", var2, "popCodes:", popCodes, "genomeBuild:", genomeBuild);
+        const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
+        
+        const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
+        
+        return (
+          <a href={linkUrl} target="_blank" rel="noopener noreferrer">
+            {displayValue}
+          </a>
+        );
       },
     }),
     columnHelper.accessor((row) => row[6], {
       header: "D'",
       cell: (info) => {
         const value = info.getValue();
-        return typeof value === 'number' ? value.toFixed(3) : value;
-      },
-    }),
-    columnHelper.accessor((row) => row[7], {
-      header: "LDpair",
-      cell: (info) => {
-        const value = info.getValue();
-        if (value && value !== "NA") {
-          // Create LDpair link - this would typically link to LDpair tool with specific parameters
-          return (
-            <a href={`#LDpair`} target="_blank" rel="noopener noreferrer">
-              {value}
-            </a>
-          );
-        }
-        return value || "NA";
+        const var1 = activeKey; // RS number from the selected variant in the left table
+        const var2 = info.row.original[2]; // RS number from current row
+        // Use the already processed population string from formData
+        const popCodes = formData?.pop || 'ALL';
+        const genomeBuild = formData?.genome_build || 'grch37'; // Genome build from form data
+        
+        console.log("D' Link - var1:", var1, "var2:", var2, "popCodes:", popCodes, "genomeBuild:", genomeBuild);
+        const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
+        
+        const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
+        
+        return (
+          <a href={linkUrl} target="_blank" rel="noopener noreferrer">
+            {displayValue}
+          </a>
+        );
       },
     }),
     columnHelper.accessor((row) => row[8], {
