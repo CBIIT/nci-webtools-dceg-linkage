@@ -577,7 +577,7 @@ def send_temp_file(filename):
 @app.route('/LDlinkRestWeb/zip', methods=['POST'])
 def zip_files():
     try:
-        filenames = request.json.get('filenames')
+        filenames = request.json.get('files')
         zip_filename = 'files.zip'
         zip_filepath = os.path.join(tmp_dir, zip_filename)
         
@@ -586,7 +586,7 @@ def zip_files():
                 file_path = safe_join(tmp_dir, 'uploads', filename)
                 zipf.write(file_path, os.path.basename(file_path))
         
-        return send_file(zip_filepath, as_attachment=True, attachment_filename=zip_filename)
+        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
     except Exception as e:
         exc_obj = e
         app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))

@@ -278,13 +278,49 @@ function formatSummarySection(section: string) {
 }
 
 function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string }) {
+  const [zipping, setZipping] = useState(false);
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
         Download Options
       </div>
       <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-          {inputFilename && (
+          {inputFilename && ((filename.includes('correlation') && inputFilename.split(',').length > 1) || (filename.includes('ldscore') && inputFilename.split(';').length > 1)) ? (
+          <button
+            id="download-zip-input-btn"
+            type="button"
+            className="btn btn-default"
+            style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+            disabled={zipping}
+            onClick={async () => {
+              const files = filename.includes('ldscore')
+                ? inputFilename.split(';').map(f => f.trim()).filter(Boolean)
+                : inputFilename.split(',').map(f => f.trim()).filter(Boolean);
+              setZipping(true);
+              try {
+                const res = await fetch('/LDlinkRestWeb/zip', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ files }),
+                });
+                if (res.ok) {
+                     const blob = await res.blob();
+                   const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'files.zip'; //
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(() => { document.body.removeChild(a); }, 0);
+                  
+                }
+              } finally {
+                setZipping(false);
+              }
+            }}
+          >
+            {zipping ? 'Zipping...' : 'Download Input (zip)'}
+          </button>
+        ) : inputFilename && (
           <button
             id="download-herit-input-btn"
             type="button"
@@ -480,7 +516,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderLdScoreTable(parsed.summary)}
         <h6>MAF/LD Score Correlation Matrix</h6>
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
-        <DownloadOptionsPanel result={result} filename="ld_score_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
+        <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
       </Container>
     );
