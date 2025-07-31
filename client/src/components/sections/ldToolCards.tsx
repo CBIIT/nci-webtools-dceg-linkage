@@ -98,9 +98,11 @@ export default function LdToolSection() {
               const cardCount = row.filter(Boolean).length;
               const isTwoCards = (isMobile && cardCount === 2) || (isExtraSmall && cardCount === 2);
               const isOneCard = (isMobile && cardCount === 1) || (isExtraSmall && cardCount === 1);
+              // Only render spacer for 1-card rows if not extra small
+              const showSpacer = isOneCard && !isExtraSmall;
               return (
                 <div className={`card-row${isTwoCards ? ' two-cards' : ''}${isOneCard ? ' one-card' : ''}`} key={rowIndex}>
-                  {isOneCard && <div className="card-spacer" />}
+                  {showSpacer && <div className="card-spacer" />}
                   {row.map((tool, colIndex) =>
                     tool ? (
                       <LDToolCard key={tool.id} {...tool} />
