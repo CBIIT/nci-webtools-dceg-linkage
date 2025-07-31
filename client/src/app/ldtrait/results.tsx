@@ -281,7 +281,10 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                       <div id="ldtrait-detail-title">Details for {activeKey}</div>
                     </Col>
                   </Row>
-                  {tableData.length > 0 && <Table title="" data={tableData} columns={columns} />}
+                  <div className="table-responsive">
+{tableData.length > 0 && <Table title="" data={tableData} columns={columns} />}
+                  </div>
+                  
                 </>
               )}
 
