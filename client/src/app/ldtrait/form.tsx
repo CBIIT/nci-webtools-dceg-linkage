@@ -115,7 +115,7 @@ export default function LdtraitForm() {
 
         <Col sm={2}>
           <Form.Group controlId="varFile" className="mb-3">
-            <Form.Label>File With Variants</Form.Label>
+            <Form.Label>Upload file with variants</Form.Label>
             <InputGroup>
               {typeof varFile === "string" && varFile !== "" ? (
                 <div className="form-control bg-light">{varFile}</div>
