@@ -1,6 +1,7 @@
 "use client";
 import { Row, Col, Container, Alert } from "react-bootstrap";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, SNP, Haplotype } from "./types";
 import { genomeBuildMap } from "@/store";
@@ -14,6 +15,11 @@ export default function LdHapResults({ ref }: { ref: string }) {
     queryKey: ["ldhap_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldhap${ref}.json`) : null),
   });
+
+  // filter out haplotypes with frequency less than 1%
+  const haplotypes = useMemo(() => {
+    return Object.values(results?.haplotypes || {}).filter((h) => h.Frequency > 0.01);
+  }, [results]);
 
   return (
     <>
@@ -87,19 +93,18 @@ export default function LdHapResults({ ref }: { ref: string }) {
                 </thead>
                 <tfoot>
                   <tr>
-                    {Object.values(results.haplotypes)?.map((h: Haplotype, i: number) => (
+                    {Object.values(haplotypes)?.map((h: Haplotype, i: number) => (
                       <td key={i}>{h.Count}</td>
                     ))}
                   </tr>
                   <tr>
-                    {Object.values(results.haplotypes)?.map((h: Haplotype, i: number) => (
+                    {Object.values(haplotypes)?.map((h: Haplotype, i: number) => (
                       <td key={i}>{h.Frequency}</td>
                     ))}
                   </tr>
                 </tfoot>
                 <tbody>
                   {(() => {
-                    const haplotypes = Object.values(results.haplotypes);
                     const splitHaps = haplotypes.map((h) => h.Haplotype?.split("_") || []);
                     const maxRows = Math.max(...splitHaps.map((h) => h.length));
                     return Array.from({ length: maxRows }).map((_, rowIdx) => (
