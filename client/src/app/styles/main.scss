@@ -520,3 +520,21 @@ table.table-chip > tbody {
     margin-bottom: 0px !important;
   }
 }
+@media only screen and (max-width: 384px) {
+  .card-row > * {
+    width: 48%;
+    max-width: 48%;
+    flex: none;
+  }
+  .card-spacer {
+    width: 48%;
+    max-width: 48%;
+    flex: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .card-row.one-card {
+    justify-content: flex-start !important;
+  }
+}

@@ -58,15 +58,35 @@ const chunkTools = (tools: (Tool | null)[], size: number): (Tool | null)[][] => 
 
 export default function LdToolSection() {
   const [isMobile, setIsMobile] = useState(false);
+  const [isExtraSmall, setIsExtraSmall] = useState(false);
 
   useEffect(() => {
-    const checkWidth = () => setIsMobile(window.innerWidth <= 930);
+    const checkWidth = () => {
+      setIsMobile(window.innerWidth <= 930);
+      setIsExtraSmall(window.innerWidth <= 384);
+    };
     checkWidth();
     window.addEventListener("resize", checkWidth);
     return () => window.removeEventListener("resize", checkWidth);
   }, []);
 
-  const rows = isMobile ? chunkToolsMobile(tools) : chunkTools(tools, 5);
+  // Helper for 2 cards per row
+  const chunkTools2 = (tools: Tool[]): Array<Array<Tool | null>> => {
+    const rows: Array<Array<Tool | null>> = [];
+    for (let i = 0; i < tools.length; i += 2) {
+      rows.push(tools.slice(i, i + 2));
+    }
+    return rows;
+  };
+
+  let rows;
+  if (isExtraSmall) {
+    rows = chunkTools2(tools);
+  } else if (isMobile) {
+    rows = chunkToolsMobile(tools);
+  } else {
+    rows = chunkTools(tools, 5);
+  }
 
   return (
     <div id="ldtool-card-container" >
@@ -76,8 +96,8 @@ export default function LdToolSection() {
           <div style={{ margin: "auto", width: "100%", backgroundColor: "#536e84", padding: "40px 0" }}>
             {rows.map((row, rowIndex) => {
               const cardCount = row.filter(Boolean).length;
-              const isTwoCards = isMobile && cardCount === 2;
-              const isOneCard = isMobile && cardCount === 1;
+              const isTwoCards = (isMobile && cardCount === 2) || (isExtraSmall && cardCount === 2);
+              const isOneCard = (isMobile && cardCount === 1) || (isExtraSmall && cardCount === 1);
               return (
                 <div className={`card-row${isTwoCards ? ' two-cards' : ''}${isOneCard ? ' one-card' : ''}`} key={rowIndex}>
                   {isOneCard && <div className="card-spacer" />}
