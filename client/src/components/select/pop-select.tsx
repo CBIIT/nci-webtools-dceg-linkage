@@ -253,6 +253,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
         <div title="Select Population">
           <Select
             {...field}
+            inputId={name}
             isMulti
             options={popOptions}
             closeMenuOnSelect={false}

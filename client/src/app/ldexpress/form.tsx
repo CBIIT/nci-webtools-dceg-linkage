@@ -157,6 +157,7 @@ export default function LDExpressForm() {
               render={({ field }) => (
                 <Select
                   {...field}
+                  inputId="tissues"
                   isMulti
                   options={tissueOptions}
                   closeMenuOnSelect={false}
