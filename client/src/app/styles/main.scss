@@ -462,47 +462,56 @@ table.table-chip > tbody {
   cursor: pointer;
   color: #2a71a5; // Change this to your desired color
 }
- .card-row > * {
-          width:19%;
-          max-width: 19%;
-          flex: none;
-        }
-        @media (max-width: 930px) {
-          .card-row > * {
-            width: 30%;
-            max-width: 30%;
-            flex: none;
-          }
-          .card-spacer {
-            width: 28%;
-            max-width: 28%;
-            flex: none;
-            height: 0;
-            margin: 0;
-            padding: 0;
-          }
-          .card-row {
-            justify-content: center; // Center all rows, use gap for equal spacing
-            margin-bottom: 85px;
-            padding-left: 1px !important; // Reduce horizontal padding for mobile
-            padding-right: 1px !important;
-          }
-          .card-row.two-cards {
-            /* No need for special justify-content, inherit from .card-row */
-            margin-left: 0;
-          }
-          .card-row.one-card {
-            justify-content: flex-start !important; // Left-align 1-card rows
-            position: relative;
-          }
-          .card-row.one-card::before {
-            display: none;
-          }
+ .card-row > * 
+{
+  width:19%;
+  max-width: 19%;
+  flex: none;
+}
 
-          .card-body{
-            height: 170px;
-          }
-        }
+#ldlink_version {
+	float: right;
+	width: 150px;
+	font-style: italic;
+	text-align: right;
+}
+
+@media (max-width: 930px) {
+  .card-row > * {
+    width: 30%;
+    max-width: 30%;
+    flex: none;
+  }
+  .card-spacer {
+    width: 28%;
+    max-width: 28%;
+    flex: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .card-row {
+    justify-content: center; // Center all rows, use gap for equal spacing
+    margin-bottom: 85px;
+    padding-left: 1px !important; // Reduce horizontal padding for mobile
+    padding-right: 1px !important;
+  }
+  .card-row.two-cards {
+    /* No need for special justify-content, inherit from .card-row */
+    margin-left: 0;
+  }
+  .card-row.one-card {
+    justify-content: flex-start !important; // Left-align 1-card rows
+    position: relative;
+  }
+  .card-row.one-card::before {
+    display: none;
+  }
+
+  .card-body{
+    height: 170px;
+  }
+}
 
 @media only screen and (max-width: 767px) {
   .card-body {

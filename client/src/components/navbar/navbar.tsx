@@ -177,7 +177,7 @@ export default function AppNavbar({ routes = [] }: AppNavbarProps): React.ReactE
     <Navbar expand="md">
       <Container>
         <Navbar.Toggle aria-controls="navbar-nav" className="px-0 py-3">
-          <i className="bi bi-list me-1"></i> Menu
+          <i className="bi bi-list me-1 navbar-expand-lg text-white"></i> 
         </Navbar.Toggle>
         <Navbar.Collapse id="navbar-nav" className="align-items-stretch">
           <Nav className="me-auto">{renderRoutes({ routes, pathName, openSubmenu, setOpenSubmenu, isMobileView })}</Nav>
