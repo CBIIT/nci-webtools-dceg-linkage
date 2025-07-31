@@ -480,7 +480,11 @@ export default function LdScoreForm() {
           )}
           {/* Only show results via LdScoreResults for heritability tab */}
           {resultRef && resultType === 'heritability' && (
-            <LdScoreResults reference={resultRef} type="heritability" />
+            <LdScoreResults 
+              reference={resultRef} 
+              type="heritability" 
+              uploads={exampleFilename || uploadedFilename} // Always pass the correct input filename
+            />
           )}
         </Tab.Pane>
 
@@ -763,9 +767,9 @@ export default function LdScoreForm() {
       </Tab.Content>
 
       {/* Show results component if reference and type are available */}
-      {resultRef && resultType && (
+      {/* {resultRef && resultType && (
         <LdScoreResults reference={resultRef} type={resultTypeMap[resultType]} />
-      )}
+      )} */}
     </Tab.Container>
   );
 }

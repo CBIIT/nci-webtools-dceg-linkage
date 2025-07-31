@@ -186,7 +186,61 @@ function CollapsibleRawPanel({ result, title }: { result: string; title: string 
   );
 }
 
-export default function LdScoreResults({ reference, type }: { reference: string, type: 'heritability' | 'correlation' | 'ldscore' }) {
+function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename }: { result: string; filename?: string; inputFilename?: string }) {
+  return (
+    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
+      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
+        Download Options
+      </div>
+      <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
+          {inputFilename && (
+          <button
+            id="download-herit-input-btn"
+            type="button"
+            className="btn btn-default"
+            style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+            onClick={() => {
+              const a = document.createElement('a');
+              a.href = `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(inputFilename)}`;
+              a.download = inputFilename;
+              document.body.appendChild(a);
+              a.click();
+              setTimeout(() => {
+                document.body.removeChild(a);
+              }, 0);
+            }}
+          >
+            Download Input
+          </button>
+        )}
+       
+        <button
+          id="download-herit-tables-btn"
+          type="button"
+          className="btn btn-default"
+          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
+          onClick={() => {
+            const blob = new Blob([result], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+              document.body.removeChild(a);
+              URL.revokeObjectURL(a.href);
+            }, 0);
+          }}
+        >
+          Download Table
+        </button>
+
+      </div>
+    </div>
+  );
+}
+
+export default function LdScoreResults({ reference, type, uploads }: { reference: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
@@ -243,15 +297,18 @@ export default function LdScoreResults({ reference, type }: { reference: string,
     );
   }
 
-  // if (!data || !result) {
-  //   return null;
-  // }
+  if ( !result) {
+    return null;
+  }
 
   if (type === 'heritability') {
+    // You may need to pass the input filename from parent or context
+    const inputFilename = uploads; // TODO: wire this up from props or state
     return (
       <Container style={{ maxWidth: 600 }}>
         <h5>Heritability Result</h5>
         <HeritabilityResultTable result={result} />
+        <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} />
         <CollapsibleRawPanel result={result} title="Heritability Analysis Output" />
       </Container>
     );
