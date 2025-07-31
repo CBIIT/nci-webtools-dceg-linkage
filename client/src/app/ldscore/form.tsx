@@ -146,13 +146,13 @@ export default function LdScoreForm() {
 
   // Add state to track the reference and type for result display
   const [resultRef, setResultRef] = useState<string | null>(null);
-  const [resultType, setResultType] = useState<"heritability" | "genetic_correlation" | "ldscore" | null>(null);
+  const [resultType, setResultType] = useState<"heritability" | "correlation" | "ldscore" | null>(null);
 
   // Add a mapping so form uses the correct type for LdScoreResults
   // 'heritability' -> 'heritability', 'genetic_correlation' -> 'correlation', 'ldscore' -> 'ldscore'
   const resultTypeMap = {
     heritability: 'heritability',
-    genetic_correlation: 'correlation',
+    correlation: 'correlation',
     ldscore: 'ldscore',
   } as const;
 
@@ -228,8 +228,9 @@ export default function LdScoreForm() {
       reference,
     });
     try {
-      const result = await fetchGeneticCorrelationResult(params);
-      setGeneticResult(result.result || JSON.stringify(result));
+      await fetchGeneticCorrelationResult(params);
+      setResultRef(reference);
+      setResultType("correlation");
     } catch (error) {
       setGeneticResult("Error fetching genetic correlation result.");
     } finally {
@@ -648,7 +649,7 @@ export default function LdScoreForm() {
             </div>
           )}
           {/* Show results via LdScoreResults for genetic correlation tab */}
-          {resultRef && resultType === 'genetic_correlation' && (
+          {resultRef && resultType === 'correlation' && (
             <LdScoreResults
               reference={resultRef}
               type="correlation"
@@ -755,12 +756,14 @@ export default function LdScoreForm() {
               </Col>
             </Row>
           </Form>
-
-          {ldResult && (
-            <div className="mt-3" style={{ maxWidth: 600, margin: '0 auto', background: '#f9f9f9', border: '1px solid #bdbdbd', borderRadius: 6, padding: 16 }}>
-              <div style={{ fontWeight: 600, marginBottom: 8, color: '#084298' }}>LD Score Calculation Result</div>
-              <pre style={{ whiteSpace: 'pre-wrap', fontSize: '0.97em', margin: 0 }}>{ldResult}</pre>
-            </div>
+          {resultRef && resultType === 'ldscore' && (
+            <LdScoreResults
+              reference={resultRef}
+              type="ldscore"
+              uploads={
+                [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
+              }
+            />
           )}
 
           {ldMutation.isError && (

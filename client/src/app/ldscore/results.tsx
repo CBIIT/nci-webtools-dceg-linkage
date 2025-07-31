@@ -332,6 +332,40 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
   );
 }
 
+// Parse LD Score result into summary and correlation matrix tables
+function parseLdScoreResult(result: string) {
+  // Find summary section
+  const summaryMatch = result.match(/Summary of LD Scores[^\n]*\n([\s\S]+?)\n\s*MAF\/LD Score Correlation Matrix/);
+  const corrMatch = result.match(/MAF\/LD Score Correlation Matrix\n([\s\S]+)/);
+  const summary = summaryMatch ? summaryMatch[1].trim() : '';
+  const corr = corrMatch ? corrMatch[1].trim() : '';
+  return { summary, corr };
+}
+
+function renderLdScoreTable(section: string, opts?: { ignoreAnalysisFinished?: boolean }) {
+  if (!section) return null;
+  let lines = section.split(/\r?\n/).filter(l => l.trim());
+  if (opts?.ignoreAnalysisFinished) {
+    const idx = lines.findIndex(l => /^Analysis\s+finished\s+at/i.test(l));
+    if (idx !== -1) lines = lines.slice(0, idx);
+  }
+  if (lines.length < 2) return <pre>{section}</pre>;
+  const header = ['', ...lines[0].split(/\s+/)]; // Add empty string as first element
+  const rows = lines.slice(1).map(l => l.split(/\s+/));
+  return (
+    <TableContainer>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+        <thead>
+          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
+        </thead>
+        <tbody>
+          {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{c}</td>)}</tr>)}
+        </tbody>
+      </table>
+    </TableContainer>
+  );
+}
+
 export default function LdScoreResults({ reference, type, uploads }: { reference: string, type: 'heritability' | 'correlation' | 'ldscore', uploads: string }) {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
@@ -408,6 +442,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
   if (type === 'correlation') {
     const parsed = parseGeneticCorrelationResult(result);
     const parsedTableText = formatGeneticCorrelationTableText(parsed);
+    const inputFilename = uploads;
     return (
       <Container style={{ maxWidth: 600 }}>
         <h5>Genetic Correlation Results</h5>
@@ -421,16 +456,34 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderKeyValueTable(parsed.gencorr || '')}
         <h6>Summary of Genetic Correlation Results</h6>
         {renderSummaryTable(parsed.summary || '')}
-        <DownloadOptionsPanel result={result} filename="genetic_correlation_result.txt" parsedTableText={parsedTableText} />
+        <DownloadOptionsPanel result={result} filename="genetic_correlation_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
         <CollapsibleRawPanel result={result} title="Genetic Correlation Output" />
       </Container>
     );
   }
   // LD Score calculation (raw output)
-  return (
-    <Container style={{ maxWidth: 600 }}>
-      <h5>LD Score Calculation Result</h5>
-      <pre style={{ background: '#f9f9f9', padding: 12, borderRadius: 6 }}>{result}</pre>
-    </Container>
-  );
+   if (type === 'ldscore'){
+    const parsed = parseLdScoreResult(result);
+    // Compose a plain text version of the summary and correlation matrix for download
+    const inputFilename = uploads;
+    const parsedTableText = [
+      "Summary of LD Scores",
+      parsed.summary,
+      "",
+      "MAF/LD Score Correlation Matrix",
+      parsed.corr
+    ].filter(Boolean).join('\n\n');
+    return (
+      <Container style={{ maxWidth: 600 }}>
+        <h5>LD Score Calculation Result</h5>
+        <h6>Summary of LD Scores</h6>
+        {renderLdScoreTable(parsed.summary)}
+        <h6>MAF/LD Score Correlation Matrix</h6>
+        {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
+        <DownloadOptionsPanel result={result} filename="ld_score_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
+        <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
+      </Container>
+    );
+   }
+
 }
