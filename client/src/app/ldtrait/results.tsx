@@ -21,7 +21,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   }
   //const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
 
-  console.log("formData---", formData);
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldtrait_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldtrait${ref}.json`) : null),
@@ -46,8 +45,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   if (!results || !results.thinned_snps || !results.details) {
     return <Alert variant="warning">No data available</Alert>;
   }
-
-  console.log("Debug: Results data", results);
 
   // Format timestamp similar to the original JavaScript implementation
   const formatTimestamp = (timestampData: any) => {
@@ -118,7 +115,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
         const popCodes = formData?.pop || 'ALL';
         const genomeBuild = formData?.genome_build || 'grch37'; // Genome build from form data
         
-        console.log("R² Link - var1:", var1, "var2:", var2, "popCodes:", popCodes, "genomeBuild:", genomeBuild);
         const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
         
         const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
@@ -140,7 +136,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
         const popCodes = formData?.pop || 'ALL';
         const genomeBuild = formData?.genome_build || 'grch37'; // Genome build from form data
         
-        console.log("D' Link - var1:", var1, "var2:", var2, "popCodes:", popCodes, "genomeBuild:", genomeBuild);
         const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
         
         const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
