@@ -7,11 +7,9 @@ import { useRouter, usePathname } from "next/navigation";
 import { snpclip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
+import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
 import { FormData, SnpClipData } from "./types";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
-
-
 
 export default function SNPClipForm() {
   const queryClient = useQueryClient();
@@ -74,7 +72,6 @@ export default function SNPClipForm() {
       pop: getSelectedPopulationGroups(data.pop),
     };
 
-
     queryClient.setQueryData(["snpclip-form-data", reference.toString()], formData);
     submitForm.mutate(formData);
   }
@@ -99,8 +96,7 @@ export default function SNPClipForm() {
               {...register("snps", {
                 required: "SNPs are required.",
                 pattern: {
-                  value:
-                    /^((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))(\n((([rR][sS]\d+)|([cC][hH][rR][\dxXyY]\d?:\d+))))*)?$/,
+                  value: rsChrMultilineRegex,
                   message: "Invalid SNP or coordinate format, only one per line",
                 },
               })}
@@ -163,9 +159,7 @@ export default function SNPClipForm() {
             </Row>
           </Form.Group>
         </Col>
-        <Col sm={2}>
-          
-        </Col>
+        <Col sm={2}></Col>
         <Col />
         <Col sm="2">
           <div className="text-end">

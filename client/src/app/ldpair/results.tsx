@@ -36,6 +36,7 @@ export default function LdPairResults({ reference, ...params }: { reference: str
 
   return (
     <>
+      <hr />
       {results && !results?.error ? (
         <Container fluid="md">
           <Row className="justify-content-center w-100">

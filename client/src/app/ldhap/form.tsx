@@ -8,7 +8,7 @@ import { ldhap } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
+import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
 import { FormData, LdhapFormData, Ldhap } from "./types";
 
 export default function LdHapForm() {
@@ -94,7 +94,7 @@ export default function LdHapForm() {
               {...register("snps", {
                 required: "This field is required",
                 pattern: {
-                  value: /^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/m,
+                  value: rsChrMultilineRegex,
                   message:
                     "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },

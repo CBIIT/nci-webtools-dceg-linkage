@@ -9,6 +9,7 @@ import PopSelect, { getOptionsFromKeys, getSelectedPopulationGroups } from "@/co
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData, submitFormData, LdPair } from "./types";
+import { rsChrRegex } from "@/services/utils";
 
 export default function LdPairForm({ params }: { params: submitFormData }) {
   const router = useRouter();
@@ -97,7 +98,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
               {...register("var1", {
                 required: "This field is required",
                 pattern: {
-                  value: /^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/,
+                  value: rsChrRegex,
                   message:
                     "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
@@ -115,7 +116,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
               {...register("var2", {
                 required: "This field is required",
                 pattern: {
-                  value: /^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/,
+                  value: rsChrRegex,
                   message:
                     "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },

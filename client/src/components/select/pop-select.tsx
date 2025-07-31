@@ -197,6 +197,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
         justifyContent: "space-between",
         fontSize: ".9rem",
         cursor: "pointer",
+        textTransform: "none",
       }}>
       <span>{data.label}</span>
       <span
@@ -253,6 +254,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
         <div title="Select Population">
           <Select
             {...field}
+            inputId={name}
             isMulti
             options={popOptions}
             closeMenuOnSelect={false}

@@ -8,6 +8,7 @@ import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import './style.css';
+import { rsChrRegex } from "@/services/utils";
 
 export interface FormData {
   var: string;
@@ -88,7 +89,7 @@ export default function LdProxyForm() {
               {...register("var", { 
                 required: "This field is required",
                 pattern: {
-                  value: /^(rs\d+|\d+:\d+)$/,
+                  value: rsChrRegex,
                   message: "Please match the requested format. rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted"
                 }
               })} 
