@@ -80,6 +80,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
 
   return (
     <>
+      <hr />
       {results ? (
         <Container fluid="fluid" className="p-3" id="snpclip-results-container">
           <Row id="snpclip-table-container">

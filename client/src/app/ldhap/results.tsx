@@ -23,6 +23,7 @@ export default function LdHapResults({ ref }: { ref: string }) {
 
   return (
     <>
+      <hr />
       {results && !results?.error ? (
         <Container fluid="md" className="justify-content-center">
           <Row>

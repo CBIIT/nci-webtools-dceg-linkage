@@ -169,6 +169,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
 
   return (
     <>
+      <hr />
       {results && !results?.error ? (
         <Container fluid="md">
           <Row>

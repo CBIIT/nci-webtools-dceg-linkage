@@ -71,6 +71,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
 
   return (
     <>
+      <hr />
       {status?.warning && <Alert variant="warning">{status.warning}</Alert>}
       {status && !status?.error ? (
         <>

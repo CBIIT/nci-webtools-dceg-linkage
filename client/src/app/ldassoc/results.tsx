@@ -142,6 +142,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
 
   return (
     <>
+      <hr />
       {results && !results?.error ? (
         <Container fluid="md" className="justify-content-center">
           <Row className="align-items-center">
