@@ -108,7 +108,7 @@ export default function LDMatrixForm() {
         </Col>
         <Col sm={2}>
           <Form.Group controlId="varFile" className="mb-3">
-            <Form.Label>File With Variants</Form.Label>
+            <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
               <div className="form-control bg-light">{varFile}</div>
             ) : (

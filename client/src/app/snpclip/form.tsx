@@ -11,8 +11,6 @@ import { parseSnps } from "@/services/utils";
 import { FormData, SnpClipData } from "./types";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 
-
-
 export default function SNPClipForm() {
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -74,7 +72,6 @@ export default function SNPClipForm() {
       pop: getSelectedPopulationGroups(data.pop),
     };
 
-
     queryClient.setQueryData(["snpclip-form-data", reference.toString()], formData);
     submitForm.mutate(formData);
   }
@@ -111,7 +108,7 @@ export default function SNPClipForm() {
         </Col>
         <Col sm={3}>
           <Form.Group controlId="varFile" className="mb-3">
-            <Form.Label>File With Variants</Form.Label>
+            <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
               <div className="form-control bg-light">{varFile}</div>
             ) : (
@@ -163,9 +160,7 @@ export default function SNPClipForm() {
             </Row>
           </Form.Group>
         </Col>
-        <Col sm={2}>
-          
-        </Col>
+        <Col sm={2}></Col>
         <Col />
         <Col sm="2">
           <div className="text-end">
