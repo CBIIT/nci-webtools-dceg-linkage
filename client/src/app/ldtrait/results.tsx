@@ -7,7 +7,6 @@ import { FormData, ResultsData, LdtraitFormData } from "./types";
 import { genomeBuildMap } from "@/store";
 import { useState, useMemo } from "react";
 import Table from "@/components/table";
-import "./styles.scss";
 
 export default function LdTraitResults({ ref }: { ref: string }) {
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -42,9 +41,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   });
 
   // Early return if no meaningful data
-  if (!results || !results.thinned_snps || !results.details) {
-    return <Alert variant="warning">No data available</Alert>;
-  }
+  const noData = !results || !results.thinned_snps || !results.details;
 
   // Format timestamp similar to the original JavaScript implementation
   const formatTimestamp = (timestampData: any) => {
@@ -220,7 +217,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
 
   // Transform warnings data for the table
   const warningsTableData = useMemo(() => {
-    if (!results || !results.details.queryWarnings?.aaData) return [];
+    if (!results || !results.details || !results.details.queryWarnings || !results.details.queryWarnings.aaData) return [];
     return results.details.queryWarnings.aaData;
   }, [results]);
 
@@ -242,10 +239,12 @@ export default function LdTraitResults({ ref }: { ref: string }) {
 
   return (
     <>
-      {!results.error ? (
+      {noData ? (
+        <Alert variant="warning">No data available</Alert>
+      ) : !results.error ? (
         <Container fluid="fluid" className="p-3" id="ldtrait-results-container">
           <Row id="ldtrait-table-container">
-            <Col md={2} className="ldtrait-table-scroller">
+            <Col md={2} >
               <div>Variants in LD with GWAS Catalog</div>
               <table id="ldtrait-table-thin" className="table table-striped">
                 <thead>
@@ -257,7 +256,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                   {results.thinned_snps.map((snp: string) => (
                     <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
                       <td>
-                        <a className="ldtrait-link">{snp}</a>
+                        <a>{snp}</a>
                       </td>
                     </tr>
                   ))}
@@ -274,7 +273,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
               )}
             </Col>
 
-            <Col md={10} className="ldtrait-table-scroller" id="ldtrait-detail">
+            <Col md={10} id="ldtrait-detail">
               {activeKey && (
                 <>
                   <Row>
@@ -286,7 +285,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                 </>
               )}
 
-              {showWarnings && warningsTableData.length > 0 && (
+              {showWarnings && results.details && results.details.queryWarnings && warningsTableData.length > 0 && (
                 <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
               )}
 
