@@ -286,52 +286,14 @@ nav {
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: stretch;
-    gap: 16px;
+    gap: 8px; // Reduce space between cards on desktop
   padding-left: 24px; // Add horizontal padding for desktop
   padding-right: 24px;
 }
 
-  .card-row > * {
-    width: 20%;
-    max-width: 20%;
-    flex: none;
-    margin: 0; // Remove margin to prevent overflow
-  }
-  .card-outside {
-    margin: 0; // Remove margin to prevent overflow
-  }
-  @media (max-width: 930px) {
-    .card-row > * {
-      width: 28%;
-      max-width: 28%;
-      flex: none;
-    }
-    .card-spacer {
-      width: 28%;
-      max-width: 28%;
-      flex: none;
-      height: 0;
-      margin: 0;
-      padding: 0;
-    }
-    .card-row {
-      justify-content: center; // Center all rows, use gap for equal spacing
-      margin-bottom: 24px;
-      padding-left: 12px !important; // Add equal horizontal padding for mobile
-      padding-right: 12px !important;
-    }
-    .card-row.two-cards {
-      /* No need for special justify-content, inherit from .card-row */
-      margin-left: 0;
-    }
-    .card-row.one-card {
-      justify-content: flex-start !important; // Left-align 1-card rows
-      position: relative;
-    }
-    .card-row.one-card::before {
-      display: none;
-    }
-  }
+.card-outside {
+  margin: 0; // Remove margin to prevent overflow
+}
 
 .border-0 {
   border: none !important;
@@ -501,14 +463,14 @@ table.table-chip > tbody {
   color: #2a71a5; // Change this to your desired color
 }
  .card-row > * {
-          width:18%;
-          max-width: 18%;
+          width:19%;
+          max-width: 19%;
           flex: none;
         }
         @media (max-width: 930px) {
           .card-row > * {
-            width: 28%;
-            max-width: 28%;
+            width: 30%;
+            max-width: 30%;
             flex: none;
           }
           .card-spacer {
@@ -521,9 +483,9 @@ table.table-chip > tbody {
           }
           .card-row {
             justify-content: center; // Center all rows, use gap for equal spacing
-            margin-bottom: 24px;
-            padding-left: 12px !important; // Add equal horizontal padding for mobile
-            padding-right: 12px !important;
+            margin-bottom: 85px;
+            padding-left: 1px !important; // Reduce horizontal padding for mobile
+            padding-right: 1px !important;
           }
           .card-row.two-cards {
             /* No need for special justify-content, inherit from .card-row */
@@ -535,6 +497,10 @@ table.table-chip > tbody {
           }
           .card-row.one-card::before {
             display: none;
+          }
+
+          .card-body{
+            height: 170px;
           }
         }
 
@@ -548,5 +514,6 @@ table.table-chip > tbody {
   }
   .card-row {
     min-height: 50px;
+    margin-bottom: 12px; // Reduce space between rows on small screens
   }
 }
