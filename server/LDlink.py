@@ -977,9 +977,13 @@ def ldscore():
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            #print(out_json)
+            # Write result to file for frontend to fetch, like ldpop
+            if reference:
+                result_filename = os.path.join(tmp_dir, f"ldscore_{reference}.txt")
+                with open(result_filename, "w") as f:
+                    f.write(filtered_result)
         else:
-                # Pretty-print the JSON output
+            # Pretty-print the JSON output
             summary_index = result.find("Summary of LD Scores")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
@@ -1130,7 +1134,11 @@ def ldherit():
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            #print(out_json)
+            # Write result to file for frontend to fetch, like ldpop
+            if reference:
+                result_filename = os.path.join(tmp_dir, f"ldherit_{reference}.txt")
+                with open(result_filename, "w") as f:
+                    f.write(filtered_result)
         else:
                 # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
@@ -1139,7 +1147,12 @@ def ldherit():
             else:
                 filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            #print(pretty_out_json)
             return filtered_result
+            out_json = pretty_out_json
+
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
@@ -1190,21 +1203,24 @@ def ldheritAPI():
         
         result = run_herit_command(filename,pop,isexample)
        
-        # Pretty-print the JSON output
+                # Pretty-print the JSON output
         summary_index = result.find("Total Observed scale")
         if summary_index != -1:
-            filtered_result = result[summary_index:]
+                filtered_result = result[summary_index:]
         else:
-            filtered_result = result
-            #filtered_result = filtered_result.replace("\\n", "\n")
+                filtered_result = result
 
-        # Delete the uploaded files
-        try:
-            os.remove(file)
-            print(f"Deleted file: {file}")
-        except Exception as e:
-            print(f"Error deleting file {file}: {e}")
+         # Delete the uploaded files
+        for file_path in saved_files.values():
+            try:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
+
         return filtered_result
+
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
@@ -1242,7 +1258,11 @@ def ldcorrelation():
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            #print(out_json)
+            # Write result to file for frontend to fetch, like ldpop
+            if reference:
+                result_filename = os.path.join(tmp_dir, f"ldcorrelation_{reference}.txt")
+                with open(result_filename, "w") as f:
+                    f.write(filtered_result)
         else:
                 # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
@@ -1251,7 +1271,12 @@ def ldcorrelation():
             else:
                 filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            #print(pretty_out_json)
             return filtered_result
+            out_json = pretty_out_json
+
     except requests.RequestException as e:
         # Print the error message
         print(f"An error occurred: {e}")
@@ -1434,6 +1459,13 @@ def ldexpress():
             app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
             toggleLocked(token, 0)
             return sendTraceback(None)
+        except:
+            app.logger.debug("timeout except")
+            toggleLocked(token, 0)
+            print("timeout error")
+        else:
+            app.logger.debug("time out else")
+            print("time out")
     end_time = time.time()
     app.logger.info("Executed LDexpress (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
@@ -1810,6 +1842,7 @@ def ldpair():
             except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)
+               
                 toggleLocked(token, 0)
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))

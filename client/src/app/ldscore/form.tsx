@@ -3,11 +3,12 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Nav, Tab } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { ldscore } from "@/services/queries";
+import { ldscore, fetchHeritabilityResult, fetchGeneticCorrelationResult, fetchLdScoreCalculationResult } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { useState } from "react";
+import LdScoreResults from "./results";
 import "./style.css";
 
 export interface FormData {
@@ -140,10 +141,23 @@ export default function LdScoreForm() {
       console.error("LDscore mutation error:", error);
     },
   });
+  // Remove all result parsing, rendering, and download helpers from here.
+  // Only keep form logic, file upload, and state management.
+
+  // Add state to track the reference and type for result display
+  const [resultRef, setResultRef] = useState<string | null>(null);
+  const [resultType, setResultType] = useState<"heritability" | "genetic_correlation" | "ldscore" | null>(null);
+
+  // Add a mapping so form uses the correct type for LdScoreResults
+  // 'heritability' -> 'heritability', 'genetic_correlation' -> 'correlation', 'ldscore' -> 'ldscore'
+  const resultTypeMap = {
+    heritability: 'heritability',
+    genetic_correlation: 'correlation',
+    ldscore: 'ldscore',
+  } as const;
+
+  // Update submit handlers to set resultRef and resultType
   const onHeritabilitySubmit = async (data: FormData) => {
-    setHeritabilityResult("");
-   // setUploadedFilename("");
-    //console.log("Submitting heritability form with data:", data.pop.value); 
     setHeritabilityLoading(true);
     const pop =  data.pop.value ;
     const genomeBuild = genome_build || "grch37";
@@ -158,23 +172,18 @@ export default function LdScoreForm() {
       reference,
     });
     try {
-      console.log("Fetching heritability result with params:", params.toString());
-      const response = await fetch(`/LDlinkRestWeb/ldherit?${params.toString()}`);
-      if (response.ok) {
-        const result = await response.json();
-        setHeritabilityResult(result.result || JSON.stringify(result));
-      } else {
-        setHeritabilityResult("Failed to fetch heritability result.");
-      }
+      await fetchHeritabilityResult(params); // still trigger backend
+      setResultRef(reference);
+      setResultType("heritability");
     } catch (error) {
-      setHeritabilityResult("Error fetching heritability result.");
+      // handle error UI if needed
     } finally {
       setHeritabilityLoading(false);
     }
   };
-  const onHeritabilityReset = () => {
-    heritabilityForm.reset();
-  };
+
+  // Removed duplicate onGeneticSubmit definition to resolve redeclaration error.
+
 
   // Genetic correlation form state
   const geneticForm = useForm<FormData>({
@@ -218,19 +227,9 @@ export default function LdScoreForm() {
       isExample: isExample ? "true" : "false",
       reference,
     });
-    console.log(filename2)
-    console.log(params.toString())
     try {
-      const response = await fetch(`/LDlinkRestWeb/ldcorrelation?${params.toString()}`);
-      
-      if (response.ok) {
-        const result = await response.json();
-        setGeneticResult(result.result || JSON.stringify(result));
- 
-      } else {
-               console.log(response)
-        setGeneticResult("Failed to fetch genetic correlation result.");
-      }
+      const result = await fetchGeneticCorrelationResult(params);
+      setGeneticResult(result.result || JSON.stringify(result));
     } catch (error) {
       setGeneticResult("Error fetching genetic correlation result.");
     } finally {
@@ -267,7 +266,6 @@ export default function LdScoreForm() {
   const [ldResult, setLdResult] = useState<string>("");
 
   const onLdSubmit = async () => {
-    // Use example or uploaded filenames
     const bed = exampleBed || uploadedBed;
     const bim = exampleBim || uploadedBim;
     const fam = exampleFam || uploadedFam;
@@ -278,29 +276,22 @@ export default function LdScoreForm() {
       return;
     }
     const isExample = !!exampleBed;
-    // Join filenames as required by backend
     const filename = `${bed};${bim};${fam}`;
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const params = new URLSearchParams({
       filename,
       window: String(window),
       windowUnit,
       isExample: isExample ? "true" : "false",
+      reference,
     });
     try {
       setUploading(true);
-      // Try both routes, prefer /LDlinkRestWeb/ldscore
-      let response = await fetch(`/LDlinkRestWeb/ldscore?${params.toString()}`);
-      if (!response.ok) {
-        response = await fetch(`/LDlinkRest/ldscore?${params.toString()}`);
-      }
-      if (response.ok) {
-        const result = await response.json();
-        setLdResult(result.result || JSON.stringify(result));
-      } else {
-        setLdResult("Failed to fetch LD Score calculation result.");
-      }
+      await fetchLdScoreCalculationResult(params);
+      setResultRef(reference);
+      setResultType("ldscore");
     } catch (error) {
-      setLdResult("Error fetching LD Score calculation result.");
+      // handle error UI if needed
     } finally {
       setUploading(false);
     }
@@ -335,7 +326,7 @@ export default function LdScoreForm() {
 
       <Tab.Content>
         <Tab.Pane eventKey="heritability">
-          <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
+          <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={() => heritabilityForm.reset()} noValidate>
             <Row>
               <Col sm={4}>
                 <Form.Group controlId="file" className="mb-3">
@@ -487,67 +478,9 @@ export default function LdScoreForm() {
               </div>
             </div>
           )}
-          {heritabilityResult && (
-            <>
-              <Row>
-                <Col>
-                  <div id="herit-table-download-raw-container" style={{ maxWidth: 600, margin: '0 auto' }}>
-                    <table className="table table-bordered table-sm mb-0" style={{ width: "100%", margin: "0 auto" }}>
-                      <caption style={{ captionSide: 'top', fontWeight: 600, fontSize: '1.1em', color: '#084298', textAlign: 'center', marginBottom: 0 }}>
-                        Heritability Result
-                      </caption>
-                      <thead>
-                        <tr>
-                          <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}></th>
-                          <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Value</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(() => {
-                          const parsed = parseHeritabilityResult(heritabilityResult);
-                          const ratioDisplay = parsed.ratio.trim().startsWith('< 0')
-                            ? '< 0 (usually indicates GC correction)'
-                            : parsed.ratio;
-                          return [
-                            ['Total Observed scale h²', parsed.h2],
-                            ['Lambda GC', parsed.lambdaGC],
-                            ['Mean Chi²', parsed.meanChi2],
-                            ['Intercept', parsed.intercept],
-                            ['Ratio', ratioDisplay],
-                          ].map(([label, value]) => (
-                            <tr key={label}>
-                              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{label}</td>
-                              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{value}</td>
-                            </tr>
-                          ));
-                        })()}
-                      </tbody>
-                    </table>
-                    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-                      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
-                        Download Options
-                      </div>
-                      <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                        <button id="download-herit-input-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadInput(heritabilityResult, exampleFilename||uploadedFilename)}>Download Input</button>
-                        <button id="download-herit-tables-btn" type="button" className="btn btn-default" style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }} onClick={() => handleDownloadTable(heritabilityResult, "heritability_result.txt")}>Download Table</button>
-                      </div>
-                    </div>
-                    <RawHeritabilityPanel result={heritabilityResult} title="Heritability Analysis Output" />
-                  </div>
-                </Col>
-              </Row>
-            </>
-          )}
-
-          {heritabilityMutation.isError && (
-            <Row>
-              <Col>
-                <Alert variant="danger" className="mt-3">
-                  <Alert.Heading>Error</Alert.Heading>
-                  <p>Failed to process Heritability calculation. Please check your input and try again.</p>
-                </Alert>
-              </Col>
-            </Row>
+          {/* Only show results via LdScoreResults for heritability tab */}
+          {resultRef && resultType === 'heritability' && (
+            <LdScoreResults reference={resultRef} type="heritability" />
           )}
         </Tab.Pane>
 
@@ -709,66 +642,7 @@ export default function LdScoreForm() {
               </div>
             </div>
           )}
-        {geneticResult && (
-          <div className="mt-3">
-            <div className="panel panel-default">
-              <div className="panel-body" style={{ padding: '12px', background: '#ffffff' }}>
-                {(() => {
-          const parsed = parseGeneticCorrelationResult(geneticResult);
-          return (
-            <>
-              <h5>Heritability of phenotype 1</h5>
-              {renderKeyValueTable(parsed.herit1 || '')}
-              <h5>Heritability of phenotype 2</h5>
-              {renderKeyValueTable(parsed.herit2 || '')}
-              <h5>Genetic Covariance</h5>
-              {renderKeyValueTable(parsed.gencov || '')}
-              <h5>Genetic Correlation</h5>
-              {renderKeyValueTable(parsed.gencorr || '')}
-              <h5>Summary of Genetic Correlation Results</h5>
-              {renderSummaryTable(parsed.summary || '')}
-                 <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-                      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
-                        Download Options
-                      </div>
-                      <div className="panel-body" style={{ padding: '12px', display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                        <button
-                          id="download-correlation-input1-btn"
-                          type="button"
-                          className="btn btn-default"
-                          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
-                          onClick={() => handleDownloadInput(geneticResult, exampleFile1 || uploadedFile1)}
-                        >
-                          Download Input 1
-                        </button>
-                        <button
-                          id="download-correlation-input2-btn"
-                          type="button"
-                          className="btn btn-default"
-                          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
-                          onClick={() => handleDownloadInput(geneticResult, exampleFile2 || uploadedFile2)}
-                        >
-                          Download Input 2
-                        </button>
-                        <button
-                          id="download-correlation-tables-btn"
-                          type="button"
-                          className="btn btn-default"
-                          style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
-                          onClick={() => handleDownloadTable(geneticResult, "correlation_result.txt")}
-                        >
-                          Download Table
-                        </button>
-                      </div>
-                    </div>
-                    <RawHeritabilityPanel result={geneticResult} title="Correlation Analysis Output" />
-            </>
-          );
-        })()}
-              </div>
-            </div>
-          </div>
-        )}
+        {geneticResult }
         </Tab.Pane>
 
         <Tab.Pane eventKey="ld_calculation">
@@ -887,6 +761,11 @@ export default function LdScoreForm() {
           )}
         </Tab.Pane>
       </Tab.Content>
+
+      {/* Show results component if reference and type are available */}
+      {resultRef && resultType && (
+        <LdScoreResults reference={resultRef} type={resultTypeMap[resultType]} />
+      )}
     </Tab.Container>
   );
 }
@@ -922,8 +801,69 @@ function handleDownloadInput(result: string, exampleFilename?: string) {
   }
 }
 function handleDownloadTable(result: string, filename: string) {
+  // Helper to parse genetic correlation result into sections
+  function parseCorrelationResult(result: string) {
+    // This is a simple parser based on expected section headers
+    const sections = {
+      herit1: "",
+      herit2: "",
+      gencov: "",
+      gencorr: "",
+      summary: "",
+    };
+    let current: keyof typeof sections | null = null;
+    const lines = result.split(/\r?\n/);
+    for (const line of lines) {
+      if (/Heritability of phenotype 1/i.test(line)) {
+        current = "herit1";
+        continue;
+      }
+      if (/Heritability of phenotype 2/i.test(line)) {
+        current = "herit2";
+        continue;
+      }
+      if (/Genetic Covariance/i.test(line)) {
+        current = "gencov";
+        continue;
+      }
+      if (/Genetic Correlation/i.test(line)) {
+        current = "gencorr";
+        continue;
+      }
+      if (/Summary of Genetic Correlation Results/i.test(line)) {
+        current = "summary";
+        continue;
+      }
+      if (current) {
+        sections[current] += (sections[current] ? "\n" : "") + line;
+      }
+    }
+    // Remove leading/trailing whitespace
+    Object.keys(sections).forEach((k) => {
+      sections[k as keyof typeof sections] = sections[k as keyof typeof sections].trim();
+    });
+    return sections;
+  }
+
+  // Helper to parse heritability result into fields
+  function parseHeritabilityResult(result: string) {
+    // Try to extract values from the result string
+    const h2Match = result.match(/Total Observed scale h2:\s*([^\n]+)/i);
+    const lambdaGCMatch = result.match(/Lambda GC:\s*([^\n]+)/i);
+    const meanChi2Match = result.match(/Mean Chi\^?2:\s*([^\n]+)/i);
+    const interceptMatch = result.match(/Intercept:\s*([^\n]+)/i);
+    const ratioMatch = result.match(/Ratio:\s*([^\n]+)/i);
+    return {
+      h2: h2Match ? h2Match[1].trim() : "",
+      lambdaGC: lambdaGCMatch ? lambdaGCMatch[1].trim() : "",
+      meanChi2: meanChi2Match ? meanChi2Match[1].trim() : "",
+      intercept: interceptMatch ? interceptMatch[1].trim() : "",
+      ratio: ratioMatch ? ratioMatch[1].trim() : "",
+    };
+  }
+
   if (filename.includes('correlation')) {
-    const parsed = parseGeneticCorrelationResult(result);
+    const parsed = parseCorrelationResult(result);
     const sections = [
       { title: "Heritability of phenotype 1", content: parsed.herit1 },
       { title: "Heritability of phenotype 2", content: parsed.herit2 },
@@ -935,7 +875,6 @@ function handleDownloadTable(result: string, filename: string) {
     for (const section of sections) {
       if (section.content && section.content.trim()) {
         lines.push(section.title);
-       // lines.push("-".repeat(section.title.length));
         // For summary, keep as is; for others, format as key-value
         if (section.title === "Summary of Genetic Correlation Results") {
           lines.push(section.content);
@@ -1001,141 +940,5 @@ function RawHeritabilityPanel({ result, title }: { result: string; title: string
         <pre style={{ fontSize: '0.97em', whiteSpace: 'pre-wrap', margin: 0 }}>{result}</pre>
       </div>
     </div>
-  );
-}
-function parseHeritabilityResult(result: string) {
-  // Extract values using regex
-  const h2Match = result.match(/Total Observed scale h2:\s*([\d.eA-Z+-]+) \(([^)]+)\)/);
-  const lambdaMatch = result.match(/Lambda GC:\s*([\d.eA-Z+-]+)/);
-  const meanChi2Match = result.match(/Mean Chi\^2:\s*([\d.eA-Z+-]+)/);
-  const interceptMatch = result.match(/Intercept:\s*([\d.eA-Z+-]+) \(([^)]+)\)/);
-  const ratioMatch = result.match(/Ratio\s*([<>=-]*)\s*([\d.eA-Z+-]+)/);
-  return {
-    h2: h2Match ? `${h2Match[1]} (${h2Match[2]})` : "",
-    lambdaGC: lambdaMatch ? lambdaMatch[1] : "",
-    meanChi2: meanChi2Match ? meanChi2Match[1] : "",
-    intercept: interceptMatch ? `${interceptMatch[1]} (${interceptMatch[2]})` : "",
-    ratio: ratioMatch ? `${ratioMatch[1]} ${ratioMatch[2]}` : "",
-  };
-}
-
-// Helper to parse genetic correlation result string into sections
-function parseGeneticCorrelationResult(resultStr: string) {
-  // Only parse from the first result section onward
-  const startIdx = resultStr.search(/Heritability of phenotype 1/i);
-  if (startIdx === -1) return {};
-  const trimmed = resultStr.slice(startIdx);
-  // Section headers in order
-  const headers = [
-    'Heritability of phenotype 1',
-    'Heritability of phenotype 2',
-    'Genetic Covariance',
-    'Genetic Correlation',
-    'Summary of Genetic Correlation Results',
-  ];
-  // Find section indices
-  const indices = headers.map(h => {
-    const re = new RegExp(`^${h}`, 'im');
-    const m = trimmed.match(re);
-    return m ? trimmed.indexOf(m[0]) : -1;
-  });
-  // Extract sections
-  const sections: Record<string, string> = {};
-  for (let i = 0; i < headers.length; ++i) {
-    if (indices[i] === -1) continue;
-    const start = indices[i] + headers[i].length;
-    const end = indices.slice(i + 1).find(idx => idx > indices[i]) ?? trimmed.length;
-    sections[headers[i]] = trimmed.slice(start, end).trim();
-  }
-  return {
-    herit1: sections['Heritability of phenotype 1'] || '',
-    herit2: sections['Heritability of phenotype 2'] || '',
-    gencov: sections['Genetic Covariance'] || '',
-    gencorr: sections['Genetic Correlation'] || '',
-    summary: sections['Summary of Genetic Correlation Results'] || '',
-  };
-}
-
-function TableContainer({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="table-responsive" style={{ maxWidth: 600, margin: '0 auto', overflowX: 'auto' }}>
-      {children}
-    </div>
-  );
-}
-
-function renderKeyValueTable(section: string) {
-  if (!section) return null;
-  // Split by newlines, but also handle multiple key-value pairs on a single line
-  const lines = section.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
-  const kvPairs: [string, string][] = [];
-  lines.forEach(line => {
-    // Try to match all key-value pairs in the line (colon or angle brackets)
-    let found = false;
-    // Colon-separated pairs
-    const colonPairs = line.matchAll(/([\w\s²\*\-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
-    for (const pair of colonPairs) {
-      kvPairs.push([pair[1].trim(), pair[2].trim()]);
-      found = true;
-    }
-    // Angle bracket pairs (e.g., Key < Value)
-    if (!found) {
-      const angleMatch = line.match(/([\w\s²\*\-]+?)([<>])\s*([^<>=]+)/);
-      if (angleMatch) {
-        kvPairs.push([angleMatch[1].trim(), angleMatch[2] + ' ' + angleMatch[3].trim()]);
-        found = true;
-      }
-    }
-    // Fallback: treat the whole line as a value with an empty key
-    if (!found) {
-      kvPairs.push(['', line.trim()]);
-      // { border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }
-    }
-  });
-  return (
-    <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
-        <thead>
-          <tr>
-            <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}></th>
-            <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {kvPairs.map(([k, v], i) => (
-            <tr key={i}>
-              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{k}</td>
-              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{v}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </TableContainer>
-  );
-}
-
-function renderSummaryTable(section: string) {
-  if (!section) return null;
-  // Exclude 'Analysis finished at' and all following lines
-  const lines = section.split(/\r?\n/).filter(l => l.trim());
-  const endIdx = lines.findIndex(l => /^Analysis\s+finished\s+at/i.test(l));
-  const filteredLines = endIdx === -1 ? lines : lines.slice(0, endIdx);
-  // Find the first line with at least two columns (header)
-  let headerIdx = 0;
-  while (headerIdx < filteredLines.length && filteredLines[headerIdx].split(/\s+/).length < 2) headerIdx++;
-  if (headerIdx >= filteredLines.length - 1) return <pre>{section}</pre>;
-  const header = filteredLines[headerIdx].split(/\s+/).filter(Boolean);
-  const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
-  return (
-    <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
-        <thead >
-          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
-        </thead>
-        <tbody>
-          {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{c}</td>)}</tr>)}
-        </tbody>
-      </table>
-    </TableContainer>
   );
 }

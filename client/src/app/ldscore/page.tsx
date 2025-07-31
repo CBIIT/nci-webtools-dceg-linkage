@@ -30,7 +30,7 @@ export default function LdScore() {
           <Col>
             <LdScoreForm />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-              <Suspense fallback={<CalculateLoading />}>{ref && <LdScoreResults />}</Suspense>
+              <Suspense fallback={<CalculateLoading />}>{ref && <LdScoreResults reference={ref} type="heritability" />}</Suspense>
             </ErrorBoundary>
           </Col>
         </Row>
