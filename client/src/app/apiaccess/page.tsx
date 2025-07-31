@@ -164,7 +164,7 @@ export default function ApiAccessPage() {
               <Button type="submit" className="btn btn-primary calculate me-2" disabled={loading}>
                 Register
               </Button>
-              <Button type="reset" className="btn btn-secondary" disabled={loading}>
+              <Button type="reset" variant="outline-danger"  className="me-1" disabled={loading}>
                 Reset
               </Button>
             </div>
