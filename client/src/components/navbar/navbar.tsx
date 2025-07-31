@@ -130,24 +130,44 @@ function renderRoutes({
         className={clsx("dropdown", isActive && "nav-menu-active")}
         onMouseEnter={() => !isMobileView && setOpenSubmenu(route.title)}
         onMouseLeave={() => !isMobileView && setOpenSubmenu(null)}>
-        <span
+        <button
+          type="button"
           className={clsx("nav-link pointer-cursor", isActive && "nav-menu-active")}
+          aria-haspopup="true"
+          aria-expanded={openSubmenu === route.title}
+          aria-controls={`dropdown-menu-${route.title}`}
+          tabIndex={0}
           onClick={() => {
             if (isMobileView) {
               setOpenSubmenu(openSubmenu === route.title ? null : route.title);
             }
-          }}>
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              setOpenSubmenu(openSubmenu === route.title ? null : route.title);
+            } else if (e.key === "Escape") {
+              setOpenSubmenu(null);
+            }
+          }}
+        >
           {route.title}
           <i className="bi bi-caret-down-fill ms-2"></i>
-        </span>
+        </button>
 
         {openSubmenu === route.title && (
-          <div className="dropdown-menu show">
+          <div
+            className="dropdown-menu show"
+            id={`dropdown-menu-${route.title}`}
+            role="menu"
+          >
             {route.subRoutes.map((subRoute) => (
               <Link
                 key={subRoute.path}
                 href={subRoute.path}
-                className={clsx("dropdown-item", pathsMatch(pathName, subRoute.path) && "active")}>
+                className={clsx("dropdown-item", pathsMatch(pathName, subRoute.path) && "active")}
+                role="menuitem"
+                tabIndex={0}
+              >
                 {subRoute.title}
               </Link>
             ))}
