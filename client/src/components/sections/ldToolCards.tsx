@@ -70,30 +70,17 @@ export default function LdToolSection() {
 
   return (
     <div id="ldtool-card-container" >
-      <style>{`
-        @media (max-width: 930px) {
-          .card-row {
-            justify-content: flex-start;
-          }
-          .card-row > * {
-            width: 30%;
-            max-width: 30%;
-            flex: none;
-          }
-          .card-row.two-cards {
-            justify-content: center !important;
-            margin-left: 0;
-          }
-        }
-      `}</style>
+     
       <div id="content" className="tab-content">
         <div className="tab-pane fade show active" id="home-tab">
-          <div style={{ width: "100%", backgroundColor: "#536e84", padding: "40px 0" }}>
+          <div style={{ margin: "auto", width: "100%", backgroundColor: "#536e84", padding: "40px 0" }}>
             {rows.map((row, rowIndex) => {
               const cardCount = row.filter(Boolean).length;
               const isTwoCards = isMobile && cardCount === 2;
+              const isOneCard = isMobile && cardCount === 1;
               return (
-                <div className={`card-row${isTwoCards ? ' two-cards' : ''}`} key={rowIndex}>
+                <div className={`card-row${isTwoCards ? ' two-cards' : ''}${isOneCard ? ' one-card' : ''}`} key={rowIndex}>
+                  {isOneCard && <div className="card-spacer" />}
                   {row.map((tool, colIndex) =>
                     tool ? (
                       <LDToolCard key={tool.id} {...tool} />

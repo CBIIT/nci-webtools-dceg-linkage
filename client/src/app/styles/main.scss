@@ -182,7 +182,7 @@ nav {
   display: inline-block;
   width: 19%;
   height: 150px;
-  margin: 10px 5px;
+  margin: 0; // Remove margin to prevent overflow
   margin-bottom: 10px;
   margin-right: 5px;
   text-decoration: none;
@@ -279,30 +279,57 @@ nav {
 }
 
 .card-row {
-  max-width: 1300px;
   min-height: 130px;
-  margin: auto;
+  margin: 0 auto 30px auto;
   text-align: center;
   display: flex;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: stretch;
-    margin-left: 30px;
-    margin-right: 30px;
-    margin-bottom: 30px;
+    gap: 16px;
+  padding-left: 24px; // Add horizontal padding for desktop
+  padding-right: 24px;
 }
 
-
   .card-row > * {
-    flex: 1 1 0;
-    min-width: 0;
-    margin: 0 8px;
+    width: 20%;
+    max-width: 20%;
+    flex: none;
+    margin: 0; // Remove margin to prevent overflow
   }
-  .card-row > :first-child { margin-left: 0 !important; }
-  .card-row > :last-child { margin-right: 0 !important; }
+  .card-outside {
+    margin: 0; // Remove margin to prevent overflow
+  }
   @media (max-width: 930px) {
+    .card-row > * {
+      width: 28%;
+      max-width: 28%;
+      flex: none;
+    }
+    .card-spacer {
+      width: 28%;
+      max-width: 28%;
+      flex: none;
+      height: 0;
+      margin: 0;
+      padding: 0;
+    }
     .card-row {
-      flex-wrap: wrap;
+      justify-content: center; // Center all rows, use gap for equal spacing
+      margin-bottom: 24px;
+      padding-left: 12px !important; // Add equal horizontal padding for mobile
+      padding-right: 12px !important;
+    }
+    .card-row.two-cards {
+      /* No need for special justify-content, inherit from .card-row */
+      margin-left: 0;
+    }
+    .card-row.one-card {
+      justify-content: flex-start !important; // Left-align 1-card rows
+      position: relative;
+    }
+    .card-row.one-card::before {
+      display: none;
     }
   }
 
@@ -473,25 +500,44 @@ table.table-chip > tbody {
   cursor: pointer;
   color: #2a71a5; // Change this to your desired color
 }
-@media only screen and (max-width: 930px) {
-  
-  .card-body {
-    height: 170px;
-  }
+ .card-row > * {
+          width:18%;
+          max-width: 18%;
+          flex: none;
+        }
+        @media (max-width: 930px) {
+          .card-row > * {
+            width: 28%;
+            max-width: 28%;
+            flex: none;
+          }
+          .card-spacer {
+            width: 28%;
+            max-width: 28%;
+            flex: none;
+            height: 0;
+            margin: 0;
+            padding: 0;
+          }
+          .card-row {
+            justify-content: center; // Center all rows, use gap for equal spacing
+            margin-bottom: 24px;
+            padding-left: 12px !important; // Add equal horizontal padding for mobile
+            padding-right: 12px !important;
+          }
+          .card-row.two-cards {
+            /* No need for special justify-content, inherit from .card-row */
+            margin-left: 0;
+          }
+          .card-row.one-card {
+            justify-content: flex-start !important; // Left-align 1-card rows
+            position: relative;
+          }
+          .card-row.one-card::before {
+            display: none;
+          }
+        }
 
-  .card-row {
-    flex-wrap: wrap;
-    justify-content: center;   
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .card-outside {
-    width: 30%;    /* 3 cards fit nicely in first row */
-    margin: 10px;
-  }
-  
-}
 @media only screen and (max-width: 767px) {
   .card-body {
     display: none;
