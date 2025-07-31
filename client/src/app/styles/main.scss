@@ -474,15 +474,23 @@ table.table-chip > tbody {
   color: #2a71a5; // Change this to your desired color
 }
 @media only screen and (max-width: 930px) {
-  .card-outside {
-    height: 210px;
-  }
+  
   .card-body {
     height: 170px;
   }
-  .card-outside {
-    width: 32.8%;
+
+  .card-row {
+    flex-wrap: wrap;
+    justify-content: center;   
+    margin-left: auto;
+    margin-right: auto;
   }
+
+  .card-outside {
+    width: 30%;    /* 3 cards fit nicely in first row */
+    margin: 10px;
+  }
+  
 }
 @media only screen and (max-width: 767px) {
   .card-body {

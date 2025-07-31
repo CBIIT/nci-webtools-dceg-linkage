@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import LDToolCard from "@/components/cards/ldtool-card";
 
 type Tool = {
@@ -22,6 +22,27 @@ const tools = [
   { id: "snpclip", title: "SNPclip", desc: "Prune a list of variants by linkage disequilibrium." },
 ];
 
+// Helper to chunk for mobile: always 3 cards, then 2 cards (centered), repeat
+const chunkToolsMobile = (tools: Tool[]): Array<Array<Tool | null>> => {
+  const mobileRows: Array<Array<Tool | null>> = [];
+  let i = 0;
+  while (i < tools.length) {
+    // First row: up to 3 cards
+    const firstRow = tools.slice(i, i + 3);
+    mobileRows.push(firstRow);
+    i += 3;
+    // Second row: up to 2 cards, left-aligned if 1, no nulls for 2 cards
+    const secondRow = tools.slice(i, i + 2);
+    if (secondRow.length === 1) {
+      mobileRows.push([secondRow[0]]);
+    } else if (secondRow.length === 2) {
+      mobileRows.push(secondRow);
+    }
+    i += 2;
+  }
+  return mobileRows;
+};
+
 const chunkTools = (tools: (Tool | null)[], size: number): (Tool | null)[][] => {
   const chunks: (Tool | null)[][] = [];
   for (let i = 0; i < tools.length; i += size) {
@@ -36,36 +57,51 @@ const chunkTools = (tools: (Tool | null)[], size: number): (Tool | null)[][] => 
 
 
 export default function LdToolSection() {
-  const rows = chunkTools(tools, 5);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkWidth = () => setIsMobile(window.innerWidth <= 930);
+    checkWidth();
+    window.addEventListener("resize", checkWidth);
+    return () => window.removeEventListener("resize", checkWidth);
+  }, []);
+
+  const rows = isMobile ? chunkToolsMobile(tools) : chunkTools(tools, 5);
 
   return (
     <div id="ldtool-card-container" >
-      
+      <style>{`
+        @media (max-width: 930px) {
+          .card-row {
+            justify-content: flex-start;
+          }
+          .card-row > * {
+            width: 30%;
+            max-width: 30%;
+            flex: none;
+          }
+          .card-row.two-cards {
+            justify-content: center !important;
+            margin-left: 0;
+          }
+        }
+      `}</style>
       <div id="content" className="tab-content">
         <div className="tab-pane fade show active" id="home-tab">
           <div style={{ width: "100%", backgroundColor: "#536e84", padding: "40px 0" }}>
-            {rows.map((row, rowIndex) => (
-              <div className="card-row" key={rowIndex}>
-                {row.map((tool, colIndex) =>
-                  tool ? (
-                    <LDToolCard key={tool.id} {...tool} />
-                  ) : (
-                    <div
-                      key={`placeholder-${rowIndex}-${colIndex}`}
-                      className="card-outside"
-                      style={{ visibility: "hidden" }}
-                    >
-                      <div className="card anchor-link border-0">
-                        <div className="text-center card-title">
-                          <h2 style={{ color: "white", margin: 0, fontSize: "24px" }}></h2>
-                        </div>
-                        <div className="card-body"><p></p></div>
-                      </div>
-                    </div>
-                  )
-                )}
-              </div>
-            ))}
+            {rows.map((row, rowIndex) => {
+              const cardCount = row.filter(Boolean).length;
+              const isTwoCards = isMobile && cardCount === 2;
+              return (
+                <div className={`card-row${isTwoCards ? ' two-cards' : ''}`} key={rowIndex}>
+                  {row.map((tool, colIndex) =>
+                    tool ? (
+                      <LDToolCard key={tool.id} {...tool} />
+                    ) : null
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
