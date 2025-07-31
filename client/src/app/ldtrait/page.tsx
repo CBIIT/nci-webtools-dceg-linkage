@@ -22,7 +22,7 @@ export default function LdTrait() {
       <ToolBanner
         name="LDtrait Tool"
         href="/help/#LDtrait"
-        description="Calculate population specific haplotype frequencies of all haplotypes observed for a list of query variants."
+        description="Search if a list of variants (or variants in LD with those variants) have previously been associated with a trait or disease."
       />
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
