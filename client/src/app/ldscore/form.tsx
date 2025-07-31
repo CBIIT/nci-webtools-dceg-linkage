@@ -483,9 +483,10 @@ export default function LdScoreForm() {
             <LdScoreResults 
               reference={resultRef} 
               type="heritability" 
-              uploads={exampleFilename || uploadedFilename} // Always pass the correct input filename
+              uploads={exampleFilename || uploadedFilename}
             />
           )}
+       
         </Tab.Pane>
 
         <Tab.Pane eventKey="genetic_correlation">
@@ -646,7 +647,16 @@ export default function LdScoreForm() {
               </div>
             </div>
           )}
-        {geneticResult }
+          {/* Show results via LdScoreResults for genetic correlation tab */}
+          {resultRef && resultType === 'genetic_correlation' && (
+            <LdScoreResults
+              reference={resultRef}
+              type="correlation"
+              uploads={
+                [exampleFile1 || uploadedFile1, exampleFile2 || uploadedFile2].filter(Boolean).join(',')
+              }
+            />
+          )}
         </Tab.Pane>
 
         <Tab.Pane eventKey="ld_calculation">

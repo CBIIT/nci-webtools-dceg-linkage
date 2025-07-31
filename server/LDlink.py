@@ -1245,6 +1245,7 @@ def ldcorrelation():
     filename = request.args.get('filename', False)
     filename2 = request.args.get('filename2', False)
     isexample = request.args.get('isExample', False)
+    reference = request.args.get('reference', False)
     print(pop,genome_build,filename,isexample)
     if filename:
         filename = secure_filename(filename)

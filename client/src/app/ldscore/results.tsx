@@ -186,7 +186,98 @@ function CollapsibleRawPanel({ result, title }: { result: string; title: string 
   );
 }
 
-function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename }: { result: string; filename?: string; inputFilename?: string }) {
+// Helper to format heritability table as plain text
+function formatHeritabilityTableText(result: string) {
+  const parsed = parseHeritabilityResult(result);
+  const rows = [
+    ['Total Observed scale h²', parsed.h2],
+    ['Lambda GC', parsed.lambdaGC],
+    ['Mean Chi²', parsed.meanChi2],
+    ['Intercept', parsed.intercept],
+    ['Ratio', parsed.ratio],
+  ];
+  // Format as aligned text table
+  const col1Width = Math.max(...rows.map(([k]) => k.length));
+  const col2Width = Math.max(...rows.map(([,v]) => v.length));
+  const header = `${'Metric'.padEnd(col1Width)} | Value`;
+  const sep = `${'-'.repeat(col1Width)}-|-${'-'.repeat(col2Width)}`;
+  const lines = [header, sep, ...rows.map(([k, v]) => `${k.padEnd(col1Width)} | ${v}`)];
+  return lines.join('\n');
+}
+
+// Helper to format genetic correlation parsed tables as plain text
+function formatGeneticCorrelationTableText(parsed: ReturnType<typeof parseGeneticCorrelationResult>) {
+  let text = '';
+  if (parsed.herit1) {
+    text += 'Heritability of phenotype 1\n';
+    text += formatKeyValueSection(parsed.herit1) + '\n';
+  }
+  if (parsed.herit2) {
+    text += 'Heritability of phenotype 2\n';
+    text += formatKeyValueSection(parsed.herit2) + '\n';
+  }
+  if (parsed.gencov) {
+    text += 'Genetic Covariance\n';
+    text += formatKeyValueSection(parsed.gencov) + '\n';
+  }
+  if (parsed.gencorr) {
+    text += 'Genetic Correlation\n';
+    text += formatKeyValueSection(parsed.gencorr) + '\n';
+  }
+  if (parsed.summary) {
+    text += 'Summary of Genetic Correlation Results\n';
+    text += formatSummarySection(parsed.summary) + '\n';
+  }
+  return text.trim();
+}
+
+function formatKeyValueSection(section: string) {
+  const lines = section.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
+  const kvPairs: [string, string][] = [];
+  lines.forEach(line => {
+    let found = false;
+    const colonPairs = line.matchAll(/([\w\s²\*\-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
+    for (const pair of colonPairs) {
+      kvPairs.push([pair[1].trim(), pair[2].trim()]);
+      found = true;
+    }
+    if (!found) {
+      const angleMatch = line.match(/([\w\s²\*\-]+?)([<>])\s*([^<>=]+)/);
+      if (angleMatch) {
+        kvPairs.push([angleMatch[1].trim(), angleMatch[2] + ' ' + angleMatch[3].trim()]);
+        found = true;
+      }
+    }
+    if (!found) {
+      kvPairs.push(['', line.trim()]);
+    }
+  });
+  if (!kvPairs.length) return '';
+  const col1Width = Math.max(...kvPairs.map(([k]) => k.length));
+  const col2Width = Math.max(...kvPairs.map(([,v]) => v.length));
+  const header = `${''.padEnd(col1Width)} | Value`;
+  const sep = `${'-'.repeat(col1Width)}-|-${'-'.repeat(col2Width)}`;
+  const linesOut = [header, sep, ...kvPairs.map(([k, v]) => `${k.padEnd(col1Width)} | ${v}`)];
+  return linesOut.join('\n');
+}
+
+function formatSummarySection(section: string) {
+  const lines = section.split(/\r?\n/).filter(l => l.trim());
+  const endIdx = lines.findIndex(l => /^Analysis\s+finished\s+at/i.test(l));
+  const filteredLines = endIdx === -1 ? lines : lines.slice(0, endIdx);
+  let headerIdx = 0;
+  while (headerIdx < filteredLines.length && filteredLines[headerIdx].split(/\s+/).length < 2) headerIdx++;
+  if (headerIdx >= filteredLines.length - 1) return section;
+  const header = filteredLines[headerIdx].split(/\s+/).filter(Boolean);
+  const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
+  const colWidths = header.map((h, i) => Math.max(h.length, ...rows.map(r => r[i]?.length || 0)));
+  const headerLine = header.map((h, i) => h.padEnd(colWidths[i])).join(' | ');
+  const sep = colWidths.map(w => '-'.repeat(w)).join('-|-');
+  const rowLines = rows.map(r => r.map((c, i) => c.padEnd(colWidths[i])).join(' | '));
+  return [headerLine, sep, ...rowLines].join('\n');
+}
+
+function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string }) {
   return (
     <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
       <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6 }}>
@@ -220,7 +311,8 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
           className="btn btn-default"
           style={{ border: '1px solid #bdbdbd', borderRadius: 4, background: '#fff' }}
           onClick={() => {
-            const blob = new Blob([result], { type: 'text/plain' });
+            const text = parsedTableText || result;
+            const blob = new Blob([text], { type: 'text/plain' });
             const a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
             a.download = filename;
@@ -302,32 +394,35 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
   }
 
   if (type === 'heritability') {
-    // You may need to pass the input filename from parent or context
-    const inputFilename = uploads; // TODO: wire this up from props or state
+    const inputFilename = uploads;
+    const parsedTableText = formatHeritabilityTableText(result);
     return (
       <Container style={{ maxWidth: 600 }}>
         <h5>Heritability Result</h5>
         <HeritabilityResultTable result={result} />
-        <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} />
+        <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
         <CollapsibleRawPanel result={result} title="Heritability Analysis Output" />
       </Container>
     );
   }
   if (type === 'correlation') {
     const parsed = parseGeneticCorrelationResult(result);
+    const parsedTableText = formatGeneticCorrelationTableText(parsed);
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h5>Heritability of phenotype 1</h5>
+        <h5>Genetic Correlation Results</h5>
+        <h6>Heritability of phenotype 1</h6>
         {renderKeyValueTable(parsed.herit1 || '')}
-        <h5>Heritability of phenotype 2</h5>
+        <h6>Heritability of phenotype 2</h6>
         {renderKeyValueTable(parsed.herit2 || '')}
-        <h5>Genetic Covariance</h5>
+        <h6>Genetic Covariance</h6>
         {renderKeyValueTable(parsed.gencov || '')}
-        <h5>Genetic Correlation</h5>
+        <h6>Genetic Correlation</h6>
         {renderKeyValueTable(parsed.gencorr || '')}
-        <h5>Summary of Genetic Correlation Results</h5>
+        <h6>Summary of Genetic Correlation Results</h6>
         {renderSummaryTable(parsed.summary || '')}
-        <pre style={{ background: '#f9f9f9', padding: 12, borderRadius: 6 }}>{result}</pre>
+        <DownloadOptionsPanel result={result} filename="genetic_correlation_result.txt" parsedTableText={parsedTableText} />
+        <CollapsibleRawPanel result={result} title="Genetic Correlation Output" />
       </Container>
     );
   }
