@@ -516,4 +516,7 @@ table.table-chip > tbody {
     min-height: 50px;
     margin-bottom: 12px; // Reduce space between rows on small screens
   }
+  .card-title{
+    margin-bottom: 0px !important;
+  }
 }
