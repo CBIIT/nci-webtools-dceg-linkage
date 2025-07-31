@@ -67,31 +67,6 @@ export default function LdScoreForm() {
     }
   };
 
-  // Update file upload handlers for genetic correlation
-  const handleGeneticFileUpload = async (file: File, fileNum: 1 | 2) => {
-    setUploading(true);
-    const formData = new FormData();
-    formData.append("ldscoreFile", file);
-    try {
-      const response = await fetch("/LDlinkRestWeb/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (response.ok) {
-        if (fileNum === 1) setUploadedFile1(file.name);
-        else setUploadedFile2(file.name);
-      } else {
-        if (fileNum === 1) setUploadedFile1("");
-        else setUploadedFile2("");
-      }
-    } catch (e) {
-      if (fileNum === 1) setUploadedFile1("");
-      else setUploadedFile2("");
-    } finally {
-      setUploading(false);
-    }
-  };
-
   // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
   const handleLdFilesUpload = async (files: FileList) => {
     setUploading(true);
@@ -309,6 +284,27 @@ export default function LdScoreForm() {
 
   return (
     <Tab.Container activeKey={analysisType} onSelect={(key) => heritabilityForm.setValue("analysis_type", key as any)}>
+      {/* Show uploading overlay for all tabs */}
+      {uploading && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(255,255,255,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="d-flex flex-column align-items-center">
+            <span
+              className="px-3 py-2 mb-2"
+              style={{
+                background: '#e3f0ff',
+                color: '#084298',
+                borderRadius: '6px',
+                fontWeight: 500,
+                textAlign: 'center',
+                maxWidth: 800,
+              }}
+            >
+              Uploading file, please wait...
+            </span>
+            <CalculateLoading />
+          </div>
+        </div>
+      )}
       <Row>
         <Col sm={12}>
           <Nav variant="tabs" className="mb-3">
@@ -324,7 +320,6 @@ export default function LdScoreForm() {
           </Nav>
         </Col>
       </Row>
-
       <Tab.Content>
         <Tab.Pane eventKey="heritability">
           <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={() => heritabilityForm.reset()} noValidate>
@@ -455,26 +450,6 @@ export default function LdScoreForm() {
                 Computational time may vary based on the number of samples and genetic markers provided in the data
               </span>
               <div>
-                <CalculateLoading />
-              </div>
-            </div>
-          )}
-          {uploading && (
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(255,255,255,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div className="d-flex flex-column align-items-center">
-                <span
-                  className="px-3 py-2 mb-2"
-                  style={{
-                    background: '#e3f0ff',
-                    color: '#084298',
-                    borderRadius: '6px',
-                    fontWeight: 500,
-                    textAlign: 'center',
-                    maxWidth: 800,
-                  }}
-                >
-                  Uploading file, please wait...
-                </span>
                 <CalculateLoading />
               </div>
             </div>
@@ -710,7 +685,7 @@ export default function LdScoreForm() {
                     />
                     {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
                       <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                        <span style={{ fontWeight: 600 }}>Input files:</span><br />
+                        <span style={{ fontWeight: 600 }}>Input files Updates:</span><br />
                         <div>{exampleBed || uploadedBed}</div>
                         <div>{exampleBim || uploadedBim}</div>
                         <div>{exampleFam || uploadedFam}</div>
@@ -784,178 +759,5 @@ export default function LdScoreForm() {
         <LdScoreResults reference={resultRef} type={resultTypeMap[resultType]} />
       )} */}
     </Tab.Container>
-  );
-}
-
-// Helper functions and components
-function handleDownloadInput(result: string, exampleFilename?: string) {
-  // Try to get the input file from the DOM or state
-  const fileInput = document.getElementById("ldscore-form-heritability-file-input") as HTMLInputElement | null;
-  if (fileInput && fileInput.files && fileInput.files[0]) {
-    const file = fileInput.files[0];
-    const url = URL.createObjectURL(file);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }, 0);
-  } else if (exampleFilename) {
-    // Download from backend API
-    const a = document.createElement("a");
-    a.href = `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`;
-    a.download = exampleFilename || "example_input.txt";
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-    }, 0);
-  } else {
-    alert("No input file available to download.");
-  }
-}
-function handleDownloadTable(result: string, filename: string) {
-  // Helper to parse genetic correlation result into sections
-  function parseCorrelationResult(result: string) {
-    // This is a simple parser based on expected section headers
-    const sections = {
-      herit1: "",
-      herit2: "",
-      gencov: "",
-      gencorr: "",
-      summary: "",
-    };
-    let current: keyof typeof sections | null = null;
-    const lines = result.split(/\r?\n/);
-    for (const line of lines) {
-      if (/Heritability of phenotype 1/i.test(line)) {
-        current = "herit1";
-        continue;
-      }
-      if (/Heritability of phenotype 2/i.test(line)) {
-        current = "herit2";
-        continue;
-      }
-      if (/Genetic Covariance/i.test(line)) {
-        current = "gencov";
-        continue;
-      }
-      if (/Genetic Correlation/i.test(line)) {
-        current = "gencorr";
-        continue;
-      }
-      if (/Summary of Genetic Correlation Results/i.test(line)) {
-        current = "summary";
-        continue;
-      }
-      if (current) {
-        sections[current] += (sections[current] ? "\n" : "") + line;
-      }
-    }
-    // Remove leading/trailing whitespace
-    Object.keys(sections).forEach((k) => {
-      sections[k as keyof typeof sections] = sections[k as keyof typeof sections].trim();
-    });
-    return sections;
-  }
-
-  // Helper to parse heritability result into fields
-  function parseHeritabilityResult(result: string) {
-    // Try to extract values from the result string
-    const h2Match = result.match(/Total Observed scale h2:\s*([^\n]+)/i);
-    const lambdaGCMatch = result.match(/Lambda GC:\s*([^\n]+)/i);
-    const meanChi2Match = result.match(/Mean Chi\^?2:\s*([^\n]+)/i);
-    const interceptMatch = result.match(/Intercept:\s*([^\n]+)/i);
-    const ratioMatch = result.match(/Ratio:\s*([^\n]+)/i);
-    return {
-      h2: h2Match ? h2Match[1].trim() : "",
-      lambdaGC: lambdaGCMatch ? lambdaGCMatch[1].trim() : "",
-      meanChi2: meanChi2Match ? meanChi2Match[1].trim() : "",
-      intercept: interceptMatch ? interceptMatch[1].trim() : "",
-      ratio: ratioMatch ? ratioMatch[1].trim() : "",
-    };
-  }
-
-  if (filename.includes('correlation')) {
-    const parsed = parseCorrelationResult(result);
-    const sections = [
-      { title: "Heritability of phenotype 1", content: parsed.herit1 },
-      { title: "Heritability of phenotype 2", content: parsed.herit2 },
-      { title: "Genetic Covariance", content: parsed.gencov },
-      { title: "Genetic Correlation", content: parsed.gencorr },
-      { title: "Summary of Genetic Correlation Results", content: parsed.summary },
-    ];
-    const lines: string[] = [];
-    for (const section of sections) {
-      if (section.content && section.content.trim()) {
-        lines.push(section.title);
-        // For summary, keep as is; for others, format as key-value
-        if (section.title === "Summary of Genetic Correlation Results") {
-          lines.push(section.content);
-        } else {
-          section.content.split(/\r?\n/).forEach(line => lines.push(line));
-        }
-        lines.push(""); // blank line between sections
-      }
-    }
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-    }, 0);
-  } else {
-    // Heritability mode (default)
-    const parsed = parseHeritabilityResult(result);
-    const lines = [
-      "Heritability Result",
-      "-------------------",
-      `Total Observed scale h2:\t${parsed.h2}`,
-      `Lambda GC:\t${parsed.lambdaGC}`,
-      `Mean Chi^2:\t${parsed.meanChi2}`,
-      `Intercept:\t${parsed.intercept}`,
-      `Ratio:\t${parsed.ratio}`,
-    ];
-    const blob = new Blob([lines.join("\n")], { type: "text/plain" });
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      document.body.removeChild(a);
-    }, 0);
-  }
-}
-function RawHeritabilityPanel({ result, title }: { result: string; title: string }) {
-  const [showRaw, setShowRaw] = useState(false);
-  return (
-    <div className="panel panel-default mt-3" style={{ maxWidth: 600, margin: '20px auto 0 auto', border: '1px solid #bdbdbd', borderRadius: 6, boxShadow: '0 1px 2px rgba(0,0,0,0.03)' }}>
-      <div className="panel-heading" style={{ fontWeight: 600, background: '#f5f5f5', padding: '8px 12px', borderBottom: '1px solid #ddd', borderTopLeftRadius: 6, borderTopRightRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span>{title}</span>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline-primary"
-          onClick={() => setShowRaw((open) => !open)}
-          aria-expanded={showRaw}
-          aria-controls="heritRawPanelBody"
-        >
-          {showRaw ? "Collapse" : "Expand"}
-        </button>
-      </div>
-      <div
-        id="heritRawPanelBody"
-        className={showRaw ? "panel-body" : "panel-body collapse"}
-        style={{ padding: showRaw ? '12px' : 0, display: showRaw ? 'block' : 'none', background: '#f9f9f9' }}
-      >
-        <pre style={{ fontSize: '0.97em', whiteSpace: 'pre-wrap', margin: 0 }}>{result}</pre>
-      </div>
-    </div>
   );
 }

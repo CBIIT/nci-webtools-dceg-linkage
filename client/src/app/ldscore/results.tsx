@@ -426,7 +426,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
   if ( !result) {
     return null;
   }
-
+  console.log("LDscore result:", result);
   if (type === 'heritability') {
     const inputFilename = uploads;
     const parsedTableText = formatHeritabilityTableText(result);
