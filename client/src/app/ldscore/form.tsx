@@ -116,49 +116,6 @@ export default function LdScoreForm() {
       console.error("LDscore mutation error:", error);
     },
   });
-  // Remove all result parsing, rendering, and download helpers from here.
-  // Only keep form logic, file upload, and state management.
-
-  // Add state to track the reference and type for result display
-  const [resultRef, setResultRef] = useState<string | null>(null);
-  const [resultType, setResultType] = useState<"heritability" | "correlation" | "ldscore" | null>(null);
-
-  // Add a mapping so form uses the correct type for LdScoreResults
-  // 'heritability' -> 'heritability', 'genetic_correlation' -> 'correlation', 'ldscore' -> 'ldscore'
-  const resultTypeMap = {
-    heritability: 'heritability',
-    correlation: 'correlation',
-    ldscore: 'ldscore',
-  } as const;
-
-  // Update submit handlers to set resultRef and resultType
-  const onHeritabilitySubmit = async (data: FormData) => {
-    setHeritabilityLoading(true);
-    const pop =  data.pop.value ;
-    const genomeBuild = genome_build || "grch37";
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-    const isExample = !!exampleFilename;
-    const filename = exampleFilename || uploadedFilename;
-    const params = new URLSearchParams({
-      filename,
-      pop,
-      genome_build: genomeBuild,
-      isExample: isExample ? "true" : "false",
-      reference,
-    });
-    try {
-      await fetchHeritabilityResult(params); // still trigger backend
-      setResultRef(reference);
-      setResultType("heritability");
-    } catch (error) {
-      // handle error UI if needed
-    } finally {
-      setHeritabilityLoading(false);
-    }
-  };
-
-  // Removed duplicate onGeneticSubmit definition to resolve redeclaration error.
-
 
   // Genetic correlation form state
   const geneticForm = useForm<FormData>({
@@ -185,6 +142,63 @@ export default function LdScoreForm() {
   });
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticResult, setGeneticResult] = useState("");
+
+  // LD calculation form state
+  const ldForm = useForm<FormData>({
+    defaultValues: {
+      analysis_type: "ld_calculation",
+      pop: undefined,
+      window: 1,
+      windowUnit: "cM"
+    }
+  });
+  const ldMutation = useMutation({
+    mutationFn: ldscore,
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        console.error("LDscore calculation failed:", data.error);
+        return;
+      }
+      queryClient.setQueryData(["ldscore", data.id], data);
+      router.push(`${pathname}?ref=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("LDscore mutation error:", error);
+    },
+  });
+  // Remove all result parsing, rendering, and download helpers from here.
+  // Only keep form logic, file upload, and state management.
+
+  // Add state to track the reference and type for result display
+  const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
+  const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
+  const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
+
+  // Update submit handlers to set resultRef and resultType
+  const onHeritabilitySubmit = async (data: FormData) => {
+    setHeritabilityLoading(true);
+    const pop =  data.pop.value ;
+    const genomeBuild = genome_build || "grch37";
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const isExample = !!exampleFilename;
+    const filename = exampleFilename || uploadedFilename;
+    const params = new URLSearchParams({
+      filename,
+      pop,
+      genome_build: genomeBuild,
+      isExample: isExample ? "true" : "false",
+      reference,
+    });
+    try {
+      await fetchHeritabilityResult(params); // still trigger backend
+      setHeritabilityResultRef(reference);
+    } catch (error) {
+      // handle error UI if needed
+    } finally {
+      setHeritabilityLoading(false);
+    }
+  };
+
   const onGeneticSubmit = async (data: FormData) => {
     setGeneticResult("");
     setGeneticLoading(true);
@@ -204,42 +218,13 @@ export default function LdScoreForm() {
     });
     try {
       await fetchGeneticCorrelationResult(params);
-      setResultRef(reference);
-      setResultType("correlation");
+      setGeneticCorrelationResultRef(reference);
     } catch (error) {
       setGeneticResult("Error fetching genetic correlation result.");
     } finally {
       setGeneticLoading(false);
     }
   };
-  const onGeneticReset = () => {
-    geneticForm.reset();
-  };
-
-  // LD calculation form state
-  const ldForm = useForm<FormData>({
-    defaultValues: {
-      analysis_type: "ld_calculation",
-      pop: undefined,
-      window: 0,
-      windowUnit: "cM"
-    }
-  });
-  const ldMutation = useMutation({
-    mutationFn: ldscore,
-    onSuccess: (data: any) => {
-      if (data?.error) {
-        console.error("LDscore calculation failed:", data.error);
-        return;
-      }
-      queryClient.setQueryData(["ldscore", data.id], data);
-      router.push(`${pathname}?ref=${data.id}`);
-    },
-    onError: (error) => {
-      console.error("LDscore mutation error:", error);
-    },
-  });
-  const [ldResult, setLdResult] = useState<string>("");
 
   const onLdSubmit = async () => {
     const bed = exampleBed || uploadedBed;
@@ -264,16 +249,26 @@ export default function LdScoreForm() {
     try {
       setUploading(true);
       await fetchLdScoreCalculationResult(params);
-      setResultRef(reference);
-      setResultType("ldscore");
+      setLdscoreResultRef(reference);
     } catch (error) {
       // handle error UI if needed
     } finally {
       setUploading(false);
     }
   };
+
+  // Reset handlers: clear only the relevant result when user resets or uploads new files
+  const onHeritabilityReset = () => {
+    heritabilityForm.reset();
+    setHeritabilityResultRef(null);
+  };
+  const onGeneticReset = () => {
+    geneticForm.reset();
+    setGeneticCorrelationResultRef(null);
+  };
   const onLdReset = () => {
     ldForm.reset();
+    setLdscoreResultRef(null);
   };
 
   const analysisType = heritabilityForm.watch("analysis_type");
@@ -322,7 +317,7 @@ export default function LdScoreForm() {
       </Row>
       <Tab.Content>
         <Tab.Pane eventKey="heritability">
-          <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={() => heritabilityForm.reset()} noValidate>
+          <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
             <Row>
               <Col sm={4}>
                 <Form.Group controlId="file" className="mb-3">
@@ -455,14 +450,13 @@ export default function LdScoreForm() {
             </div>
           )}
           {/* Only show results via LdScoreResults for heritability tab */}
-          {resultRef && resultType === 'heritability' && (
+          {heritabilityResultRef && (
             <LdScoreResults 
-              reference={resultRef} 
+              reference={heritabilityResultRef} 
               type="heritability" 
               uploads={exampleFilename || uploadedFilename}
             />
           )}
-       
         </Tab.Pane>
 
         <Tab.Pane eventKey="genetic_correlation">
@@ -624,9 +618,9 @@ export default function LdScoreForm() {
             </div>
           )}
           {/* Show results via LdScoreResults for genetic correlation tab */}
-          {resultRef && resultType === 'correlation' && (
+          {geneticCorrelationResultRef && (
             <LdScoreResults
-              reference={resultRef}
+              reference={geneticCorrelationResultRef}
               type="correlation"
               uploads={
                 [exampleFile1 || uploadedFile1, exampleFile2 || uploadedFile2].filter(Boolean).join(',')
@@ -731,9 +725,9 @@ export default function LdScoreForm() {
               </Col>
             </Row>
           </Form>
-          {resultRef && resultType === 'ldscore' && (
+          {ldscoreResultRef && (
             <LdScoreResults
-              reference={resultRef}
+              reference={ldscoreResultRef}
               type="ldscore"
               uploads={
                 [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')

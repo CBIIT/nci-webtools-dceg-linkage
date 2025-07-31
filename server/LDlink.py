@@ -930,7 +930,7 @@ def ldscore():
     windUnit = request.args.get('windUnit', 'cm')
     isExample = request.args.get('isExample', False)
     reference = request.args.get('reference',False)
-    print(pop,genome_build,filename,ldwindow,windUnit,isExample)
+    #print(pop,genome_build,filename,ldwindow,windUnit,isExample)
 
     fileDir = f"/data/tmp/uploads/{reference}/"
     #print(filename)
@@ -939,6 +939,7 @@ def ldscore():
         filenames = [secure_filename(f.strip()) for f in filename.replace(';', ',').split(',')]
         for fname in filenames:
             fileroot, ext = os.path.splitext(fname)
+          
             # Find the chromosome number in the filename
             file_parts = fname.split('.')
             file_chromo = None
@@ -946,17 +947,17 @@ def ldscore():
                 if part.isdigit() and 1 <= int(part) <= 22:
                     file_chromo = part         
                     break
+        
             if file_chromo:
                 # Find the file in the directory
-                pattern = os.path.join(fileDir, fname)
-                #print(891, pattern)
-                for file_path in glob.glob(pattern):
+                pattern = os.path.join("/data/tmp/uploads/", f"{file_chromo}.*")
+                for file_path in glob.glob(pattern):                   
                     extension = file_path.split('.')[-1]
                     new_filename = f"{file_chromo}.{extension}"
                     new_file_path = os.path.join(fileDir, new_filename)
                    # Create the reference subfolder if it doesn't exist
-                    #reference_folder = os.path.join(fileDir, str(reference))
-                    #os.makedirs(reference_folder, exist_ok=True)
+                    reference_folder = os.path.join(fileDir, str(reference))
+                    os.makedirs(reference_folder, exist_ok=True)
                     new_file_path = os.path.join(fileDir, new_filename)
                     if os.path.abspath(file_path) != os.path.abspath(new_file_path):
                         shutil.copyfile(file_path, new_file_path)
