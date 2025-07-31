@@ -60,7 +60,7 @@ export default function Home() {
             <p>
               Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
             </p>
-            <p id="ldlink_version">LDlink Version {version.version}</p>
+            <p id="ldlink_version">Version {version.version}</p>
 
 
           </div>

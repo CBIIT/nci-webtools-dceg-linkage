@@ -8,6 +8,7 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
   color: #444;
+  font-size: 16px;;
 }
 
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
@@ -15,6 +16,10 @@ body {
     font-weight: 500;
     line-height: 1.1;
     color: inherit;
+}
+
+.tab-content p {
+  font-size: 16px;;
 }
 
 .disabled-contrast {
