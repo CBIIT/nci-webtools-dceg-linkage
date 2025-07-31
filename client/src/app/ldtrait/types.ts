@@ -1,17 +1,5 @@
 import { PopOption } from "@/components/select/pop-select";
 
-export interface SNP {
-  RS: string;
-  Coord: string;
-  Alleles: string;
-}
-
-export interface Haplotype {
-  Count: number;
-  Frequency: number;
-  Haplotype: string;
-}
-
 export interface ResultsData {
   query_snps: Array<Array<string>>;
   thinned_snps: string[];
