@@ -271,9 +271,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     thinned_list = []
 
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
-    print("Debug: snp_coords =", snp_coords)
-    print("Debug: pop =", pop)
-    print("Debug: window =", window)
+    
     # establish low/high window for each query snp
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     found = {}	
@@ -284,11 +282,9 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     for snp_coord in snp_coords:
         # print(snp_coord)
         found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, genome_build)
-        print("Debug: Found variants for", snp_coord[0], ":", "None" if found[snp_coord[0]] is None else len(found[snp_coord[0]]))
         if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
             snp_coords_gwas.append(snp_coord)
-            print("Debug: Added to thinned_list:", snp_coord[0])
             # Calculate LD statistics of variant pairs ?in parallel?	
             for record in found[snp_coord[0]]:	
                 ldPairs.append([snp_coord[0], str(snp_coord[1]), str(snp_coord[2]), "rs" + record["SNP_ID_CURRENT"], str(record["chromosome"]), str(record[genome_build_vars[genome_build]['position']])])	
@@ -411,7 +407,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         
     # Write the return data to file
     json_output = json.dumps(return_data, sort_keys=True, indent=2)
-    print("Debug: Final output data:", json_output)
     print(json_output, file=out_json)
     out_json.close()
 
