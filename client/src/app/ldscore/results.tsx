@@ -6,17 +6,34 @@ import { Container, Row, Col, Alert, Spinner } from "react-bootstrap";
 
 // Helper functions for parsing and rendering results (copied from form.tsx, can be improved)
 function parseHeritabilityResult(result: string) {
-  const h2Match = result.match(/Total Observed scale h2:\s*([\d.eA-Z+-]+) \(([^)]+)\)/);
-  const lambdaMatch = result.match(/Lambda GC:\s*([\d.eA-Z+-]+)/);
-  const meanChi2Match = result.match(/Mean Chi\^2:\s*([\d.eA-Z+-]+)/);
-  const interceptMatch = result.match(/Intercept:\s*([\d.eA-Z+-]+) \(([^)]+)\)/);
-  const ratioMatch = result.match(/Ratio\s*([<>=-]*)\s*([\d.eA-Z+-]+)/);
+  // Split by lines and parse each line by the first colon
+  const lines = result.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
+  const parsed: Record<string, string> = {};
+  let lastKey = '';
+  lines.forEach(line => {
+    const idx = line.indexOf(':');
+    if (idx !== -1) {
+      const key = line.slice(0, idx).trim();
+      const value = line.slice(idx + 1).trim();
+      parsed[key] = value;
+      lastKey = key;
+    } else if (lastKey) {
+      // If the line contains 'Ratio' (with or without <, >, =), treat it as a new Ratio row
+      const ratioMatch = line.match(/(Ratio\s*[<>=]?.*)/i);
+      if (ratioMatch) {
+        parsed['Ratio'] = ratioMatch[1].replace(/^Ratio\s*/i, '').trim();
+        lastKey = 'Ratio';
+      } else {
+        parsed[lastKey] += ' ' + line.trim();
+      }
+    }
+  });
   return {
-    h2: h2Match ? `${h2Match[1]} (${h2Match[2]})` : "",
-    lambdaGC: lambdaMatch ? lambdaMatch[1] : "",
-    meanChi2: meanChi2Match ? meanChi2Match[1] : "",
-    intercept: interceptMatch ? `${interceptMatch[1]} (${interceptMatch[2]})` : "",
-    ratio: ratioMatch ? `${ratioMatch[1]} ${ratioMatch[2]}` : "",
+    h2: parsed['Total Observed scale h2'] || '',
+    lambdaGC: parsed['Lambda GC'] || '',
+    meanChi2: parsed['Mean Chi^2'] || '',
+    intercept: parsed['Intercept'] || '',
+    ratio: parsed['Ratio'] || '',
   };
 }
 
@@ -26,7 +43,7 @@ function parseGeneticCorrelationResult(resultStr: string) {
   const trimmed = resultStr.slice(startIdx);
   const headers = [
     'Heritability of phenotype 1',
-    'Heritability of phenotype 2',
+    'Heritability of phenotype 2/2',
     'Genetic Covariance',
     'Genetic Correlation',
     'Summary of Genetic Correlation Results',
@@ -45,7 +62,7 @@ function parseGeneticCorrelationResult(resultStr: string) {
   }
   return {
     herit1: sections['Heritability of phenotype 1'] || '',
-    herit2: sections['Heritability of phenotype 2'] || '',
+    herit2: sections['Heritability of phenotype 2/2'] || '',
     gencov: sections['Genetic Covariance'] || '',
     gencorr: sections['Genetic Correlation'] || '',
     summary: sections['Summary of Genetic Correlation Results'] || '',
@@ -84,7 +101,7 @@ function renderKeyValueTable(section: string) {
   });
   return (
     <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
         <thead>
           <tr>
             <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}></th>
@@ -116,7 +133,7 @@ function renderSummaryTable(section: string) {
   const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
   return (
     <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
         <thead >
           <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
         </thead>
@@ -139,7 +156,7 @@ function HeritabilityResultTable({ result }: { result: string }) {
   ];
   return (
     <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0,width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
         <thead>
           <tr>
             <th style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>Metric</th>
@@ -199,9 +216,9 @@ function formatHeritabilityTableText(result: string) {
   // Format as aligned text table
   const col1Width = Math.max(...rows.map(([k]) => k.length));
   const col2Width = Math.max(...rows.map(([,v]) => v.length));
-  const header = `${'Metric'.padEnd(col1Width)} | Value`;
-  const sep = `${'-'.repeat(col1Width)}-|-${'-'.repeat(col2Width)}`;
-  const lines = [header, sep, ...rows.map(([k, v]) => `${k.padEnd(col1Width)} | ${v}`)];
+  // Use tab instead of separator
+  const header = ` \tValue`;
+  const lines = [header, ...rows.map(([k, v]) => `${k}\t${v}`)];
   return lines.join('\n');
 }
 
@@ -210,23 +227,23 @@ function formatGeneticCorrelationTableText(parsed: ReturnType<typeof parseGeneti
   let text = '';
   if (parsed.herit1) {
     text += 'Heritability of phenotype 1\n';
-    text += formatKeyValueSection(parsed.herit1) + '\n';
+    text += formatKeyValueSection(parsed.herit1) + '\n\n';
   }
   if (parsed.herit2) {
     text += 'Heritability of phenotype 2\n';
-    text += formatKeyValueSection(parsed.herit2) + '\n';
+    text += formatKeyValueSection(parsed.herit2) + '\n\n';
   }
   if (parsed.gencov) {
     text += 'Genetic Covariance\n';
-    text += formatKeyValueSection(parsed.gencov) + '\n';
+    text += formatKeyValueSection(parsed.gencov) + '\n\n';
   }
   if (parsed.gencorr) {
     text += 'Genetic Correlation\n';
-    text += formatKeyValueSection(parsed.gencorr) + '\n';
+    text += formatKeyValueSection(parsed.gencorr) + '\n\n';
   }
   if (parsed.summary) {
     text += 'Summary of Genetic Correlation Results\n';
-    text += formatSummarySection(parsed.summary) + '\n';
+    text += formatSummarySection(parsed.summary) + '\n\n';
   }
   return text.trim();
 }
@@ -234,30 +251,46 @@ function formatGeneticCorrelationTableText(parsed: ReturnType<typeof parseGeneti
 function formatKeyValueSection(section: string) {
   const lines = section.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
   const kvPairs: [string, string][] = [];
+  let lastKey = '';
   lines.forEach(line => {
-    let found = false;
-    const colonPairs = line.matchAll(/([\w\s²\*\-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
-    for (const pair of colonPairs) {
-      kvPairs.push([pair[1].trim(), pair[2].trim()]);
-      found = true;
-    }
-    if (!found) {
-      const angleMatch = line.match(/([\w\s²\*\-]+?)([<>])\s*([^<>=]+)/);
-      if (angleMatch) {
-        kvPairs.push([angleMatch[1].trim(), angleMatch[2] + ' ' + angleMatch[3].trim()]);
-        found = true;
+    // If the line is a header like 'Heritability of phenotype 2/2', skip it
+    if (/^Heritability of phenotype \d+(\/\d+)?$/.test(line.trim())) return;
+    // If the line is just '/2' or similar, skip it
+    if (/^\/\d+$/.test(line.trim())) return;
+    // If the line is just a number (e.g. '2'), skip it
+    if (/^\d+$/.test(line.trim())) return;
+    const idx = line.indexOf(':');
+    if (idx !== -1) {
+      lastKey = line.slice(0, idx).trim();
+      kvPairs.push([lastKey, line.slice(idx + 1).trim()]);
+    } else if (lastKey) {
+      // If the line contains 'Ratio' (with or without <, >, =), split it out as a new row
+      const ratioMatch = line.match(/(Ratio\s*[<>=]?.*)/i);
+      if (ratioMatch) {
+        // If there is text before 'Ratio', append it to the previous value
+        const before = line.slice(0, ratioMatch.index).trim();
+        if (before) {
+          const prev = kvPairs.pop();
+          if (prev) kvPairs.push([prev[0], (prev[1] + ' ' + before).trim()]);
+        }
+        // Add Ratio as a new row
+        kvPairs.push(['Ratio', ratioMatch[1].replace(/^Ratio\s*/i, '').trim()]);
+        lastKey = 'Ratio';
+      } else {
+        // Remove leading whitespace from value
+        const prev = kvPairs.pop();
+        if (prev) {
+          kvPairs.push([prev[0], (prev[1] + '\n' + line.trim()).replace(/^\s+/, '')]);
+        }
       }
-    }
-    if (!found) {
+    } else {
       kvPairs.push(['', line.trim()]);
     }
   });
   if (!kvPairs.length) return '';
-  const col1Width = Math.max(...kvPairs.map(([k]) => k.length));
-  const col2Width = Math.max(...kvPairs.map(([,v]) => v.length));
-  const header = `${''.padEnd(col1Width)} | Value`;
-  const sep = `${'-'.repeat(col1Width)}-|-${'-'.repeat(col2Width)}`;
-  const linesOut = [header, sep, ...kvPairs.map(([k, v]) => `${k.padEnd(col1Width)} | ${v}`)];
+  // Use tab instead of separator
+  const header = `\tValue`;
+  const linesOut = [header, ...kvPairs.map(([k, v]) => `${k}\t${v}`)];
   return linesOut.join('\n');
 }
 
@@ -270,11 +303,10 @@ function formatSummarySection(section: string) {
   if (headerIdx >= filteredLines.length - 1) return section;
   const header = filteredLines[headerIdx].split(/\s+/).filter(Boolean);
   const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
-  const colWidths = header.map((h, i) => Math.max(h.length, ...rows.map(r => r[i]?.length || 0)));
-  const headerLine = header.map((h, i) => h.padEnd(colWidths[i])).join(' | ');
-  const sep = colWidths.map(w => '-'.repeat(w)).join('-|-');
-  const rowLines = rows.map(r => r.map((c, i) => c.padEnd(colWidths[i])).join(' | '));
-  return [headerLine, sep, ...rowLines].join('\n');
+  // Use tab instead of separator
+  const headerLine = header.join('\t');
+  const rowLines = rows.map(r => r.join('\t'));
+  return [headerLine, ...rowLines].join('\n');
 }
 
 function DownloadOptionsPanel({ result, filename = "heritability_result.txt", inputFilename, parsedTableText }: { result: string; filename?: string; inputFilename?: string; parsedTableText?: string }) {
@@ -318,7 +350,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
               }
             }}
           >
-            {zipping ? 'Zipping...' : 'Download Input (zip)'}
+            {zipping ? 'Zipping...' : 'Download Inputs'}
           </button>
         ) : inputFilename && (
           <button
@@ -390,7 +422,7 @@ function renderLdScoreTable(section: string, opts?: { ignoreAnalysisFinished?: b
   const rows = lines.slice(1).map(l => l.split(/\s+/));
   return (
     <TableContainer>
-      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0 }}>
+      <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
         <thead>
           <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
         </thead>
@@ -481,7 +513,6 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     const inputFilename = uploads;
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h5>Genetic Correlation Results</h5>
         <h6>Heritability of phenotype 1</h6>
         {renderKeyValueTable(parsed.herit1 || '')}
         <h6>Heritability of phenotype 2</h6>
@@ -511,7 +542,6 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     ].filter(Boolean).join('\n\n');
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h5>LD Score Calculation Result</h5>
         <h6>Summary of LD Scores</h6>
         {renderLdScoreTable(parsed.summary)}
         <h6>MAF/LD Score Correlation Matrix</h6>

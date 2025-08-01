@@ -45,6 +45,8 @@ export default function LdScoreForm() {
   const [uploadedBim, setUploadedBim] = useState<string>("");
   const [uploadedFam, setUploadedFam] = useState<string>("");
 
+  const [ldscoreLoading, setLdscoreLoading] = useState(false);
+
   const handleFileUpload = async (file: File) => {
     setUploading(true);
     const formData = new FormData();
@@ -247,13 +249,15 @@ export default function LdScoreForm() {
       reference,
     });
     try {
-      setUploading(true);
+      setLdscoreLoading(true);
+      //setUploading(true);
       await fetchLdScoreCalculationResult(params);
       setLdscoreResultRef(reference);
     } catch (error) {
       // handle error UI if needed
     } finally {
-      setUploading(false);
+     // setUploading(false);
+      setLdscoreLoading(false);
     }
   };
 
@@ -331,10 +335,10 @@ export default function LdScoreForm() {
                       accept=".txt,.tsv,.csv"
                       title="Upload pre-munged GWAS sumstats"
                       onChange={async (e) => {
-                        //e.target.value = "";
                         const input = e.target as HTMLInputElement;
                         const file = input.files && input.files[0];
-                        setHeritabilityResult("")
+                        setHeritabilityResult("");
+                        setHeritabilityResultRef(null); // Reset result when new file is loaded
                         if (file) {
                           setUploading(true);
                           await handleFileUpload(file);
@@ -389,7 +393,7 @@ export default function LdScoreForm() {
                     />
                   {(exampleFilename || uploadedFilename) && (
                     <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                      <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
+                      <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
                      <a
                         href={exampleFilename
                           ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
@@ -476,6 +480,7 @@ export default function LdScoreForm() {
                       onChange={async (e) => {
                         const input = e.target as HTMLInputElement;
                         const file = input.files && input.files[0];
+                        setGeneticCorrelationResultRef(null); // Reset result when new file is loaded
                         if (file) {
                           await handleFileUpload(file);
                           setUploadedFile1(file.name);
@@ -499,6 +504,7 @@ export default function LdScoreForm() {
                       onChange={async (e) => {
                         const input = e.target as HTMLInputElement;
                         const file = input.files && input.files[0];
+                        setGeneticCorrelationResultRef(null); // Reset result when new file is loaded
                         if (file) {
    
                           await handleFileUpload(file);
@@ -650,6 +656,7 @@ export default function LdScoreForm() {
                       onChange={async (e) => {
                         const input = e.target as HTMLInputElement;
                         if (input.files) {
+                          setLdscoreResultRef(null); // Reset LD score result when new files are loaded
                           handleLdFilesUpload(input.files);
                         }
                       }}
@@ -679,7 +686,7 @@ export default function LdScoreForm() {
                     />
                     {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
                       <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                        <span style={{ fontWeight: 600 }}>Input files Updates:</span><br />
+                        <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
                         <div>{exampleBed || uploadedBed}</div>
                         <div>{exampleBim || uploadedBim}</div>
                         <div>{exampleFam || uploadedFam}</div>
@@ -725,6 +732,28 @@ export default function LdScoreForm() {
               </Col>
             </Row>
           </Form>
+  
+          {ldscoreLoading && (
+            <div className="d-flex flex-column align-items-center my-3">
+              <span
+                className="px-3 py-2 mb-2"
+                style={{
+                  background: '#e3f0ff',
+                  color: '#084298',
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  maxWidth: 800,
+                }}
+              >
+                Computational time may vary based on the number of samples and genetic markers provided in the data
+              </span>
+              <div>
+                <CalculateLoading />
+              </div>
+            </div>
+          )}
+          {/* Show results component if reference and type are available */}
           {ldscoreResultRef && (
             <LdScoreResults
               reference={ldscoreResultRef}

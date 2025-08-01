@@ -29,3 +29,5 @@ database/
 config.yml
 
 .env
+docker-compose.yml
+docker/
