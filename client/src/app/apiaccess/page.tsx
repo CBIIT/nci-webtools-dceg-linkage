@@ -61,7 +61,7 @@ export default function ApiAccessPage() {
     <Container className="py-4 tab-content mb-0">
       <div className="not-home">
         <div className="text-center">
-          <h1 className="h2">
+          <h1>
             <Image
               src="/images/LDlink_logo_small_clear.png"
               alt="LDlink"
@@ -83,7 +83,7 @@ export default function ApiAccessPage() {
             <i>
               Interested in accessing LDlink&apos;s API using R? <br />
               Check out the new LDlinkR package now available on{" "}
-              <a href="https://cran.r-project.org/web/packages/LDlinkR/index.html" title="LDlinkR CRAN" target="_blank" rel="noopener noreferrer">
+              <a href="https://cran.r-project.org/web/packages/LDlinkR/index.html" title="LDlinkR CRAN" target="_blank" rel="noopener noreferrer" className="dark-blue">
                 CRAN
               </a>.
             </i>
@@ -180,7 +180,7 @@ export default function ApiAccessPage() {
             )}
             <Alert className="mt-3 alert-api">
               <b>Important:</b> API access is limited to sequential requests only. Please wait until calculation results are returned before making another request.
-              Contact <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">support</a> if you plan to make large volumes of API requests.
+              Contact <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support" className="dark-blue">support</a> if you plan to make large volumes of API requests.
             </Alert>
           </Col>
         </Row>
