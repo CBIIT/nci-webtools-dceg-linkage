@@ -687,9 +687,45 @@ export default function LdScoreForm() {
                     {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
                       <div className="mt-1" style={{ fontSize: "0.95em" }}>
                         <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
-                        <div>{exampleBed || uploadedBed}</div>
-                        <div>{exampleBim || uploadedBim}</div>
-                        <div>{exampleFam || uploadedFam}</div>
+                        {(exampleBed || uploadedBed) && (
+                          <div>
+                            <a
+                              href={exampleBed ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBed)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBed)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {exampleBed || uploadedBed}
+                            </a>
+                          </div>
+                        )}
+                        {(exampleBim || uploadedBim) && (
+                          <div>
+                            <a
+                              href={exampleBim ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBim)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBim)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {exampleBim || uploadedBim}
+                            </a>
+                          </div>
+                        )}
+                        {(exampleFam || uploadedFam) && (
+                          <div>
+                            <a
+                              href={exampleFam ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFam)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFam)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {exampleFam || uploadedFam}
+                            </a>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
