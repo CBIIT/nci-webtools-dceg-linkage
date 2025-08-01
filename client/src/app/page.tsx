@@ -4,7 +4,6 @@ import Image from "next/image";
 import LdToolCard from "@/components/cards/ldtool-card";
 import WhatsNew from "@/components/sections/whatsnew";
 import LdToolSection from "@/components/sections/ldToolCards";
-import version from "./version/version.json";
 
 export default function Home() {
  
@@ -60,7 +59,7 @@ export default function Home() {
             <p>
               Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
             </p>
-            <p id="ldlink_version">Version {version.version}</p>
+            <p id="ldlink_version">Version {process.env.NEXT_PUBLIC_VERSION}</p>
 
 
           </div>
