@@ -2142,7 +2142,10 @@ def ldtrait():
                             trait["warning"] = json_dict["warning"]
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
+                # Write the trait dictionary directly to JSON file and prepare response
                 out_json = json.dumps(trait, sort_keys=False)
+                with open(tmp_dir + "ldtrait" + reference + ".json", "w") as f:
+                    f.write(out_json)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
