@@ -271,14 +271,33 @@ export default function LdScoreForm() {
   const onHeritabilityReset = () => {
     heritabilityForm.reset();
     setHeritabilityResultRef(null);
+    setExampleFilename("");
+    setExampleFilepath("");
+    setUploadedFilename("");
+    // Also reset pop and window fields
+    heritabilityForm.setValue("pop", { label: '', value: '' });
   };
   const onGeneticReset = () => {
     geneticForm.reset();
     setGeneticCorrelationResultRef(null);
+    setExampleFile1("");
+    setExampleFile2("");
+    setUploadedFile1("");
+    setUploadedFile2("");
+    geneticForm.setValue("pop", { label: '', value: '' });
   };
   const onLdReset = () => {
     ldForm.reset();
     setLdscoreResultRef(null);
+    setExampleBed("");
+    setExampleBim("");
+    setExampleFam("");
+    setUploadedBed("");
+    setUploadedBim("");
+    setUploadedFam("");
+    ldForm.setValue("pop", { label: '', value: '' });
+    ldForm.setValue("window", 1);
+    ldForm.setValue("windowUnit", "cM");
   };
 
   const analysisType = heritabilityForm.watch("analysis_type");
