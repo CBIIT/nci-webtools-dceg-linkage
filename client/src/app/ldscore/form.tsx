@@ -178,6 +178,8 @@ export default function LdScoreForm() {
 
   // Update submit handlers to set resultRef and resultType
   const onHeritabilitySubmit = async (data: FormData) => {
+    // Clear all results before new calculation
+    setHeritabilityResultRef(null);
     setHeritabilityLoading(true);
     const pop =  data.pop.value ;
     const genomeBuild = genome_build || "grch37";
@@ -202,6 +204,8 @@ export default function LdScoreForm() {
   };
 
   const onGeneticSubmit = async (data: FormData) => {
+    // Clear all results before new calculation
+    setGeneticCorrelationResultRef(null);
     setGeneticResult("");
     setGeneticLoading(true);
     const pop = data.pop.value;
@@ -229,6 +233,8 @@ export default function LdScoreForm() {
   };
 
   const onLdSubmit = async () => {
+    // Clear all results before new calculation
+    setLdscoreResultRef(null);
     const bed = exampleBed || uploadedBed;
     const bim = exampleBim || uploadedBim;
     const fam = exampleFam || uploadedFam;
@@ -243,8 +249,8 @@ export default function LdScoreForm() {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const params = new URLSearchParams({
       filename,
-      window: String(window),
-      windowUnit,
+      ldwindow: String(window),
+      windUnit: String(windowUnit),
       isExample: isExample ? "true" : "false",
       reference,
     });
