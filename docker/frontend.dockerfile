@@ -26,8 +26,9 @@ ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL}
 ARG GOOGLE_MAPS_API_KEY=none
 ENV NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
 RUN npm run build 
-
+COPY docker/nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 EXPOSE 443
 
 CMD npm run start
+CMD npm run start -- -p 3001 & nginx -g 'daemon off;'

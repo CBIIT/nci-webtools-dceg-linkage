@@ -580,12 +580,41 @@ def zip_files():
         filenames = request.json.get('files')
         zip_filename = 'files.zip'
         zip_filepath = os.path.join(tmp_dir, zip_filename)
-        
+        uploads_dir = os.path.join(tmp_dir, 'uploads')
+        ldscore_dir = os.path.join(param_list['data_dir'], 'ldscore')
+
+        os.makedirs(uploads_dir, exist_ok=True)
+
+        # List of known example files
+        example_files = [
+            'BBJ_LDLC22.txt',
+            'BBJ_HDLC22.txt',
+            '22.bed',
+            '22.bim',
+            '22.fam',
+        ]
+
+        # For each file, ensure it exists in uploads_dir; if not, copy from ldscore_dir if it's an example file
+        for filename in filenames:
+            upload_path = os.path.join(uploads_dir, filename)
+            if not os.path.exists(upload_path):
+                if filename in example_files:
+                    source_path = os.path.join(ldscore_dir, filename)
+                    if os.path.exists(source_path):
+                        shutil.copy(source_path, upload_path)
+                        app.logger.info(f"Copied example file {source_path} to {upload_path}")
+                    else:
+                        app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
+                        return jsonify({'error': f'Example file {filename} not found in {ldscore_dir}'}), 404
+                else:
+                    app.logger.error(f"File {filename} not found in uploads directory and is not an example file.")
+                    return jsonify({'error': f'File {filename} not found in uploads directory and is not an example file.'}), 404
+
         with zipfile.ZipFile(zip_filepath, 'w') as zipf:
             for filename in filenames:
-                file_path = safe_join(tmp_dir, 'uploads', filename)
+                file_path = os.path.join(uploads_dir, filename)
                 zipf.write(file_path, os.path.basename(file_path))
-        
+
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
     except Exception as e:
         exc_obj = e
