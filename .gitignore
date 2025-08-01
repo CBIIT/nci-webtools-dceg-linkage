@@ -30,4 +30,5 @@ config.yml
 
 .env
 docker-compose.yml
-docker/
+docker/frontendlocal.dockerfile
+docker/nginx.conf
