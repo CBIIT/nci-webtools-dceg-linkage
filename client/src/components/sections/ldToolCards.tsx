@@ -1,6 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import LDToolCard from "@/components/cards/ldtool-card";
+import { Container } from "react-bootstrap";
+
 
 type Tool = {
   id: string;
@@ -101,14 +103,16 @@ export default function LdToolSection() {
               // Only render spacer for 1-card rows if not extra small
               const showSpacer = isOneCard && !isExtraSmall;
               return (
-                <div className={`card-row${isTwoCards ? ' two-cards' : ''}${isOneCard ? ' one-card' : ''}`} key={rowIndex}>
-                  {showSpacer && <div className="card-spacer" />}
-                  {row.map((tool, colIndex) =>
-                    tool ? (
-                      <LDToolCard key={tool.id} {...tool} />
-                    ) : null
-                  )}
-                </div>
+                <Container key={rowIndex}>
+                  <div className={`card-row${isTwoCards ? ' two-cards' : ''}${isOneCard ? ' one-card' : ''}`}>
+                    {showSpacer && <div className="card-spacer" />}
+                    {row.map((tool, colIndex) =>
+                      tool ? (
+                        <LDToolCard key={tool.id} {...tool} />
+                      ) : null
+                    )}
+                  </div>
+                </Container>
               );
             })}
           </div>
