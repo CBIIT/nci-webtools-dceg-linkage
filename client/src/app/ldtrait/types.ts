@@ -25,7 +25,6 @@ export interface ResultsData {
   error?: string;
 }
 
-
 export interface FormData {
   snps: string;
   varFile?: string | FileList;
@@ -58,17 +57,4 @@ export interface Ldtrait {
   };
   warning?: string;
   error?: string;
-}
-
-export interface Warning {
-  rs_number: string;
-  position: string;
-  alleles: string;
-  comment: string;
-}
-export interface Detail {
-  rs_number: string;
-  position: string;
-  alleles: string;
-  comment: string;
 }
