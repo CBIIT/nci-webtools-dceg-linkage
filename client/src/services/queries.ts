@@ -107,3 +107,6 @@ export async function fetchLdScoreCalculationResult(params: URLSearchParams): Pr
   }
 }
 
+export async function ldtrait(params: any): Promise<any> {
+  return (await axios.post(`/LDlinkRestWeb/ldtrait`, params)).data;
+}
