@@ -164,9 +164,8 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const chr = info.row.original[1];
         const position = info.row.original[2];
         if (!chr || !position || !value || value === ".") return value;
-        // Use +/-250bp window around position, same as Position column
-        const start = Math.max(Number(position) - 250, 0);
-        const end = Number(position) + 250;
+        const start = parseInt(position) - 1;
+        const end = parseInt(position);
         const region = `${chr}:${start}-${end}`;
         const genome = formData?.genome_build === "grch37" ? "GRCh37" : "GRCh38";
         const url = `https://www.regulomedb.org/regulome-search?genome=${genome}&regions=${encodeURIComponent(region)}`;
