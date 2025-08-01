@@ -979,7 +979,7 @@ def ldscore():
         
             if file_chromo:
                 # Find the file in the directory
-                pattern = os.path.join("/data/tmp/uploads/", f"{file_chromo}.*")
+                pattern = os.path.join("/data/tmp/uploads/", f"*{file_chromo}.*")
                 for file_path in glob.glob(pattern):                   
                     extension = file_path.split('.')[-1]
                     new_filename = f"{file_chromo}.{extension}"
