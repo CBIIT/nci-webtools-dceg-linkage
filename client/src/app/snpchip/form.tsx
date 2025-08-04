@@ -289,16 +289,7 @@ export default function SNPChipForm() {
                       setSelected={setAffymetrixChips}
                       type="affymetrix"
                     />
-                    {affymetrixChips.length > 0 && (
-                      <div className="mt-2">
-                        <strong>Selected Affymetrix arrays:</strong>
-                        <ul className="mb-0">
-                          {affymetrixChips.map(chip => (
-                            <li key={chip.id}>{chip.name} ({chip.id})</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    
                   </Col>
                 </Row>
               </>
