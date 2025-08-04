@@ -14,8 +14,9 @@ import "./style.css";
 export interface FormData {
   file?: File;
   file2?: File; // Second file for genetic correlation
+  ldfiles?: FileList; // Add this line for LD calculation file uploads
   analysis_type: "heritability" | "genetic_correlation" | "ld_calculation";
-  pop: LdscorePopOption;
+  pop: LdscorePopOption | null; // Allow null for no selection
   window: number;
   windowUnit: "kb" | "cM";
 }
@@ -98,10 +99,11 @@ export default function LdScoreForm() {
   // Heritability form state
   const heritabilityForm = useForm<FormData>({
     defaultValues: {
+      file: undefined,
       analysis_type: "heritability",
+      //pop: { label: '', value: '' },
       pop: undefined,
-      window: 0,
-      windowUnit: "cM"
+      window: 1,
     }
   });
   const heritabilityMutation = useMutation({
@@ -122,10 +124,11 @@ export default function LdScoreForm() {
   // Genetic correlation form state
   const geneticForm = useForm<FormData>({
     defaultValues: {
+      file: undefined,
+      file2: undefined,
       analysis_type: "genetic_correlation",
       pop: undefined,
-      window: 0,
-      windowUnit: "cM"
+         window: 1,
     }
   });
   const geneticMutation = useMutation({
@@ -148,8 +151,8 @@ export default function LdScoreForm() {
   // LD calculation form state
   const ldForm = useForm<FormData>({
     defaultValues: {
+      ldfiles: undefined,
       analysis_type: "ld_calculation",
-      pop: undefined,
       window: 1,
       windowUnit: "cM"
     }
@@ -181,7 +184,7 @@ export default function LdScoreForm() {
     // Clear all results before new calculation
     setHeritabilityResultRef(null);
     setHeritabilityLoading(true);
-    const pop =  data.pop.value ;
+    const pop = data.pop?.value ?? "";
     const genomeBuild = genome_build || "grch37";
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFilename;
@@ -208,7 +211,7 @@ export default function LdScoreForm() {
     setGeneticCorrelationResultRef(null);
     setGeneticResult("");
     setGeneticLoading(true);
-    const pop = data.pop.value;
+    const pop = data.pop?.value ?? "";
     const genomeBuild = genome_build || "grch37";
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const isExample = !!exampleFile1;
@@ -240,10 +243,6 @@ export default function LdScoreForm() {
     const fam = exampleFam || uploadedFam;
     const window = ldForm.getValues("window");
     const windowUnit = ldForm.getValues("windowUnit");
-    if (!bed || !bim || !fam) {
-      alert("Please provide all three files: .bed, .bim, .fam");
-      return;
-    }
     const isExample = !!exampleBed;
     const filename = `${bed};${bim};${fam}`;
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
@@ -274,8 +273,7 @@ export default function LdScoreForm() {
     setExampleFilename("");
     setExampleFilepath("");
     setUploadedFilename("");
-    // Also reset pop and window fields
-    heritabilityForm.setValue("pop", { label: '', value: '' });
+    heritabilityForm.setValue("pop",null);
   };
   const onGeneticReset = () => {
     geneticForm.reset();
@@ -284,10 +282,15 @@ export default function LdScoreForm() {
     setExampleFile2("");
     setUploadedFile1("");
     setUploadedFile2("");
-    geneticForm.setValue("pop", { label: '', value: '' });
+    geneticForm.setValue("pop", null);
   };
   const onLdReset = () => {
-    ldForm.reset();
+    ldForm.reset({
+      ldfiles: undefined,
+      analysis_type: "ld_calculation",
+      window: 1,
+      windowUnit: "cM"
+    });
     setLdscoreResultRef(null);
     setExampleBed("");
     setExampleBim("");
@@ -295,9 +298,6 @@ export default function LdScoreForm() {
     setUploadedBed("");
     setUploadedBim("");
     setUploadedFam("");
-    ldForm.setValue("pop", { label: '', value: '' });
-    ldForm.setValue("window", 1);
-    ldForm.setValue("windowUnit", "cM");
   };
 
   const analysisType = heritabilityForm.watch("analysis_type");
@@ -499,7 +499,7 @@ export default function LdScoreForm() {
                   ) : (
                     <Form.Control 
                       type="file" 
-                      {...geneticForm.register("file", { required: "Trait 1 file is required" })}
+                      {...geneticForm.register("file", { required: "File is required" })}
                       accept=".txt,.tsv,.csv"
                       title="Upload pre-munged GWAS sumstats"
                       onChange={async (e) => {
@@ -523,7 +523,7 @@ export default function LdScoreForm() {
                   ) : (
                     <Form.Control 
                       type="file" 
-                      {...geneticForm.register("file2", { required: "Trait 2 file is required" })}
+                      {...geneticForm.register("file2", { required: "File is required" })}
                       accept=".txt,.tsv,.csv"
                       title="Upload pre-munged GWAS sumstats"
                       onChange={async (e) => {
@@ -675,6 +675,7 @@ export default function LdScoreForm() {
                   ) : (
                     <Form.Control
                       type="file"
+                      {...ldForm.register("ldfiles", { required: "File is required" })}
                       accept=".bed,.bim,.fam"
                       multiple
                       title="Upload .bed, .bim, .fam files"
@@ -687,6 +688,7 @@ export default function LdScoreForm() {
                       }}
                     />
                   )}
+                  <Form.Text className="text-danger">{ldForm.formState.errors?.ldfiles?.message}</Form.Text>
                 </Form.Group>
                 <Form.Group controlId="useExLd" className="mb-3">
                   <div className="mt-2">
@@ -764,6 +766,7 @@ export default function LdScoreForm() {
                     <Form.Control
                       type="number"
                       {...ldForm.register("window", { required: "Window is required",  min: { value: 1, message: "Window must be greater than 0" } })}
+                      defaultValue={1}
                       style={{ maxWidth: "120px", marginRight: "8px" }}
                       title="Please enter an integer greater than 0"
                     />

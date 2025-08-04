@@ -513,9 +513,9 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     const inputFilename = uploads;
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h6>Heritability of phenotype 1</h6>
+        <h6>Heritability of Phenotype 1</h6>
         {renderKeyValueTable(parsed.herit1 || '')}
-        <h6>Heritability of phenotype 2</h6>
+        <h6>Heritability of Phenotype 2</h6>
         {renderKeyValueTable(parsed.herit2 || '')}
         <h6>Genetic Covariance</h6>
         {renderKeyValueTable(parsed.gencov || '')}
