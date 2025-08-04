@@ -1,24 +1,18 @@
 "use client";
-import { Form, Button, Accordion, Row, Col, Spinner  } from "react-bootstrap";
-import { useState, useEffect } from "react";
-import { snpchipPlatforms } from "../../services/queries";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Row, Col, Form, Button, Accordion, Spinner } from "react-bootstrap";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter, usePathname } from "next/navigation";
+import { snpchipPlatforms, snpchip } from "@/services/queries";
+import CalculateLoading from "@/components/calculateLoading";
+import { useStore } from "@/store";
+import { FormData } from "./types";
+import { parseSnps } from "@/services/utils";
 
-export interface Platform {
+interface Platform {
   id: string;
   name: string;
-}
-
-interface SnpChipFormProps {
-  handleSubmit: (e: React.FormEvent) => void;
-  loading: boolean;
-  input: string;
-  setInput: (value: string) => void;
-  file: File | null;
-  setFile: (file: File | null) => void;
-  illuminaChips: Platform[];
-  setIlluminaChips: (chips: Platform[]) => void;
-  affymetrixChips: Platform[];
-  setAffymetrixChips: (chips: Platform[]) => void;
 }
 
 function CheckboxList({
@@ -39,7 +33,6 @@ function CheckboxList({
       setSelected([...selected, option]);
     }
   };
-
   return (
     <>
       {options.map((option) => (
@@ -57,23 +50,40 @@ function CheckboxList({
   );
 }
 
-export default function SnpChipForm({
-  handleSubmit,
-  loading,
-  input,
-  setInput,
-  file,
-  setFile,
-  illuminaChips,
-  setIlluminaChips,
-  affymetrixChips,
-  setAffymetrixChips,
-}: SnpChipFormProps) {
+export default function SNPChipForm() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { genome_build } = useStore((state: { genome_build: string }) => state);
+
+  const defaultForm: FormData = {
+    snps: "",
+    pop: [],
+    genome_build: genome_build || "grch37",
+    varFile: "",
+    platforms: [],
+  };
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
+    defaultValues: defaultForm,
+  });
+
+  const varFile = watch("varFile") as string | FileList;
   const [availableIllumina, setAvailableIllumina] = useState<Platform[]>([]);
   const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>([]);
+  const [illuminaChips, setIlluminaChips] = useState<Platform[]>([]);
+  const [affymetrixChips, setAffymetrixChips] = useState<Platform[]>([]);
   const [platformsLoading, setPlatformsLoading] = useState(true);
   const [selectAllIllumina, setSelectAllIllumina] = useState(true);
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
+  const [uploadedFileName, setUploadedFileName] = useState<string>("");
 
   useEffect(() => {
     async function fetchPlatforms() {
@@ -82,7 +92,6 @@ export default function SnpChipForm({
         const data = await snpchipPlatforms();
         const illumina: Platform[] = [];
         const affymetrix: Platform[] = [];
-
         for (const key in data) {
           if (key.startsWith("I_")) {
             illumina.push({ id: key, name: data[key] });
@@ -90,7 +99,6 @@ export default function SnpChipForm({
             affymetrix.push({ id: key, name: data[key] });
           }
         }
-
         setAvailableIllumina(illumina);
         setAvailableAffymetrix(affymetrix);
         setIlluminaChips(illumina);
@@ -102,56 +110,100 @@ export default function SnpChipForm({
       }
     }
     fetchPlatforms();
-  }, [setIlluminaChips, setAffymetrixChips]);
+  }, []);
 
   useEffect(() => {
     setSelectAllIllumina(availableIllumina.length > 0 && illuminaChips.length === availableIllumina.length);
     setSelectAllAffymetrix(availableAffymetrix.length > 0 && affymetrixChips.length === availableAffymetrix.length);
   }, [illuminaChips, affymetrixChips, availableIllumina, availableAffymetrix]);
 
-  return (
-    <>
-      <Form onSubmit={handleSubmit} className="mb-4">
-        <Row className="mb-3 align-items-end">
-          <Col md={4}>
-            <Form.Group controlId="snpchip-file-snp-numbers">
-              <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={5}
-                placeholder="RS Numbers or Genomic Coordinates"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                required={!file}
-                title="Enter list of RS numbers or Genomic Coordinates (one per line)"
-              />
-            </Form.Group>
-          </Col>
-          <Col md={5}>
-            <Form.Group controlId="snpchip-file">
-              <Form.Label>Upload file with variants</Form.Label>
-              <Form.Control
-                type="file"
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  const selectedFile = target.files?.[0] || null;
-                  setFile(selectedFile);
-                  if (selectedFile) setInput("");
-                }}
-              />
-            </Form.Group>
-          </Col>
-          <Col md={3} className="d-flex justify-content-end">
-            <Button type="reset" variant="outline-danger" className="me-1">
-              Reset
-            </Button>
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading ? <Spinner animation="border" size="sm" /> : "Calculate"}
-            </Button>
-          </Col>
-        </Row>
-      </Form>
+  useEffect(() => {
+    if (varFile instanceof FileList && varFile.length > 0) {
+      const file = varFile[0];
+      setUploadedFileName(file.name);
+      const reader = new FileReader();
+      reader.onload = (e: ProgressEvent<FileReader>) => {
+        const text = e.target?.result as string;
+        if (text) {
+          setValue("snps", parseSnps(text));
+        }
+      };
+      reader.readAsText(file);
+    } else {
+      setUploadedFileName("");
+    }
+  }, [varFile, setValue]);
 
+  const submitForm = useMutation<any, Error, FormData>({
+    mutationFn: (params: FormData) => snpchip(params),
+    onSuccess: (_data, variables) => {
+      if (variables && variables.reference) {
+        router.push(`${pathname}?ref=${variables.reference}`);
+      }
+    },
+  });
+
+  async function onSubmit(form: FormData) {
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1));
+    const { varFile, ...data } = form;
+    const formData: FormData = {
+      ...data,
+      varFile,
+      reference,
+      genome_build,
+      platforms: [...illuminaChips, ...affymetrixChips].map((chip) => chip.id),
+    };
+    queryClient.setQueryData(["snpchip-form-data", reference.toString()], formData);
+    submitForm.mutate(formData);
+  }
+
+  function onReset(event: React.FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    router.push("/snpchip");
+    reset(defaultForm);
+    queryClient.invalidateQueries({ queryKey: ["snpchip-form-data"] });
+    submitForm.reset();
+  }
+
+  return (
+    <Form id="snpchip-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
+      <Row className="mb-3 align-items-start">
+        <Col md={4}>
+          <Form.Group controlId="snps">
+            <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
+            <Form.Control
+              as="textarea"
+              rows={5}
+              placeholder="RS Numbers or Genomic Coordinates"
+              {...register("snps", { required: "SNPs are required." })}
+              title="Enter list of RS numbers or Genomic Coordinates (one per line)"
+            />
+            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
+            {uploadedFileName && (
+              <div className="mt-2 text-success">
+                <strong>Uploaded file:</strong> {uploadedFileName}
+              </div>
+            )}
+          </Form.Group>
+        </Col>
+        <Col md={5}>
+          <Form.Group controlId="varFile">
+            <Form.Label>Upload file with variants</Form.Label>
+            <Form.Control
+              type="file"
+              {...register("varFile")}
+            />
+          </Form.Group>
+        </Col>
+        <Col md={3} className="d-flex justify-content-end">
+          <Button type="reset" variant="outline-danger" className="me-1">
+            Reset
+          </Button>
+          <Button type="submit" variant="primary" disabled={submitForm.isPending}>
+            {submitForm.isPending ? <Spinner animation="border" size="sm" /> : "Calculate"}
+          </Button>
+        </Col>
+      </Row>
       <Accordion className="mb-4">
         <Accordion.Item eventKey="0">
           <Accordion.Header>
@@ -159,8 +211,7 @@ export default function SnpChipForm({
               <span>Filter by array</span>
               {!platformsLoading && (
                 <small className="text-muted me-2">
-                  {illuminaChips?.length || 0} Illumina array(s), and {affymetrixChips?.length || 0} Affymetrix array(s)
-                  selected
+                  {illuminaChips?.length || 0} Illumina array(s), and {affymetrixChips?.length || 0} Affymetrix array(s) selected
                 </small>
               )}
             </div>
@@ -172,8 +223,7 @@ export default function SnpChipForm({
               </div>
             ) : (
               <>
-                {illuminaChips.length === availableIllumina.length &&
-                affymetrixChips.length === availableAffymetrix.length ? (
+                {illuminaChips.length === availableIllumina.length && affymetrixChips.length === availableAffymetrix.length ? (
                   <p className="instruction">
                     Limit search results to only SNPs on the selected arrays (
                     <span
@@ -223,6 +273,16 @@ export default function SnpChipForm({
                       setSelected={setIlluminaChips}
                       type="illumina"
                     />
+                    {illuminaChips.length > 0 && (
+                      <div className="mt-2">
+                        <strong>Selected Illumina arrays:</strong>
+                        <ul className="mb-0">
+                          {illuminaChips.map(chip => (
+                            <li key={chip.id}>{chip.name} ({chip.id})</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </Col>
                   <Col>
                     <Form.Check
@@ -242,6 +302,16 @@ export default function SnpChipForm({
                       setSelected={setAffymetrixChips}
                       type="affymetrix"
                     />
+                    {affymetrixChips.length > 0 && (
+                      <div className="mt-2">
+                        <strong>Selected Affymetrix arrays:</strong>
+                        <ul className="mb-0">
+                          {affymetrixChips.map(chip => (
+                            <li key={chip.id}>{chip.name} ({chip.id})</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </Col>
                 </Row>
               </>
@@ -249,7 +319,8 @@ export default function SnpChipForm({
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+      {submitForm.isPending && <CalculateLoading />}
       <hr />
-    </>
+    </Form>
   );
 }
