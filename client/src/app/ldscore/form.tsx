@@ -80,6 +80,7 @@ export default function LdScoreForm() {
   const handleLdFilesUpload = async (files: FileList) => {
     setUploading(true);
     setUploadedBed(""); setUploadedBim(""); setUploadedFam("");
+    ldForm.clearErrors("ldfiles");
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const ext = file.name.split('.').pop()?.toLowerCase();
@@ -603,6 +604,8 @@ export default function LdScoreForm() {
                         setUploadedFile1("");
                         setUploadedFile2("");
                         geneticForm.setValue("analysis_type", "genetic_correlation");
+                        geneticForm.clearErrors("file");
+                        geneticForm.clearErrors("file2");
                       } else {
                         setExampleFile1("");
                         setExampleFile2("");
@@ -727,6 +730,7 @@ export default function LdScoreForm() {
                           setUploadedBed("");
                           setUploadedBim("");
                           setUploadedFam("");
+                          ldForm.clearErrors("ldfiles");
                         } else {
                           setExampleBed("");
                           setExampleBim("");
