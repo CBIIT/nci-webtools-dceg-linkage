@@ -147,7 +147,7 @@ export default function Correlation() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...geneticForm.register("file", { required: "Trait 1 file is required" })}
+                  {...geneticForm.register("file", { required: "File is required" })}
                   accept=".txt,.tsv,.csv"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
@@ -171,7 +171,7 @@ export default function Correlation() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...geneticForm.register("file2", { required: "Trait 2 file is required" })}
+                  {...geneticForm.register("file2", { required: "File is required" })}
                   accept=".txt,.tsv,.csv"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
@@ -220,19 +220,22 @@ export default function Correlation() {
               <Form.Check
                 type="switch"
                 id="use-example-correlation"
-                label="Use Example Data"
+                label="Use example data"
                 checked={useExampleCorrelation}
                 onChange={(e) => {
                   setUseExampleCorrelation(e.target.checked);
+                   setGeneticCorrelationResultRef(null);
                   if (e.target.checked) {
                     setExampleFile1("BBJ_HDLC22.txt");
                     setExampleFile2("BBJ_LDLC22.txt");
                     setUploadedFile1("");
                     setUploadedFile2("");
+                    geneticForm.clearErrors("file");
+                    geneticForm.clearErrors("file2");
                   } else {
                     setExampleFile1("");
                     setExampleFile2("");
-                    geneticForm.setValue("pop", null);
+                    //geneticForm.setValue("pop", null);
                   }
                 }}
               />

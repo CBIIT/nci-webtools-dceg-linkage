@@ -169,10 +169,11 @@ export default function Heritability() {
                 <Form.Check 
                   type="switch"
                   id="use-example-heritability"
-                  label="Use Example Data"
+                  label="Use example data"
                   checked={useExample}
                   onChange={async (e) => {
                     setUseExample(e.target.checked);
+                    setHeritabilityResultRef(null);
                     if (e.target.checked) {
                       setExampleFilename("");
                       setExampleFilepath("");
@@ -198,7 +199,7 @@ export default function Heritability() {
                       setExampleFilename("");
                       setExampleFilepath("");
                       setUploadedFilename("");
-                      heritabilityForm.setValue("pop", null);
+                      //heritabilityForm.setValue("pop", null);
                     }
                   }}
                 />

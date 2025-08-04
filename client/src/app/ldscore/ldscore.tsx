@@ -189,6 +189,7 @@ export default function LDScore() {
                   checked={useExampleLdscore}
                   onChange={(e) => {
                     setUseExampleLdscore(e.target.checked);
+                        setLdscoreResultRef(null);
                     if (e.target.checked) {
                       setExampleBed("22.bed");
                       setExampleBim("22.bim");

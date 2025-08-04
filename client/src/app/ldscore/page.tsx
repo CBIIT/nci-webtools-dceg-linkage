@@ -26,7 +26,7 @@ export default function LdScore() {
                 <Col sm={12}>
                   <Nav variant="tabs" className="mb-3">
                     <Nav.Item>
-                      <Nav.Link eventKey="heritability">Heritability</Nav.Link>
+                      <Nav.Link eventKey="heritability">Heritability Analysis</Nav.Link>
                     </Nav.Item>
                     <Nav.Item>
                       <Nav.Link eventKey="genetic_correlation">Genetic Correlation</Nav.Link>
