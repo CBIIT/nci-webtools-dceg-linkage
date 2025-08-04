@@ -401,7 +401,7 @@ export default function LdScoreForm() {
                     <Form.Check 
                       type="switch"
                       id="use-example-heritability"
-                      label="Use Example Data"
+                      label="Use example data"
                       checked={useExample}
                       onChange={async (e) => {
                         setUseExample(e.target.checked);
@@ -432,7 +432,7 @@ export default function LdScoreForm() {
                           setExampleFilepath("");
                           setUploadedFilename("");
                           setHeritabilityResult("");
-                          heritabilityForm.setValue("pop", null);
+                          //heritabilityForm.setValue("pop", null);
                         }
                       }}
                     />
@@ -594,7 +594,7 @@ export default function LdScoreForm() {
                   <Form.Check 
                     type="switch"
                     id="use-example-correlation"
-                    label="Use Example Data"
+                    label="Use example data"
                     checked={useExampleCorrelation}
                     onChange={(e) => {
                       setUseExampleCorrelation(e.target.checked);
@@ -609,7 +609,7 @@ export default function LdScoreForm() {
                       } else {
                         setExampleFile1("");
                         setExampleFile2("");
-                        geneticForm.setValue("pop", null);
+                        //geneticForm.setValue("pop", null);
                       }
                     }}
                   />
@@ -699,7 +699,7 @@ export default function LdScoreForm() {
                   ) : (
                     <Form.Control
                       type="file"
-                      {...ldForm.register("ldfiles", { required: "File is required" })}
+                      {...ldForm.register("ldfiles", { required: "Files are required" })}
                       accept=".bed,.bim,.fam"
                       multiple
                       title="Upload .bed, .bim, .fam files"
@@ -719,7 +719,7 @@ export default function LdScoreForm() {
                     <Form.Check
                       type="switch"
                       id="use-example-ld"
-                      label="Use Example Data"
+                      label="Use example data"
                       checked={useExampleLdscore}
                       onChange={(e) => {
                         setUseExampleLdscore(e.target.checked);

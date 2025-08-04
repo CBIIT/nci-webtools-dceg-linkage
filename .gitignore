@@ -29,6 +29,3 @@ database/
 config.yml
 
 .env
-docker-compose.yml
-docker/frontendlocal.dockerfile
-docker/nginx.conf

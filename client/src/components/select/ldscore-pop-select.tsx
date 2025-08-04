@@ -33,7 +33,7 @@ export default function LdscorePopSelect({ name, control, rules }: { name: strin
             options={ldscorePopOptions}
             isMulti={false}
             classNamePrefix="react-select"
-            placeholder="Select Population"
+            placeholder="Select..."
           />
         </div>
       )}
