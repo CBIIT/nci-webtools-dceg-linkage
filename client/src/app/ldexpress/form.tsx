@@ -133,7 +133,7 @@ export default function LDExpressForm() {
         </Col>
         <Col sm={2}>
           <Form.Group controlId="ldexpressFile" className="mb-3">
-            <Form.Label>File With Variants</Form.Label>
+            <Form.Label>Upload file with variants</Form.Label>
             {typeof ldexpressFile === "string" && ldexpressFile !== "" ? (
               <div className="form-control bg-light">{ldexpressFile}</div>
             ) : (
