@@ -2,9 +2,8 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Accordion, Spinner } from "react-bootstrap";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { snpchipPlatforms, snpchip } from "@/services/queries";
+import { snpchipPlatforms } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData } from "./types";
@@ -50,8 +49,32 @@ function CheckboxList({
   );
 }
 
-export default function SNPChipForm() {
-  const queryClient = useQueryClient();
+interface SNPChipFormProps {
+  input: string;
+  setInput: (val: string) => void;
+  file: File | null;
+  setFile: (val: File | null) => void;
+  illuminaChips: Platform[];
+  setIlluminaChips: (chips: Platform[]) => void;
+  affymetrixChips: Platform[];
+  setAffymetrixChips: (chips: Platform[]) => void;
+  loading: boolean;
+  handleSubmit: (e: React.FormEvent) => Promise<void>;
+}
+
+export default function SNPChipForm({
+  input,
+  setInput,
+  file,
+  setFile,
+  illuminaChips,
+  setIlluminaChips,
+  affymetrixChips,
+  setAffymetrixChips,
+  loading,
+  handleSubmit,
+}: SNPChipFormProps) {
+  console.log("SNPChipForm mounted");
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state: { genome_build: string }) => state);
@@ -66,7 +89,7 @@ export default function SNPChipForm() {
   const {
     control,
     register,
-    handleSubmit,
+    handleSubmit: formHandleSubmit,
     reset,
     watch,
     setValue,
@@ -78,8 +101,6 @@ export default function SNPChipForm() {
   const varFile = watch("varFile") as string | FileList;
   const [availableIllumina, setAvailableIllumina] = useState<Platform[]>([]);
   const [availableAffymetrix, setAvailableAffymetrix] = useState<Platform[]>([]);
-  const [illuminaChips, setIlluminaChips] = useState<Platform[]>([]);
-  const [affymetrixChips, setAffymetrixChips] = useState<Platform[]>([]);
   const [platformsLoading, setPlatformsLoading] = useState(true);
   const [selectAllIllumina, setSelectAllIllumina] = useState(true);
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
@@ -89,7 +110,9 @@ export default function SNPChipForm() {
     async function fetchPlatforms() {
       try {
         setPlatformsLoading(true);
+        console.log("Fetching platforms...");
         const data = await snpchipPlatforms();
+        console.log("Fetched data: ", data);
         const illumina: Platform[] = [];
         const affymetrix: Platform[] = [];
         for (const key in data) {
@@ -106,6 +129,7 @@ export default function SNPChipForm() {
       } catch (error) {
         console.error("Failed to fetch SNPchip platforms", error);
       } finally {
+        console.log("Finished fetchPlatforms");
         setPlatformsLoading(false);
       }
     }
@@ -115,7 +139,7 @@ export default function SNPChipForm() {
   useEffect(() => {
     setSelectAllIllumina(availableIllumina.length > 0 && illuminaChips.length === availableIllumina.length);
     setSelectAllAffymetrix(availableAffymetrix.length > 0 && affymetrixChips.length === availableAffymetrix.length);
-  }, [illuminaChips, affymetrixChips, availableIllumina, availableAffymetrix]);
+  }, [illuminaChips, affymetrixChips, availableIllumina, availableAffymetrix, setIlluminaChips, setAffymetrixChips]);
 
   useEffect(() => {
     if (varFile instanceof FileList && varFile.length > 0) {
@@ -134,39 +158,8 @@ export default function SNPChipForm() {
     }
   }, [varFile, setValue]);
 
-  const submitForm = useMutation<any, Error, FormData>({
-    mutationFn: (params: FormData) => snpchip(params),
-    onSuccess: (_data, variables) => {
-      if (variables && variables.reference) {
-        router.push(`${pathname}?ref=${variables.reference}`);
-      }
-    },
-  });
-
-  async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1));
-    const { varFile, ...data } = form;
-    const formData: FormData = {
-      ...data,
-      varFile,
-      reference,
-      genome_build,
-      platforms: [...illuminaChips, ...affymetrixChips].map((chip) => chip.id),
-    };
-    queryClient.setQueryData(["snpchip-form-data", reference.toString()], formData);
-    submitForm.mutate(formData);
-  }
-
-  function onReset(event: React.FormEvent<HTMLFormElement>): void {
-    event.preventDefault();
-    router.push("/snpchip");
-    reset(defaultForm);
-    queryClient.invalidateQueries({ queryKey: ["snpchip-form-data"] });
-    submitForm.reset();
-  }
-
   return (
-    <Form id="snpchip-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
+    <Form id="snpchip-form" onSubmit={handleSubmit} noValidate>
       <Row className="mb-3 align-items-start">
         <Col md={4}>
           <Form.Group controlId="snps">
@@ -175,11 +168,10 @@ export default function SNPChipForm() {
               as="textarea"
               rows={5}
               placeholder="RS Numbers or Genomic Coordinates"
-              {...register("snps", { required: "SNPs are required." })}
+              value={input}
+              onChange={e => setInput(e.target.value)}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
             />
-            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
-            
           </Form.Group>
         </Col>
         <Col md={5}>
@@ -187,7 +179,10 @@ export default function SNPChipForm() {
             <Form.Label>Upload file with variants</Form.Label>
             <Form.Control
               type="file"
-              {...register("varFile")}
+              onChange={e => {
+                const target = e.target as HTMLInputElement;
+                setFile(target.files ? target.files[0] : null);
+              }}
             />
           </Form.Group>
         </Col>
@@ -195,8 +190,8 @@ export default function SNPChipForm() {
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
           </Button>
-          <Button type="submit" variant="primary" disabled={submitForm.isPending}>
-            {submitForm.isPending ? <Spinner animation="border" size="sm" /> : "Calculate"}
+          <Button type="submit" variant="primary" disabled={loading}>
+            {loading ? <Spinner animation="border" size="sm" /> : "Calculate"}
           </Button>
         </Col>
       </Row>
@@ -297,7 +292,7 @@ export default function SNPChipForm() {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-      {submitForm.isPending && <CalculateLoading />}
+      {loading && <CalculateLoading />}
       <hr />
     </Form>
   );

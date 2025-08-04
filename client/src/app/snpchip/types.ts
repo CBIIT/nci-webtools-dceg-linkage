@@ -20,3 +20,8 @@ export interface SnpChipData {
   reference: number;
   platforms: string[];
 }
+
+export interface Platform {
+  id: string;
+  name: string;
+}

@@ -2142,10 +2142,7 @@ def ldtrait():
                             trait["warning"] = json_dict["warning"]
                             f.write("Warning(s):\n")
                             f.write(trait["warning"])
-                # Write the trait dictionary directly to JSON file and prepare response
                 out_json = json.dumps(trait, sort_keys=False)
-                with open(tmp_dir + "ldtrait" + reference + ".json", "w") as f:
-                    f.write(out_json)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -2295,6 +2292,8 @@ def snpchip():
         try:
             snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+            with open(tmp_dir + "snpchip" + reference + ".json", "w") as f:
+                    f.write(out_json)
         except Exception as e:
             exc_obj = e
             app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -2340,6 +2339,8 @@ def snpchip():
             except Exception as e:
                 # unlock token then display error message
                 out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
+                with open(tmp_dir + "snpchip" + reference + ".json", "w") as f:
+                    f.write(out_json)
                 output = json.loads(out_json)
                 toggleLocked(token, 0)
                 exc_obj = e

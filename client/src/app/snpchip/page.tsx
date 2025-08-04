@@ -3,12 +3,13 @@
 import { useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Container, Row, Col, Form, Alert, Card } from "react-bootstrap";
-import SnpChipForm, { Platform } from "./form";
+import SnpChipForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import SNPChipResults, { SnpchipResult } from "./results";
 import { useStore } from "@/store";
 import { snpchip } from "@/services/queries";
 import { PLATFORM_LOOKUP } from "./constants";
+import type { Platform } from "./types";
 
 interface SnpChipPayload {
   snps: string;
@@ -80,6 +81,7 @@ export default function SNPchip() {
       const raw = await snpchip(payload);
 
       let data = raw;
+      console.log("data --- ", data);
       if (typeof raw === "string") {
         try {
           data = JSON.parse(raw);
@@ -90,7 +92,7 @@ export default function SNPchip() {
         }
       }
 
-      // console.log("SNPchip results:", data);
+       console.log("SNPchip results:", data);
       if (data.error) {
         setError(data.error);
         return;
@@ -213,19 +215,19 @@ export default function SNPchip() {
         <Col>
           <Suspense fallback={<CalculateLoading />}>
             <SnpChipForm
-              handleSubmit={handleSubmit}
               input={input}
               setInput={setInput}
               file={file}
               setFile={setFile}
-              loading={loading}
               illuminaChips={illuminaChips}
               setIlluminaChips={setIlluminaChips}
               affymetrixChips={affymetrixChips}
               setAffymetrixChips={setAffymetrixChips}
+              loading={loading}
+              handleSubmit={handleSubmit}
             />
           </Suspense>
-          {loading && <CalculateLoading />}
+          {/* {loading && <CalculateLoading />} */}
           {error && <Alert variant="danger">{error}</Alert>}
           {warning && (
             <Row className="justify-content-center my-3">
@@ -239,9 +241,11 @@ export default function SNPchip() {
               </Col>
             </Row>
           )}
-          <Suspense fallback={<CalculateLoading />}>
-            {results && <SNPChipResults results={results} genome_build={genome_build} />}
-          </Suspense>
+          {results && results.snpchip && results.snpchip.length > 0 && (
+            <Suspense fallback={<CalculateLoading />}>
+              <SNPChipResults results={results} genome_build={genome_build} />
+            </Suspense>
+          )}
         </Col>
       </Row>
     </Container>
