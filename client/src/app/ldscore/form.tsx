@@ -38,6 +38,9 @@ export default function LdScoreForm() {
   const [uploadedFile1, setUploadedFile1] = useState<string>("");
   const [uploadedFile2, setUploadedFile2] = useState<string>("");
 
+  // State for "Use Example Data" switch in heritability tab
+  const [useExample, setUseExample] = useState(false);
+
   // Add state for LD calculation example and uploaded files
   const [exampleBed, setExampleBed] = useState<string>("");
   const [exampleBim, setExampleBim] = useState<string>("");
@@ -45,6 +48,9 @@ export default function LdScoreForm() {
   const [uploadedBed, setUploadedBed] = useState<string>("");
   const [uploadedBim, setUploadedBim] = useState<string>("");
   const [uploadedFam, setUploadedFam] = useState<string>("");
+
+  // State for "Use Example Data" switch in LD calculation tab
+  const [useExampleLdscore, setUseExampleLdscore] = useState(false);
 
   const [ldscoreLoading, setLdscoreLoading] = useState(false);
 
@@ -147,6 +153,8 @@ export default function LdScoreForm() {
   });
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticResult, setGeneticResult] = useState("");
+  // State for "Use Example Data" switch in genetic correlation tab
+  const [useExampleCorrelation, setUseExampleCorrelation] = useState(false);
 
   // LD calculation form state
   const ldForm = useForm<FormData>({
@@ -273,6 +281,7 @@ export default function LdScoreForm() {
     setExampleFilename("");
     setExampleFilepath("");
     setUploadedFilename("");
+    setUseExample(false);
     heritabilityForm.setValue("pop",null);
   };
   const onGeneticReset = () => {
@@ -282,12 +291,16 @@ export default function LdScoreForm() {
     setExampleFile2("");
     setUploadedFile1("");
     setUploadedFile2("");
+    setUseExampleCorrelation(false);
     geneticForm.setValue("pop", null);
   };
   const onLdReset = () => {
     ldForm.reset({
+      file: undefined,
+      file2: undefined,
       ldfiles: undefined,
       analysis_type: "ld_calculation",
+      pop: null,
       window: 1,
       windowUnit: "cM"
     });
@@ -298,6 +311,7 @@ export default function LdScoreForm() {
     setUploadedBed("");
     setUploadedBim("");
     setUploadedFam("");
+    setUseExampleLdscore(false);
   };
 
   const analysisType = heritabilityForm.watch("analysis_type");
@@ -387,11 +401,14 @@ export default function LdScoreForm() {
                       type="switch"
                       id="use-example-heritability"
                       label="Use Example Data"
+                      checked={useExample}
                       onChange={async (e) => {
+                        setUseExample(e.target.checked);
                         if (e.target.checked) {
-                          heritabilityForm.setValue("analysis_type", "heritability");
-                          setUploadedFilename("")
-                          setHeritabilityResult("")
+                          setExampleFilename("");
+                          setExampleFilepath("");
+                          setUploadedFilename("");
+                          setHeritabilityResult("");
                           heritabilityForm.clearErrors("file");
                           try {
                             const response = await fetch("/LDlinkRestWeb/ldherit_example");
@@ -412,7 +429,9 @@ export default function LdScoreForm() {
                         } else {
                           setExampleFilename("");
                           setExampleFilepath("");
-                          heritabilityForm.setValue("pop", { label: "", value: "" });
+                          setUploadedFilename("");
+                          setHeritabilityResult("");
+                          heritabilityForm.setValue("pop", null);
                         }
                       }}
                     />
@@ -575,7 +594,9 @@ export default function LdScoreForm() {
                     type="switch"
                     id="use-example-correlation"
                     label="Use Example Data"
+                    checked={useExampleCorrelation}
                     onChange={(e) => {
+                      setUseExampleCorrelation(e.target.checked);
                       if (e.target.checked) {
                         setExampleFile1("BBJ_HDLC22.txt");
                         setExampleFile2("BBJ_LDLC22.txt");
@@ -585,7 +606,7 @@ export default function LdScoreForm() {
                       } else {
                         setExampleFile1("");
                         setExampleFile2("");
-                        geneticForm.setValue("pop", { label: "", value: "" });
+                        geneticForm.setValue("pop", null);
                       }
                     }}
                   />
@@ -696,7 +717,9 @@ export default function LdScoreForm() {
                       type="switch"
                       id="use-example-ld"
                       label="Use Example Data"
-                      onChange={async (e) => {
+                      checked={useExampleLdscore}
+                      onChange={(e) => {
+                        setUseExampleLdscore(e.target.checked);
                         if (e.target.checked) {
                           setExampleBed("22.bed");
                           setExampleBim("22.bim");
