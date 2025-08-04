@@ -179,11 +179,7 @@ export default function SNPChipForm() {
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
             />
             <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
-            {uploadedFileName && (
-              <div className="mt-2 text-success">
-                <strong>Uploaded file:</strong> {uploadedFileName}
-              </div>
-            )}
+            
           </Form.Group>
         </Col>
         <Col md={5}>
@@ -273,16 +269,7 @@ export default function SNPChipForm() {
                       setSelected={setIlluminaChips}
                       type="illumina"
                     />
-                    {illuminaChips.length > 0 && (
-                      <div className="mt-2">
-                        <strong>Selected Illumina arrays:</strong>
-                        <ul className="mb-0">
-                          {illuminaChips.map(chip => (
-                            <li key={chip.id}>{chip.name} ({chip.id})</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    
                   </Col>
                   <Col>
                     <Form.Check

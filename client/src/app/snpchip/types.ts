@@ -7,7 +7,16 @@ export type FormData = {
   platforms: string[];
 };
 
-export type ResultData = {
-  // Define result data structure here
-  [key: string]: any;
-};
+export interface ResultsData {
+  details: Record<string, string[]>;
+  warnings: string[][];
+  snp_list: string[];
+  snps_ld_pruned?: string[];
+}
+
+export interface SnpChipData {
+  snps: string;
+  genome_build: string;
+  reference: number;
+  platforms: string[];
+}
