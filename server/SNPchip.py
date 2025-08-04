@@ -131,6 +131,9 @@ def calculate_chip(snplst, platform_query, web, request, genome_build):
     count = 0
     platform_NOT = []
     if platform_query != "":  # <--If user did not enter platforms as a request
+        #platform_list = convert_codeToPlatforms(platform_query, web)
+        if isinstance(platform_query, list):
+            platform_query = '+'.join(platform_query)
         platform_list = convert_codeToPlatforms(platform_query, web)
     # Quering MongoDB to get platforms for position/chromsome pairs
     else:
