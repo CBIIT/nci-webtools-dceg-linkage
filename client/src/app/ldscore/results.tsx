@@ -500,7 +500,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     const parsedTableText = formatHeritabilityTableText(result);
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h5>Heritability Result</h5>
+        <h5 style={{ fontWeight: 'bold' }}>Heritability Result</h5>
         <HeritabilityResultTable result={result} />
         <DownloadOptionsPanel result={result} filename="heritability_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
         <CollapsibleRawPanel result={result} title="Heritability Analysis Output" />
@@ -513,15 +513,15 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     const inputFilename = uploads;
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h6>Heritability of Phenotype 1</h6>
+        <h5 style={{ fontWeight: 'bold' }}>Heritability of Phenotype 1</h5>
         {renderKeyValueTable(parsed.herit1 || '')}
-        <h6>Heritability of Phenotype 2</h6>
+        <h5 style={{ fontWeight: 'bold' }}>Heritability of Phenotype 2</h5>
         {renderKeyValueTable(parsed.herit2 || '')}
-        <h6>Genetic Covariance</h6>
+        <h5 style={{ fontWeight: 'bold' }} >Genetic Covariance</h5>
         {renderKeyValueTable(parsed.gencov || '')}
-        <h6>Genetic Correlation</h6>
+        <h5>Genetic Correlation</h5>
         {renderKeyValueTable(parsed.gencorr || '')}
-        <h6>Summary of Genetic Correlation Results</h6>
+        <h5 style={{ fontWeight: 'bold' }} >Summary of Genetic Correlation Results</h5>
         {renderSummaryTable(parsed.summary || '')}
         <DownloadOptionsPanel result={result} filename="genetic_correlation_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
         <CollapsibleRawPanel result={result} title="Genetic Correlation Output" />
@@ -542,9 +542,9 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     ].filter(Boolean).join('\n\n');
     return (
       <Container style={{ maxWidth: 600 }}>
-        <h6>Summary of LD Scores</h6>
+        <h5 style={{ fontWeight: 'bold' }}>Summary of LD Scores</h5>
         {renderLdScoreTable(parsed.summary)}
-        <h6>MAF/LD Score Correlation Matrix</h6>
+        <h5 style={{ fontWeight: 'bold' }}>MAF/LD Score Correlation Matrix</h5>
         {renderLdScoreTable(parsed.corr, { ignoreAnalysisFinished: true })}
         <DownloadOptionsPanel result={result} filename="ldscore_result.txt" inputFilename={inputFilename} parsedTableText={parsedTableText} />
         <CollapsibleRawPanel result={result} title="LD Score Calculation Output" />
