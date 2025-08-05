@@ -405,34 +405,22 @@ export default function SNPChipForm() {
           {error}
         </div>
       )}
-      {warning && !results && (
-        <div className="alert alert-warning mt-3" role="alert">
-          {warning}
+      {warning && (
+        <div className="row justify-content-center my-3">
+          <div className="col-sm-8 col-md-7">
+            <div className="card border-warning w-100">
+              <div className="card-header bg-warning">Warning</div>
+              <div className="card-body py-2 snpchip-card-body">
+                <div className="card-text" style={{ marginBottom: 0 }}>{warning}</div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
       {results && (
         <div className="mt-4">
           <h5>Results</h5>
           <Results results={results} genome_build={genome_build} />
-          {warning && warning.includes("did not have any platforms found") && (
-            <div className="mt-4">
-              <h6 className="text-warning">The following RS number did not have any platforms found:</h6>
-              <div className="table-responsive">
-                <table className="table table-bordered table-sm">
-                  <thead>
-                    <tr>
-                      <th>RS Number</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {warning.match(/RS\d+/g)?.map((rs, idx) => (
-                      <tr key={idx}><td>{rs}</td></tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
         </div>
       )}
     </Form>
