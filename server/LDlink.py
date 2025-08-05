@@ -591,7 +591,7 @@ def zip_files():
     app.logger.info("Starting zip file creation")
     
     try:
-        filenames = request.json.get('filenames', [])
+        filenames = request.json.get('files', [])
         app.logger.debug(f"Creating zip with {len(filenames)} files")
         
         zip_filename = 'files.zip'
