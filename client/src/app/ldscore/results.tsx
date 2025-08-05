@@ -493,10 +493,8 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     queryKey: resultQueryKey,
     queryFn: async () => {
       const res = await fetch(resultUrl);
-      console.log(res)
       if (!res.ok) throw new Error('Result not found');
       const text = await res.text();
-      console.log("Fetched result text:", text);
       return text;
     },
   });
@@ -530,7 +528,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
   if ( !result) {
     return null;
   }
-  console.log("LDscore result:", result);
+
   if (type === 'heritability') {
     const inputFilename = uploads;
     const parsedTableText = formatHeritabilityTableText(result);
