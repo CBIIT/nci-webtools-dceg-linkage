@@ -596,10 +596,39 @@ def zip_files():
         
         zip_filename = 'files.zip'
         zip_filepath = os.path.join(tmp_dir, zip_filename)
-        
+        uploads_dir = os.path.join(tmp_dir, 'uploads')
+        ldscore_dir = os.path.join(param_list['data_dir'], 'ldscore')
+
+        os.makedirs(uploads_dir, exist_ok=True)
+
+        # List of known example files
+        example_files = [
+            'BBJ_LDLC22.txt',
+            'BBJ_HDLC22.txt',
+            '22.bed',
+            '22.bim',
+            '22.fam',
+        ]
+
+        # For each file, ensure it exists in uploads_dir; if not, copy from ldscore_dir if it's an example file
+        for filename in filenames:
+            upload_path = os.path.join(uploads_dir, filename)
+            if not os.path.exists(upload_path):
+                if filename in example_files:
+                    source_path = os.path.join(ldscore_dir, filename)
+                    if os.path.exists(source_path):
+                        shutil.copy(source_path, upload_path)
+                        app.logger.info(f"Copied example file {source_path} to {upload_path}")
+                    else:
+                        app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
+                        return jsonify({'error': f'Example file {filename} not found in {ldscore_dir}'}), 404
+                else:
+                    app.logger.error(f"File {filename} not found in uploads directory and is not an example file.")
+                    return jsonify({'error': f'File {filename} not found in uploads directory and is not an example file.'}), 404
+
         with zipfile.ZipFile(zip_filepath, 'w') as zipf:
             for filename in filenames:
-                file_path = safe_join(tmp_dir, 'uploads', filename)
+                file_path = os.path.join(uploads_dir, filename)
                 zipf.write(file_path, os.path.basename(file_path))
                 app.logger.debug(f"Added file to zip: {filename}")
         
@@ -951,6 +980,7 @@ def ldscore():
         filenames = [secure_filename(f.strip()) for f in filename.replace(';', ',').split(',')]
         for fname in filenames:
             fileroot, ext = os.path.splitext(fname)
+          
             # Find the chromosome number in the filename
             file_parts = fname.split('.')
             file_chromo = None
@@ -958,17 +988,17 @@ def ldscore():
                 if part.isdigit() and 1 <= int(part) <= 22:
                     file_chromo = part         
                     break
+        
             if file_chromo:
                 # Find the file in the directory
-                pattern = os.path.join(fileDir, fname)
-                #print(891, pattern)
-                for file_path in glob.glob(pattern):
+                pattern = os.path.join("/data/tmp/uploads/", f"*{file_chromo}.*")
+                for file_path in glob.glob(pattern):                   
                     extension = file_path.split('.')[-1]
                     new_filename = f"{file_chromo}.{extension}"
                     new_file_path = os.path.join(fileDir, new_filename)
                    # Create the reference subfolder if it doesn't exist
-                    #reference_folder = os.path.join(fileDir, str(reference))
-                    #os.makedirs(reference_folder, exist_ok=True)
+                    reference_folder = os.path.join(fileDir, str(reference))
+                    os.makedirs(reference_folder, exist_ok=True)
                     new_file_path = os.path.join(fileDir, new_filename)
                     if os.path.abspath(file_path) != os.path.abspath(new_file_path):
                         shutil.copyfile(file_path, new_file_path)
@@ -989,9 +1019,13 @@ def ldscore():
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            #print(out_json)
+            # Write result to file for frontend to fetch, like ldpop
+            if reference:
+                result_filename = os.path.join(tmp_dir, f"ldscore_{reference}.txt")
+                with open(result_filename, "w") as f:
+                    f.write(filtered_result)
         else:
-                # Pretty-print the JSON output
+            # Pretty-print the JSON output
             summary_index = result.find("Summary of LD Scores")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
@@ -1142,7 +1176,11 @@ def ldherit():
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            #print(out_json)
+            # Write result to file for frontend to fetch, like ldpop
+            if reference:
+                result_filename = os.path.join(tmp_dir, f"ldherit_{reference}.txt")
+                with open(result_filename, "w") as f:
+                    f.write(filtered_result)
         else:
                 # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
@@ -1151,7 +1189,12 @@ def ldherit():
             else:
                 filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            #print(pretty_out_json)
             return filtered_result
+            out_json = pretty_out_json
+
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit request error: {e}")
@@ -1202,13 +1245,21 @@ def ldheritAPI():
         
         result = run_herit_command(filename,pop,isexample)
        
-        # Pretty-print the JSON output
+                # Pretty-print the JSON output
         summary_index = result.find("Total Observed scale")
         if summary_index != -1:
-            filtered_result = result[summary_index:]
+                filtered_result = result[summary_index:]
         else:
-            filtered_result = result
-            #filtered_result = filtered_result.replace("\\n", "\n")
+                filtered_result = result
+
+         # Delete the uploaded files
+        for file_path in saved_files.values():
+            try:
+                os.remove(file_path)
+                print(f"Deleted file: {file_path}")
+            except Exception as e:
+                print(f"Error deleting file {file_path}: {e}")
+
 
         # Delete the uploaded files
         try:
@@ -1217,6 +1268,7 @@ def ldheritAPI():
         except Exception as e:
             app.logger.error(f"Error deleting file {file}: {e}")
         return filtered_result
+
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDherit API request error: {e}")
@@ -1241,6 +1293,7 @@ def ldcorrelation():
     filename = request.args.get('filename', False)
     filename2 = request.args.get('filename2', False)
     isexample = request.args.get('isExample', False)
+    reference = request.args.get('reference',False)
     app.logger.debug(f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
     if filename:
         filename = secure_filename(filename)
@@ -1254,7 +1307,11 @@ def ldcorrelation():
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
             out_json = {"result": filtered_result}
-            #print(out_json)
+            # Write result to file for frontend to fetch, like ldpop
+            if reference:
+                result_filename = os.path.join(tmp_dir, f"ldcorrelation_{reference}.txt")
+                with open(result_filename, "w") as f:
+                    f.write(filtered_result)
         else:
                 # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
@@ -1263,7 +1320,12 @@ def ldcorrelation():
             else:
                 filtered_result = result
             #filtered_result = filtered_result.replace("\\n", "\n")
+            #out_json = {"result": filtered_result}
+            #pretty_out_json = json.dumps(out_json, indent=4)
+            #print(pretty_out_json)
             return filtered_result
+            out_json = pretty_out_json
+
     except requests.RequestException as e:
         # Log the error message
         app.logger.error(f"LDcorrelation request error: {e}")
@@ -1446,6 +1508,13 @@ def ldexpress():
             app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
             toggleLocked(token, 0)
             return sendTraceback(None)
+        except:
+            app.logger.debug("timeout except")
+            toggleLocked(token, 0)
+            print("timeout error")
+        else:
+            app.logger.debug("time out else")
+            print("time out")
     end_time = time.time()
     app.logger.info("Executed LDexpress (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
@@ -1822,6 +1891,7 @@ def ldpair():
             except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)
+               
                 toggleLocked(token, 0)
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))

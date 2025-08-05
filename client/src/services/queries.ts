@@ -83,8 +83,28 @@ export async function snpchip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpchip`, params)).data;
 }
 
+export async function ldscore(params: any): Promise<any> {
+  return (await axios.post(`/LDlinkRestWeb/ldscore`, params)).data;
+}
 export async function snpclip(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/snpclip`, params)).data;
+}
+
+export async function fetchHeritabilityResult(params: URLSearchParams): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/ldherit?${params.toString()}`)).data;
+}
+
+export async function fetchGeneticCorrelationResult(params: URLSearchParams): Promise<any> {
+  return (await axios.get(`/LDlinkRestWeb/ldcorrelation?${params.toString()}`)).data;
+}
+
+export async function fetchLdScoreCalculationResult(params: URLSearchParams): Promise<any> {
+  // Try /LDlinkRestWeb/ldscore first, fallback to /LDlinkRest/ldscore if needed
+  try {
+    return (await axios.get(`/LDlinkRestWeb/ldscore?${params.toString()}`)).data;
+  } catch (err) {
+    return (await axios.get(`/LDlinkRest/ldscore?${params.toString()}`)).data;
+  }
 }
 
 export async function ldtrait(params: any): Promise<any> {

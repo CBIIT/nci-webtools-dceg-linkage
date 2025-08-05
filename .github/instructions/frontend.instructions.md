@@ -172,6 +172,11 @@ export default function FormComponent() {
 - Handle large datasets efficiently
 - Provide export functionality
 
+### Download Optimizations
+- Implement file compression for faster downloads
+- Use streaming for large files
+- Each table should have download link as txt file
+
 ## Error Handling
 
 ### Error Boundaries

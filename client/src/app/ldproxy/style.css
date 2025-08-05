@@ -10,3 +10,7 @@
 .grey-tooltip.bs-tooltip-bottom .tooltip-arrow::before {
   border-bottom-color: #e0e0e0 !important;
 }
+
+.nowrap-text {
+  white-space: nowrap;
+}
