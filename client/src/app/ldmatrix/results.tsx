@@ -29,13 +29,14 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
     queryKey: ["ldmatrix_status", ref],
     queryFn: async () => (ref ? fetchOutput(`matrix${ref}.json`) : null),
   });
-  const { data: enableExport } = useQuery<FormData>({
+  const { data: enableExport } = useQuery<boolean>({
     queryKey: ["ldmatrix-export", ref],
     queryFn: async () => (ref ? fetchOutputStatus(`matrix_plot_${ref}.jpeg`) : false),
     enabled: !!ref && !status?.error,
-    refetchInterval: 5000, // Check every 5 seconds
+    refetchInterval: (query) => (query.state.data ? false : 5000),
     retry: 60,
   });
+
   const { data: plotJson } = useSuspenseQuery({
     queryKey: ["ldmatrix_plot", ref],
     queryFn: async () => (ref && !status?.error ? fetchOutput(`ldmatrix_plot_${ref}.json`) : null),

@@ -25,13 +25,9 @@ LDlink is a Next.js 15 web application that provides a suite of tools for interr
 
 ### Additional Libraries
 - **React Hook Form 7.58.1** - Form handling
-- **React Select 5.10.1** - Select components
-- **HTML2Canvas 1.4.1** - Screenshot functionality
 - **Bokeh.js 3.7.3** - Data visualization
-- **React Google Maps API 2.20.7** - Map integration
 - **TanStack Table 8.21.3** - Data tables
 - **Bootstrap Icons 1.13.1** - Icon library
-- **Clsx 2.1.1** - Conditional CSS classes
 
 ## Project Structure
 
@@ -110,13 +106,6 @@ export default function ComponentName({ prop1, prop2 }: ComponentProps) {
 - Use the `queries.ts` service for API calls
 - Implement proper error handling
 - Use TanStack Query for caching and background updates
-
-## Logging Guidelines
-
-### Log levels
- - debug: only use for debugging purposes
- - info: log user input and api ouput
- - error: All errors that may occur
 
 ## Styling Guidelines
 
