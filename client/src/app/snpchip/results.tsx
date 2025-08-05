@@ -34,7 +34,6 @@ const rotateDivStyle: React.CSSProperties = {
   marginLeft: "5px", // optional tweak for alignment
 };
 export default function Results({ results, genome_build }: ResultsProps) {
-  console.log("SNPchip results >>>> :", results);
   function downloadResults() {
     const blob = new Blob([results.details], { type: "text/plain" });
     const url = URL.createObjectURL(blob);

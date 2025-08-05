@@ -10,11 +10,7 @@ import { FormData } from "./types";
 import { parseSnps , rsChrMultilineRegex} from "@/services/utils";
 import Results from "./results";
 import { PLATFORM_LOOKUP } from "./constants";
-
-interface Platform {
-  id: string;
-  name: string;
-}
+import { Platform } from "./types";
 
 function CheckboxList({
   options,
@@ -95,9 +91,7 @@ export default function SNPChipForm() {
     async function fetchPlatforms() {
       try {
         setPlatformsLoading(true);
-        console.log("Fetching platforms...");
         const data = await snpchipPlatforms();
-        console.log("Fetched data: ", data);
         const illumina: Platform[] = [];
         const affymetrix: Platform[] = [];
         for (const key in data) {
@@ -114,7 +108,6 @@ export default function SNPChipForm() {
       } catch (error) {
         console.error("Failed to fetch SNPchip platforms", error);
       } finally {
-        console.log("Finished fetchPlatforms");
         setPlatformsLoading(false);
       }
     }
