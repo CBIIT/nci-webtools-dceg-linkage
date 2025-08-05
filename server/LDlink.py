@@ -634,7 +634,7 @@ def zip_files():
         
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename}")
-        return send_file(zip_filepath, as_attachment=True, attachment_filename=zip_filename)
+        return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
     except Exception as e:
         app.logger.error(f"Zip file creation failed: {str(e)}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
