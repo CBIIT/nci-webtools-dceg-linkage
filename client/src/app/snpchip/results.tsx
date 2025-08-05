@@ -51,7 +51,6 @@ export default function Results({ results, genome_build }: ResultsProps) {
   }[genome_build];
 
   return (
-    <div className="jumbotron">
       <div className="container-fluid" id="snpchip-results-container">
         <Row>
           <Col md={12} style={{ overflowX: "scroll" }}>
@@ -106,6 +105,5 @@ export default function Results({ results, genome_build }: ResultsProps) {
               </a>
             </div>
       </div>
-    </div>
   );
 }

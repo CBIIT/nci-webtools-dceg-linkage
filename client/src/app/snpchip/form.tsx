@@ -7,7 +7,7 @@ import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData } from "./types";
-import { parseSnps , rsChrMultilineRegex} from "@/services/utils";
+import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
 import Results from "./results";
 import { PLATFORM_LOOKUP } from "./constants";
 import { Platform } from "./types";
