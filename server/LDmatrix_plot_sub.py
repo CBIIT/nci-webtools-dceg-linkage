@@ -465,6 +465,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     connector.axis.axis_line_color = None
     connector.axis.major_tick_line_color = None
     connector.axis.minor_tick_line_color = None
+    connector.yaxis.visible = False
 
     connector.toolbar_location = None
 
