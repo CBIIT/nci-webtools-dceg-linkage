@@ -29,9 +29,9 @@ function parseHeritabilityResult(result: string) {
     }
   });
   return {
-    h2: parsed['Total Observed scale h2'] || '',
+    h2: parsed['Total Observed scale h²'] || '',
     lambdaGC: parsed['Lambda GC'] || '',
-    meanChi2: parsed['Mean Chi^2'] || '',
+    meanChi2: parsed['Mean Chi²'] || '',
     intercept: parsed['Intercept'] || '',
     ratio: parsed['Ratio'] || '',
   };
@@ -135,7 +135,7 @@ function renderSummaryTable(section: string) {
     <TableContainer>
       <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
         <thead >
-          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
+          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h.replace(/h2/g, 'h²')}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{c}</td>)}</tr>)}
