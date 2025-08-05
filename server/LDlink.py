@@ -53,17 +53,19 @@ app.debug = False
 
 # Log settings
 log_level = getattr(logging, param_list["log_level"].upper(), logging.DEBUG)
-formatter = logging.Formatter("%(asctime)s %(levelname)-8s %(message)s", "%Y-%m-%d %H:%M:%S")
+formatter = logging.Formatter("[%(name)s] [%(asctime)s] [%(levelname)s] - %(message)s", "%Y-%m-%d %H:%M:%S")
 handler = logging.StreamHandler(stream=sys.stderr)
 handler.setLevel(log_level)
 handler.setFormatter(formatter)
 
-app.logger = logging.getLogger("root")
+app.logger = logging.getLogger("ldlink")
 app.logger.setLevel(log_level)
 app.logger.addHandler(handler)
 
-# Suppress PyMongo logs below WARNING
+# Suppress third-party logs below WARNING
 logging.getLogger("pymongo").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
 
@@ -96,7 +98,13 @@ def sendTraceback(error, showTraceback=False):
         traceback.print_exc()
         custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
-    app.logger.info("Generated error message " + json.dumps(custom, indent=4, sort_keys=True))
+    
+    # Enhanced error logging with sanitization
+    log_error = custom.copy()
+    if "traceback" in log_error:
+        log_error["traceback"] = "TRACEBACK_AVAILABLE"  # Don't log full traceback in production
+    app.logger.error(f"Generated error response: {json.dumps(log_error, indent=2)}")
+    
     return current_app.response_class(out_json, mimetype="application/json")
 
 
@@ -540,13 +548,13 @@ def root():
 # @app.route('/LDlinkRest2/ping/', strict_slashes=False)
 @app.route("/ping/", strict_slashes=False)
 def ping():
-    app.logger.debug("pong")
-    print("pong")
+    app.logger.debug("Health check ping received")
     try:
         return "true"
     except Exception as e:
-        exc_obj = e
-        app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        app.logger.error(f"Health check failed: {str(e)}")
+        app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
+        return "false", 500
 
 
 # Route to check file exist status
@@ -576,8 +584,13 @@ def send_temp_file(filename):
 
 @app.route('/LDlinkRestWeb/zip', methods=['POST'])
 def zip_files():
+    start_time = time.time()
+    app.logger.info("Starting zip file creation")
+    
     try:
-        filenames = request.json.get('filenames')
+        filenames = request.json.get('filenames', [])
+        app.logger.debug(f"Creating zip with {len(filenames)} files")
+        
         zip_filename = 'files.zip'
         zip_filepath = os.path.join(tmp_dir, zip_filename)
         
@@ -585,11 +598,14 @@ def zip_files():
             for filename in filenames:
                 file_path = safe_join(tmp_dir, 'uploads', filename)
                 zipf.write(file_path, os.path.basename(file_path))
+                app.logger.debug(f"Added file to zip: {filename}")
         
+        execution_time = round(time.time() - start_time, 2)
+        app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename}")
         return send_file(zip_filepath, as_attachment=True, attachment_filename=zip_filename)
     except Exception as e:
-        exc_obj = e
-        app.logger.error(''.join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
+        app.logger.error(f"Zip file creation failed: {str(e)}")
+        app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
         return jsonify({'error': str(e)}), 500
  
 
@@ -599,54 +615,41 @@ def zip_files():
 # @app.route('/LDlinkRest2/upload', methods=['POST'])
 @app.route("/LDlinkRestWeb/upload", methods=["POST"])
 def upload():
-    print("Processing upload")
-    print("****** Stage 1: UPLOAD BUTTON ***** ")
-    print("UPLOAD_DIR = %s" % (app.config["UPLOAD_DIR"]))
-    for arg in request.args:
-        print(arg)
-    print("request.method = %s" % (request.method))
-    print("request.files = %s" % (request.files))
+    start_time = time.time()
+    app.logger.info("Starting file upload request")
+    
     if request.method == 'POST':
-        # check if the post request has the file part
-        print(" We got a POST")
-        # print dir(request.files)
         if len(request.files) == 0:
-            print('No file part')
+            app.logger.warning("Upload request received with no files")
             return 'No file part...'
-        # if 'ldassocFile' not in request.files:
-        #     print('No file part')
-        #     return 'No file part...'
-        # if 'ldscoreFile' not in request.files:
-        #     print('No file part')
-        #     return 'No file part...'
-        file = request.files['ldassocFile'] if 'ldassocFile' in request.files else request.files['ldscoreFile'] if 'ldscoreFile' in request.files else None
+        
         reference = request.form.get('reference', None)
-
-        # if user does not select file, browser also
-        # submit a empty part without filename
-        print(len(request.files))
+        uploaded_files = []
+        
         for file_key in request.files:
             file = request.files[file_key]
-            print(type(file))
             if file.filename == '':
-                print('No selected file')
+                app.logger.warning("Empty filename provided in upload")
                 return 'No selected file'
      
             if file:
-                print('file.filename ' + file.filename)
-                print('file and allowed_file')
                 filename = secure_filename(file.filename)
-                print("About to SAVE file")
-                print("filename = " + filename)
+                app.logger.debug(f"Processing upload: {filename}")
+                
                 os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
                 if reference:
                     ref_dir = os.path.join(app.config['UPLOAD_DIR'], reference)
                     os.makedirs(ref_dir, exist_ok=True)
-                    file.save(os.path.join(ref_dir, filename))
+                    file_path = os.path.join(ref_dir, filename)
                 else:
-                    file.save(os.path.join(app.config['UPLOAD_DIR'], filename))
-                print(f'File {filename} was saved')
+                    file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
+                
+                file.save(file_path)
+                uploaded_files.append(filename)
+                app.logger.info(f"Successfully uploaded file: {filename}")
         
+        execution_time = round(time.time() - start_time, 2)
+        app.logger.info(f"Upload completed ({execution_time}s) - {len(uploaded_files)} files saved")
         return 'All files were saved'
 
 @app.route('/LDlinkRestWeb/copy_and_download/<filename>', methods=['GET'])
@@ -655,6 +658,9 @@ def copy_and_download(filename):
     Copies a file from the `data/ldscore/` directory to the `tmp/` directory
     and serves it for download.
     """
+    start_time = time.time()
+    app.logger.info(f"Starting file copy and download: {filename}")
+    
     try:
         # Define source and destination paths
         source_dir = os.path.join(param_list['data_dir'], 'ldscore')
@@ -667,15 +673,18 @@ def copy_and_download(filename):
 
         # Copy the file to the destination directory
         shutil.copy(source_file, destination_file)
-        print(f"Copied {source_file} to {destination_file}")
+        app.logger.info(f"Successfully copied {source_file} to {destination_file}")
 
         # Serve the file for download
+        execution_time = round(time.time() - start_time, 2)
+        app.logger.info(f"File download completed ({execution_time}s): {filename}")
         return send_from_directory(destination_dir, filename, as_attachment=True)
 
     except FileNotFoundError:
+        app.logger.error(f"File not found: {filename} in {source_dir}")
         return f"File {filename} not found in {source_dir}", 404
     except Exception as e:
-        print(f"Error: {e}")
+        app.logger.error(f"File copy/download failed: {str(e)}")
         return f"An error occurred: {e}", 500
     
 
@@ -2540,7 +2549,7 @@ def unlock_tokens_background():
         try:
             unlock_stale_tokens(db, lock_timeout)
         except Exception as e:
-            print(e)
+            app.logger.error(f"Background token unlock failed: {str(e)}")
         time.sleep(lock_timeout / 2)
 
 
