@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Accordion, Spinner } from "react-bootstrap";
 import { useRouter, usePathname } from "next/navigation";
-import { snpchipPlatforms } from "@/services/queries";
+import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { FormData } from "./types";
-import { parseSnps } from "@/services/utils";
+import { parseSnps , rsChrMultilineRegex} from "@/services/utils";
+import Results from "./results";
 
 interface Platform {
   id: string;
@@ -49,35 +50,18 @@ function CheckboxList({
   );
 }
 
-interface SNPChipFormProps {
-  input: string;
-  setInput: (val: string) => void;
-  file: File | null;
-  setFile: (val: File | null) => void;
-  illuminaChips: Platform[];
-  setIlluminaChips: (chips: Platform[]) => void;
-  affymetrixChips: Platform[];
-  setAffymetrixChips: (chips: Platform[]) => void;
-  loading: boolean;
-  handleSubmit: (e: React.FormEvent) => Promise<void>;
-}
-
-export default function SNPChipForm({
-  input,
-  setInput,
-  file,
-  setFile,
-  illuminaChips,
-  setIlluminaChips,
-  affymetrixChips,
-  setAffymetrixChips,
-  loading,
-  handleSubmit,
-}: SNPChipFormProps) {
-  console.log("SNPChipForm mounted");
-  const router = useRouter();
-  const pathname = usePathname();
-  const { genome_build } = useStore((state: { genome_build: string }) => state);
+export default function SNPChipForm() {
+  // All state and logic are now managed here
+  const [input, setInput] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [illuminaChips, setIlluminaChips] = useState<Platform[]>([]);
+  const [affymetrixChips, setAffymetrixChips] = useState<Platform[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [warning, setWarning] = useState<string | null>(null);
+  const genome_build = useStore((state) => state.genome_build);
+  const setGenomeBuild = useStore((state) => state.setGenomeBuild);
 
   const defaultForm: FormData = {
     snps: "",
@@ -158,34 +142,153 @@ export default function SNPChipForm({
     }
   }, [varFile, setValue]);
 
+  const onSubmit = async (form: FormData) => {
+    setLoading(true);
+    setResults(null);
+    setError(null);
+    setWarning(null);
+
+    let snpsData = form.snps;
+    if (varFile instanceof FileList && varFile.length > 0) {
+      try {
+        snpsData = await varFile[0].text();
+      } catch (err) {
+        setError("Error reading file.");
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (!snpsData) {
+      setError("Please provide a list of SNPs or upload a file.");
+      setLoading(false);
+      return;
+    }
+
+    const selectedPlatforms = [...illuminaChips, ...affymetrixChips]
+      .map((p) => p.id)
+      .join("+");
+
+    if (!selectedPlatforms) {
+      setError("Please select at least one platform.");
+      setLoading(false);
+      return;
+    }
+
+    const payload = {
+      snps: snpsData,
+      platforms: selectedPlatforms,
+      genome_build: genome_build,
+      reference: Math.floor(Math.random() * (99999 - 10000 + 1) + 10000),
+    };
+
+    try {
+      const raw = await snpchip(payload);
+      let data = raw;
+      if (typeof raw === "string") {
+        try {
+          data = JSON.parse(raw);
+        } catch (err) {
+          setError("Failed to parse SNPchip response.");
+          setLoading(false);
+          return;
+        }
+      }
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
+      if (data.warning) {
+        setWarning(data.warning);
+      }
+      // Transform and display results
+      const db = genome_build === 'grch37' ? 'hg19' : 'hg38';
+      const snpchipRows = Object.entries(data)
+        .filter(([key]) => !isNaN(Number(key)))
+        .map(([_, row]) => {
+          if (!Array.isArray(row)) return null;
+          const rs_number_raw = String(row[0]);
+          const position_raw = String(row[1]);
+          const platformsStr = row[2] || "";
+          const map = platformsStr
+            ? platformsStr.split(",").map((v: string) => v.trim()).filter(Boolean)
+            : [];
+          return { map, rs_number_raw, position_raw };
+        })
+        .filter((row) => row !== null);
+      if (snpchipRows.length > 0) {
+        const uniquePlatformNames = new Set<string>();
+        snpchipRows.forEach((row) => {
+          row.map.forEach((p: string) => p && uniquePlatformNames.add(p));
+        });
+        const headers = Array.from(uniquePlatformNames).map((name) => ({
+          code: name,
+          platform: name,
+        }));
+        headers.sort((a, b) => a.platform.localeCompare(b.platform));
+        const mappedSnpchip = snpchipRows.map((row) => {
+          return {
+            ...row,
+            map: headers.map((h) => (row.map.includes(h.platform) ? "\u2714" : "")),
+          };
+        });
+        const detailsText = [
+          ["RS Number", "Position", ...headers.map((h) => h.platform)].join("\t"),
+          ...mappedSnpchip.map((row) => {
+            return [
+              row.rs_number_raw,
+              "chr" + row.position_raw,
+              ...row.map.map((v) => (v === "\u2714" ? "\u2714" : "")),
+            ].join("\t");
+          }),
+        ].join("\n");
+        const transformedResults = {
+          snpchip: mappedSnpchip,
+          headers,
+          details: detailsText,
+        };
+        setResults(transformedResults);
+      } else if (!data.warning) {
+        setWarning("No results found for the given SNPs.");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <Form id="snpchip-form" onSubmit={handleSubmit} noValidate>
+    <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} noValidate>
       <Row className="mb-3 align-items-start">
-        <Col md={4}>
-          <Form.Group controlId="snps">
-            <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={5}
-              placeholder="RS Numbers or Genomic Coordinates"
-              value={input}
-              onChange={e => setInput(e.target.value)}
-              title="Enter list of RS numbers or Genomic Coordinates (one per line)"
-            />
-          </Form.Group>
+        <Col sm={'auto'}>
+          <Form.Group controlId="snps" className="mb-3">
+                      <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={2}
+                        {...register("snps", {
+                          required: "SNPs are required.",
+                          pattern: {
+                            value: rsChrMultilineRegex,
+                            message: "Invalid SNP or coordinate format, only one per line",
+                          },
+                        })}
+                        title="Enter list of RS numbers or Genomic Coordinates (one per line)"
+                      />
+                      <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
+                    </Form.Group>
         </Col>
-        <Col md={5}>
-          <Form.Group controlId="varFile">
+        <Col sm={3}>
+          <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
-            <Form.Control
-              type="file"
-              onChange={e => {
-                const target = e.target as HTMLInputElement;
-                setFile(target.files ? target.files[0] : null);
-              }}
-            />
+            {typeof varFile === "string" && varFile !== "" ? (
+              <div className="form-control bg-light">{varFile}</div>
+            ) : (
+              <Form.Control placeholder="Upload" type="file" {...register("varFile")} />
+            )}
           </Form.Group>
-        </Col>
+        </Col><Col />
         <Col md={3} className="d-flex justify-content-end">
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
@@ -294,6 +397,23 @@ export default function SNPChipForm({
       </Accordion>
       {loading && <CalculateLoading />}
       <hr />
+      {/* Results, warnings, and errors display */}
+      {error && (
+        <div className="alert alert-danger mt-3" role="alert">
+          {error}
+        </div>
+      )}
+      {warning && !results && (
+        <div className="alert alert-warning mt-3" role="alert">
+          {warning}
+        </div>
+      )}
+      {results && (
+        <div className="mt-4">
+          <h5>Results</h5>
+          <Results results={results} genome_build={genome_build} />
+        </div>
+      )}
     </Form>
   );
 }
