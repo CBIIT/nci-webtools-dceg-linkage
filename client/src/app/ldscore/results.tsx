@@ -555,7 +555,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderKeyValueTable(parsed.herit2 || '')}
         <h5 style={{ fontWeight: 'bold' }} >Genetic Covariance</h5>
         {renderKeyValueTable(parsed.gencov || '')}
-        <h5>Genetic Correlation</h5>
+        <h5 style={{ fontWeight: 'bold' }}>Genetic Correlation</h5>
         {renderKeyValueTable(parsed.gencorr || '')}
         <h5 style={{ fontWeight: 'bold' }} >Summary of Genetic Correlation Results</h5>
         {renderSummaryTable(parsed.summary || '')}
