@@ -9,6 +9,7 @@ import Alert from "react-bootstrap/Alert";
 import SnpChipForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import { useStore } from "@/store";
 
 const Results = dynamic(() => import("./results"), {
   ssr: false,
@@ -16,7 +17,8 @@ const Results = dynamic(() => import("./results"), {
 
 export default function SNPchip() {
   const [results, setResults] = useState(null);
-  const [genomeBuild, setGenomeBuild] = useState("grch37");
+  const genomeBuild = useStore((state) => state.genome_build);
+  const setGenomeBuild = useStore((state) => state.setGenomeBuild);
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 

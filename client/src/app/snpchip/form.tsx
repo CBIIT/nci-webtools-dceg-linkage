@@ -406,16 +406,16 @@ export default function SNPChipForm({
         </div>
       )}
       {warning && (
-        <div className="row justify-content-center my-3">
-          <div className="col-sm-8 col-md-7">
+        <Row className="justify-content-center my-3">
+          <Col sm={8} md={7}>
             <div className="card border-warning w-100">
               <div className="card-header bg-warning">Warning</div>
               <div className="card-body py-2 snpchip-card-body">
                 <div className="card-text" style={{ marginBottom: 0 }}>{warning}</div>
               </div>
             </div>
-          </div>
-        </div>
+          </Col>
+        </Row>
       )}
       
     </Form>
