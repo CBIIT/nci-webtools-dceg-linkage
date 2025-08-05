@@ -47,18 +47,25 @@ function CheckboxList({
   );
 }
 
-export default function SNPChipForm() {
-  // All state and logic are now managed here
+export default function SNPChipForm({
+  results,
+  setResults,
+  genome_build,
+  setGenomeBuild,
+}: {
+  results: any;
+  setResults: (val: any) => void;
+  genome_build: string;
+  setGenomeBuild: (val: string) => void;
+}) {
+  // All state and logic are now managed here except results and genome_build
   const [input, setInput] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [illuminaChips, setIlluminaChips] = useState<Platform[]>([]);
   const [affymetrixChips, setAffymetrixChips] = useState<Platform[]>([]);
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [warning, setWarning] = useState<string | null>(null);
-  const genome_build = useStore((state) => state.genome_build);
-  const setGenomeBuild = useStore((state) => state.setGenomeBuild);
 
   const defaultForm: FormData = {
     snps: "",
@@ -410,12 +417,7 @@ export default function SNPChipForm() {
           </div>
         </div>
       )}
-      {results && (
-        <div className="mt-4">
-          <h5>Results</h5>
-          <Results results={results} genome_build={genome_build} />
-        </div>
-      )}
+      
     </Form>
   );
 }

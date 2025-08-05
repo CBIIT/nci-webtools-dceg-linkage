@@ -1,7 +1,7 @@
 // app/snpchip/page.tsx
 "use client";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import dynamic from "next/dynamic";
 import { Container, Row, Col } from "react-bootstrap";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
@@ -10,9 +10,13 @@ import SnpChipForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
 
-const Results = dynamic(() => import("./results"));
+const Results = dynamic(() => import("./results"), {
+  ssr: false,
+});
 
 export default function SNPchip() {
+  const [results, setResults] = useState(null);
+  const [genomeBuild, setGenomeBuild] = useState("grch37");
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
 
@@ -26,10 +30,15 @@ export default function SNPchip() {
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
-            <SnpChipForm />
+            <SnpChipForm
+              results={results}
+              setResults={setResults}
+              genome_build={genomeBuild}
+              setGenomeBuild={setGenomeBuild}
+            />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>
-                {ref && <Results ref={ref} />}
+                {results && <Results results={results} genome_build={genomeBuild} />}
               </Suspense>
             </ErrorBoundary>
           </Col>
