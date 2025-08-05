@@ -1,5 +1,5 @@
 ---
-applyTo: "server/*,docker/backend.dockerfile,docker/wsgi.conf"
+applyTo: "server,docker/backend.dockerfile,docker/wsgi.conf"
 ---
 
 # LDlink Backend Logging Guidelines
@@ -24,6 +24,10 @@ Log flask/mod-wsgi API and Python modules to support:
   - Subprocess execution details
 - **Production**: Avoid in production environments
 - **AI Note**: Avoid generating DEBUG logs using AI - these should be manually added for specific debugging needs
+- **Examples**:
+  - `"Executed LDmatrix (1.53s)"`
+  - `"User token validated for LDproxy request"`
+  - `"Retrieved 150 SNPs from database"`
 
 ### INFO
 - **Purpose**: Key checkpoints and business logic events
@@ -35,10 +39,8 @@ Log flask/mod-wsgi API and Python modules to support:
   - File operations (uploads, downloads, cleanup)
   - External API calls and responses
 - **Examples**:
-  - `"Executed LDmatrix (1.53s)"`
-  - `"User token validated for LDproxy request"`
-  - `"Retrieved 150 SNPs from database"`
-
+  - `"ldexpress params {"genome_build": "grch37", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": 0.1, "reference": "71219", "snps": "rs3\\nrs4", "tissues": "Adipose_Subcutaneous", "token": false, "web": true, "window": "500000"}"`
+  
 ### WARNING
 - **Purpose**: Unexpected but recoverable situations
 - **When to use**:
