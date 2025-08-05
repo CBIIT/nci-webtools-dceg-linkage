@@ -9,6 +9,7 @@ import { useStore } from "@/store";
 import { FormData } from "./types";
 import { parseSnps , rsChrMultilineRegex} from "@/services/utils";
 import Results from "./results";
+import { PLATFORM_LOOKUP } from "./constants";
 
 interface Platform {
   id: string;
@@ -222,9 +223,10 @@ export default function SNPChipForm() {
           row.map.forEach((p: string) => p && uniquePlatformNames.add(p));
         });
         const headers = Array.from(uniquePlatformNames).map((name) => ({
-          code: name,
+          code: PLATFORM_LOOKUP[name] || name,
           platform: name,
         }));
+        // Sort headers alphabetically by full platform name
         headers.sort((a, b) => a.platform.localeCompare(b.platform));
         const mappedSnpchip = snpchipRows.map((row) => {
           return {
@@ -412,6 +414,25 @@ export default function SNPChipForm() {
         <div className="mt-4">
           <h5>Results</h5>
           <Results results={results} genome_build={genome_build} />
+          {warning && warning.includes("did not have any platforms found") && (
+            <div className="mt-4">
+              <h6 className="text-warning">The following RS number did not have any platforms found:</h6>
+              <div className="table-responsive">
+                <table className="table table-bordered table-sm">
+                  <thead>
+                    <tr>
+                      <th>RS Number</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {warning.match(/RS\d+/g)?.map((rs, idx) => (
+                      <tr key={idx}><td>{rs}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </Form>
