@@ -1,9 +1,26 @@
 import csv
+import logging
 import subprocess
 import sys
+from datetime import datetime
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars,connectMongoDBReadOnly
 from LDcommon import set_alleles,get_dbsnp_coord,get_coords,get_regDB,get_forgeDB
 from LDutilites import get_config
+
+# Configure logging - use module-specific logger instead of root logger
+logger = logging.getLogger('ldassoc_sub')
+logger.setLevel(logging.INFO)
+
+# Create console handler with custom format
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '[ldassoc_sub] [%(asctime)s] [%(levelname)s] - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
 
 snp = sys.argv[1]
 chr = sys.argv[2]
@@ -12,12 +29,17 @@ request = sys.argv[4]
 genome_build = sys.argv[5]
 process = sys.argv[6]
 
+logger.debug(f"Starting LDassoc_sub process {process} - snp: {snp}, chr: {chr}, genome_build: {genome_build}, request: {request}")
+logger.debug(f"Processing coordinates: {len(coords.split('_'))} variants")
+
 # Set data directories using config.yml
 param_list = get_config()
 data_dir = param_list['data_dir']
 tmp_dir = param_list['tmp_dir']
 genotypes_dir = param_list['genotypes_dir']
 aws_info = param_list['aws_info']
+
+logger.debug(f"Loaded configuration - data_dir: {data_dir}, tmp_dir: {tmp_dir}")
 
 export_s3_keys = retrieveAWSCredentials()
 
@@ -28,14 +50,17 @@ for i in range(len(pop_list)):
     ids.append(pop_list[i].strip())
 
 pop_ids = list(set(ids))
+logger.debug(f"Loaded {len(pop_ids)} population IDs from {tmp_dir}pops_{request}.txt")
 
 # Get VCF region
 vcf_filePath = "%s/%s%s/%s"  % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chr))
 vcf_query_snp_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 
+logger.debug(f"Checking S3 VCF file: {vcf_query_snp_file}")
 checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
 
 coordinates = coords.replace("_", " ")
+logger.debug(f"Processing coordinates: {coordinates[:100]}..." if len(coordinates) > 100 else f"Processing coordinates: {coordinates}")
 
 def LD_calcs(hap, allele, allele_n):
     # Extract haplotypes
@@ -175,6 +200,7 @@ for geno_n in vcf:
             temp = [rs, al, "chr" + chr + ":" + bp, rs_n, al_n, "chr" + chr_n + ":" + bp_n, dist, D_prime, r2, match,score_forage,score, maf_q, maf_p, funct]
             out.append(temp)
 
+logger.debug(f"LDassoc_sub process {process} completed - processed {len(out)} variants")
 
 for i in range(len(out)):
     print("\t".join(str(j) for j in out[i]))

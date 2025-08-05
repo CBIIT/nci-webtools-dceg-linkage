@@ -61,11 +61,14 @@ handler.setFormatter(formatter)
 app.logger = logging.getLogger("ldlink")
 app.logger.setLevel(log_level)
 app.logger.addHandler(handler)
+# Prevent propagation to root logger to avoid using root logger
+app.logger.propagate = False
 
 # Suppress third-party logs below WARNING
-logging.getLogger("pymongo").setLevel(logging.WARNING)
-logging.getLogger("urllib3").setLevel(logging.WARNING)
-logging.getLogger("requests").setLevel(logging.WARNING)
+# logging.getLogger('boto3').setLevel(logging.WARNING)
+# logging.getLogger("pymongo").setLevel(logging.WARNING)
+# logging.getLogger("urllib3").setLevel(logging.WARNING)
+# logging.getLogger("requests").setLevel(logging.WARNING)
 
 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
 
@@ -714,7 +717,7 @@ def ldscore_example():
             'filenames': example_files,
             'filepaths': example_filepaths
         }
-    print(example)
+    app.logger.debug(f"LDscore example files: {example}")
     return json.dumps(example)
 
 # Route for LDherit example 
@@ -731,7 +734,7 @@ def ldherit_example():
             'filenames': example_files,
             'filepaths': example_filepaths
         }
-    print(example)
+    app.logger.debug(f"LDherit example files: {example}")
     return json.dumps(example)
 
 # Route for LDherit example 
@@ -751,7 +754,7 @@ def ldcorrelation_example():
             'filepath': example_filepaths,
             'filepath2':ldscore_example_dir+ example_files2
         }
-    print(example)
+    app.logger.debug(f"LDcorrelation example files: {example}")
     return json.dumps(example)
 
 
@@ -888,7 +891,7 @@ def ldassoc():
         # WEB REQUEST
         web = True
         reference = request.args.get("reference", False)
-        print("reference: " + reference)
+        app.logger.debug(f"LDassoc reference: {reference}")
         app.logger.debug(
             "ldassoc params "
             + json.dumps(
@@ -929,7 +932,7 @@ def ldscore():
         web = True
     else:
         web = False
-    print("LDscore###############:",request.args.get('isExample'))
+    app.logger.debug(f"LDscore request with isExample: {request.args.get('isExample')}")
     start_time = time.time()
 
     pop = request.args.get('pop', False)
@@ -939,7 +942,7 @@ def ldscore():
     windUnit = request.args.get('windUnit', 'cm')
     isExample = request.args.get('isExample', False)
     reference = request.args.get('reference',False)
-    print(pop,genome_build,filename,ldwindow,windUnit,isExample)
+    app.logger.debug(f"LDscore params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, ldwindow: {ldwindow}, windUnit: {windUnit}, isExample: {isExample}")
 
     fileDir = f"/data/tmp/uploads/{reference}/"
     #print(filename)
@@ -969,9 +972,9 @@ def ldscore():
                     new_file_path = os.path.join(fileDir, new_filename)
                     if os.path.abspath(file_path) != os.path.abspath(new_file_path):
                         shutil.copyfile(file_path, new_file_path)
-                        print(f"Copied {file_path} to {new_file_path}")
+                        app.logger.info(f"Copied {file_path} to {new_file_path}")
                     else:
-                        print(f"Skipped copying {file_path} to itself.")
+                        app.logger.debug(f"Skipped copying {file_path} to itself.")
                     #os.rename(file_path, new_file_path)
                     #print(f"Copied {file_path} to {new_file_path}")
     try:
@@ -981,7 +984,7 @@ def ldscore():
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
         result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample,reference)
-        print("######################### Result:")
+        app.logger.debug("LDscore calculation completed, processing result")
         #print(result)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
@@ -1002,8 +1005,8 @@ def ldscore():
             out_json = pretty_out_json
 
     except requests.RequestException as e:
-        # Print the error message
-        print(f"An error occurred: {e}")
+        # Log the error message
+        app.logger.error(f"LDscore request error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -1054,7 +1057,7 @@ def ldscoreapi():
             if part.isdigit() and 1 <= int(part) <= 22:
                 file_chromo = part
                 break
-    print(file_chromo)
+    app.logger.debug(f"LDscore API file chromosome: {file_chromo}")
     if file_chromo:
         # Find the file in the directory
         pattern = os.path.join(fileDir, f"{fileroot}.*")
@@ -1063,7 +1066,7 @@ def ldscoreapi():
             new_filename = f"{file_chromo}.{extension}"
             new_file_path = os.path.join(fileDir, new_filename)
             os.rename(file_path, new_file_path)
-            print(f"Renamed {file_path} to {new_file_path}")
+            app.logger.info(f"Renamed {file_path} to {new_file_path}")
 
     try:
         # Make an API call to the ldsc39_container
@@ -1072,7 +1075,7 @@ def ldscoreapi():
         #response.raise_for_status()  # Raise an exception for HTTP errors
         
         result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
-        print("######################### Result:")
+        app.logger.debug("LDscore API calculation completed, processing result")
         #print(result)
        
                 # Pretty-print the JSON output
@@ -1086,16 +1089,16 @@ def ldscoreapi():
         for file_path in saved_files.values():
             try:
                 os.remove(file_path)
-                print(f"Deleted file: {file_path}")
+                app.logger.info(f"Deleted file: {file_path}")
             except Exception as e:
-                print(f"Error deleting file {file_path}: {e}")
+                app.logger.error(f"Error deleting file {file_path}: {e}")
 
 
         return filtered_result
 
     except requests.RequestException as e:
-        # Print the error message
-        print(f"An error occurred: {e}")
+        # Log the error message
+        app.logger.error(f"LDscore API request error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -1114,7 +1117,7 @@ def ldherit():
         web = True
     else:
         web = False
-    print("LDherit###############:",request.args.get('isExample'))
+    app.logger.debug(f"LDherit request with isExample: {request.args.get('isExample')}")
     start_time = time.time()
     
     pop = request.args.get('pop', False)
@@ -1122,13 +1125,13 @@ def ldherit():
     filename = request.args.get('filename', False)
     isexample = request.args.get('isExample', False)
     reference = request.args.get('reference',False)
-    print(pop,genome_build,filename,isexample)
+    app.logger.debug(f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
     fileDir = f"/data/tmp/uploads"
-    print(filename)
+    app.logger.debug(f"LDherit processing filename: {filename}")
     try:
         # Make an API call to the ldsc39_container
        
@@ -1150,8 +1153,8 @@ def ldherit():
             #filtered_result = filtered_result.replace("\\n", "\n")
             return filtered_result
     except requests.RequestException as e:
-        # Print the error message
-        print(f"An error occurred: {e}")
+        # Log the error message
+        app.logger.error(f"LDherit request error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -1185,12 +1188,12 @@ def ldheritAPI():
 
     start_time = time.time()
        
-    print(pop,genome_build,filename,isexample)
+    app.logger.debug(f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
    
-    print(filename)
+    app.logger.debug(f"LDherit API processing filename: {filename}")
     try:
         # Make an API call to the ldsc39_container
        
@@ -1210,13 +1213,13 @@ def ldheritAPI():
         # Delete the uploaded files
         try:
             os.remove(file)
-            print(f"Deleted file: {file}")
+            app.logger.info(f"Deleted file: {file}")
         except Exception as e:
-            print(f"Error deleting file {file}: {e}")
+            app.logger.error(f"Error deleting file {file}: {e}")
         return filtered_result
     except requests.RequestException as e:
-        # Print the error message
-        print(f"An error occurred: {e}")
+        # Log the error message
+        app.logger.error(f"LDherit API request error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -1230,7 +1233,7 @@ def ldcorrelation():
         web = True
     else:
         web = False
-    print("LDcorrelation###############:",request.args.get('isExample'))
+    app.logger.debug(f"LDcorrelation request with isExample: {request.args.get('isExample')}")
     start_time = time.time()
     
     pop = request.args.get('pop', False)
@@ -1238,13 +1241,13 @@ def ldcorrelation():
     filename = request.args.get('filename', False)
     filename2 = request.args.get('filename2', False)
     isexample = request.args.get('isExample', False)
-    print(pop,genome_build,filename,isexample)
+    app.logger.debug(f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
     fileDir = f"/data/tmp/uploads"
-    print(filename)
+    app.logger.debug(f"LDcorrelation processing filename: {filename}")
     try:
         # Make an API call to the ldsc39_container    
         result = run_correlation_command(filename,filename2,pop,isexample)
@@ -1262,8 +1265,8 @@ def ldcorrelation():
             #filtered_result = filtered_result.replace("\\n", "\n")
             return filtered_result
     except requests.RequestException as e:
-        # Print the error message
-        print(f"An error occurred: {e}")
+        # Log the error message
+        app.logger.error(f"LDcorrelation request error: {e}")
         out_json = {"error": str(e)}
 
     end_time = time.time()
@@ -1937,7 +1940,7 @@ def ldpop():
             return sendTraceback(None)
     end_time = time.time()
     app.logger.info("Executed LDpop (%ss)" % (round(end_time - start_time, 2)))
-    print("ERRR", out_json)
+    app.logger.debug(f"LDpop output: {out_json}")
     schedule_tmp_cleanup(reference, app.logger)
     return current_app.response_class(out_json, mimetype="application/json")
 
@@ -2253,10 +2256,10 @@ def ldtrait():
         except:
             app.logger.debug("timeout except")
             toggleLocked(token, 0)
-            print("timeout error")
+            app.logger.error("LDtrait timeout error")
         else:
             app.logger.debug("time out else")
-            print("time out")
+            app.logger.warning("LDtrait timeout occurred")
     end_time = time.time()
     app.logger.info("Executed LDtrait (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
