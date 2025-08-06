@@ -17,10 +17,9 @@ const Results = dynamic(() => import("./results"), {
 
 export default function SNPchip() {
   const [results, setResults] = useState(null);
-  const genomeBuild = useStore((state) => state.genome_build);
-  const setGenomeBuild = useStore((state) => state.setGenomeBuild);
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
+  const genomeBuild = useStore((state) => state.genome_build);
 
   return (
     <>
@@ -36,7 +35,6 @@ export default function SNPchip() {
               results={results}
               setResults={setResults}
               genome_build={genomeBuild}
-              setGenomeBuild={setGenomeBuild}
             />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>
