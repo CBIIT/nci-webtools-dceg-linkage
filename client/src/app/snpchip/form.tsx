@@ -397,7 +397,7 @@ export default function SNPChipForm({
       <hr />
       {/* Results, warnings, and errors display */}
       {error && (
-        <Alert className="mt-3" role="alert">
+        <Alert className="mt-3" role="alert" variant="danger">
           {error}
         </Alert>
       )}
