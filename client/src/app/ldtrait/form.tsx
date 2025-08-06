@@ -177,6 +177,7 @@ export default function LdtraitForm() {
                     message: "Value must be between 0 and 1",
                   },
                 })}
+                title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
             </InputGroup>
             <Form.Label>Base pair window</Form.Label>
@@ -186,16 +187,10 @@ export default function LdtraitForm() {
               <Form.Control
                 type="number"
                 {...register("window", {
-                  required: "This field is required",
-                  min: {
-                    value: 0,
-                    message: "Value must be at least 0",
-                  },
-                  max: {
-                    value: 1000000,
-                    message: "Value must be at most 1,000,000",
-                  },
+                  required: "Base pair window is required",
+                  pattern: { value: /^\d+$/, message: "Invalid base pair window" },
                 })}
+                 placeholder="100000"
               />
               
             </InputGroup>
