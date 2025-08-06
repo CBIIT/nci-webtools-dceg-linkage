@@ -7,6 +7,7 @@ RUN dnf -y update \
    make \
    nodejs \
    npm \
+   nginx \
    && dnf clean all
 
 RUN mkdir -p /app/client

@@ -35,11 +35,11 @@ export default function LdAssocResults({ ref }: { ref: string }) {
     queryKey: ["ldassoc_plot", ref],
     queryFn: async () => (ref && !results?.error ? fetchOutput(`ldassoc_plot_${ref}.json`) : null),
   });
-  const { data: enableExport } = useQuery<FormData>({
+  const { data: enableExport } = useQuery<boolean>({
     queryKey: ["ldassoc-export", ref],
     queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
     enabled: !!ref && !results?.error,
-    refetchInterval: 5000, // Check every 5 seconds
+    refetchInterval: (query) => (query.state.data ? false : 5000),
     retry: 60,
   });
 
@@ -75,7 +75,16 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   const columns = [
     columnHelper.accessor((row) => row[0], {
       header: "RS Number",
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        const rs = info.getValue();
+        if (!rs || rs === ".") return rs;
+        const url = `http://www.ncbi.nlm.nih.gov/snp/${rs}`;
+        return (
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {rs}
+          </a>
+        );
+      },
     }),
     columnHelper.accessor((row) => row[1], {
       header: "Chr",
@@ -83,7 +92,28 @@ export default function LdAssocResults({ ref }: { ref: string }) {
     }),
     columnHelper.accessor((row) => row[2], {
       header: `Position (${genomeBuildMap[formData?.genome_build ?? "grch37"]})`,
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        const position = info.getValue();
+        const rs = info.row.original[0];
+        const chr = info.row.original[1];
+        if (!position || !rs || rs === "." || !chr) return position;
+        // Show +/-250bp window around position
+        const start = Math.max(Number(position) - 250, 0);
+        const end = Number(position) + 250;
+        const region = `${chr}:${start}-${end}`;
+        const params = {
+          "db": formData?.genome_build === "grch37" ? "hg19" : "hg38",
+          "position": region,
+          "snp151": "pack",
+          "hgFind.matches": rs,
+        };
+        const url = `https://genome.ucsc.edu/cgi-bin/hgTracks?${new URLSearchParams(params)}`;
+        return (
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {position}
+          </a>
+        );
+      },
     }),
     columnHelper.accessor((row) => row[3], {
       header: "Alleles",
@@ -115,11 +145,36 @@ export default function LdAssocResults({ ref }: { ref: string }) {
     }),
     columnHelper.accessor((row) => row[10], {
       header: "FORGEdb",
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        const value = info.getValue();
+        const rs = info.row.original[0];
+        if (!rs || rs === ".") return value;
+        const url = `https://forgedb.cancer.gov/explore?rsid=${rs}`;
+        return (
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {value}
+          </a>
+        );
+      },
     }),
     columnHelper.accessor((row) => row[11], {
       header: "RegulomeDB",
-      cell: (info) => info.getValue(),
+      cell: (info) => {
+        const value = info.getValue();
+        const chr = info.row.original[1];
+        const position = info.row.original[2];
+        if (!chr || !position || !value || value === ".") return value;
+        const start = parseInt(position) - 1;
+        const end = parseInt(position);
+        const region = `${chr}:${start}-${end}`;
+        const genome = formData?.genome_build === "grch37" ? "GRCh37" : "GRCh38";
+        const url = `https://www.regulomedb.org/regulome-search?genome=${genome}&regions=${encodeURIComponent(region)}`;
+        return (
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {value}
+          </a>
+        );
+      },
     }),
     columnHelper.accessor((row) => row[12], {
       header: "HaploReg",

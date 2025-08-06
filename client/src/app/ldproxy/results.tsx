@@ -101,11 +101,11 @@ export default function LdProxyResults({ ref }: { ref: string }) {
     queryKey: ["ldproxy_plot", ref],
     queryFn: async () => (ref && !results?.error ? fetchOutput(`ldproxy_plot_${ref}.json`) : null),
   });
-  const { data: enableExport } = useQuery<FormData>({
+  const { data: enableExport } = useQuery<boolean>({
     queryKey: ["ldproxy-export", ref],
     queryFn: async () => (ref ? fetchOutputStatus(`proxy_plot_${ref}.jpeg`) : false),
     enabled: !!ref && !results?.error,
-    refetchInterval: 5000, // Check every 5 seconds
+    refetchInterval: (query) => (query.state.data ? false : 5000),
     retry: 60,
   });
 

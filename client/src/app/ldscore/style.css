@@ -1,0 +1,35 @@
+/* LDscore specific styles */
+.ldscore-form {
+  background-color: #f8f9fa;
+}
+
+.analysis-type-buttons .btn {
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.file-upload-section {
+  border: 2px dashed #dee2e6;
+  border-radius: 0.375rem;
+  padding: 1rem;
+  text-align: center;
+  transition: border-color 0.15s ease-in-out;
+}
+
+.file-upload-section:hover {
+  border-color: #adb5bd;
+}
+
+.file-upload-section.drag-over {
+  border-color: #0d6efd;
+  background-color: #e7f1ff;
+}
+
+.results-section {
+  min-height: 400px;
+}
+
+.example-data-info {
+  font-size: 0.875rem;
+  color: #6c757d;
+}

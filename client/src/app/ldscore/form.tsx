@@ -1,0 +1,874 @@
+"use client";
+import { useForm } from "react-hook-form";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Nav, Tab } from "react-bootstrap";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useRouter, usePathname } from "next/navigation";
+import { ldscore, fetchHeritabilityResult, fetchGeneticCorrelationResult, fetchLdScoreCalculationResult, upload } from "@/services/queries";
+import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
+import CalculateLoading from "@/components/calculateLoading";
+import { useStore } from "@/store";
+import { useState } from "react";
+import LdScoreResults from "./results";
+import "./style.css";
+
+export interface FormData {
+  file?: File;
+  file2?: File; // Second file for genetic correlation
+  ldfiles?: FileList; // Add this line for LD calculation file uploads
+  analysis_type: "heritability" | "genetic_correlation" | "ld_calculation";
+  pop: LdscorePopOption | null; // Allow null for no selection
+  window: number;
+  windowUnit: "kb" | "cM";
+}
+
+export default function LdScoreForm() {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { genome_build } = useStore((state) => state);
+  const [exampleFilename, setExampleFilename] = useState<string>("");
+  const [exampleFilepath, setExampleFilepath] = useState<string>("");
+  const [heritabilityResult, setHeritabilityResult] = useState<string>("");
+  const [heritabilityLoading, setHeritabilityLoading] = useState(false);
+  const [heritPanelOpen, setHeritPanelOpen] = useState(false);
+  const [uploadedFilename, setUploadedFilename] = useState<string>("");
+  const [uploading, setUploading] = useState(false);
+  const [exampleFile1, setExampleFile1] = useState<string>("");
+  const [exampleFile2, setExampleFile2] = useState<string>("");
+  const [uploadedFile1, setUploadedFile1] = useState<string>("");
+  const [uploadedFile2, setUploadedFile2] = useState<string>("");
+
+  // State for "Use Example Data" switch in heritability tab
+  const [useExample, setUseExample] = useState(false);
+
+  // Add state for LD calculation example and uploaded files
+  const [exampleBed, setExampleBed] = useState<string>("");
+  const [exampleBim, setExampleBim] = useState<string>("");
+  const [exampleFam, setExampleFam] = useState<string>("");
+  const [uploadedBed, setUploadedBed] = useState<string>("");
+  const [uploadedBim, setUploadedBim] = useState<string>("");
+  const [uploadedFam, setUploadedFam] = useState<string>("");
+
+  // State for "Use Example Data" switch in LD calculation tab
+  const [useExampleLdscore, setUseExampleLdscore] = useState(false);
+
+  const [ldscoreLoading, setLdscoreLoading] = useState(false);
+
+  const handleFileUpload = async (file: File) => {
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("ldscoreFile", file);
+   
+    try {
+      const response = await upload(formData);
+      if (response.status === 200) {
+        setUploadedFilename(file.name);
+      } else {
+        setUploadedFilename("");
+      }
+    } catch (e) {
+      setUploadedFilename("");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
+  const handleLdFilesUpload = async (files: FileList) => {
+    setUploading(true);
+    setUploadedBed(""); setUploadedBim(""); setUploadedFam("");
+    ldForm.clearErrors("ldfiles");
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      const formData = new FormData();
+      formData.append("ldscoreFile", file);
+      try {
+        const response = await fetch("/LDlinkRestWeb/upload", {
+          method: "POST",
+          body: formData,
+        });
+        if (response.ok) {
+          if (ext === 'bed') setUploadedBed(file.name);
+          if (ext === 'bim') setUploadedBim(file.name);
+          if (ext === 'fam') setUploadedFam(file.name);
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    setUploading(false);
+  };
+
+  // Heritability form state
+  const heritabilityForm = useForm<FormData>({
+    defaultValues: {
+      file: undefined,
+      analysis_type: "heritability",
+      //pop: { label: '', value: '' },
+      pop: undefined,
+      window: 1,
+    }
+  });
+  const heritabilityMutation = useMutation({
+    mutationFn: ldscore,
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        console.error("LDscore calculation failed:", data.error);
+        return;
+      }
+      queryClient.setQueryData(["ldscore", data.id], data);
+      router.push(`${pathname}?ref=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("LDscore mutation error:", error);
+    },
+  });
+
+  // Genetic correlation form state
+  const geneticForm = useForm<FormData>({
+    defaultValues: {
+      file: undefined,
+      file2: undefined,
+      analysis_type: "genetic_correlation",
+      pop: undefined,
+         window: 1,
+    }
+  });
+  const geneticMutation = useMutation({
+    mutationFn: ldscore,
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        console.error("LDscore calculation failed:", data.error);
+        return;
+      }
+      queryClient.setQueryData(["ldscore", data.id], data);
+      router.push(`${pathname}?ref=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("LDscore mutation error:", error);
+    },
+  });
+  const [geneticLoading, setGeneticLoading] = useState(false);
+  const [geneticResult, setGeneticResult] = useState("");
+  // State for "Use Example Data" switch in genetic correlation tab
+  const [useExampleCorrelation, setUseExampleCorrelation] = useState(false);
+
+  // LD calculation form state
+  const ldForm = useForm<FormData>({
+    defaultValues: {
+      ldfiles: undefined,
+      analysis_type: "ld_calculation",
+      window: 1,
+      windowUnit: "cM"
+    }
+  });
+  const ldMutation = useMutation({
+    mutationFn: ldscore,
+    onSuccess: (data: any) => {
+      if (data?.error) {
+        console.error("LDscore calculation failed:", data.error);
+        return;
+      }
+      queryClient.setQueryData(["ldscore", data.id], data);
+      router.push(`${pathname}?ref=${data.id}`);
+    },
+    onError: (error) => {
+      console.error("LDscore mutation error:", error);
+    },
+  });
+  // Remove all result parsing, rendering, and download helpers from here.
+  // Only keep form logic, file upload, and state management.
+
+  // Add state to track the reference and type for result display
+  const [heritabilityResultRef, setHeritabilityResultRef] = useState<string | null>(null);
+  const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
+  const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
+
+  // Update submit handlers to set resultRef and resultType
+  const onHeritabilitySubmit = async (data: FormData) => {
+    // Clear all results before new calculation
+    setHeritabilityResultRef(null);
+    setHeritabilityLoading(true);
+    const pop = data.pop?.value ?? "";
+    const genomeBuild = genome_build || "grch37";
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const isExample = !!exampleFilename;
+    const filename = exampleFilename || uploadedFilename;
+    const params = new URLSearchParams({
+      filename,
+      pop,
+      genome_build: genomeBuild,
+      isExample: isExample ? "true" : "false",
+      reference,
+    });
+    try {
+      await fetchHeritabilityResult(params); // still trigger backend
+      setHeritabilityResultRef(reference);
+    } catch (error) {
+      // handle error UI if needed
+    } finally {
+      setHeritabilityLoading(false);
+    }
+  };
+
+  const onGeneticSubmit = async (data: FormData) => {
+    // Clear all results before new calculation
+    setGeneticCorrelationResultRef(null);
+    setGeneticResult("");
+    setGeneticLoading(true);
+    const pop = data.pop?.value ?? "";
+    const genomeBuild = genome_build || "grch37";
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const isExample = !!exampleFile1;
+    const filename = exampleFile1 || uploadedFile1;
+    const filename2 = exampleFile2 || uploadedFile2;
+    const params = new URLSearchParams({
+      filename,
+      filename2,
+      pop,
+      genome_build: genomeBuild,
+      isExample: isExample ? "true" : "false",
+      reference,
+    });
+    try {
+      await fetchGeneticCorrelationResult(params);
+      setGeneticCorrelationResultRef(reference);
+    } catch (error) {
+      setGeneticResult("Error fetching genetic correlation result.");
+    } finally {
+      setGeneticLoading(false);
+    }
+  };
+
+  const onLdSubmit = async () => {
+    // Clear all results before new calculation
+    setLdscoreResultRef(null);
+    const bed = exampleBed || uploadedBed;
+    const bim = exampleBim || uploadedBim;
+    const fam = exampleFam || uploadedFam;
+    const window = ldForm.getValues("window");
+    const windowUnit = ldForm.getValues("windowUnit");
+    const isExample = !!exampleBed;
+    const filename = `${bed};${bim};${fam}`;
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const params = new URLSearchParams({
+      filename,
+      ldwindow: String(window),
+      windUnit: String(windowUnit),
+      isExample: isExample ? "true" : "false",
+      reference,
+    });
+    try {
+      setLdscoreLoading(true);
+      //setUploading(true);
+      await fetchLdScoreCalculationResult(params);
+      setLdscoreResultRef(reference);
+    } catch (error) {
+      // handle error UI if needed
+    } finally {
+     // setUploading(false);
+      setLdscoreLoading(false);
+    }
+  };
+
+  // Reset handlers: clear only the relevant result when user resets or uploads new files
+  const onHeritabilityReset = () => {
+    heritabilityForm.reset();
+    setHeritabilityResultRef(null);
+    setExampleFilename("");
+    setExampleFilepath("");
+    setUploadedFilename("");
+    setUseExample(false);
+    heritabilityForm.setValue("pop",null);
+  };
+  const onGeneticReset = () => {
+    geneticForm.reset();
+    setGeneticCorrelationResultRef(null);
+    setExampleFile1("");
+    setExampleFile2("");
+    setUploadedFile1("");
+    setUploadedFile2("");
+    setUseExampleCorrelation(false);
+    geneticForm.setValue("pop", null);
+  };
+  const onLdReset = () => {
+    ldForm.reset({
+      file: undefined,
+      file2: undefined,
+      ldfiles: undefined,
+      analysis_type: "ld_calculation",
+      pop: null,
+      window: 1,
+      windowUnit: "cM"
+    });
+    setLdscoreResultRef(null);
+    setExampleBed("");
+    setExampleBim("");
+    setExampleFam("");
+    setUploadedBed("");
+    setUploadedBim("");
+    setUploadedFam("");
+    setUseExampleLdscore(false);
+  };
+
+  const analysisType = heritabilityForm.watch("analysis_type");
+
+  if (heritabilityMutation.isPending || geneticMutation.isPending || ldMutation.isPending) {
+    return <CalculateLoading />;
+  }
+
+  return (
+    <Tab.Container activeKey={analysisType} onSelect={(key) => heritabilityForm.setValue("analysis_type", key as any)}>
+      {/* Show uploading overlay for all tabs */}
+      {uploading && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(255,255,255,0.7)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="d-flex flex-column align-items-center">
+            <span
+              className="px-3 py-2 mb-2"
+              style={{
+                background: '#e3f0ff',
+                color: '#084298',
+                borderRadius: '6px',
+                fontWeight: 500,
+                textAlign: 'center',
+                maxWidth: 800,
+              }}
+            >
+              Uploading file, please wait...
+            </span>
+            <CalculateLoading />
+          </div>
+        </div>
+      )}
+      <Row>
+        <Col sm={12}>
+          <Nav variant="tabs" className="mb-3">
+            <Nav.Item>
+              <Nav.Link eventKey="heritability">Heritability Analysis</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="genetic_correlation">Genetic Correlation</Nav.Link>
+            </Nav.Item>
+            <Nav.Item>
+              <Nav.Link eventKey="ld_calculation">LD Score Calculation</Nav.Link>
+            </Nav.Item>
+          </Nav>
+        </Col>
+      </Row>
+      <Tab.Content>
+        <Tab.Pane eventKey="heritability">
+          <Form id="ldscore-form-heritability" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
+            <Row>
+              <Col sm={4}>
+                <Form.Group controlId="file" className="mb-3">
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+                  {typeof exampleFilename === "string" && exampleFilename !== "" ? (
+              <div className="form-control bg-light">{exampleFilename}</div>
+            ) : (
+                    <Form.Control 
+                      type="file" 
+                      {...heritabilityForm.register("file", { required: "File is required" })}
+                      accept=".txt,.tsv,.csv"
+                      title="Upload pre-munged GWAS sumstats"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        const file = input.files && input.files[0];
+                        setHeritabilityResult("");
+                        setHeritabilityResultRef(null); // Reset result when new file is loaded
+                        if (file) {
+                          setUploading(true);
+                          await handleFileUpload(file);
+                          setUploading(false);
+                          setUploadedFilename(file.name);
+                          heritabilityForm.clearErrors("file");
+                        }
+                      }}
+                    />
+                  )}
+                  <div className="mt-2">
+                    <a href="/help#LDscore" className="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                      Click here for sample format
+                    </a>
+                  </div>
+             <Form.Text className="text-danger">{heritabilityForm.formState.errors?.file?.message}</Form.Text>
+             </Form.Group>
+             <Form.Group controlId="useEx" className="mb-3">
+                  <div className="mt-2">
+                    <Form.Check 
+                      type="switch"
+                      id="use-example-heritability"
+                      label="Use example data"
+                      checked={useExample}
+                      onChange={async (e) => {
+                        setUseExample(e.target.checked);
+                        if (e.target.checked) {
+                          setExampleFilename("");
+                          setExampleFilepath("");
+                          setUploadedFilename("");
+                          setHeritabilityResult("");
+                          heritabilityForm.clearErrors("file");
+                          try {
+                            const response = await fetch("/LDlinkRestWeb/ldherit_example");
+                            if (response.ok) {
+                              const data = await response.json();
+                              setExampleFilename(data.filenames || "");
+                              setExampleFilepath(data.filepaths || "");
+                            } else {
+                              setExampleFilename("");
+                              setExampleFilepath("");
+                              console.error("Failed to fetch example data");
+                            }
+                          } catch (error) {
+                            setExampleFilename("");
+                            setExampleFilepath("");
+                            console.error("Error fetching example data:", error);
+                          }
+                        } else {
+                          setExampleFilename("");
+                          setExampleFilepath("");
+                          setUploadedFilename("");
+                          setHeritabilityResult("");
+                          //heritabilityForm.setValue("pop", null);
+                        }
+                      }}
+                    />
+                  {(exampleFilename || uploadedFilename) && (
+                    <div className="mt-1" style={{ fontSize: "0.95em" }}>
+                      <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
+                     <a
+                        href={exampleFilename
+                          ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`
+                          : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFilename)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFilename || uploadedFilename}
+                      </a>
+                    </div>
+                  )}
+                  </div>
+               
+                </Form.Group>
+              </Col>
+
+              <Col sm={4}>
+                <Form.Group controlId="pop" className="mb-3">
+                  <Form.Label>Population</Form.Label>
+                  <LdscorePopSelect name="pop" control={heritabilityForm.control} rules={{ required: "Population is required" }} />
+                  <Form.Text className="text-danger">{heritabilityForm.formState.errors?.pop?.message}</Form.Text>
+                </Form.Group>
+              </Col>
+
+              <Col />
+              <Col sm={2}>
+                <div className="text-end">
+                  <Button type="reset" variant="outline-danger" className="me-1">
+                    Reset
+                  </Button>
+                  <Button type="submit" variant="primary" disabled={heritabilityMutation.isPending}>
+                    Calculate
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+          {heritabilityLoading && (
+            <div className="d-flex flex-column align-items-center my-3">
+              <span
+                className="px-3 py-2 mb-2"
+                style={{
+                  background: '#e3f0ff',
+                  color: '#084298',
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  maxWidth: 800,
+                }}
+              >
+                Computational time may vary based on the number of samples and genetic markers provided in the data
+              </span>
+              <div>
+                <CalculateLoading />
+              </div>
+            </div>
+          )}
+          {/* Only show results via LdScoreResults for heritability tab */}
+          {heritabilityResultRef && (
+            <LdScoreResults 
+              reference={heritabilityResultRef} 
+              type="heritability" 
+              uploads={exampleFilename || uploadedFilename}
+            />
+          )}
+        </Tab.Pane>
+
+        <Tab.Pane eventKey="genetic_correlation">
+          <Form id="ldscore-form-genetic-correlation" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
+            <Row>
+              <Col sm={3}>
+                <Form.Group controlId="file" className="mb-3">
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+                  {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
+                    <div className="form-control bg-light">{exampleFile1}</div>
+                  ) : (
+                    <Form.Control 
+                      type="file" 
+                      {...geneticForm.register("file", { required: "File is required" })}
+                      accept=".txt,.tsv,.csv"
+                      title="Upload pre-munged GWAS sumstats"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        const file = input.files && input.files[0];
+                        setGeneticCorrelationResultRef(null); // Reset result when new file is loaded
+                        if (file) {
+                          await handleFileUpload(file);
+                          setUploadedFile1(file.name);
+                          geneticForm.clearErrors("file");
+                        }
+                      }}
+                    />
+                  )}
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.file?.message}</Form.Text>
+                </Form.Group>
+                <Form.Group controlId="file2" className="mb-3">
+                  <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
+                  {typeof exampleFile2 === "string" && exampleFile2 !== "" ? (
+                    <div className="form-control bg-light">{exampleFile2}</div>
+                  ) : (
+                    <Form.Control 
+                      type="file" 
+                      {...geneticForm.register("file2", { required: "File is required" })}
+                      accept=".txt,.tsv,.csv"
+                      title="Upload pre-munged GWAS sumstats"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        const file = input.files && input.files[0];
+                        setGeneticCorrelationResultRef(null); // Reset result when new file is loaded
+                        if (file) {
+   
+                          await handleFileUpload(file);
+                          setUploadedFile2(file.name);
+                          geneticForm.clearErrors("file2");
+                        }
+                      }}
+                    />
+                  )}
+                  <div className="mt-2">
+                    <a href="/help#LDscore" className="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                      Click here for sample format
+                    </a>
+                  </div>
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
+                </Form.Group>
+              
+              </Col>
+              <Col sm={1}></Col>
+              <Col sm={3}>
+                <Form.Group controlId="pop" className="mb-3">
+                  <Form.Label>Population</Form.Label>
+                  <LdscorePopSelect name="pop" control={geneticForm.control} rules={{ required: "Population is required" }} />
+                  <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
+                </Form.Group>
+              </Col>
+              <Col />
+              <Col sm={3}>
+                <div className="text-end">
+                  <Button type="reset" variant="outline-danger" className="me-1">
+                    Reset
+                  </Button>
+                  <Button type="submit" variant="primary" disabled={geneticMutation.isPending}>
+                    Calculate
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+            <Row>
+              <Col sm={12}>
+                <div className="mb-3">
+                  <Form.Check 
+                    type="switch"
+                    id="use-example-correlation"
+                    label="Use example data"
+                    checked={useExampleCorrelation}
+                    onChange={(e) => {
+                      setUseExampleCorrelation(e.target.checked);
+                      if (e.target.checked) {
+                        setExampleFile1("BBJ_HDLC22.txt");
+                        setExampleFile2("BBJ_LDLC22.txt");
+                        setUploadedFile1("");
+                        setUploadedFile2("");
+                        geneticForm.setValue("analysis_type", "genetic_correlation");
+                        geneticForm.clearErrors("file");
+                        geneticForm.clearErrors("file2");
+                      } else {
+                        setExampleFile1("");
+                        setExampleFile2("");
+                        //geneticForm.setValue("pop", null);
+                      }
+                    }}
+                  />
+                   {(exampleFile1 || uploadedFile1) && (exampleFile2 || uploadedFile2) && (
+                    <>
+                      <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
+                      <a
+                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile1)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFile1 || uploadedFile1}
+                      </a>
+                     <br></br>
+                      <a
+                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile2)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                      >
+                        {exampleFile2 || uploadedFile2}
+                      </a>
+                    </>
+                  )}
+                </div>
+              </Col>
+            </Row>
+            
+            {geneticMutation.isError && (
+              <Row>
+                <Col>
+                  <Alert variant="danger" className="mt-3">
+                    <Alert.Heading>Error</Alert.Heading>
+                    <p>Failed to process Genetic Correlation calculation. Please check your input and try again.</p>
+                  </Alert>
+                </Col>
+              </Row>
+            )}
+          </Form>
+        {geneticLoading && (
+            <div className="d-flex flex-column align-items-center my-3">
+              <span
+                className="px-3 py-2 mb-2"
+                style={{
+                  background: '#e3f0ff',
+                  color: '#084298',
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  maxWidth: 800,
+                }}
+              >
+                Computational time may vary based on the number of samples and genetic markers provided in the data
+              </span>
+              <div>
+                <CalculateLoading />
+              </div>
+            </div>
+          )}
+          {/* Show results via LdScoreResults for genetic correlation tab */}
+          {geneticCorrelationResultRef && (
+            <LdScoreResults
+              reference={geneticCorrelationResultRef}
+              type="correlation"
+              uploads={
+                [exampleFile1 || uploadedFile1, exampleFile2 || uploadedFile2].filter(Boolean).join(',')
+              }
+            />
+          )}
+        </Tab.Pane>
+
+        <Tab.Pane eventKey="ld_calculation">
+          <Form id="ldscore-form-ld-calculation" onSubmit={ldForm.handleSubmit(onLdSubmit)} onReset={onLdReset} noValidate>
+            <Row>
+              <Col sm={4}>
+                <Form.Group controlId="ldfiles" className="mb-3">
+                  <Form.Label>Upload .bed, .bim, .fam files (all three required)</Form.Label>
+                  {(exampleBed || exampleBim || exampleFam) ? (
+                    <div className="form-control bg-light">
+                      {exampleBed && <div>{exampleBed}</div>}
+                      {exampleBim && <div>{exampleBim}</div>}
+                      {exampleFam && <div>{exampleFam}</div>}
+                    </div>
+                  ) : (
+                    <Form.Control
+                      type="file"
+                      {...ldForm.register("ldfiles", { required: "Files are required" })}
+                      accept=".bed,.bim,.fam"
+                      multiple
+                      title="Upload .bed, .bim, .fam files"
+                      onChange={async (e) => {
+                        const input = e.target as HTMLInputElement;
+                        if (input.files) {
+                          setLdscoreResultRef(null); // Reset LD score result when new files are loaded
+                          handleLdFilesUpload(input.files);
+                        }
+                      }}
+                    />
+                  )}
+                  <Form.Text className="text-danger">{ldForm.formState.errors?.ldfiles?.message}</Form.Text>
+                </Form.Group>
+                <Form.Group controlId="useExLd" className="mb-3">
+                  <div className="mt-2">
+                    <Form.Check
+                      type="switch"
+                      id="use-example-ld"
+                      label="Use example data"
+                      checked={useExampleLdscore}
+                      onChange={(e) => {
+                        setUseExampleLdscore(e.target.checked);
+                        if (e.target.checked) {
+                          setExampleBed("22.bed");
+                          setExampleBim("22.bim");
+                          setExampleFam("22.fam");
+                          setUploadedBed("");
+                          setUploadedBim("");
+                          setUploadedFam("");
+                          ldForm.clearErrors("ldfiles");
+                        } else {
+                          setExampleBed("");
+                          setExampleBim("");
+                          setExampleFam("");
+                        }
+                      }}
+                    />
+                    {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
+                      <div className="mt-1" style={{ fontSize: "0.95em" }}>
+                        <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
+                        {(exampleBed || uploadedBed) && (
+                          <div>
+                            <a
+                              href={exampleBed ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBed)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBed)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {exampleBed || uploadedBed}
+                            </a>
+                          </div>
+                        )}
+                        {(exampleBim || uploadedBim) && (
+                          <div>
+                            <a
+                              href={exampleBim ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBim)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBim)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {exampleBim || uploadedBim}
+                            </a>
+                          </div>
+                        )}
+                        {(exampleFam || uploadedFam) && (
+                          <div>
+                            <a
+                              href={exampleFam ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFam)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFam)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'none', color: 'inherit' }}
+                            >
+                              {exampleFam || uploadedFam}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </Form.Group>
+              </Col>
+              <Col sm={3}>
+                {/* Keep window option as before */}
+                <Form.Group controlId="window" className="mb-3">
+                  <Form.Label>Window</Form.Label>
+                  <div className="d-flex">
+                    <Form.Control
+                      type="number"
+                      {...ldForm.register("window", { required: "Window is required",  min: { value: 1, message: "Window must be greater than 0" } })}
+                      defaultValue={1}
+                      style={{ maxWidth: "120px", marginRight: "8px" }}
+                      title="Please enter an integer greater than 0"
+                    />
+                    <Form.Select
+                      {...ldForm.register("windowUnit")}
+                      style={{ maxWidth: "80px" }}
+                      defaultValue="cM"
+                      title="Select unit for the window size"
+                    >
+                      <option value="kb">kb</option>
+                      <option value="cM">cM</option>
+                    </Form.Select>
+                  </div>
+                  <Form.Text className="text-danger">{ldForm.formState.errors?.window?.message}</Form.Text>
+                </Form.Group>
+              </Col>
+              <Col />
+              <Col sm={2}>
+                <div className="text-end">
+                  <Button type="reset" variant="outline-danger" className="me-1">
+                    Reset
+                  </Button>
+                  <Button type="submit" variant="primary" disabled={ldMutation.isPending}>
+                    Calculate
+                  </Button>
+                </div>
+              </Col>
+            </Row>
+          </Form>
+  
+          {ldscoreLoading && (
+            <div className="d-flex flex-column align-items-center my-3">
+              <span
+                className="px-3 py-2 mb-2"
+                style={{
+                  background: '#e3f0ff',
+                  color: '#084298',
+                  borderRadius: '6px',
+                  fontWeight: 500,
+                  textAlign: 'center',
+                  maxWidth: 800,
+                }}
+              >
+                Computational time may vary based on the number of samples and genetic markers provided in the data
+              </span>
+              <div>
+                <CalculateLoading />
+              </div>
+            </div>
+          )}
+          {/* Show results component if reference and type are available */}
+          {ldscoreResultRef && (
+            <LdScoreResults
+              reference={ldscoreResultRef}
+              type="ldscore"
+              uploads={
+                [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
+              }
+            />
+          )}
+
+          {ldMutation.isError && (
+            <Row>
+              <Col>
+                <Alert variant="danger" className="mt-3">
+                  <Alert.Heading>Error</Alert.Heading>
+                  <p>Failed to process LD Score calculation. Please check your input and try again.</p>
+                </Alert>
+              </Col>
+            </Row>
+          )}
+        </Tab.Pane>
+      </Tab.Content>
+
+      {/* Show results component if reference and type are available */}
+      {/* {resultRef && resultType && (
+        <LdScoreResults reference={resultRef} type={resultTypeMap[resultType]} />
+      )} */}
+    </Tab.Container>
+  );
+}

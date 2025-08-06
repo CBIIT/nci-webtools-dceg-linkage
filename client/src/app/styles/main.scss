@@ -8,6 +8,18 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
   color: #444;
+  font-size: 16px;;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
+    font-family: inherit;
+    font-weight: 500;
+    line-height: 1.1;
+    color: inherit;
+}
+
+.tab-content p {
+  font-size: 16px;;
 }
 
 .disabled-contrast {
@@ -138,6 +150,9 @@ nav {
   background-color: #f5ab35;
 }
 
+a{
+  color: #1C4D6D;
+}
 .card {
   width: 100%;
 }
@@ -175,7 +190,7 @@ nav {
   display: inline-block;
   width: 19%;
   height: 150px;
-  margin: 10px 5px;
+  margin: 0; // Remove margin to prevent overflow
   margin-bottom: 10px;
   margin-right: 5px;
   text-decoration: none;
@@ -272,12 +287,20 @@ nav {
 }
 
 .card-row {
-  max-width: 1300px;
   min-height: 130px;
-  margin: auto;
+  margin: 0 auto 30px auto;
   text-align: center;
-  padding-left: 5px;
-  padding-right: 5px;
+  display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: stretch;
+    gap: 8px; // Reduce space between cards on desktop
+  padding-left: 24px; // Add horizontal padding for desktop
+  padding-right: 24px;
+}
+
+.card-outside {
+  margin: 0; // Remove margin to prevent overflow
 }
 
 .border-0 {
@@ -447,17 +470,57 @@ table.table-chip > tbody {
   cursor: pointer;
   color: #2a71a5; // Change this to your desired color
 }
-@media only screen and (max-width: 930px) {
-  .card-outside {
-    height: 210px;
+ .card-row > * 
+{
+  width:19%;
+  max-width: 19%;
+  flex: none;
+}
+
+#ldlink_version {
+	float: right;
+	width: 150px;
+	font-style: italic;
+	text-align: right;
+}
+
+@media (max-width: 930px) {
+  .card-row > * {
+    width: 30%;
+    max-width: 30%;
+    flex: none;
   }
-  .card-body {
+  .card-spacer {
+    width: 28%;
+    max-width: 28%;
+    flex: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+  }
+  .card-row {
+    justify-content: center; // Center all rows, use gap for equal spacing
+    margin-bottom: 85px;
+    padding-left: 1px !important; // Reduce horizontal padding for mobile
+    padding-right: 1px !important;
+  }
+  .card-row.two-cards {
+    /* No need for special justify-content, inherit from .card-row */
+    margin-left: 0;
+  }
+  .card-row.one-card {
+    justify-content: flex-start !important; // Left-align 1-card rows
+    position: relative;
+  }
+  .card-row.one-card::before {
+    display: none;
+  }
+
+  .card-body{
     height: 170px;
   }
-  .card-outside {
-    width: 32.8%;
-  }
 }
+
 @media only screen and (max-width: 767px) {
   .card-body {
     display: none;
@@ -468,5 +531,25 @@ table.table-chip > tbody {
   }
   .card-row {
     min-height: 50px;
+    margin-bottom: 12px; // Reduce space between rows on small screens
   }
+  .card-title{
+    margin-bottom: 0px !important;
+  }
+}
+@media only screen and (max-width: 384px) {
+  .card-row > * {
+    width: 48%;
+    max-width: 48%;
+    flex: none;
+  }
+  .card-spacer {
+    width: 48%;
+    max-width: 48%;
+    flex: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+  }
+  
 }

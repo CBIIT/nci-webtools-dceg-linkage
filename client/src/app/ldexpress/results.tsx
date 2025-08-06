@@ -291,7 +291,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
                 </Accordion.Item>
               </Accordion>
             </Col>
-            <Col>
+            <Col sm="10" className="overflow-auto">
               <div>
                 {tableData && <Table title="" data={tableData} columns={columns} />}
                 <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>

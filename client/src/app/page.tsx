@@ -14,7 +14,7 @@ export default function Home() {
         <div>
           <Row className="mt-3">
             <div className="text-center">
-              <h1 className="h2">
+              <h1>
                 Welcome to{" "}
                 <Image
                   src="/images/LDlink_logo_small_clear.png"
@@ -59,9 +59,8 @@ export default function Home() {
             <p>
               Questions or comments? Contact us via <a href="mailto:NCILDlinkWebAdmin@mail.nih.gov?subject=LDlink" target="_top" title="Support">email</a>.
             </p>
-            <p id="ldlink_version"></p>
-            
-            
+            <p id="ldlink_version">Version {process.env.NEXT_PUBLIC_VERSION}</p>
+
 
           </div>
           </Row>

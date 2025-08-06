@@ -8,7 +8,7 @@ export default function HelpPage() {
     <Container className="py-4 help-page tab-content mb-0">
       <div className="not-home">
         <div className="text-center">
-          <h1 className="h2">
+          <h1>
             <Image
               src="/images/LDlink_logo_small_clear.png"
               alt="LDlink"

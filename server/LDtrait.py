@@ -271,6 +271,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     thinned_list = []
 
     print("##### FIND GWAS VARIANTS IN WINDOW #####")	
+    
     # establish low/high window for each query snp
     # window = 500000 # -/+ 500Kb = 500,000Bp = 1Mb = 1,000,000 Bp total
     found = {}	
@@ -281,7 +282,6 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
     for snp_coord in snp_coords:
         # print(snp_coord)
         found[snp_coord[0]] = get_window_variants(db, snp_coord[1], snp_coord[2], window, genome_build)
-        # print("found", snp_coord[0], len(found[snp_coord[0]]))
         if found[snp_coord[0]] is not None:
             thinned_list.append(snp_coord[0])
             snp_coords_gwas.append(snp_coord)
@@ -394,10 +394,22 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         out_json.close()
         return("", "", "")
 
-    # Return output
-    json_output = json.dumps(output, sort_keys=True, indent=2)
+    # Prepare return data
+    return_data = {
+        "query_snps": sanitized_query_snps,
+        "thinned_snps": thinned_list,
+        "details": details
+    }
+    if "warning" in output:
+        return_data["warning"] = output["warning"]
+    if "error" in output:
+        return_data["error"] = output["error"]
+        
+    # Write the return data to file
+    json_output = json.dumps(return_data, sort_keys=True, indent=2)
     print(json_output, file=out_json)
     out_json.close()
+
     end = timer()	
     print("TIME ELAPSED:", str(end - start) + "(s)")	
     print("##### LDTRAIT COMPLETE #####")
