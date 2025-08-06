@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, Accordion, Spinner } from "react-bootstrap";
+import { Row, Col, Form, Button, Accordion, Spinner, Alert, Card } from "react-bootstrap";
 import { useRouter, usePathname } from "next/navigation";
 import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
@@ -401,22 +401,22 @@ export default function SNPChipForm({
       <hr />
       {/* Results, warnings, and errors display */}
       {error && (
-        <div className="alert alert-danger mt-3" role="alert">
+        <Alert className="mt-3" role="alert">
           {error}
-        </div>
+        </Alert>
       )}
       {warning && (
-        <Row className="justify-content-center my-3">
-          <Col sm={8} md={7}>
-            <div className="card border-warning w-100">
-              <div className="card-header bg-warning">Warning</div>
-              <div className="card-body py-2 snpchip-card-body">
-                <div className="card-text" style={{ marginBottom: 0 }}>{warning}</div>
-              </div>
-            </div>
-          </Col>
-        </Row>
-      )}
+  <Row className="justify-content-center my-3">
+    <Col sm={8} md={7}>
+      <Card border="warning" className="w-100">
+        <Card.Header className="bg-warning">Warning</Card.Header>
+        <Card.Body className="py-2 snpchip-card-body">
+          <Card.Text style={{ marginBottom: 0 }}>{warning}</Card.Text>
+        </Card.Body>
+      </Card>
+    </Col>
+  </Row>
+)}
       
     </Form>
   );
