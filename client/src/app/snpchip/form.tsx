@@ -5,10 +5,8 @@ import { Row, Col, Form, Button, Accordion, Spinner, Alert, Card } from "react-b
 import { useRouter, usePathname } from "next/navigation";
 import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
-import { useStore } from "@/store";
 import { FormData } from "./types";
 import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
-import Results from "./results";
 import { PLATFORM_LOOKUP } from "./constants";
 import { Platform } from "./types";
 
@@ -51,12 +49,10 @@ export default function SNPChipForm({
   results,
   setResults,
   genome_build,
-  setGenomeBuild,
 }: {
   results: any;
   setResults: (val: any) => void;
   genome_build: string;
-  setGenomeBuild: (val: string) => void;
 }) {
   // All state and logic are now managed here except results and genome_build
   const [input, setInput] = useState("");
