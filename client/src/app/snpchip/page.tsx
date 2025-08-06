@@ -36,7 +36,7 @@ export default function SNPchip() {
               setResults={setResults}
               genome_build={genomeBuild}
             />
-            <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
+            <ErrorBoundary errorComponent={() => <Alert variant="danger">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>
                 {results && <Results results={results} genome_build={genomeBuild} />}
               </Suspense>
