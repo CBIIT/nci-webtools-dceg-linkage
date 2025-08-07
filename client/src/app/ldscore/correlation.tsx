@@ -30,8 +30,10 @@ export default function Correlation() {
   const [useExampleCorrelation, setUseExampleCorrelation] = useState(false);
   const [geneticLoading, setGeneticLoading] = useState(false);
   const [geneticCorrelationResultRef, setGeneticCorrelationResultRef] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string>("");
 
   const handleFileUpload = async (file: File) => {
+    setFileError(""); // Clear any previous errors
     setUploading(true);
     const formData = new FormData();
     formData.append("ldscoreFile", file);
@@ -44,9 +46,11 @@ export default function Correlation() {
       if (response.ok) {
         return file.name;
       } else {
+        setFileError('Error: File upload failed');
         return "";
       }
     } catch (e) {
+      setFileError('Error: File upload failed');
       return "";
     } finally {
       setUploading(false);
@@ -111,6 +115,7 @@ export default function Correlation() {
     setUploadedFile1("");
     setUploadedFile2("");
     setUseExampleCorrelation(false);
+    setFileError("");
     geneticForm.setValue("pop", null);
   };
 
@@ -132,7 +137,9 @@ export default function Correlation() {
             >
               Uploading file, please wait...
             </span>
-            <CalculateLoading />
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
       )}
@@ -148,13 +155,20 @@ export default function Correlation() {
                 <Form.Control 
                   type="file" 
                   {...geneticForm.register("file", { required: "File is required" })}
-                  accept=".txt,.tsv,.csv"
+                  accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
+                      // Check file extension
+                      const ext = file.name.split('.').pop()?.toLowerCase();
+                      if (ext !== 'txt') {
+                        setFileError('Error: Only .txt files are allowed');
+                        input.value = ''; // Clear the input
+                        return;
+                      }
                       const filename = await handleFileUpload(file);
                       setUploadedFile1(filename);
                       geneticForm.clearErrors("file");
@@ -172,13 +186,20 @@ export default function Correlation() {
                 <Form.Control 
                   type="file" 
                   {...geneticForm.register("file2", { required: "File is required" })}
-                  accept=".txt,.tsv,.csv"
+                  accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     const file = input.files && input.files[0];
                     setGeneticCorrelationResultRef(null);
                     if (file) {
+                      // Check file extension
+                      const ext = file.name.split('.').pop()?.toLowerCase();
+                      if (ext !== 'txt') {
+                        setFileError('Error: Only .txt files are allowed');
+                        input.value = ''; // Clear the input
+                        return;
+                      }
                       const filename = await handleFileUpload(file);
                       setUploadedFile2(filename);
                       geneticForm.clearErrors("file2");
@@ -208,8 +229,8 @@ export default function Correlation() {
               <Button type="reset" variant="outline-danger" className="me-1">
                 Reset
               </Button>
-              <Button type="submit" variant="primary" disabled={geneticMutation.isPending}>
-                Calculate
+              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
+               {geneticLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>
           </Col>
@@ -247,7 +268,7 @@ export default function Correlation() {
                     target="_blank"
                     rel="noopener noreferrer"
                     download
-                    style={{ textDecoration: 'none', color: 'inherit' }}
+                    style={{ textDecoration: 'underline', color: '#2a71a5' }}
                   >
                     {exampleFile1 || uploadedFile1}
                   </a>
@@ -257,7 +278,7 @@ export default function Correlation() {
                     target="_blank"
                     rel="noopener noreferrer"
                     download
-                    style={{ textDecoration: 'none', color: 'inherit' }}
+                      style={{ textDecoration: 'underline', color: '#2a71a5' }}
                   >
                     {exampleFile2 || uploadedFile2}
                   </a>
@@ -267,6 +288,16 @@ export default function Correlation() {
           </Col>
         </Row>
       </Form>
+
+      {fileError && (
+        <Row>
+          <Col>
+            <Alert variant="danger" className="mt-3">
+              {fileError}
+            </Alert>
+          </Col>
+        </Row>
+      )}
 
       {geneticLoading && (
         <div className="d-flex flex-column align-items-center my-3">
@@ -290,6 +321,8 @@ export default function Correlation() {
       )}
 
       {geneticCorrelationResultRef && (
+           <>
+         <hr />
         <LdScoreResults
           reference={geneticCorrelationResultRef}
           type="correlation"
@@ -297,6 +330,7 @@ export default function Correlation() {
             [exampleFile1 || uploadedFile1, exampleFile2 || uploadedFile2].filter(Boolean).join(',')
           }
         />
+        </>
       )}
     </>
   );

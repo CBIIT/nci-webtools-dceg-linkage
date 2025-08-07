@@ -34,6 +34,7 @@ export default function LDScore() {
   const [uploading, setUploading] = useState(false);
   const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
+  const [fileError, setFileError] = useState<string>("");
 
   // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
   const handleLdFilesUpload = async (files: FileList) => {
@@ -113,6 +114,7 @@ export default function LDScore() {
     setUploadedFam("");
     setUseExampleLdscore(false);
     setError("");
+    setFileError("");
   };
 
   return (
@@ -145,16 +147,18 @@ export default function LDScore() {
             >
               Uploading file, please wait...
             </span>
-            <CalculateLoading />
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
       )}
 
       <Form id="ldscore-form-ld-calculation" onSubmit={form.handleSubmit(onSubmit)} onReset={onReset} noValidate>
         <Row>
-          <Col sm={4}>
+          <Col sm={5}>
             <Form.Group controlId="ldfiles" className="mb-3">
-              <Form.Label>Upload .bed, .bim, .fam files (all three required)</Form.Label>
+              <Form.Label >Upload *.bed, *.bim, *.fam files (all three required)</Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
                 <div className="form-control bg-light">
                   {exampleBed && <div>{exampleBed}</div>}
@@ -167,10 +171,43 @@ export default function LDScore() {
                   {...form.register("ldfiles", { required: "Files are required" })}
                   accept=".bed,.bim,.fam"
                   multiple
-                  title="Upload .bed, .bim, .fam files"
+                  title="Upload *.bed, *.bim, *.fam files"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     if (input.files) {
+                      // Validate file count and extensions
+                      if (input.files.length !== 3) {
+                        setFileError('Error: Please upload exactly three files - one .bed, one .bim, and one .fam file');
+                        input.value = ''; // Clear the input
+                        return;
+                      }
+
+                      // Check if we have exactly one of each required file type
+                      const extensions = Array.from(input.files).map(file => 
+                        file.name.split('.').pop()?.toLowerCase()
+                      );
+                      const hasBed = extensions.includes('bed');
+                      const hasBim = extensions.includes('bim');
+                      const hasFam = extensions.includes('fam');
+
+                      if (!hasBed || !hasBim || !hasFam) {
+                        setFileError('Error: Please upload exactly one .bed, one .bim, and one .fam file');
+                        input.value = ''; // Clear the input
+                        return;
+                      }
+
+                      // Check for duplicates
+                      const bedCount = extensions.filter(ext => ext === 'bed').length;
+                      const bimCount = extensions.filter(ext => ext === 'bim').length;
+                      const famCount = extensions.filter(ext => ext === 'fam').length;
+
+                      if (bedCount !== 1 || bimCount !== 1 || famCount !== 1) {
+                        setFileError('Error: Please upload exactly one .bed, one .bim, and one .fam file');
+                        input.value = ''; // Clear the input
+                        return;
+                      }
+
+                      setFileError(""); // Clear any previous errors
                       setLdscoreResultRef(null); // Reset LD score result when new files are loaded
                       handleLdFilesUpload(input.files);
                     }
@@ -215,7 +252,7 @@ export default function LDScore() {
                           target="_blank"
                           rel="noopener noreferrer"
                           download
-                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          style={{ textDecoration: 'underline', color: '#2a71a5' }}
                         >
                           {exampleBed || uploadedBed}
                         </a>
@@ -228,7 +265,7 @@ export default function LDScore() {
                           target="_blank"
                           rel="noopener noreferrer"
                           download
-                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          style={{ textDecoration: 'underline', color: '#2a71a5' }}
                         >
                           {exampleBim || uploadedBim}
                         </a>
@@ -241,7 +278,7 @@ export default function LDScore() {
                           target="_blank"
                           rel="noopener noreferrer"
                           download
-                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          style={{ textDecoration: 'underline', color: '#2a71a5' }}
                         >
                           {exampleFam || uploadedFam}
                         </a>
@@ -252,8 +289,8 @@ export default function LDScore() {
               </div>
             </Form.Group>
           </Col>
-          
-          <Col sm={3}>
+
+          <Col sm={4}>
             <Form.Group controlId="window" className="mb-3">
               <Form.Label>Window</Form.Label>
               <div className="d-flex">
@@ -261,7 +298,7 @@ export default function LDScore() {
                   type="number"
                   {...form.register("window", { 
                     required: "Window is required",  
-                    min: { value: 1, message: "Window must be greater than 0" } 
+                    min: { value: 1, message: "Window must be an integer greater than 0" } 
                   })}
                   defaultValue={1}
                   style={{ maxWidth: "120px", marginRight: "8px" }}
@@ -289,12 +326,22 @@ export default function LDScore() {
                 Reset
               </Button>
               <Button type="submit" variant="primary" disabled={ldscoreLoading}>
-                Calculate
+                {ldscoreLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>
           </Col>
         </Row>
       </Form>
+
+      {fileError && (
+        <Row>
+          <Col>
+            <Alert variant="danger" className="mt-3">
+              {fileError}
+            </Alert>
+          </Col>
+        </Row>
+      )}
 
       {ldscoreLoading && (
         <div className="d-flex flex-column align-items-center my-3">
@@ -318,7 +365,10 @@ export default function LDScore() {
       )}
 
       {/* Show results component if reference is available */}
+     
       {ldscoreResultRef && (
+        <>
+         <hr />
         <LdScoreResults
           reference={ldscoreResultRef}
           type="ldscore"
@@ -326,6 +376,7 @@ export default function LDScore() {
             [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
           }
         />
+        </>
       )}
 
       {error && (

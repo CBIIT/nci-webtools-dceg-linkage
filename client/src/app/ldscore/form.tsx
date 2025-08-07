@@ -438,7 +438,7 @@ export default function LdScoreForm() {
                     />
                   {(exampleFilename || uploadedFilename) && (
                     <div className="mt-1" style={{ fontSize: "0.95em" }}>
-                      <span style={{ fontWeight: 600 }}>Input file uploaded:</span><br />
+                      <span style={{ fontWeight: 600 }}>Input file uploaded test:</span><br />
                      <a
                         href={exampleFilename
                           ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFilename)}`

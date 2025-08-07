@@ -125,7 +125,9 @@ export default function Heritability() {
             >
               Uploading file, please wait...
             </span>
-            <CalculateLoading />
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
       )}
@@ -141,7 +143,7 @@ export default function Heritability() {
                 <Form.Control 
                   type="file" 
                   {...heritabilityForm.register("file", { required: "File is required" })}
-                  accept=".txt,.tsv,.csv"
+                  accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
@@ -213,7 +215,7 @@ export default function Heritability() {
                       target="_blank"
                       rel="noopener noreferrer"
                       download
-                      style={{ textDecoration: 'none', color: 'inherit' }}
+                      style={{ textDecoration: 'underline', color: '#2a71a5' }}
                     >
                       {exampleFilename || uploadedFilename}
                     </a>
@@ -237,8 +239,12 @@ export default function Heritability() {
               <Button type="reset" variant="outline-danger" className="me-1">
                 Reset
               </Button>
-              <Button type="submit" variant="primary" disabled={heritabilityMutation.isPending}>
-                Calculate
+              <Button 
+                type="submit" 
+                variant={ "primary"}
+                disabled={heritabilityMutation.isPending || heritabilityLoading}
+              >
+                {heritabilityLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>
           </Col>
@@ -267,11 +273,14 @@ export default function Heritability() {
       )}
 
       {heritabilityResultRef && (
+           <>
+         <hr />
         <LdScoreResults 
           reference={heritabilityResultRef} 
           type="heritability" 
           uploads={exampleFilename || uploadedFilename}
         />
+        </>
       )}
     </>
   );
