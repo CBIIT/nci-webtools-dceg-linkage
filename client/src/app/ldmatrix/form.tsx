@@ -123,7 +123,7 @@ export default function LDMatrixForm() {
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm="auto">
+        <Col sm="auto" style={{ maxWidth: "300px" }}>
           <Form.Group controlId="collapseTranscript" className="mb-3">
             <Form.Label className="d-block">Collapse transcripts:</Form.Label>
             <ButtonGroup>

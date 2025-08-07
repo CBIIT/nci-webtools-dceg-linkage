@@ -181,7 +181,7 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.tissues?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={"auto"}>
+        <Col sm={"auto"} style={{ maxWidth: "300px" }}>
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -217,7 +217,7 @@ export default function LDExpressForm() {
         <Col>
           Thresholds
           <Form.Group as={Row} controlId="r2_d_threshold" className="align-items-center mb-2">
-            <Col sm="auto" className="pe-0">
+            <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
               <Form.Label style={{ width: "1.8rem" }}>
                 {r2_d === "r2" ? (
                   <>
@@ -252,7 +252,7 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
           </Form.Group>
           <Form.Group as={Row} controlId="p_threshold" className="d-flex align-items-center mb-2">
-            <Col sm="auto" className="pe-0">
+            <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
               <Form.Label style={{ width: "1.8rem" }}>P {"<"}</Form.Label>
             </Col>
             <Col>

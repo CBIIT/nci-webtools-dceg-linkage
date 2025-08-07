@@ -287,7 +287,7 @@ export default function SNPChipForm({
             )}
           </Form.Group>
         </Col><Col />
-        <Col md={3} className="d-flex justify-content-end">
+        <Col sm={3} className="d-flex justify-content-end">
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
           </Button>

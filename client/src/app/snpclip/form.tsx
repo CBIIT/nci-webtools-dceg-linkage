@@ -122,11 +122,11 @@ export default function SNPClipForm() {
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={"auto"}>
+        <Col sm={2}>
           <div>Threshold</div>
           <Form.Group controlId="r2_threshold" className="mb-3">
             <Row className="align-items-center">
-              <Col md={3} xs="auto">
+              <Col sm={3} xs="auto" style={{ maxWidth: "300px" }}>
                 <Form.Label className="mb-0">
                   R<sup>2</sup>
                 </Form.Label>
@@ -158,7 +158,7 @@ export default function SNPClipForm() {
           </Form.Group>
           <Form.Group controlId="maf_threshold" className="mb-3">
             <Row className="align-items-center">
-              <Col md={3} xs="auto">
+              <Col sm={3} xs="auto" style={{ maxWidth: "300px" }}>
                 <Form.Label className="mb-0">MAF </Form.Label>
               </Col>
               <Col>
@@ -186,9 +186,9 @@ export default function SNPClipForm() {
             </Row>
           </Form.Group>
         </Col>
+
         
-        <Col />
-        <Col  md={3}>
+        <Col sm={2} className="d-flex justify-content-end align-items-start ms-auto">
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
