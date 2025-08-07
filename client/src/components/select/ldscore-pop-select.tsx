@@ -30,6 +30,7 @@ export default function LdscorePopSelect({ name, control, rules }: { name: strin
          
           <Select
             {...field}
+            inputId={name}
             options={ldscorePopOptions}
             isMulti={false}
             classNamePrefix="react-select"

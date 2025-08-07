@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, Nav, Tab } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
-import { ldscore, fetchHeritabilityResult, fetchGeneticCorrelationResult, fetchLdScoreCalculationResult } from "@/services/queries";
+import { ldscore, fetchHeritabilityResult, fetchGeneticCorrelationResult, fetchLdScoreCalculationResult, upload } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
@@ -60,11 +60,8 @@ export default function LdScoreForm() {
     formData.append("ldscoreFile", file);
    
     try {
-      const response = await fetch("/LDlinkRestWeb/upload", {
-        method: "POST",
-        body: formData,
-      });
-      if (response.ok) {
+      const response = await upload(formData);
+      if (response.status === 200) {
         setUploadedFilename(file.name);
       } else {
         setUploadedFilename("");

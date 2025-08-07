@@ -33,7 +33,6 @@ const rotateDivStyle: React.CSSProperties = {
   width: "5px", // control line break
   marginLeft: "5px", // optional tweak for alignment
 };
-
 export default function Results({ results, genome_build }: ResultsProps) {
   function downloadResults() {
     const blob = new Blob([results.details], { type: "text/plain" });
@@ -52,7 +51,6 @@ export default function Results({ results, genome_build }: ResultsProps) {
   }[genome_build];
 
   return (
-    <div className="jumbotron">
       <div className="container-fluid" id="snpchip-results-container">
         <Row>
           <Col md={12} style={{ overflowX: "scroll" }}>
@@ -107,6 +105,5 @@ export default function Results({ results, genome_build }: ResultsProps) {
               </a>
             </div>
       </div>
-    </div>
   );
 }

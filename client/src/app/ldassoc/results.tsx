@@ -35,11 +35,11 @@ export default function LdAssocResults({ ref }: { ref: string }) {
     queryKey: ["ldassoc_plot", ref],
     queryFn: async () => (ref && !results?.error ? fetchOutput(`ldassoc_plot_${ref}.json`) : null),
   });
-  const { data: enableExport } = useQuery<FormData>({
+  const { data: enableExport } = useQuery<boolean>({
     queryKey: ["ldassoc-export", ref],
     queryFn: async () => (ref ? fetchOutputStatus(`assoc_plot_${ref}.jpeg`) : false),
     enabled: !!ref && !results?.error,
-    refetchInterval: 5000, // Check every 5 seconds
+    refetchInterval: (query) => (query.state.data ? false : 5000),
     retry: 60,
   });
 
@@ -81,7 +81,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const url = `http://www.ncbi.nlm.nih.gov/snp/${rs}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
-            {rs} 
+            {rs}
           </a>
         );
       },
@@ -102,15 +102,15 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const end = Number(position) + 250;
         const region = `${chr}:${start}-${end}`;
         const params = {
-          db: formData?.genome_build === "grch37" ? "hg19" : "hg38",
-          position: region,
-          snp151: "pack",
+          "db": formData?.genome_build === "grch37" ? "hg19" : "hg38",
+          "position": region,
+          "snp151": "pack",
           "hgFind.matches": rs,
         };
         const url = `https://genome.ucsc.edu/cgi-bin/hgTracks?${new URLSearchParams(params)}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
-            {position} 
+            {position}
           </a>
         );
       },
@@ -152,7 +152,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const url = `https://forgedb.cancer.gov/explore?rsid=${rs}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
-            {value} 
+            {value}
           </a>
         );
       },
@@ -170,7 +170,9 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const genome = formData?.genome_build === "grch37" ? "GRCh37" : "GRCh38";
         const url = `https://www.regulomedb.org/regulome-search?genome=${genome}&regions=${encodeURIComponent(region)}`;
         return (
-          <a href={url} target="_blank" rel="noopener noreferrer">{value}</a>
+          <a href={url} target="_blank" rel="noopener noreferrer">
+            {value}
+          </a>
         );
       },
     }),

@@ -1,14 +1,33 @@
 import json
+import logging
 import sys
 import operator
 import os
 import subprocess
+import time
+from datetime import datetime
 from multiprocessing.dummy import Pool
 from math import log10
 from LDcommon import retrieveAWSCredentials, get_coords_gene,genome_build_vars, connectMongoDBReadOnly,get_coords,get_output
 from LDutilites import get_config, array_split
 from selenium import webdriver
 from selenium.webdriver.firefox.options import Options
+
+# Configure logging - use module-specific logger instead of root logger
+logger = logging.getLogger('ldassoc_plot_sub')
+logger.setLevel(logging.INFO)
+
+# Create console handler with custom format
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '[ldassoc_plot_sub] [%(asctime)s] [%(levelname)s] - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
+
 options = Options()
 options.add_argument("--headless")
 
@@ -30,6 +49,9 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     Returns:
         None
     """
+    start_time = time.time()
+    logger.debug(f"Starting LDassoc SVG generation - file: {file}, region: {region}, pop: {pop}, request: {request}, genome_build: {genome_build}")
+    
     # Set data directories using config.yml 
     param_list = get_config()
     data_dir = param_list['data_dir']
@@ -38,16 +60,20 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     aws_info = param_list['aws_info'] 
     num_subprocesses = param_list['num_subprocesses']
 
+    logger.debug(f"Loaded configuration for SVG generation")
+
     export_s3_keys = retrieveAWSCredentials()
 
     # Ensure tmp directory exists
     if not os.path.exists(tmp_dir):
         os.makedirs(tmp_dir)
+        logger.debug(f"Created temporary directory: {tmp_dir}")
 
     chrs=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","X","Y"]
 
     # Define parameters for --variant option
     if region=="variant":
+        logger.debug("Processing SVG generation for variant region mode")
         if myargsOrigin=="None":
             return None
             
@@ -835,12 +861,15 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
     reset_output()
 
     # Remove temporary files
+    logger.debug("Cleaning up temporary files")
     subprocess.call("rm "+tmp_dir+"pops_"+request+".txt", shell=True)
     subprocess.call("rm "+tmp_dir+"*"+request+"*.vcf", shell=True)
     subprocess.call("rm "+tmp_dir+"genes_*"+request+"*.json", shell=True)
     subprocess.call("rm "+tmp_dir+"recomb_"+request+".json", shell=True)
     subprocess.call("rm "+tmp_dir+"assoc_args"+request+".json", shell=True)
 
+    duration = round(time.time() - start_time, 2)
+    logger.debug(f"LDassoc SVG generation completed successfully in {duration} seconds")
     print("Bokeh high quality image export complete!")
 
     # Return plot output

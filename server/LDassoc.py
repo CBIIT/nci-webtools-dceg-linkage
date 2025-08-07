@@ -1,19 +1,37 @@
 #!/usr/bin/env python3
 import json
+import logging
 import operator
 import os
 import subprocess
 import httpx
 import threading
 import time
+from datetime import datetime
 from multiprocessing.dummy import Pool
 from LDcommon import checkS3File, retrieveAWSCredentials, genome_build_vars, getRefGene, getRecomb,connectMongoDBReadOnly
 from LDcommon import validsnp,get_coords,get_coords_gene, get_population,get_query_variant_c,get_output
 from LDutilites import get_config,array_split
 
+# Configure logging - use module-specific logger instead of root logger
+logger = logging.getLogger('ldassoc')
+logger.setLevel(logging.INFO)
+
+# Create console handler with custom format
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter(
+    '[ldassoc] [%(asctime)s] [%(levelname)s] - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.propagate = False
+
 # Create LDassoc function
 def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	start_time=time.time()
+	logger.debug(f"Starting LDassoc calculation - file: {file}, region: {region}, pop: {pop}, request: {request}, genome_build: {genome_build}, web: {web}")
 
 	# Set data directories using config.yml
 	param_list = get_config()
@@ -30,7 +48,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# Ensure tmp directory exists
 	if not os.path.exists(tmp_dir):
 		os.makedirs(tmp_dir)
-
 	# Create JSON output
 	out_json = open(tmp_dir+'assoc'+request+".json","w")
 	output = {}
@@ -42,14 +59,18 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# Define parameters for --variant option
 	if region=="variant":
+		logger.debug("Processing variant region mode")
 		if myargs.origin==None:
-			output["error"]="--origin required when --variant is specified."
+			error_msg = "--origin required when --variant is specified."
+			logger.error(f"Validation failed: {error_msg}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
 			return("","")
 
 	if myargs.origin!=None:
+		logger.debug(f"Processing origin variant: {myargs.origin}")
 		# Find coordinates (GRCh37/hg19) or (GRCh38/hg38) for SNP RS number
 		if myargs.origin[0:2]=="rs":
 			snp=myargs.origin
@@ -60,7 +81,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			var_coord = get_coords(db, snp)
 
 			if var_coord==None:
-				output["error"] = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
+				error_msg = snp + " is not in dbSNP " + dbsnp_version + " (" + genome_build_vars[genome_build]['title'] + ")."
+				logger.error(f"SNP lookup failed: {error_msg}")
+				output["error"] = error_msg
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
@@ -68,7 +91,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 			# check if variant is on chrY for genome build = GRCh38
 			if var_coord['chromosome'] == "Y" and (genome_build == "grch38" or genome_build == "grch38_high_coverage"):
-				output["error"] = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + var_coord['id'] + " = chr" + var_coord['chromosome'] + ":" + var_coord[genome_build_vars[genome_build]['position']] + ")"
+				error_msg = "Input variants on chromosome Y are unavailable for GRCh38, only available for GRCh37 (" + "rs" + var_coord['id'] + " = chr" + var_coord['chromosome'] + ":" + var_coord[genome_build_vars[genome_build]['position']] + ")"
+				logger.error(f"Chromosome Y variant error: {error_msg}")
+				output["error"] = error_msg
 				json_output = json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
@@ -80,7 +105,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			var_coord = {'chromosome':myargs.origin.split(":")[0].strip("chr"), 'position':myargs.origin.split(":")[1]}
 
 		else:
-			output["error"]="--origin ("+myargs.origin+") is not a RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
+			error_msg = "--origin ("+myargs.origin+") is not a RS number (ex: rs12345) or chromosomal position (ex: chr22:25855459)."
+			logger.error(f"Invalid origin format: {error_msg}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
@@ -95,29 +122,33 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	header_list.append(myargs.bp)
 	header_list.append(myargs.pval)
 
-	# print "[ldassoc debug] load input file"
 
 	# Load input file
 	with open(file) as fp:
 		header = fp.readline().strip().split()
 		first = fp.readline().strip().split()
-	print("HEADER: " + str(header))
-	print("FIRST: " + str(first))
+	
+	logger.debug(f"File header: {header}")
+	logger.debug(f"First data line: {first}")
 
 	if len(header)!=len(first):
-		output["error"]="Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
+		error_msg = "Header has "+str(len(header))+" elements and first line has "+str(len(first))+" elements."
+		logger.error(f"File format validation failed: {error_msg}")
+		output["error"]=error_msg
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print(json_output)
 		print(json_output, file=out_json)
 		out_json.close()
 		return("","")
 
-	# print "[ldassoc debug] check header"
+	logger.debug("Validating required columns in header")
 
 	# Check header
 	for item in header_list:
 		if item not in header:
-			output["error"]="Variables mapping is not listed in the association file header."
+			error_msg = "Variables mapping is not listed in the association file header."
+			logger.error(f"Header validation failed: missing column '{item}' in {header}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
@@ -128,6 +159,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	chr_index=header.index(myargs.chr)
 	pos_index=header.index(myargs.bp)
 	p_index=header.index(myargs.pval)
+	
+	logger.debug(f"Column indices - chr: {chr_index}, pos: {pos_index}, pval: {p_index}")
 
 
 	# Define window of interest around query SNP
@@ -142,16 +175,18 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		window=myargs.window
 
 	if region=="variant":
-		# print "[ldassoc debug] choose variant"
 		coord1=int(org_coord)-window
 		if coord1<0:
 			coord1=0
 		coord2=int(org_coord)+window
+		logger.debug(f"Variant coordinates: {coord1}-{coord2}")
 
 	elif region=="gene":
-		# print "[ldassoc debug] choose gene"
+		logger.debug(f"Processing gene mode with gene: {myargs.name}, window: {window}")
 		if myargs.name==None:
-			output["error"]="Gene name (--name) is needed when --gene option is used."
+			error_msg = "Gene name (--name) is needed when --gene option is used."
+			logger.error(f"Gene mode validation failed: {error_msg}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
@@ -160,12 +195,15 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		# Connect to Mongo snp database
 		db = connectMongoDBReadOnly(web)
 		
+		logger.debug(f"Looking up gene coordinates for: {myargs.name}")
 
 		# Find RS number in snp database
 		gene_coord = get_coords_gene(myargs.name, db,genome_build)
 
 		if gene_coord == None or gene_coord[2] == 'NA' or gene_coord == 'NA':
-			output["error"]="Gene name " + myargs.name + " is not in RefSeq database."
+			error_msg = "Gene name " + myargs.name + " is not in RefSeq database."
+			logger.error(f"Gene lookup failed: {error_msg}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
@@ -176,18 +214,24 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 		if coord1<0:
 			coord1=0
 		coord2=int(gene_coord[3])+window
+		
+		logger.debug(f"Gene coordinates: chr{gene_coord[1]}:{coord1}-{coord2}")
 
 		# Run with --origin option
 		if myargs.origin!=None:
 			if gene_coord[1]!=chromosome:
-				output["error"]="Origin variant "+myargs.origin+" is not on the same chromosome as "+myargs.name+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
+				error_msg = "Origin variant "+myargs.origin+" is not on the same chromosome as "+myargs.name+" (chr"+chromosome+" is not equal to chr"+gene_coord[1]+")."
+				logger.error(f"Chromosome mismatch: {error_msg}")
+				output["error"]=error_msg
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
 				return("","")
 
 			if coord1>int(org_coord) or int(org_coord)>coord2:
-				output["error"]="Origin variant "+myargs.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
+				error_msg = "Origin variant "+myargs.origin+" (chr"+chromosome+":"+org_coord+") is not in the coordinate range chr"+gene_coord[1]+":"+str(coord1)+"-"+str(coord2)+"."
+				logger.error(f"Origin variant out of range: {error_msg}")
+				output["error"]=error_msg
 				json_output=json.dumps(output, sort_keys=True, indent=2)
 				print(json_output, file=out_json)
 				out_json.close()
@@ -290,20 +334,22 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 	# Generate coordinate list and P-value dictionary
 	max_window=3000000
 	if coord2-coord1>max_window:
-			output["error"]="Queried regioin is "+str(coord2-coord1)+" base pairs. Max size is "+str(max_window)+" base pairs."
-			json_output=json.dumps(output, sort_keys=True, indent=2)
-			print(json_output, file=out_json)
-			out_json.close()
-			return("","")
+		error_msg = "Queried region is "+str(coord2-coord1)+" base pairs. Max size is "+str(max_window)+" base pairs."
+		logger.error(f"Region size validation failed: {error_msg}")
+		output["error"]=error_msg
+		json_output=json.dumps(output, sort_keys=True, indent=2)
+		print(json_output, file=out_json)
+		out_json.close()
+		return("","")
 			
 
 	assoc_coords=[]
 	a_pos=[]
 	assoc_dict={}
 	assoc_list=[]
-	# print "[ldassoc debug] iterate through uploaded file"
-	print ("file: ", file)#
-	#print("chromosome: ", chromosome)
+	
+	logger.debug(f"Processing association file for chromosome {chromosome} in range {coord1}-{coord2}")
+	
 	with open(file) as fp:
 		for line_num, line in enumerate(fp, 1):
 			col = line.strip().split()
@@ -315,12 +361,6 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 					except ValueError:
 						continue
 					else:
-						#print("coord1: ", coord1)
-						#print("coord2: ", coord2)
-						#for x in range(len(col)):
-							#print (col[x], ",")
-						#print(col[pos_index])
-						#print("middle: ", col[pos_index])
 						if coord1<=int(col[pos_index])<=coord2:
 							try:
 								float(col[p_index])
@@ -334,39 +374,48 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 								assoc_list.append([coord_i,float(col[p_index])])
 
 			else:
-				output["warning"]="Line " + str(line_num) + " of association data file has a different number of elements than the header"
+				warning_msg = "Line " + str(line_num) + " of association data file has a different number of elements than the header"
+				logger.warning(warning_msg)
+				output["warning"]=warning_msg
+
+	logger.debug(f"Found {len(assoc_coords)} variants in the specified region from association file")
 
 	# Coordinate list checks
 	if len(assoc_coords)==0:
-		output["error"]="There are no variants in the association file with genomic coordinates inside the plotting window."
+		error_msg = "There are no variants in the association file with genomic coordinates inside the plotting window."
+		logger.error(f"No variants found: {error_msg}")
+		output["error"]=error_msg
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print(json_output, file=out_json)
 		out_json.close()
 		return("","")
 
 	# Select desired ancestral populations
+	logger.debug(f"Getting population IDs for population: {pop}")
 	pop_ids = get_population(pop,request,output)
 	if isinstance(pop_ids,str):
+		logger.error(f"Population selection failed: {output.get('error', 'Unknown error')}")
 		json_output=json.dumps(output, sort_keys=True, indent=2)
 		print(json_output, file=out_json)
 		out_json.close()
 		return("","")
+	
+	logger.debug(f"Selected {len(pop_ids)} individuals from {pop} population")
 	# Define LD origin coordinate
 	try:
 		org_coord
 	except NameError:
+		logger.debug("Origin coordinate not defined, finding lowest P-value variant")
 		counterMissing = 0
 		for var_p in sorted(assoc_list, key=operator.itemgetter(1)):
 			snp=var_p[0].split("-")[0]
+			logger.debug(f"Attempting to use variant {snp} as origin (P-value: {var_p[1]})")
 			# Extract lowest P SNP phased genotypes
 			vcf_filePath = "%s/%s%s/%s" % (aws_info['data_subfolder'], genotypes_dir, genome_build_vars[genome_build]["1000G_dir"], genome_build_vars[genome_build]["1000G_file"] % (chromosome))
 			vcf_file = "s3://%s/%s" % (aws_info['bucket'], vcf_filePath)
 			checkS3File(aws_info, aws_info['bucket'], vcf_filePath)
-			#tabix_snp_h= export_s3_keys + " cd {1}; tabix -HD {0} | grep CHROM".format(vcf_file, data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
-			#head = [x.decode('utf-8') for x in subprocess.Popen(tabix_snp_h, shell=True, stdout=subprocess.PIPE).stdout.readlines()][0].strip().split()
 			tabix_snp= export_s3_keys + " cd {3}; tabix -hD {0} {1} | grep -v -e END > {2}".format(vcf_file, genome_build_vars[genome_build]['1000G_chr_prefix'] + var_p[0], tmp_dir+"snp_no_dups_"+request+".vcf", data_dir + genotypes_dir + genome_build_vars[genome_build]['1000G_dir'])
 			subprocess.call(tabix_snp, shell=True)
-			#print(snp,var_p)
 			# Check lowest P SNP is in the 1000G population and not monoallelic
 			vcf=open(tmp_dir+"snp_no_dups_"+request+".vcf").readlines()
 			h = 0
@@ -374,19 +423,22 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				h += 1
 			head = vcf[h].strip().split()
 			vcf = vcf[h+1:]
-			#print("vcf length:",len(vcf))
 			if len(vcf)==0:
 				counterMissing = counterMissing +1
+				warning_msg = "Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
+				logger.warning(warning_msg)
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
+					output["warning"]=output["warning"]+". "+warning_msg
 				else:
-					output["warning"]="Lowest P-value variant ("+snp+") is not in 1000G reference panel, using next lowest P-value variant"
+					output["warning"]=warning_msg
 				continue
 			elif len(vcf)>1:
+				warning_msg = "Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
+				logger.warning(warning_msg)
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
+					output["warning"]=output["warning"]+". "+warning_msg
 				else:
-					output["warning"]="Multiple variants map to lowest P-value variant ("+snp+"), using first variant in VCF file"
+					output["warning"]=warning_msg
 				geno = vcf[0].strip().split()
 				geno[0] = geno[0].lstrip('chr')
 
@@ -395,10 +447,12 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 				geno[0] = geno[0].lstrip('chr')
 
 			if "," in geno[3] or "," in geno[4]:
+				warning_msg = "Lowest P-value variant ("+snp+") is not a biallelic variant, using next lowest P-value variant"
+				logger.warning(warning_msg)
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is not a biallelic variant, using next lowest P-value variant"
+					output["warning"]=output["warning"]+". "+warning_msg
 				else:
-					output["warning"]="Lowest P-value variant ("+snp+" is not a biallelic variant, using next lowest P-value variant"
+					output["warning"]=warning_msg
 				continue
 
 			index=[]
@@ -416,26 +470,32 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 						genotypes[j]=1
 
 			if genotypes["0"]==0 or genotypes["1"]==0:
-				output["error"]=snp+" is monoallelic in the "+pop+" population."
+				warning_msg = "Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
+				logger.warning(warning_msg)
 				if "warning" in output:
-					output["warning"]=output["warning"]+". Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
+					output["warning"]=output["warning"]+". "+warning_msg
 				else:
-					output["warning"]="Lowest P-value variant ("+snp+") is monoallelic in the "+pop+" population, using next lowest P-value variant"
+					output["warning"]=warning_msg
 				continue
 
 			org_coord=var_p[0].split("-")[1]
+			logger.debug(f"Selected origin variant: {snp} at position {org_coord}")
 			break
-		#print(counterMissing,len(assoc_list))
 		if counterMissing == len(assoc_list):
-			output["error"]="Association file Lowest P-value variant ("+snp+") is not in 1000G reference panel"
+			error_msg = "Association file Lowest P-value variant ("+snp+") is not in 1000G reference panel"
+			logger.error(f"All variants failed validation: {error_msg}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
 			return("","")
 
 	else:
+		logger.debug(f"Using predefined origin coordinate: {org_coord}")
 		if genome_build_vars[genome_build]['1000G_chr_prefix'] + chromosome + ":" + org_coord + "-" + org_coord not in assoc_coords:
-			output["error"]="Association file is missing a p-value for origin variant "+snp+"."
+			error_msg = "Association file is missing a p-value for origin variant "+snp+"."
+			logger.error(f"Origin variant validation failed: {error_msg}")
+			output["error"]=error_msg
 			json_output=json.dumps(output, sort_keys=True, indent=2)
 			print(json_output, file=out_json)
 			out_json.close()
@@ -443,51 +503,41 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 		# Extract query SNP phased genotypes
 		temp = [snp, str(chromosome), org_coord]
-		#print(temp)
+		logger.debug(f"Extracting genotypes for query variant: {temp}")
 		(geno,tmp_dist, warningmsg) = get_query_variant_c(temp, pop_ids, str(request), genome_build, True,output)
 
-
-
-	# print "[ldassoc debug] begin calculating LD in parallel"
 	# Calculate proxy LD statistics in parallel
-	print("")
+	logger.debug("Starting parallel LD calculations")
 	if len(assoc_coords) < 60:
 		num_subprocesses = 1
-	# else:
-	# 	threads=4
+		logger.debug("Using single subprocess for small dataset")
 
-	# print("######assoc_coords######")
-	# print("assoc_coords length:", len(assoc_coords))
-	# # print("\n".join(assoc_coords))
-	# print("####################")
-
-	# block=len(assoc_coords) // num_subprocesses
-	# assoc_coords_subset_chunks = np.array_split(assoc_coords, num_subprocesses)
+	# Split coordinates into chunks for parallel processing
 	assoc_coords_subset_chunks = array_split(assoc_coords, num_subprocesses)
-	# print(assoc_coords_subset_chunks)
+	logger.debug(f"Split {len(assoc_coords)} coordinates into {num_subprocesses} chunks")
 
 	commands=[]
-	print("Create LDassoc_sub subprocesses")
+	logger.debug("Creating LDassoc_sub subprocesses")
 
 	for subprocess_id in range(num_subprocesses):
 		subprocessArgs = " ".join([str(snp), str(chromosome), str("_".join(assoc_coords_subset_chunks[subprocess_id])), str(request), str(genome_build), str(subprocess_id)])
-		#print(subprocessArgs)
 		commands.append("python3 LDassoc_sub.py " + subprocessArgs)
+		logger.debug(f"Subprocess {subprocess_id}: {len(assoc_coords_subset_chunks[subprocess_id])} coordinates")
 	
+	subprocess_start_time = time.time()
 	processes=[subprocess.Popen(command, shell=True, stdout=subprocess.PIPE) for command in commands]
 
-	# print "[ldassoc debug] collect output in parallel" 
-
+	# Collect output in parallel
 	pool = Pool(len(processes))
 	out_raw=pool.map(get_output, processes)
 	pool.close()
 	pool.join()
 
-	print("LDassoc_sub subprocessed completed.")
-
-	# print "[ldassoc debug] aggregate output"
+	subprocess_duration = round(time.time() - subprocess_start_time, 2)
+	logger.debug(f"LDassoc_sub subprocesses completed in {subprocess_duration} seconds")
 
 	# Aggregate output
+	logger.debug("Aggregating subprocess output")
 	out_prox=[]
 	for i in range(len(out_raw)):
 		for j in range(len(out_raw[i])):
@@ -501,6 +551,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			if coord_i_j in assoc_dict:
 				col.append(float(assoc_dict[coord_i_j][0]))
 				out_prox.append(col)
+
+	logger.debug(f"Processed {len(out_prox)} variants with LD calculations")
 
 	out_dist_sort=sorted(out_prox, key=operator.itemgetter(15))
 	out_p_sort=sorted(out_dist_sort, key=operator.itemgetter(16), reverse=False)
@@ -785,9 +837,8 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			p_plot_pval2.append(float(assoc_dict[chromosome+":"+input_pos+"-"+input_pos][0]))
 			p_plot_dist.append(str(round(float(input_pos)/1000000-index_var_pos,4)))
 
-	# print "[ldassoc debug] begin Bokeh plotting"
-
 	# Begin Bokeh Plotting
+	logger.debug("Starting Bokeh visualization generation")
 	from collections import OrderedDict
 	from bokeh.embed import components,file_html, json_item
 	from bokeh.layouts import gridplot
@@ -1191,11 +1242,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# Generate high quality images only if accessed via web instance
 	if web:
-		# Open thread for high quality image exports
-		# print("Open thread for high quality image exports.")
-		# command = "python3 LDassoc_plot_sub.py " + tmp_dir + 'assoc_args' + request + ".json" + " " + file + " " + region + " " + pop + " " + request + " " + genome_build + " " + myargsName + " " + myargsOrigin
-		# subprocess.Popen(command, shell=True, stdout=subprocess.PIPE)
-		print("Making request to export service for high quality images")
+		logger.debug("Initiating background export service for high quality images")
 		payload = {
 			"file": file,
 			"region": region,
@@ -1210,8 +1257,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 			try:
 				with httpx.Client(timeout=None) as client:
 					client.post('http://localhost:5000/ldassoc_svg', json=payload, timeout=None, follow_redirects=True)
+					logger.debug("High quality image export request sent successfully")
 			except Exception as e:
-				print(f"Async export request failed: {e}")
+				logger.error(f"Async export request failed: {e}")
 		threading.Thread(target=send_async, daemon=True).start()
 
 	###########################
@@ -1225,17 +1273,19 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
 	# save json embedding
 	jsonEmbed = f"ldassoc_plot_{request}.json"
-	print('Save JSON embedding: '+ jsonEmbed)
+	logger.debug(f"Saving JSON embedding: {jsonEmbed}")
 	with open(tmp_dir + jsonEmbed, "w") as f_json:
 		json.dump(json_item(out_grid), f_json)
 
+	# Calculate and log final statistics
+	duration=round(time.time() - start_time,2)
+	
+	logger.info(f"Results summary - Individuals: {len(pop_ids)}, SNPs in region: {len(out_prox)}, Runtime: {duration}s")
 
 	# Print run time statistics
-	print("Number of Individuals: "+str(len(pop_ids)))
-	print("SNPs in Region: "+str(len(out_prox)))
-	duration=round(time.time() - start_time,2)
-	print("Run time: "+str(duration)+" seconds\n")
-
+	logger.debug("Number of Individuals: "+str(len(pop_ids)))
+	logger.debug("SNPs in Region: "+str(len(out_prox)))
+	logger.debug("Run time: "+str(duration)+" seconds\n")
 
 	# Remove temporary files in LDassoc_plot_sub.py
 

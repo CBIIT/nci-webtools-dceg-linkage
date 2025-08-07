@@ -81,15 +81,27 @@ function renderKeyValueTable(section: string) {
   if (!section) return null;
   const lines = section.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
   const kvPairs: [string, string][] = [];
+  
+  // Helper function to format key text with superscripts
+  const formatKeyText = (key: string) => {
+    if (key.includes('Total Observed scale h2') || key.includes('Total Observed scale h²')) {
+      return key.replace(/h2|h²/g, 'h²');
+    }
+    if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
+      return key.replace(/Chi\^2|Chi²/g, 'Chi²');
+    }
+    return key;
+  };
+  
   lines.forEach(line => {
     let found = false;
-    const colonPairs = line.matchAll(/([\w\s²\*\-]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
+    const colonPairs = line.matchAll(/([\w\s²\*\-0-9\^]+?):\s*([^:<>]+?)(?=(?:[A-Z][^:]*:|$))/g);
     for (const pair of colonPairs) {
       kvPairs.push([pair[1].trim(), pair[2].trim()]);
       found = true;
     }
     if (!found) {
-      const angleMatch = line.match(/([\w\s²\*\-]+?)([<>])\s*([^<>=]+)/);
+      const angleMatch = line.match(/([\w\s²\*\-\^]+?)([<>])\s*([^<>=]+)/);
       if (angleMatch) {
         kvPairs.push([angleMatch[1].trim(), angleMatch[2] + ' ' + angleMatch[3].trim()]);
         found = true;
@@ -111,7 +123,7 @@ function renderKeyValueTable(section: string) {
         <tbody>
           {kvPairs.map(([k, v], i) => (
             <tr key={i}>
-              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{k}</td>
+              <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{formatKeyText(k)}</td>
               <td style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{v}</td>
             </tr>
           ))}
@@ -135,7 +147,7 @@ function renderSummaryTable(section: string) {
     <TableContainer>
       <table className="table table-bordered table-sm mb-3" style={{ margin: 0, minWidth: 0, width: 'auto', tableLayout: 'auto', maxWidth: '100%' }}>
         <thead >
-          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h}</th>)}</tr>
+          <tr>{header.map((h, i) => <th key={i} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', backgroundColor: 'rgb(242, 242, 242)', fontWeight: 600 }}>{h.replace(/h2/g, 'h²')}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map((cols, i) => <tr key={i}>{cols.map((c, j) => <td key={j} style={{ border: '1px solid black', padding: '4px 8px', textAlign: 'left', fontSize: '0.97em' }}>{c}</td>)}</tr>)}
@@ -252,6 +264,18 @@ function formatKeyValueSection(section: string) {
   const lines = section.split(/\r?\n/).filter(l => l.trim() && !/^[-]+$/.test(l));
   const kvPairs: [string, string][] = [];
   let lastKey = '';
+  
+  // Helper function to format key text with superscripts for download
+  const formatKeyTextForDownload = (key: string) => {
+    if (key.includes('Total Observed scale h2') || key.includes('Total Observed scale h²')) {
+      return key.replace(/h2|h²/g, 'h²');
+    }
+    if (key.includes('Mean Chi^2') || key.includes('Mean Chi²')) {
+      return key.replace(/Chi\^2|Chi²/g, 'Chi²');
+    }
+    return key;
+  };
+  
   lines.forEach(line => {
     // If the line is a header like 'Heritability of phenotype 2/2', skip it
     if (/^Heritability of phenotype \d+(\/\d+)?$/.test(line.trim())) return;
@@ -290,7 +314,7 @@ function formatKeyValueSection(section: string) {
   if (!kvPairs.length) return '';
   // Use tab instead of separator
   const header = `\tValue`;
-  const linesOut = [header, ...kvPairs.map(([k, v]) => `${k}\t${v}`)];
+  const linesOut = [header, ...kvPairs.map(([k, v]) => `${formatKeyTextForDownload(k)}\t${v}`)];
   return linesOut.join('\n');
 }
 
@@ -301,10 +325,22 @@ function formatSummarySection(section: string) {
   let headerIdx = 0;
   while (headerIdx < filteredLines.length && filteredLines[headerIdx].split(/\s+/).length < 2) headerIdx++;
   if (headerIdx >= filteredLines.length - 1) return section;
+  
+  // Helper function to format header text with superscripts for download
+  const formatHeaderTextForDownload = (text: string) => {
+    if (text.includes('h2')) {
+      return text.replace(/h2/g, 'h²');
+    }
+    if (text.includes('Chi^2') || text.includes('Chi²')) {
+      return text.replace(/Chi\^2|Chi²/g, 'Chi²');
+    }
+    return text;
+  };
+  
   const header = filteredLines[headerIdx].split(/\s+/).filter(Boolean);
   const rows = filteredLines.slice(headerIdx + 1).map(l => l.split(/\s+/).filter(Boolean));
-  // Use tab instead of separator
-  const headerLine = header.join('\t');
+  // Use tab instead of separator and format headers with superscripts
+  const headerLine = header.map(h => formatHeaderTextForDownload(h)).join('\t');
   const rowLines = rows.map(r => r.join('\t'));
   return [headerLine, ...rowLines].join('\n');
 }
@@ -457,10 +493,8 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
     queryKey: resultQueryKey,
     queryFn: async () => {
       const res = await fetch(resultUrl);
-      console.log(res)
       if (!res.ok) throw new Error('Result not found');
       const text = await res.text();
-      console.log("Fetched result text:", text);
       return text;
     },
   });
@@ -494,7 +528,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
   if ( !result) {
     return null;
   }
-  console.log("LDscore result:", result);
+
   if (type === 'heritability') {
     const inputFilename = uploads;
     const parsedTableText = formatHeritabilityTableText(result);
@@ -519,7 +553,7 @@ export default function LdScoreResults({ reference, type, uploads }: { reference
         {renderKeyValueTable(parsed.herit2 || '')}
         <h5 style={{ fontWeight: 'bold' }} >Genetic Covariance</h5>
         {renderKeyValueTable(parsed.gencov || '')}
-        <h5>Genetic Correlation</h5>
+        <h5 style={{ fontWeight: 'bold' }}>Genetic Correlation</h5>
         {renderKeyValueTable(parsed.gencorr || '')}
         <h5 style={{ fontWeight: 'bold' }} >Summary of Genetic Correlation Results</h5>
         {renderSummaryTable(parsed.summary || '')}
