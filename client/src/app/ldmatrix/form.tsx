@@ -87,13 +87,12 @@ export default function LDMatrixForm() {
   return (
     <Form id="ldmatrix-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col sm="auto" style={{ maxWidth: "300px" }}>
           <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
-              rows={2}
-              style={{ maxWidth: "280px" }}
+              rows={2}          
               {...register("snps", {
                 required: "This field is required",
                 pattern: {
