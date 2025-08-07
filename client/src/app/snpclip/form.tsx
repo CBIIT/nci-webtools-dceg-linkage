@@ -153,6 +153,7 @@ export default function SNPClipForm() {
                    } })}
                    title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
                 />
+                <Form.Text className="text-danger">{errors?.r2_threshold?.message}</Form.Text>
               </Col>
             </Row>
           </Form.Group>
@@ -182,6 +183,7 @@ export default function SNPClipForm() {
                    } })}
                    title="MAF must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
                 />
+                <Form.Text className="text-danger">{errors?.maf_threshold?.message}</Form.Text>
               </Col>
             </Row>
           </Form.Group>

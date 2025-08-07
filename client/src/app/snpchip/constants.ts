@@ -41,7 +41,13 @@ export const PLATFORM_LOOKUP: Record<string, string> = {
   "Illumina HumanExon510Sv1": "I_Exon510S",
   "Illumina HumanOmni2.5S-8v1": "I_O2.5S-8v1",
   "Affymetrix Axiom GW EAS": "A_EAS",
-  "Affymetrix Axiom GW EUR": "A_EUR"
+  "Affymetrix Axiom GW EUR": "A_EUR",
+  "Illumina Global Screening version 1": "I_GSA-v1",
+  "Illumina Global Screening version 2": "I_GSA-v2",
+  "Illumina Multi-Ethnic Global": "I_MEGA",
+  "Affymetrix Axiom UK Biobank": "A_UKBA",
+  "Affymetrix Axiom Precision Medicine Research": "A_PMRA",
+  "Illumina Global Screening version 3_Confluence": "I_GSA-v3C",
 
 };
 
