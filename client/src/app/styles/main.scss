@@ -484,6 +484,15 @@ table.table-chip > tbody {
 	text-align: right;
 }
 
+.snpchip-table th {
+  white-space: normal;
+  vertical-align: middle;
+  word-break: break-word;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  line-height: 1.2;
+}
+
 @media (max-width: 930px) {
   .card-row > * {
     width: 30%;
