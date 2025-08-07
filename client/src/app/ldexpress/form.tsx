@@ -118,6 +118,7 @@ export default function LDExpressForm() {
             <Form.Control
               as="textarea"
               rows={2}
+              style={{ maxWidth: "280px" }}
               {...register("snps", {
                 required: "This field is required",
                 pattern: {

@@ -265,6 +265,7 @@ export default function SNPChipForm({
                       <Form.Control
                         as="textarea"
                         rows={2}
+                        style={{ maxWidth: "280px" }}
                         {...register("snps", {
                           required: "SNPs are required.",
                           pattern: {

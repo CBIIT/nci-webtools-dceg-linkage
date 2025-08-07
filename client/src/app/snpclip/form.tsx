@@ -93,6 +93,7 @@ export default function SNPClipForm() {
             <Form.Control
               as="textarea"
               rows={2}
+              style={{ maxWidth: "280px" }}
               {...register("snps", {
                 required: "This field is required",
                 pattern: {
@@ -102,7 +103,7 @@ export default function SNPClipForm() {
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
             />
-            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
+            <Form.Text className="text-danger" style={{ maxWidth: "260px" }}>{errors?.snps?.message}</Form.Text>
           </Form.Group>
         </Col>
         <Col sm={2}>
