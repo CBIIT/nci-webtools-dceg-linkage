@@ -173,6 +173,14 @@ export default function LdtraitForm() {
                 type="text"
                 {...register("r2_d_threshold", {
                   required: "This field is required",
+                  min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                  },
+                  max: {
+                    value: 1,
+                    message: "Value must be at most 1",
+                  },
                   pattern: {
                     value: /^\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)$/,
                     message: "Value must be between 0 and 1",
@@ -189,9 +197,17 @@ export default function LdtraitForm() {
                 type="number"
                 {...register("window", {
                   required: "Base pair window is required",
+                  min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                  },
+                  max: {
+                    value: 1000000,
+                    message: "Value must be at most 1,000,000",
+                  },
                   pattern: { value: /^\d+$/, message: "Invalid base pair window" },
                 })}
-                 placeholder="100000"
+                 placeholder="500000"
               />
               
             </InputGroup>

@@ -140,6 +140,14 @@ export default function SNPClipForm() {
                   max="1"
                   {...register("r2_threshold", { 
                     required: "Threshold is required",
+                    min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                    },
+                    max: {
+                      value: 1,
+                      message: "Value must be at most 1",
+                    },
                     pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
@@ -161,6 +169,14 @@ export default function SNPClipForm() {
                   min="0"
                   max="1"
                   {...register("maf_threshold", {  required: "MAF is required",
+                    min: {
+                      value: 0,
+                      message: "Value must be at least 0",
+                    },
+                    max: {
+                      value: 1,
+                      message: "Value must be at most 1",
+                    },
                     pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)"
