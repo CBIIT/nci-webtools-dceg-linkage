@@ -146,7 +146,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
                 style={{
                   height: "auto",
                   width: "100%",
-                  maxWidth: "700px",
+                  maxWidth: "400px",
                 }}
               />
             </Col>
