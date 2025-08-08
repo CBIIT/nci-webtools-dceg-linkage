@@ -242,7 +242,7 @@ export default function LdProxyForm() {
                 title="Value must be a number between 0 and 1,000,000"
               />
             </div>
-            <Form.Text className="text-danger nowrap-text">{errors?.window?.message}</Form.Text>
+            <Form.Text className="text-danger text-nowrap">{errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
         <Col />
