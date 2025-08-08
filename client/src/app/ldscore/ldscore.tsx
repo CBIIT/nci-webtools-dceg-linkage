@@ -169,22 +169,18 @@ export default function LDScore() {
               ) : (
                 <Form.Control
                   type="file"
-                  {...form.register("ldfiles", { required: "Files are required" })}
-                  accept=".bed,.bim,.fam"
-                  multiple
-                  title="Upload *.bed, *.bim, *.fam files"
-                  onChange={async (e) => {
-                    const input = e.target as HTMLInputElement;
-                    if (input.files) {
-                      // Validate file count and extensions
-                      if (input.files.length !== 3) {
-                        setFileError('Error: Upload must include 3 files, one of each type: .bed, .bim, and .fam');
-                        input.value = ''; // Clear the input
-                        return;
+                  {...form.register("ldfiles", { 
+                    required: "Files are required",
+                    validate: (fileList: FileList | undefined) => {
+                      if (!fileList || fileList.length === 0) return true;
+                      
+                      // Validate file count
+                      if (fileList.length !== 3) {
+                        return 'Upload must include 3 files, one of each type: .bed, .bim, and .fam';
                       }
 
                       // Check if we have exactly one of each required file type
-                      const extensions = Array.from(input.files).map(file => 
+                      const extensions = Array.from(fileList).map(file => 
                         file.name.split('.').pop()?.toLowerCase()
                       );
                       const hasBed = extensions.includes('bed');
@@ -192,9 +188,7 @@ export default function LDScore() {
                       const hasFam = extensions.includes('fam');
 
                       if (!hasBed || !hasBim || !hasFam) {
-                        setFileError('Error: Upload must include 3 files, one of each type: .bed, .bim, and .fam');
-                        input.value = ''; // Clear the input
-                        return;
+                        return 'Upload must include 3 files, one of each type: .bed, .bim, and .fam';
                       }
 
                       // Check for duplicates
@@ -203,11 +197,18 @@ export default function LDScore() {
                       const famCount = extensions.filter(ext => ext === 'fam').length;
 
                       if (bedCount !== 1 || bimCount !== 1 || famCount !== 1) {
-                        setFileError('Error: Upload must include 3 files, one of each type: .bed, .bim, and .fam');
-                        input.value = ''; // Clear the input
-                        return;
+                        return 'Upload must include 3 files, one of each type: .bed, .bim, and .fam';
                       }
 
+                      return true;
+                    }
+                  })}
+                  accept=".bed,.bim,.fam"
+                  multiple
+                  title="Upload *.bed, *.bim, *.fam files"
+                  onChange={async (e) => {
+                    const input = e.target as HTMLInputElement;
+                    if (input.files) {
                       setFileError(""); // Clear any previous errors
                       setLdscoreResultRef(null); // Reset LD score result when new files are loaded
                       handleLdFilesUpload(input.files);
@@ -215,12 +216,13 @@ export default function LDScore() {
                   }}
                 />
               )}
+               <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
                <div className="mt-2">
                 <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
                 </HoverUnderlineLink>
               </div>
-              <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
+             
             </Form.Group>
             
             <Form.Group controlId="useExLd" className="mb-3">
