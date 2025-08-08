@@ -138,7 +138,7 @@ export default function SNPChipForm({
     } else {
       setUploadedFileName("");
     }
-  }, [varFile, setValue]);
+  }, [varFile, setValue, reset]);
 
   const onSubmit = async (form: FormData) => {
     setLoading(true);

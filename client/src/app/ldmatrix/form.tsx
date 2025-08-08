@@ -26,6 +26,7 @@ export default function LDMatrixForm() {
     r2_d: "d",
     collapseTranscript: false,
     annotate: "forge",
+    varFile: "",
   };
   const {
     control,
@@ -53,7 +54,7 @@ export default function LDMatrixForm() {
       };
       reader.readAsText(file);
     }
-  }, [varFile, setValue]);
+  }, [varFile, setValue, reset]);
 
   const submitForm = useMutation<any, unknown, LdmatrixFormData>({
     mutationFn: (params: any) => ldmatrix(params),

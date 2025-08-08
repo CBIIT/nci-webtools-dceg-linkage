@@ -22,6 +22,7 @@ export default function LdHapForm() {
     snps: "",
     pop: [],
     genome_build: "grch37",
+    varFile: "",
   };
   const {
     control,
@@ -49,7 +50,7 @@ export default function LdHapForm() {
       };
       reader.readAsText(file);
     }
-  }, [varFile, setValue]);
+  }, [varFile, setValue, reset]);
 
   const submitForm = useMutation<Ldhap, Error, LdhapFormData>({
     mutationFn: (params: LdhapFormData) => ldhap(params),

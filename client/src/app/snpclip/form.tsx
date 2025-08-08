@@ -52,7 +52,7 @@ export default function SNPClipForm() {
       };
       reader.readAsText(file);
     }
-  }, [varFile, setValue]);
+  }, [varFile, setValue, reset]);
 
   const submitForm = useMutation<any, Error, SnpClipData>({
     mutationFn: (params: SnpClipData) => snpclip(params),

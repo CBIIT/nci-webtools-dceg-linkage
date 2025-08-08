@@ -28,6 +28,7 @@ export default function LDExpressForm() {
     r2_d_threshold: 0.1,
     window: 500000,
     genome_build: "grch37",
+    ldexpressFile: "",
   };
   const {
     control,
@@ -56,7 +57,7 @@ export default function LDExpressForm() {
       };
       reader.readAsText(file);
     }
-  }, [ldexpressFile, setValue]);
+  }, [ldexpressFile, setValue, reset]);
 
   const { data: tissues, isFetching } = useQuery({
     queryKey: ["ldexpress_tissues"],

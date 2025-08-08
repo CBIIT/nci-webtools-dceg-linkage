@@ -26,6 +26,7 @@ export default function LdtraitForm() {
     r2_d_threshold: "0.1",
     window: "500000",
     ifContinue: "Continue",
+    varFile: "",
   };
 
   const {
@@ -41,7 +42,6 @@ export default function LdtraitForm() {
   });
 
   const varFile = watch("varFile") as string | FileList;
-  const r2_d = watch("r2_d");
 
   useEffect(() => {
     if (varFile instanceof FileList && varFile.length > 0) {
@@ -55,7 +55,7 @@ export default function LdtraitForm() {
       };
       reader.readAsText(file);
     }
-  }, [varFile, setValue]);
+  }, [varFile, setValue, reset]);
 
   const submitForm = useMutation<Ldtrait, Error, LdtraitFormData>({
     mutationFn: (params: LdtraitFormData) => ldtrait(params),
