@@ -12,8 +12,8 @@ import { useState } from "react";
 import LdScoreResults from "./results";
 
 interface CorrelationFormData {
-  file?: File;
-  file2?: File;
+  file?: FileList;
+  file2?: FileList;
   pop: LdscorePopOption | null;
 }
 
@@ -155,7 +155,15 @@ export default function Correlation() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...geneticForm.register("file", { required: "File is required" })}
+                  {...geneticForm.register("file", { 
+                    required: "File is required",
+                    validate: (fileList: FileList | undefined) => {
+                      if (!fileList || fileList.length === 0) return true;
+                      const file = fileList[0];
+                      const ext = file.name.split('.').pop()?.toLowerCase();
+                      return ext === 'txt' || 'Only .txt files are allowed';
+                    }
+                  })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
@@ -186,7 +194,15 @@ export default function Correlation() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...geneticForm.register("file2", { required: "File is required" })}
+                  {...geneticForm.register("file2", { 
+                    required: "File is required",
+                    validate: (fileList: FileList | undefined) => {
+                      if (!fileList || fileList.length === 0) return true;
+                      const file = fileList[0];
+                      const ext = file.name.split('.').pop()?.toLowerCase();
+                      return ext === 'txt' || 'Only .txt files are allowed';
+                    }
+                  })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
