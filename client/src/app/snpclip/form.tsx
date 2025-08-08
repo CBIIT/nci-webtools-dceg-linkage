@@ -87,25 +87,25 @@ export default function SNPClipForm() {
   return (
     <Form id="snpclip-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col sm={'auto'} style={{ maxWidth: "300px" }}>
           <Form.Group controlId="snps" className="mb-3">
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
               rows={2}
               {...register("snps", {
-                required: "SNPs are required.",
+                required: "This field is required",
                 pattern: {
                   value: rsChrMultilineRegex,
-                  message: "Invalid SNP or coordinate format, only one per line",
+                  message: "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
                 },
               })}
               title="Enter list of RS numbers or Genomic Coordinates (one per line)"
             />
-            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
+            <Form.Text className="text-danger" style={{ maxWidth: "260px" }}>{errors?.snps?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={3}>
+        <Col sm={2}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
@@ -126,7 +126,7 @@ export default function SNPClipForm() {
           <div>Threshold</div>
           <Form.Group controlId="r2_threshold" className="mb-3">
             <Row className="align-items-center">
-              <Col md="2" xs="auto">
+              <Col sm={3} xs="auto" style={{ maxWidth: "300px" }}>
                 <Form.Label className="mb-0">
                   R<sup>2</sup>
                 </Form.Label>
@@ -137,15 +137,30 @@ export default function SNPClipForm() {
                   step="0.01"
                   min="0"
                   max="1"
-                  {...register("r2_threshold", { required: true, min: 0, max: 1 })}
+                  {...register("r2_threshold", { 
+                    required: "Threshold is required",
+                    min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                    },
+                    max: {
+                      value: 1,
+                      message: "Value must be at most 1",
+                    },
+                    pattern: {
+                    value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
+                    message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
+                   } })}
+                   title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
                 />
+                <Form.Text className="text-danger">{errors?.r2_threshold?.message}</Form.Text>
               </Col>
             </Row>
           </Form.Group>
           <Form.Group controlId="maf_threshold" className="mb-3">
             <Row className="align-items-center">
-              <Col md="2" xs="auto">
-                <Form.Label className="mb-0">MAF</Form.Label>
+              <Col sm={3} xs="auto" style={{ maxWidth: "300px" }}>
+                <Form.Label className="mb-0">MAF </Form.Label>
               </Col>
               <Col>
                 <Form.Control
@@ -153,15 +168,29 @@ export default function SNPClipForm() {
                   step="0.01"
                   min="0"
                   max="1"
-                  {...register("maf_threshold", { required: true, min: 0, max: 1 })}
+                  {...register("maf_threshold", {  required: "MAF is required",
+                    min: {
+                      value: 0,
+                      message: "Value must be at least 0",
+                    },
+                    max: {
+                      value: 1,
+                      message: "Value must be at most 1",
+                    },
+                    pattern: {
+                    value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
+                    message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)"
+                   } })}
+                   title="MAF must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
                 />
+                <Form.Text className="text-danger">{errors?.maf_threshold?.message}</Form.Text>
               </Col>
             </Row>
           </Form.Group>
         </Col>
-        <Col sm={2}></Col>
-        <Col />
-        <Col sm="2">
+
+        
+        <Col sm={2} className="d-flex justify-content-end align-items-start ms-auto">
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

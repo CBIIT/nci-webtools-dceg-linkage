@@ -259,7 +259,7 @@ export default function SNPChipForm({
   return (
     <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} noValidate>
       <Row className="mb-3 align-items-start">
-        <Col sm={'auto'}>
+        <Col sm={'auto'} style={{ maxWidth: "300px" }}>
           <Form.Group controlId="snps" className="mb-3">
                       <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
                       <Form.Control
@@ -287,7 +287,7 @@ export default function SNPChipForm({
             )}
           </Form.Group>
         </Col><Col />
-        <Col md={3} className="d-flex justify-content-end">
+        <Col sm={3} className="d-flex justify-content-end">
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
           </Button>

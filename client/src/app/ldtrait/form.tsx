@@ -94,7 +94,7 @@ export default function LdtraitForm() {
   return (
     <Form id="ldtrait-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col sm="auto" style={{ maxWidth: "300px" }}>
           <Form.Group controlId="snps" className="mb-3">
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
@@ -172,11 +172,20 @@ export default function LdtraitForm() {
                 type="text"
                 {...register("r2_d_threshold", {
                   required: "This field is required",
+                  min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                  },
+                  max: {
+                    value: 1,
+                    message: "Value must be at most 1",
+                  },
                   pattern: {
                     value: /^\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)$/,
                     message: "Value must be between 0 and 1",
                   },
                 })}
+                title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
             </InputGroup>
             <Form.Label>Base pair window</Form.Label>
@@ -186,7 +195,7 @@ export default function LdtraitForm() {
               <Form.Control
                 type="number"
                 {...register("window", {
-                  required: "This field is required",
+                  required: "Base pair window is required",
                   min: {
                     value: 0,
                     message: "Value must be at least 0",
@@ -195,7 +204,9 @@ export default function LdtraitForm() {
                     value: 1000000,
                     message: "Value must be at most 1,000,000",
                   },
+                  pattern: { value: /^\d+$/, message: "Invalid base pair window" },
                 })}
+                 placeholder="500000"
               />
               
             </InputGroup>
