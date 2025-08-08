@@ -1,7 +1,7 @@
 "use client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert, InputGroup } from "react-bootstrap";
+import { Row, Col, Form, Button, ButtonGroup, ToggleButton, InputGroup, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { ldtrait } from "@/services/queries";
@@ -10,6 +10,7 @@ import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
 import { FormData, LdtraitFormData, Ldtrait } from "./types";
+import MultiSnp from "@/components/form/multiSnp";
 
 export default function LdtraitForm() {
   const queryClient = useQueryClient();
@@ -95,23 +96,7 @@ export default function LdtraitForm() {
     <Form id="ldtrait-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
-          <Form.Group controlId="snps" className="mb-3">
-            <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              {...register("snps", {
-                required: "This field is required",
-                pattern: {
-                  value: /^(([ |\t])*[r|R][s|S]\d+([ |\t])*|([ |\t])*[c|C][h|H][r|R][\d|x|X|y|Y]\d?:\d+([ |\t])*)$/m,
-                  message:
-                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
-                },
-              })}
-              title="Enter list of RS numbers or Genomic Coordinates (one per line)"
-            />
-            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
-          </Form.Group>
+          <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
 
         <Col sm={2}>
@@ -172,21 +157,29 @@ export default function LdtraitForm() {
                 type="text"
                 {...register("r2_d_threshold", {
                   required: "This field is required",
+                  min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                  },
+                  max: {
+                    value: 1,
+                    message: "Value must be at most 1",
+                  },
                   pattern: {
                     value: /^\+?(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?)$/,
                     message: "Value must be between 0 and 1",
                   },
                 })}
+                title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
               />
             </InputGroup>
             <Form.Label>Base pair window</Form.Label>
             <InputGroup>
-            
               <InputGroup.Text>±</InputGroup.Text>
               <Form.Control
                 type="number"
                 {...register("window", {
-                  required: "This field is required",
+                  required: "Base pair window is required",
                   min: {
                     value: 0,
                     message: "Value must be at least 0",
@@ -195,13 +188,12 @@ export default function LdtraitForm() {
                     value: 1000000,
                     message: "Value must be at most 1,000,000",
                   },
+                  pattern: { value: /^\d+$/, message: "Invalid base pair window" },
                 })}
+                placeholder="500000"
               />
-              
             </InputGroup>
-            <Form.Text className="text-danger">
-              {errors?.r2_d_threshold?.message || errors?.window?.message}
-            </Form.Text>
+            <Form.Text className="text-danger">{errors?.r2_d_threshold?.message || errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
 

@@ -6,7 +6,6 @@ import { Row, Col, Container, Dropdown, Alert } from "react-bootstrap";
 import Spinner from "react-bootstrap/Spinner";
 import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
-import { FormData } from "./types";
 
 export default function LdAMatrixResults({ ref }: { ref: string }) {
   const [bokehLoaded, setBokehLoaded] = useState(false);

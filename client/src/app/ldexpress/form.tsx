@@ -9,8 +9,9 @@ import { ldexpress, ldexpressTissues } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
+import { parseSnps } from "@/services/utils";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
+import MultiSnp from "@/components/form/multiSnp";
 
 export default function LDExpressForm() {
   const queryClient = useQueryClient();
@@ -113,23 +114,7 @@ export default function LDExpressForm() {
     <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto">
-          <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
-            <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              {...register("snps", {
-                required: "This field is required",
-                pattern: {
-                  value: rsChrMultilineRegex,
-                  message:
-                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
-                },
-              })}
-              title="Enter list of RS numbers or Genomic Coordinates (one per line)"
-            />
-            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
-          </Form.Group>
+          <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
         <Col sm={2}>
           <Form.Group controlId="ldexpressFile" className="mb-3">
@@ -181,7 +166,7 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.tissues?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={"auto"}>
+        <Col sm="auto" style={{ maxWidth: "300px" }}>
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -216,8 +201,8 @@ export default function LDExpressForm() {
         </Col>
         <Col>
           Thresholds
-          <Form.Group as={Row} controlId="r2_d_threshold" className="align-items-center mb-2">
-            <Col sm="auto" className="pe-0">
+          <Form.Group as={Row} controlId="r2_d_threshold" className="text-nowrap align-items-center mb-2">
+            <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
               <Form.Label style={{ width: "1.8rem" }}>
                 {r2_d === "r2" ? (
                   <>
@@ -233,6 +218,14 @@ export default function LDExpressForm() {
               <Form.Control
                 {...register("r2_d_threshold", {
                   required: "Threshold is required",
+                  min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                  },
+                  max: {
+                    value: 1,
+                    message: "Value must be at most 1",
+                  },
                   pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
@@ -244,13 +237,21 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
           </Form.Group>
           <Form.Group as={Row} controlId="p_threshold" className="d-flex align-items-center mb-2">
-            <Col sm="auto" className="pe-0">
+            <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
               <Form.Label style={{ width: "1.8rem" }}>P {"<"}</Form.Label>
             </Col>
             <Col>
               <Form.Control
                 {...register("p_threshold", {
                   required: "Threshold is required",
+                  min: {
+                    value: 0,
+                    message: "Value must be at least 0",
+                  },
+                  max: {
+                    value: 1,
+                    message: "Value must be at most 1",
+                  },
                   pattern: {
                     value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
                     message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",

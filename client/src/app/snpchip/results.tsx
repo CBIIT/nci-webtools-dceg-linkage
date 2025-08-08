@@ -54,10 +54,10 @@ export default function Results({ results, genome_build }: ResultsProps) {
       <div className="container-fluid" id="snpchip-results-container">
         <Row>
           <Col md={12} style={{ overflowX: "scroll" }}>
-            <Table striped bordered hover size="sm">
+            <Table striped bordered hover size="sm" className="snpchip-table">
               <thead>
                 <tr>
-                  <th colSpan={2}>SNP Chip List</th>
+                  <th colSpan={2} className="text-center align-middle">SNP Chip List</th>
                   {results.headers.map((header, i) => (
                     <th rowSpan={2} style={rotateStyle} key={i} title={header.platform}>
                       <div style={rotateDivStyle}>

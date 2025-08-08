@@ -7,7 +7,7 @@ import { ldproxy } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import './style.css';
+import "./style.css";
 import { rsChrRegex } from "@/services/utils";
 
 export interface FormData {
@@ -86,28 +86,28 @@ export default function LdProxyForm() {
           <Form.Group controlId="var">
             <Form.Label>Variant</Form.Label>
             <Form.Control
-              {...register("var", { 
+              {...register("var", {
                 required: "This field is required",
                 pattern: {
                   value: rsChrRegex,
-                  message: "Please match the requested format. rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted"
-                }
-              })} 
+                  message:
+                    "Please match the requested format. rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted",
+                },
+              })}
               title="rs followed by 1 or more digits (ex. rs12345) or CHR:POS, no spaces permitted"
               placeholder="Variant RSID or CHR:POS"
             />
             <Form.Text className="text-danger">{errors?.var?.message}</Form.Text>
           </Form.Group>
         </Col>
-
-        <Col sm={2}>
+        <Col sm={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={"auto"}>
+        <Col sm="auto" style={{ maxWidth: "300px" }}>
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -218,31 +218,31 @@ export default function LdProxyForm() {
         <Col>
           <Form.Group controlId="window" className="mb-3">
             <Form.Label style={{ whiteSpace: "nowrap" }}>Base pair window</Form.Label>
-            <div className="d-flex align-items-center" >
+            <div className="d-flex align-items-center">
               ±&nbsp;
               <Form.Control
-                  type="number"
-                  {...register("window", {
-                    required: "Base pair window is required",
-                    valueAsNumber: true,
-                    min: {
-                      value: 0,
-                      message: "Minimum value is 0"
+                type="number"
+                {...register("window", {
+                  required: "Base pair window is required",
+                  valueAsNumber: true,
+                  min: {
+                    value: 0,
+                    message: "Minimum value is 0",
+                  },
+                  max: {
+                    value: 1000000,
+                    message: "Max value is 1000000",
+                  },
+                  validate: {
+                    isInteger: (value) => {
+                      return Number.isInteger(value) || "Must be a whole number";
                     },
-                    max: {
-                      value: 1000000,
-                      message: "Max value is 1000000"
-                    },
-                    validate: {
-                      isInteger: (value) => {
-                        return Number.isInteger(value) || "Must be a whole number";
-                      }
-                    }
-                  })}
-                  title="Value must be a number between 0 and 1,000,000"
-                />
+                  },
+                })}
+                title="Value must be a number between 0 and 1,000,000"
+              />
             </div>
-            <Form.Text className="text-danger nowrap-text">{errors?.window?.message}</Form.Text>
+            <Form.Text className="text-danger text-nowrap">{errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
         <Col />
