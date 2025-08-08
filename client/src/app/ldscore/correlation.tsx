@@ -261,28 +261,37 @@ export default function Correlation() {
                   }
                 }}
               />
-              {(exampleFile1 || uploadedFile1) && (exampleFile2 || uploadedFile2) && (
+              {((exampleFile1 || uploadedFile1) || (exampleFile2 || uploadedFile2)) && (
                 <>
                   <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
-                  <a
-                    href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile1)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                    style={{ textDecoration: 'underline', color: '#2a71a5' }}
-                  >
-                    {exampleFile1 || uploadedFile1}
-                  </a>
-                  <br></br>
-                  <a
-                    href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile2)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    download
-                      style={{ textDecoration: 'underline', color: '#2a71a5' }}
-                  >
-                    {exampleFile2 || uploadedFile2}
-                  </a>
+                  {(exampleFile1 || uploadedFile1) && (
+                    <>
+                      <a
+                        href={exampleFile1 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile1)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile1)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                      >
+                        {exampleFile1 || uploadedFile1}
+                      </a>
+                      <br />
+                    </>
+                  )}
+                  {(exampleFile2 || uploadedFile2) && (
+                    <>
+                      <a
+                        href={exampleFile2 ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFile2)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFile2)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        download
+                        style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                      >
+                        {exampleFile2 || uploadedFile2}
+                      </a>
+                      <br />
+                    </>
+                  )}
                 </>
               )}
             </div>
