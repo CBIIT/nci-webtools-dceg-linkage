@@ -17,3 +17,4 @@ cairosvg
 Pillow
 pybedtools==0.9.1  # Specify a known working version
 ldsc @ git+https://github.com/CBIIT/ldsc.git@ldsc39
+ddtrace

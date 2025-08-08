@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { fetchLdScoreCalculationResult } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
+import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useState } from "react";
 import LdScoreResults from "./results";
 
@@ -29,11 +30,13 @@ export default function LDScore() {
   const [uploadedBed, setUploadedBed] = useState<string>("");
   const [uploadedBim, setUploadedBim] = useState<string>("");
   const [uploadedFam, setUploadedFam] = useState<string>("");
+  const [allUploadedFiles, setAllUploadedFiles] = useState<string[]>([]);
   const [useExampleLdscore, setUseExampleLdscore] = useState(false);
   const [ldscoreLoading, setLdscoreLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [ldscoreResultRef, setLdscoreResultRef] = useState<string | null>(null);
   const [error, setError] = useState<string>("");
+  const [fileError, setFileError] = useState<string>("");
 
   // Upload handler for LD calculation multiple files (.bed, .bim, .fam)
   const handleLdFilesUpload = async (files: FileList) => {
@@ -41,7 +44,10 @@ export default function LDScore() {
     setUploadedBed(""); 
     setUploadedBim(""); 
     setUploadedFam("");
+    setAllUploadedFiles([]);
     form.clearErrors("ldfiles");
+    
+    const uploadedFileNames: string[] = [];
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -55,6 +61,8 @@ export default function LDScore() {
           body: formData,
         });
         if (response.ok) {
+          uploadedFileNames.push(file.name);
+          // Keep the specific type tracking for the submission logic
           if (ext === 'bed') setUploadedBed(file.name);
           if (ext === 'bim') setUploadedBim(file.name);
           if (ext === 'fam') setUploadedFam(file.name);
@@ -63,6 +71,8 @@ export default function LDScore() {
         // ignore individual file upload errors
       }
     }
+    
+    setAllUploadedFiles(uploadedFileNames);
     setUploading(false);
   };
 
@@ -111,8 +121,10 @@ export default function LDScore() {
     setUploadedBed("");
     setUploadedBim("");
     setUploadedFam("");
+    setAllUploadedFiles([]);
     setUseExampleLdscore(false);
     setError("");
+    setFileError("");
   };
 
   return (
@@ -145,16 +157,18 @@ export default function LDScore() {
             >
               Uploading file, please wait...
             </span>
-            <CalculateLoading />
+            <div className="spinner-border text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
           </div>
         </div>
       )}
 
       <Form id="ldscore-form-ld-calculation" onSubmit={form.handleSubmit(onSubmit)} onReset={onReset} noValidate>
         <Row>
-          <Col sm={4}>
+          <Col sm={5}>
             <Form.Group controlId="ldfiles" className="mb-3">
-              <Form.Label>Upload .bed, .bim, .fam files (all three required)</Form.Label>
+              <Form.Label >Upload *.bed, *.bim, *.fam files (all three required)</Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
                 <div className="form-control bg-light">
                   {exampleBed && <div>{exampleBed}</div>}
@@ -164,20 +178,60 @@ export default function LDScore() {
               ) : (
                 <Form.Control
                   type="file"
-                  {...form.register("ldfiles", { required: "Files are required" })}
+                  {...form.register("ldfiles", { 
+                    required: "Files are required",
+                    validate: (fileList: FileList | undefined) => {
+                      if (!fileList || fileList.length === 0) return true;
+                      
+                      // Validate file count
+                      if (fileList.length !== 3) {
+                        return 'Upload must include 3 files, one of each type: .bed, .bim, and .fam';
+                      }
+
+                      // Check if we have exactly one of each required file type
+                      const extensions = Array.from(fileList).map(file => 
+                        file.name.split('.').pop()?.toLowerCase()
+                      );
+                      const hasBed = extensions.includes('bed');
+                      const hasBim = extensions.includes('bim');
+                      const hasFam = extensions.includes('fam');
+
+                      if (!hasBed || !hasBim || !hasFam) {
+                        return 'Upload must include 3 files, one of each type: .bed, .bim, and .fam';
+                      }
+
+                      // Check for duplicates
+                      const bedCount = extensions.filter(ext => ext === 'bed').length;
+                      const bimCount = extensions.filter(ext => ext === 'bim').length;
+                      const famCount = extensions.filter(ext => ext === 'fam').length;
+
+                      if (bedCount !== 1 || bimCount !== 1 || famCount !== 1) {
+                        return 'Upload must include 3 files, one of each type: .bed, .bim, and .fam';
+                      }
+
+                      return true;
+                    }
+                  })}
                   accept=".bed,.bim,.fam"
                   multiple
-                  title="Upload .bed, .bim, .fam files"
+                  title="Upload *.bed, *.bim, *.fam files"
                   onChange={async (e) => {
                     const input = e.target as HTMLInputElement;
                     if (input.files) {
+                      setFileError(""); // Clear any previous errors
                       setLdscoreResultRef(null); // Reset LD score result when new files are loaded
                       handleLdFilesUpload(input.files);
                     }
                   }}
                 />
               )}
-              <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
+               <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
+               <div className="mt-2">
+                <HoverUnderlineLink href="/help#LDscore">
+                  Click here for sample format
+                </HoverUnderlineLink>
+              </div>
+             
             </Form.Group>
             
             <Form.Group controlId="useExLd" className="mb-3">
@@ -197,6 +251,7 @@ export default function LDScore() {
                       setUploadedBed("");
                       setUploadedBim("");
                       setUploadedFam("");
+                      setAllUploadedFiles([]);
                       form.clearErrors("ldfiles");
                     } else {
                       setExampleBed("");
@@ -205,55 +260,74 @@ export default function LDScore() {
                     }
                   }}
                 />
-                {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
+                {((allUploadedFiles.length > 0) || (exampleBed || exampleBim || exampleFam)) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
                     <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
-                    {(exampleBed || uploadedBed) && (
-                      <div>
+                    {/* Show example files when using example data */}
+                    {useExampleLdscore && (
+                      <>
+                        {exampleBed && (
+                          <div>
+                            <a
+                              href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBed)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                            >
+                              {exampleBed}
+                            </a>
+                          </div>
+                        )}
+                        {exampleBim && (
+                          <div>
+                            <a
+                              href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBim)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                            >
+                              {exampleBim}
+                            </a>
+                          </div>
+                        )}
+                        {exampleFam && (
+                          <div>
+                            <a
+                              href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFam)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                            >
+                              {exampleFam}
+                            </a>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {/* Show all uploaded files */}
+                    {!useExampleLdscore && allUploadedFiles.map((fileName, index) => (
+                      <div key={index}>
                         <a
-                          href={exampleBed ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBed)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBed)}`}
+                          href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(fileName)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           download
-                          style={{ textDecoration: 'none', color: 'inherit' }}
+                          style={{ textDecoration: 'underline', color: '#2a71a5' }}
                         >
-                          {exampleBed || uploadedBed}
+                          {fileName}
                         </a>
                       </div>
-                    )}
-                    {(exampleBim || uploadedBim) && (
-                      <div>
-                        <a
-                          href={exampleBim ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBim)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBim)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          style={{ textDecoration: 'none', color: 'inherit' }}
-                        >
-                          {exampleBim || uploadedBim}
-                        </a>
-                      </div>
-                    )}
-                    {(exampleFam || uploadedFam) && (
-                      <div>
-                        <a
-                          href={exampleFam ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFam)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFam)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          style={{ textDecoration: 'none', color: 'inherit' }}
-                        >
-                          {exampleFam || uploadedFam}
-                        </a>
-                      </div>
-                    )}
+                    ))}
                   </div>
                 )}
               </div>
             </Form.Group>
           </Col>
-          
-          <Col sm={3}>
+
+          <Col sm={4}>
             <Form.Group controlId="window" className="mb-3">
               <Form.Label>Window</Form.Label>
               <div className="d-flex">
@@ -261,7 +335,7 @@ export default function LDScore() {
                   type="number"
                   {...form.register("window", { 
                     required: "Window is required",  
-                    min: { value: 1, message: "Window must be greater than 0" } 
+                    min: { value: 1, message: "Window must be an integer greater than 0" } 
                   })}
                   defaultValue={1}
                   style={{ maxWidth: "120px", marginRight: "8px" }}
@@ -289,12 +363,22 @@ export default function LDScore() {
                 Reset
               </Button>
               <Button type="submit" variant="primary" disabled={ldscoreLoading}>
-                Calculate
+                {ldscoreLoading ? "Loading..." : "Calculate"}
               </Button>
             </div>
           </Col>
         </Row>
       </Form>
+
+      {fileError && (
+        <Row>
+          <Col>
+            <Alert variant="danger" className="mt-3">
+              {fileError}
+            </Alert>
+          </Col>
+        </Row>
+      )}
 
       {ldscoreLoading && (
         <div className="d-flex flex-column align-items-center my-3">
@@ -318,7 +402,10 @@ export default function LDScore() {
       )}
 
       {/* Show results component if reference is available */}
+     
       {ldscoreResultRef && (
+        <>
+         <hr />
         <LdScoreResults
           reference={ldscoreResultRef}
           type="ldscore"
@@ -326,6 +413,7 @@ export default function LDScore() {
             [exampleBed || uploadedBed, exampleBim || uploadedBim, exampleFam || uploadedFam].filter(Boolean).join(';')
           }
         />
+        </>
       )}
 
       {error && (

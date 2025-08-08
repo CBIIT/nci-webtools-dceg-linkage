@@ -114,7 +114,7 @@ EXPOSE 80
 EXPOSE 8080
 
 CMD flask --app bokehExport run & \
-    mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
+    ddtrace-run mod_wsgi-express start-server ${LDLINK_HOME}/LDlink.wsgi \
     --httpd-executable=/usr/sbin/httpd \
     --modules-directory /etc/httpd/modules/ \
     --include-file /etc/httpd/conf.d/wsgi.conf \
