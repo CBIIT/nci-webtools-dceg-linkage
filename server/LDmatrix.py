@@ -645,6 +645,16 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         rug.rect(x='x', y='y', width='w', height='h', fill_color='red',
                 dilate=True, line_color=None, fill_alpha=0.6, source=source_rug)
 
+        rug.yaxis.visible = False
+        rug.yaxis.major_label_text_color = None  # Hide y-axis text
+        rug.yaxis.minor_tick_line_alpha = 0      # Hide minor tick lines
+        rug.yaxis.axis_label = " "               # Remove axis label
+        rug.grid.grid_line_color = None          # Hide grid lines
+        #rug.axis.axis_line_color = None          # Hide axis lines
+        rug.axis.major_tick_line_color = None    # Hide major tick lines
+        rug.axis.minor_tick_line_color = None    # Hide minor tick lines
+
+
         hover = rug.select(dict(type=HoverTool))
         hover.tooltips = OrderedDict([
             ("SNP", "@snp_id_plot (@alleles_snp_plot)"),

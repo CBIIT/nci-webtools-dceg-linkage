@@ -391,6 +391,8 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     matrix_plot.grid.grid_line_color = None
     matrix_plot.axis.axis_line_color = None
     matrix_plot.axis.major_tick_line_color = None
+    # Hide extra y-axis
+    matrix_plot.yaxis.visible = False
     if len(snps) < threshold:
         matrix_plot.axis.major_label_text_font_size = "8pt"
         matrix_plot.xaxis.major_label_orientation = "vertical"
@@ -463,6 +465,7 @@ def calculate_matrix_svg(snplst, pop, request, genome_build, r2_d="r2", collapse
     connector.axis.axis_line_color = None
     connector.axis.major_tick_line_color = None
     connector.axis.minor_tick_line_color = None
+    connector.yaxis.visible = False
 
     connector.toolbar_location = None
 
