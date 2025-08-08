@@ -113,11 +113,11 @@ export default function LDExpressForm() {
     <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto" style={{ maxWidth: "300px" }}>
-          <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
+          <Form.Group controlId="snps" className="mb-3">
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
-              rows={2}              
+              rows={2}
               {...register("snps", {
                 required: "This field is required",
                 pattern: {
@@ -216,7 +216,7 @@ export default function LDExpressForm() {
         </Col>
         <Col>
           Thresholds
-          <Form.Group as={Row} controlId="r2_d_threshold" className="align-items-center mb-2">
+          <Form.Group as={Row} controlId="r2_d_threshold" className="text-nowrap align-items-center mb-2">
             <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
               <Form.Label style={{ width: "1.8rem" }}>
                 {r2_d === "r2" ? (

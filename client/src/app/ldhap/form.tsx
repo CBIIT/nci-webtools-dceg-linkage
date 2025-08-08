@@ -86,7 +86,7 @@ export default function LdHapForm() {
     <Form id="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col sm="auto" style={{ maxWidth: "300px" }}>
-          <Form.Group controlId="snps" className="mb-3" style={{ maxWidth: "230px" }}>
+          <Form.Group controlId="snps" className="mb-3">
             <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
             <Form.Control
               as="textarea"
