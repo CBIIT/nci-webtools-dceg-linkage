@@ -6,9 +6,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { FormData } from "./types";
-import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
+import { parseSnps } from "@/services/utils";
 import { PLATFORM_LOOKUP } from "./constants";
 import { Platform } from "./types";
+import MultiSnp from "@/components/form/multiSnp";
 
 function CheckboxList({
   options,
@@ -162,9 +163,7 @@ export default function SNPChipForm({
       return;
     }
 
-    const selectedPlatforms = [...illuminaChips, ...affymetrixChips]
-      .map((p) => p.id)
-      .join("+");
+    const selectedPlatforms = [...illuminaChips, ...affymetrixChips].map((p) => p.id).join("+");
 
     if (!selectedPlatforms) {
       setError("Please select at least one platform.");
@@ -199,7 +198,7 @@ export default function SNPChipForm({
         setWarning(data.warning);
       }
       // Transform and display results
-      const db = genome_build === 'grch37' ? 'hg19' : 'hg38';
+      const db = genome_build === "grch37" ? "hg19" : "hg38";
       const snpchipRows = Object.entries(data)
         .filter(([key]) => !isNaN(Number(key)))
         .map(([_, row]) => {
@@ -208,7 +207,10 @@ export default function SNPChipForm({
           const position_raw = String(row[1]);
           const platformsStr = row[2] || "";
           const map = platformsStr
-            ? platformsStr.split(",").map((v: string) => v.trim()).filter(Boolean)
+            ? platformsStr
+                .split(",")
+                .map((v: string) => v.trim())
+                .filter(Boolean)
             : [];
           return { map, rs_number_raw, position_raw };
         })
@@ -259,23 +261,8 @@ export default function SNPChipForm({
   return (
     <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} noValidate>
       <Row className="mb-3 align-items-start">
-        <Col sm={'auto'} style={{ maxWidth: "300px" }}>
-          <Form.Group controlId="snps" className="mb-3">
-                      <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={2}
-                        {...register("snps", {
-                          required: "SNPs are required.",
-                          pattern: {
-                            value: rsChrMultilineRegex,
-                            message: "Invalid SNP or coordinate format, only one per line",
-                          },
-                        })}
-                        title="Enter list of RS numbers or Genomic Coordinates (one per line)"
-                      />
-                      <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
-                    </Form.Group>
+        <Col sm="auto">
+          <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
         <Col sm={3}>
           <Form.Group controlId="varFile" className="mb-3">
@@ -286,7 +273,8 @@ export default function SNPChipForm({
               <Form.Control placeholder="Upload" type="file" {...register("varFile")} />
             )}
           </Form.Group>
-        </Col><Col />
+        </Col>
+        <Col />
         <Col sm={3} className="d-flex justify-content-end">
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
@@ -303,7 +291,8 @@ export default function SNPChipForm({
               <span>Filter by array</span>
               {!platformsLoading && (
                 <small className="text-muted me-2">
-                  {illuminaChips?.length || 0} Illumina array(s), and {affymetrixChips?.length || 0} Affymetrix array(s) selected
+                  {illuminaChips?.length || 0} Illumina array(s), and {affymetrixChips?.length || 0} Affymetrix array(s)
+                  selected
                 </small>
               )}
             </div>
@@ -315,7 +304,8 @@ export default function SNPChipForm({
               </div>
             ) : (
               <>
-                {illuminaChips.length === availableIllumina.length && affymetrixChips.length === availableAffymetrix.length ? (
+                {illuminaChips.length === availableIllumina.length &&
+                affymetrixChips.length === availableAffymetrix.length ? (
                   <p className="instruction">
                     Limit search results to only SNPs on the selected arrays (
                     <span
@@ -365,7 +355,6 @@ export default function SNPChipForm({
                       setSelected={setIlluminaChips}
                       type="illumina"
                     />
-                    
                   </Col>
                   <Col>
                     <Form.Check
@@ -385,7 +374,6 @@ export default function SNPChipForm({
                       setSelected={setAffymetrixChips}
                       type="affymetrix"
                     />
-                    
                   </Col>
                 </Row>
               </>
@@ -402,18 +390,17 @@ export default function SNPChipForm({
         </Alert>
       )}
       {warning && (
-  <Row className="justify-content-center my-3">
-    <Col sm={8} md={7}>
-      <Card border="warning" className="w-100">
-        <Card.Header className="bg-warning">Warning</Card.Header>
-        <Card.Body className="py-2 snpchip-card-body">
-          <Card.Text style={{ marginBottom: 0 }}>{warning}</Card.Text>
-        </Card.Body>
-      </Card>
-    </Col>
-  </Row>
-)}
-      
+        <Row className="justify-content-center my-3">
+          <Col sm={8} md={7}>
+            <Card border="warning" className="w-100">
+              <Card.Header className="bg-warning">Warning</Card.Header>
+              <Card.Body className="py-2 snpchip-card-body">
+                <Card.Text style={{ marginBottom: 0 }}>{warning}</Card.Text>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
     </Form>
   );
 }

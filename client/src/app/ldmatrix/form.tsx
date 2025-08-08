@@ -8,7 +8,8 @@ import { ldmatrix } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps, rsChrMultilineRegex } from "@/services/utils";
+import { parseSnps } from "@/services/utils";
+import MultiSnp from "@/components/form/multiSnp";
 import { FormData, LdmatrixFormData } from "./types";
 
 export default function LDMatrixForm() {
@@ -87,24 +88,8 @@ export default function LDMatrixForm() {
   return (
     <Form id="ldmatrix-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto" style={{ maxWidth: "300px" }}>
-          <Form.Group controlId="snps" className="mb-3">
-            <Form.Label>RS Numbers or Genomic Coordinates</Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={2}
-              {...register("snps", {
-                required: "This field is required",
-                pattern: {
-                  value: rsChrMultilineRegex,
-                  message:
-                    "Please match the format requested: rs followed by 1 or more digits (ex: rs12345), no spaces permitted - or - chr(0-22, X, Y):##### (ex: chr1:12345)",
-                },
-              })}
-              title="Enter list of RS numbers or Genomic Coordinates (one per line)"
-            />
-            <Form.Text className="text-danger">{errors?.snps?.message}</Form.Text>
-          </Form.Group>
+        <Col sm="auto">
+          <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
         <Col sm={2}>
           <Form.Group controlId="varFile" className="mb-3">
@@ -123,7 +108,7 @@ export default function LDMatrixForm() {
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm="auto" style={{ maxWidth: "300px" }}>
+        <Col sm="auto">
           <Form.Group controlId="collapseTranscript" className="mb-3">
             <Form.Label className="d-block">Collapse transcripts:</Form.Label>
             <ButtonGroup>

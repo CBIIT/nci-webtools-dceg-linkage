@@ -107,7 +107,7 @@ export default function LdProxyForm() {
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={"auto"} style={{ maxWidth: "300px" }}>
+        <Col sm="auto" style={{ maxWidth: "300px" }}>
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
