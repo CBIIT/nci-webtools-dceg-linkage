@@ -30,6 +30,7 @@ export default function LDScore() {
   const [uploadedBed, setUploadedBed] = useState<string>("");
   const [uploadedBim, setUploadedBim] = useState<string>("");
   const [uploadedFam, setUploadedFam] = useState<string>("");
+  const [allUploadedFiles, setAllUploadedFiles] = useState<string[]>([]);
   const [useExampleLdscore, setUseExampleLdscore] = useState(false);
   const [ldscoreLoading, setLdscoreLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -43,7 +44,10 @@ export default function LDScore() {
     setUploadedBed(""); 
     setUploadedBim(""); 
     setUploadedFam("");
+    setAllUploadedFiles([]);
     form.clearErrors("ldfiles");
+    
+    const uploadedFileNames: string[] = [];
     
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
@@ -57,6 +61,8 @@ export default function LDScore() {
           body: formData,
         });
         if (response.ok) {
+          uploadedFileNames.push(file.name);
+          // Keep the specific type tracking for the submission logic
           if (ext === 'bed') setUploadedBed(file.name);
           if (ext === 'bim') setUploadedBim(file.name);
           if (ext === 'fam') setUploadedFam(file.name);
@@ -65,6 +71,8 @@ export default function LDScore() {
         // ignore individual file upload errors
       }
     }
+    
+    setAllUploadedFiles(uploadedFileNames);
     setUploading(false);
   };
 
@@ -113,6 +121,7 @@ export default function LDScore() {
     setUploadedBed("");
     setUploadedBim("");
     setUploadedFam("");
+    setAllUploadedFiles([]);
     setUseExampleLdscore(false);
     setError("");
     setFileError("");
@@ -242,6 +251,7 @@ export default function LDScore() {
                       setUploadedBed("");
                       setUploadedBim("");
                       setUploadedFam("");
+                      setAllUploadedFiles([]);
                       form.clearErrors("ldfiles");
                     } else {
                       setExampleBed("");
@@ -250,48 +260,67 @@ export default function LDScore() {
                     }
                   }}
                 />
-                {(uploadedBed || uploadedBim || uploadedFam || exampleBed || exampleBim || exampleFam) && (
+                {((allUploadedFiles.length > 0) || (exampleBed || exampleBim || exampleFam)) && (
                   <div className="mt-1" style={{ fontSize: "0.95em" }}>
                     <span style={{ fontWeight: 600 }}>Input files uploaded:</span><br />
-                    {(exampleBed || uploadedBed) && (
-                      <div>
+                    {/* Show example files when using example data */}
+                    {useExampleLdscore && (
+                      <>
+                        {exampleBed && (
+                          <div>
+                            <a
+                              href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBed)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                            >
+                              {exampleBed}
+                            </a>
+                          </div>
+                        )}
+                        {exampleBim && (
+                          <div>
+                            <a
+                              href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBim)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                            >
+                              {exampleBim}
+                            </a>
+                          </div>
+                        )}
+                        {exampleFam && (
+                          <div>
+                            <a
+                              href={`/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFam)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              download
+                              style={{ textDecoration: 'underline', color: '#2a71a5' }}
+                            >
+                              {exampleFam}
+                            </a>
+                          </div>
+                        )}
+                      </>
+                    )}
+                    {/* Show all uploaded files */}
+                    {!useExampleLdscore && allUploadedFiles.map((fileName, index) => (
+                      <div key={index}>
                         <a
-                          href={exampleBed ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBed)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBed)}`}
+                          href={`/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(fileName)}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           download
                           style={{ textDecoration: 'underline', color: '#2a71a5' }}
                         >
-                          {exampleBed || uploadedBed}
+                          {fileName}
                         </a>
                       </div>
-                    )}
-                    {(exampleBim || uploadedBim) && (
-                      <div>
-                        <a
-                          href={exampleBim ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleBim)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedBim)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          style={{ textDecoration: 'underline', color: '#2a71a5' }}
-                        >
-                          {exampleBim || uploadedBim}
-                        </a>
-                      </div>
-                    )}
-                    {(exampleFam || uploadedFam) && (
-                      <div>
-                        <a
-                          href={exampleFam ? `/LDlinkRestWeb/copy_and_download/${encodeURIComponent(exampleFam)}` : `/LDlinkRestWeb/tmp/uploads/${encodeURIComponent(uploadedFam)}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                          style={{ textDecoration: 'underline', color: '#2a71a5' }}
-                        >
-                          {exampleFam || uploadedFam}
-                        </a>
-                      </div>
-                    )}
+                    ))}
                   </div>
                 )}
               </div>
