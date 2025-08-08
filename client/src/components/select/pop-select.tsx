@@ -195,7 +195,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        fontSize: ".9rem",
+        fontSize: "1rem",
         cursor: "pointer",
         textTransform: "none",
       }}>
