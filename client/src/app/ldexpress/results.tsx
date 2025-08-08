@@ -40,7 +40,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
   const tissues = useWatch({ control, name: "tissues" });
 
   useEffect(() => {
-    if (results) {
+    if (results && !results.error) {
       reset();
       results.thinned_snps.forEach((snp: string) => {
         appendSnp({ value: snp, checked: false });
@@ -55,12 +55,12 @@ export default function LdExpressResults({ ref }: { ref: string }) {
   }, [results, reset, appendSnp, appendGene, appendTissue]);
 
   const tableData = useMemo(() => {
-    if (!results) return [];
+    if (!results || results.error) return [];
     const selectedSnps = snps?.filter((snp) => snp.checked).map((snp) => snp.value) || [];
     const selectedGenes = genes?.filter((gene) => gene.checked).map((gene) => gene.value) || [];
     const selectedTissues = tissues?.filter((tissue) => tissue.checked).map((tissue) => tissue.value) || [];
 
-    return results.details.results.aaData.filter((row: any) => {
+    return results.details.results?.aaData.filter((row: any) => {
       const snp = row[0];
       const gene = row[5].split("__")[0];
       const tissue = row[7].split("__")[0];
