@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Alert } from "react-bootstrap";
 import { fetchLdScoreCalculationResult } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
+import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useState } from "react";
 import LdScoreResults from "./results";
 
@@ -177,7 +178,7 @@ export default function LDScore() {
                     if (input.files) {
                       // Validate file count and extensions
                       if (input.files.length !== 3) {
-                        setFileError('Error: Please upload exactly three files - one .bed, one .bim, and one .fam file');
+                        setFileError('Error: Upload must include 3 files, one of each type: .bed, .bim, and .fam');
                         input.value = ''; // Clear the input
                         return;
                       }
@@ -191,7 +192,7 @@ export default function LDScore() {
                       const hasFam = extensions.includes('fam');
 
                       if (!hasBed || !hasBim || !hasFam) {
-                        setFileError('Error: Please upload exactly one .bed, one .bim, and one .fam file');
+                        setFileError('Error: Upload must include 3 files, one of each type: .bed, .bim, and .fam');
                         input.value = ''; // Clear the input
                         return;
                       }
@@ -202,7 +203,7 @@ export default function LDScore() {
                       const famCount = extensions.filter(ext => ext === 'fam').length;
 
                       if (bedCount !== 1 || bimCount !== 1 || famCount !== 1) {
-                        setFileError('Error: Please upload exactly one .bed, one .bim, and one .fam file');
+                        setFileError('Error: Upload must include 3 files, one of each type: .bed, .bim, and .fam');
                         input.value = ''; // Clear the input
                         return;
                       }
@@ -214,6 +215,11 @@ export default function LDScore() {
                   }}
                 />
               )}
+               <div className="mt-2">
+                <HoverUnderlineLink href="/help#LDscore">
+                  Click here for sample format
+                </HoverUnderlineLink>
+              </div>
               <Form.Text className="text-danger">{form.formState.errors?.ldfiles?.message}</Form.Text>
             </Form.Group>
             

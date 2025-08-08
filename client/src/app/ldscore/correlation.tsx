@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { fetchGeneticCorrelationResult } from "@/services/queries";
 import LdscorePopSelect, { LdscorePopOption } from "@/components/select/ldscore-pop-select";
 import CalculateLoading from "@/components/calculateLoading";
+import HoverUnderlineLink from "@/components/HoverUnderlineLink";
 import { useStore } from "@/store";
 import { useState } from "react";
 import LdScoreResults from "./results";
@@ -208,9 +209,9 @@ export default function Correlation() {
                 />
               )}
               <div className="mt-2">
-                <a href="/help#LDscore" className="text-decoration-none" target="_blank" rel="noopener noreferrer">
+                <HoverUnderlineLink href="/help#LDscore">
                   Click here for sample format
-                </a>
+                </HoverUnderlineLink>
               </div>
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
             </Form.Group>
