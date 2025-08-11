@@ -259,8 +259,24 @@ export default function SNPChipForm({
     }
   };
 
+  function onReset(event: React.FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    // Reset form to default values
+    reset(defaultForm);
+    // Reset component state
+    setInput("");
+    setFile(null);
+    setResults(null);
+    setError(null);
+    setWarning(null);
+    setUploadedFileName("");
+    // Reset platform selections to all selected
+    setIlluminaChips(availableIllumina);
+    setAffymetrixChips(availableAffymetrix);
+  }
+
   return (
-    <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} noValidate>
+    <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row className="mb-3 align-items-start">
         <Col sm="auto">
           <MultiSnp name="snps" register={register} errors={errors} />
