@@ -697,7 +697,7 @@ $(document).ready(function () {
     });
 
   // Load news text from news.html to news-container div
-  $.get("news.html?v=5.7.0", function (data) {
+  $.get("news.html?v=5.8.0", function (data) {
     let tmpData = data.split("<p>");
     let i = 0;
     var newsHTMLList = [];
@@ -3662,7 +3662,7 @@ function populateHeaderValues(event, numFiles, label) {
 }
 
 function loadHelp() {
-  $("#help-tab").load("help.html?v=5.7.0");
+  $("#help-tab").load("help.html?v=5.8.0");
 }
 
 function calculate(e) {
