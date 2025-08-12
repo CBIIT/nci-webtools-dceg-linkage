@@ -433,6 +433,38 @@ table.table-chip > tbody {
   line-height: 1.2;
 }
 
+.accordion-bg {
+  background-color: #EEEEEE;
+  
+  .accordion-item {
+    background-color: #EEEEEE;
+    border: 1px solid #ddd;
+  }
+  
+  .accordion-header {
+    background-color: #EEEEEE;
+  }
+  
+  .accordion-button {
+    background-color: #EEEEEE;
+    
+    &:not(.collapsed) {
+      background-color: #DDDDDD;
+      color: #000;
+    }
+    
+    &:focus {
+      background-color: #DDDDDD;
+      border-color: #ccc;
+      box-shadow: 0 0 0 0.25rem rgba(221, 221, 221, 0.25);
+    }
+  }
+  
+  .accordion-body {
+    background-color: #F8F8F8;
+  }
+}
+
 @media (max-width: 930px) {
   .card-row > * {
     width: 30%;

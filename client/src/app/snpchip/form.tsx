@@ -90,6 +90,7 @@ export default function SNPChipForm({
   const [selectAllIllumina, setSelectAllIllumina] = useState(true);
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [accordionOpen, setAccordionOpen] = useState<string | string[] | null>(null);
 
   useEffect(() => {
     async function fetchPlatforms() {
@@ -273,6 +274,8 @@ export default function SNPChipForm({
     // Reset platform selections to all selected
     setIlluminaChips(availableIllumina);
     setAffymetrixChips(availableAffymetrix);
+    // Close the accordion
+    setAccordionOpen(null);
   }
 
   return (
@@ -301,7 +304,7 @@ export default function SNPChipForm({
           </Button>
         </Col>
       </Row>
-      <Accordion className="mb-4">
+      <Accordion className="mb-4 accordion-bg" activeKey={accordionOpen} onSelect={(eventKey) => setAccordionOpen(eventKey || null)}>
         <Accordion.Item eventKey="0">
           <Accordion.Header>
             <div className="d-flex justify-content-between w-100 align-items-center snpchip-accordion">
