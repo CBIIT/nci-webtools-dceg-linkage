@@ -2936,7 +2936,7 @@ function autoCalculate() {
         updateData(id);
       }
       break;
-     case "ldtraitgwas":
+     case "ldtraitget":
       if (url.snps && url.pop ) {
         $("#ldtrait-file-snp-numbers").prop("value", url.snps);
         $("#trait_color_r2").toggleClass("active", url.r2_d == "r2");
@@ -2945,7 +2945,7 @@ function autoCalculate() {
           .toggleClass("active", url.r2_d == "d");
         refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldtrait");
         initCalculate("ldtrait");
-        updateData("ldtraitgwas");
+        updateData("ldtraitget");
       }
       break;
     case "ldexpressgwas":
@@ -3844,7 +3844,7 @@ function updateData(id) {
         updateLDtrait();
       }
       break;
-    case "ldtraitgwas":
+    case "ldtraitget":
       if (isPopulationSet("ldtrait") && validateLDtraitBasePairWindow()) {
         $("#" + "ldtrait" + "-loading").show();
         updateLDtraitGWAS();
@@ -5846,7 +5846,7 @@ function updateLDtraitGWAS() {
     "target",
     "trait_variants_annotated" + ldInputs.reference
   );
-  var url = restServerUrl + "/ldtraitgwas";
+  var url = restServerUrl + "/ldtraitget";
   var ajaxRequest = $.ajax({
     type: "GET",
     url: url,

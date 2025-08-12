@@ -2233,9 +2233,9 @@ def ldtrait():
 
 
 # Web and API route for LDtrait
-@app.route("/LDlinkRest/ldtrait", methods=["GET"])
+@app.route("/LDlinkRest/ldtraitget", methods=["GET"])
 # API route for LDtrait GWAS Catalog
-@app.route("/LDlinkRestWeb/ldtrait", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldtraitget", methods=["GET"])
 @requires_token
 def ldtraitgwas():
     start_time = time.time()
