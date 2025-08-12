@@ -2948,7 +2948,7 @@ function autoCalculate() {
         updateData("ldtraitget");
       }
       break;
-    case "ldexpressgwas":
+    case "ldexpressget":
       if (url.snps && url.pop ) {
         $("#ldexpress-file-snp-numbers").prop("value", url.snps);
         $("#express_color_r2").toggleClass("active", url.r2_d == "r2");
@@ -2958,7 +2958,7 @@ function autoCalculate() {
         refreshPopulation(decodeURIComponent(url.pop).split("+"), "ldexpress");
         initCalculate("ldexpress");
         
-        updateData("ldexpressgwas");
+        updateData("ldexpressget");
       }
       break;
   }
@@ -3080,7 +3080,7 @@ function setupLDexpressControls() {
     $("#ldexpress-initial-message").hide();
   });
     const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('tab') === 'ldexpressgwas') {
+  if (urlParams.get('tab') === 'ldexpressget') {
    initExpressTissues(true);
   } else {
    initExpressTissues();
@@ -3850,7 +3850,7 @@ function updateData(id) {
         updateLDtraitGWAS();
       }
       break;
-    case "ldexpressgwas":
+    case "ldexpressget":
       if (isPopulationSet("ldexpress") && validateLDexpressBasePairWindow()) {
         $("#" + "ldexpress" + "-loading").show();
         updateLDexpressGWAS();
@@ -5638,7 +5638,7 @@ function updateLDexpressGWAS() {
     "target",
     "express_variants_annotated" + ldInputs.reference
   );
-  var url = restServerUrl + "/ldexpressgwas";
+  var url = restServerUrl + "/ldexpressget";
   var ajaxRequest = $.ajax({
     type: "GET",
     url: url,

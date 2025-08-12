@@ -2414,8 +2414,9 @@ def ldtraitgwas():
 
    
     
-@app.route("/LDlinkRest/ldexpress", methods=["GET"])
-@app.route("/LDlinkRestWeb/ldexpress", methods=["GET"])
+@app.route("/LDlinkRest/ldexpressget", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldexpressget", methods=["GET"])
+@requires_token
 def ldexpressgwas():
     start_time = time.time()
        # Required parameters
