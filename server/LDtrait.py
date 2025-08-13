@@ -103,7 +103,21 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
     matched_snps = []
     window_problematic_snps = []
     for record in found:
-        ld = ldInfo.get(query_snp).get("rs" + record["SNP_ID_CURRENT"])
+        # Check if ldInfo has the query_snp and the specific RS number
+        query_snp_ld = ldInfo.get(query_snp)
+        if query_snp_ld is None:
+            # If no LD info for query SNP, skip this record
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "No LD information available for query SNP."]
+            window_problematic_snps.append(problematic_record)
+            continue
+            
+        ld = query_snp_ld.get("rs" + record["SNP_ID_CURRENT"])
+        if ld is None:
+            # If no LD info for this specific SNP pair, skip this record
+            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "No LD information available for SNP pair."]
+            window_problematic_snps.append(problematic_record)
+            continue
+            
         if (ld["r2"] != "NA" or ld["D_prime"] != "NA"):
             if ((r2_d == "r2" and ld["r2"] >= r2_d_threshold) or (r2_d == "d" and ld["D_prime"] >= r2_d_threshold)):
                 matched_record = []
@@ -147,7 +161,11 @@ def get_gwas_fields(query_snp, query_snp_chr, query_snp_pos, found, pops, pop_id
                     problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "D' value (" + str(ld["D_prime"]) + ") below threshold. (" + str(r2_d_threshold) + ")"]
                     window_problematic_snps.append(problematic_record)
         else:
-            problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            # Handle case where LD values are "NA"
+            if ld and "output" in ld and "error" in ld["output"]:
+                problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", " ".join(ld["output"]["error"])]
+            else:
+                problematic_record = [query_snp, "rs" + record["SNP_ID_CURRENT"], "chr" + str(record["chromosome"]) + ":" + str(record[genome_build_vars[genome_build]['position']]), record["DISEASE/TRAIT"] if ("DISEASE/TRAIT" in record and len(record["DISEASE/TRAIT"]) > 0) else "NA", "LD calculation failed."]
             window_problematic_snps.append(problematic_record)
     return (matched_snps, window_problematic_snps)
 

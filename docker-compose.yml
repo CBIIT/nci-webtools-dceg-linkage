@@ -38,14 +38,14 @@ services:
   #   networks:
   #     - my_network
 
-  database:
-    image: mongo:latest
-    ports:
-      - "27017:27017"
-    volumes:
-      - ./database:/data/db
-    networks:
-      - my_network
+  # database:
+  #   image: mongo:latest
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - ./database:/data/db
+  #   networks:
+  #     - my_network
 
 #  ldsc:
 #    image: ldsc39
