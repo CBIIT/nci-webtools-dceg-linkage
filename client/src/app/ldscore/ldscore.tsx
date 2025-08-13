@@ -335,7 +335,14 @@ export default function LDScore() {
                   type="number"
                   {...form.register("window", { 
                     required: "Window is required",  
-                    min: { value: 1, message: "Window must be an integer greater than 0" } 
+                    min: { value: 1, message: "Window must be an integer greater than 0" },
+                    validate: (value) => {
+                      const num = Number(value);
+                      if (!Number.isInteger(num)) {
+                        return "Window must be an integer greater than 0";
+                      }
+                      return true;
+                    }
                   })}
                   defaultValue={1}
                   style={{ maxWidth: "120px", marginRight: "8px" }}
