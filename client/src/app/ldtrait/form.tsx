@@ -191,6 +191,7 @@ export default function LdtraitForm() {
                   pattern: { value: /^\d+$/, message: "Invalid base pair window" },
                 })}
                 placeholder="500000"
+                title="Value must be a number between 0 and 1,000,000"
               />
             </InputGroup>
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message || errors?.window?.message}</Form.Text>

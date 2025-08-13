@@ -90,6 +90,7 @@ export default function SNPChipForm({
   const [selectAllIllumina, setSelectAllIllumina] = useState(true);
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
+  const [accordionOpen, setAccordionOpen] = useState<string | string[] | null>(null);
 
   useEffect(() => {
     async function fetchPlatforms() {
@@ -258,8 +259,26 @@ export default function SNPChipForm({
     }
   };
 
+  function onReset(event: React.FormEvent<HTMLFormElement>): void {
+    event.preventDefault();
+    // Reset form to default values
+    reset(defaultForm);
+    // Reset component state
+    setInput("");
+    setFile(null);
+    setResults(null);
+    setError(null);
+    setWarning(null);
+    setUploadedFileName("");
+    // Reset platform selections to all selected
+    setIlluminaChips(availableIllumina);
+    setAffymetrixChips(availableAffymetrix);
+    // Close the accordion
+    setAccordionOpen(null);
+  }
+
   return (
-    <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} noValidate>
+    <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row className="mb-3 align-items-start">
         <Col sm="auto">
           <MultiSnp name="snps" register={register} errors={errors} />
@@ -284,7 +303,7 @@ export default function SNPChipForm({
           </Button>
         </Col>
       </Row>
-      <Accordion className="mb-4">
+      <Accordion className="mb-4 accordion-bg" activeKey={accordionOpen} onSelect={(eventKey) => setAccordionOpen(eventKey || null)}>
         <Accordion.Item eventKey="0">
           <Accordion.Header>
             <div className="d-flex justify-content-between w-100 align-items-center snpchip-accordion">

@@ -1,72 +1,63 @@
-export const PLATFORM_LOOKUP: Record<string, string> = {
-  "Affymetrix Axiom Exome 1A": "A_Exome1A",
-  "Affymetrix Axiom Exome 319": "A_Exome319",
-  "Affymetrix Axiom GW CHB2": "A_CHB2",
-  "Affymetrix Axiom UK Biobank Array": "A_UKBA",
-  "Affymetrix SNP 6.0": "A_SNP6.0",
-  "Illumina Cardio-MetaboChip": "I_CardioMetab",
-  "Illumina Global Diversity Array_Confluence": "I_GDA-C",
-  "Illumina Human1M-Duov3": "I_1M-D",
-  "Illumina Human1Mv1": "I_1M",
-  "Illumina Human610-Quadv1": "I_610-Q",
-  "Illumina Human660W-Quadv1": "I_660W-Q",
-  "Illumina HumanCNV370-Duov1": "I_CNV370-D",
-  "Illumina HumanCNV370-Quadv3": "I_CNV370-Q",
-  "Illumina HumanCoreExome-12v1": "I_CoreE-12v1",
-  "Illumina HumanCoreExome-12v1.1": "I_CoreE-12v1.1",
-  "Illumina HumanCoreExome-24v1": "I_CoreE-24v1",
-  "Illumina HumanCoreExome-24v1.1": "I_CoreE-24v1.1",
-  "Illumina HumanExome-12v1.1": "I_Exome-12",
-  "Illumina HumanHap300-Duov2": "I_300-D",
-  "Illumina HumanHap300v1": "I_300",
-  "Illumina HumanHap550v1": "I_550v1",
-  "Illumina HumanHap550v3": "I_550v3",
-  "Illumina HumanOmni1S-8v1": "I_O1S-8",
-  "Illumina HumanOmni2.5-4v1": "I_O2.5-4",
-  "Illumina HumanOmni2.5-8v1.2": "I_O2.5-8",
-  "Illumina HumanOmni2.5Exome-8v1": "I_O2.5E-8v1",
-  "Illumina HumanOmni2.5Exome-8v1.1": "I_O2.5E-8v1.1",
-  "Illumina HumanOmni2.5Exome-8v1.2": "I_O2.5E-8v1.2",
-  "Illumina HumanOmni5-4v1": "I_O5-4",
-  "Illumina HumanOmni5Exome-4v1": "I_O5E-4",
-  "Illumina HumanOmniExpressExome-8v1": "I_OEE-8v1",
-  "Illumina HumanOmniExpressExome-8v1.1": "I_OEE-8v1.1",
-  "Illumina HumanOmniExpressExome-8v1.2": "I_OEE-8v1.2",
-  "Illumina HumanOmniExpressExome-8v1.3": "I_OEE-8v1.3",
-  "Illumina HumanOmniZhongHua-8v1": "I_OZH-8v1",
-  "Illumina HumanOmniZhongHua-8v1.1": "I_OZH-8v1.1",
-  "Illumina HumanOmniZhongHua-8v1.2": "I_OZH-8v1.2",
-  "Illumina Infinium PsychArray-24v1": "I_Psyc-24v1",
-  "Illumina Infinium PsychArray-24v1.1": "I_Psyc-24v1.1",
-  "Illumina HumanExon510Sv1": "I_Exon510S",
-  "Illumina HumanOmni2.5S-8v1": "I_O2.5S-8v1",
-  "Affymetrix Axiom GW EAS": "A_EAS",
-  "Affymetrix Axiom GW EUR": "A_EUR",
-  "Illumina Global Screening version 1": "I_GSA-v1",
-  "Illumina Global Screening version 2": "I_GSA-v2",
-  "Illumina Multi-Ethnic Global": "I_MEGA",
-  "Affymetrix Axiom UK Biobank": "A_UKBA",
-  "Affymetrix Axiom Precision Medicine Research": "A_PMRA",
-  "Illumina Global Screening version 3_Confluence": "I_GSA-v3C",
-  "Affymetrix Axiom Precision Medicine Research Array" : "A_PMRA",
-  "Affymetrix Mapping 250K Sty" :"A_250S",
-  "Affymetrix OncoScan" :"A_Onco",
-  "Affymetrix OncoScan CNV" :"A_OncoCNV",
-  "Affymetrix SNP 5.0" :"A_SNP5.0",
-  "Illumina HumanCore-12v1":"I_Core-12",
-  "Illumina HumanOmni1-Quadv1" :"I_O1-Q",
-  "Illumina HumanOmniExpress-12v1":"I_OE-12",
-  "Illumina HumanOmniExpress-12v1 FFPE":"I_OE-12f",
-  "Illumina HumanOmniExpress-24v1":"I_OE-24",
-  "Illumina Infinium CytoSNP-850K":"I_ME-Global-8",
-  "Illumina Infinium Multi-Ethnic Global-8":"I_ME-Global-8",
-  "Illumina Infinium OncoArray-500K":"I_OncoArray",
-  "Illumina Multi-Ethnic Global Array" :"I_MEGA"
+import { snpchipPlatforms } from "@/services/queries";
 
-
-
+// Cache for platform data to avoid repeated API calls
+const platformCache: {
+  platformLookup: Record<string, string> | null;
+  codeToPlatform: Record<string, string> | null;
+} = {
+  platformLookup: null,
+  codeToPlatform: null,
 };
 
-export const CODE_TO_PLATFORM: Record<string, string> = Object.fromEntries(
-  Object.entries(PLATFORM_LOOKUP).map(([full, short]) => [short, full])
-);
+// Generate PLATFORM_LOOKUP from API response
+export const generatePlatformLookup = async (): Promise<Record<string, string>> => {
+  if (platformCache.platformLookup) {
+    return platformCache.platformLookup;
+  }
+
+  try {
+    const platforms = await snpchipPlatforms() as Record<string, string>;
+    // Convert from { "A_10X": "Affymetrix Mapping 10K Xba142" } 
+    // to { "Affymetrix Mapping 10K Xba142": "A_10X" }
+    const lookup: Record<string, string> = {};
+    for (const [code, fullName] of Object.entries(platforms)) {
+      lookup[fullName] = code;
+    }
+    platformCache.platformLookup = lookup;
+    return lookup;
+  } catch (error) {
+    console.error("Failed to generate platform lookup:", error);
+    return {};
+  }
+};
+
+// Generate CODE_TO_PLATFORM from API response
+export const generateCodeToPlatform = async (): Promise<Record<string, string>> => {
+  if (platformCache.codeToPlatform) {
+    return platformCache.codeToPlatform;
+  }
+
+  try {
+    const platforms = await snpchipPlatforms() as Record<string, string>;
+    // Return as-is since API already provides { "A_10X": "Affymetrix Mapping 10K Xba142" }
+    platformCache.codeToPlatform = platforms;
+    return platforms;
+  } catch (error) {
+    console.error("Failed to generate code to platform mapping:", error);
+    return {};
+  }
+};
+
+// Initialize and export the dynamic constants
+export let PLATFORM_LOOKUP: Record<string, string> = {};
+export let CODE_TO_PLATFORM: Record<string, string> = {};
+
+// Initialize the constants on module load
+(async () => {
+  try {
+    PLATFORM_LOOKUP = await generatePlatformLookup();
+    CODE_TO_PLATFORM = await generateCodeToPlatform();
+  } catch (error) {
+    console.error("Failed to initialize platform constants:", error);
+  }
+})();
