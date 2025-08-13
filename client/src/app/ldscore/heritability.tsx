@@ -143,7 +143,14 @@ export default function Heritability() {
               ) : (
                 <Form.Control 
                   type="file" 
-                  {...heritabilityForm.register("file", { required: "File is required" })}
+                   {...heritabilityForm.register("file", { 
+                    required: "File is required",
+                    validate: (file: File | undefined) => {
+                      if (!file) return true;
+                      const ext = file.name.split('.').pop()?.toLowerCase();
+                      return ext === 'txt' || 'Only .txt files are allowed';
+                    }
+                  })}
                   accept=".txt"
                   title="Upload pre-munged GWAS sumstats"
                   onChange={async (e) => {
