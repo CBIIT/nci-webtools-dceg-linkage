@@ -97,7 +97,6 @@ export default function SNPChipForm({
       try {
         setPlatformsLoading(true);
         const data = await snpchipPlatforms();
-        console.log(data);
         const illumina: Platform[] = [];
         const affymetrix: Platform[] = [];
         for (const key in data) {
