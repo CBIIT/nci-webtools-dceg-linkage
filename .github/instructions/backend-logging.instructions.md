@@ -16,32 +16,30 @@ Log flask/mod-wsgi API and Python modules to support:
 ## Log Level Usage
 
 ### DEBUG
+
 - **Purpose**: Internal details for development/testing environments
-- **When to use**: 
+- **When to use**:
   - Function entry/exit points
   - Variable state during processing
   - Database query parameters (sanitized)
   - Subprocess execution details
 - **Production**: Avoid in production environments
-- **AI Note**: Avoid generating DEBUG logs using AI - these should be manually added for specific debugging needs
+- **AI Note**: Avoid generating new DEBUG logs using AI - these should be manually added for specific debugging needs. Most print statements should be converted into debug logs depending on their context and purpose. Avoid logs that are redundant in context, such as "[process_name] is starting" 
 - **Examples**:
   - `"Executed LDmatrix (1.53s)"`
   - `"User token validated for LDproxy request"`
   - `"Retrieved 150 SNPs from database"`
 
 ### INFO
-- **Purpose**: Key checkpoints and business logic events
+
+- **Purpose**: Log parameters or events that precede operational or functional errors to provide further context for troubleshooting
 - **When to use**:
-  - API request start/completion with timing
-  - User actions (login, logout, token usage)
-  - Service start/stop events
-  - Database operation results (counts, success/failure)
-  - File operations (uploads, downloads, cleanup)
-  - External API calls and responses
+  - API request parameters
 - **Examples**:
   - `"ldexpress params {"genome_build": "grch37", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": 0.1, "reference": "71219", "snps": "rs3\\nrs4", "tissues": "Adipose_Subcutaneous", "token": false, "web": true, "window": "500000"}"`
-  
+
 ### WARNING
+
 - **Purpose**: Unexpected but recoverable situations
 - **When to use**:
   - Invalid input parameters that can be corrected
@@ -53,6 +51,7 @@ Log flask/mod-wsgi API and Python modules to support:
   - `"Database connection pool at 80% capacity"`
 
 ### ERROR
+
 - **Purpose**: Operation failures that prevent normal execution
 - **When to use**:
   - API failures
@@ -67,11 +66,13 @@ Log flask/mod-wsgi API and Python modules to support:
 ## Log Format
 
 ### Standard Format
+
 ```
 "[{module_name}] [{timestamp}] [{log_level}] - {message}"
 ```
 
 ### Examples
+
 ```
 [ldmatrix] [2025-01-15 14:30:22] [INFO] - Executed LDmatrix (1.53s)
 [ldproxy] [2025-01-15 14:30:25] [ERROR] - Failed to retrieve SNP data: connection timeout
@@ -81,39 +82,39 @@ Log flask/mod-wsgi API and Python modules to support:
 ## Module-Specific Logging Patterns
 
 ### API Endpoints
-```python
-# At function start
-app.logger.info(f"Starting {function_name} request")
 
+```python
 # For timing
 start_time = time.time()
 # ... processing ...
 execution_time = round(time.time() - start_time, 2)
-app.logger.info(f"Executed {function_name} ({execution_time}s)")
+app.logger.debug(f"Executed {function_name} ({execution_time}s)")
 
 # For errors
 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
 ```
 
 ### Database Operations
+
 ```python
 # Before query
-app.logger.debug(f"Executing query: {sanitized_query}")
+app.logger.info(f"Executing query: {sanitized_query}")
 
 # After query
-app.logger.info(f"Retrieved {len(results)} records from {collection_name}")
+app.logger.debug(f"Retrieved {len(results)} records from {collection_name}")
 
 # On error
 app.logger.error(f"Database operation failed: {error_message}")
 ```
 
 ### File Operations
+
 ```python
 # File creation
-app.logger.info(f"Created output file: {file_path}")
+app.logger.debug(f"Created output file: {file_path}")
 
 # File cleanup
-app.logger.info(f"Cleaned up {file_count} temporary files")
+app.logger.debug(f"Cleaned up {file_count} temporary files")
 
 # File errors
 app.logger.error(f"Failed to write file {file_path}: {error}")
@@ -122,6 +123,7 @@ app.logger.error(f"Failed to write file {file_path}: {error}")
 ## Security Guidelines
 
 ### What NOT to Log
+
 - **PII (Personally Identifiable Information)**: Names, emails, addresses
 - **Access keys**: API tokens, passwords, private keys
 - **Sensitive data**: Personal genetic information, health data
@@ -129,38 +131,26 @@ app.logger.error(f"Failed to write file {file_path}: {error}")
 - **Stack traces in production**: Use ERROR level with sanitized messages
 
 ### What to Log (Safely)
+
 - **Request metadata**: Method, endpoint, user agent (sanitized)
 - **Performance metrics**: Timing, resource usage
 - **Error types**: Exception class names, error codes
 - **Business events**: User actions, system state changes
 
-### Sanitization Examples
-```python
-# Good - log essential info only
-app.logger.info(f"User {user_id} accessed LDproxy endpoint")
-
-# Bad - log sensitive data
-app.logger.info(f"User {email} with token {api_token} accessed endpoint")
-
-# Good - log request parameters safely
-app.logger.debug(f"LDmatrix request: {len(snp_list)} SNPs, population: {population}")
-
-# Bad - log full request body
-app.logger.debug(f"Request body: {request.get_json()}")
-```
-
 ## Performance Considerations
 
 ### Log Volume Management
+
 - **Avoid excessive logging**: Don't log every loop iteration
 - **Use appropriate levels**: DEBUG for development, INFO for production
 - **Batch operations**: Log summary rather than individual items
 - **Conditional logging**: Use log level checks for expensive operations
 
 ### Examples
+
 ```python
 # Good - log summary
-app.logger.info(f"Processed {total_count} SNPs in {execution_time}s")
+app.logger.debug(f"Processed {total_count} SNPs in {execution_time}s")
 
 # Bad - log every item
 for snp in snp_list:
@@ -174,10 +164,11 @@ if app.logger.isEnabledFor(logging.DEBUG):
 ## Error Handling Patterns
 
 ### Structured Error Logging
+
 ```python
 try:
     result = process_data(input_data)
-    app.logger.info(f"Successfully processed {len(result)} items")
+    app.logger.debug(f"Successfully processed {len(result)} items")
 except ValueError as e:
     app.logger.warning(f"Invalid input format: {str(e)}")
     return error_response("Invalid input format")
@@ -193,10 +184,10 @@ except Exception as e:
 ## Context and Correlation
 
 ### Request Tracking
+
 ```python
 # Add request ID to all logs
 request_id = generate_request_id()
-app.logger.info(f"[{request_id}] Starting LDmatrix request")
 
 # Pass request context to helper functions
 def process_snps(snp_list, request_id):
@@ -204,10 +195,10 @@ def process_snps(snp_list, request_id):
 ```
 
 ### Module Identification
+
 ```python
 # Use consistent module names
 logger = logging.getLogger("ldmatrix")  # Instead of "root"
-logger.info("Starting matrix calculation")
 ```
 
 ## Best Practices Summary
@@ -221,6 +212,54 @@ logger.info("Starting matrix calculation")
 7. **Errors**: Always log full error details in development, sanitized in production
 8. **Traceability**: Enable request flow tracking through correlation IDs
 
+## AI Agent Log Reference Guidelines
+
+When troubleshooting issues or debugging problems, AI agents should:
+
+### Check Latest Logs
+
+1. **Always examine recent log files** in the `/logs` folder for context:
+
+   - `error.log` - Contains Apache/mod_wsgi errors, application errors, and debug messages
+   - `output.log` - Contains server startup information and configuration details
+
+2. **Use log analysis for troubleshooting**:
+
+   - Look for recent error patterns
+   - Identify failing modules or endpoints
+   - Check for performance issues or timeouts
+   - Review configuration problems
+
+3. **Reference log patterns when making changes**:
+   - Follow existing logging formats found in current logs
+   - Maintain consistency with observed log levels
+   - Use similar module naming conventions seen in logs
+
+### Log Analysis Commands
+
+```bash
+# View latest error logs
+tail -50 /logs/error.log
+
+# Search for specific errors
+grep -i "error\|exception\|failed" /logs/error.log | tail -20
+
+# Check for recent activity
+tail -f /logs/error.log
+
+# Filter by specific modules
+grep "\[ldmatrix\]\|\[ldproxy\]\|\[ldlink\]" /logs/error.log | tail -20
+```
+
+### Integration with Debugging
+
+When investigating issues:
+
+1. Check logs first to understand current system state
+2. Identify error patterns before proposing solutions
+3. Ensure any new logging follows patterns observed in existing logs
+4. Verify log output after making changes
+
 ## Implementation Checklist
 
 When adding logging to new code:
@@ -232,3 +271,4 @@ When adding logging to new code:
 - [ ] Add error handling with proper logging
 - [ ] Include relevant context (request ID, user info)
 - [ ] Test logging in both development and production environments
+- [ ] **Check existing logs in `/logs` folder for context and patterns**
