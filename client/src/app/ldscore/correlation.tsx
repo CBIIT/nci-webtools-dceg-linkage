@@ -172,12 +172,12 @@ export default function Correlation() {
                     setGeneticCorrelationResultRef(null);
                     if (file) {
                       // Check file extension
-                      const ext = file.name.split('.').pop()?.toLowerCase();
-                      if (ext !== 'txt') {
-                        setFileError('Error: Only .txt files are allowed');
-                        input.value = ''; // Clear the input
-                        return;
-                      }
+                      // const ext = file.name.split('.').pop()?.toLowerCase();
+                      // if (ext !== 'txt') {
+                      //   setFileError('Error: Only .txt files are allowed');
+                      //   input.value = ''; // Clear the input
+                      //   return;
+                      // }
                       const filename = await handleFileUpload(file);
                       setUploadedFile1(filename);
                       geneticForm.clearErrors("file");
@@ -211,12 +211,12 @@ export default function Correlation() {
                     setGeneticCorrelationResultRef(null);
                     if (file) {
                       // Check file extension
-                      const ext = file.name.split('.').pop()?.toLowerCase();
-                      if (ext !== 'txt') {
-                        setFileError('Error: Only .txt files are allowed');
-                        input.value = ''; // Clear the input
-                        return;
-                      }
+                      // const ext = file.name.split('.').pop()?.toLowerCase();
+                      // if (ext !== 'txt') {
+                      //   setFileError('Error: Only .txt files are allowed');
+                      //   input.value = ''; // Clear the input
+                      //   return;
+                      // }
                       const filename = await handleFileUpload(file);
                       setUploadedFile2(filename);
                       geneticForm.clearErrors("file2");
