@@ -54,6 +54,7 @@ import shutil
 from Cleanup import schedule_tmp_cleanup
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+
 # retrieve config
 param_list = get_config()
 # Ensure tmp directory exists
@@ -83,7 +84,7 @@ app.logger.addHandler(handler)
 app.logger.propagate = False
 
 # Suppress third-party logs below WARNING
-logging.getLogger('boto3').setLevel(logging.WARNING)
+logging.getLogger("boto3").setLevel(logging.WARNING)
 logging.getLogger("pymongo").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -92,9 +93,6 @@ os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
 
 
 # Flask Limiter initialization
-def get_token():
-    return request.args.get("token")
-
 def get_rate_limit_key():
     """
     Key function for rate limiting:
@@ -113,31 +111,44 @@ def get_rate_limit_key():
             client_ip = request.remote_addr
         return f"ip:{client_ip}"
 
+
 # Configure MongoDB storage for distributed rate limiting
 # Uses existing MongoDB configuration from param_list
-try:
-    # Build MongoDB URI from existing configuration
-    mongodb_host = param_list['mongodb_host']
-    mongodb_port = param_list['mongodb_port']
-    mongodb_database = param_list['mongodb_database']
-    mongodb_username = param_list['mongodb_username']
-    mongodb_password = param_list['mongodb_password']
-    
-    # Create MongoDB URI for rate limiting
+def create_secure_mongodb_uri():
+    """Create MongoDB URI for rate limiting without exposing credentials in logs."""
+    from urllib.parse import quote_plus
+
+    mongodb_host = param_list["mongodb_host"]
+    mongodb_port = param_list["mongodb_port"]
+    mongodb_database = param_list["mongodb_database"]
+    mongodb_username = param_list["mongodb_username"]
+    mongodb_password = param_list["mongodb_password"]
+
     if mongodb_username and mongodb_password:
-        mongodb_uri = f"mongodb://{mongodb_username}:{mongodb_password}@{mongodb_host}:{mongodb_port}/{mongodb_database}"
+        encoded_username = quote_plus(mongodb_username)
+        encoded_password = quote_plus(mongodb_password)
+        return f"mongodb://{encoded_username}:{encoded_password}@{mongodb_host}:{mongodb_port}/{mongodb_database}"
     else:
-        mongodb_uri = f"mongodb://{mongodb_host}:{mongodb_port}/{mongodb_database}"
-    
+        return f"mongodb://{mongodb_host}:{mongodb_port}/{mongodb_database}"
+
+
+try:
+    mongodb_uri = create_secure_mongodb_uri()
     limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri=mongodb_uri)
-    app.logger.debug(f"Rate limiting using MongoDB: {mongodb_host}:{mongodb_port}/{mongodb_database}")
+
+    # Log connection info without credentials
+    mongodb_host = param_list["mongodb_host"]
+    mongodb_port = param_list["mongodb_port"]
+    mongodb_database = param_list["mongodb_database"]
+    app.logger.debug(f"Rate limiting configured with MongoDB: {mongodb_host}:{mongodb_port}/{mongodb_database}")
+
 except Exception as e:
-    # Fallback to memory for development (not recommended for production autoscaling)
-    app.logger.warning(f"MongoDB not available for rate limiting ({e}), falling back to memory storage.")
+    error_msg = str(e)
+    if "mongodb://" in error_msg:
+        error_msg = "MongoDB connection failed"
+
+    app.logger.warning(f"MongoDB not available for rate limiting ({error_msg}), falling back to memory storage.")
     limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri="memory://")
-
-
-### Helper functions ###
 
 
 # Return error (and traceback if specified) from calculations
@@ -616,7 +627,6 @@ def ping():
 def status(filename):
     filepath = safe_join(tmp_dir, filename)
     return jsonify(os.path.isfile(filepath))
-
 
 
 # Route to serve temporary files
