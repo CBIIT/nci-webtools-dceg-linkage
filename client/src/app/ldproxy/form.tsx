@@ -3,12 +3,13 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
+import { AxiosError } from "axios";
 import { ldproxy } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import "./style.css";
-import { rsChrRegex } from "@/services/utils";
+import { rsChrRegex, parseRateLimitError } from "@/services/utils";
 
 export interface FormData {
   var: string;
@@ -57,6 +58,8 @@ export default function LdProxyForm() {
       }
     },
   });
+
+  console.log(submitForm.error);
 
   async function onSubmit(data: any) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
@@ -260,7 +263,13 @@ export default function LdProxyForm() {
       {submitForm.isPending && <CalculateLoading />}
       {submitForm.isError && (
         <Alert variant="danger" className="mt-3">
-          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+          <p>
+            {submitForm.error instanceof AxiosError && submitForm.error.response?.status === 429
+              ? parseRateLimitError(submitForm.error)
+              : submitForm.error instanceof AxiosError
+              ? submitForm.error.message
+              : "An unknown error occurred."}
+          </p>
         </Alert>
       )}
     </Form>

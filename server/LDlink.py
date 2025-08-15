@@ -12,7 +12,7 @@ from threading import Thread
 from pathlib import Path
 from functools import wraps
 from socket import gethostname
-from flask import Flask, request, jsonify, current_app, send_from_directory,send_file,Response
+from flask import Flask, request, jsonify, current_app, send_from_directory, send_file
 from werkzeug.utils import secure_filename
 from werkzeug.security import safe_join
 from LDpair import calculate_pair
@@ -28,12 +28,32 @@ from LDutilites import get_config, unlock_stale_tokens
 from LDcommon import genome_build_vars, connectMongoDBReadOnly
 from SNPclip import calculate_clip
 from SNPchip import calculate_chip, get_platform_request
-from ApiAccess import register_user, checkToken, checkApiServer2Auth, checkBlocked, checkLocked, toggleLocked, logAccess, emailJustification, blockUser, unblockUser, getStats, setUserLock, setUserApi2Auth, unlockAllUsers, getLockedUsers, getBlockedUsers, lookupUser
-import requests,glob
-from ldscore.ldsc_utils import run_ldsc_command,run_herit_command,run_correlation_command
+from ApiAccess import (
+    register_user,
+    checkToken,
+    checkApiServer2Auth,
+    checkBlocked,
+    checkLocked,
+    toggleLocked,
+    logAccess,
+    emailJustification,
+    blockUser,
+    unblockUser,
+    getStats,
+    setUserLock,
+    setUserApi2Auth,
+    unlockAllUsers,
+    getLockedUsers,
+    getBlockedUsers,
+    lookupUser,
+)
+import requests, glob
+from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # retrieve config
 param_list = get_config()
@@ -44,7 +64,6 @@ tmp_dir = param_list["tmp_dir"]
 Path(tmp_dir).mkdir(parents=True, exist_ok=True)
 
 ### Initialize Flask App ###
-
 is_main = __name__ == "__main__"
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 10 * 1024 * 1024 * 1024
@@ -65,29 +84,71 @@ app.logger.addHandler(handler)
 app.logger.propagate = False
 
 # Suppress third-party logs below WARNING
-# logging.getLogger('boto3').setLevel(logging.WARNING)
-# logging.getLogger("pymongo").setLevel(logging.WARNING)
-# logging.getLogger("urllib3").setLevel(logging.WARNING)
-# logging.getLogger("requests").setLevel(logging.WARNING)
+logging.getLogger("boto3").setLevel(logging.WARNING)
+logging.getLogger("pymongo").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+logging.getLogger("requests").setLevel(logging.WARNING)
 
 os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
 
-# Flask Limiter initialization
-# def get_token():
-#     return request.args.get('token')
-# # limit requests with token on API calls only
-# limiter = Limiter(
-#     app,
-#     key_func=get_token
-# )
-# limiter = Limiter(
-#     app,
-#     key_func=get_remote_address,
-#     default_limits=["200 per day", "50 per hour"]
-# )
-# Example Flask Limiter decorator: @limiter.limit("1 per second")
 
-### Helper functions ###
+# Flask Limiter initialization
+def get_rate_limit_key():
+    """
+    Key function for rate limiting:
+    - For API routes: use token (if present)
+    - For Web routes: use client IP address
+    """
+    token = request.args.get("token")
+    if token:
+        return f"token:{token}"
+    else:
+        # For web routes without tokens, use IP address
+        # Handle X-Forwarded-For header for load balancer scenarios
+        if request.headers.getlist("X-Forwarded-For"):
+            client_ip = request.headers.getlist("X-Forwarded-For")[0]
+        else:
+            client_ip = request.remote_addr
+        return f"ip:{client_ip}"
+
+
+# Configure MongoDB storage for distributed rate limiting
+# Uses existing MongoDB configuration from param_list
+def create_secure_mongodb_uri():
+    """Create MongoDB URI for rate limiting without exposing credentials in logs."""
+    from urllib.parse import quote_plus
+
+    mongodb_host = param_list["mongodb_host"]
+    mongodb_port = param_list["mongodb_port"]
+    mongodb_database = param_list["mongodb_database"]
+    mongodb_username = param_list["mongodb_username"]
+    mongodb_password = param_list["mongodb_password"]
+
+    if mongodb_username and mongodb_password:
+        encoded_username = quote_plus(mongodb_username)
+        encoded_password = quote_plus(mongodb_password)
+        return f"mongodb://{encoded_username}:{encoded_password}@{mongodb_host}:{mongodb_port}/{mongodb_database}"
+    else:
+        return f"mongodb://{mongodb_host}:{mongodb_port}/{mongodb_database}"
+
+
+try:
+    mongodb_uri = create_secure_mongodb_uri()
+    limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri=mongodb_uri)
+
+    # Log connection info without credentials
+    mongodb_host = param_list["mongodb_host"]
+    mongodb_port = param_list["mongodb_port"]
+    mongodb_database = param_list["mongodb_database"]
+    app.logger.debug(f"Rate limiting configured with MongoDB: {mongodb_host}:{mongodb_port}/{mongodb_database}")
+
+except Exception as e:
+    error_msg = str(e)
+    if "mongodb://" in error_msg:
+        error_msg = "MongoDB connection failed"
+
+    app.logger.warning(f"MongoDB not available for rate limiting ({error_msg}), falling back to memory storage.")
+    limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri="memory://")
 
 
 # Return error (and traceback if specified) from calculations
@@ -101,13 +162,13 @@ def sendTraceback(error, showTraceback=False):
         traceback.print_exc()
         custom["traceback"] = traceback.format_exc()
     out_json = json.dumps(custom, sort_keys=False, indent=2)
-    
+
     # Enhanced error logging with sanitization
     log_error = custom.copy()
     if "traceback" in log_error:
         log_error["traceback"] = "TRACEBACK_AVAILABLE"  # Don't log full traceback in production
     app.logger.error(f"Generated error response: {json.dumps(log_error, indent=2)}")
-    
+
     return current_app.response_class(out_json, mimetype="application/json")
 
 
@@ -252,7 +313,7 @@ def requires_admin_token(f):
 #     institution = request.args.get('institution', False)
 #     registered = request.args.get('registered', False)
 #     blocked = request.args.get('blocked', False)
-#     justification = request.args.get('justification', False) 
+#     justification = request.args.get('justification', False)
 #     app.logger.debug('apiblocked_web params ' + json.dumps({
 #         'firstname': firstname,
 #         'lastname': lastname,
@@ -277,6 +338,7 @@ def requires_admin_token(f):
 
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
+@limiter.limit("1 per minute")
 def register_web():
     start_time = time.time()
     firstname = request.args.get("firstname", False)
@@ -551,7 +613,6 @@ def root():
 # @app.route('/LDlinkRest2/ping/', strict_slashes=False)
 @app.route("/ping/", strict_slashes=False)
 def ping():
-    app.logger.debug("Health check ping received")
     try:
         return "true"
     except Exception as e:
@@ -569,45 +630,40 @@ def status(filename):
 
 
 # Route to serve temporary files
-#@app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
-#@app.route('/tmp/<filename>', strict_slashes=False)
-#def send_temp_file(filename):
-#    return send_from_directory(tmp_dir, filename)
-
-# Route to serve temporary files
-@app.route('/LDlinkRestWeb/tmp/<filename>', strict_slashes=False)
-@app.route('/tmp/<filename>', strict_slashes=False)
-@app.route('/LDlinkRestWeb/tmp/uploads/<filename>', strict_slashes=False)
-@app.route('/tmp/uploads/<filename>', strict_slashes=False)
+@app.route("/LDlinkRestWeb/tmp/<filename>", strict_slashes=False)
+@app.route("/tmp/<filename>", strict_slashes=False)
+@app.route("/LDlinkRestWeb/tmp/uploads/<filename>", strict_slashes=False)
+@app.route("/tmp/uploads/<filename>", strict_slashes=False)
 def send_temp_file(filename):
-    if 'uploads' in request.path:
-        return send_from_directory(os.path.join(tmp_dir, 'uploads'), filename)
+    if "uploads" in request.path:
+        return send_from_directory(os.path.join(tmp_dir, "uploads"), filename)
     else:
         return send_from_directory(tmp_dir, filename)
 
-@app.route('/LDlinkRestWeb/zip', methods=['POST'])
+
+@app.route("/LDlinkRestWeb/zip", methods=["POST"])
 def zip_files():
     start_time = time.time()
     app.logger.info("Starting zip file creation")
-    
+
     try:
-        filenames = request.json.get('files', [])
+        filenames = request.json.get("files", [])
         app.logger.debug(f"Creating zip with {len(filenames)} files")
-        
-        zip_filename = 'files.zip'
+
+        zip_filename = "files.zip"
         zip_filepath = os.path.join(tmp_dir, zip_filename)
-        uploads_dir = os.path.join(tmp_dir, 'uploads')
-        ldscore_dir = os.path.join(param_list['data_dir'], 'ldscore')
+        uploads_dir = os.path.join(tmp_dir, "uploads")
+        ldscore_dir = os.path.join(param_list["data_dir"], "ldscore")
 
         os.makedirs(uploads_dir, exist_ok=True)
 
         # List of known example files
         example_files = [
-            'BBJ_LDLC22.txt',
-            'BBJ_HDLC22.txt',
-            '22.bed',
-            '22.bim',
-            '22.fam',
+            "BBJ_LDLC22.txt",
+            "BBJ_HDLC22.txt",
+            "22.bed",
+            "22.bim",
+            "22.fam",
         ]
 
         # For each file, ensure it exists in uploads_dir; if not, copy from ldscore_dir if it's an example file
@@ -621,25 +677,29 @@ def zip_files():
                         app.logger.info(f"Copied example file {source_path} to {upload_path}")
                     else:
                         app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
-                        return jsonify({'error': f'Example file {filename} not found in {ldscore_dir}'}), 404
+                        return jsonify({"error": f"Example file {filename} not found in {ldscore_dir}"}), 404
                 else:
                     app.logger.error(f"File {filename} not found in uploads directory and is not an example file.")
-                    return jsonify({'error': f'File {filename} not found in uploads directory and is not an example file.'}), 404
+                    return (
+                        jsonify(
+                            {"error": f"File {filename} not found in uploads directory and is not an example file."}
+                        ),
+                        404,
+                    )
 
-        with zipfile.ZipFile(zip_filepath, 'w') as zipf:
+        with zipfile.ZipFile(zip_filepath, "w") as zipf:
             for filename in filenames:
                 file_path = os.path.join(uploads_dir, filename)
                 zipf.write(file_path, os.path.basename(file_path))
                 app.logger.debug(f"Added file to zip: {filename}")
-        
+
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename}")
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
     except Exception as e:
         app.logger.error(f"Zip file creation failed: {str(e)}")
         app.logger.error("".join(traceback.format_exception(None, e, e.__traceback__)))
-        return jsonify({'error': str(e)}), 500
- 
+        return jsonify({"error": str(e)}), 500
 
 
 # File upload route
@@ -649,42 +709,43 @@ def zip_files():
 def upload():
     start_time = time.time()
     app.logger.info("Starting file upload request")
-    
-    if request.method == 'POST':
+
+    if request.method == "POST":
         if len(request.files) == 0:
             app.logger.warning("Upload request received with no files")
-            return 'No file part...'
-        
-        reference = request.form.get('reference', None)
+            return "No file part..."
+
+        reference = request.form.get("reference", None)
         uploaded_files = []
-        
+
         for file_key in request.files:
             file = request.files[file_key]
-            if file.filename == '':
+            if file.filename == "":
                 app.logger.warning("Empty filename provided in upload")
-                return 'No selected file'
-     
+                return "No selected file"
+
             if file:
                 filename = secure_filename(file.filename)
                 app.logger.debug(f"Processing upload: {filename}")
-                
-                os.makedirs(app.config['UPLOAD_DIR'], exist_ok=True)
+
+                os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
                 if reference:
-                    ref_dir = os.path.join(app.config['UPLOAD_DIR'], reference)
+                    ref_dir = os.path.join(app.config["UPLOAD_DIR"], reference)
                     os.makedirs(ref_dir, exist_ok=True)
                     file_path = os.path.join(ref_dir, filename)
                 else:
-                    file_path = os.path.join(app.config['UPLOAD_DIR'], filename)
-                
+                    file_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+
                 file.save(file_path)
                 uploaded_files.append(filename)
                 app.logger.info(f"Successfully uploaded file: {filename}")
-        
+
         execution_time = round(time.time() - start_time, 2)
         app.logger.info(f"Upload completed ({execution_time}s) - {len(uploaded_files)} files saved")
-        return 'All files were saved'
+        return "All files were saved"
 
-@app.route('/LDlinkRestWeb/copy_and_download/<filename>', methods=['GET'])
+
+@app.route("/LDlinkRestWeb/copy_and_download/<filename>", methods=["GET"])
 def copy_and_download(filename):
     """
     Copies a file from the `data/ldscore/` directory to the `tmp/` directory
@@ -692,11 +753,11 @@ def copy_and_download(filename):
     """
     start_time = time.time()
     app.logger.info(f"Starting file copy and download: {filename}")
-    
+
     try:
         # Define source and destination paths
-        source_dir = os.path.join(param_list['data_dir'], 'ldscore')
-        destination_dir = os.path.join(tmp_dir, 'uploads')
+        source_dir = os.path.join(param_list["data_dir"], "ldscore")
+        destination_dir = os.path.join(tmp_dir, "uploads")
         source_file = os.path.join(source_dir, filename)
         destination_file = os.path.join(destination_dir, filename)
 
@@ -718,7 +779,7 @@ def copy_and_download(filename):
     except Exception as e:
         app.logger.error(f"File copy/download failed: {str(e)}")
         return f"An error occurred: {e}", 500
-    
+
 
 # Route for LDassoc example GWAS data
 @app.route("/LDlinkRest/ldassoc_example", methods=["GET"])
@@ -732,57 +793,56 @@ def ldassoc_example():
     example = {"filename": os.path.basename(example_filepath), "headers": read_csv_headers(example_filepath)}
     return json.dumps(example)
 
+
 # Route for LDscore example 22
-@app.route('/LDlinkRest/ldscore_example', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldscore_example', methods=['GET'])
+@app.route("/LDlinkRest/ldscore_example", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldscore_example", methods=["GET"])
 def ldscore_example():
-    genome_build = request.args.get('genome_build', 'grch37')
-    data_dir = param_list['data_dir']
-    ldscore_example_dir = data_dir + 'ldscore/'
-    #ldscore_example_dir = param_list['ldscore_example_dir']
-    example_files = ['22.bed', '22.bim', '22.fam']
-    example_filepaths = [ldscore_example_dir+ file for file in example_files] #+ genome_build_vars[genome_build]['ldassoc_example_file']
-    example = {
-            'filenames': example_files,
-            'filepaths': example_filepaths
-        }
+    genome_build = request.args.get("genome_build", "grch37")
+    data_dir = param_list["data_dir"]
+    ldscore_example_dir = data_dir + "ldscore/"
+    # ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = ["22.bed", "22.bim", "22.fam"]
+    example_filepaths = [
+        ldscore_example_dir + file for file in example_files
+    ]  # + genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {"filenames": example_files, "filepaths": example_filepaths}
     app.logger.debug(f"LDscore example files: {example}")
     return json.dumps(example)
 
-# Route for LDherit example 
-@app.route('/LDlinkRest/ldherit_example', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldherit_example', methods=['GET'])
+
+# Route for LDherit example
+@app.route("/LDlinkRest/ldherit_example", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldherit_example", methods=["GET"])
 def ldherit_example():
-    genome_build = request.args.get('genome_build', 'grch37')
-    data_dir = param_list['data_dir']
-    ldscore_example_dir = data_dir + 'ldscore/'
-    #ldscore_example_dir = param_list['ldscore_example_dir']
-    example_files = 'BBJ_HDLC22.txt'
-    example_filepaths = ldscore_example_dir+ example_files #+ genome_build_vars[genome_build]['ldassoc_example_file']
-    example = {
-            'filenames': example_files,
-            'filepaths': example_filepaths
-        }
+    genome_build = request.args.get("genome_build", "grch37")
+    data_dir = param_list["data_dir"]
+    ldscore_example_dir = data_dir + "ldscore/"
+    # ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = "BBJ_HDLC22.txt"
+    example_filepaths = ldscore_example_dir + example_files  # + genome_build_vars[genome_build]['ldassoc_example_file']
+    example = {"filenames": example_files, "filepaths": example_filepaths}
     app.logger.debug(f"LDherit example files: {example}")
     return json.dumps(example)
 
-# Route for LDherit example 
-@app.route('/LDlinkRest/ldcorrelation_example', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldcorrelation_example', methods=['GET'])
+
+# Route for LDherit example
+@app.route("/LDlinkRest/ldcorrelation_example", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldcorrelation_example", methods=["GET"])
 def ldcorrelation_example():
-    genome_build = request.args.get('genome_build', 'grch37')
-    data_dir = param_list['data_dir']
-    ldscore_example_dir = data_dir + 'ldscore/'
-    #ldscore_example_dir = param_list['ldscore_example_dir']
-    example_files = 'BBJ_HDLC22.txt'
-    example_files2 = 'BBJ_LDLC22.txt'
-    example_filepaths = ldscore_example_dir+ example_files #+ genome_build_vars[genome_build]['ldassoc_example_file']
+    genome_build = request.args.get("genome_build", "grch37")
+    data_dir = param_list["data_dir"]
+    ldscore_example_dir = data_dir + "ldscore/"
+    # ldscore_example_dir = param_list['ldscore_example_dir']
+    example_files = "BBJ_HDLC22.txt"
+    example_files2 = "BBJ_LDLC22.txt"
+    example_filepaths = ldscore_example_dir + example_files  # + genome_build_vars[genome_build]['ldassoc_example_file']
     example = {
-            'filenames': example_files,
-            'filenames2': example_files2,
-            'filepath': example_filepaths,
-            'filepath2':ldscore_example_dir+ example_files2
-        }
+        "filenames": example_files,
+        "filenames2": example_files2,
+        "filepath": example_filepaths,
+        "filepath2": ldscore_example_dir + example_files2,
+    }
     app.logger.debug(f"LDcorrelation example files: {example}")
     return json.dumps(example)
 
@@ -952,51 +1012,54 @@ def ldassoc():
     schedule_tmp_cleanup(reference, app.logger)
     return sendJSON(out_json)
 
+
 # Web and API route for LDassoc
-@app.route('/LDlinkRest/ldscore', methods=['GET'])
-#@app.route('/LDlinkRest2/ldassoc', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldscore', methods=['GET'])
+@app.route("/LDlinkRest/ldscore", methods=["GET"])
+# @app.route('/LDlinkRest2/ldassoc', methods=['GET'])
+@app.route("/LDlinkRestWeb/ldscore", methods=["GET"])
 def ldscore():
-    if 'LDlinkRestWeb' in request.path:
+    if "LDlinkRestWeb" in request.path:
         web = True
     else:
         web = False
     app.logger.debug(f"LDscore request with isExample: {request.args.get('isExample')}")
     start_time = time.time()
 
-    pop = request.args.get('pop', False)
-    genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)
-    ldwindow = request.args.get('ldwindow', '1')
-    windUnit = request.args.get('windUnit', 'cm')
-    isExample = request.args.get('isExample', False)
-    reference = request.args.get('reference',False)
-    app.logger.debug(f"LDscore params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, ldwindow: {ldwindow}, windUnit: {windUnit}, isExample: {isExample}")
+    pop = request.args.get("pop", False)
+    genome_build = request.args.get("genome_build", "grch37")
+    filename = request.args.get("filename", False)
+    ldwindow = request.args.get("ldwindow", "1")
+    windUnit = request.args.get("windUnit", "cm")
+    isExample = request.args.get("isExample", False)
+    reference = request.args.get("reference", False)
+    app.logger.debug(
+        f"LDscore params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, ldwindow: {ldwindow}, windUnit: {windUnit}, isExample: {isExample}"
+    )
 
     fileDir = f"/data/tmp/uploads/{reference}/"
-    #print(filename)
+    # print(filename)
     if filename and str(isExample).lower() != "true":
         # Split by comma or semicolon (adjust as needed)
-        filenames = [secure_filename(f.strip()) for f in filename.replace(';', ',').split(',')]
+        filenames = [secure_filename(f.strip()) for f in filename.replace(";", ",").split(",")]
         for fname in filenames:
             fileroot, ext = os.path.splitext(fname)
-          
+
             # Find the chromosome number in the filename
-            file_parts = fname.split('.')
+            file_parts = fname.split(".")
             file_chromo = None
             for part in file_parts:
                 if part.isdigit() and 1 <= int(part) <= 22:
-                    file_chromo = part         
+                    file_chromo = part
                     break
-        
+
             if file_chromo:
                 # Find the file in the directory
                 pattern = os.path.join("/data/tmp/uploads/", f"*{file_chromo}.*")
-                for file_path in glob.glob(pattern):                   
-                    extension = file_path.split('.')[-1]
+                for file_path in glob.glob(pattern):
+                    extension = file_path.split(".")[-1]
                     new_filename = f"{file_chromo}.{extension}"
                     new_file_path = os.path.join(fileDir, new_filename)
-                   # Create the reference subfolder if it doesn't exist
+                    # Create the reference subfolder if it doesn't exist
                     reference_folder = os.path.join(fileDir, str(reference))
                     os.makedirs(reference_folder, exist_ok=True)
                     new_file_path = os.path.join(fileDir, new_filename)
@@ -1005,19 +1068,19 @@ def ldscore():
                         app.logger.info(f"Copied {file_path} to {new_file_path}")
                     else:
                         app.logger.debug(f"Skipped copying {file_path} to itself.")
-                    #os.rename(file_path, new_file_path)
-                    #print(f"Copied {file_path} to {new_file_path}")
+                    # os.rename(file_path, new_file_path)
+                    # print(f"Copied {file_path} to {new_file_path}")
     try:
         # Make an API call to the ldsc39_container
-       
-        #response = requests.get(ldsc39_url)
-        #response.raise_for_status()  # Raise an exception for HTTP errors
-        
-        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample,reference)
+
+        # response = requests.get(ldsc39_url)
+        # response.raise_for_status()  # Raise an exception for HTTP errors
+
+        result = run_ldsc_command(pop, genome_build, filename, ldwindow, windUnit, isExample, reference)
         app.logger.debug("LDscore calculation completed, processing result")
-        #print(result)
+        # print(result)
         if web:
-            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -1031,10 +1094,10 @@ def ldscore():
                 filtered_result = result[summary_index:]
             else:
                 filtered_result = result
-            #filtered_result = filtered_result.replace("\\n", "\n")
-            #out_json = {"result": filtered_result}
-            #pretty_out_json = json.dumps(out_json, indent=4)
-            #print(pretty_out_json)
+            # filtered_result = filtered_result.replace("\\n", "\n")
+            # out_json = {"result": filtered_result}
+            # pretty_out_json = json.dumps(out_json, indent=4)
+            # print(pretty_out_json)
             return filtered_result
             out_json = pretty_out_json
 
@@ -1048,21 +1111,22 @@ def ldscore():
     schedule_tmp_cleanup(reference, app.logger)
     return jsonify(out_json)
 
-@app.route('/LDlinkRest/ldscoreapi', methods=['POST'])
+
+@app.route("/LDlinkRest/ldscoreapi", methods=["POST"])
 @requires_token
 def ldscoreapi():
-    required_files = ['file1', 'file2', 'file3']
+    required_files = ["file1", "file2", "file3"]
     fileDir = "/data/tmp/uploads"
 
     start_time = time.time()
 
-    pop = request.args.get('pop', 'eur')
-    genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)+".bim"
-    ldwindow = request.args.get('ldwindow', '1')
-    windUnit = request.args.get('windUnit', 'cm')
-    isExample = request.args.get('isExample', False)
-    
+    pop = request.args.get("pop", "eur")
+    genome_build = request.args.get("genome_build", "grch37")
+    filename = request.args.get("filename", False) + ".bim"
+    ldwindow = request.args.get("ldwindow", "1")
+    windUnit = request.args.get("windUnit", "cm")
+    isExample = request.args.get("isExample", False)
+
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
@@ -1070,22 +1134,22 @@ def ldscoreapi():
     for file_key in required_files:
         if file_key not in request.files:
             return jsonify({"error": f"No {file_key} part"}), 400
-    
+
     # Save the files
     saved_files = {}
     for file_key in required_files:
         file = request.files[file_key]
-        if file.filename == '':
+        if file.filename == "":
             return jsonify({"error": f"No selected file for {file_key}"}), 400
-        
+
         if file:
             filename = secure_filename(file.filename)
             file_path = os.path.join(fileDir, filename)
             file.save(file_path)
             saved_files[file_key] = file_path
-    
+
     if filename:
-        file_parts = filename.split('.')
+        file_parts = filename.split(".")
         file_chromo = None
         for part in file_parts:
             if part.isdigit() and 1 <= int(part) <= 22:
@@ -1096,7 +1160,7 @@ def ldscoreapi():
         # Find the file in the directory
         pattern = os.path.join(fileDir, f"{fileroot}.*")
         for file_path in glob.glob(pattern):
-            extension = file_path.split('.')[-1]
+            extension = file_path.split(".")[-1]
             new_filename = f"{file_chromo}.{extension}"
             new_file_path = os.path.join(fileDir, new_filename)
             os.rename(file_path, new_file_path)
@@ -1104,29 +1168,28 @@ def ldscoreapi():
 
     try:
         # Make an API call to the ldsc39_container
-       
-        #response = requests.get(ldsc39_url)
-        #response.raise_for_status()  # Raise an exception for HTTP errors
-        
-        result = run_ldsc_command(pop, genome_build, filename,ldwindow,windUnit,isExample)
+
+        # response = requests.get(ldsc39_url)
+        # response.raise_for_status()  # Raise an exception for HTTP errors
+
+        result = run_ldsc_command(pop, genome_build, filename, ldwindow, windUnit, isExample)
         app.logger.debug("LDscore API calculation completed, processing result")
-        #print(result)
-       
-                # Pretty-print the JSON output
+        # print(result)
+
+        # Pretty-print the JSON output
         summary_index = result.find("Summary of LD Scores")
         if summary_index != -1:
-                filtered_result = result[summary_index:]
+            filtered_result = result[summary_index:]
         else:
-                filtered_result = result
+            filtered_result = result
 
-         # Delete the uploaded files
+        # Delete the uploaded files
         for file_path in saved_files.values():
             try:
                 os.remove(file_path)
                 app.logger.info(f"Deleted file: {file_path}")
             except Exception as e:
                 app.logger.error(f"Error deleting file {file_path}: {e}")
-
 
         return filtered_result
 
@@ -1144,22 +1207,24 @@ def ldscoreapi():
 #####
 ###########
 # Web for LDscore
-@app.route('/LDlinkRest/ldherit', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldherit', methods=['GET'])
+@app.route("/LDlinkRest/ldherit", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldherit", methods=["GET"])
 def ldherit():
-    if 'LDlinkRestWeb' in request.path:
+    if "LDlinkRestWeb" in request.path:
         web = True
     else:
         web = False
     app.logger.debug(f"LDherit request with isExample: {request.args.get('isExample')}")
     start_time = time.time()
-    
-    pop = request.args.get('pop', False)
-    genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)
-    isexample = request.args.get('isExample', False)
-    reference = request.args.get('reference',False)
-    app.logger.debug(f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
+
+    pop = request.args.get("pop", False)
+    genome_build = request.args.get("genome_build", "grch37")
+    filename = request.args.get("filename", False)
+    isexample = request.args.get("isExample", False)
+    reference = request.args.get("reference", False)
+    app.logger.debug(
+        f"LDherit params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+    )
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
@@ -1168,13 +1233,13 @@ def ldherit():
     app.logger.debug(f"LDherit processing filename: {filename}")
     try:
         # Make an API call to the ldsc39_container
-       
-        #response = requests.get(ldsc39_url)
-        #response.raise_for_status()  # Raise an exception for HTTP errors
-        
-        result = run_herit_command(filename,pop,isexample)
+
+        # response = requests.get(ldsc39_url)
+        # response.raise_for_status()  # Raise an exception for HTTP errors
+
+        result = run_herit_command(filename, pop, isexample)
         if web:
-            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -1182,16 +1247,16 @@ def ldherit():
                 with open(result_filename, "w") as f:
                     f.write(filtered_result)
         else:
-                # Pretty-print the JSON output
+            # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
             else:
                 filtered_result = result
-            #filtered_result = filtered_result.replace("\\n", "\n")
-            #out_json = {"result": filtered_result}
-            #pretty_out_json = json.dumps(out_json, indent=4)
-            #print(pretty_out_json)
+            # filtered_result = filtered_result.replace("\\n", "\n")
+            # out_json = {"result": filtered_result}
+            # pretty_out_json = json.dumps(out_json, indent=4)
+            # print(pretty_out_json)
             return filtered_result
             out_json = pretty_out_json
 
@@ -1205,61 +1270,63 @@ def ldherit():
     schedule_tmp_cleanup(reference, app.logger)
     return jsonify(out_json)
 
+
 ###########
 #####
 ###########
 # Web and API route for LDscore
-@app.route('/LDlinkRest/ldheritapi', methods=['POST'])
+@app.route("/LDlinkRest/ldheritapi", methods=["POST"])
 @requires_token
 def ldheritAPI():
-    if 'file' not in request.files:
+    if "file" not in request.files:
         return jsonify({"error": "No file part"}), 400
-    
-    file = request.files['file']
+
+    file = request.files["file"]
     fileDir = f"/data/tmp/uploads"
-    if file.filename == '':
+    if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
-    
+
     if file:
         # Save the file to a desired location
         file.save(f"{fileDir}/{file.filename}")
-    
-    pop = request.args.get('pop', False)
-    genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)
-    isexample = request.args.get('isExample', False)
+
+    pop = request.args.get("pop", False)
+    genome_build = request.args.get("genome_build", "grch37")
+    filename = request.args.get("filename", False)
+    isexample = request.args.get("isExample", False)
 
     start_time = time.time()
-       
-    app.logger.debug(f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
+
+    app.logger.debug(
+        f"LDherit API params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+    )
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
-   
+
     app.logger.debug(f"LDherit API processing filename: {filename}")
     try:
         # Make an API call to the ldsc39_container
-       
-        #response = requests.get(ldsc39_url)
-        #response.raise_for_status()  # Raise an exception for HTTP errors
-        
-        result = run_herit_command(filename,pop,isexample)
-       
-                # Pretty-print the JSON output
+
+        # response = requests.get(ldsc39_url)
+        # response.raise_for_status()  # Raise an exception for HTTP errors
+
+        result = run_herit_command(filename, pop, isexample)
+
+        # Pretty-print the JSON output
         summary_index = result.find("Total Observed scale")
         if summary_index != -1:
-                filtered_result = result[summary_index:]
+            filtered_result = result[summary_index:]
         else:
-                filtered_result = result
+            filtered_result = result
 
-         # Delete the uploaded files
+        # Delete the uploaded files
         for file_path in saved_files.values():
             try:
                 os.remove(file_path)
                 print(f"Deleted file: {file_path}")
             except Exception as e:
                 print(f"Error deleting file {file_path}: {e}")
-
 
         # Delete the uploaded files
         try:
@@ -1278,23 +1345,26 @@ def ldheritAPI():
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     return jsonify(out_json)
 
-@app.route('/LDlinkRest/ldcorrelation', methods=['GET'])
-@app.route('/LDlinkRestWeb/ldcorrelation', methods=['GET'])
+
+@app.route("/LDlinkRest/ldcorrelation", methods=["GET"])
+@app.route("/LDlinkRestWeb/ldcorrelation", methods=["GET"])
 def ldcorrelation():
-    if 'LDlinkRestWeb' in request.path:
+    if "LDlinkRestWeb" in request.path:
         web = True
     else:
         web = False
     app.logger.debug(f"LDcorrelation request with isExample: {request.args.get('isExample')}")
     start_time = time.time()
-    
-    pop = request.args.get('pop', False)
-    genome_build = request.args.get('genome_build', 'grch37')
-    filename = request.args.get('filename', False)
-    filename2 = request.args.get('filename2', False)
-    isexample = request.args.get('isExample', False)
-    reference = request.args.get('reference',False)
-    app.logger.debug(f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}")
+
+    pop = request.args.get("pop", False)
+    genome_build = request.args.get("genome_build", "grch37")
+    filename = request.args.get("filename", False)
+    filename2 = request.args.get("filename2", False)
+    isexample = request.args.get("isExample", False)
+    reference = request.args.get("reference", False)
+    app.logger.debug(
+        f"LDcorrelation params - pop: {pop}, genome_build: {genome_build}, filename: {filename}, isexample: {isexample}"
+    )
     if filename:
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
@@ -1302,10 +1372,10 @@ def ldcorrelation():
     fileDir = f"/data/tmp/uploads"
     app.logger.debug(f"LDcorrelation processing filename: {filename}")
     try:
-        # Make an API call to the ldsc39_container    
-        result = run_correlation_command(filename,filename2,pop,isexample)
+        # Make an API call to the ldsc39_container
+        result = run_correlation_command(filename, filename2, pop, isexample)
         if web:
-            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith('*'))
+            filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
             # Write result to file for frontend to fetch, like ldpop
             if reference:
@@ -1313,16 +1383,16 @@ def ldcorrelation():
                 with open(result_filename, "w") as f:
                     f.write(filtered_result)
         else:
-                # Pretty-print the JSON output
+            # Pretty-print the JSON output
             summary_index = result.find("Total Observed scale")
             if summary_index != -1:
                 filtered_result = result[summary_index:]
             else:
                 filtered_result = result
-            #filtered_result = filtered_result.replace("\\n", "\n")
-            #out_json = {"result": filtered_result}
-            #pretty_out_json = json.dumps(out_json, indent=4)
-            #print(pretty_out_json)
+            # filtered_result = filtered_result.replace("\\n", "\n")
+            # out_json = {"result": filtered_result}
+            # pretty_out_json = json.dumps(out_json, indent=4)
+            # print(pretty_out_json)
             return filtered_result
             out_json = pretty_out_json
 
@@ -1334,7 +1404,6 @@ def ldcorrelation():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     return jsonify(out_json)
-
 
 
 # Web and API route for LDexpress
@@ -1891,7 +1960,7 @@ def ldpair():
             except Exception as e:
                 # unlock token then display error message
                 output = json.loads(out_json)
-               
+
                 toggleLocked(token, 0)
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
@@ -2020,6 +2089,7 @@ def ldpop():
 # @app.route('/LDlinkRest2/ldproxy', methods=['GET'])
 @app.route("/LDlinkRestWeb/ldproxy", methods=["GET"])
 @requires_token
+@limiter.limit("1 per minute")
 def ldproxy():
     start_time = time.time()
     var = request.args.get("var", False)
@@ -2140,6 +2210,7 @@ def ldproxy():
 # @app.route('/LDlinkRest2/ldtrait', methods=['POST'])
 @app.route("/LDlinkRestWeb/ldtrait", methods=["POST"])
 @requires_token
+@limiter.limit("1 per minute")
 def ldtrait():
     start_time = time.time()
     data = json.loads(request.stream.read())
@@ -2377,7 +2448,7 @@ def snpchip():
             snp_chip = calculate_chip(snplst, platforms, web, reference, genome_build)
             out_json = json.dumps(snp_chip, sort_keys=True, indent=2)
             with open(tmp_dir + "snpchip" + reference + ".json", "w") as f:
-                    f.write(out_json)
+                f.write(out_json)
         except Exception as e:
             exc_obj = e
             app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
