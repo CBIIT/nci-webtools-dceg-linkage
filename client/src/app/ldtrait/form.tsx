@@ -4,11 +4,12 @@ import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, InputGroup, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
+import { AxiosError } from "axios";
 import { ldtrait } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
+import { parseSnps, parseRateLimitError } from "@/services/utils";
 import { FormData, LdtraitFormData, Ldtrait } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
@@ -213,7 +214,13 @@ export default function LdtraitForm() {
       {submitForm.isPending && <CalculateLoading />}
       {submitForm.isError && (
         <Alert variant="danger" className="mt-3">
-          <p>Error: {submitForm.error instanceof Error ? submitForm.error.message : "An unknown error occurred."}</p>
+          <p>
+            {submitForm.error instanceof AxiosError && submitForm.error.response?.status === 429
+              ? parseRateLimitError(submitForm.error)
+              : submitForm.error instanceof AxiosError
+              ? submitForm.error.message
+              : "An unknown error occurred."}
+          </p>
         </Alert>
       )}
     </Form>
