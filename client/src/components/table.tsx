@@ -87,13 +87,29 @@ export default function Table({ title = "", data, columns, ...props }: TableProp
         </Col>
       </Row>
       <Row className="align-items-center">
+        <Col sm="auto">{data.length} Total Entries</Col>
+        <Col>
+          Show{" "}
+          <select
+            value={table.getState().pagination.pageSize}
+            onChange={(e) => {
+              table.setPageSize(Number(e.target.value));
+            }}>
+            {[10, 25, 50, 100].map((pageSize) => (
+              <option key={pageSize} value={pageSize}>
+                {pageSize}
+              </option>
+            ))}
+          </select>{" "}
+          entries
+        </Col>
         <Col sm="auto">
           Page{" "}
           <strong>
             {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
           </strong>
         </Col>
-        <Col>
+        <Col sm="auto">
           <button
             className="border rounded p-1 mx-1"
             onClick={() => table.setPageIndex(0)}
@@ -118,22 +134,6 @@ export default function Table({ title = "", data, columns, ...props }: TableProp
             disabled={!table.getCanNextPage()}>
             {">>"}
           </button>
-        </Col>
-        <Col sm="auto">{data.length} Total Entries</Col>
-        <Col sm="auto">
-          Show{" "}
-          <select
-            value={table.getState().pagination.pageSize}
-            onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
-            }}>
-            {[10, 25, 50, 100].map((pageSize) => (
-              <option key={pageSize} value={pageSize}>
-                {pageSize}
-              </option>
-            ))}
-          </select>{" "}
-          entries
         </Col>
       </Row>
     </Container>
