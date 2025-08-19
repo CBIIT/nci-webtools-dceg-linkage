@@ -2089,7 +2089,7 @@ def ldpop():
 # @app.route('/LDlinkRest2/ldproxy', methods=['GET'])
 @app.route("/LDlinkRestWeb/ldproxy", methods=["GET"])
 @requires_token
-@limiter.limit("1 per minute")
+@limiter.limit("10000 per hour")
 def ldproxy():
     start_time = time.time()
     var = request.args.get("var", False)
@@ -2210,7 +2210,7 @@ def ldproxy():
 # @app.route('/LDlinkRest2/ldtrait', methods=['POST'])
 @app.route("/LDlinkRestWeb/ldtrait", methods=["POST"])
 @requires_token
-@limiter.limit("1 per minute")
+@limiter.limit("10000 per hour")
 def ldtrait():
     start_time = time.time()
     data = json.loads(request.stream.read())
