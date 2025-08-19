@@ -543,7 +543,7 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
             #                      border_fill_color='white', background_fill_color="beige", 
             #                     tools="hover,undo,redo,reset,pan,box_zoom,save", title=" ", width=800, height=700)
 
-        matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
+        matrix_rect_renderer = matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, source=source,
                         color="box_color", alpha="box_trans", line_color=None)
         # Rotate LDmatrix 45 degrees
         # matrix_plot.rect(x='xname_pos', y='yname', width=0.95 * spacing, height=0.95, angle=0.785398, source=source,
@@ -587,6 +587,12 @@ def calculate_matrix(snplst, pop, request, web, request_method, genome_build, r2
         sup_2 = "\u00B2"
 
         hover = matrix_plot.select(dict(type=HoverTool))
+        # Restrict hover interactions to only the rectangle glyphs so text does not create its own tooltip
+        try:
+            hover.renderers = [matrix_rect_renderer]
+        except Exception:
+            # Fallback for any unexpected behavior in select/assignment; continue with tooltips configuration
+            pass
         hover.tooltips = OrderedDict([
             ("Variant 1", " " + "@yname (@yA)"),
             ("Variant 2", " " + "@xname (@xA)"),
