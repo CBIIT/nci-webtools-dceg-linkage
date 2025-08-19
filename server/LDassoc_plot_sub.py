@@ -539,9 +539,9 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
 
     assoc_points_not1000G=assoc_plot.scatter(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
     assoc_points=assoc_plot.scatter(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
-    assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
+    assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")]), toggleable=False))
 
-    hover=HoverTool(renderers=[assoc_points])
+    hover=HoverTool(renderers=[assoc_points], toggleable=False)
     hover.tooltips=OrderedDict([
         ("Variant", "@prs @p_alle"),
         ("P-value", "@p_val"),
@@ -699,6 +699,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             ("Transcript ID", "@exons_plot_id"),
             ("Exon", "@exons_plot_exon"),
         ])
+        hover.toggleable = False
 
         # else:
         #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
@@ -849,6 +850,7 @@ def calculate_assoc_svg(file, region, pop, request, genome_build, myargs, myargs
             ("Gene", "@exons_c_plot_name"),
             ("Transcript IDs", "@exons_c_plot_id"),
         ])
+        hover.toggleable = False
 
         # else:
         #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0

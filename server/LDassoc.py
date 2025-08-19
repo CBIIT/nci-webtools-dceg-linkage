@@ -900,9 +900,9 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
 
     assoc_points_not1000G=assoc_plot.scatter(x='p_plot_posX', y='p_plot_pvalY', size=9+float("0.25")*14.0, source=source_p, line_color="gray", fill_color="white")
     assoc_points=assoc_plot.scatter(x='x', y='y', size='size', color='color', alpha='alpha', source=source)
-    assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")])))
+    assoc_plot.add_tools(HoverTool(renderers=[assoc_points_not1000G], tooltips=OrderedDict([("Variant", "@p_plot_pos2"), ("P-value", "@p_plot_pval2"), ("Distance (Mb)", "@p_plot_dist")]), toggleable=False))
 
-    hover=HoverTool(renderers=[assoc_points])
+    hover=HoverTool(renderers=[assoc_points], toggleable=False)
     hover.tooltips=OrderedDict([
         ("Variant", "@prs @p_alle"),
         ("P-value", "@p_val"),
@@ -1042,7 +1042,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                            x_range=xr, y_range=yr2, border_fill_color='white',
                            title="", 
-                           width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
+                           width=900, height=plot_h_pix, tools="xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -1057,6 +1057,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
             ("Transcript ID", "@exons_plot_id"),
             ("Exon", "@exons_plot_exon"),
         ])
+        hover.toggleable = False
 
         # else:
         #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0
@@ -1190,7 +1191,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                            x_range=xr, y_range=yr2_c, border_fill_color='white',
                            title="", 
-                           width=900, height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
+                           width=900, height=plot_c_h_pix, tools="xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
@@ -1204,6 +1205,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
             ("Gene", "@exons_c_plot_name"),
             ("Transcript IDs", "@exons_c_plot_id"),
         ])
+        hover.toggleable = False
 
         # else:
         #     x_coord_text = coord1/1000000.0 + (coord2/1000000.0 - coord1/1000000.0) / 2.0

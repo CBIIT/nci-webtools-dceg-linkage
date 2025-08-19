@@ -184,7 +184,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
         const url = `http://pubs.broadinstitute.org/mammals/haploreg/detail_v4.2.php?id=${rs}`;
         return (
           <a href={url} target="_blank" rel="noopener noreferrer">
-            Link <i className="bi bi-box-arrow-up-right"></i>
+            <i className="bi bi-box-arrow-up-right"></i>
           </a>
         );
       },
@@ -223,7 +223,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             <Col sm={12} className="d-flex justify-content-center">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
-            <Col sm={12} className="d-flex justify-content-center">
+            <Col sm={12} className="d-flex justify-content-center my-3">
               <Image
                 src="/images/LDassoc_legend.png"
                 title="LDassoc Legend"
@@ -272,13 +272,13 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 View scoring scheme for RegulomeDB scores
               </a>
             </Col>
-            <Col sm={12} className="justify-content-center">
+            <Col sm={{ span: 12, offset: 2 }} className="justify-content-center">
               <ul style={{ listStyleType: "none" }}>
                 <li>
                   Number of Individuals: <b>{results.report.statistics.individuals}</b>
                 </li>
                 <li>
-                  SNPs in Region: <b>{results.report.statistics.in_region}</b>
+                  Variants in Region: <b>{results.report.statistics.in_region}</b>
                 </li>
                 <li>
                   Run time: <b>{Number(results.report.statistics.runtime).toFixed(2)}</b> seconds
