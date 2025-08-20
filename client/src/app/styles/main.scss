@@ -163,11 +163,7 @@ a {
 .card-outside {
   transition: all 0.4s ease-in-out;
   display: inline-block;
-  width: 19%;
   height: 150px;
-  margin: 0; // Remove margin to prevent overflow
-  margin-bottom: 10px;
-  margin-right: 5px;
   text-decoration: none;
   vertical-align: top;
   text-align: left;
@@ -187,6 +183,37 @@ a {
 
 .card-outside:hover .card .card-body p {
   color: #21628d;
+}
+
+@media only screen and (max-width: 1160px) {
+  .card-outside {
+    height: 185px;
+  }
+  .card-body {
+    height: 145px;
+    padding-top: 10px;
+  }
+}
+
+@media only screen and (max-width: 930px) {
+  .card-outside {
+    height: 210px;
+  }
+  .card-body {
+    height: 170px;
+  }
+}
+@media only screen and (max-width: 767px) {
+  .card-body {
+    display: none;
+  }
+  .card-outside {
+    height: 40px;
+    max-width: 225px;
+  }
+  .card-row {
+    min-height: 50px;
+  }
 }
 
 .news-card-outside {
@@ -254,24 +281,10 @@ a {
 }
 
 .card-row {
+  max-width: 1300px;
   min-height: 130px;
-  margin: 0 auto 30px auto;
+  margin: auto;
   text-align: center;
-  display: flex;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: stretch;
-  gap: 8px; // Reduce space between cards on desktop
-  padding-left: 24px; // Add horizontal padding for desktop
-  padding-right: 24px;
-}
-
-.card-outside {
-  margin: 0; // Remove margin to prevent overflow
-}
-
-.border-0 {
-  border: none !important;
 }
 
 .news-card-body p {
@@ -434,34 +447,34 @@ table.table-chip > tbody {
 }
 
 .accordion-bg {
-  background-color: #EEEEEE;
-  
+  background-color: #eeeeee;
+
   .accordion-item {
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
     border: 1px solid #ddd;
   }
-  
+
   .accordion-header {
-    background-color: #EEEEEE;
+    background-color: #eeeeee;
   }
-  
+
   .accordion-button {
-    background-color: #EEEEEE;
-    
+    background-color: #eeeeee;
+
     &:not(.collapsed) {
-      background-color: #DDDDDD;
+      background-color: #dddddd;
       color: #000;
     }
-    
+
     &:focus {
-      background-color: #DDDDDD;
+      background-color: #dddddd;
       border-color: #ccc;
       box-shadow: 0 0 0 0.25rem rgba(221, 221, 221, 0.25);
     }
   }
-  
+
   .accordion-body {
-    background-color: #F8F8F8;
+    background-color: #f8f8f8;
   }
 }
 
@@ -481,7 +494,7 @@ table.table-chip > tbody {
   }
   .card-row {
     justify-content: center; // Center all rows, use gap for equal spacing
-    margin-bottom: 85px;
+    margin: auto;
     padding-left: 1px !important; // Reduce horizontal padding for mobile
     padding-right: 1px !important;
   }
@@ -508,7 +521,6 @@ table.table-chip > tbody {
   }
   .card-outside {
     height: 40px;
-    width: 32%;
   }
   .card-row {
     min-height: 50px;
