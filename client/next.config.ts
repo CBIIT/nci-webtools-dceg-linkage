@@ -5,11 +5,11 @@ const nextConfig: NextConfig = {
     return [
       {
         source: "/LDlinkRestWeb/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:80"}/LDlinkRestWeb/:path*`,
+        destination: `http://${process.env.NEXT_PUBLIC_API_BASE_URL || "localhost:80"}/LDlinkRestWeb/:path*`,
       },
       {
         source: "/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080"}/LDlinkRest/:path*`,
+        destination: `http://${process.env.NEXT_PUBLIC_API_BASE_URL || "localhost:8080"}/LDlinkRest/:path*`,
       },
     ];
   },
