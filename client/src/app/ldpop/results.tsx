@@ -179,7 +179,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                   <Row className="mb-1">
                     <Col md={4} />
                     <Col md={4} className="text-center">
-                      <h3>{`${results.inputs.rs1} ${results.inputs.rs1} LD`}</h3>
+                      <h3>{`${results.inputs.rs1} ${results.inputs.rs2} LD`}</h3>
                     </Col>
                     <Col md={4} className="d-flex justify-content-end">
                       <ExportDropdown
@@ -191,7 +191,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                     </Col>
                   </Row>
                   {isLoaded && (
-                    <div ref={mapRef1}>
+                    <div ref={mapRef1} style={{ position: "relative" }}>
                       <PopMap
                         mapOptions={mapOptions}
                         markers={results.locations?.rs1_rs2_LD_map?.map((loc: Rs1Rs2LDMapLocation, i: number) => ({
@@ -229,19 +229,26 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                               <b>D&#39;</b>: {loc[8]}
                             </div>
                           ),
-                        }))}>
-                        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                          <Image
-                            src="/images/LDpop_legend_R2.png"
-                            alt="LDpop LD legend"
-                            title="LDpop LD Legend"
-                            width={300}
-                            height={120}
-                            style={{ width: 300, height: "auto" }}
-                            priority
-                          />
-                        </div>
-                      </PopMap>
+                        }))}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "0px",
+                          left: "20%",
+                          transform: "translateX(-50%)",
+                          zIndex: 1000,
+                        }}>
+                        <Image
+                          src="/images/LDpop_legend_R2.png"
+                          alt="LDpop LD legend"
+                          title="LDpop LD Legend"
+                          width={300}
+                          height={120}
+                          style={{ width: 300, height: "auto" }}
+                          priority
+                        />
+                      </div>
                     </div>
                   )}
                 </Tab>
@@ -261,7 +268,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                     </Col>
                   </Row>
                   {isLoaded && (
-                    <div ref={mapRef2}>
+                    <div ref={mapRef2} style={{ position: "relative" }}>
                       <PopMap
                         mapOptions={mapOptions}
                         markers={results.locations?.rs1_map?.map((loc: Rs1MapLocation, i: number) => ({
@@ -295,19 +302,26 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                               {loc[5]}
                             </div>
                           ),
-                        }))}>
-                        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                          <Image
-                            src="/images/LDpop_legend_MAF.png"
-                            alt="LDpop MAF legend"
-                            title="LDpop MAF Legend"
-                            width={200}
-                            height={120}
-                            style={{ width: 200, height: "auto" }}
-                            priority
-                          />
-                        </div>
-                      </PopMap>
+                        }))}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "0px",
+                          left: "20%",
+                          transform: "translateX(-50%)",
+                          zIndex: 1000,
+                        }}>
+                        <Image
+                          src="/images/LDpop_legend_MAF.png"
+                          alt="LDpop MAF legend"
+                          title="LDpop MAF Legend"
+                          width={200}
+                          height={120}
+                          style={{ width: 200, height: "auto" }}
+                          priority
+                        />
+                      </div>
                     </div>
                   )}
                 </Tab>
@@ -327,7 +341,7 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                     </Col>
                   </Row>
                   {isLoaded && (
-                    <div ref={mapRef3}>
+                    <div ref={mapRef3} style={{ position: "relative" }}>
                       <PopMap
                         mapOptions={mapOptions}
                         markers={results.locations?.rs2_map?.map((loc: Rs2MapLocation, i: number) => ({
@@ -361,19 +375,26 @@ export default function LdPopResults({ reference, ...params }: { reference: stri
                               {loc[5]}
                             </div>
                           ),
-                        }))}>
-                        <div style={{ display: "flex", justifyContent: "center", marginTop: 16 }}>
-                          <Image
-                            src="/images/LDpop_legend_MAF.png"
-                            alt="LDpop MAF legend"
-                            title="LDpop MAF Legend"
-                            width={200}
-                            height={120}
-                            style={{ width: 200, height: "auto" }}
-                            priority
-                          />
-                        </div>
-                      </PopMap>
+                        }))}
+                      />
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: "0px",
+                          left: "20%",
+                          transform: "translateX(-50%)",
+                          zIndex: 1000,
+                        }}>
+                        <Image
+                          src="/images/LDpop_legend_MAF.png"
+                          alt="LDpop MAF legend"
+                          title="LDpop MAF Legend"
+                          width={200}
+                          height={120}
+                          style={{ width: 200, height: "auto" }}
+                          priority
+                        />
+                      </div>
                     </div>
                   )}
                 </Tab>

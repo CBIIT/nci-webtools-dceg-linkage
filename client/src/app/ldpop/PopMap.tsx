@@ -21,12 +21,7 @@ export interface PopMapProps {
 
 const defaultContainerStyle = { width: "100%", height: "400px" };
 
-const PopMap: React.FC<PopMapProps> = ({
-  mapOptions,
-  containerStyle,
-  markers,
-  children,
-}) => {
+const PopMap: React.FC<PopMapProps> = ({ mapOptions, containerStyle, markers, children }) => {
   return (
     <GoogleMap mapContainerStyle={containerStyle || defaultContainerStyle} options={mapOptions}>
       {markers.map((marker, i) => (
@@ -34,13 +29,22 @@ const PopMap: React.FC<PopMapProps> = ({
           <Marker
             position={marker.position}
             // Only pass icon if it is a string, Icon, or Symbol and has a 'url' if required
-            icon={marker.icon && typeof marker.icon === 'object' && 'url' in marker.icon && !marker.icon.url ? undefined : marker.icon}
+            icon={
+              marker.icon && typeof marker.icon === "object" && "url" in marker.icon && !marker.icon.url
+                ? undefined
+                : marker.icon
+            }
             label={marker.label}
             title={marker.title}
             onClick={marker.onClick}
           />
           {marker.infoWindowOpen && marker.infoWindowContent && (
-            <InfoWindow position={marker.position} onCloseClick={marker.onClick}>
+            <InfoWindow
+              position={marker.position}
+              options={{
+                pixelOffset: new google.maps.Size(0, -40), // Position above the marker using pixel offset
+              }}
+              onCloseClick={marker.onClick}>
               <div>{marker.infoWindowContent}</div>
             </InfoWindow>
           )}
