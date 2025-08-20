@@ -9,6 +9,12 @@ export interface LocusDetails {
   };
 }
 
+export type FormValues = {
+  snps: { value: string; checked: boolean }[];
+  genes: { value: string; checked: boolean }[];
+  tissues: { value: string; checked: boolean }[];
+};
+
 export interface LocusData {
   query_snps: string[][];
   thinned_snps: string[];

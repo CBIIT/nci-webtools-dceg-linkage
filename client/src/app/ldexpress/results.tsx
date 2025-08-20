@@ -1,20 +1,16 @@
 "use client";
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState } from "react";
 import { Row, Col, Container, Accordion, Form, Alert } from "react-bootstrap";
-import { useQuery, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
-import { FormData, LocusData } from "./types";
-
-type FormValues = {
-  snps: { value: string; checked: boolean }[];
-  genes: { value: string; checked: boolean }[];
-  tissues: { value: string; checked: boolean }[];
-};
+import { FormData, LocusData, FormValues } from "./types";
+import { genomeBuildMap } from "@/store";
 
 export default function LdExpressResults({ ref }: { ref: string }) {
+  const [viewWarnings, setViewWarnings] = useState(false);
   const { register, reset, control } = useForm<FormValues>();
   const queryClient = useQueryClient();
   const formData = queryClient.getQueryData(["ldexpress-form-data", ref]) as FormData | undefined;
@@ -72,11 +68,10 @@ export default function LdExpressResults({ ref }: { ref: string }) {
     });
   }, [results, snps, genes, tissues]);
 
-  const genomeBuildMap: Record<string, string> = {
-    grch37: "GRCh37",
-    grch38: "GRCh38",
-    grch38_high_coverage: "GRCh38 High Coverage",
-  };
+  const warningsTableData = useMemo(() => {
+    if (!results || results.error) return [];
+    return results.details.queryWarnings.aaData.map((e) => ({ variant: e[0], position: e[1], details: e[2] }));
+  }, [results]);
 
   const columnHelper = createColumnHelper<any>();
   const columns = [
@@ -99,7 +94,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
       },
     }),
     columnHelper.accessor((row) => row[2], {
-      header: `Position (${genomeBuildMap[formData?.genome_build as string]})`,
+      header: `Position (${genomeBuildMap[formData?.genome_build as string] || "Unknown"})`,
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[3], {
@@ -239,6 +234,21 @@ export default function LdExpressResults({ ref }: { ref: string }) {
     }),
   ];
 
+  const warningsColumns = [
+    columnHelper.accessor((row) => row.variant, {
+      header: "Variant",
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row.position, {
+      header: `Position (${genomeBuildMap[formData?.genome_build as string] || "GRCh37"})`,
+      cell: (info) => info.getValue(),
+    }),
+    columnHelper.accessor((row) => row.details, {
+      header: "Details",
+      cell: (info) => info.getValue(),
+    }),
+  ];
+
   return (
     <>
       <hr />
@@ -257,6 +267,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
                         id={`snp-${index}`}
                         label={field.value}
                         {...register(`snps.${index}.checked`)}
+                        disabled={viewWarnings}
                       />
                     ))}
                   </Accordion.Body>
@@ -271,6 +282,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
                         id={`gene-${index}`}
                         label={field.value}
                         {...register(`genes.${index}.checked`)}
+                        disabled={viewWarnings}
                       />
                     ))}
                   </Accordion.Body>
@@ -285,19 +297,30 @@ export default function LdExpressResults({ ref }: { ref: string }) {
                         id={`tissue-${index}`}
                         label={field.value}
                         {...register(`tissues.${index}.checked`)}
+                        disabled={viewWarnings}
                       />
                     ))}
                   </Accordion.Body>
                 </Accordion.Item>
               </Accordion>
+              <Form className="my-3">
+                <Form.Check
+                  type="switch"
+                  id="view-warnings"
+                  label="Variants With Warnings"
+                  onChange={() => setViewWarnings(!viewWarnings)}
+                />
+              </Form>
             </Col>
             <Col sm="10" className="overflow-auto">
-              <div>
-                {tableData && <Table title="" data={tableData} columns={columns} />}
-                <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
-                  Download GTEx QTL annotated variant list
-                </a>
-              </div>
+              {viewWarnings ? (
+                <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
+              ) : (
+                tableData && <Table title="" data={tableData} columns={columns} />
+              )}
+              <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
+                Download GTEx QTL annotated variant list
+              </a>
             </Col>
           </Row>
         </Container>
