@@ -26,6 +26,7 @@ export default function LdHapResults({ ref }: { ref: string }) {
       <hr />
       {results && !results?.error ? (
         <Container fluid="md" className="justify-content-center">
+          {results?.warning && <Alert variant="warning" dismissible>{results?.warning}</Alert>}
           <Row>
             <Col sm="auto">
               <table className="table table-condensed w-auto">

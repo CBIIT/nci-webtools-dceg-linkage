@@ -16,6 +16,7 @@ export interface ResultsData {
   snps: Record<string, SNP>;
   haplotypes: Record<string, Haplotype>;
   error?: string;
+  warning?: string;
 }
 
 export interface LdhapFormData {
