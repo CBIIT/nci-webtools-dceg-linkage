@@ -109,7 +109,7 @@ export default function SNPClipForm() {
           </Form.Group>
         </Col>
         <Col sm={2}>
-          <div>Threshold</div>
+          <div>Thresholds</div>
           <Form.Group controlId="r2_threshold" className="mb-3">
             <Row className="align-items-center">
               <Col sm={3} xs="auto" style={{ maxWidth: "300px" }}>
@@ -135,10 +135,10 @@ export default function SNPClipForm() {
                     },
                     pattern: {
                       value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
-                      message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
+                      message: "Value must be between 0 and 1",
                     },
                   })}
-                  title="Threshold must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
+                  title="R2 Threshold must be a number between 0 and 1."
                 />
                 <Form.Text className="text-danger">{errors?.r2_threshold?.message}</Form.Text>
               </Col>
@@ -167,10 +167,10 @@ export default function SNPClipForm() {
                     },
                     pattern: {
                       value: /(0(\.[0-9]+)?|1(\.0+)?|\.([0-9]+)?|e-[1-9]+)/,
-                      message: "Value must be between 0 and 1. Scientific notation supported (e.g., 1e-5)",
+                      message: "Value must be between 0 and 1",
                     },
                   })}
-                  title="MAF must be a number between 0 and 1.&#013;Scientific notation supported (i.e. 1e-5)."
+                  title="MAF must be a number between 0 and 1"
                 />
                 <Form.Text className="text-danger">{errors?.maf_threshold?.message}</Form.Text>
               </Col>

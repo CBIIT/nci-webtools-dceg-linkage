@@ -2592,7 +2592,7 @@ def snpclip():
                             f.write("\n")
                 out_json = json.dumps(clip, sort_keys=False)
                 with open(tmp_dir + "snpclip" + reference + ".json", "w") as f:
-                    json.dump(out_json, f)
+                    f.write(out_json)
             except Exception as e:
                 exc_obj = e
                 app.logger.error("".join(traceback.format_exception(None, exc_obj, exc_obj.__traceback__)))
