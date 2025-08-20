@@ -25,47 +25,13 @@ export default function LdTraitResults({ ref }: { ref: string }) {
     queryFn: async () => (ref ? fetchOutput(`ldtrait${ref}.json`) : null),
   });
 
-  // Fetch GWAS Catalog timestamp
-  const { data: timestampData } = useSuspenseQuery({
-    queryKey: ["ldtrait_timestamp"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/LDlinkRestWeb/ldtrait_timestamp");
-        const data = await response.json();
-        return data;
-      } catch (error) {
-        console.error("Failed to fetch timestamp:", error);
-        return null;
-      }
-    },
-  });
-
   // Early return if no meaningful data
   const noData = !results || !results.thinned_snps || !results.details;
-
-  // Format timestamp similar to the original JavaScript implementation
-  const formatTimestamp = (timestampData: any) => {
-    if (!timestampData || !timestampData.$date) return "...";
-    
-    try {
-      const datetime = new Date(timestampData.$date);
-      const date = datetime.toLocaleDateString("en-US");
-      const time = datetime.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-      const timezone = datetime.toString().match(/([A-Z]+[\+-][0-9]+)/)?.[1] || "";
-      return `${date}, ${time} (${timezone})`;
-    } catch (error) {
-      console.error("Error formatting timestamp:", error);
-      return "...";
-    }
-  };
 
   // Transform data for the table
   const tableData = useMemo(() => {
     if (!results || !activeKey || !results.details[activeKey]?.aaData) return [];
-    
+
     return results.details[activeKey].aaData;
   }, [results, activeKey]);
 
@@ -109,13 +75,13 @@ export default function LdTraitResults({ ref }: { ref: string }) {
         const var1 = activeKey; // RS number from the selected variant in the left table
         const var2 = info.row.original[2]; // RS number from current row
         // Use the already processed population string from formData
-        const popCodes = formData?.pop || 'ALL';
-        const genomeBuild = formData?.genome_build || 'grch37'; // Genome build from form data
-        
+        const popCodes = formData?.pop || "ALL";
+        const genomeBuild = formData?.genome_build || "grch37"; // Genome build from form data
+
         const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
-        
-        const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
-        
+
+        const displayValue = typeof value === "number" ? value.toFixed(3) : value;
+
         return (
           <a href={linkUrl} target="_blank" rel="noopener noreferrer">
             {displayValue}
@@ -130,13 +96,13 @@ export default function LdTraitResults({ ref }: { ref: string }) {
         const var1 = activeKey; // RS number from the selected variant in the left table
         const var2 = info.row.original[2]; // RS number from current row
         // Use the already processed population string from formData
-        const popCodes = formData?.pop || 'ALL';
-        const genomeBuild = formData?.genome_build || 'grch37'; // Genome build from form data
-        
+        const popCodes = formData?.pop || "ALL";
+        const genomeBuild = formData?.genome_build || "grch37"; // Genome build from form data
+
         const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
-        
-        const displayValue = typeof value === 'number' ? value.toFixed(3) : value;
-        
+
+        const displayValue = typeof value === "number" ? value.toFixed(3) : value;
+
         return (
           <a href={linkUrl} target="_blank" rel="noopener noreferrer">
             {displayValue}
@@ -145,12 +111,12 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       },
     }),
     columnHelper.accessor((row) => row[8], {
-      header: "Risk Allele Frequency", 
+      header: "Risk Allele Frequency",
       cell: (info) => {
         const value = info.getValue();
-        if (typeof value === 'number') {
+        if (typeof value === "number") {
           return value.toFixed(3);
-        } else if (typeof value === 'string' && !isNaN(parseFloat(value))) {
+        } else if (typeof value === "string" && !isNaN(parseFloat(value))) {
           return parseFloat(value).toFixed(3);
         }
         return value;
@@ -160,7 +126,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       header: "Beta or OR",
       cell: (info) => {
         const value = info.getValue();
-        return typeof value === 'number' ? value.toFixed(3) : value;
+        return typeof value === "number" ? value.toFixed(3) : value;
       },
     }),
     columnHelper.accessor((row) => row[10], {
@@ -203,11 +169,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       cell: (info) => {
         //const rsNumber = info.row.original[2]; // Get RS number from column 2
         return (
-          <a 
-            href={`https://www.ebi.ac.uk/gwas/variants/${info.getValue()}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
+          <a href={`https://www.ebi.ac.uk/gwas/variants/${info.getValue()}`} target="_blank" rel="noopener noreferrer">
             Link
           </a>
         );
@@ -217,7 +179,8 @@ export default function LdTraitResults({ ref }: { ref: string }) {
 
   // Transform warnings data for the table
   const warningsTableData = useMemo(() => {
-    if (!results || !results.details || !results.details.queryWarnings || !results.details.queryWarnings.aaData) return [];
+    if (!results || !results.details || !results.details.queryWarnings || !results.details.queryWarnings.aaData)
+      return [];
     return results.details.queryWarnings.aaData;
   }, [results]);
 
@@ -239,12 +202,13 @@ export default function LdTraitResults({ ref }: { ref: string }) {
 
   return (
     <>
+      <hr />
       {noData ? (
         <Alert variant="warning">No data available</Alert>
       ) : !results.error ? (
         <Container fluid="fluid" className="p-3" id="ldtrait-results-container">
           <Row id="ldtrait-table-container">
-            <Col md={2} >
+            <Col md={2}>
               <div>Variants in LD with GWAS Catalog</div>
               <table id="ldtrait-table-thin" className="table table-striped">
                 <thead>
@@ -282,9 +246,8 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                     </Col>
                   </Row>
                   <div className="table-responsive">
-{tableData.length > 0 && <Table title="" data={tableData} columns={columns} />}
+                    {tableData.length > 0 && <Table title="" data={tableData} columns={columns} />}
                   </div>
-                  
                 </>
               )}
 
@@ -303,11 +266,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
               <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated_${ref}.txt`} download>
                 Download GWAS Catalog annotated variant list
               </a>
-            </Col>
-          </Row>
-          <Row className="mt-2">
-            <Col>
-              <i>GWAS Catalog last updated on <span id="ldtrait-timestamp">{formatTimestamp(timestampData)}</span></i>
             </Col>
           </Row>
         </Container>

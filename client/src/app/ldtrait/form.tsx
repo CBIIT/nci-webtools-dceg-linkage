@@ -43,6 +43,26 @@ export default function LdtraitForm() {
   });
 
   const varFile = watch("varFile") as string | FileList;
+  const snps = watch("snps");
+  const window = watch("window");
+
+  // Calculate estimated processing time using same formula as updateLDtrait()
+  function calculateEstimatedTime(): string {
+    if (!snps || !window) return "";
+
+    const snpCount = snps.split("\n").filter((line) => line.trim()).length;
+    const windowValue = parseInt(window) || 500000;
+
+    const estimateWindowSizeMultiplier = windowValue / 500000.0;
+    const estimateSeconds = Math.round(snpCount * 5 * estimateWindowSizeMultiplier);
+    const estimateMinutes = estimateSeconds / 60;
+
+    if (estimateSeconds < 60) {
+      return `${estimateSeconds} seconds`;
+    } else {
+      return `${estimateMinutes.toFixed(2)} minute(s)`;
+    }
+  }
 
   useEffect(() => {
     if (varFile instanceof FileList && varFile.length > 0) {
@@ -121,7 +141,7 @@ export default function LdtraitForm() {
           </Form.Group>
         </Col>
 
-        <Col sm="2">
+        <Col sm="auto">
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -149,7 +169,8 @@ export default function LdtraitForm() {
               </ToggleButton>
             </ButtonGroup>
           </Form.Group>
-
+        </Col>
+        <Col sm="2">
           <Form.Group className="mb-3">
             <Form.Label>Thresholds</Form.Label>
             <InputGroup className="mb-2">
@@ -198,7 +219,6 @@ export default function LdtraitForm() {
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message || errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
-
         <Col>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
@@ -211,7 +231,12 @@ export default function LdtraitForm() {
         </Col>
       </Row>
 
-      {submitForm.isPending && <CalculateLoading />}
+      {submitForm.isPending && (
+        <div className="text-center my-3">
+          <CalculateLoading />
+          <p className="text-muted">Estimated calculation time: {calculateEstimatedTime()}</p>
+        </div>
+      )}
       {submitForm.isError && (
         <Alert variant="danger" className="mt-3">
           <p>
