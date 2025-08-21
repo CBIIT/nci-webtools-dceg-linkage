@@ -307,7 +307,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
                 <Form.Check
                   type="switch"
                   id="view-warnings"
-                  label="Variants With Warnings"
+                  label="Variants with Warnings"
                   onChange={() => setViewWarnings(!viewWarnings)}
                 />
               </Form>
