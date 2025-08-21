@@ -9,6 +9,7 @@ services:
       - "8080:8080"
     volumes:
       - ./data:/data
+      - ./logs:/logs
     env_file:
       - server/.env
     networks:
@@ -19,9 +20,7 @@ services:
   #     context: .
   #     dockerfile: docker/frontend.dockerfile
   #     args:
-  #       NEXT_PUBLIC_API_BASE_URL: http://backend:80
-  #   environment:
-  #     - NEXT_PUBLIC_API_BASE_URL=http://backend:80
+  #       NEXT_PUBLIC_API_BASE_URL: backend:80
   #   ports:
   #     - "3000:80"
   #   networks:
