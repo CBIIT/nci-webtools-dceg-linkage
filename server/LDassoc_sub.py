@@ -194,11 +194,11 @@ logger.debug(f"Executing tabix command for coordinate window")
 try:
     process = subprocess.Popen(tabix_snp, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = process.communicate()
-    
+
     if process.returncode != 0:
         logger.error(f"Tabix command failed with return code {process.returncode}: {stderr.decode('utf-8')}")
         sys.exit(1)
-    
+
     vcf = csv.reader([x.decode("utf-8") for x in stdout.splitlines()], dialect="excel-tab")
     logger.debug("Successfully executed tabix command and loaded VCF data")
 except Exception as e:
@@ -292,8 +292,7 @@ for geno_n in vcf:
 
 # Calculate and log execution time
 execution_time = round(time.time() - start_time, 2)
-logger.debug(f"LDassoc_sub process {process} completed - processed {len(out)} variants")
-logger.debug(f"Executed LDassoc_sub process {process} ({execution_time}s)")
+logger.debug(f"LDassoc_sub process completed ({execution_time}s) - processed {len(out)} variants")
 
 for i in range(len(out)):
     print("\t".join(str(j) for j in out[i]))
