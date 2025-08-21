@@ -2,12 +2,10 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, Accordion, Spinner, Alert, Card } from "react-bootstrap";
-import { useRouter, usePathname } from "next/navigation";
 import { snpchipPlatforms, snpchip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { FormData } from "./types";
 import { parseSnps } from "@/services/utils";
-import { PLATFORM_LOOKUP } from "./constants";
 import { Platform } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
@@ -91,12 +89,20 @@ export default function SNPChipForm({
   const [selectAllAffymetrix, setSelectAllAffymetrix] = useState(true);
   const [uploadedFileName, setUploadedFileName] = useState<string>("");
   const [accordionOpen, setAccordionOpen] = useState<string | string[] | null>(null);
+  const [platformLookup, setPlatformLookup] = useState<Record<string, string>>({});
 
   useEffect(() => {
     async function fetchPlatforms() {
       try {
         setPlatformsLoading(true);
         const data = await snpchipPlatforms();
+        
+        // Create platform lookup (reverse mapping: fullName -> code)
+        const lookup: Record<string, string> = {};
+        for (const [code, fullName] of Object.entries(data)) {
+          lookup[fullName as string] = code;
+        }
+        
         const illumina: Platform[] = [];
         const affymetrix: Platform[] = [];
         for (const key in data) {
@@ -110,6 +116,7 @@ export default function SNPChipForm({
         setAvailableAffymetrix(affymetrix);
         setIlluminaChips(illumina);
         setAffymetrixChips(affymetrix);
+        setPlatformLookup(lookup);
       } catch (error) {
         console.error("Failed to fetch SNPchip platforms", error);
       } finally {
@@ -222,7 +229,7 @@ export default function SNPChipForm({
           row.map.forEach((p: string) => p && uniquePlatformNames.add(p));
         });
         const headers = Array.from(uniquePlatformNames).map((name) => ({
-          code: PLATFORM_LOOKUP[name] || name,
+          code: platformLookup[name] || name,
           platform: name,
         }));
         // Sort headers alphabetically by full platform name
