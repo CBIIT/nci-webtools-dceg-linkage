@@ -1042,7 +1042,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
         gene_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                            x_range=xr, y_range=yr2, border_fill_color='white',
                            title="", 
-                           width=900, height=plot_h_pix, tools="xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
+                           width=900, height=plot_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_raw) <= max_genes:
         gene_plot.segment(genes_plot_start, genes_plot_yn, genes_plot_end,
@@ -1191,7 +1191,7 @@ def calculate_assoc(file, region, pop, request, genome_build, web, myargs):
         gene_c_plot = figure(min_border_top=2, min_border_bottom=0, min_border_left=100, min_border_right=5,
                            x_range=xr, y_range=yr2_c, border_fill_color='white',
                            title="", 
-                           width=900, height=plot_c_h_pix, tools="xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
+                           width=900, height=plot_c_h_pix, tools="hover,xpan,box_zoom,wheel_zoom,tap,undo,redo,reset,save")
 
         # if len(genes_c_raw) <= max_genes_c:
         gene_c_plot.segment(genes_c_plot_start, genes_c_plot_yn, genes_c_plot_end,
