@@ -4,25 +4,25 @@ import { useForm } from "react-hook-form";
 import { Container, Row, Col, Form, Button, Alert, Modal, Spinner } from "react-bootstrap";
 import Image from "next/image";
 
-const API_BASE_URL = "https://" + process.env.NEXT_PUBLIC_API_BASE_URL || (typeof window !== "undefined" ? window.location.origin : "");
+const BASE_URL = "https://" + process.env.NEXT_PUBLIC_BASE_URL || (typeof window !== "undefined" ? window.location.origin : "");
 
 const API_EXAMPLES = [
   {
     name: "LDexpress",
     link: "/help#LDexpress",
-    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${API_BASE_URL}/LDlinkRest/ldexpress?token=faketoken123'`
+    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI+CEU", "tissues": "Adipose_Subcutaneous+Adipose_Visceral_Omentum", "r2_d": "r2", "r2_d_threshold": "0.1", "p_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldexpress?token=faketoken123'`
   },
   {
     name: "LDhap",
     link: "/help#LDhap",
-    code: `curl -k -X GET '${API_BASE_URL}/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&genome_build=grch38&token=faketoken123'`
+    code: `curl -k -X GET '${BASE_URL}/LDlinkRest/ldhap?snps=rs3%0Ars4&pop=ALL&genome_build=grch38&token=faketoken123'`
   },
   {
     name: "LDmatrix",
     link: "/help#LDmatrix",
     code: [
-      `curl -k -X GET '${API_BASE_URL}/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&genome_build=grch38_high_coverage&token=faketoken123'`,
-      `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "CEU","r2_d": "d", "genome_build": "grch37"}' '${API_BASE_URL}/LDlinkRest/ldmatrix?token=faketoken123'`
+      `curl -k -X GET '${BASE_URL}/LDlinkRest/ldmatrix?snps=rs3%0Ars4%0Ars148890987&pop=CEU&r2_d=d&genome_build=grch38_high_coverage&token=faketoken123'`,
+      `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "CEU","r2_d": "d", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldmatrix?token=faketoken123'`
     ],
     notes: ["GET requests can support up to 300 SNPs.", "POST requests can support up to 2,500 SNPs."]
   },
@@ -30,35 +30,35 @@ const API_EXAMPLES = [
     name: "LDpair",
     link: "/help#LDpair", 
     code: [
-      `curl -k -X GET '${API_BASE_URL}/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&genome_build=grch37&json_out=false&token=faketoken123'`,
-      `curl -k -H "Content-Type: application/json" -X POST -d '{"snp_pairs": [["rs3", "rs4"], ["rs7837688", "rs4242384"]], "pop": "CEU+YRI+CHB","genome_build": "grch37", "json_out": true}' '${API_BASE_URL}/LDlinkRest/ldpair?token=faketoken123'`
+      `curl -k -X GET '${BASE_URL}/LDlinkRest/ldpair?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&genome_build=grch37&json_out=false&token=faketoken123'`,
+      `curl -k -H "Content-Type: application/json" -X POST -d '{"snp_pairs": [["rs3", "rs4"], ["rs7837688", "rs4242384"]], "pop": "CEU+YRI+CHB","genome_build": "grch37", "json_out": true}' '${BASE_URL}/LDlinkRest/ldpair?token=faketoken123'`
     ],
     notes: ["GET requests only support 1 SNP pair.", "POST requests can support up to 10 SNP pairs. If more than 1 SNP pair is provided, a JSON response will always be returned."]
   },
   {
     name: "LDpop",
     link: "/help#LDpop",
-    code: `curl -k -X GET '${API_BASE_URL}/LDlinkRest/ldpop?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&r2_d=r2&genome_build=grch37&token=faketoken123'`
+    code: `curl -k -X GET '${BASE_URL}/LDlinkRest/ldpop?var1=rs3&var2=rs4&pop=CEU%2BYRI%2BCHB&r2_d=r2&genome_build=grch37&token=faketoken123'`
   },
   {
     name: "LDproxy", 
     link: "/help#LDproxy",
-    code: `curl -k -X GET '${API_BASE_URL}/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&window=500000&genome_build=grch37&token=faketoken123'`
+    code: `curl -k -X GET '${BASE_URL}/LDlinkRest/ldproxy?var=rs3&pop=MXL&r2_d=r2&window=500000&genome_build=grch37&token=faketoken123'`
   },
   {
     name: "LDtrait",
     link: "/help#LDtrait",
-    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${API_BASE_URL}/LDlinkRest/ldtrait?token=faketoken123'`
+    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI", "r2_d": "r2", "r2_d_threshold": "0.1", "window": "500000", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/ldtrait?token=faketoken123'`
   },
   {
     name: "SNPchip",
     link: "/help#SNPchip", 
-    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4\\nrs17795812", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1+I_GDA-C+I_GSA-v3C", "genome_build": "grch37"}' '${API_BASE_URL}/LDlinkRest/snpchip?token=faketoken123'`
+    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4\\nrs17795812", "platforms":"A_10X+A_250N+A_250S+A_50H+A_50X+A_AFR+A_ASI+A_CHB2+A_DMETplus+A_EAS+A_EUR+A_Exome1A+A_Exome319+A_Hu+A_Hu-CHB+A_LAT+A_Onco+A_OncoCNV+A_SNP5.0+A_SNP6.0+I_100+I_1M+I_1M-D+I_240S+I_300+I_300-D+I_550v1+I_550v3+I_610-Q+I_650Y+I_660W-Q+I_CNV-12+I_CNV370-D+I_CNV370-Q+I_CVD+I_CardioMetab+I_Core-12+I_CoreE-12v1+I_CoreE-12v1.1+I_CoreE-24v1+I_CoreE-24v1.1+I_Cyto-12v2+I_Cyto-12v2.1+I_Cyto-12v2.1f+I_Cyto850+I_Exome-12+I_Exon510S+I_Immuno-24v1+I_Immuno-24v2+I_Linkage-12+I_Linkage-24+I_ME-Global-8+I_NS-12+I_O1-Q+I_O1S-8+I_O2.5-4+I_O2.5-8+I_O2.5E-8v1+I_O2.5E-8v1.1+I_O2.5E-8v1.2+I_O2.5S-8+I_O5-4+I_O5E-4+I_OE-12+I_OE-12f+I_OE-24+I_OEE-8v1+I_OEE-8v1.1+I_OEE-8v1.2+I_OEE-8v1.3+I_OZH-8v1+I_OZH-8v1.1+I_OZH-8v1.2+I_OncoArray+I_Psyc-24v1+I_Psyc-24v1.1+I_GDA-C+I_GSA-v3C", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/snpchip?token=faketoken123'`
   },
   {
     name: "SNPclip",
     link: "/help#SNPclip",
-    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01", "genome_build": "grch37"}' '${API_BASE_URL}/LDlinkRest/snpclip?token=faketoken123'`
+    code: `curl -k -H "Content-Type: application/json" -X POST -d '{"snps": "rs3\\nrs4", "pop": "YRI", "r2_threshold": "0.1", "maf_threshold": "0.01", "genome_build": "grch37"}' '${BASE_URL}/LDlinkRest/snpclip?token=faketoken123'`
   }
 ];
 
