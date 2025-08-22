@@ -1,19 +1,10 @@
 import { PopOption } from "@/components/select/pop-select";
 
-export interface SNP {
-  RS: string;
-  Coord: string;
-  Alleles: string;
-}
-
-export interface Haplotype {
-  Count: number;
-  Frequency: number;
-  Haplotype: string;
-}
+// Tuple type for snpclip detail data: [position, alleles, comment]
+export type SnpClipDetailTuple = [string, string, string];
 
 export interface ResultsData {
-  details: Record<string, string[]>;
+  details: Record<string, SnpClipDetailTuple>;
   warnings: string[][];
   snp_list: string[];
   snps_ld_pruned?: string[];
@@ -30,7 +21,7 @@ export interface FormData {
   varFile: string | FileList;
 }
 
-export interface SnpClipData {
+export interface SnpClipFormData {
   snps: string;
   pop: string;
   r2_threshold: string;
@@ -39,14 +30,7 @@ export interface SnpClipData {
   reference: number;
 }
 
-export interface Detail {
-  rs_number: string;
-  position: string;
-  alleles: string;
-  comment: string;
-}
-
-export interface Warning {
+export interface VariantDetails {
   rs_number: string;
   position: string;
   alleles: string;

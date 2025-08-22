@@ -8,7 +8,7 @@ import { snpclip } from "@/services/queries";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
-import { FormData, SnpClipData } from "./types";
+import { FormData, SnpClipFormData } from "./types";
 import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
 import MultiSnp from "@/components/form/multiSnp";
 
@@ -54,8 +54,8 @@ export default function SNPClipForm() {
     }
   }, [varFile, setValue, reset]);
 
-  const submitForm = useMutation<any, Error, SnpClipData>({
-    mutationFn: (params: SnpClipData) => snpclip(params),
+  const submitForm = useMutation<any, Error, SnpClipFormData>({
+    mutationFn: (params: SnpClipFormData) => snpclip(params),
     onSuccess: (_data, variables) => {
       if (variables && variables.reference) {
         router.push(`${pathname}?ref=${variables.reference}`);
@@ -66,7 +66,7 @@ export default function SNPClipForm() {
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1));
     const { varFile, ...data } = form;
-    const formData: SnpClipData = {
+    const formData: SnpClipFormData = {
       ...data,
       reference,
       genome_build,

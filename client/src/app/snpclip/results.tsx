@@ -6,7 +6,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { useForm, useWatch } from "react-hook-form";
 import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
-import { FormData, ResultsData, Detail, Warning } from "./types";
+import { FormData, ResultsData, VariantDetails } from "./types";
 import { genomeBuildMap } from "@/store";
 import "./styles.scss";
 
@@ -37,14 +37,14 @@ export default function SNPClipResults({ ref }: { ref: string }) {
   const { warnings, thinnedSnps, detailsToShow } = useMemo(() => {
     if (!results?.details) {
       return {
-        warnings: [] as Warning[],
+        warnings: [] as VariantDetails[],
         thinnedSnps: results?.snp_list || [],
-        detailsToShow: [] as Detail[],
+        detailsToShow: [] as VariantDetails[],
       };
     }
 
     const snpList = [...(results.snp_list || [])];
-    const warnings: Warning[] = [];
+    const warnings: VariantDetails[] = [];
     const details = Object.entries(results.details);
 
     // Process warnings and filter out from snp list
@@ -62,7 +62,7 @@ export default function SNPClipResults({ ref }: { ref: string }) {
     });
 
     // Process details for selected SNP
-    const detailsToShow: Detail[] = selectedSnp
+    const detailsToShow: VariantDetails[] = selectedSnp
       ? details
           .filter(([rs_number, [, , comment]]) => {
             // Include the selected SNP itself if it's kept
@@ -93,7 +93,7 @@ export default function SNPClipResults({ ref }: { ref: string }) {
     return `https://genome.ucsc.edu/cgi-bin/hgTracks?db=${db}&position=${newPosition}&hgFind.matches=${rsNumber}`;
   };
 
-  const columnHelper = createColumnHelper<Detail | Warning>();
+  const columnHelper = createColumnHelper<VariantDetails>();
   const columns = [
     columnHelper.accessor("rs_number", {
       header: "RS Number",
