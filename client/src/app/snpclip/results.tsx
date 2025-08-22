@@ -135,7 +135,7 @@ export default function SNPClipResults({ ref_id }: { ref_id: string }) {
                   <Form.Check
                     type="switch"
                     id="view-warnings"
-                    label="Variants With Warnings"
+                    label="Variants with Warnings"
                     checked={showWarnings}
                     onChange={() => setShowWarnings(!showWarnings)}
                   />

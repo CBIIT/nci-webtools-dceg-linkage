@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Alert from "react-bootstrap/Alert";
 import { Container, Row, Col } from "react-bootstrap";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
@@ -19,7 +19,7 @@ export default function LdTrait() {
   const ref = searchParams.get("ref");
 
   // Fetch and format GWAS Catalog timestamp
-  const { data: timestampData } = useSuspenseQuery({
+  const { data: timestampData, isLoading: timestampLoading } = useQuery({
     queryKey: ["ldtrait_timestamp"],
     queryFn: () =>
       fetch("/LDlinkRestWeb/ldtrait_timestamp")
@@ -28,6 +28,7 @@ export default function LdTrait() {
   });
 
   const formatTimestamp = () => {
+    if (timestampLoading) return "Loading...";
     if (!timestampData?.$date) return "...";
     const datetime = new Date(timestampData.$date);
     const date = datetime.toLocaleDateString("en-US");

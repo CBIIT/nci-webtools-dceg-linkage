@@ -1,7 +1,7 @@
 import { Container, Row, Col } from "react-bootstrap";
 import Image from "next/image";
-import WhatsNew from "@/components/sections/whatsnew";
-import LdToolSection from "@/components/sections/ldToolCards";
+import WhatsNew from "@/components/home/whatsnew";
+import LdToolSection from "@/components/home/ldToolCards";
 
 export default function Home() {
   return (
