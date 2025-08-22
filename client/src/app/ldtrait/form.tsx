@@ -99,8 +99,6 @@ export default function LdtraitForm() {
     };
 
     queryClient.setQueryData(["ldtrait-form-data", reference], formData);
-    queryClient.setQueryData(["ldtrait-form-data", reference], formData);
-    localStorage.setItem(`ldtrait-form-data-${reference}`, JSON.stringify(formData));
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }

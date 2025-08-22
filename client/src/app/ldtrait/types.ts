@@ -1,25 +1,32 @@
 import { PopOption } from "@/components/select/pop-select";
 
+// Better typed tuple for GWAS trait data
+export type GwasTraitData = [
+  string,          // GWAS Trait
+  string,          // PMID
+  string,          // RS Number
+  string,          // Position
+  string,          // Alleles
+  number,          // R²
+  number,          // D'
+  string[],        // LDpair link data
+  string,          // Risk Allele
+  number | string, // Beta or OR
+  string,          // Effect Size
+  string,          // P-value
+  string           // RS Number for link
+];
+
 export interface ResultsData {
-  query_snps: Array<Array<string>>;
+  query_snps: string[][];
   thinned_snps: string[];
   details: {
     [key: string]: {
-      aaData: Array<[
-        string, // GWAS Trait
-        string, // PMID
-        string, // RS Number
-        string, // Position
-        string, // Alleles
-        number, // R²
-        number, // D'
-        Array<string>, // LDpair link data
-        string, // Risk Allele
-        number | string, // Beta or OR
-        string, // Effect Size
-        string, // P-value
-        string  // RS Number for link
-      ]>;
+      aaData: GwasTraitData[];
+    };
+  } & {
+    queryWarnings?: {
+      aaData: string[][];
     };
   };
   error?: string;
@@ -52,7 +59,11 @@ export interface Ldtrait {
   thinned_snps: string[];
   details: {
     [key: string]: {
-      aaData: Array<any>;
+      aaData: GwasTraitData[];
+    };
+  } & {
+    queryWarnings?: {
+      aaData: string[][];
     };
   };
   warning?: string;

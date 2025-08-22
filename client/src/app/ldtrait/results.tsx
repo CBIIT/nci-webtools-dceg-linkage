@@ -1,39 +1,47 @@
 "use client";
-import { Row, Col, Container, Alert } from "react-bootstrap";
+import { useState, useMemo, useEffect } from "react";
+import { Row, Col, Container, Form, Alert } from "react-bootstrap";
 import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
+import { useForm, useWatch } from "react-hook-form";
+import Table from "@/components/table";
 import { fetchOutput } from "@/services/queries";
 import { FormData, ResultsData, LdtraitFormData } from "./types";
 import { genomeBuildMap } from "@/store";
-import { useState, useMemo } from "react";
-import Table from "@/components/table";
+
+interface FormValues {
+  selectedSnp: string;
+}
 
 export default function LdTraitResults({ ref }: { ref: string }) {
-  const [activeKey, setActiveKey] = useState<string | null>(null);
   const [showWarnings, setShowWarnings] = useState(false);
+  const { register, reset, control } = useForm<FormValues>();
 
   const queryClient = useQueryClient();
-  let formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
-  if (!formData && typeof window !== "undefined") {
-    const local = localStorage.getItem(`ldtrait-form-data-${ref}`);
-    if (local) formData = JSON.parse(local);
-  }
-  //const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
+  const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldtrait_results", ref],
     queryFn: async () => (ref ? fetchOutput(`ldtrait${ref}.json`) : null),
   });
 
+  const selectedSnp = useWatch({ control, name: "selectedSnp" });
+
+  useEffect(() => {
+    if (results && !results.error) {
+      reset({ selectedSnp: "" });
+    }
+  }, [results, reset]);
+
   // Early return if no meaningful data
   const noData = !results || !results.thinned_snps || !results.details;
 
   // Transform data for the table
   const tableData = useMemo(() => {
-    if (!results || !activeKey || !results.details[activeKey]?.aaData) return [];
+    if (!results || !selectedSnp || !results.details[selectedSnp]?.aaData) return [];
 
-    return results.details[activeKey].aaData;
-  }, [results, activeKey]);
+    return results.details[selectedSnp].aaData;
+  }, [results, selectedSnp]);
 
   // Create table columns
   const columnHelper = createColumnHelper<any>();
@@ -72,7 +80,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       header: "R²",
       cell: (info) => {
         const value = info.getValue();
-        const var1 = activeKey; // RS number from the selected variant in the left table
+        const var1 = selectedSnp; // RS number from the selected variant in the left table
         const var2 = info.row.original[2]; // RS number from current row
         // Use the already processed population string from formData
         const popCodes = formData?.pop || "ALL";
@@ -93,7 +101,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       header: "D'",
       cell: (info) => {
         const value = info.getValue();
-        const var1 = activeKey; // RS number from the selected variant in the left table
+        const var1 = selectedSnp; // RS number from the selected variant in the left table
         const var2 = info.row.original[2]; // RS number from current row
         // Use the already processed population string from formData
         const popCodes = formData?.pop || "ALL";
@@ -200,78 +208,80 @@ export default function LdTraitResults({ ref }: { ref: string }) {
     }),
   ];
 
+  if (results?.error) {
+    return (
+      <>
+        <hr />
+        <Alert variant="danger">{results.error}</Alert>
+      </>
+    );
+  }
+
+  if (noData) {
+    return (
+      <>
+        <hr />
+        <Alert variant="warning">No data available</Alert>
+      </>
+    );
+  }
+
   return (
     <>
       <hr />
-      {noData ? (
-        <Alert variant="warning">No data available</Alert>
-      ) : !results.error ? (
-        <Container fluid="fluid" className="p-3" id="ldtrait-results-container">
-          <Row id="ldtrait-table-container">
-            <Col md={2}>
-              <div>Variants in LD with GWAS Catalog</div>
-              <table id="ldtrait-table-thin" className="table table-striped">
-                <thead>
-                  <tr>
-                    <th className="rs-number">RS Number</th>
-                  </tr>
-                </thead>
-                <tbody id="ldtrait-snp-list">
-                  {results.thinned_snps.map((snp: string) => (
-                    <tr key={snp} onClick={() => setActiveKey(snp)} className={activeKey === snp ? "active" : ""}>
-                      <td>
-                        <a>{snp}</a>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {results.details.queryWarnings?.aaData?.length > 0 && (
-                <a
-                  id="ldtrait-warnings-button"
-                  title="View details."
-                  onClick={() => setShowWarnings(!showWarnings)}
-                  style={{ cursor: "pointer" }}>
-                  {showWarnings ? "Hide" : "Show"} Variants with Warnings
-                </a>
-              )}
-            </Col>
+      <Container fluid="md" className="p-3">
+        <Row>
+          <Col md={2}>
+            <h5>Variants in LD with GWAS Catalog</h5>
+            <div>RS Number</div>
+            <div className="overflow-auto border p-2" style={{ maxHeight: "400px" }}>
+              {results.thinned_snps.map((snp: string) => (
+                <Form.Check
+                  key={snp}
+                  type="radio"
+                  id={`snp-${snp}`}
+                  label={snp}
+                  value={snp}
+                  {...register("selectedSnp")}
+                  disabled={showWarnings}
+                  className="mb-2"
+                  title="View details"
+                />
+              ))}
+            </div>
 
-            <Col md={10} id="ldtrait-detail">
-              {activeKey && (
-                <>
-                  <Row>
-                    <Col>
-                      <div id="ldtrait-detail-title">Details for {activeKey}</div>
-                    </Col>
-                  </Row>
-                  <div className="table-responsive">
-                    {tableData.length > 0 && <Table title="" data={tableData} columns={columns} />}
-                  </div>
-                </>
-              )}
+            {(results.details.queryWarnings?.aaData?.length ?? 0) > 0 && (
+              <Form className="my-3">
+                <Form.Check
+                  type="switch"
+                  id="view-warnings"
+                  label="Variants with Warnings"
+                  checked={showWarnings}
+                  onChange={() => setShowWarnings(!showWarnings)}
+                />
+              </Form>
+            )}
+          </Col>
 
-              {showWarnings && results.details && results.details.queryWarnings && warningsTableData.length > 0 && (
-                <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
-              )}
+          <Col md={10} className="overflow-auto">
+            {showWarnings && warningsTableData.length > 0 ? (
+              <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
+            ) : selectedSnp && tableData.length > 0 ? (
+              <Table title={`Details for ${selectedSnp}`} data={tableData} columns={columns} />
+            ) : (
+              !showWarnings && <div className="text-muted p-3">Click a variant on the left to view details.</div>
+            )}
+          </Col>
+        </Row>
 
-              {!activeKey && !showWarnings && (
-                <div id="ldtrait-initial-message">Click a variant on the left to view details.</div>
-              )}
-            </Col>
-          </Row>
-
-          <Row className="mt-3">
-            <Col>
-              <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated_${ref}.txt`} download>
-                Download GWAS Catalog annotated variant list
-              </a>
-            </Col>
-          </Row>
-        </Container>
-      ) : (
-        <Alert variant="danger">{results?.error || "An error has occurred"}</Alert>
-      )}
+        <Row className="mt-3">
+          <Col>
+            <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated${ref}.txt`} download>
+              Download GWAS Catalog annotated variant list
+            </a>
+          </Col>
+        </Row>
+      </Container>
     </>
   );
 }

@@ -155,6 +155,7 @@ export default function SNPClipResults({ ref }: { ref: string }) {
                   {...register("selectedSnp")}
                   disabled={showWarnings}
                   className="mb-2"
+                  title="View details"
                 />
               ))}
             </div>
