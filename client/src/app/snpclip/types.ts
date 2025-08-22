@@ -17,6 +17,8 @@ export interface ResultsData {
   warnings: string[][];
   snp_list: string[];
   snps_ld_pruned?: string[];
+  warning?: string;
+  error?: string;
 }
 
 export interface FormData {

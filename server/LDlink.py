@@ -2579,8 +2579,6 @@ def snpclip():
                         clip["filtered"][snp[0]] = details[snp[0]]
                     if "warning" in json_dict:
                         clip["warning"] = json_dict["warning"]
-                        f.write("Warning(s):\n")
-                        f.write(clip["warning"])
                 with open(tmp_dir + "snp_list" + reference + ".txt", "w") as f:
                     for rs_number in snp_list:
                         f.write(rs_number + "\n")

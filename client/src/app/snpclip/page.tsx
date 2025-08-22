@@ -29,7 +29,7 @@ export default function SNPclip() {
           <Col>
             <Form />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-              <Suspense fallback={<CalculateLoading />}>{ref && <Results ref_id={ref} />}</Suspense>
+              <Suspense fallback={<CalculateLoading />}>{ref && <Results ref={ref} />}</Suspense>
             </ErrorBoundary>
           </Col>
         </Row>
