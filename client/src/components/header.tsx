@@ -21,10 +21,7 @@ export function Header({ routes = [] }: HeaderProps) {
   const [search, setSearch] = useState("");
 
   const newSearch = () =>
-    window.open(
-      `https://www.google.com/search?q=site:https://ldlink.nih.gov/ ${encodeURIComponent(search)}`,
-      "_blank"
-    );
+    window.open(`https://www.google.com/search?q=site:https://ldlink.nih.gov/ ${encodeURIComponent(search)}`, "_blank");
 
   const handleKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") newSearch();
@@ -35,15 +32,15 @@ export function Header({ routes = [] }: HeaderProps) {
   return (
     <>
       <header>
-        <div className="usa-banner__header">
-          <div className="usa-banner__inner">
-            <div className="container">
-              <div className="usa-banner__header-text">
-                An official website of the United States government
+        <section className="usa-banner" aria-label="Official government website">
+          <header className="usa-banner__header">
+            <div className="usa-banner__inner">
+              <div className="container">
+                <div className="usa-banner__header-text">An official website of the United States government</div>
               </div>
             </div>
-          </div>
-        </div>
+          </header>
+        </section>
         <Container className="my-2">
           <Row>
             <Col xl="9" md="8" sm="12">
@@ -90,8 +87,7 @@ export function Header({ routes = [] }: HeaderProps) {
                     borderTopLeftRadius: "0",
                     marginLeft: "-1px",
                     cursor: "pointer",
-                  }}
-                >
+                  }}>
                   <i className="bi bi-search"></i>
                 </div>
               </div>
