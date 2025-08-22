@@ -357,42 +357,7 @@ a {
   font-size: 16px;
 }
 
-#snpclip-initial-message {
-  font-weight: bold;
-  font-size: 110%;
-  margin-top: 50px;
-}
-#snpclip-table-container {
-  min-height: 580px;
-}
-.snpclip-table-scroller {
-  overflow-y: auto;
-  max-height: 575px;
-  padding-top: 10px;
-}
-#snpclip-snp-list {
-  /*width:175px; */
-  float: left;
-  max-height: 400px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  border-top: 1px solid #ccc;
-  border-left: 1px solid #ccc;
-  border-right: 1px solid #ccc;
-}
-#snpclip-snp-list > a {
-  text-decoration: underline;
-  color: #2d6a9f;
-}
-#snpclip-detail {
-  /*	border:1px solid #333; */
-  float: left;
-  padding: 10px;
-}
-#snpclip-warning {
-  float: left;
-  padding: 10px;
-}
+
 caption {
   font-weight: bold;
 }

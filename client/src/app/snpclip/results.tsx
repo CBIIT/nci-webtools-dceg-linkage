@@ -141,7 +141,7 @@ export default function SNPClipResults({ ref }: { ref: string }) {
         )}
 
         <Row>
-          <Col md={2} className="snpclip-table-scroller">
+          <Col md={2}>
             <h5>LD Thinned Variant List</h5>
             <div>RS Number</div>
             <div className="overflow-auto border p-2" style={{ maxHeight: "400px" }}>
