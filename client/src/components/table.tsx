@@ -35,7 +35,7 @@ export default function Table({ title = "", data, columns, ...props }: TableProp
     <Container className="mb-3" tabIndex={0}>
       <Row className="justify-content-between mb-2">
         <Col sm="auto">
-          <h4 className="text-primary-emphasis">{title}</h4>
+          <h5>{title}</h5>
         </Col>
         <Col />
         <Col sm="auto">
