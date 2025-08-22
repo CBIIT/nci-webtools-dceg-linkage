@@ -90,7 +90,7 @@ export default function Home() {
                 </a>
                 .
               </p>
-              <p id="ldlink_version">Version {process.env.NEXT_PUBLIC_VERSION}</p>
+              <p>Version {process.env.NEXT_PUBLIC_VERSION}</p>
             </Container>
           </Col>
         </Row>
