@@ -136,7 +136,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
             <Col sm={12} className="d-flex justify-content-center">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
-            <Col sm={12} className="d-flex justify-content-center">
+            <Col sm={12} className="d-flex justify-content-center my-3">
               <Image
                 src="/images/LDmatrix_legend.png"
                 title="LDmatrix Legend"
