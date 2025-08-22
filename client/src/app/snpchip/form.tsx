@@ -256,6 +256,7 @@ export default function SNPChipForm({
           details: detailsText,
         };
         setResults(transformedResults);
+        setAccordionOpen(null);
       } else if (!data.warning) {
         setWarning("No results found for the given SNPs.");
       }
