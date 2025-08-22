@@ -145,9 +145,12 @@ export default function Heritability() {
                   type="file" 
                    {...heritabilityForm.register("file", { 
                     required: "File is required",
-                    validate: (file: File | undefined) => {
-                      if (!file) return true;
-                      const ext = file.name.split('.').pop()?.toLowerCase();
+                    validate: (file: File | File[] | FileList | undefined) => {
+                      if (!file) return 'File is required';
+                      // Handle FileList, File[], or single File
+                      const f = Array.isArray(file) ? file[0] : (file instanceof FileList ? file[0] : file);
+                      if (!f || !f.name) return 'File is required';
+                      const ext = f.name.split('.').pop()?.toLowerCase();
                       return ext === 'txt' || 'Only .txt files are allowed';
                     }
                   })}
