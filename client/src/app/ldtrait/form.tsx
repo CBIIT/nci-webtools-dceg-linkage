@@ -28,6 +28,7 @@ export default function LdtraitForm() {
     window: "500000",
     ifContinue: "Continue",
     varFile: "",
+    reference: "",
   };
 
   const {
@@ -88,7 +89,7 @@ export default function LdtraitForm() {
   });
 
   async function onSubmit(form: FormData) {
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000);
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
     const { varFile, ...data } = form;
     const formData: LdtraitFormData = {
       ...data,

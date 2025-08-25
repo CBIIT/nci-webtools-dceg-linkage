@@ -30,6 +30,7 @@ export interface ResultsData {
     };
   };
   error?: string;
+  warning?: string;
 }
 
 export interface FormData {
@@ -40,6 +41,7 @@ export interface FormData {
   r2_d_threshold: string;
   window: string;
   genome_build: string;
+  reference: string;
   ifContinue?: "Continue" | "False";
 }
 
@@ -50,7 +52,7 @@ export interface LdtraitFormData {
   r2_d_threshold: string;
   window: string;
   genome_build: string;
-  reference: number;
+  reference: string;
   ifContinue: "Continue" | "False";
 }
 

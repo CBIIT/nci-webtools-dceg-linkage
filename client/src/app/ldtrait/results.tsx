@@ -1,12 +1,13 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
-import { Row, Col, Container, Form, Alert } from "react-bootstrap";
-import { useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
+import { Row, Col, Container, Form, Alert, Button } from "react-bootstrap";
+import { useSuspenseQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { createColumnHelper } from "@tanstack/react-table";
 import { useForm, useWatch } from "react-hook-form";
+import { useRouter, usePathname } from "next/navigation";
 import Table from "@/components/table";
-import { fetchOutput } from "@/services/queries";
-import { FormData, ResultsData, LdtraitFormData } from "./types";
+import { fetchOutput, ldtrait } from "@/services/queries";
+import { ResultsData, LdtraitFormData, Ldtrait } from "./types";
 import { genomeBuildMap } from "@/store";
 
 interface FormValues {
@@ -18,7 +19,33 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   const { register, reset, control } = useForm<FormValues>();
 
   const queryClient = useQueryClient();
+  const router = useRouter();
+  const pathname = usePathname();
   const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
+  console.log(formData, ref);
+  const continueSubmit = useMutation<Ldtrait, Error, LdtraitFormData>({
+    mutationFn: (params: LdtraitFormData) => ldtrait(params),
+    onSuccess: (_data, variables) => {
+      if (variables && variables.reference) {
+        router.push(`${pathname}?ref=${variables.reference}`);
+      }
+    },
+  });
+
+  const handleContinue = () => {
+    console.log(formData, ref);
+    if (!formData) return;
+
+    const newReference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
+    const continueFormData: LdtraitFormData = {
+      ...formData,
+      reference: newReference,
+      ifContinue: "False",
+    };
+
+    queryClient.setQueryData(["ldtrait-form-data", newReference], continueFormData);
+    continueSubmit.mutate(continueFormData);
+  };
 
   const { data: results } = useSuspenseQuery<ResultsData>({
     queryKey: ["ldtrait_results", ref],
@@ -221,7 +248,18 @@ export default function LdTraitResults({ ref }: { ref: string }) {
     return (
       <>
         <hr />
-        <Alert variant="warning">No data available</Alert>
+        {results?.warning ? (
+          <div className="text-center">
+            <Alert variant="warning">{results.warning}</Alert>
+            <div>
+              <Button variant="primary" onClick={handleContinue} disabled={continueSubmit.isPending}>
+                Continue
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <Alert variant="warning">No data available</Alert>
+        )}
       </>
     );
   }
