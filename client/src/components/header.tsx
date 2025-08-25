@@ -41,8 +41,8 @@ export function Header({ routes = [] }: HeaderProps) {
             </div>
           </header>
         </section>
-        <Container className="my-2">
-          <Row>
+        <Container className="my-0">
+          <Row className="align-items-center">
             <Col xl="9" md="8" sm="12">
               <a rel="noopener noreferrer" href="https://cancercontrol.cancer.gov/">
                 <Image
@@ -57,7 +57,7 @@ export function Header({ routes = [] }: HeaderProps) {
             </Col>
 
             <Col xl="3" md="4" sm="9" xs="9">
-              <div className="d-flex" style={{ width: "auto" }}>
+              <div className="d-flex align-items-center justify-content-center" style={{ width: "auto" }}>
                 <label htmlFor="doc_search" className="visually-hidden">
                   Search:
                 </label>
