@@ -1,5 +1,14 @@
 "use client";
 
+function parseVersion(versionString: string | undefined): string {
+  if (!versionString) return "dev";
+  
+  // Match version pattern like X.Y.Z where X, Y, Z are numbers
+  const versionMatch = versionString.match(/(\d+\.\d+\.\d+)/);
+  
+  return versionMatch ? versionMatch[1] : "dev";
+}
+
 export default function Footer() {
   return (
     <footer className="footer text-left text-md-center pt-4 pb-4 text-light flex-none">
@@ -46,7 +55,7 @@ export default function Footer() {
           <li className="pb-1 d-none d-md-inline">|</li>
           <li className="pb-1 d-block d-md-inline">
             <a className="text-light m-1" target="_blank" href="https://github.com/CBIIT/nci-webtools-dceg-linkage">
-              Version {process.env.NEXT_PUBLIC_VERSION || "dev"}
+              Version {parseVersion(process.env.NEXT_PUBLIC_VERSION)}
             </a>
           </li>
         </ul>
