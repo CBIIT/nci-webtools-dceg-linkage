@@ -22,7 +22,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
-  console.log(formData, ref);
   const continueSubmit = useMutation<Ldtrait, Error, LdtraitFormData>({
     mutationFn: (params: LdtraitFormData) => ldtrait(params),
     onSuccess: (_data, variables) => {
@@ -33,7 +32,6 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   });
 
   const handleContinue = () => {
-    console.log(formData, ref);
     if (!formData) return;
 
     const newReference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
