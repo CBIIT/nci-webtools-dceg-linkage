@@ -69,7 +69,7 @@ export function Header({ routes = [] }: HeaderProps) {
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={handleKey}
                   className="form-control"
-                  placeholder="Document Site Search"
+                  placeholder="Site Search"
                   style={{
                     borderTopLeftRadius: "20px",
                     borderBottomLeftRadius: "20px",
