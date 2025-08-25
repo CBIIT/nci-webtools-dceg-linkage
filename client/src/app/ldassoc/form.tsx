@@ -178,7 +178,7 @@ export default function LDAssocForm() {
 
   async function onSubmit(data: any) {
     if (!data.useEx) await handleUpload(data);
-    const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
+    const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
     const formData = {
       ...data,
       reference,

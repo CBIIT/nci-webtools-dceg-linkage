@@ -48,13 +48,9 @@ export default function LdTrait() {
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
             <Form />
-            {ref && (
-              <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-                <Suspense fallback={<CalculateLoading />}>
-                  <Results ref={ref} />
-                </Suspense>
-              </ErrorBoundary>
-            )}
+            <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
+              <Suspense fallback={<CalculateLoading />}>{ref && <Results ref={ref} />}</Suspense>
+            </ErrorBoundary>
             <i>
               GWAS Catalog last updated on <span id="ldtrait-timestamp">{formatTimestamp()}</span>
             </i>
