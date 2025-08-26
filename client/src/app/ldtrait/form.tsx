@@ -6,15 +6,32 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { AxiosError } from "axios";
 import { ldtrait } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, getOptionsFromKeys } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps, parseRateLimitError } from "@/services/utils";
-import { FormData, LdtraitFormData, Ldtrait } from "./types";
+import { FormData, Ldtrait, submitFormData } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
-export default function LdtraitForm() {
-  const queryClient = useQueryClient();
+// Calculate estimated processing time using same formula as updateLDtrait()
+export function calculateEstimatedTime(snps: string, window: string): string {
+  if (!snps || !window) return "";
+
+  const snpCount = snps.split("\n").filter((line) => line.trim()).length;
+  const windowValue = parseInt(window) || 500000;
+
+  const estimateWindowSizeMultiplier = windowValue / 500000.0;
+  const estimateSeconds = Math.round(snpCount * 5 * estimateWindowSizeMultiplier);
+  const estimateMinutes = estimateSeconds / 60;
+
+  if (estimateSeconds < 60) {
+    return `${estimateSeconds} seconds`;
+  } else {
+    return `${estimateMinutes.toFixed(2)} minute(s)`;
+  }
+}
+
+export default function LdtraitForm({ params }: { params: submitFormData }) {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state: { genome_build: string }) => state);
@@ -47,23 +64,17 @@ export default function LdtraitForm() {
   const snps = watch("snps");
   const window = watch("window");
 
-  // Calculate estimated processing time using same formula as updateLDtrait()
-  function calculateEstimatedTime(): string {
-    if (!snps || !window) return "";
-
-    const snpCount = snps.split("\n").filter((line) => line.trim()).length;
-    const windowValue = parseInt(window) || 500000;
-
-    const estimateWindowSizeMultiplier = windowValue / 500000.0;
-    const estimateSeconds = Math.round(snpCount * 5 * estimateWindowSizeMultiplier);
-    const estimateMinutes = estimateSeconds / 60;
-
-    if (estimateSeconds < 60) {
-      return `${estimateSeconds} seconds`;
-    } else {
-      return `${estimateMinutes.toFixed(2)} minute(s)`;
+  // Load form from URL params
+  useEffect(() => {
+    if (params && Object.keys(params).length > 0) {
+      const popArray = getOptionsFromKeys(params.pop);
+      reset({
+        ...params,
+        pop: popArray,
+        varFile: "",
+      });
     }
-  }
+  }, [params, reset]);
 
   useEffect(() => {
     if (varFile instanceof FileList && varFile.length > 0) {
@@ -79,11 +90,12 @@ export default function LdtraitForm() {
     }
   }, [varFile, setValue, reset]);
 
-  const submitForm = useMutation<Ldtrait, Error, LdtraitFormData>({
-    mutationFn: (params: LdtraitFormData) => ldtrait(params),
+  const submitForm = useMutation<Ldtrait, Error, submitFormData>({
+    mutationFn: (params: submitFormData) => ldtrait(params),
     onSuccess: (_data, variables) => {
       if (variables && variables.reference) {
-        router.push(`${pathname}?ref=${variables.reference}`);
+        const urlParams = new URLSearchParams({ ...variables });
+        router.push(`${pathname}?${urlParams.toString()}`);
       }
     },
   });
@@ -91,15 +103,14 @@ export default function LdtraitForm() {
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
     const { varFile, ...data } = form;
-    const formData: LdtraitFormData = {
+    const formData: submitFormData = {
       ...data,
       reference,
       genome_build,
       pop: getSelectedPopulationGroups(form.pop),
-      ifContinue: form.ifContinue || "Continue",
+      ifContinue: "Continue",
     };
 
-    queryClient.setQueryData(["ldtrait-form-data", reference], formData);
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
@@ -108,7 +119,6 @@ export default function LdtraitForm() {
     event.preventDefault();
     router.push("/ldtrait");
     reset(defaultForm);
-    queryClient.invalidateQueries({ queryKey: ["ldtrait-form-data"] });
     submitForm.reset();
   }
 
@@ -233,7 +243,7 @@ export default function LdtraitForm() {
       {submitForm.isPending && (
         <div className="text-center my-3">
           <CalculateLoading />
-          <p className="text-muted">Estimated calculation time: {calculateEstimatedTime()}</p>
+          <p className="text-muted">Estimated calculation time: {calculateEstimatedTime(snps, window)}</p>
         </div>
       )}
       {submitForm.isError && (

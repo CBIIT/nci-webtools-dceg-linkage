@@ -6,37 +6,36 @@ import { createColumnHelper } from "@tanstack/react-table";
 import { useForm, useWatch } from "react-hook-form";
 import { useRouter, usePathname } from "next/navigation";
 import Table from "@/components/table";
+import CalculateLoading from "@/components/calculateLoading";
 import { fetchOutput, ldtrait } from "@/services/queries";
-import { ResultsData, LdtraitFormData, Ldtrait } from "./types";
+import { ResultsData, Ldtrait, submitFormData } from "./types";
+import { calculateEstimatedTime } from "./form";
 import { genomeBuildMap } from "@/store";
 
-interface FormValues {
-  selectedSnp: string;
-}
-
-export default function LdTraitResults({ ref }: { ref: string }) {
+export default function LdTraitResults({ reference, ...params }: { reference: string } & submitFormData) {
   const [showWarnings, setShowWarnings] = useState(false);
-  const { register, reset, control } = useForm<FormValues>();
+  const { register, reset, control } = useForm<{ selectedSnp: string }>();
 
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const formData = queryClient.getQueryData(["ldtrait-form-data", ref]) as LdtraitFormData | undefined;
-  const continueSubmit = useMutation<Ldtrait, Error, LdtraitFormData>({
-    mutationFn: (params: LdtraitFormData) => ldtrait(params),
+
+  const continueSubmit = useMutation<Ldtrait, Error, submitFormData>({
+    mutationFn: (params: submitFormData) => ldtrait(params),
     onSuccess: (_data, variables) => {
       if (variables && variables.reference) {
-        router.push(`${pathname}?ref=${variables.reference}`);
+        const urlParams = new URLSearchParams({ ...variables });
+        router.push(`${pathname}?${urlParams.toString()}`);
       }
     },
   });
 
   const handleContinue = () => {
-    if (!formData) return;
+    if (!params) return;
 
     const newReference = Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString();
-    const continueFormData: LdtraitFormData = {
-      ...formData,
+    const continueFormData: submitFormData = {
+      ...params,
       reference: newReference,
       ifContinue: "False",
     };
@@ -46,8 +45,8 @@ export default function LdTraitResults({ ref }: { ref: string }) {
   };
 
   const { data: results } = useSuspenseQuery<ResultsData>({
-    queryKey: ["ldtrait_results", ref],
-    queryFn: async () => (ref ? fetchOutput(`ldtrait${ref}.json`) : null),
+    queryKey: ["ldtrait_results", reference],
+    queryFn: async () => (reference ? fetchOutput(`ldtrait${reference}.json`) : null),
   });
 
   const selectedSnp = useWatch({ control, name: "selectedSnp" });
@@ -94,7 +93,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       },
     }),
     columnHelper.accessor((row) => row[3], {
-      header: `Position (${genomeBuildMap[formData?.genome_build || "grch37"]})`,
+      header: `Position (${genomeBuildMap[params?.genome_build || "grch37"]})`,
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[4], {
@@ -107,9 +106,9 @@ export default function LdTraitResults({ ref }: { ref: string }) {
         const value = info.getValue();
         const var1 = selectedSnp; // RS number from the selected variant in the left table
         const var2 = info.row.original[2]; // RS number from current row
-        // Use the already processed population string from formData
-        const popCodes = formData?.pop || "ALL";
-        const genomeBuild = formData?.genome_build || "grch37"; // Genome build from form data
+        // Use the already processed population string from params
+        const popCodes = params?.pop || "ALL";
+        const genomeBuild = params?.genome_build || "grch37"; // Genome build from form data
 
         const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
 
@@ -128,9 +127,9 @@ export default function LdTraitResults({ ref }: { ref: string }) {
         const value = info.getValue();
         const var1 = selectedSnp; // RS number from the selected variant in the left table
         const var2 = info.row.original[2]; // RS number from current row
-        // Use the already processed population string from formData
-        const popCodes = formData?.pop || "ALL";
-        const genomeBuild = formData?.genome_build || "grch37"; // Genome build from form data
+        // Use the already processed population string from params
+        const popCodes = params?.pop || "ALL";
+        const genomeBuild = params?.genome_build || "grch37"; // Genome build from form data
 
         const linkUrl = `/ldpair?var1=${var1}&var2=${var2}&pop=${popCodes}&genome_build=${genomeBuild}&tab=ldpair`;
 
@@ -224,7 +223,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[1], {
-      header: `Position (${genomeBuildMap[formData?.genome_build || "grch37"]})`,
+      header: `Position (${genomeBuildMap[params?.genome_build || "grch37"]})`,
       cell: (info) => info.getValue(),
     }),
     columnHelper.accessor((row) => row[2], {
@@ -254,6 +253,12 @@ export default function LdTraitResults({ ref }: { ref: string }) {
                 Continue
               </Button>
             </div>
+            {continueSubmit.isPending && (
+              <div className="text-center my-3">
+                <CalculateLoading />
+                <p className="text-muted">Estimated calculation time: {calculateEstimatedTime(params?.snps || "", params?.window || "500000")}</p>
+              </div>
+            )}
           </div>
         ) : (
           <Alert variant="warning">No data available</Alert>
@@ -312,7 +317,7 @@ export default function LdTraitResults({ ref }: { ref: string }) {
 
         <Row className="mt-3">
           <Col>
-            <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated${ref}.txt`} download>
+            <a href={`/LDlinkRestWeb/tmp/trait_variants_annotated${reference}.txt`} download>
               Download GWAS Catalog annotated variant list
             </a>
           </Col>

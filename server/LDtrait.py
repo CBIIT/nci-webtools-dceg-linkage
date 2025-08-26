@@ -319,6 +319,7 @@ def calculate_trait(snplst, pop, request, web, r2_d, genome_build, r2_d_threshol
         output["warning"] = 'Too many snp pairs found within the specified base pair window which might cause server timeout.'+\
             ' You might want to split the input in multiple runs to avoid timeout. ' +\
             ' If you still want to proceed with the current list, click "Continue".' + \
+            ' If you want to start over, click "Reset".' + \
                               str(output["warning"] if "warning" in output else "")
         json_output = json.dumps(output, sort_keys=True, indent=2)
         print(json_output, file=out_json)

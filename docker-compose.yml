@@ -21,6 +21,8 @@ services:
   #     dockerfile: docker/frontend.dockerfile
   #     args:
   #       NEXT_PUBLIC_API_BASE_URL: http://backend:80
+  #       NEXT_PUBLIC_BASE_URL: localhost
+  #       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: ""
   #   ports:
   #     - "3000:80"
   #   networks:

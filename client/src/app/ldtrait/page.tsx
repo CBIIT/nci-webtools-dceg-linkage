@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import Form from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import { submitFormData } from "./types";
 
 const Results = dynamic(() => import("./results"), {
   ssr: false,
@@ -16,7 +17,7 @@ const Results = dynamic(() => import("./results"), {
 
 export default function LdTrait() {
   const searchParams = useSearchParams();
-  const ref = searchParams.get("ref");
+  const params = Object.fromEntries(searchParams.entries()) as unknown as submitFormData;
 
   // Fetch and format GWAS Catalog timestamp
   const { data: timestampData, isLoading: timestampLoading } = useQuery({
@@ -47,9 +48,9 @@ export default function LdTrait() {
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
-            <Form />
+            <Form params={params} />
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
-              <Suspense fallback={<CalculateLoading />}>{ref && <Results ref={ref} />}</Suspense>
+              <Suspense fallback={<CalculateLoading />}>{params.reference && <Results {...params} />}</Suspense>
             </ErrorBoundary>
             <i>
               GWAS Catalog last updated on <span id="ldtrait-timestamp">{formatTimestamp()}</span>

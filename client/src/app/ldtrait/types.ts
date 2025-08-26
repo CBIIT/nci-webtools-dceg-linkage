@@ -45,7 +45,7 @@ export interface FormData {
   ifContinue?: "Continue" | "False";
 }
 
-export interface LdtraitFormData {
+export interface submitFormData {
   snps: string;
   pop: string;
   r2_d: "r2" | "d";
