@@ -1,5 +1,6 @@
 import Select, { components } from "react-select";
 import { Controller } from "react-hook-form";
+import { useState, useEffect } from "react";
 import "./select.scss";
 
 export interface PopOption {
@@ -143,6 +144,18 @@ export function getSelectedPopulationGroups(selected: PopOption[], populationsOb
 }
 
 export default function PopSelect({ name, control, rules }: { name: string; control: any; rules?: any }) {
+  const [showWarning, setShowWarning] = useState(false);
+
+  // Auto-hide the warning popup after 5 seconds
+  useEffect(() => {
+    if (showWarning) {
+      const timer = setTimeout(() => {
+        setShowWarning(false);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [showWarning]);
+
   const popGroups: GroupedOption[] = Object.entries(populations).map(([key, group]) => ({
     label: `(${key}) ${group.label}`,
     value: key,
@@ -224,6 +237,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
     const currHasAll = Array.isArray(selected) && selected.some((opt) => opt.value === "ALL");
 
     if (currHasAll && !prevHasAll) {
+      setShowWarning(false);
       onchange([{ label: "(ALL) All Populations", value: "ALL" }]);
       return;
     }
@@ -231,6 +245,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
     // If "ALL" was previously selected and now something else is selected, remove "ALL"
     if (!currHasAll && prevHasAll) {
       const filtered = selected.filter((opt) => opt.value !== "ALL");
+      setShowWarning(filtered.length >= 2);
       onchange(filtered);
       return;
     }
@@ -238,36 +253,72 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
     // If both present, remove "ALL"
     if (currHasAll && selected.length > 1) {
       const filtered = selected.filter((opt) => opt.value !== "ALL");
+      setShowWarning(filtered.length >= 2);
       onchange(filtered);
       return;
     }
 
+    // Show warning if 2 or more populations selected
+    setShowWarning(selected.length >= 2);
     onchange(selected);
   }
 
   return (
-    <Controller
-      name={name}
-      control={control}
-      rules={rules}
-      render={({ field }) => (
-        <div title="Select Population">
-          <Select
-            {...field}
-            inputId={name}
-            isMulti
-            options={popOptions}
-            closeMenuOnSelect={false}
-            components={{ Group }}
-            className="basic-multi-select"
-            classNamePrefix="select"
-            value={field.value || []}
-            styles={customStyles}
-            formatGroupLabel={formatGroupLabel}
-            onChange={(selected) => handleChange(Array.from(selected), field.value, field.onChange)}
-          />
-        </div>
-      )}
-    />
+    <>
+      <div style={{ position: 'relative' }}>
+        <Controller
+          name={name}
+          control={control}
+          rules={rules}
+          render={({ field }) => (
+            <div title="Select Population">
+              <Select
+                {...field}
+                inputId={name}
+                isMulti
+                options={popOptions}
+                closeMenuOnSelect={false}
+                components={{ Group }}
+                className="basic-multi-select"
+                classNamePrefix="select"
+                value={field.value || []}
+                styles={customStyles}
+                formatGroupLabel={formatGroupLabel}
+                onChange={(selected) => handleChange(Array.from(selected), field.value, field.onChange)}
+              />
+            </div>
+          )}
+        />
+
+        {showWarning && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '0',
+              left: '100%',
+              zIndex: 10000,
+              backgroundColor: '#ffffffff',
+              border: '1px solid #f6f4ecff',
+              borderRadius: '4px',
+              padding: '8px 12px',
+              fontSize: '0.875rem',
+              color: '#000000ff',
+              marginLeft: '8px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              opacity: 1,
+              transform: 'translateY(0)',
+              transition: 'all 0.3s ease-in-out',
+              minWidth: '200px',
+              maxWidth: '250px'
+            }}
+          >
+            <div style={{ paddingRight: '1px' }}>
+              <strong>Warning:</strong><br />
+              Selecting 2 or more sub-populations at a time significantly slows down query time and ties up limited system resources.
+            </div>
+          </div>
+        )}
+      </div>
+    </>
   );
 }
