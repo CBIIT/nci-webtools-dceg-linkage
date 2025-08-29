@@ -816,23 +816,30 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
     source = ColumnDataSource(data)
 
     proxy_plot.line(recomb_x, recomb_y, line_width=1, color="black", alpha=0.5)
+ # Add scatter plot with specific hover tool
+    scatter_renderer = proxy_plot.scatter(x='x', y='y', size='size',
+                                        color='color', alpha=0.5, source=source)
 
-    proxy_plot.scatter(x='x', y='y', size='size',
-                    color='color', alpha=0.5, source=source)
-
-    hover = proxy_plot.select(dict(type=HoverTool))
-    hover.tooltips = OrderedDict([
-        ("Query Variant", "@qrs @q_alle"),
-        ("Proxy Variant", "@prs @p_alle"),
-        ("Distance (Mb)", "@dist"),
-        ("MAF (Query,Proxy)", "@q_maf,@p_maf"),
-        ("R" + sup_2, "@r"),
-        ("D\'", "@d"),
-        ("Correlated Alleles", "@alleles"),
-        ("FORGEdb Score", "@forgedb"),
-        ("RegulomeDB Rank", "@regdb"),
-        ("Functional Class", "@funct"),
-    ])
+    # Create specific hover tool for scatter points only
+    hover_tool = HoverTool(
+        renderers=[scatter_renderer],
+        tooltips=OrderedDict([
+            ("Query Variant", "@qrs @q_alle"),
+            ("Proxy Variant", "@prs @p_alle"),
+            ("Distance (Mb)", "@dist"),
+            ("MAF (Query,Proxy)", "@q_maf,@p_maf"),
+            ("R" + sup_2, "@r"),
+            ("D\'", "@d"),
+            ("Correlated Alleles", "@alleles"),
+            ("FORGEdb Score", "@forgedb"),
+            ("RegulomeDB Rank", "@regdb"),
+            ("Functional Class", "@funct"),
+        ])
+    )
+    
+    # Remove the default hover tool and add our specific one
+    proxy_plot.tools = [tool for tool in proxy_plot.tools if not isinstance(tool, HoverTool)]
+    proxy_plot.add_tools(hover_tool)
 
     if annotate == "regulome":
         proxy_plot.text(x, y, text=regdb, alpha=1, text_font_size="7pt",
