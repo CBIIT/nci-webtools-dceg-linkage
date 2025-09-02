@@ -87,10 +87,10 @@ export default function LdHapForm() {
   return (
     <Form id="ldhap-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col s={12} sm={6} md={6} lg={3}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
-        <Col sm={2}>
+        <Col s={12} sm={6} md={6} lg={3}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
@@ -100,7 +100,7 @@ export default function LdHapForm() {
             )}
           </Form.Group>
         </Col>
-        <Col sm="3">
+        <Col s={12} sm={6} md={6} lg={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -108,7 +108,7 @@ export default function LdHapForm() {
           </Form.Group>
         </Col>
         <Col />
-        <Col sm="2">
+        <Col s={12} sm={4} md={4} lg={2}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
