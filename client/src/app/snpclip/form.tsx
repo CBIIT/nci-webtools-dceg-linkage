@@ -178,7 +178,7 @@ export default function SNPClipForm() {
           </Form.Group>
         </Col>
 
-        <Col   s={12} sm={12} md={12} lg={2} className="d-flex justify-content-end align-items-start ms-auto">
+        <Col   s={12} sm={12} md={12} lg={2} style={{ minWidth: "180px" }} className="d-flex justify-content-end align-items-start ms-auto">
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

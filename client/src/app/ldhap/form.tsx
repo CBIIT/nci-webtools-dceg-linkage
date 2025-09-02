@@ -108,7 +108,7 @@ export default function LdHapForm() {
           </Form.Group>
         </Col>
         <Col />
-        <Col s={12} sm={4} md={4} lg={2}>
+        <Col s={12} sm={4} md={4} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

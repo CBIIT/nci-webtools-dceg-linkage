@@ -289,7 +289,7 @@ export default function LDExpressForm() {
             </Col>
           </Form.Group>
         </Col>
-        <Col xs={12} sm={6} md={4} lg={2} >
+        <Col xs={12} sm={6} md={4} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

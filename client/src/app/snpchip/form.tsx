@@ -302,7 +302,7 @@ export default function SNPChipForm({
           </Form.Group>
         </Col>
         <Col />
-        <Col s={12} sm={12} md={12} lg={3} className="d-flex justify-content-end">
+        <Col s={12} sm={12} md={12} lg={3} className="d-flex justify-content-end" style={{ minWidth: "180px" }}>
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
           </Button>

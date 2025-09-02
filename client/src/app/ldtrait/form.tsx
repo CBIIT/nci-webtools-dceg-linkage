@@ -228,7 +228,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message || errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col s={12} sm={12} md={12} lg={2}>
+        <Col s={12} sm={12} md={12} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
