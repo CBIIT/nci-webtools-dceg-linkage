@@ -147,7 +147,7 @@ export default function Correlation() {
 
       <Form id="correlation-form" onSubmit={geneticForm.handleSubmit(onGeneticSubmit)} onReset={onGeneticReset} noValidate>
         <Row>
-          <Col sm={3}>
+            <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
               {typeof exampleFile1 === "string" && exampleFile1 !== "" ? (
@@ -231,30 +231,7 @@ export default function Correlation() {
               </div>
               <Form.Text className="text-danger">{geneticForm.formState.errors?.file2?.message}</Form.Text>
             </Form.Group>
-          </Col>
-          <Col sm={1}></Col>
-          <Col sm={3}>
-            <Form.Group controlId="pop" className="mb-3">
-              <Form.Label>Population</Form.Label>
-              <LdscorePopSelect name="pop" control={geneticForm.control} rules={{ required: "Population is required" }} />
-              <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
-            </Form.Group>
-          </Col>
-          <Col />
-          <Col sm={3}>
-            <div className="text-end">
-              <Button type="reset" variant="outline-danger" className="me-1">
-                Reset
-              </Button>
-              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
-               {geneticLoading ? "Loading..." : "Calculate"}
-              </Button>
-            </div>
-          </Col>
-        </Row>
-        <Row>
-          <Col sm={12}>
-            <div className="mb-3">
+                        <div className="mb-3">
               <Form.Check
                 type="switch"
                 id="use-example-correlation"
@@ -312,7 +289,27 @@ export default function Correlation() {
               )}
             </div>
           </Col>
+        
+           <Col s={12} sm={12} md={6} lg={4}>
+            <Form.Group controlId="pop" className="mb-3">
+              <Form.Label>Population</Form.Label>
+              <LdscorePopSelect name="pop" control={geneticForm.control} rules={{ required: "Population is required" }} />
+              <Form.Text className="text-danger">{geneticForm.formState.errors?.pop?.message}</Form.Text>
+            </Form.Group>
+          </Col>
+          <Col />
+          <Col s={12} sm={12} md={5} lg={3}>
+            <div className="text-end">
+              <Button type="reset" variant="outline-danger" className="me-1">
+                Reset
+              </Button>
+              <Button type="submit" variant="primary" disabled={geneticMutation.isPending || geneticLoading}>
+               {geneticLoading ? "Loading..." : "Calculate"}
+              </Button>
+            </div>
+          </Col>
         </Row>
+
       </Form>
 
       {fileError && (
