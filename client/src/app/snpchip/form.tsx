@@ -288,10 +288,10 @@ export default function SNPChipForm({
   return (
     <Form id="snpchip-form" onSubmit={formHandleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row className="mb-3 align-items-start">
-        <Col sm="auto">
+          <Col s={12} sm={12} md={6} lg={4}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
-        <Col sm={3}>
+         <Col s={12} sm={12} md={6} lg={4}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
@@ -302,7 +302,7 @@ export default function SNPChipForm({
           </Form.Group>
         </Col>
         <Col />
-        <Col sm={3} className="d-flex justify-content-end">
+        <Col s={12} sm={12} md={12} lg={3} className="d-flex justify-content-end">
           <Button type="reset" variant="outline-danger" className="me-1">
             Reset
           </Button>
