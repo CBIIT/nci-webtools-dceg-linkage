@@ -249,7 +249,7 @@ export default function LdProxyForm() {
           </Form.Group>
         </Col>
         <Col />
-        <Col s={12} sm={12} md={5} lg={2}>
+        <Col s={12} sm={12} md={12} lg={2}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
