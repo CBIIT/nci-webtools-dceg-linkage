@@ -91,7 +91,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
   return (
     <Form id="ldpair-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm={2}>
+         <Col s={12} sm={12} md={6} lg={3}>
           <Form.Group controlId="var1" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>Variant 1</Form.Label>
             <Form.Control
@@ -109,7 +109,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
             <Form.Text className="text-danger">{errors?.var1?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+         <Col s={12} sm={12} md={6} lg={3}>
           <Form.Group controlId="var2" className="mb-3" style={{ maxWidth: "230px" }}>
             <Form.Label>Variant 2</Form.Label>
             <Form.Control
@@ -128,7 +128,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
           </Form.Group>
         </Col>
 
-        <Col sm="3">
+         <Col s={12} sm={12} md={6} lg={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -136,7 +136,7 @@ export default function LdPairForm({ params }: { params: submitFormData }) {
           </Form.Group>
         </Col>
         <Col />
-        <Col sm="2">
+           <Col s={12} sm={12} md={5} lg={2}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
