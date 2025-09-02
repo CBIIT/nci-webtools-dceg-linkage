@@ -113,18 +113,6 @@ export default function LDExpressForm() {
 
   return (
     <>
-      <style jsx>{`
-        @media (max-width: 1199px) {
-          .thresholds-column.col-lg-5 {
-            flex: 0 0 auto !important;
-            width: 33.333333% !important;
-          }
-          .buttons-column.col-lg5 {
-            flex: 0 0 auto !important;
-            width: 33.333333% !important;
-          }
-        }
-      `}</style>
       <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
         <Col xs={12} sm={6} md={4} lg={3}>
@@ -217,7 +205,7 @@ export default function LDExpressForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col xs={12} sm={6} md={4} lg={2} className="thresholds-column">
+        <Col xs={12} sm={6} md={4} lg={2} >
          Thresholds
           <Form.Group as={Row} controlId="r2_d_threshold" className="text-nowrap d-flex align-items-center mb-2">
             <Col xs={4} sm={3} md="auto" lg={3} className="pe-0" style={{ maxWidth: "100px" }}>
@@ -301,7 +289,7 @@ export default function LDExpressForm() {
             </Col>
           </Form.Group>
         </Col>
-        <Col xs={12} sm={6} md={4} lg={2} className="buttons-column">
+        <Col xs={12} sm={6} md={4} lg={2} >
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
