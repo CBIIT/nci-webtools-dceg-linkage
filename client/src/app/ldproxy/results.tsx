@@ -221,7 +221,8 @@ export default function LdProxyResults({ ref }: { ref: string }) {
             <Col sm={12} className="d-flex justify-content-center">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
-            <Col sm={12} className="d-flex justify-content-center">
+          
+            <Col sm={12} className="d-flex justify-content-center my-4">
               <Image
                 src="/images/LDproxy_legend.png"
                 title="LDproxy Legend"
@@ -235,6 +236,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
                 }}
               />
             </Col>
+          
             <Col sm={12} className="justify-content-center text-center">
               <a
                 id="ldproxy-genome"

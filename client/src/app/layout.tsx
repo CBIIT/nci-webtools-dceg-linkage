@@ -23,8 +23,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       {title: "LDpair", path: "/ldpair"},
       {title: "LDpop", path: "/ldpop"},
       {title: "LDproxy", path: "/ldproxy"},
-      {title: "LDtrait", path: "/ldtrait"},
       {title: "LDscore", path: "/ldscore"},
+      {title: "LDtrait", path: "/ldtrait"},
       {title: "SNPchip", path: "/snpchip"},
       {title: "SNPclip", path: "/snpclip"}
 

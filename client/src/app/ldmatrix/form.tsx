@@ -89,10 +89,10 @@ export default function LDMatrixForm() {
   return (
     <Form id="ldmatrix-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col s={12} sm={6} md={6} lg={3}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
-        <Col sm={2}>
+        <Col s={12} sm={6} md={6} lg={3}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
@@ -102,14 +102,14 @@ export default function LDMatrixForm() {
             )}
           </Form.Group>
         </Col>
-        <Col sm="3">
+        <Col s={12} sm={6} md={6} lg={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm="auto">
+        <Col s={12} sm={6} md={6} lg={2}>
           <Form.Group controlId="collapseTranscript" className="mb-3">
             <Form.Label className="d-block">Collapse transcripts:</Form.Label>
             <ButtonGroup>
@@ -173,10 +173,9 @@ export default function LDMatrixForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col />
-        <Col sm="2">
+       <Col s={12} sm={12} md={12} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
-            <Button type="reset" variant="outline-danger" className="me-1">
+            <Button type="reset" variant="outline-danger" className="me-0">
               Reset
             </Button>
             <Button type="submit" variant="primary" disabled={submitForm.isPending}>

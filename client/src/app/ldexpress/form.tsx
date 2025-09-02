@@ -112,12 +112,13 @@ export default function LDExpressForm() {
   }
 
   return (
-    <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
+    <>
+      <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col xs={12} sm={6} md={4} lg={3}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
-        <Col sm={2}>
+        <Col xs={12} sm={6} md={4} lg={2}>
           <Form.Group controlId="ldexpressFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof ldexpressFile === "string" && ldexpressFile !== "" ? (
@@ -128,46 +129,50 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={3}>
+        <Col xs={12} sm={6} md={4} lg={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
-            <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+            <div className="">
+              <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
+            </div>
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
           <Form.Group controlId="tissues" className="mb-3">
             <Form.Label>Tissues</Form.Label>
-            <Controller
-              name={"tissues"}
-              control={control}
-              rules={{ required: "Tissue is required" }}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  inputId="tissues"
-                  isMulti
-                  options={tissueOptions}
-                  closeMenuOnSelect={false}
-                  className="basic-multi-select"
-                  classNamePrefix="select"
-                  value={field.value || []}
-                  isDisabled={isFetching}
-                  onChange={(selected) => {
-                    const allTissuesOption = { value: "all", label: "All Tissues" };
-                    if (selected.some((s) => s.value === "all") && !field.value.some((s) => s.value === "all")) {
-                      field.onChange([allTissuesOption]);
-                    } else if (selected.some((s) => s.value === "all") && selected.length > 1) {
-                      field.onChange(selected.filter((s) => s.value !== "all"));
-                    } else {
-                      field.onChange(selected);
-                    }
-                  }}
-                />
-              )}
-            />
+            <div className="">
+              <Controller
+                name={"tissues"}
+                control={control}
+                rules={{ required: "Tissue is required" }}
+                render={({ field }) => (
+                  <Select
+                    {...field}
+                    inputId="tissues"
+                    isMulti
+                    options={tissueOptions}
+                    closeMenuOnSelect={false}
+                    className="basic-multi-select"
+                    classNamePrefix="select"
+                    value={field.value || []}
+                    isDisabled={isFetching}
+                    onChange={(selected) => {
+                      const allTissuesOption = { value: "all", label: "All Tissues" };
+                      if (selected.some((s) => s.value === "all") && !field.value.some((s) => s.value === "all")) {
+                        field.onChange([allTissuesOption]);
+                      } else if (selected.some((s) => s.value === "all") && selected.length > 1) {
+                        field.onChange(selected.filter((s) => s.value !== "all"));
+                      } else {
+                        field.onChange(selected);
+                      }
+                    }}
+                  />
+                )}
+              />
+            </div>
             <Form.Text className="text-danger">{errors?.tissues?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm="auto" style={{ maxWidth: "300px" }}>
+        <Col xs={12} sm={6} md={4} lg={1} className="ms-0 me-0">
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -200,10 +205,10 @@ export default function LDExpressForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col>
-          Thresholds
-          <Form.Group as={Row} controlId="r2_d_threshold" className="text-nowrap align-items-center mb-2">
-            <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
+        <Col xs={12} sm={6} md={4} lg={2} >
+         Thresholds
+          <Form.Group as={Row} controlId="r2_d_threshold" className="text-nowrap d-flex align-items-center mb-2">
+            <Col xs={4} sm={3} md="auto" lg={3} className="pe-0" style={{ maxWidth: "100px" }}>
               <Form.Label style={{ width: "1.8rem" }}>
                 {r2_d === "r2" ? (
                   <>
@@ -215,8 +220,9 @@ export default function LDExpressForm() {
                 ≥
               </Form.Label>
             </Col>
-            <Col>
+            <Col xs={8} sm={9} md={5} lg={9} className="text-start">
               <Form.Control
+                className="text-start"
                 {...register("r2_d_threshold", {
                   required: "Threshold is required",
                   min: {
@@ -237,11 +243,11 @@ export default function LDExpressForm() {
             </Col>
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message}</Form.Text>
           </Form.Group>
-          <Form.Group as={Row} controlId="p_threshold" className="d-flex align-items-center mb-2">
-            <Col sm="auto" className="pe-0" style={{ maxWidth: "300px" }}>
+          <Form.Group as={Row} controlId="p_threshold" className="text-nowrap d-flex align-items-center mb-2">
+            <Col xs={4} sm={3} md="auto" lg={3} className="pe-0" style={{ maxWidth: "100px" }}>
               <Form.Label style={{ width: "1.8rem" }}>P {"<"}</Form.Label>
             </Col>
-            <Col>
+            <Col xs={8} sm={9} md={5} lg={9}>
               <Form.Control
                 {...register("p_threshold", {
                   required: "Threshold is required",
@@ -264,6 +270,7 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.p_threshold?.message}</Form.Text>
           </Form.Group>
           <Form.Group controlId="window" className="mb-2">
+              <Col xs={8} sm={9} md={8} lg={12}>
             <Form.Label>Base pair window</Form.Label>
             <div className="d-flex align-items-center">
               ±&nbsp;
@@ -279,9 +286,10 @@ export default function LDExpressForm() {
               />
             </div>
             <Form.Text className="text-danger">{errors?.window?.message}</Form.Text>
+            </Col>
           </Form.Group>
         </Col>
-        <Col>
+        <Col xs={12} sm={6} md={4} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
@@ -299,5 +307,6 @@ export default function LDExpressForm() {
         </Alert>
       )}
     </Form>
+    </>
   );
 }

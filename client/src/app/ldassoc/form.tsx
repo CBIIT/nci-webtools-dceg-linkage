@@ -202,7 +202,7 @@ export default function LDAssocForm() {
   return (
     <Form id="ldassoc-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm={3}>
+        <Col xs={12} md={5} lg={3}>
           <Form.Group controlId="filename" className="mb-3">
             <Form.Label>Association Data File</Form.Label>
             {typeof filename === "string" && filename !== "" ? (
@@ -282,7 +282,7 @@ export default function LDAssocForm() {
             </div>
           )}
         </Col>
-        <Col sm={2}>
+        <Col xs={12} md={5} lg={2}>
           <Form.Group controlId="calculateRegion" className="mb-3">
             <Form.Label>Location</Form.Label>
             <Form.Select {...register("calculateRegion", { required: "Location is required" })}>
@@ -401,14 +401,14 @@ export default function LDAssocForm() {
             </div>
           )}
         </Col>
-        <Col sm={3}>
+        <Col xs={12} md={5} lg={3}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col xs={12} md={5} lg={2}>
           <Form.Group controlId="dprime" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -516,7 +516,7 @@ export default function LDAssocForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+        <Col xs={12} md={2} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

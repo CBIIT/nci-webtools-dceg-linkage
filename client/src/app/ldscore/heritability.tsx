@@ -135,7 +135,7 @@ export default function Heritability() {
 
       <Form id="heritability-form" onSubmit={heritabilityForm.handleSubmit(onHeritabilitySubmit)} onReset={onHeritabilityReset} noValidate>
         <Row>
-          <Col sm={4}>
+          <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="file" className="mb-3">
               <Form.Label>Upload pre-munged GWAS sumstats file</Form.Label>
               {typeof exampleFilename === "string" && exampleFilename !== "" ? (
@@ -236,7 +236,7 @@ export default function Heritability() {
             </Form.Group>
           </Col>
 
-          <Col sm={4}>
+          <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="pop" className="mb-3">
               <Form.Label>Population</Form.Label>
               <LdscorePopSelect name="pop" control={heritabilityForm.control} rules={{ required: "Population is required" }} />
@@ -245,7 +245,7 @@ export default function Heritability() {
           </Col>
 
           <Col />
-          <Col sm={2}>
+         <Col s={12} sm={12} md={5} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
               <Button type="reset" variant="outline-danger" className="me-1">
                 Reset

@@ -166,7 +166,7 @@ export default function LDScore() {
 
       <Form id="ldscore-form-ld-calculation" onSubmit={form.handleSubmit(onSubmit)} onReset={onReset} noValidate>
         <Row>
-          <Col sm={5}>
+           <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="ldfiles" className="mb-3">
               <Form.Label >Upload *.bed, *.bim, *.fam files (all three required)</Form.Label>
               {(exampleBed || exampleBim || exampleFam) ? (
@@ -327,7 +327,7 @@ export default function LDScore() {
             </Form.Group>
           </Col>
 
-          <Col sm={4}>
+          <Col s={12} sm={12} md={6} lg={4}>
             <Form.Group controlId="window" className="mb-3">
               <Form.Label>Window</Form.Label>
               <div className="d-flex">
@@ -364,7 +364,7 @@ export default function LDScore() {
           
           <Col />
           
-          <Col sm={2}>
+          <Col s={12} sm={12} md={6} lg={3} style={{ minWidth: "180px" }}>
             <div className="text-end">
               <Button type="reset" variant="outline-danger" className="me-1">
                 Reset

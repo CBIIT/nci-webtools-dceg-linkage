@@ -125,11 +125,11 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
   return (
     <Form id="ldtrait-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+        <Col s={12} sm={12} md={6} lg={2}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
 
-        <Col sm={2}>
+         <Col s={12} sm={12} md={6} lg={2}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             <InputGroup>
@@ -142,7 +142,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
           </Form.Group>
         </Col>
 
-        <Col sm="3">
+         <Col s={12} sm={12} md={6} lg={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -150,7 +150,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
           </Form.Group>
         </Col>
 
-        <Col sm="auto">
+        <Col s={12} sm={12} md={6} lg={2}>
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -179,7 +179,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col sm="2">
+         <Col s={12} sm={12} md={6} lg={2}>
           <Form.Group className="mb-3">
             <Form.Label>Thresholds</Form.Label>
             <InputGroup className="mb-2">
@@ -228,7 +228,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
             <Form.Text className="text-danger">{errors?.r2_d_threshold?.message || errors?.window?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col>
+        <Col s={12} sm={12} md={12} lg={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
