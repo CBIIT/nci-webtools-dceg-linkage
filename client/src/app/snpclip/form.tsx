@@ -88,10 +88,10 @@ export default function SNPClipForm() {
   return (
     <Form id="snpclip-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm="auto">
+         <Col s={12} sm={12} md={6} lg={3}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
-        <Col sm={2}>
+           <Col s={12} sm={12} md={6} lg={3}>
           <Form.Group controlId="varFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof varFile === "string" && varFile !== "" ? (
@@ -101,14 +101,14 @@ export default function SNPClipForm() {
             )}
           </Form.Group>
         </Col>
-        <Col sm={3}>
+          <Col s={12} sm={12} md={6} lg={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
             <Form.Text className="text-danger">{errors?.pop?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={2}>
+          <Col s={12} sm={12} md={6} lg={2}>
           <div>Thresholds</div>
           <Form.Group controlId="r2_threshold" className="mb-3">
             <Row className="align-items-center">
@@ -178,7 +178,7 @@ export default function SNPClipForm() {
           </Form.Group>
         </Col>
 
-        <Col sm={2} className="d-flex justify-content-end align-items-start ms-auto">
+        <Col   s={12} sm={12} md={12} lg={2} className="d-flex justify-content-end align-items-start ms-auto">
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
