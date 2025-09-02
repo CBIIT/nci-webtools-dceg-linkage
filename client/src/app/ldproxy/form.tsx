@@ -85,7 +85,7 @@ export default function LdProxyForm() {
   return (
     <Form id="ldproxy-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col sm={2}>
+            <Col s={12} sm={12} md={5} lg={2}>
           <Form.Group controlId="var">
             <Form.Label>Variant</Form.Label>
             <Form.Control
@@ -103,7 +103,7 @@ export default function LdProxyForm() {
             <Form.Text className="text-danger">{errors?.var?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col sm={3}>
+            <Col s={12} sm={12} md={5} lg={2}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <PopSelect name="pop" control={control} rules={{ required: "Population is required" }} />
@@ -218,7 +218,7 @@ export default function LdProxyForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col>
+        <Col s={12} sm={12} md={5} lg={2}>
           <Form.Group controlId="window" className="mb-3">
             <Form.Label style={{ whiteSpace: "nowrap" }}>Base pair window</Form.Label>
             <div className="d-flex align-items-center">
@@ -249,7 +249,7 @@ export default function LdProxyForm() {
           </Form.Group>
         </Col>
         <Col />
-        <Col sm={2}>
+        <Col s={12} sm={12} md={5} lg={2}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset
