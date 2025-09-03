@@ -14,9 +14,10 @@ type TableProps = {
   title?: string;
   data: any[];
   columns: any[];
+  responsive?: boolean;
 };
 
-export default function Table({ title = "", data, columns, ...props }: TableProps) {
+export default function Table({ responsive = true, title = "", data, columns, ...props }: TableProps) {
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
   const table = useReactTable({
     data,
@@ -46,50 +47,44 @@ export default function Table({ title = "", data, columns, ...props }: TableProp
           />
         </Col>
       </Row>
-      <Row>
-        <Col>
-          <BsTable striped bordered {...props}>
-            <thead>
-              {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => (
-                    <th key={header.id} colSpan={header.colSpan}>
-                      {header.isPlaceholder ? null : (
-                        <>
-                          <div
-                            {...{
-                              className: header.column.getCanSort() ? "cursor-pointer select-none" : "",
-                              onClick: header.column.getToggleSortingHandler(),
-                            }}>
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {{
-                              asc: <i className="bi bi-chevron-down" />,
-                              desc: <i className="bi bi-chevron-down" />,
-                            }[header.column.getIsSorted() as string] ?? <i className="bi bi-chevron-expand" />}
-                          </div>
-                        </>
-                      )}
-                    </th>
-                  ))}
-                </tr>
+      <BsTable responsive={responsive} hover {...props}>
+        <thead>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <th key={header.id} colSpan={header.colSpan}>
+                  {header.isPlaceholder ? null : (
+                    <>
+                      <div
+                        {...{
+                          className: header.column.getCanSort() ? "cursor-pointer select-none" : "",
+                          onClick: header.column.getToggleSortingHandler(),
+                        }}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{
+                          asc: <i className="bi bi-chevron-down" />,
+                          desc: <i className="bi bi-chevron-down" />,
+                        }[header.column.getIsSorted() as string] ?? <i className="bi bi-chevron-expand" />}
+                      </div>
+                    </>
+                  )}
+                </th>
               ))}
-            </thead>
-            <tbody>
-              {table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                  ))}
-                </tr>
+            </tr>
+          ))}
+        </thead>
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
               ))}
-            </tbody>
-          </BsTable>
-        </Col>
-      </Row>
-      <Row className="align-items-center">
-        <Col sm="auto">{data.length} Total Entries</Col>
-        <Col>
-          Show{" "}
+            </tr>
+          ))}
+        </tbody>
+      </BsTable>
+      <Row className="justify-content-between">
+        <Col sm="auto">
           <select
             value={table.getState().pagination.pageSize}
             onChange={(e) => {

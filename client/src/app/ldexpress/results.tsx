@@ -314,13 +314,10 @@ export default function LdExpressResults({ ref }: { ref: string }) {
             </Col>
             <Col sm="10" className="overflow-auto">
               {viewWarnings ? (
-                <div className="table-responsive">
                   <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
-                </div>
+      
               ) : (
-                <div className="table-responsive">
-                  {tableData && <Table title="" data={tableData} columns={columns} />}
-                </div>
+                  tableData && <Table title="" data={tableData} columns={columns} />
               )}
               <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
                 Download GTEx QTL annotated variant list

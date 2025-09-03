@@ -175,13 +175,9 @@ export default function SNPClipResults({ ref }: { ref: string }) {
 
           <Col md={10} className="overflow-auto">
             {showWarnings && warnings.length > 0 ? (
-              <div className="table-responsive">
                 <Table title="Variants With Warnings" data={warnings} columns={columns} />
-              </div>
             ) : detailsToShow.length > 0 ? (
-              <div className="table-responsive">
                 <Table title={`Details for ${selectedSnp}`} data={detailsToShow} columns={columns} />
-              </div>
             ) : (
               !showWarnings && <div className="text-muted p-3">Click a variant on the left to view details.</div>
             )}
