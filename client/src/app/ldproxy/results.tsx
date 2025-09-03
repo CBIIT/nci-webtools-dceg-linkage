@@ -274,7 +274,11 @@ export default function LdProxyResults({ ref }: { ref: string }) {
             </Col>
           </Row>
           <Row>
-            <Col>{results && <Table title="Proxy Variants" data={results.aaData} columns={columns} />}</Col>
+            <Col>
+              <div className="table-responsive">
+                {results && <Table title="Proxy Variants" data={results.aaData} columns={columns} />}
+              </div>
+            </Col>
           </Row>
           <Row>
             <Col>

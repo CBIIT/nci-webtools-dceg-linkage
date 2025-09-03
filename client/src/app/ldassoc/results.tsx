@@ -287,7 +287,11 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
           </Row>
           <Row>
-            <Col>{results && <Table title="Association Results" data={results.aaData} columns={columns} />}</Col>
+            <Col>
+              <div className="table-responsive">
+                {results && <Table title="Association Results" data={results.aaData} columns={columns} />}
+              </div>
+            </Col>
           </Row>
           <Row>
             <Col>

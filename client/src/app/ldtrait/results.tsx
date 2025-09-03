@@ -306,9 +306,13 @@ export default function LdTraitResults({ reference, ...params }: { reference: st
 
           <Col md={10} className="overflow-auto">
             {showWarnings && warningsTableData.length > 0 ? (
-              <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
+              <div className="table-responsive">
+                <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
+              </div>
             ) : selectedSnp && tableData.length > 0 ? (
-              <Table title={`Details for ${selectedSnp}`} data={tableData} columns={columns} />
+              <div className="table-responsive">
+                <Table title={`Details for ${selectedSnp}`} data={tableData} columns={columns} />
+              </div>
             ) : (
               !showWarnings && <div className="text-muted p-3">Click a variant on the left to view details.</div>
             )}
