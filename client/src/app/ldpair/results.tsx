@@ -156,8 +156,8 @@ export default function LdPairResults({ reference, ...params }: { reference: str
 
               {/* Haplotypes and Statistics Section */}
               <Row className="mt-4 w-100 justify-content-center">
-                <Col sm={3} />
-                <Col sm={3}>
+                <Col sm={2}></Col>
+                <Col sm={5}>
                   <div className="text-decoration-underline mb-2">Haplotypes</div>
                   {["hap1", "hap2", "hap3", "hap4"].map((hap) => (
                     <div key={hap}>
@@ -166,7 +166,7 @@ export default function LdPairResults({ reference, ...params }: { reference: str
                     </div>
                   ))}
                 </Col>
-                <Col sm={3} className="text-start">
+                <Col sm={5} className="text-start">
                   <div className="text-decoration-underline mb-2">Statistics</div>
                   <div>D&apos;: {results.statistics?.d_prime}</div>
                   <div>
