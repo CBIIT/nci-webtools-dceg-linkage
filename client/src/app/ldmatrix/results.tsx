@@ -133,7 +133,7 @@ export default function LdAMatrixResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex justify-content-center">
+            <Col sm={12} className="d-flex justify-content-start overflow-x-auto">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
             <Col sm={12} className="d-flex justify-content-center my-3">

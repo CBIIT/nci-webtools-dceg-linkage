@@ -115,10 +115,10 @@ export default function LDExpressForm() {
     <>
       <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
       <Row>
-        <Col xs={12} sm={6} md={4} lg={3}>
+        <Col xs={12} sm={6} md={4}lg={4} xl={2}>
           <MultiSnp name="snps" register={register} errors={errors} />
         </Col>
-        <Col xs={12} sm={6} md={4} lg={2}>
+        <Col xs={12} sm={6} md={4} lg={4} xl={2}>
           <Form.Group controlId="ldexpressFile" className="mb-3">
             <Form.Label>Upload file with variants</Form.Label>
             {typeof ldexpressFile === "string" && ldexpressFile !== "" ? (
@@ -129,7 +129,7 @@ export default function LDExpressForm() {
           </Form.Group>
         </Col>
 
-        <Col xs={12} sm={6} md={4} lg={2}>
+        <Col xs={12} sm={6} md={4} lg={4} xl={2} style={{ minWidth: "200px" }}>
           <Form.Group controlId="pop" className="mb-3">
             <Form.Label>Population</Form.Label>
             <div className="">
@@ -172,7 +172,7 @@ export default function LDExpressForm() {
             <Form.Text className="text-danger">{errors?.tissues?.message}</Form.Text>
           </Form.Group>
         </Col>
-        <Col xs={12} sm={6} md={4} lg={1} className="ms-0 me-0">
+        <Col xs={12} sm={6} md={4} lg={4} xl={2} className="ms-0 me-0">
           <Form.Group controlId="r2_d" className="mb-3">
             <Form.Label className="d-block">LD measure</Form.Label>
             <ButtonGroup className="ms-1">
@@ -205,7 +205,7 @@ export default function LDExpressForm() {
             </ButtonGroup>
           </Form.Group>
         </Col>
-        <Col xs={12} sm={6} md={4} lg={2} >
+        <Col xs={12} sm={6} md={4} lg={4} xl={2} >
          Thresholds
           <Form.Group as={Row} controlId="r2_d_threshold" className="text-nowrap d-flex align-items-center mb-2">
             <Col xs={4} sm={3} md="auto" lg={3} className="pe-0" style={{ maxWidth: "100px" }}>
@@ -289,7 +289,7 @@ export default function LDExpressForm() {
             </Col>
           </Form.Group>
         </Col>
-        <Col xs={12} sm={6} md={4} lg={2} style={{ minWidth: "180px" }}>
+        <Col xs={12} sm={6} md={4} lg={4} xl={2} style={{ minWidth: "180px" }}>
           <div className="text-end">
             <Button type="reset" variant="outline-danger" className="me-1">
               Reset

@@ -220,7 +220,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex justify-content-center">
+            <Col sm={12} className="d-flex justify-content-start overflow-x-auto">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
             <Col sm={12} className="d-flex justify-content-center my-3">
@@ -287,7 +287,9 @@ export default function LdAssocResults({ ref }: { ref: string }) {
             </Col>
           </Row>
           <Row>
-            <Col>{results && <Table title="Association Results" data={results.aaData} columns={columns} />}</Col>
+            <Col>
+                {results && <Table title="Association Results" data={results.aaData} columns={columns} />}
+            </Col>
           </Row>
           <Row>
             <Col>

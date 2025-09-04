@@ -255,7 +255,7 @@ export default function LdExpressResults({ ref }: { ref: string }) {
       {results && !results?.error ? (
         <Container fluid="md" className="justify-content-center">
           <Row>
-            <Col sm="2">
+            <Col sm="4" md="4" style={{ maxWidth: "200px" }}>
               <Accordion defaultActiveKey={["0", "1", "2"]} alwaysOpen>
                 <Accordion.Item eventKey="0">
                   <Accordion.Header>Variants in LD with GTEx QTL</Accordion.Header>
@@ -312,11 +312,12 @@ export default function LdExpressResults({ ref }: { ref: string }) {
                 />
               </Form>
             </Col>
-            <Col sm="10" className="overflow-auto">
+            <Col sm="8" md="9" className="overflow-auto">
               {viewWarnings ? (
-                <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
+                  <Table title="Query Variants with Warnings" data={warningsTableData} columns={warningsColumns} />
+      
               ) : (
-                tableData && <Table title="" data={tableData} columns={columns} />
+                  tableData && <Table title="" data={tableData} columns={columns} />
               )}
               <a href={`/LDlinkRestWeb/tmp/express_variants_annotated${ref}.txt`} download>
                 Download GTEx QTL annotated variant list

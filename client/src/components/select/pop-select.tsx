@@ -237,7 +237,7 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
     const currHasAll = Array.isArray(selected) && selected.some((opt) => opt.value === "ALL");
 
     if (currHasAll && !prevHasAll) {
-      setShowWarning(false);
+      setShowWarning(true); // Show warning when ALL is selected
       onchange([{ label: "(ALL) All Populations", value: "ALL" }]);
       return;
     }

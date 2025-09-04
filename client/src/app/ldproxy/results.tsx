@@ -218,7 +218,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex justify-content-center">
+            <Col sm={12} className="d-flex justify-content-start overflow-x-auto">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
           
@@ -274,7 +274,9 @@ export default function LdProxyResults({ ref }: { ref: string }) {
             </Col>
           </Row>
           <Row>
-            <Col>{results && <Table title="Proxy Variants" data={results.aaData} columns={columns} />}</Col>
+            <Col>            
+                {results && <Table  title="Proxy Variants" data={results.aaData} columns={columns} />}
+            </Col>
           </Row>
           <Row>
             <Col>
