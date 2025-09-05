@@ -218,7 +218,7 @@ export default function LdProxyResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex justify-content-start overflow-x-auto">
+            <Col sm={12} className="d-flex overflow-x-auto">
               {plotJson && <div ref={plotRef} className="mt-4" />}
             </Col>
           

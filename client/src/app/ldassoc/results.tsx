@@ -220,8 +220,8 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex justify-content-start overflow-x-auto">
-              {plotJson && <div ref={plotRef} className="mt-4" />}
+            <Col sm={12} className="d-flex overflow-x-auto">
+              {plotJson && <div ref={plotRef} className="mt-4 mx-md-auto" />}
             </Col>
             <Col sm={12} className="d-flex justify-content-center my-3">
               <Image
