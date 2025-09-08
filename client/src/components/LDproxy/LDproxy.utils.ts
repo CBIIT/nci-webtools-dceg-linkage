@@ -22,7 +22,7 @@ export function getInitialState(query: any): LDproxyState {
           .replace(/^\+|\+$/g, ""); // trim leading/trailing plus
         return getOptionsFromKeys(normalized);
       })()
-    : [{ value: "YRI", label: "(YRI) Yoruba in Ibadan, Nigeria" }];
+    : [];
 
   try {
     // Attach to global for manual inspection: window.__LDproxyPopOptions

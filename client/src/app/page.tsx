@@ -1,9 +1,29 @@
 import { Container, Row, Col } from "react-bootstrap";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import Image from "next/image";
 import WhatsNew from "@/components/home/whatsnew";
 import LdToolSection from "@/components/home/ldToolCards";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  // Client-side fallback redirect if middleware not applied (e.g., static export or dev env)
+  useEffect(() => {
+    if (searchParams?.has("snps") && searchParams.get("tab") === "ldtraitget") {
+      const params = new URLSearchParams();
+      const copyKeys = ["snps", "pop", "r2_d", "window", "genome_build", "r2_d_threshold"] as const;
+      copyKeys.forEach(k => {
+        const v = searchParams.get(k);
+        if (v) params.set(k, v);
+      });
+      if (!params.has("r2_d")) params.set("r2_d", "r2");
+      if (!params.has("window")) params.set("window", "500000");
+      if (!params.has("genome_build")) params.set("genome_build", "grch37");
+      if (!params.has("r2_d_threshold")) params.set("r2_d_threshold", "0.1");
+      router.replace(`/ldtrait?${params.toString()}`);
+    }
+  }, [searchParams, router]);
   return (
     <>
       <Container>

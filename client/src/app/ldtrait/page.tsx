@@ -1,7 +1,7 @@
 "use client";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
-import { Suspense } from "react";
+import { Suspense, useMemo } from "react";
 import { ErrorBoundary } from "next/dist/client/components/error-boundary";
 import Alert from "react-bootstrap/Alert";
 import { Container, Row, Col } from "react-bootstrap";
@@ -17,7 +17,41 @@ const Results = dynamic(() => import("./results"), {
 
 export default function LdTrait() {
   const searchParams = useSearchParams();
-  const params = Object.fromEntries(searchParams.entries()) as unknown as submitFormData;
+
+  // Build normalized params object supporting deep links (var -> snps, pop separators, defaults)
+  const params = useMemo(() => {
+    const raw = Object.fromEntries(searchParams.entries());
+    const safeDecode = (val?: string) => {
+      if (!val) return "";
+      try {
+        return decodeURIComponent(val);
+      } catch {
+        return val;
+      }
+    };
+    const normalizePop = (val?: string) =>
+      safeDecode(val || "")
+        .replace(/,/g, "+")
+        .replace(/\s+/g, "+")
+        .replace(/\++/g, "+")
+        .replace(/^\+|\+$/g, "");
+
+    const snps = raw.snps || raw.var || "";
+    const pop = normalizePop(raw.pop || "");
+    const r2_d = raw.r2_d === "d" ? "d" : "r2";
+
+    const normalized: submitFormData = {
+      snps,
+      pop,
+      r2_d,
+      r2_d_threshold: raw.r2_d_threshold || "0.1",
+      window: raw.window || "500000",
+      genome_build: raw.genome_build || "grch37",
+      reference: raw.reference || "",
+      ifContinue: (raw.ifContinue === "False" ? "False" : "Continue") as "Continue" | "False",
+    };
+    return normalized;
+  }, [searchParams]);
 
   // Fetch and format GWAS Catalog timestamp
   const { data: timestampData, isLoading: timestampLoading } = useQuery({

@@ -38,7 +38,7 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
 
   const defaultForm: FormData = {
     snps: "",
-    pop: [],
+    pop: null, // null so Select shows placeholder
     genome_build: "grch37",
     r2_d: "r2",
     r2_d_threshold: "0.1",
@@ -64,17 +64,22 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
   const snps = watch("snps");
   const window = watch("window");
 
-  // Load form from URL params
+  // Load form from URL params (normalized upstream) & auto-submit on deep link (simulate Calculate click)
   useEffect(() => {
     if (params && Object.keys(params).length > 0) {
-      const popArray = getOptionsFromKeys(params.pop);
+      const popArray = params.pop ? getOptionsFromKeys(params.pop || "") : [];
       reset({
+        ...defaultForm,
         ...params,
-        pop: popArray,
+        pop: popArray.length ? popArray : null,
         varFile: "",
       });
+      if (!params.reference && params.snps && params.pop) {
+        // defer to ensure form state applied before submit
+        setTimeout(() => handleSubmit(onSubmit)(), 0);
+      }
     }
-  }, [params, reset]);
+  }, [params, reset, handleSubmit]);
 
   useEffect(() => {
     if (varFile instanceof FileList && varFile.length > 0) {
@@ -107,11 +112,11 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
       ...data,
       reference,
       genome_build,
-      pop: getSelectedPopulationGroups(form.pop),
+  pop: form.pop ? getSelectedPopulationGroups(form.pop) : "",
       ifContinue: "Continue",
     };
 
-    router.push(`${pathname}`);
+    // Do not clear URL before mutation completes (keep deep-link params visible until replaced with reference)
     submitForm.mutate(formData);
   }
 

@@ -36,7 +36,8 @@ export interface ResultsData {
 export interface FormData {
   snps: string;
   varFile?: string | FileList;
-  pop: PopOption[];
+  // Allow null so react-select shows placeholder instead of rendering an empty token
+  pop: PopOption[] | null;
   r2_d: "r2" | "d";
   r2_d_threshold: string;
   window: string;

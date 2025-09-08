@@ -281,10 +281,12 @@ export default function PopSelect({ name, control, rules }: { name: string; cont
                 components={{ Group }}
                 className="basic-multi-select"
                 classNamePrefix="select"
-                value={field.value || []}
+                placeholder="Select population(s)"
+                // Support null initial value
+                value={field.value === null ? null : field.value || []}
                 styles={customStyles}
                 formatGroupLabel={formatGroupLabel}
-                onChange={(selected) => handleChange(Array.from(selected), field.value, field.onChange)}
+                onChange={(selected) => handleChange(Array.from(selected || []), field.value || [], field.onChange)}
               />
             </div>
           )}

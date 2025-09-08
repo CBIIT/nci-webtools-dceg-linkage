@@ -110,3 +110,9 @@ export async function fetchLdScoreCalculationResult(params: URLSearchParams): Pr
 export async function ldtrait(params: any): Promise<any> {
   return (await axios.post(`/LDlinkRestWeb/ldtrait`, params)).data;
 }
+
+// GET variant of LDtrait (ldtraitget) for deep-link auto-run without triggering POST rate limits
+export async function ldtraitGet(params: any): Promise<any> {
+  const search = new URLSearchParams(params).toString();
+  return (await axios.get(`/LDlinkRestWeb/ldtraitget?${search}`)).data;
+}

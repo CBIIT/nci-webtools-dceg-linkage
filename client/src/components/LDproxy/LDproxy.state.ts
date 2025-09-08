@@ -2,7 +2,7 @@ import { PopOption } from "../select/pop-select";
 
 export class LDproxyState {
   var: string = "";
-  pop: PopOption[] = [{ value: "YRI", label: "(YRI) Yoruba in Ibadan, Nigera" }];
+  pop: PopOption[] = [];
   r2_d: string = "r2";
   genome_build: string = "grch37";
   window: string = "500000";
