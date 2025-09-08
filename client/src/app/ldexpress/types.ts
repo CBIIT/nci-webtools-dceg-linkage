@@ -28,7 +28,7 @@ export interface FormData {
   snps: string;
   ldexpressFile?: FileList | string;
   pop: PopOption[];
-  tissues: { value: string; label: string }[];
+  tissues: { value: string; label: string }[] | null;
   r2_d: string;
   p_threshold: number;
   r2_d_threshold: number;

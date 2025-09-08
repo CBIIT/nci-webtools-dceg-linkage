@@ -13,7 +13,7 @@ import { parseSnps } from "@/services/utils";
 import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
-export default function LDExpressForm() {
+export default function LDExpressForm({ params }: { params?: any }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -22,7 +22,7 @@ export default function LDExpressForm() {
   const defaultForm: FormData = {
     snps: "",
     pop: [],
-    tissues: [],
+  tissues: null, // null initial to show placeholder
     r2_d: "r2",
     p_threshold: 0.1,
     r2_d_threshold: 0.1,
@@ -44,6 +44,7 @@ export default function LDExpressForm() {
 
   const ldexpressFile = watch("ldexpressFile") as string | FileList;
   const r2_d = watch("r2_d");
+  const tissuesValue = watch("tissues");
 
   useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
@@ -83,9 +84,52 @@ export default function LDExpressForm() {
     },
   });
 
+  // Populate from deep-link params once tissues loaded
+  useEffect(() => {
+    if (!params) return;
+    const { snps, pop, tissues: tissueStr, r2_d, p_threshold, r2_d_threshold, window, genome_build } = params;
+    // Only reset if we actually have at least snps + pop + tissues
+    if (snps || pop || tissueStr) {
+      // Build tissue option objects
+      let tissueOptionsSelected: { value: string; label: string }[] = [];
+      if (tissueStr && tissues?.tissueInfo) {
+        const allList = (tissues.tissueInfo as Tissue[]).map(t => ({ value: t.tissueSiteDetailId, label: t.tissueSiteDetail }));
+        const codes = tissueStr.split('+').filter(Boolean);
+        if (codes.length && codes.length === allList.length) {
+          tissueOptionsSelected = [{ value: 'all', label: 'All Tissues' }];
+        } else if (codes.includes('all')) {
+          tissueOptionsSelected = [{ value: 'all', label: 'All Tissues' }];
+        } else {
+          tissueOptionsSelected = allList.filter(o => codes.includes(o.value));
+        }
+      } else if (!tissueStr && params.autorun === '1' && tissues?.tissueInfo) {
+        // Deep link autorun with no tissues specified -> All Tissues
+        tissueOptionsSelected = [{ value: 'all', label: 'All Tissues' }];
+      }
+      reset({
+        ...defaultForm,
+        snps: snps || '',
+        r2_d: r2_d || 'r2',
+        p_threshold: parseFloat(p_threshold || '0.1'),
+        r2_d_threshold: parseFloat(r2_d_threshold || '0.1'),
+        window: parseInt(window || '500000'),
+        genome_build: genome_build || 'grch37',
+  pop: pop ? pop.split('+').filter(Boolean).map((code: string) => ({ value: code, label: `(${code}) ${code}` })) : [],
+        tissues: tissueOptionsSelected.length ? tissueOptionsSelected : null,
+      });
+      if (params.autorun === '1' && snps && pop && (tissueStr || tissueOptionsSelected.length)) {
+        // Defer to next tick to ensure React Hook Form state is fully applied
+        setTimeout(() => handleSubmit(onSubmit)(), 0);
+      }
+    }
+  }, [params, tissues, reset, handleSubmit]);
+
+  // No default All Tissues for manual load; deep-link autorun handles selection above
+
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const { ldexpressFile, ...data } = form;
+  const tissueSelections = data.tissues && data.tissues.length > 0 ? data.tissues : [];
     const formData: LdexpressFormData = {
       ...data,
       reference,
@@ -93,24 +137,21 @@ export default function LDExpressForm() {
       window: data.window.toString(),
       pop: getSelectedPopulationGroups(data.pop),
       tissues:
-        data.tissues[0].value === "all"
+        tissueSelections[0] && tissueSelections[0].value === "all"
           ? (tissues.tissueInfo as Tissue[]).map((e) => e.tissueSiteDetailId).join("+")
-          : data.tissues.map((e) => e.value).join("+"),
+          : tissueSelections.map((e) => e.value).join("+"),
     };
-
-    queryClient.setQueryData(["ldexpress-form-data", reference], formData);
-    router.push(`${pathname}`);
+  queryClient.setQueryData(["ldexpress-form-data", reference], formData);
+  // Keep query params until mutation finishes to avoid flicker
     submitForm.mutate(formData);
   }
 
   function onReset(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    router.push("/ldexpress");
     reset(defaultForm);
     queryClient.invalidateQueries();
     submitForm.reset();
   }
-
   return (
     <>
       <Form id="ldexpress-form" onSubmit={handleSubmit(onSubmit)} onReset={onReset} noValidate>
@@ -153,11 +194,13 @@ export default function LDExpressForm() {
                     closeMenuOnSelect={false}
                     className="basic-multi-select"
                     classNamePrefix="select"
-                    value={field.value || []}
+                    placeholder="Select tissue(s)"
+                    value={field.value === null ? [] : field.value || []}
                     isDisabled={isFetching}
                     onChange={(selected) => {
                       const allTissuesOption = { value: "all", label: "All Tissues" };
-                      if (selected.some((s) => s.value === "all") && !field.value.some((s) => s.value === "all")) {
+                      const curr = field.value || [];
+                      if (selected.some((s) => s.value === "all") && !curr.some((s: any) => s.value === "all")) {
                         field.onChange([allTissuesOption]);
                       } else if (selected.some((s) => s.value === "all") && selected.length > 1) {
                         field.onChange(selected.filter((s) => s.value !== "all"));

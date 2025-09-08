@@ -23,6 +23,21 @@ export default function Home() {
       if (!params.has("r2_d_threshold")) params.set("r2_d_threshold", "0.1");
       router.replace(`/ldtrait?${params.toString()}`);
     }
+    if (searchParams?.has("snps") && searchParams.get("tab") === "ldexpressget") {
+      const params = new URLSearchParams();
+      const copyKeys = ["snps", "pop", "tissues", "r2_d", "p_threshold", "r2_d_threshold", "window", "genome_build"] as const;
+      copyKeys.forEach(k => {
+        const v = searchParams.get(k);
+        if (v) params.set(k, v);
+      });
+      if (!params.has("r2_d")) params.set("r2_d", "r2");
+      if (!params.has("p_threshold")) params.set("p_threshold", "0.1");
+      if (!params.has("r2_d_threshold")) params.set("r2_d_threshold", "0.1");
+      if (!params.has("window")) params.set("window", "500000");
+      if (!params.has("genome_build")) params.set("genome_build", "grch37");
+      params.set("autorun", "1");
+      router.replace(`/ldexpress?${params.toString()}`);
+    }
   }, [searchParams, router]);
   return (
     <>
