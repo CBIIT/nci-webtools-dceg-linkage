@@ -59,10 +59,10 @@ export default function LdProxyForm({ initialState }: { initialState: LDproxySta
       const resolvedRef = data?.request || data?.reference || variables?.reference;
       if (!resolvedRef) {
         // eslint-disable-next-line no-console
-        console.warn("[LDproxy/form] Missing request id in response; variables.reference fallback also undefined.", {
-          data,
-          variables,
-        });
+        // console.warn("[LDproxy/form] Missing request id in response; variables.reference fallback also undefined.", {
+        //   data,
+        //   variables,
+        // });
       }
       const sp = new URLSearchParams({ ref: String(resolvedRef || "") }).toString();
       router.push(`${pathname}?${sp}`);
