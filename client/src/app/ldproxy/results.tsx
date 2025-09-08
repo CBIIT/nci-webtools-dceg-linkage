@@ -78,6 +78,16 @@ function ldproxy_haploreg_link(row: any) {
 }
 
 export default function LdProxyResults({ ref }: { ref: string }) {
+  // If no reference id yet (e.g., deep-link without ?ref=), avoid triggering the
+  // ternary that would show the generic error Alert. Show a spinner placeholder
+  // instead and keep the existing Alert line unchanged for real error cases.
+  if (!ref) {
+    return (
+      <>
+        <hr />
+      </>
+    );
+  }
   const handleDownload = async (format: string) => {
     const url = `/LDlinkRestWeb/tmp/proxy_plot_${ref}.${format}`;
     const response = await fetch(url);
