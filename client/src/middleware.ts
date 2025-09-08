@@ -28,6 +28,18 @@ export function middleware(request: NextRequest) {
     const params = new URLSearchParams({ snps, pop, tissues, r2_d, p_threshold, r2_d_threshold, window: windowParam, genome_build, autorun: '1' });
     return NextResponse.redirect(new URL(`/ldexpress?${params.toString()}`, request.url));
   }
+  if (pathname === '/' && searchParams.has('var') && searchParams.get('tab') === 'ldproxy') {
+    const variable = searchParams.get('var') || '';
+    const pop = searchParams.get('pop') || '';
+    const r2_d = searchParams.get('r2_d') || 'r2';
+    const windowParam = searchParams.get('window') || '5000';
+    const genome_build = searchParams.get('genome_build') || 'grch37';
+    const collapseTranscript = searchParams.get('collapseTranscript') || 'true';
+    const annotate = searchParams.get('annotate') || 'forge';
+    // Provide params expected by LDproxy initial state; supplying 'var' triggers auto-submit.
+    const params = new URLSearchParams({ var: variable, pop, r2_d, window: windowParam, genome_build, collapseTranscript, annotate });
+    return NextResponse.redirect(new URL(`/ldproxy?${params.toString()}`, request.url));
+  }
   return NextResponse.next();
 }
 

@@ -2374,6 +2374,8 @@ def ldtrait():
     token = request.args.get("token", False)
     genome_build = data["genome_build"] if "genome_build" in data else "grch37"
     web = False
+    # Default continue behavior (proceed). Will be overridden for web requests if provided.
+    ifContinue = True
     reference = (
         str(data["reference"]) if "reference" in data else str(time.strftime("%I%M%S")) + str(random.randint(0, 10000))
     )
@@ -2383,9 +2385,14 @@ def ldtrait():
         # WEB REQUEST
         if request.headers.get("User-Agent"):
             web = True
-            if data["ifContinue"]:
-                ifContinue = data["ifContinue"]
-                ifContinue = bool(ifContinue != "False")
+            # Gracefully handle optional continue flag (older clients may omit it)
+            try:
+                ifContinue_raw = data.get("ifContinue", "Continue")
+                # Accept boolean, string, or other truthy values; only explicit string "False" means False
+                ifContinue = False if str(ifContinue_raw) == "False" else True
+            except Exception:
+                # Fallback to safe default (proceed) if something unexpected occurs
+                ifContinue = True
             # reference = str(data['reference'])
             app.logger.debug(
                 "ldtrait params "

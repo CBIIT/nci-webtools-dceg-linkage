@@ -1,3 +1,4 @@
+"use client";
 import { Container, Row, Col } from "react-bootstrap";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
