@@ -1,5 +1,12 @@
 export const newsData = [
   {
+    title: "LDlink 6.0.0 Release (Date - TBD)",
+    items: [
+      `Modernized UI Technology with update from jQuery to Next.js and React's component-based architecture`,
+      `Improved site's UI responsiveness, layouts and error/warning messaging`
+    ]
+  },
+  {
     title: "LDlink 5.7.0 Release (06/18/2025)",
     items: [
       `Added LDscore module`

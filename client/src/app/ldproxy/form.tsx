@@ -54,10 +54,18 @@ export default function LdProxyForm({ initialState }: { initialState: LDproxySta
 
   const submitForm = useMutation({
     mutationFn: (params: any) => ldproxy(params),
-    onSuccess: (data: any) => {
-      const params = new URLSearchParams({ ref: data.request }).toString();
-      const path = `${pathname}?${params}`;
-      router.push(path);
+    onSuccess: (data: any, variables: any) => {
+      // Server should return an object with 'request'; provide fallbacks for legacy or missing key cases
+      const resolvedRef = data?.request || data?.reference || variables?.reference;
+      if (!resolvedRef) {
+        // eslint-disable-next-line no-console
+        console.warn("[LDproxy/form] Missing request id in response; variables.reference fallback also undefined.", {
+          data,
+          variables,
+        });
+      }
+      const sp = new URLSearchParams({ ref: String(resolvedRef || "") }).toString();
+      router.push(`${pathname}?${sp}`);
     },
     onError: (error: unknown) => {
       console.error(error);
