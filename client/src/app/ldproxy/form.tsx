@@ -10,6 +10,8 @@ import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import "./style.css";
 import { rsChrRegex, parseRateLimitError } from "@/services/utils";
+import { LDproxyState } from "@/components/LDproxy/LDproxy.state";
+import { useEffect } from "react";
 
 export interface FormData {
   var: string;
@@ -22,11 +24,11 @@ export interface FormData {
   annotate: "forge" | "regulome" | "no";
 }
 
-export default function LdProxyForm() {
+export default function LdProxyForm({ initialState }: { initialState: LDproxyState }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
-  const { genome_build } = useStore((state) => state);
+  const { genome_build } = useStore();
 
   const defaultForm: FormData = {
     var: "",
@@ -47,17 +49,27 @@ export default function LdProxyForm() {
     setValue,
     formState: { errors },
   } = useForm({
-    defaultValues: defaultForm,
+    defaultValues: initialState || defaultForm,
   });
 
-  const submitForm = useMutation<any, unknown, any>({
+  const submitForm = useMutation({
     mutationFn: (params: any) => ldproxy(params),
-    onSuccess: (_data, variables) => {
-      if (variables && variables.reference) {
-        router.push(`${pathname}?ref=${variables.reference}`);
-      }
+    onSuccess: (data: any) => {
+      const params = new URLSearchParams({ ref: data.request }).toString();
+      const path = `${pathname}?${params}`;
+      router.push(path);
+    },
+    onError: (error: unknown) => {
+      console.error(error);
     },
   });
+
+  useEffect(() => {
+    if (initialState.submitted) {
+      // Programmatically submit the form if the "submitted" flag is true
+      handleSubmit(onSubmit)();
+    }
+  }, [initialState.submitted, handleSubmit]);
 
   console.log(submitForm.error);
 
@@ -77,9 +89,9 @@ export default function LdProxyForm() {
   function onReset(event: any): void {
     event.preventDefault();
     router.push("/ldproxy");
-    reset(defaultForm);
-    queryClient.invalidateQueries();
-    submitForm.reset();
+    reset(new LDproxyState());
+  queryClient.invalidateQueries({});
+  // no submitForm.reset() method on mutation; if we need to clear state, we can optionally set status
   }
 
   return (
