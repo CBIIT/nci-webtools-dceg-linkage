@@ -52,8 +52,8 @@ from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlat
 import zipfile
 import shutil
 from Cleanup import schedule_tmp_cleanup
-from flask_limiter import Limiter
-from flask_limiter.util import get_remote_address
+# from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address
 
 # retrieve config
 param_list = get_config()
@@ -93,62 +93,62 @@ os.makedirs(app.config["UPLOAD_DIR"], exist_ok=True)
 
 
 # Flask Limiter initialization
-def get_rate_limit_key():
-    """
-    Key function for rate limiting:
-    - For API routes: use token (if present)
-    - For Web routes: use client IP address
-    """
-    token = request.args.get("token")
-    if token:
-        return f"token:{token}"
-    else:
-        # For web routes without tokens, use IP address
-        # Handle X-Forwarded-For header for load balancer scenarios
-        if request.headers.getlist("X-Forwarded-For"):
-            client_ip = request.headers.getlist("X-Forwarded-For")[0]
-        else:
-            client_ip = request.remote_addr
-        return f"ip:{client_ip}"
+# def get_rate_limit_key():
+#     """
+#     Key function for rate limiting:
+#     - For API routes: use token (if present)
+#     - For Web routes: use client IP address
+#     """
+#     token = request.args.get("token")
+#     if token:
+#         return f"token:{token}"
+#     else:
+#         # For web routes without tokens, use IP address
+#         # Handle X-Forwarded-For header for load balancer scenarios
+#         if request.headers.getlist("X-Forwarded-For"):
+#             client_ip = request.headers.getlist("X-Forwarded-For")[0]
+#         else:
+#             client_ip = request.remote_addr
+#         return f"ip:{client_ip}"
 
 
 # Configure MongoDB storage for distributed rate limiting
 # Uses existing MongoDB configuration from param_list
-def create_secure_mongodb_uri():
-    """Create MongoDB URI for rate limiting without exposing credentials in logs."""
-    from urllib.parse import quote_plus
+# def create_secure_mongodb_uri():
+#     """Create MongoDB URI for rate limiting without exposing credentials in logs."""
+#     from urllib.parse import quote_plus
 
-    mongodb_host = param_list["mongodb_host"]
-    mongodb_port = param_list["mongodb_port"]
-    mongodb_database = param_list["mongodb_database"]
-    mongodb_username = param_list["mongodb_username"]
-    mongodb_password = param_list["mongodb_password"]
+#     mongodb_host = param_list["mongodb_host"]
+#     mongodb_port = param_list["mongodb_port"]
+#     mongodb_database = param_list["mongodb_database"]
+#     mongodb_username = param_list["mongodb_username"]
+#     mongodb_password = param_list["mongodb_password"]
 
-    if mongodb_username and mongodb_password:
-        encoded_username = quote_plus(mongodb_username)
-        encoded_password = quote_plus(mongodb_password)
-        return f"mongodb://{encoded_username}:{encoded_password}@{mongodb_host}:{mongodb_port}/{mongodb_database}"
-    else:
-        return f"mongodb://{mongodb_host}:{mongodb_port}/{mongodb_database}"
+#     if mongodb_username and mongodb_password:
+#         encoded_username = quote_plus(mongodb_username)
+#         encoded_password = quote_plus(mongodb_password)
+#         return f"mongodb://{encoded_username}:{encoded_password}@{mongodb_host}:{mongodb_port}/{mongodb_database}"
+#     else:
+#         return f"mongodb://{mongodb_host}:{mongodb_port}/{mongodb_database}"
 
 
-try:
-    mongodb_uri = create_secure_mongodb_uri()
-    limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri=mongodb_uri)
+# try:
+#     mongodb_uri = create_secure_mongodb_uri()
+#     limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri=mongodb_uri)
 
-    # Log connection info without credentials
-    mongodb_host = param_list["mongodb_host"]
-    mongodb_port = param_list["mongodb_port"]
-    mongodb_database = param_list["mongodb_database"]
-    app.logger.debug(f"Rate limiting configured with MongoDB: {mongodb_host}:{mongodb_port}/{mongodb_database}")
+#     # Log connection info without credentials
+#     mongodb_host = param_list["mongodb_host"]
+#     mongodb_port = param_list["mongodb_port"]
+#     mongodb_database = param_list["mongodb_database"]
+#     app.logger.debug(f"Rate limiting configured with MongoDB: {mongodb_host}:{mongodb_port}/{mongodb_database}")
 
-except Exception as e:
-    error_msg = str(e)
-    if "mongodb://" in error_msg:
-        error_msg = "MongoDB connection failed"
+# except Exception as e:
+#     error_msg = str(e)
+#     if "mongodb://" in error_msg:
+#         error_msg = "MongoDB connection failed"
 
-    app.logger.warning(f"MongoDB not available for rate limiting ({error_msg}), falling back to memory storage.")
-    limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri="memory://")
+#     app.logger.warning(f"MongoDB not available for rate limiting ({error_msg}), falling back to memory storage.")
+#     limiter = Limiter(app=app, key_func=get_rate_limit_key, storage_uri="memory://")
 
 
 # Return error (and traceback if specified) from calculations
@@ -338,7 +338,6 @@ def requires_admin_token(f):
 
 # Web route to register user's email for API token
 @app.route("/LDlinkRestWeb/apiaccess/register_web", methods=["GET"])
-@limiter.limit("1 per minute")
 def register_web():
     start_time = time.time()
     firstname = request.args.get("firstname", False)
@@ -2241,7 +2240,7 @@ def ldpop():
 # @app.route('/LDlinkRest2/ldproxy', methods=['GET'])
 @app.route("/LDlinkRestWeb/ldproxy", methods=["GET"])
 @requires_token
-@limiter.limit("10000 per hour")
+# @limiter.limit("10000 per hour")
 def ldproxy():
     start_time = time.time()
     var = request.args.get("var", False)
@@ -2362,7 +2361,6 @@ def ldproxy():
 # @app.route('/LDlinkRest2/ldtrait', methods=['POST'])
 @app.route("/LDlinkRestWeb/ldtrait", methods=["POST"])
 @requires_token
-@limiter.limit("10000 per hour")
 def ldtrait():
     start_time = time.time()
     data = json.loads(request.stream.read())
