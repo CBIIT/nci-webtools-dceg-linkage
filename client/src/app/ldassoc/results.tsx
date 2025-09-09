@@ -44,6 +44,8 @@ export default function LdAssocResults({ ref }: { ref: string }) {
   });
 
   const plotRef = useRef<HTMLDivElement>(null);
+  // Separate scroll container (mirrors ldproxy) so we can auto-center once but allow full left scroll to view y-axis
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (plotJson && plotRef.current) {
@@ -56,6 +58,15 @@ export default function LdAssocResults({ ref }: { ref: string }) {
 
       // Create new plot
       embed.embed_item(plotJson, plotRef.current);
+
+      // After rendering, horizontally center once (without preventing scrolling fully left)
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          const sc = scrollContainerRef.current;
+          const maxScroll = sc.scrollWidth - sc.clientWidth;
+          if (maxScroll > 0) sc.scrollLeft = maxScroll / 2;
+        }
+      });
     }
 
     // Cleanup on unmount
@@ -220,10 +231,22 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex overflow-x-auto">
-              {plotJson && <div ref={plotRef} className="mt-4 mx-md-auto" />}
+            <Col sm={12} className="text-center">
+              <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto"
+                style={{ width: "100%" }}
+              >
+                {plotJson && (
+                  <div
+                    ref={plotRef}
+                    className="mt-4"
+                    style={{ display: "inline-block" }}
+                  />
+                )}
+              </div>
             </Col>
-            <Col sm={12} className="d-flex justify-content-center my-3">
+            <Col sm={12} className="text-center my-3">
               <Image
                 src="/images/LDassoc_legend.png"
                 title="LDassoc Legend"
@@ -237,7 +260,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 }}
               />
             </Col>
-            <Col sm={12} className="justify-content-center text-center">
+            <Col sm={12} className="text-center">
               <a
                 id="ldassoc-genome"
                 href={`https://genome.ucsc.edu/cgi-bin/hgTracks?db=${
@@ -256,7 +279,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 data in UCSC Genome Browser
               </a>
             </Col>
-            <Col sm={12} className="justify-content-center text-center">
+            <Col sm={12} className="text-center">
               <a
                 href="https://forgedb.cancer.gov/about/"
                 target="LDassoc-forgedb-browser_FOREGEdb"
@@ -264,7 +287,7 @@ export default function LdAssocResults({ ref }: { ref: string }) {
                 View scoring scheme for FORGEdb scores
               </a>
             </Col>
-            <Col sm={12} className="justify-content-center text-center">
+            <Col sm={12} className="text-center">
               <a
                 href="https://www.regulomedb.org/regulome-help/"
                 target="LDassoc-genome-browser_RegulomeDB"

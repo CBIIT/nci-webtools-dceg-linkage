@@ -120,6 +120,8 @@ export default function LdProxyResults({ ref }: { ref: string }) {
   });
 
   const plotRef = useRef<HTMLDivElement>(null);
+    // Separate scroll container so we don't combine flex centering with horizontal scrolling (which clipped the left axis)
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (plotJson && plotRef.current) {
@@ -132,6 +134,17 @@ export default function LdProxyResults({ ref }: { ref: string }) {
 
       // Create new plot
       embed.embed_item(plotJson, plotRef.current);
+
+      // After Bokeh renders, center horizontally once (without losing ability to scroll fully left)
+      requestAnimationFrame(() => {
+        if (scrollContainerRef.current) {
+          const sc = scrollContainerRef.current;
+            const maxScroll = sc.scrollWidth - sc.clientWidth;
+            if (maxScroll > 0) {
+              sc.scrollLeft = maxScroll / 2;
+            }
+        }
+      });
     }
 
     // Cleanup on unmount
@@ -228,8 +241,20 @@ export default function LdProxyResults({ ref }: { ref: string }) {
                 </Dropdown.Menu>
               </Dropdown>
             </Col>
-            <Col sm={12} className="d-flex overflow-x-auto">
-              {plotJson && <div ref={plotRef} className="mt-4" />}
+            <Col sm={12} className="text-center">
+              <div
+                ref={scrollContainerRef}
+                className="overflow-x-auto"
+                style={{ width: "100%" }}
+              >
+                {plotJson && (
+                  <div
+                    ref={plotRef}
+                    className="mt-4"
+                    style={{ display: "inline-block" }}
+                  />
+                )}
+              </div>
             </Col>
           
             <Col sm={12} className="d-flex justify-content-center my-4">
