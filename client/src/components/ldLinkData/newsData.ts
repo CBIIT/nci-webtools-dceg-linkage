@@ -7,12 +7,6 @@ export const newsData = [
     ]
   },
   {
-    title: "LDlink 5.7.0 Release (06/18/2025)",
-    items: [
-      `Added LDscore module`
-    ],
-  },
-  {
     title: "LDlinkR",
     items: [
       `Interested in accessing LDlink's API using R? <br>Check out the new LDlinkR package now available on <a href="https://cran.r-project.org/web/packages/LDlinkR/index.html" title="LDlinkR CRAN" target="_blank">CRAN</a>.`,
