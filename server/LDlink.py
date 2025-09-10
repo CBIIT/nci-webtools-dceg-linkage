@@ -1065,6 +1065,11 @@ def ldscore():
                     if os.path.abspath(file_path) != os.path.abspath(new_file_path):
                         shutil.copyfile(file_path, new_file_path)
                         app.logger.info(f"Copied {file_path} to {new_file_path}")
+                        try:
+                            os.remove(file_path)
+                            app.logger.info(f"Deleted original file: {file_path}")
+                        except Exception as e:
+                            app.logger.error(f"Error deleting original file {file_path}: {e}")
                     else:
                         app.logger.debug(f"Skipped copying {file_path} to itself.")
                     # os.rename(file_path, new_file_path)
@@ -1228,15 +1233,31 @@ def ldherit():
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
-    fileDir = f"/data/tmp/uploads"
+    fileDir = f"/data/tmp/uploads/{reference}/"
     app.logger.debug(f"LDherit processing filename: {filename}")
+    # Copy file to reference subfolder and remove original
+    if filename:
+        filename = secure_filename(filename)
+        src_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+        dst_path = os.path.join(fileDir, filename)
+        os.makedirs(fileDir, exist_ok=True)
+        if os.path.abspath(src_path) != os.path.abspath(dst_path):
+            try:
+                shutil.copyfile(src_path, dst_path)
+                app.logger.info(f"Copied {src_path} to {dst_path}")
+                os.remove(src_path)
+                app.logger.info(f"Deleted original file: {src_path}")
+            except Exception as e:
+                app.logger.error(f"Error copying/removing file {src_path}: {e}")
+        else:
+            app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
         # Make an API call to the ldsc39_container
 
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(filename, pop, isexample)
+        result = run_herit_command(os.path.join(fileDir, filename), fileDir, pop, isexample)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1368,11 +1389,28 @@ def ldcorrelation():
         filename = secure_filename(filename)
         fileroot, ext = os.path.splitext(filename)
 
-    fileDir = f"/data/tmp/uploads"
+    fileDir = f"/data/tmp/uploads/{reference}/"
     app.logger.debug(f"LDcorrelation processing filename: {filename}")
+    # Copy both files to reference subfolder and remove originals
+    os.makedirs(fileDir, exist_ok=True)
+    for fname in [filename, filename2]:
+        if fname:
+            fname = secure_filename(fname)
+            src_path = os.path.join(app.config["UPLOAD_DIR"], fname)
+            dst_path = os.path.join(fileDir, fname)
+            if os.path.abspath(src_path) != os.path.abspath(dst_path):
+                try:
+                    shutil.copyfile(src_path, dst_path)
+                    app.logger.info(f"Copied {src_path} to {dst_path}")
+                    os.remove(src_path)
+                    app.logger.info(f"Deleted original file: {src_path}")
+                except Exception as e:
+                    app.logger.error(f"Error copying/removing file {src_path}: {e}")
+            else:
+                app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
         # Make an API call to the ldsc39_container
-        result = run_correlation_command(filename, filename2, pop, isexample)
+        result = run_correlation_command(os.path.join(fileDir, filename), os.path.join(fileDir, filename2), fileDir,pop, isexample)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
