@@ -1,3 +1,5 @@
+
+  // ...existing code...
 "use client";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
@@ -12,6 +14,8 @@ import { useStore } from "@/store";
 import { parseSnps, parseRateLimitError } from "@/services/utils";
 import { FormData, Ldtrait, submitFormData } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
+
+
 
 // Calculate estimated processing time using same formula as updateLDtrait()
 export function calculateEstimatedTime(snps: string, window: string): string {
@@ -114,6 +118,35 @@ export default function LdtraitForm({ params }: { params: submitFormData }) {
     router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
+
+  // Auto-submit if all required params are present in URL
+  useEffect(() => {
+    if (
+      params &&
+      params.snps &&
+      params.pop &&
+      params.genome_build &&
+      params.r2_d &&
+      params.r2_d_threshold &&
+      params.window &&
+      params.ifContinue &&
+      !params.reference // Only submit if no reference/result yet
+    ) {
+      const popArray = Array.isArray(params.pop) ? params.pop : [params.pop];
+      onSubmit({
+        snps: params.snps,
+        pop: popArray.filter(Boolean).map((p: any) => typeof p === "string" ? { value: p, label: p } : p),
+        genome_build: params.genome_build,
+        r2_d: params.r2_d,
+        r2_d_threshold: params.r2_d_threshold,
+        window: params.window,
+        ifContinue: params.ifContinue,
+        varFile: "",
+        reference: "",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   function onReset(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();

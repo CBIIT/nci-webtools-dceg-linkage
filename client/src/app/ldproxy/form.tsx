@@ -1,28 +1,19 @@
 "use client";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import { AxiosError } from "axios";
 import { ldproxy } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups, PopOption } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups, getOptionsFromKeys,PopOption } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import "./style.css";
+import { FormData, SubmitFormData } from "./types";
 import { rsChrRegex, parseRateLimitError } from "@/services/utils";
 
-export interface FormData {
-  var: string;
-  pop: PopOption[];
-  reference: string;
-  genome_build: "grch37" | "grch38" | "grch38_high_coverage";
-  r2_d: string;
-  window: string;
-  collapseTranscript: boolean;
-  annotate: "forge" | "regulome" | "no";
-}
-
-export default function LdProxyForm() {
+export default function LdProxyForm({ params }: { params: SubmitFormData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -46,9 +37,43 @@ export default function LdProxyForm() {
     watch,
     setValue,
     formState: { errors },
-  } = useForm({
+  } = useForm<FormData>({
     defaultValues: defaultForm,
   });
+
+  // load form from url params
+  // similar to ldpair
+  // load form form url params
+  useEffect(() => {
+    if (params && Object.keys(params).length > 0) {
+      const popArray = getOptionsFromKeys(params.pop);
+      reset({ ...params, pop: popArray });
+    }
+  }, [params, reset]);
+
+
+  // Automatically submit if all params except reference are available
+  useEffect(() => {
+    const hasAllParams = params && params.var && params.pop && params.r2_d && params.genome_build && !params.reference;
+    if (hasAllParams) {
+      const popArray = Array.isArray(params.pop) ? params.pop : [params.pop];
+      onSubmit({
+        var: params.var,
+        pop: popArray.filter(Boolean).map((p: any) =>
+          typeof p === "string"
+            ? { value: p, label: p }
+            : p
+        ),
+        genome_build: params.genome_build,
+        r2_d: params.r2_d,
+        window: params.window,
+        collapseTranscript: params.collapseTranscript,
+        annotate: params.annotate,
+        reference: params.reference ?? Math.floor(Math.random() * (99999 - 10000 + 1) + 10000).toString(),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params]);
 
   const submitForm = useMutation<any, unknown, any>({
     mutationFn: (params: any) => ldproxy(params),
@@ -61,12 +86,11 @@ export default function LdProxyForm() {
 
   console.log(submitForm.error);
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
-    const formData = {
+    const formData: SubmitFormData = {
       ...data,
       reference,
-      genome_build,
       pop: getSelectedPopulationGroups(data.pop),
     };
     queryClient.setQueryData(["ldproxy-form-data", reference], formData);
