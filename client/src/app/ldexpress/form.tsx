@@ -14,6 +14,65 @@ import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
 export default function LDExpressForm() {
+  // Auto-submit if all required params are present in URL
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const snps = searchParams.get("snps");
+    const pop = searchParams.get("pop");
+    const tissuesParam = searchParams.get("tissues");
+    const r2_d = searchParams.get("r2_d");
+    const p_threshold = searchParams.get("p_threshold");
+    const r2_d_threshold = searchParams.get("r2_d_threshold");
+    const windowVal = searchParams.get("window");
+    const genome_build = searchParams.get("genome_build");
+    const ref = searchParams.get("ref");
+
+    if (
+      snps &&
+      pop &&
+      tissuesParam &&
+      r2_d &&
+      r2_d_threshold &&
+      windowVal &&
+      genome_build &&
+      !ref
+    ) {
+      // Support comma or plus separated tissues
+      const tissueArray = tissuesParam.includes("+")
+        ? tissuesParam.split("+")
+        : tissuesParam.includes(",")
+        ? tissuesParam.split(",")
+        : [tissuesParam];
+      const tissueOptionsSelected = tissueArray.map((t) => ({ value: t, label: t }));
+      // Support comma separated populations
+      const popArray = pop.includes(",") ? pop.split(",") : [pop];
+      reset({
+        snps,
+        pop: popArray.map((p) => ({ value: p, label: p })),
+        tissues: tissueOptionsSelected,
+        r2_d,
+        p_threshold: p_threshold ? Number(p_threshold) : 0.1,
+        r2_d_threshold: r2_d_threshold ? Number(r2_d_threshold) : 0.1,
+        window: windowVal ? Number(windowVal) : 500000,
+        genome_build,
+        ldexpressFile: "",
+      });
+      setTimeout(() => {
+        onSubmit({
+          snps,
+          pop: popArray.map((p) => ({ value: p, label: p })),
+          tissues: tissueOptionsSelected,
+          r2_d,
+          p_threshold: p_threshold ? Number(p_threshold) : 0.1,
+          r2_d_threshold: r2_d_threshold ? Number(r2_d_threshold) : 0.1,
+          window: windowVal ? Number(windowVal) : 500000,
+          genome_build,
+          ldexpressFile: "",
+        });
+      }, 100);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
