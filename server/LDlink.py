@@ -651,14 +651,21 @@ def zip_files():
 
     try:
         filenames = request.json.get("files", [])
-        app.logger.debug(f"Creating zip with {len(filenames)} files")
+        reference = request.json.get("reference", None)
+        app.logger.debug(f"Creating zip with {len(filenames)} files, reference: {reference}")
 
         zip_filename = "files.zip"
-        zip_filepath = os.path.join(tmp_dir, zip_filename)
-        uploads_dir = os.path.join(tmp_dir, "uploads")
         ldscore_dir = os.path.join(param_list["data_dir"], "ldscore")
 
-        os.makedirs(uploads_dir, exist_ok=True)
+        # If reference is provided, use reference subfolder for both input files and zip
+        if reference:
+            uploads_dir = os.path.join(tmp_dir, "uploads", str(reference))
+            os.makedirs(uploads_dir, exist_ok=True)
+            zip_filepath = os.path.join(uploads_dir, zip_filename)
+        else:
+            uploads_dir = os.path.join(tmp_dir, "uploads")
+            os.makedirs(uploads_dir, exist_ok=True)
+            zip_filepath = os.path.join(tmp_dir, zip_filename)
 
         # List of known example files
         example_files = [
@@ -676,7 +683,7 @@ def zip_files():
                 if filename in example_files:
                     source_path = os.path.join(ldscore_dir, filename)
                     if os.path.exists(source_path):
-                        shutil.copy(source_path, upload_path)
+                        #shutil.copy(source_path, upload_path)
                         app.logger.info(f"Copied example file {source_path} to {upload_path}")
                     else:
                         app.logger.error(f"Example file {filename} not found in {ldscore_dir}")
@@ -697,7 +704,7 @@ def zip_files():
                 app.logger.debug(f"Added file to zip: {filename}")
 
         execution_time = round(time.time() - start_time, 2)
-        app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename}")
+        app.logger.info(f"Zip file created successfully ({execution_time}s): {zip_filename} in {uploads_dir}")
         return send_file(zip_filepath, as_attachment=True, download_name=zip_filename)
     except Exception as e:
         app.logger.error(f"Zip file creation failed: {str(e)}")
@@ -1040,8 +1047,10 @@ def ldscore():
     )
 
     fileDir = f"/data/tmp/uploads/{reference}/"
+
+    
     # print(filename)
-    if filename and str(isExample).lower() != "true":
+    if filename:
         # Split by comma or semicolon (adjust as needed)
         filenames = [secure_filename(f.strip()) for f in filename.replace(";", ",").split(",")]
         for fname in filenames:
@@ -1055,9 +1064,15 @@ def ldscore():
                     file_chromo = part
                     break
 
+            app.logger.info(file_chromo)        
             if file_chromo:
                 # Find the file in the directory
                 pattern = os.path.join("/data/tmp/uploads/", f"*{file_chromo}.*")
+
+                if str(isExample).lower() == "true":
+                    pattern = os.path.join("/data/ldscore", f"*{file_chromo}.*")
+                    app.logger.info(pattern)
+
                 for file_path in glob.glob(pattern):
                     extension = file_path.split(".")[-1]
                     new_filename = f"{file_chromo}.{extension}"
@@ -1070,8 +1085,9 @@ def ldscore():
                         shutil.copyfile(file_path, new_file_path)
                         app.logger.info(f"Copied {file_path} to {new_file_path}")
                         try:
-                            os.remove(file_path)
-                            app.logger.info(f"Deleted original file: {file_path}")
+                            if not str(isExample).lower() == "true":
+                                os.remove(file_path)
+                                app.logger.info(f"Deleted original file: {file_path}")
                         except Exception as e:
                             app.logger.error(f"Error deleting original file {file_path}: {e}")
                     else:

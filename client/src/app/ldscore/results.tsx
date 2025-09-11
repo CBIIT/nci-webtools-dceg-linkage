@@ -369,7 +369,7 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
                 const res = await fetch('/LDlinkRestWeb/zip', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ files }),
+                  body: JSON.stringify({ files, reference }),
                 });
                 if (res.ok) {
                      const blob = await res.blob();
@@ -399,14 +399,13 @@ function DownloadOptionsPanel({ result, filename = "heritability_result.txt", in
               a.href = `/LDlinkRestWeb/tmp/uploads/${reference}/${encodeURIComponent(inputFilename)}`;
               a.download = inputFilename;
               document.body.appendChild(a);
-              alert(a.href)
               a.click();
               setTimeout(() => {
                 document.body.removeChild(a);
               }, 0);
             }}
           >
-            Download Input {reference}
+            Download Input
           </button>
         )}
        
