@@ -639,6 +639,10 @@ def send_temp_file(filename):
     else:
         return send_from_directory(tmp_dir, filename)
 
+@app.route("/LDlinkRestWeb/tmp/uploads/<reference>/<filename>", strict_slashes=False)
+@app.route("/tmp/uploads/<reference>/<filename>", strict_slashes=False)
+def send_temp_file_reference(reference, filename):
+    return send_from_directory(os.path.join(tmp_dir, "uploads", reference), filename)
 
 @app.route("/LDlinkRestWeb/zip", methods=["POST"])
 def zip_files():
@@ -1239,17 +1243,27 @@ def ldherit():
     # Copy file to reference subfolder and remove original
     if filename:
         filename = secure_filename(filename)
-        src_path = os.path.join(app.config["UPLOAD_DIR"], filename)
+        # Use /data/ldscore/ for example files
+        if str(isexample).lower() == "true":
+            src_path = os.path.join(param_list["data_dir"], "ldscore", filename)
+        else:
+            src_path = os.path.join(app.config["UPLOAD_DIR"], filename)
         dst_path = os.path.join(fileDir, filename)
         os.makedirs(fileDir, exist_ok=True)
         if os.path.abspath(src_path) != os.path.abspath(dst_path):
-            try:
-                shutil.copyfile(src_path, dst_path)
-                app.logger.info(f"Copied {src_path} to {dst_path}")
-                os.remove(src_path)
-                app.logger.info(f"Deleted original file: {src_path}")
-            except Exception as e:
-                app.logger.error(f"Error copying/removing file {src_path}: {e}")
+            app.logger.info(f"Moving {src_path} to {dst_path}")
+            if not os.path.exists(src_path):
+                app.logger.error(f"Source file does not exist: {src_path}")
+            else:
+                try:
+                    shutil.copyfile(src_path, dst_path)
+                    app.logger.info(f"Copied {src_path} to {dst_path}")
+                    # Only remove if not example
+                    if str(isexample).lower() != "true":
+                        os.remove(src_path)
+                        app.logger.info(f"Deleted original file: {src_path}")
+                except Exception as e:
+                    app.logger.error(f"Error copying/removing file {src_path}: {e}")
         else:
             app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
@@ -1398,16 +1412,25 @@ def ldcorrelation():
     for fname in [filename, filename2]:
         if fname:
             fname = secure_filename(fname)
-            src_path = os.path.join(app.config["UPLOAD_DIR"], fname)
+            # Use /data/ldscore/ for example files
+            if str(isexample).lower() == "true":
+                src_path = os.path.join(param_list["data_dir"], "ldscore", fname)
+            else:
+                src_path = os.path.join(app.config["UPLOAD_DIR"], fname)
             dst_path = os.path.join(fileDir, fname)
             if os.path.abspath(src_path) != os.path.abspath(dst_path):
-                try:
-                    shutil.copyfile(src_path, dst_path)
-                    app.logger.info(f"Copied {src_path} to {dst_path}")
-                    os.remove(src_path)
-                    app.logger.info(f"Deleted original file: {src_path}")
-                except Exception as e:
-                    app.logger.error(f"Error copying/removing file {src_path}: {e}")
+                if not os.path.exists(src_path):
+                    app.logger.error(f"Source file does not exist: {src_path}")
+                else:
+                    try:
+                        shutil.copyfile(src_path, dst_path)
+                        app.logger.info(f"Copied {src_path} to {dst_path}")
+                        # Only remove if not example
+                        if str(isexample).lower() != "true":
+                            os.remove(src_path)
+                            app.logger.info(f"Deleted original file: {src_path}")
+                    except Exception as e:
+                        app.logger.error(f"Error copying/removing file {src_path}: {e}")
             else:
                 app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
