@@ -51,7 +51,7 @@ import requests, glob
 from ldscore.ldsc_utils import run_ldsc_command, run_herit_command, run_correlation_command
 import zipfile
 import shutil
-from Cleanup import schedule_tmp_cleanup
+from Cleanup import schedule_tmp_cleanup, schedule_tmp_cleanup_ldscore
 # from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
 
@@ -1113,6 +1113,7 @@ def ldscore():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger)
     return jsonify(out_json)
 
 
@@ -1257,7 +1258,7 @@ def ldherit():
         # response = requests.get(ldsc39_url)
         # response.raise_for_status()  # Raise an exception for HTTP errors
 
-        result = run_herit_command(os.path.join(fileDir, filename), fileDir, pop, isexample)
+        result = run_herit_command( filename, fileDir, pop, isexample)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1288,6 +1289,7 @@ def ldherit():
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
     schedule_tmp_cleanup(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger)
     return jsonify(out_json)
 
 
@@ -1410,7 +1412,7 @@ def ldcorrelation():
                 app.logger.debug(f"Skipped copying {src_path} to itself.")
     try:
         # Make an API call to the ldsc39_container
-        result = run_correlation_command(os.path.join(fileDir, filename), os.path.join(fileDir, filename2), fileDir,pop, isexample)
+        result = run_correlation_command(filename, filename2, fileDir, pop, isexample)
         if web:
             filtered_result = "\n".join(line for line in result.splitlines() if not line.strip().startswith("*"))
             out_json = {"result": filtered_result}
@@ -1440,6 +1442,8 @@ def ldcorrelation():
 
     end_time = time.time()
     app.logger.info("Executed LDscore (%ss)" % (round(end_time - start_time, 2)))
+    schedule_tmp_cleanup(reference, app.logger)
+    schedule_tmp_cleanup_ldscore(reference, app.logger)
     return jsonify(out_json)
 
 
