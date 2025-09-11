@@ -12,6 +12,13 @@ export const versionHistory: NewsEntry[] = [
     ]
   },
     {
+    title: "LDlink 5.8.0 Release (08/27/2025)",
+    items: [
+      "Added GET methods for the LDexpress and LDtrait API endpoints",
+      "Added examples of the GET methods for the LDexpress and LDtrait to the API Access page"
+    ]
+  },
+    {
     title: "LDlink 5.7.0 Release (06/18/2025)",
     items: ["Added LDscore module"]
   },
