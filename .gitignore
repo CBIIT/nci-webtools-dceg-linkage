@@ -30,3 +30,5 @@ config.yml
 docker-compose.yml
 
 .env
+client/.next
+client/next-env.d.ts
