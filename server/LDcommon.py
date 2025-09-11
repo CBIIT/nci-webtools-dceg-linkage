@@ -1019,6 +1019,7 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         # Combine plots into a grid
         out_grid = gridplot(proxy_plot, rug, gene_plot, ncols=1,
                             toolbar_options=dict(logo=None))
+        return (out_grid,proxy_plot,gene_plot,rug,plot_h_pix)
     # Gene Plot (Collapsed)                        
     else:
         genes_c_file = tmp_dir + "genes_c_" + request + ".json"
@@ -1134,4 +1135,4 @@ def ldproxy_figure(out_ld_sort, r2_d,coord1,coord2,snp,pop,request,db,snp_coord,
         
         out_grid = gridplot(proxy_plot, rug, gene_c_plot,
                     ncols=1, toolbar_options=dict(logo=None))
-    return (out_grid,proxy_plot,gene_c_plot,rug,plot_h_pix)
+        return (out_grid,proxy_plot,gene_c_plot,rug,plot_h_pix)
