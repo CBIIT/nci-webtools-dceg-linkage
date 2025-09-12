@@ -8,7 +8,7 @@ import { createColumnHelper } from "@tanstack/react-table";
 import Table from "@/components/table";
 import { fetchOutput, fetchOutputStatus } from "@/services/queries";
 import { embed } from "@bokeh/bokehjs";
-import { FormData } from "./form";
+import { FormData } from "./types";
 
 // Helper functions for column rendering
 function ldproxy_rs_results_link(data: any) {

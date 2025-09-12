@@ -36,6 +36,18 @@ export interface FormData {
   genome_build: string;
 }
 
+export interface SubmitFormData {
+  snps: string;
+  pop: PopOption[];
+  tissues: { value: string; label: string }[];
+  r2_d: string;
+  p_threshold: number;
+  r2_d_threshold: number;
+  window: number | string;
+  genome_build: string;
+   reference: string;
+}
+
 export interface Ldexpress {
   reference: string;
 }

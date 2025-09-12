@@ -6,73 +6,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
-import PopSelect, { getSelectedPopulationGroups } from "@/components/select/pop-select";
+import PopSelect, { getSelectedPopulationGroups,getOptionsFromKeys } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
 import { parseSnps } from "@/services/utils";
-import { FormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
+import { FormData, SubmitFormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
-export default function LDExpressForm() {
-  // Auto-submit if all required params are present in URL
-  useEffect(() => {
-    const searchParams = new URLSearchParams(window.location.search);
-    const snps = searchParams.get("snps");
-    const pop = searchParams.get("pop");
-    const tissuesParam = searchParams.get("tissues");
-    const r2_d = searchParams.get("r2_d");
-    const p_threshold = searchParams.get("p_threshold");
-    const r2_d_threshold = searchParams.get("r2_d_threshold");
-    const windowVal = searchParams.get("window");
-    const genome_build = searchParams.get("genome_build");
-    const ref = searchParams.get("ref");
-
-    if (
-      snps &&
-      pop &&
-      tissuesParam &&
-      r2_d &&
-      r2_d_threshold &&
-      windowVal &&
-      genome_build &&
-      !ref
-    ) {
-      // Support comma or plus separated tissues
-      const tissueArray = tissuesParam.includes("+")
-        ? tissuesParam.split("+")
-        : tissuesParam.includes(",")
-        ? tissuesParam.split(",")
-        : [tissuesParam];
-      const tissueOptionsSelected = tissueArray.map((t) => ({ value: t, label: t }));
-      // Support comma separated populations
-      const popArray = pop.includes(",") ? pop.split(",") : [pop];
-      reset({
-        snps,
-        pop: popArray.map((p) => ({ value: p, label: p })),
-        tissues: tissueOptionsSelected,
-        r2_d,
-        p_threshold: p_threshold ? Number(p_threshold) : 0.1,
-        r2_d_threshold: r2_d_threshold ? Number(r2_d_threshold) : 0.1,
-        window: windowVal ? Number(windowVal) : 500000,
-        genome_build,
-        ldexpressFile: "",
-      });
-      setTimeout(() => {
-        onSubmit({
-          snps,
-          pop: popArray.map((p) => ({ value: p, label: p })),
-          tissues: tissueOptionsSelected,
-          r2_d,
-          p_threshold: p_threshold ? Number(p_threshold) : 0.1,
-          r2_d_threshold: r2_d_threshold ? Number(r2_d_threshold) : 0.1,
-          window: windowVal ? Number(windowVal) : 500000,
-          genome_build,
-          ldexpressFile: "",
-        });
-      }, 100);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+export default function LDExpressForm({ params }: { params: SubmitFormData }) {
   const queryClient = useQueryClient();
   const router = useRouter();
   const pathname = usePathname();
@@ -104,6 +45,54 @@ export default function LDExpressForm() {
   const ldexpressFile = watch("ldexpressFile") as string | FileList;
   const r2_d = watch("r2_d");
 
+  const { data: tissues, isFetching } = useQuery({
+    queryKey: ["ldexpress_tissues"],
+    queryFn: () => ldexpressTissues(),
+  });
+
+  // Auto-populate and submit form from URL params
+  useEffect(() => {
+    const hasAllParams = params && params.snps && params.pop && params.tissues && !params.reference;
+    if (hasAllParams && tissues?.tissueInfo) {
+      // 1. Format population array
+      const popArray = Array.isArray(params.pop)
+        ? params.pop.map((p: any) => (typeof p === "string" ? { value: p, label: p } : p))
+        : [{ value: params.pop, label: params.pop }];
+
+      // 2. Find the correct tissue object from the API response
+      const tissueNameFromParam = Array.isArray(params.tissues)
+        ? typeof params.tissues[0] === "string"
+          ? params.tissues[0]
+          : params.tissues[0].label
+        : typeof params.tissues === "string"
+        ? params.tissues
+        : typeof params.tissues === "object" && params.tissues !== null && "label" in params.tissues
+        ? (params.tissues as { label: string }).label
+        : "";
+      const tissueInfo = (tissues.tissueInfo as Tissue[]).find(
+        (t) => t.tissueSiteDetail.toLowerCase() === tissueNameFromParam.replace(/_/g, " ").toLowerCase(),
+      );
+
+      // 3. Proceed only if a valid tissue was found
+      if (tissueInfo) {
+        const tissuesArray = [{ value: tissueInfo.tissueSiteDetailId, label: tissueInfo.tissueSiteDetail }];
+
+        // 4. Construct the final form data
+        const formData: FormData = {
+          ...defaultForm,
+          ...params,
+          pop: popArray,
+          tissues: tissuesArray,
+        };
+
+        // 5. Reset the form state and submit
+        reset(formData);
+        onSubmit(formData);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [params, tissues, reset]);
+
   useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
       const file = ldexpressFile[0];
@@ -117,11 +106,6 @@ export default function LDExpressForm() {
       reader.readAsText(file);
     }
   }, [ldexpressFile, setValue, reset]);
-
-  const { data: tissues, isFetching } = useQuery({
-    queryKey: ["ldexpress_tissues"],
-    queryFn: () => ldexpressTissues(),
-  });
 
   const tissueOptions = useMemo(() => {
     const options = tissues
