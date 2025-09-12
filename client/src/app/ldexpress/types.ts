@@ -45,7 +45,7 @@ export interface SubmitFormData {
   r2_d_threshold: number;
   window: number | string;
   genome_build: string;
-   reference: string;
+  reference?: string;
 }
 
 export interface Ldexpress {

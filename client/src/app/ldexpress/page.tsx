@@ -8,6 +8,7 @@ import { Container, Row, Col } from "react-bootstrap";
 import LDExpressForm from "./form";
 import CalculateLoading from "@/components/calculateLoading";
 import ToolBanner from "@/components/toolBanner";
+import { SubmitFormData } from "./types";
 
 const LdExpressResults = dynamic(() => import("./results"), {
   ssr: false,
@@ -16,7 +17,7 @@ const LdExpressResults = dynamic(() => import("./results"), {
 export default function LdExpress() {
   const searchParams = useSearchParams();
   const ref = searchParams.get("ref");
-
+  const params = Object.fromEntries(searchParams.entries()) as unknown as SubmitFormData;
   return (
     <>
       <ToolBanner
@@ -27,7 +28,7 @@ export default function LdExpress() {
       <Container fluid="md">
         <Row className="border rounded bg-white my-3 p-3 shadow-sm">
           <Col>
-            <LDExpressForm />
+            <LDExpressForm  params={params}/>
             <ErrorBoundary errorComponent={() => <Alert variant="warning">Error loading results</Alert>}>
               <Suspense fallback={<CalculateLoading />}>{ref && <LdExpressResults ref={ref} />}</Suspense>
             </ErrorBoundary>
