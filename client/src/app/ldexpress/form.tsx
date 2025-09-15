@@ -3,7 +3,7 @@ import { useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups,getOptionsFromKeys } from "@/components/select/pop-select";
@@ -19,16 +19,6 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
-
-  // If caller didn't pass structured params (route params), fall back to query string
-  const searchParams = useSearchParams();
-  const urlParamsObj: Record<string, any> = {};
-  if (searchParams) {
-    for (const [k, v] of searchParams.entries()) {
-      urlParamsObj[k] = v;
-    }
-  }
-  const effectiveParams: any = params && Object.keys(params).length > 0 ? params : urlParamsObj;
 
   const defaultForm: FormData = {
     snps: "",
@@ -102,7 +92,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
         ...params,
         pop: popArray,
         tissues: tissueOptions,
-      } as unknown as FormData;
+      } as FormData;
     
       reset(newForm);
       // Ensure we only auto-submit once
