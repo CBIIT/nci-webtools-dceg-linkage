@@ -103,6 +103,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
         pop: popArray,
         tissues: tissueOptions,
       } as unknown as FormData;
+
       reset(newForm);
       // Ensure we only auto-submit once
       if (!autoSubmittedRef.current) {
@@ -112,35 +113,6 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
       }
     }
   }, [params, reset, tissues]);
-
-
-  // Auto-populate and submit form from URL params
-  // useEffect(() => {
-  //   const hasAllParams = params && params.snps && params.pop && params.tissues && !params.reference;
-  //   if (hasAllParams && tissues?.tissueInfo) {
-  //     // 1. Format population array
-  //      const popArray = Array.isArray(params.pop) ? params.pop : [params.pop];
-
-     
-  //     // 3. Proceed only if a valid tissue was found
-  //     if (tissueInfo) {
-  //       const tissuesArray = [{ value: tissueInfo.tissueSiteDetailId, label: tissueInfo.tissueSiteDetail }];
-
-  //       // 4. Construct the final form data
-  //       const formData: FormData = {
-  //         ...defaultForm,
-  //         ...params,
-  //         pop: popArray.filter(Boolean).map((p: any) => (typeof p === "string" ? { value: p, label: p } : p)),
-  //         tissues: tissuesArray,
-  //       };
-
-  //       // 5. Reset the form state and submit
-  //       reset(formData);
-  //       onSubmit(formData);
-  //     }
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [params, tissues, reset]);
 
   useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
@@ -190,8 +162,19 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
           : data.tissues.map((e) => e.value).join("+"),
     };
 
-    queryClient.setQueryData(["ldexpress-form-data", reference], formData);
-    router.push(`${pathname}`);
+    // Cache a UI-shaped form so results page can read selected populations
+    // and tissues as arrays. Keep the backend-shaped formData (strings)
+    // for the mutation payload.
+    const uiForm: FormData = {
+      ...data,
+      reference,
+      genome_build,
+      window: data.window,
+    } as unknown as FormData;
+    queryClient.setQueryData(["ldexpress-form-data", reference], uiForm);
+
+    // Do not navigate away before the mutation completes. onSuccess will
+    // navigate to the result using the returned reference.
     submitForm.mutate(formData);
   }
 
