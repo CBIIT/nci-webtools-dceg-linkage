@@ -45,7 +45,7 @@ export default function LdProxyForm({ params }: { params: SubmitFormData }) {
   // similar to ldpair
   // load form form url params
   useEffect(() => {
-    if (params && Object.keys(params).length > 0) {
+    if (params && Object.keys(params).length > 0 && params.pop) {
       const popArray = getOptionsFromKeys(params.pop);
       reset({ ...params, pop: popArray });
     }

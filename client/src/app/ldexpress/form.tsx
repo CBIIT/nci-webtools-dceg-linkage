@@ -89,7 +89,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
     // Load form from URL params
   useEffect(() => {
     // Wait until tissues API data is available so mapping works
-    if (params && Object.keys(params).length > 0 && tissues && Array.isArray((tissues as any).tissueInfo)) {
+    if (params && Object.keys(params).length > 0 && params.pop && tissues && Array.isArray((tissues as any).tissueInfo)) {
       const popArray = getOptionsFromKeys(params.pop);
       // Normalize incoming params.tissues into a single string code or name
       const rawTissueParam = Array.isArray(params.tissues)
@@ -103,7 +103,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
         pop: popArray,
         tissues: tissueOptions,
       } as unknown as FormData;
-
+    
       reset(newForm);
       // Ensure we only auto-submit once
       if (!autoSubmittedRef.current) {
@@ -114,7 +114,7 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
     }
   }, [params, reset, tissues]);
 
-  useEffect(() => {
+ useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
       const file = ldexpressFile[0];
       const reader = new FileReader();
@@ -127,7 +127,6 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
       reader.readAsText(file);
     }
   }, [ldexpressFile, setValue, reset]);
-
   const tissueOptions = useMemo(() => {
     const options = tissues
       ? (tissues.tissueInfo as Tissue[]).map((e) => ({ value: e.tissueSiteDetailId, label: e.tissueSiteDetail }))
@@ -137,7 +136,6 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
     }
     return options;
   }, [tissues]);
-
   const submitForm = useMutation<Ldexpress, unknown, LdexpressFormData>({
     mutationFn: (params) => ldexpress(params),
     onSuccess: (_data, variables) => {
@@ -146,7 +144,6 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
       }
     },
   });
-
   async function onSubmit(form: FormData) {
     const reference = Math.floor(Math.random() * (99999 - 10000 + 1)).toString();
     const { ldexpressFile, ...data } = form;
@@ -161,23 +158,10 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
           ? (tissues.tissueInfo as Tissue[]).map((e) => e.tissueSiteDetailId).join("+")
           : data.tissues.map((e) => e.value).join("+"),
     };
-
-    // Cache a UI-shaped form so results page can read selected populations
-    // and tissues as arrays. Keep the backend-shaped formData (strings)
-    // for the mutation payload.
-    const uiForm: FormData = {
-      ...data,
-      reference,
-      genome_build,
-      window: data.window,
-    } as unknown as FormData;
-    queryClient.setQueryData(["ldexpress-form-data", reference], uiForm);
-
-    // Do not navigate away before the mutation completes. onSuccess will
-    // navigate to the result using the returned reference.
+    queryClient.setQueryData(["ldexpress-form-data", reference], formData);
+    router.push(`${pathname}`);
     submitForm.mutate(formData);
   }
-
   function onReset(event: React.FormEvent<HTMLFormElement>): void {
     event.preventDefault();
     router.push("/ldexpress");
