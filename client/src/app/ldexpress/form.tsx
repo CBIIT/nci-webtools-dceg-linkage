@@ -3,13 +3,14 @@ import { useMemo, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { Row, Col, Form, Button, ButtonGroup, ToggleButton, Alert } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Select from "react-select";
 import { ldexpress, ldexpressTissues } from "@/services/queries";
 import PopSelect, { getSelectedPopulationGroups,getOptionsFromKeys } from "@/components/select/pop-select";
 import CalculateLoading from "@/components/calculateLoading";
 import { useStore } from "@/store";
-import { parseSnps } from "@/services/utils";
+import { parseSnps, getTissueOptionsFromKeys } from "@/services/utils";
+import { useRef } from "react";
 import { FormData, SubmitFormData, Ldexpress, LdexpressFormData, Tissue } from "./types";
 import MultiSnp from "@/components/form/multiSnp";
 
@@ -18,6 +19,16 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
   const router = useRouter();
   const pathname = usePathname();
   const { genome_build } = useStore((state) => state);
+
+  // If caller didn't pass structured params (route params), fall back to query string
+  const searchParams = useSearchParams();
+  const urlParamsObj: Record<string, any> = {};
+  if (searchParams) {
+    for (const [k, v] of searchParams.entries()) {
+      urlParamsObj[k] = v;
+    }
+  }
+  const effectiveParams: any = params && Object.keys(params).length > 0 ? params : urlParamsObj;
 
   const defaultForm: FormData = {
     snps: "",
@@ -49,49 +60,87 @@ export default function LDExpressForm({ params }: { params: SubmitFormData }) {
     queryKey: ["ldexpress_tissues"],
     queryFn: () => ldexpressTissues(),
   });
+//  console.log(tissues);
 
-  // Auto-populate and submit form from URL params
+  const autoSubmittedRef = useRef(false);
+
+  // Ensure tissues param is converted into an array of option objects
+  function makeTissuesArray(param: any) {
+    if (!param) return [];
+    if (Array.isArray(param)) {
+      return param.map((p) => (typeof p === "string" ? { value: p, label: p } : p));
+    }
+    if (typeof param === "string") {
+      if (param.toLowerCase() === "all") return [{ value: "all", label: "All Tissues" }];
+      // plus-separated ids
+      const codes = param.split("+");
+      if (tissues && Array.isArray((tissues as any).tissueInfo)) {
+        return getTissueOptionsFromKeys(param, tissues as any);
+      }
+      return codes.map((c) => ({ value: c, label: c }));
+    }
+    if (typeof param === "object") {
+      if ("value" in param) return [param];
+      if ("label" in param) return [{ value: (param as any).value || (param as any).label, label: (param as any).label }];
+    }
+    return [];
+  }
+
+    // Load form from URL params
   useEffect(() => {
-    const hasAllParams = params && params.snps && params.pop && params.tissues && !params.reference;
-    if (hasAllParams && tissues?.tissueInfo) {
-      // 1. Format population array
-      const popArray = Array.isArray(params.pop)
-        ? params.pop.map((p: any) => (typeof p === "string" ? { value: p, label: p } : p))
-        : [{ value: params.pop, label: params.pop }];
+    // Wait until tissues API data is available so mapping works
+    if (params && Object.keys(params).length > 0 && tissues && Array.isArray((tissues as any).tissueInfo)) {
+      const popArray = getOptionsFromKeys(params.pop);
+      // Normalize incoming params.tissues into a single string code or name
+      const rawTissueParam = Array.isArray(params.tissues)
+        ? (params.tissues[0] as any)?.value || (params.tissues[0] as any)?.label || params.tissues[0]
+        : (params.tissues as any);
 
-      // 2. Find the correct tissue object from the API response
-      const tissueNameFromParam = Array.isArray(params.tissues)
-        ? typeof params.tissues[0] === "string"
-          ? params.tissues[0]
-          : params.tissues[0].label
-        : typeof params.tissues === "string"
-        ? params.tissues
-        : typeof params.tissues === "object" && params.tissues !== null && "label" in params.tissues
-        ? (params.tissues as { label: string }).label
-        : "";
-      const tissueInfo = (tissues.tissueInfo as Tissue[]).find(
-        (t) => t.tissueSiteDetail.toLowerCase() === tissueNameFromParam.replace(/_/g, " ").toLowerCase(),
-      );
-
-      // 3. Proceed only if a valid tissue was found
-      if (tissueInfo) {
-        const tissuesArray = [{ value: tissueInfo.tissueSiteDetailId, label: tissueInfo.tissueSiteDetail }];
-
-        // 4. Construct the final form data
-        const formData: FormData = {
-          ...defaultForm,
-          ...params,
-          pop: popArray,
-          tissues: tissuesArray,
-        };
-
-        // 5. Reset the form state and submit
-        reset(formData);
-        onSubmit(formData);
+      const tissueOptions = getTissueOptionsFromKeys(rawTissueParam, tissues as any);
+      // Reset form with mapped options, then auto-submit once
+      const newForm = {
+        ...params,
+        pop: popArray,
+        tissues: tissueOptions,
+      } as unknown as FormData;
+      reset(newForm);
+      // Ensure we only auto-submit once
+      if (!autoSubmittedRef.current) {
+        autoSubmittedRef.current = true;
+        // Small timeout to ensure reset has propagated to form state
+        setTimeout(() => onSubmit(newForm), 20);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params, tissues, reset]);
+  }, [params, reset, tissues]);
+
+
+  // Auto-populate and submit form from URL params
+  // useEffect(() => {
+  //   const hasAllParams = params && params.snps && params.pop && params.tissues && !params.reference;
+  //   if (hasAllParams && tissues?.tissueInfo) {
+  //     // 1. Format population array
+  //      const popArray = Array.isArray(params.pop) ? params.pop : [params.pop];
+
+     
+  //     // 3. Proceed only if a valid tissue was found
+  //     if (tissueInfo) {
+  //       const tissuesArray = [{ value: tissueInfo.tissueSiteDetailId, label: tissueInfo.tissueSiteDetail }];
+
+  //       // 4. Construct the final form data
+  //       const formData: FormData = {
+  //         ...defaultForm,
+  //         ...params,
+  //         pop: popArray.filter(Boolean).map((p: any) => (typeof p === "string" ? { value: p, label: p } : p)),
+  //         tissues: tissuesArray,
+  //       };
+
+  //       // 5. Reset the form state and submit
+  //       reset(formData);
+  //       onSubmit(formData);
+  //     }
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [params, tissues, reset]);
 
   useEffect(() => {
     if (ldexpressFile instanceof FileList && ldexpressFile.length > 0) {
