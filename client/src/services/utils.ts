@@ -64,19 +64,31 @@ export function getTissueOptionsFromKeys(tissue: string | undefined, tissues?: L
     return [{ value: "all", label: "All Tissues" }];
   }
 
-  const codes = typeof tissue === "string" && tissue.trim() !== "" ? tissue.split("+") : [];
+  // Accept plus-separated codes, but be robust to other separators or URL-encoded values
+  const raw = typeof tissue === "string" ? tissue.trim() : "";
+  // split on plus signs, commas, or whitespace so 'Adrenal_Gland+Artery_Aorta' or
+  // 'Adrenal_Gland Artery_Aorta' both produce separate codes
+  const splitCodes = raw === "" ? [] : raw.split(/[+,\s]+/).map((s) => s.trim()).filter(Boolean);
 
   // Map codes to matching tissue objects; fall back to returning code as label when not found
-  const options = codes
+  const options = splitCodes
     .map((code) => {
-      const match = tissues.tissueInfo.find((t) => t.tissueSiteDetailId === code);
+      // decode any URL-encoded sequences and normalize underscores
+      const decoded = decodeURIComponent(code);
+      const normalized = decoded.replace(/\s+/g, " ").replace(/_/g, " ").trim();
+
+      // try exact id match first
+      const match = tissues.tissueInfo.find((t) => t.tissueSiteDetailId === code || t.tissueSiteDetailId === decoded);
       if (match) return { value: match.tissueSiteDetailId, label: match.tissueSiteDetail };
+
       // try matching by name (some params might be passed as names)
-      const byName = tissues.tissueInfo.find((t) =>
-        t.tissueSiteDetail.toLowerCase() === code.replace(/_/g, " ").toLowerCase(),
+      const byName = tissues.tissueInfo.find(
+        (t) => t.tissueSiteDetail.toLowerCase() === normalized.toLowerCase(),
       );
       if (byName) return { value: byName.tissueSiteDetailId, label: byName.tissueSiteDetail };
-      return { value: code, label: code };
+
+      // fallback: return original code as value with a cleaned-up label
+      return { value: code, label: normalized || code };
   })
   .filter(Boolean);
   return options;
